@@ -12,8 +12,4 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import pbr.version
-
-
-__version__ = pbr.version.VersionInfo(
-    'vitrage').version_string()
+__author = 'stack'
