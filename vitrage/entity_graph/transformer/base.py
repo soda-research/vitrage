@@ -12,4 +12,29 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-__author__ = 'stack'
+import abc
+
+from oslo_log import log as logging
+
+LOG = logging.getLogger(__name__)
+
+
+class Transformer(object):
+
+    @abc.abstractmethod
+    def transform(self, entity_event):
+        """Transforms an entity event into entity wrapper
+
+        :return: An EntityWrapper. EntityWrapper is namedTuple that contains
+        an entity vertex and a list of vertex and an edge pair that describe
+        the entity's neighbors.
+        """
+        pass
+
+    @abc.abstractmethod
+    def get_key_fields(self):
+        pass
+
+    @abc.abstractmethod
+    def get_key(self, entity_event):
+        pass

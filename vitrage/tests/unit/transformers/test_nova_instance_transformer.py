@@ -12,9 +12,15 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from oslotest import base
+from oslo_log import log as logging
+from vitrage.tests.unit import base
+
+LOG = logging.getLogger(__name__)
 
 
-class TestCase(base.BaseTestCase):
+class TransformNovaInstanceTest(base.BaseTest):
 
-    """Test case base class for all unit tests."""
+    def test_transform_instance(self):
+
+        LOG.debug('Test transform Nova instance into entity wrapper')
+        self.assertTrue(True)

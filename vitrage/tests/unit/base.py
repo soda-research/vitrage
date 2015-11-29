@@ -12,17 +12,9 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-"""
-test_vitrage
-----------------------------------
-
-Tests for `vitrage` module.
-"""
-
-from vitrage.tests import base
+from oslotest import base
 
 
-class TestVitrage(base.TestCase):
+class BaseTest(base.BaseTestCase):
 
-    def test_something(self):
-        pass
+    """Test case base class for all unit tests."""
