@@ -21,6 +21,7 @@ ChangeLog
 .testrepository
 .coverage
 cover
+etc/vitrage/vitrage.conf
 
 #Python
 *.pyc
