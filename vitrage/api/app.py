@@ -16,12 +16,16 @@ import pecan
 
 from oslo_config import cfg
 from oslo_log import log
+# noinspection PyPackageRequirements
 from paste import deploy
+from werkzeug import serving
+
 from vitrage.api import hooks
-from vitrage.i18n import _
+# noinspection PyProtectedMember
+from vitrage.i18n import _LI
+# noinspection PyProtectedMember
 from vitrage.i18n import _LW
 from vitrage import service
-from werkzeug import serving
 
 LOG = log.getLogger(__name__)
 
@@ -35,7 +39,7 @@ PECAN_CONFIG = {
 
 def setup_app(pecan_config=PECAN_CONFIG, conf=None):
     if conf is None:
-        raise RuntimeError("Config is actually mandatory")
+        raise RuntimeError('Config is actually mandatory')
     app_hooks = [hooks.ConfigHook(conf),
                  hooks.TranslationHook()]
 
@@ -67,7 +71,7 @@ def load_app(conf):
 
     if not cfg_file:
         raise cfg.ConfigFilesNotFoundError([conf.api.paste_config])
-    LOG.info("Full WSGI config used: %s" % cfg_file)
+    LOG.info(_LI('Full WSGI config used: %s') % cfg_file)
     return deploy.loadapp("config:" + cfg_file)
 
 
@@ -76,16 +80,16 @@ def build_server(conf):
     # Create the WSGI server and start it
     host, port = conf.api.host, conf.api.port
 
-    LOG.info(_('Starting server in PID %s') % os.getpid())
-    LOG.info(_("Configuration:"))
+    LOG.info(_LI('Starting server in PID %s') % os.getpid())
+    LOG.info(_LI("Configuration:"))
     conf.log_opt_values(LOG, logging.INFO)
 
     if host == '0.0.0.0':
-        LOG.info(_(
-            'serving on 0.0.0.0:%(sport)s, view at http://127.0.0.1:%(vport)s')
-            % ({'sport': port, 'vport': port}))
+        LOG.info(_LI(
+            'serving on 0.0.0.0:%(port)s, view at http://127.0.0.1:%(port)s')
+            % ({'port': port}))
     else:
-        LOG.info(_("serving on http://%(host)s:%(port)s") % (
+        LOG.info(_LI('serving on http://%(host)s:%(port)s') % (
             {'host': host, 'port': port}))
 
     serving.run_simple(host, port,

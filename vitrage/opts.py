@@ -23,8 +23,8 @@ def list_opts():
                    default='0.0.0.0',
                    help='The listen IP for the vitrage API server.',
                    ),
-        cfg.StrOpt('paste_config', default="api-paste.ini",
-                   help="Configuration file for WSGI definition of API."),
+        cfg.StrOpt('paste_config', default='api-paste.ini',
+                   help='Configuration file for WSGI definition of API.'),
 
         cfg.IntOpt('workers', default=1,
                    min=1,

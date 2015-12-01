@@ -21,17 +21,17 @@ class RootController(object):
     @pecan.expose('json')
     def index():
         return {
-            "versions": [
+            'versions': [
                 {
-                    "status": "CURRENT",
-                    "links": [
+                    'status': 'CURRENT',
+                    'links': [
                         {
-                            "rel": "self",
-                            "href": pecan.request.application_url + "/v1/"
+                            'rel': 'self',
+                            'href': pecan.request.application_url + '/v1/'
                         }
                     ],
-                    "id": "v1.0",
-                    "updated": "2015-11-29"
+                    'id': 'v1.0',
+                    'updated': '2015-11-29'
                 }
             ]
         }

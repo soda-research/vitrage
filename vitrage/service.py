@@ -34,7 +34,7 @@ def prepare_service(args=None, default_opts=None, conf=None):
 
     for group, options in opts.list_opts():
         conf.register_opts(list(options),
-                           group=None if group == "DEFAULT" else group)
+                           group=None if group == 'DEFAULT' else group)
 
     for opt, value, group in default_opts or []:
         conf.set_default(opt, value, group)
