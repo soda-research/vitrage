@@ -10,8 +10,14 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import json
 import pecan
+
 from pecan import rest
+
+
+def abort(param, e):
+    pass
 
 
 class TopologyController(rest.RestController):
@@ -19,4 +25,9 @@ class TopologyController(rest.RestController):
     @pecan.expose('json')
     def get():
         # TODO(eyal) temporary mock
-        return {'test': 'test'}
+        graph_file = pecan.request.cfg.find_file('graph.sample.json')
+        try:
+            with open(graph_file) as data_file:
+                return json.load(data_file)
+        except Exception as e:
+            pecan.abort(404, str(e))
