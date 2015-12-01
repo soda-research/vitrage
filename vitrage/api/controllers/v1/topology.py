@@ -10,10 +10,13 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import pecan
 from pecan import rest
 
 
 class TopologyController(rest.RestController):
-    """Manages operations on the topology."""
-
-    pass
+    @staticmethod
+    @pecan.expose('json')
+    def get():
+        # TODO(eyal) temporary mock
+        return {'test': 'test'}
