@@ -1,0 +1,37 @@
+event_type                             S  update
+u-OS-DCF:diskConfig                    S  AUTO
+u-OS-EXT-AZ:availability_zone          S  nova
+u-OS-EXT-SRV-ATTR:host                 D  [a-z]{4}-devstack
+u-OS-EXT-SRV-ATTR:hostname             D  host-[0-9]
+u-OS-EXT-SRV-ATTR:hypervisor_hostname  D  [a-z]{4}-devstack
+u-OS-EXT-SRV-ATTR:instance_name        S  instance-[0-9]+
+u-OS-EXT-SRV-ATTR:kernel_id            S  [0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}
+u-OS-EXT-SRV-ATTR:launch_index         S  0
+u-OS-EXT-SRV-ATTR:ramdisk_id           S  [0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}
+u-OS-EXT-SRV-ATTR:reservation_id       D  r-[a-z]+
+u-OS-EXT-SRV-ATTR:root_device_name     D  /dev/vda
+u-OS-EXT-SRV-ATTR:user_data            D  -
+u-OS-EXT-STS:power_state               D  1
+u-OS-EXT-STS:task_state                D  -
+u-OS-EXT-STS:vm_state                  D  active|inactive
+u-OS-SRV-USG:launched_at               S  2015-11-25T14:18:20.000000
+u-OS-SRV-USG:terminated_at             D  -
+u-accessIPv4                           D  ^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$
+u-accessIPv6                           D  ^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$
+u-config_drive                         D  True|False
+u-created                              D  \d{2}:\d{2}:\d{2} \d{2}:\d{2}:\d{2}
+u-flavor                               D  m1.nano
+u-hostId                               D  [0-9a-f]{56}
+u-id                                   S  [0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}
+u-image                                D  cirros-[a-z]+ ([a-z0-9]+)
+u-key_name                             D  -
+u-metadata                             D  \{\}
+u-name                                 D  vm1
+u-os-extended-volumes:volumes_attached D  \[\]
+u-progress                             D  0
+u-public_network                       D  ^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$
+u-security_groups                      D  default
+u-status                               D  ACTIVE|INACTIVE
+u-tenant_id                            D  [0-9a-f]{32}
+u-updated                              D  2015-11-25T14:18:20Z
+u-user_id                              D  [0-9a-f]{32}
