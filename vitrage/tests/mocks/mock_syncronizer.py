@@ -29,8 +29,6 @@ usage example:
     events = generate_random_events_list(spec_list)
 """
 
-__author__ = 'erosensw'
-
 import random
 
 import mock_generators as mg

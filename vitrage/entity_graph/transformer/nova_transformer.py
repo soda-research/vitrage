@@ -90,12 +90,12 @@ class InstanceTransformer(base.Transformer):
         return base.EntityWrapper(
             entity_vertex,
             [host_neighbor],
-            cons.ActionTypes.UPDATE)
+            cons.EventAction.UPDATE)
 
     def _transform_init_snapshot_event(self, entity_event):
 
         entity_wrapper = self._transform_snapshot_event(entity_event)
-        entity_wrapper.action = cons.ActionTypes.CREATE
+        entity_wrapper.action = cons.EventAction.CREATE
         return entity_wrapper
 
     def _transform_update_event(self):

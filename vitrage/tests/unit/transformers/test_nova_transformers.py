@@ -57,7 +57,8 @@ class NovaInstanceTransformerTest(base.BaseTest):
         for event in instance_events:
             entity_wrapper = transformer._transform_snapshot_event(event)
 
-            self.assertEqual(cons.ActionTypes.UPDATE, entity_wrapper.action)
+            self.assertEqual(cons.EventAction.UPDATE,
+                             entity_wrapper.action)
 
             expected_key = transformer.extract_key(event)
             self.assertEqual(expected_key, entity_wrapper.vertex.vertex_id)

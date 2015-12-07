@@ -33,3 +33,6 @@ class BaseTest(base.BaseTestCase):
             self.assertEqual(d1, d2)
         else:
             super(BaseTest, self).assertDictEqual(d1, d2, message)
+
+    def setUp(self):
+        super(BaseTest, self).setUp()

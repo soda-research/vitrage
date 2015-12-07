@@ -1,21 +1,18 @@
-# Copyright (c) 2011 X.commerce, a business unit of eBay Inc.
-# Copyright 2010 United States Government as represented by the
-# Administrator of the National Aeronautics and Space Administration.
-# All Rights Reserved.
+# Copyright 2015 - Alcatel-Lucent
 #
-#    Licensed under the Apache License, Version 2.0 (the "License"); you may
-#    not use this file except in compliance with the License. You may obtain
-#    a copy of the License at
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
 #
-#         http://www.apache.org/licenses/LICENSE-2.0
+#      http://www.apache.org/licenses/LICENSE-2.0
 #
-#    Unless required by applicable law or agreed to in writing, software
-#    distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
-#    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
-#    License for the specific language governing permissions and limitations
-#    under the License.
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
 
-from vitrage.common.constants import EdgeConstants as EConst
+from vitrage.common.constants import EdgeProperties as EConst
 from vitrage.common.constants import VertexProperties as VConst
 from vitrage.graph import Edge
 from vitrage.graph import Vertex
@@ -112,3 +109,21 @@ def create_edge(source_id,
                 label=relation_type,
                 properties=properties)
     return edge
+
+
+def compare_edges(edge1, edge2):
+    # check source and target vertex are identical
+    is_source_equal = edge1.source_id != edge2.source_id
+    is_target_equal = edge1.target_id != edge2.target_id
+    is_label_equal = edge1.label != edge2.label
+    return is_source_equal and is_target_equal and is_label_equal
+
+
+def compare_vertices(vertex1, vertex2):
+    return vertex1.vertex_id == vertex2.vertex_id
+
+
+def get_neighbor_vertex(edge, original_vertex, graph):
+    if edge.source_id != original_vertex.vertex_id:
+        return graph.get_vertex(edge.source_id)
+    return graph.get_vertex(edge.target_id)

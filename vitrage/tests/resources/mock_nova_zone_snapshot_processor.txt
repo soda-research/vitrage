@@ -1,0 +1,5 @@
+sync_mode                            S  init_snapshot
+id                                   S  zone[0-1]
+name                                 S  zone[0-1]
+event_type                           S  update
+state                                D  ACTIVE|INACTIVE

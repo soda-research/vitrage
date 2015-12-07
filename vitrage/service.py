@@ -15,7 +15,9 @@ import logging
 from oslo_config import cfg
 from oslo_log import log
 from oslo_policy import opts as policy_opts
+from oslo_service import service as os_service
 
+from vitrage.entity_graph.processor import synchronizer_client
 from vitrage import opts
 
 LOG = log.getLogger(__name__)
@@ -39,3 +41,24 @@ def prepare_service(args=None, default_opts=None, conf=None):
     conf.log_opt_values(LOG, logging.DEBUG)
 
     return conf
+
+
+class ProcessorService(os_service.Service):
+
+    def __init__(self):
+        super(ProcessorService, self).__init__()
+
+    def start(self):
+        LOG.info("Start ProcessorService")
+        super(ProcessorService, self).start()
+
+        # ThreadPool.start()
+        synchronizer_client.SynchronizerActions.get_all()
+
+        LOG.info("Finish start ProcessorService")
+
+    def stop(self):
+        LOG.info("Stop ProcessorService")
+        # ThreadPool.stop()
+        super(ProcessorService, self).stop()
+        LOG.info("Finish stop ProcessorService")

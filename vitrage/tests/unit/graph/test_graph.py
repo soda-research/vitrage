@@ -18,13 +18,14 @@ test_vitrage graph
 
 Tests for `vitrage` graph driver
 """
+
 from oslo_log import log as logging
 
 import random
 import time
 
-from vitrage.common.constants import EdgeConstants as EConst
 from vitrage.common.constants import EdgeLabels as ELabel
+from vitrage.common.constants import EdgeProperties as EConst
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.graph import create_graph
 from vitrage.graph import Direction

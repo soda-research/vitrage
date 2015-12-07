@@ -22,11 +22,11 @@ class VertexProperties(object):
     STATE = 'STATE'
     PROJECT = 'PROJECT'
     UPDATE_TIMESTAMP = 'UPDATE_TIMESTAMP'
-    NAME = 'name'
+    NAME = 'NAME'
     IS_PARTIAL_DATA = 'IS_PARTIAL_DATA'
 
 
-class EdgeConstants(object):
+class EdgeProperties(object):
     RELATION_NAME = 'RELATION_NAME'
     IS_EDGE_DELETED = 'IS_EDGE_DELETED'
     EDGE_DELETION_TIMESTAMP = 'EDGE_DELETION_TIMESTAMP'
@@ -47,7 +47,7 @@ class EntityTypes(object):
     RESOURCE = 'RESOURCE'
 
 
-class ActionTypes(object):
-    CREATE = 'CREATE'
-    DELETE = 'DELETE'
-    UPDATE = 'UPDATE'
+class EventAction(object):
+    CREATE = 'create'
+    DELETE = 'delete'
+    UPDATE = 'update'
