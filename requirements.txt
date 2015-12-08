@@ -4,6 +4,7 @@
 
 pbr>=1.6
 Babel>=1.3
+python-novaclient>=2.26.0
 networkx>=1.10
 oslo.log>=1.12.0 # Apache-2.0
 oslo.policy>=0.3.0
