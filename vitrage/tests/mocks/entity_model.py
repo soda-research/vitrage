@@ -32,7 +32,8 @@ class CommonEntityModel(object):
             for v in values:
                 self.set_param(v[0], v[1])
 
-    def get_params(self):
+    @property
+    def params(self):
         return self.current
 
     def set_param(self, key, value=None):

@@ -23,19 +23,35 @@ multiple instances of the same entity type.
 
 """
 
-import random
+from os.path import curdir
+from os import walk
+from random import randint
 
 from entity_model import CommonEntityModel as cem
+
+
+def _get_filename_path(filename):
+    base_dir = None
+    for i in walk("../%s" % curdir):
+        if i[0].find('resources') != -1 and filename in i[2]:
+            base_dir = i[0]
+            break
+    if base_dir is None:
+        raise IOError("No file {0} in resources folder".format(filename))
+    else:
+        return '{0}/{1}'.format(base_dir, filename)
 
 
 class MockEventGenerator(object):
     """Represents a single generator.
 
     A generator can generate events for several instances of the same type
+
+    file is expected to be in the ../resources folder
     """
 
     def __init__(self, filename, instance_num, generator_name='generator'):
-        self.config_file = filename
+        self.config_file = _get_filename_path(filename)
         self.static_params = {}
         self.dynamic_params = {}
         self.instance_num = instance_num
@@ -59,7 +75,7 @@ class MockEventGenerator(object):
                 param_type = line_params[1].lower()
                 params_dict[param_type][line_params[0]] = line_params[2]
         except KeyError as ke:
-            print("Syntax error ({0}): {1}".format(ke.errno, ke.strerror))
+            print("Syntax error: {0}".format(ke.message))
 
     def prepare_instance_models(self):
         """Create the models for all the instances """
@@ -81,7 +97,7 @@ class MockEventGenerator(object):
 
         data_stream = []
         for _ in xrange(event_num):
-            model = self.models[random.randint(0, self.instance_num - 1)]
+            model = self.models[randint(0, self.instance_num - 1)]
             model.generate_dynamic_params()
-            data_stream.append(model.get_params())
+            data_stream.append(model.params)
         return data_stream
