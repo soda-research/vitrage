@@ -1,4 +1,4 @@
-event_type                             S  update
+sync_mode                              S  update
 u-OS-DCF:diskConfig                    S  AUTO
 u-OS-EXT-AZ:availability_zone          S  nova
 u-OS-EXT-SRV-ATTR:host                 D  [a-z]{4}-devstack
@@ -22,7 +22,7 @@ u-config_drive                         D  True|False
 u-created                              D  \d{2}:\d{2}:\d{2} \d{2}:\d{2}:\d{2}
 u-flavor                               D  m1.nano
 u-hostId                               D  [0-9a-f]{56}
-u-id                                   S  [0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}
+instance_id                            S  [0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}
 u-image                                D  cirros-[a-z]+ ([a-z0-9]+)
 u-key_name                             D  -
 u-metadata                             D  \{\}

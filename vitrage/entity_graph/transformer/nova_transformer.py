@@ -12,37 +12,36 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import abc
-import six
-
-from collections import namedtuple
 from oslo_log import log as logging
+from vitrage.common.constants import VertexConstants as vertex_cons
+from vitrage.entity_graph.transformer import base
 
 LOG = logging.getLogger(__name__)
 
+KEY_SEPARATOR = ':'
 
-EntityWrapper = \
-    namedtuple('EntityWrapper', ['entity_vertex', 'neighbors'], 'action')
+ENTITY_TYPE = 'RESOURCE'
+INSTANCE_SUB_TYPE = 'nova.instance'
+HOST_SUB_TYPE = 'nova.host'
 
 
-@six.add_metaclass(abc.ABCMeta)
-class Transformer(object):
+class InstanceTransformer(base.Transformer):
 
-    @abc.abstractmethod
+    # # Fields returned from Nova Instance snapshot
+    ENTITY_ID_DICT = {'snapshot': 'id',
+                      'init_snapshot': 'id',
+                      'update': 'instance_id'}
+
     def transform(self, entity_event):
-        """Transforms an entity event into entity wrapper
-
-        :return: An EntityWrapper. EntityWrapper is namedTuple that contains
-        an entity vertex and a list of vertex and an edge pair that describe
-        the entity's neighbors.
-        :rtype: EntityWrapper
-        """
         pass
 
-    @abc.abstractmethod
     def key_fields(self):
-        pass
+        return [vertex_cons.TYPE, vertex_cons.SUB_TYPE, vertex_cons.ID]
 
-    @abc.abstractmethod
     def extract_key(self, entity_event):
-        pass
+
+        sync_mode = entity_event['sync_mode']
+        return KEY_SEPARATOR.join(
+            [ENTITY_TYPE,
+             INSTANCE_SUB_TYPE,
+             entity_event[self.ENTITY_ID_DICT[sync_mode]]])

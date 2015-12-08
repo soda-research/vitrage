@@ -67,7 +67,7 @@ class Edge(object):
         :param source_id: source vertex id
         :type source_id: str
 
-        :param target_id: target vertex id
+        :param target_id: target vertex id`
         :type target_id: str
 
         :param label:

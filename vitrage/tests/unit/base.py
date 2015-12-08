@@ -13,8 +13,16 @@
 # under the License.
 
 from oslotest import base
+import sys
 
 
 class BaseTest(base.BaseTestCase):
 
     """Test case base class for all unit tests."""
+
+    def assert_list_equal(self, l1, l2):
+        if tuple(sys.version_info)[0:2] < (2, 7):
+            # for python 2.6 compatibility
+            self.assertEqual(l1, l2)
+        else:
+            super(BaseTest, self).assertListEqual(l1, l2)

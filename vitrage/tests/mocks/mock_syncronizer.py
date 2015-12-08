@@ -20,7 +20,7 @@ of what can be returned
 
 usage example:
     test_entity_spec_list = [
-        {'filename': '../resources/mock_nova_instance_config_1.txt',
+        {'filename': '../resources/mock_nova_inst_snapshot.txt',
          '#instances': 10,
          'name': 'Instance (vm) generator'
          }
