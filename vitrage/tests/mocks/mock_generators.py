@@ -73,7 +73,7 @@ class MockEventGenerator(object):
                 param_type = line_params[1].lower()
                 params_dict[param_type][line_params[0]] = line_params[2]
         except KeyError as ke:
-            print("Syntax error ({0}): {1}".format(ke.errno, ke.strerror))
+            print("Syntax error: {0}".format(ke.message))
 
     def prepare_instance_models(self):
         """Create the models for all the instances """
