@@ -46,6 +46,39 @@ class Vertex(object):
         self.vertex_id = vertex_id
         self.properties = properties
 
+    def __getitem__(self, key):
+        """Get the vertex properties
+
+        Use vertex[key] instead of vertex.properties[key]
+
+        Example
+        -------
+        v = Vertex(vertex_id=123,properties={some_key: "some_val"}
+        value = v["some_key"]
+        """
+        return self.properties[key]
+
+    def __setitem__(self, key, value):
+        """Set the vertex properties
+
+        Use vertex[key] instead of vertex.properties[key]
+
+        Example
+        -------
+        v = Vertex(vertex_id=123,properties={some_key: "some value"}
+        v["some_key"] = "another value"
+        """
+        if not self.properties:
+            self.properties = {}
+        self.properties[key] = value
+
+    def __delitem__(self, key):
+        if self.properties and key in self.properties:
+            del self.properties[key]
+
+    def __iter__(self):
+        return self.properties.itervalues()
+
 
 class Edge(object):
     """Class Edge represents a directional edge between two vertices
@@ -86,6 +119,21 @@ class Edge(object):
         self.target_id = target_id
         self.label = label
         self.properties = properties
+
+    def __getitem__(self, key):
+        return self.properties[key]
+
+    def __setitem__(self, key, value):
+        if not self.properties:
+            self.properties = {}
+        self.properties[key] = value
+
+    def __delitem__(self, key):
+        if self.properties and key in self.properties:
+            del self.properties[key]
+
+    def __iter__(self):
+        return self.properties.itervalues()
 
 
 @six.add_metaclass(abc.ABCMeta)
@@ -139,7 +187,7 @@ class Graph(object):
         v1_prop = {'prop_key':'some value for my first vertex'}
         v2_prop = {'prop_key':'another value for my second vertex'}
         v1 = Vertex(vertex_id=1, properties=v1_prop)
-        v2 = Vertex(vertex_id=1, properties=v2_prop)
+        v2 = Vertex(vertex_id=2, properties=v2_prop)
         graph.add_vertex(v1)
         graph.add_vertex(v2)
 

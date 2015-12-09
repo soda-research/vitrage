@@ -17,12 +17,17 @@
 Graph abstraction
 """
 
-import networkx_graph
+from driver import *  # noqa
+from util import *  # noqa
+from networkx_graph import *  # noqa
 
 
 def graph_factory(name):
-    """For now only return NXGraph
+    """Create a Graph instance
 
+    For now only return NXGraph
+
+    :type name: str
     :rtype: Graph
     """
-    return networkx_graph.NXGraph(name)
+    return NXGraph(name)
