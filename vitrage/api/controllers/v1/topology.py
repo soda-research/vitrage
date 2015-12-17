@@ -13,21 +13,22 @@
 import json
 import pecan
 
+from pecan.core import abort
 from pecan import rest
-
-
-def abort(param, e):
-    pass
+from vitrage.api.policy import enforce
 
 
 class TopologyController(rest.RestController):
     @staticmethod
     @pecan.expose('json')
     def get():
+
+        enforce("get topology", pecan.request.headers,
+                pecan.request.enforcer, {})
         # TODO(eyal) temporary mock
         graph_file = pecan.request.cfg.find_file('graph.sample.json')
         try:
             with open(graph_file) as data_file:
                 return json.load(data_file)
         except Exception as e:
-            pecan.abort(404, str(e))
+            abort(404, str(e))
