@@ -26,6 +26,12 @@ import abc
 import six
 
 
+class Direction(object):
+    OUT = 1
+    IN = 2
+    BOTH = 3
+
+
 class Vertex(object):
     """Class Vertex
 
@@ -59,7 +65,7 @@ class Vertex(object):
         return self.properties[key]
 
     def __setitem__(self, key, value):
-        """Set the vertex properties
+        """Set a vertex property
 
         Use vertex[key] instead of vertex.properties[key]
 
@@ -73,11 +79,46 @@ class Vertex(object):
         self.properties[key] = value
 
     def __delitem__(self, key):
+        """Delete a property from the vertex
+
+        Example
+        -------
+        vertex = Vertex(vertex_id=123,
+                        properties={'property_key': 'some value'})
+        del(vertex['property_key'])
+
+        :param key:
+        :return:
+        """
         if self.properties and key in self.properties:
             del self.properties[key]
 
+    def __eq__(self, other):
+        """Compare two vertices
+
+        Example
+        -------
+        if vertex1 == vertex2:
+            do something
+
+        :type other: Vertex
+        :rtype: bool
+        """
+        return self.__dict__ == other.__dict__ and \
+            self.properties == other.properties
+
+    def __hash__(self):
+        return hash(self.vertex_id)
+
     def __iter__(self):
         return self.properties.itervalues()
+
+    def __str__(self):
+        return '{vertex_id : %s, properties : %s}' % \
+               (str(self.vertex_id), str(self.properties))
+
+    def get(self, k, d=None):
+        return self.properties.get(k, d)
 
 
 class Edge(object):
@@ -124,16 +165,58 @@ class Edge(object):
         return self.properties[key]
 
     def __setitem__(self, key, value):
+        """Set an edge property
+
+        Use edge[key] instead of edge.properties[key]
+
+        Example
+        -------
+        e = Edge(source_id=123, target_id=234, label='SOME_LABEL')
+        e['some_key'] = 'some value'
+        """
         if not self.properties:
             self.properties = {}
         self.properties[key] = value
 
     def __delitem__(self, key):
+        """Delete a property from the edge
+
+        Example
+        -------
+        edge = Edge(source_id=123, target_id=234, label='SOME_LABEL'
+                    properties={'property_key': 'some value'})
+        del(edge['property_key'])
+        """
         if self.properties and key in self.properties:
             del self.properties[key]
 
+    def __eq__(self, other):
+        """Compare two edges
+
+        Example
+        -------
+        if edge1 == edge2:
+            do something
+
+        :type other: Edge
+        :rtype: bool
+        """
+        return self.__dict__ == other.__dict__ and \
+            self.properties == other.properties
+
+    def __hash__(self):
+        return hash('%s%s%s' % (str(self.source_id), str(self.target_id),
+                                str(self.label)))
+
     def __iter__(self):
         return self.properties.itervalues()
+
+    def __str__(self):
+        return '{source_id: %s, target_id: %s, label = %s, properties: %s}' \
+               % (self.source_id, self.target_id, self.label, self.properties)
+
+    def get(self, k, d=None):
+        return self.properties.get(k, d)
 
 
 @six.add_metaclass(abc.ABCMeta)
@@ -154,6 +237,24 @@ class Graph(object):
 
         :return: A copy of the graph
         :rtype: Graph
+        """
+        pass
+
+    @abc.abstractmethod
+    def num_vertex(self):
+        """Number of vertices in the graph
+
+        :return:
+        :rtype: int
+        """
+        pass
+
+    @abc.abstractmethod
+    def num_edges(self):
+        """Number of edges in the graph
+
+        :return:
+        :rtype: int
         """
         pass
 
@@ -213,11 +314,6 @@ class Graph(object):
         """
         pass
 
-    # TODO(ihefetz) uncomment:
-    # @abc.abstractmethod
-    # def get_vertices(self, properties_filter):
-    #     pass
-
     @abc.abstractmethod
     def get_edge(self, source_id, target_id, label):
         """Fetch an edge from the graph,
@@ -239,32 +335,35 @@ class Graph(object):
         pass
 
     @abc.abstractmethod
-    def get_edges(self, source_id, target_id, labels=None, directed=True):
+    def get_edges(self, v_id, direction=Direction.OUT,
+                  attr_filter=None):
         """Fetch multiple edges from the graph,
 
         Fetch an edge from the graph, according to its two vertices and label
 
-        :param source_id: vertex id of the source vertex
-        :type source_id: str
+        EXAMPLE
+        -------
+        v2_edges1 = g.get_edges(
+            v_id=v2.vertex_id,
+            attr_filter={'LABEL': 'ON'})
 
-        :param target_id: vertex id of the target vertex
-        :type target_id: str
+        v2_edges2 = g.get_edges(
+            v_id=v2.vertex_id,
+            attr_filter={'LABEL': ['ON', 'WITH']})
 
-        :param labels: the label property of the edge
-        :type labels: str or list of str
+        :param v_id: vertex id a vertex
+        :type v_id: str
 
-        :param directed: consider edge direction
-        :type directed: bool
+        :param direction: specify In/Out/Both for edge direction
+        :type direction: int
 
-        :return: The edge between the two vertices or None
-        :rtype: Edge
+        :param attr_filter: expected keys and values
+        :type attr_filter: dict
+
+        :return: All edges matching the requirements
+        :rtype: list of Edge
         """
         pass
-
-    # TODO(ihefetz) uncomment:
-    # @abc.abstractmethod
-    # def get_neighboring_edges(self, v_id, properties_filter):
-    #     pass
 
     @abc.abstractmethod
     def update_vertex(self, v, hard_update=False):
@@ -310,15 +409,50 @@ class Graph(object):
         """
         pass
 
-    # @abc.abstractmethod
-    # def neighbors(self, v, vertex_attr=None, edge_attr=None):
-    #     # TODO(ihefetz) also direction? also return the edges?
-    #     """TODO(ihefetz)
-    #
-    #     :param v: TODO(ihefetz)
-    #     :param vertex_attr: TODO(ihefetz)
-    #     :param edge_attr: TODO(ihefetz)
-    #     :return: TODO(ihefetz)
-    #     :rtype: list of Vertex
-    #     """
-    #     pass
+    @abc.abstractmethod
+    def neighbors(self, v_id, vertex_attr_filter=None,
+                  edge_attr_filter=None, direction=Direction.OUT):
+        """Get vertices that are neighboring to v_id vertex
+
+        To filter the neighboring vertices, specify property values for
+        the vertices or for the edges connecting them.
+
+        Example:
+        --------
+        graph = Graph()
+
+        v1_prop = {'prop_key':'some value for my first vertex'}
+        v2_prop = {'prop_key':'another value for my second vertex'}
+        v3_prop = {'prop_key':'YES'}
+        v1 = Vertex(vertex_id=1, properties=v1_prop)
+        v2 = Vertex(vertex_id=2, properties=v2_prop)
+        v3 = Vertex(vertex_id=3, properties=v3_prop)
+        graph.add_vertex(v1)
+        graph.add_vertex(v2)
+        graph.add_vertex(v3)
+
+        e_prop = {'edge_prop':'and here is my edge property value'}
+        e1 = Edge(source_id=v1.vertex_id, target_id=v2.vertex_id,
+                 label='BELONGS', properties=e_prop)
+        e2 = Edge(source_id=v1.vertex_id, target_id=v3.vertex_id,
+                 label='ON', properties=e_prop)
+        graph.add_edge(e1)
+        graph.add_edge(e2)
+
+        vertices_list1 = graph.neighbors(v_id=v1.vertex_id,
+                               vertex_attr_filter={'prop_key':'YES'},
+                               edge_attr_filter={'LABEL':'ON})
+        vertices_list2 = graph.neighbors(v_id=v1.vertex_id,
+                               vertex_attr_filter={'prop_key':['YES', 'CAT']},
+                               edge_attr_filter={'LABEL':['ON', 'WITH']})
+
+        :param v_id: vertex id
+        :type v_id: str
+        :param vertex_attr_filter: expected keys and values
+        :type vertex_attr_filter dict
+        :param edge_attr_filter: expected keys and values
+        :type edge_attr_filter: dict
+        :return: A list of vertices that match the requested query
+        :rtype: set of Vertex
+        """
+        pass

@@ -14,14 +14,21 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+from oslo_log import log as logging
 
 import copy
-
 import networkx as nx
 
-from driver import Edge
+from driver import Direction
+from driver import Edge  # noqa
 from driver import Graph
-from driver import Vertex
+from driver import Vertex  # noqa
+from networkx_utils import edge_copy
+from networkx_utils import filter_items
+from networkx_utils import vertex_copy
+
+
+LOG = logging.getLogger(__name__)
 
 
 class NXGraph(Graph):
@@ -29,15 +36,15 @@ class NXGraph(Graph):
     GRAPH_TYPE = "networkx"
 
     def __init__(self, name):
-        self.g = nx.MultiDiGraph()
+        self._g = nx.MultiDiGraph()
         super(NXGraph, self).__init__(name=name, graph_type=NXGraph.GRAPH_TYPE)
 
     def __len__(self):
-        return len(self.g)
+        return len(self._g)
 
     def copy(self):
         self_copy = NXGraph(self.name)
-        self_copy.g = self.g.copy()
+        self_copy._g = self._g.copy()
         return self_copy
 
     def add_vertex(self, v):
@@ -46,7 +53,7 @@ class NXGraph(Graph):
         :type v: Vertex
         """
         properties_copy = copy.copy(v.properties)
-        self.g.add_node(n=v.vertex_id, attr_dict=properties_copy)
+        self._g.add_node(n=v.vertex_id, attr_dict=properties_copy)
 
     def add_edge(self, e):
         """Add an edge to the graph
@@ -54,47 +61,69 @@ class NXGraph(Graph):
         :type e: Edge
         """
         properties_copy = copy.copy(e.properties)
-        self.g.add_edge(u=e.source_id, v=e.target_id,
-                        key=e.label, attr_dict=properties_copy)
+        self._g.add_edge(u=e.source_id, v=e.target_id,
+                         key=e.label, attr_dict=properties_copy)
 
     def get_vertex(self, v_id):
         """Fetch a vertex from the graph
 
         :rtype: Vertex
         """
-        properties = self.g.node.get(v_id, None)
-        properties_copy = copy.copy(properties) if properties else None
-        vertex = Vertex(vertex_id=v_id, properties=properties_copy)
-        return vertex
-
-    def _get_edge_properties(self, source_id, target_id, label):
-        try:
-            properties = self.g.adj[source_id][target_id][label]
-            return properties
-        except KeyError:
-            return None
+        properties = self._g.node.get(v_id, None)
+        if properties:
+            return vertex_copy(v_id, properties)
+        LOG.debug("get_vertex item not found. v_id=" + str(v_id))
+        return None
 
     def get_edge(self, source_id, target_id, label):
-        """Fetch an edge from the graph,
-
-        :rtype: Edge
-        """
-        properties = self._get_edge_properties(source_id, target_id, label)
-        if properties:
-            properties_copy = copy.copy(properties)
-            item = Edge(source_id=source_id, target_id=target_id,
-                        label=label, properties=properties_copy)
-            return item
-        else:
+        try:
+            properties = self._g.adj[source_id][target_id][label]
+        except KeyError:
+            LOG.debug("get_edge item not found. source_id=" + str(source_id) +
+                      ", target_id=" + str(target_id) +
+                      ", label=" + str(label))
             return None
+        if properties:
+            return edge_copy(source_id, target_id, label, properties)
+        return None
 
-    def get_edges(self, source_id, target_id, labels=None, directed=True):
+    def get_edges(self, v_id, direction=Direction.OUT,
+                  attr_filter=None):
         """Fetch multiple edges from the graph
 
         :rtype: list of Edge
         """
-        # TODO(ihefetz) implement this function
-        pass
+        if not direction:
+            LOG.error("get_edges: direction cannot be None")
+            raise AttributeError("get_edges: direction cannot be None")
+
+        if not v_id:
+            LOG.error("get_edges: v_id cannot be None")
+            raise AttributeError("get_edges: v_id cannot be None")
+
+        edges_by_direction = self._get_edges_by_direction(v_id, direction)
+        filtered_edges = filter_items(edges_by_direction, attr_filter)
+        return filtered_edges
+
+    def _get_edges_by_direction(self, v_id, direction):
+        edges = set()
+        if direction == Direction.BOTH:
+            edges.update(self._get_edges_by_direction(v_id, Direction.IN))
+            edges.update(self._get_edges_by_direction(v_id, Direction.OUT))
+            return edges
+        if direction == Direction.OUT:
+            found_items = self._g.out_edges(nbunch=v_id, data=True, keys=True)
+        else:  # IN
+            found_items = self._g.in_edges(nbunch=v_id, data=True, keys=True)
+        for source_id, target_id, label, data in found_items:
+            edges.add(edge_copy(source_id, target_id, label, data))
+        return edges
+
+    def num_vertex(self):
+        return len(self._g)
+
+    def num_edges(self):
+        return self._g.number_of_edges()
 
     def update_vertex(self, v, hard_update=False):
         """Update the vertex properties
@@ -102,7 +131,7 @@ class NXGraph(Graph):
         :type v: Vertex
         """
         if hard_update:
-            properties = self.g.node.get(v.vertex_id, None)
+            properties = self._g.node.get(v.vertex_id, None)
             if properties:
                 properties.clear()
         self.add_vertex(v)
@@ -125,11 +154,29 @@ class NXGraph(Graph):
 
         :type v: Vertex
         """
-        self.g.remove_node(n=v.vertex_id)
+        self._g.remove_node(n=v.vertex_id)
 
     def remove_edge(self, e):
         """Remove an edge from the graph
 
         :type e: Edge
         """
-        self.g.remove_edge(u=e.source_id, v=e.target_id)
+        self._g.remove_edge(u=e.source_id, v=e.target_id, key=e.label)
+
+    def neighbors(self, v_id, vertex_attr_filter=None, edge_attr_filter=None,
+                  direction=Direction.OUT):
+        if not direction:
+            LOG.error("neighbors: direction cannot be None")
+            raise AttributeError("neighbors: direction cannot be None")
+
+        if not v_id:
+            LOG.error("neighbors: v_id cannot be None")
+            raise AttributeError("neighbors: v_id cannot be None")
+
+        edges = self.get_edges(v_id, direction, edge_attr_filter)
+        vertices_except_me = {self.get_vertex(edge.target_id)
+                              if edge.source_id == v_id else
+                              self.get_vertex(edge.source_id)
+                              for edge in edges}
+        vertices = filter_items(vertices_except_me, vertex_attr_filter)
+        return vertices
