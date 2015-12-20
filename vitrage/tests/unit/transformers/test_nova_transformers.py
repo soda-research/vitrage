@@ -15,6 +15,7 @@
 from oslo_log import log as logging
 
 from vitrage.common.constants import VertexConstants as vertexCons
+import vitrage.entity_graph.transformer.base as trans_base
 from vitrage.entity_graph.transformer import nova_transformer as nt
 from vitrage.tests.mocks import mock_syncronizer as mock_sync
 from vitrage.tests.unit import base
@@ -31,8 +32,6 @@ def get_instance_entity_spec_list(config_file_path, number_of_instances):
     """Returns a list of nova instance specifications by
 
     given specific configuration file.
-
-    :rtype : list
     """
     return {
         'filename': config_file_path,
@@ -68,15 +67,16 @@ class NovaInstanceTransformerTest(base.BaseTest):
 
         for event in instance_events:
             observed_key = transformer.extract_key(event)
-            observed_key_fields = observed_key.split(nt.KEY_SEPARATOR)
+            observed_key_fields = observed_key.split(
+                trans_base.Transformer.KEY_SEPARATOR)
 
             self.assertEqual(nt.ENTITY_TYPE, observed_key_fields[0])
             self.assertEqual(nt.INSTANCE_SUB_TYPE, observed_key_fields[1])
 
-            event_id = event[transformer.ENTITY_ID_DICT[event['sync_mode']]]
+            event_id = event[transformer.INSTANCE_ID_DICT[event['sync_mode']]]
             self.assertEqual(event_id, observed_key_fields[2])
 
-            expected_key = nt.KEY_SEPARATOR.join(
+            expected_key = trans_base.Transformer.KEY_SEPARATOR.join(
                 [nt.ENTITY_TYPE,
                  nt.INSTANCE_SUB_TYPE,
                  event_id])

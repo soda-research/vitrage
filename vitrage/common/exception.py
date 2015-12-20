@@ -11,5 +11,28 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+"""
+**********
+Exceptions
+**********
 
-__author__ = 'stack'
+Base exceptions and errors for Vitrage.
+
+"""
+
+
+# the root of all Exceptions
+class VitrageException(Exception):
+    """Base class for exceptions in Vitrage."""
+
+
+class VitrageError(VitrageException):
+    """Exception for a serious error in Vitrage"""
+
+
+class VitrageAlgorithmError(VitrageException):
+    """Exception for unexpected termination of algorithms."""
+
+
+class VitrageTransformerError(VitrageException):
+    """Exception for a serious error in Vitrage transformer"""

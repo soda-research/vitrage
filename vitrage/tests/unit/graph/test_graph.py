@@ -28,7 +28,7 @@ from vitrage.common.constants import EdgeLabels as ELabel
 from vitrage.common.constants import VertexConstants as VConst
 from vitrage.graph import create_graph
 from vitrage.graph import Direction
-from vitrage.graph import util
+from vitrage.graph import utils
 from vitrage.tests.unit import base
 
 LOG = logging.getLogger(__name__)
@@ -43,24 +43,24 @@ HOST = 'HOST'
 INSTANCE = 'INSTANCE'
 NODE = 'NODE'
 
-v_node = util.create_vertex(
+v_node = utils.create_vertex(
     vertex_id=NODE + '111111111111',
     entity_id='111111111111',
     entity_type=NODE)
-v_host = util.create_vertex(
+v_host = utils.create_vertex(
     vertex_id=HOST + '222222222222',
     entity_id='222222222222',
     entity_type=HOST)
-v_instance = util.create_vertex(
+v_instance = utils.create_vertex(
     vertex_id=INSTANCE + '333333333333',
     entity_id='333333333333',
     entity_type=INSTANCE)
-v_alarm = util.create_vertex(
+v_alarm = utils.create_vertex(
     vertex_id=ALARM + '444444444444',
     entity_id='444444444444',
     entity_type=ALARM)
 
-e_node_to_host = util.create_edge(
+e_node_to_host = utils.create_edge(
     source_id=v_node.vertex_id,
     target_id=v_host.vertex_id,
     relation_type=ELabel.CONTAINS,
@@ -68,11 +68,11 @@ e_node_to_host = util.create_edge(
 
 
 def add_connected_vertex(entity_type, edge_type, graph, id, other_vertex):
-    host_to_add = util.create_vertex(
+    host_to_add = utils.create_vertex(
         vertex_id=entity_type + str(id),
         entity_id=id,
         entity_type=entity_type)
-    edge_to_add = util.create_edge(
+    edge_to_add = utils.create_edge(
         source_id=host_to_add.vertex_id,
         target_id=other_vertex.vertex_id,
         relation_type=edge_type)
@@ -207,7 +207,7 @@ class GraphTest(base.BaseTest):
                          'Graph item should change after update')
 
         # check metadata
-        another_vertex = util.create_vertex(
+        another_vertex = utils.create_vertex(
             vertex_id='123', entity_id='456', entity_type=INSTANCE,
             metadata={'some_meta': 'DATA'}
         )
@@ -287,7 +287,7 @@ class GraphTest(base.BaseTest):
 
         # check metadata
         another_label = 'ANOTHER_LABEL'
-        another_edge = util.create_edge(
+        another_edge = utils.create_edge(
             source_id=v_node.vertex_id,
             target_id=v_host.vertex_id,
             relation_type=another_label,
@@ -326,7 +326,7 @@ class GraphTest(base.BaseTest):
         v2 = v_host
         v3 = v_instance
         v4 = v_alarm
-        v5 = util.create_vertex(
+        v5 = utils.create_vertex(
             vertex_id='kuku',
             entity_type=HOST)
 
@@ -337,33 +337,33 @@ class GraphTest(base.BaseTest):
         g.add_vertex(v4)
         g.add_vertex(v5)
 
-        g.add_edge(util.create_edge(source_id=v1.vertex_id,
-                                    target_id=v2.vertex_id,
-                                    relation_type=relation_a))
-        g.add_edge(util.create_edge(source_id=v1.vertex_id,
-                                    target_id=v2.vertex_id,
-                                    relation_type=relation_b))
-        g.add_edge(util.create_edge(source_id=v1.vertex_id,
-                                    target_id=v4.vertex_id,
-                                    relation_type=relation_a))
-        g.add_edge(util.create_edge(source_id=v1.vertex_id,
-                                    target_id=v4.vertex_id,
-                                    relation_type=relation_b))
-        g.add_edge(util.create_edge(source_id=v2.vertex_id,
-                                    target_id=v1.vertex_id,
-                                    relation_type=relation_c))
-        g.add_edge(util.create_edge(source_id=v2.vertex_id,
-                                    target_id=v3.vertex_id,
-                                    relation_type=relation_a))
-        g.add_edge(util.create_edge(source_id=v2.vertex_id,
-                                    target_id=v3.vertex_id,
-                                    relation_type=relation_b))
-        g.add_edge(util.create_edge(source_id=v2.vertex_id,
-                                    target_id=v4.vertex_id,
-                                    relation_type=relation_a))
-        g.add_edge(util.create_edge(source_id=v4.vertex_id,
-                                    target_id=v1.vertex_id,
-                                    relation_type=relation_c))
+        g.add_edge(utils.create_edge(source_id=v1.vertex_id,
+                                     target_id=v2.vertex_id,
+                                     relation_type=relation_a))
+        g.add_edge(utils.create_edge(source_id=v1.vertex_id,
+                                     target_id=v2.vertex_id,
+                                     relation_type=relation_b))
+        g.add_edge(utils.create_edge(source_id=v1.vertex_id,
+                                     target_id=v4.vertex_id,
+                                     relation_type=relation_a))
+        g.add_edge(utils.create_edge(source_id=v1.vertex_id,
+                                     target_id=v4.vertex_id,
+                                     relation_type=relation_b))
+        g.add_edge(utils.create_edge(source_id=v2.vertex_id,
+                                     target_id=v1.vertex_id,
+                                     relation_type=relation_c))
+        g.add_edge(utils.create_edge(source_id=v2.vertex_id,
+                                     target_id=v3.vertex_id,
+                                     relation_type=relation_a))
+        g.add_edge(utils.create_edge(source_id=v2.vertex_id,
+                                     target_id=v3.vertex_id,
+                                     relation_type=relation_b))
+        g.add_edge(utils.create_edge(source_id=v2.vertex_id,
+                                     target_id=v4.vertex_id,
+                                     relation_type=relation_a))
+        g.add_edge(utils.create_edge(source_id=v4.vertex_id,
+                                     target_id=v1.vertex_id,
+                                     relation_type=relation_c))
 
         # CHECK V1
 

@@ -18,9 +18,9 @@ Graph abstraction
 """
 
 from driver import *  # noqa
-from util import *  # noqa
-from networkx_utils import *  # noqa
 from networkx_graph import *  # noqa
+from networkx_utils import *  # noqa
+from utils import *  # noqa
 
 
 def create_graph(name):

@@ -28,6 +28,8 @@ EntityWrapper = \
 @six.add_metaclass(abc.ABCMeta)
 class Transformer(object):
 
+    KEY_SEPARATOR = ':'
+
     @abc.abstractmethod
     def transform(self, entity_event):
         """Transforms an entity event into entity wrapper
