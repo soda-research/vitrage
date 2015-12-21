@@ -212,8 +212,11 @@ class Edge(object):
         return self.properties.itervalues()
 
     def __str__(self):
-        return '{source_id: %s, target_id: %s, label = %s, properties: %s}' \
-               % (self.source_id, self.target_id, self.label, self.properties)
+        return '{source_id : %s, target_id : %s, ' \
+               'label = %s, properties : %s}' % (self.source_id,
+                                                 self.target_id,
+                                                 self.label,
+                                                 self.properties)
 
     def get(self, k, d=None):
         return self.properties.get(k, d)

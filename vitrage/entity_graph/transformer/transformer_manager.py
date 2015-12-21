@@ -15,7 +15,7 @@
 
 from oslo_log import log as logging
 from oslo_utils import importutils
-from vitrage.common.constants import VertexConstants
+from vitrage.common.constants import VertexProperties
 from vitrage.common.exception import VitrageTransformerError
 
 LOG = logging.getLogger(__name__)
@@ -63,7 +63,7 @@ class TransformerManager(object):
 
     def key_fields(self, vertex):
 
-        e_sub_type = vertex.properties.get(VertexConstants.SUB_TYPE, None)
+        e_sub_type = vertex.properties.get(VertexProperties.SUB_TYPE, None)
 
         if e_sub_type is None:
             raise VitrageTransformerError(

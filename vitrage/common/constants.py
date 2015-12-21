@@ -13,7 +13,7 @@
 # under the License.
 
 
-class VertexConstants(object):
+class VertexProperties(object):
     TYPE = 'TYPE'
     SUB_TYPE = 'SUB_TYPE'
     ID = 'ID'
@@ -22,6 +22,7 @@ class VertexConstants(object):
     STATE = 'STATE'
     PROJECT = 'PROJECT'
     UPDATE_TIMESTAMP = 'UPDATE_TIMESTAMP'
+    NAME = 'name'
 
 
 class EdgeConstants(object):
@@ -35,7 +36,17 @@ class EdgeLabels(object):
     CONTAINS = 'contains'
 
 
-class SynchronizerMessageMode(object):
+class SyncMode(object):
     SNAPSHOT = 'snapshot'
     INIT_SNAPSHOT = 'init_snapshot'
     UPDATE = 'update'
+
+
+class EntityTypes(object):
+    RESOURCE = 'RESOURCE'
+
+
+class ActionTypes(object):
+    CREATE = 'CREATE'
+    DELETE = 'DELETE'
+    UPDATE = 'UPDATE'

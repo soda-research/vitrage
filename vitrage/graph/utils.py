@@ -16,7 +16,7 @@
 #    under the License.
 
 from vitrage.common.constants import EdgeConstants as EConst
-from vitrage.common.constants import VertexConstants as VConst
+from vitrage.common.constants import VertexProperties as VConst
 from vitrage.graph import Edge
 from vitrage.graph import Vertex
 

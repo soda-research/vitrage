@@ -22,7 +22,9 @@ LOG = logging.getLogger(__name__)
 
 
 EntityWrapper = \
-    namedtuple('EntityWrapper', ['entity_vertex', 'neighbors'], 'action')
+    namedtuple('EntityWrapper', ['vertex', 'neighbors', 'action'])
+
+Neighbor = namedtuple('Neighbor', ['vertex', 'edge'])
 
 
 @six.add_metaclass(abc.ABCMeta)
