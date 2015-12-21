@@ -14,8 +14,7 @@
 
 import multiprocessing
 
-
-from synchronizer import Synchronizer
+from vitrage.synchronizer.synchronizer import Synchronizer
 
 
 class TestClient(object):
