@@ -13,7 +13,7 @@
 # under the License.
 
 from oslo_log import log as logging
-from vitrage.common.constants import VertexConstants as vertex_cons
+from vitrage.common.constants import VertexProperties as vertex_cons
 from vitrage.common.exception import VitrageTransformerError
 import vitrage.entity_graph.transformer.base as base_transformer
 from vitrage.entity_graph.transformer import transformer_manager

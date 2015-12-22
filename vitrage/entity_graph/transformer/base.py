@@ -18,11 +18,15 @@ import six
 from collections import namedtuple
 from oslo_log import log as logging
 
+import vitrage.common.constants as cons
+
 LOG = logging.getLogger(__name__)
 
 
 EntityWrapper = \
-    namedtuple('EntityWrapper', ['entity_vertex', 'neighbors'], 'action')
+    namedtuple('EntityWrapper', ['vertex', 'neighbors', 'action'])
+
+Neighbor = namedtuple('Neighbor', ['vertex', 'edge'])
 
 
 @six.add_metaclass(abc.ABCMeta)
@@ -41,9 +45,10 @@ class Transformer(object):
         """
         pass
 
-    @abc.abstractmethod
     def key_fields(self):
-        pass
+        return [cons.VertexProperties.TYPE,
+                cons.VertexProperties.SUB_TYPE,
+                cons.VertexProperties.ID]
 
     @abc.abstractmethod
     def extract_key(self, entity_event):

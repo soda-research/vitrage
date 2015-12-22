@@ -1,4 +1,4 @@
-sync_mode                            D  snapshot
+sync_mode                            D  init_snapshot
 OS-DCF:diskConfig                    S  AUTO
 OS-EXT-AZ:availability_zone          S  nova
 OS-EXT-SRV-ATTR:host                 D  [a-z]{4}-devstack

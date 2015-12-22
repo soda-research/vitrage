@@ -18,14 +18,15 @@ test_vitrage graph
 
 Tests for `vitrage` graph driver
 """
+
 from oslo_log import log as logging
 
 import random
 import time
 
-from vitrage.common.constants import EdgeConstants as EConst
 from vitrage.common.constants import EdgeLabels as ELabel
-from vitrage.common.constants import VertexConstants as VConst
+from vitrage.common.constants import EdgeProperties as EConst
+from vitrage.common.constants import VertexProperties as VProps
 from vitrage.graph import create_graph
 from vitrage.graph import Direction
 from vitrage.graph import utils
@@ -146,7 +147,8 @@ entity_graph, vm_alarm_id, vm_id, vms = create_entity_graph(
 class GraphTest(base.BaseTest):
 
     def _assert_set_equal(self, d1, d2, message):
-        super(GraphTest, self).assert_dict_equal(dict(d1), dict(d2), message)
+        super(GraphTest, self).assert_dict_equal(
+            dict.fromkeys(d1, 0), dict.fromkeys(d2, 0), message)
 
     def test_graph(self):
         g = create_graph('test_graph')
@@ -167,43 +169,43 @@ class GraphTest(base.BaseTest):
         self.assertEqual(2, len(graph_copy), 'graph copy __len__')
 
         updated_vertex = g.get_vertex(v_host.vertex_id)
-        updated_vertex[VConst.TYPE] = ALARM
+        updated_vertex[VProps.TYPE] = ALARM
         g.update_vertex(updated_vertex)
         v_from_g = g.get_vertex(v_host.vertex_id)
         v_from_graph_copy = graph_copy.get_vertex(v_host.vertex_id)
-        self.assertEqual(ALARM, v_from_g[VConst.TYPE],
+        self.assertEqual(ALARM, v_from_g[VProps.TYPE],
                          'graph vertex changed after update')
-        self.assertEqual(HOST, v_from_graph_copy[VConst.TYPE],
+        self.assertEqual(HOST, v_from_graph_copy[VProps.TYPE],
                          'graph copy vertex unchanged after update')
 
     def test_vertex_crud(self):
         g = create_graph('test_vertex_crud')
         g.add_vertex(v_node)
         v = g.get_vertex(v_node.vertex_id)
-        self.assertEqual(v_node[VConst.ID], v[VConst.ID],
+        self.assertEqual(v_node[VProps.ID], v[VProps.ID],
                          'vertex properties are saved')
-        self.assertEqual(v_node[VConst.TYPE], v[VConst.TYPE],
+        self.assertEqual(v_node[VProps.TYPE], v[VProps.TYPE],
                          'vertex properties are saved')
         self.assertEqual(v_node.vertex_id, v.vertex_id,
                          'vertex vertex_id is saved')
 
         # Changing the referenced item
         updated_v = v
-        updated_v[VConst.SUB_TYPE] = 'KUKU'
-        updated_v[VConst.TYPE] = 'CHANGED'
+        updated_v[VProps.SUB_TYPE] = 'KUKU'
+        updated_v[VProps.TYPE] = 'CHANGED'
         # Get it again
         v = g.get_vertex(v_node.vertex_id)
-        self.assertIsNone(v.get(VConst.SUB_TYPE, None),
+        self.assertIsNone(v.get(VProps.SUB_TYPE, None),
                           'Change should not affect graph item')
-        self.assertEqual(v_node[VConst.TYPE], v[VConst.TYPE],
+        self.assertEqual(v_node[VProps.TYPE], v[VProps.TYPE],
                          'Change should not affect graph item')
         # Update the graph item and see changes take place
         g.update_vertex(updated_v)
         # Get it again
         v = g.get_vertex(v_node.vertex_id)
-        self.assertEqual(updated_v[VConst.SUB_TYPE], v[VConst.SUB_TYPE],
+        self.assertEqual(updated_v[VProps.SUB_TYPE], v[VProps.SUB_TYPE],
                          'Graph item should change after update')
-        self.assertEqual(updated_v[VConst.TYPE], v[VConst.TYPE],
+        self.assertEqual(updated_v[VProps.TYPE], v[VProps.TYPE],
                          'Graph item should change after update')
 
         # check metadata
@@ -213,9 +215,9 @@ class GraphTest(base.BaseTest):
         )
         g.add_vertex(another_vertex)
         v = g.get_vertex(another_vertex.vertex_id)
-        self.assertEqual(another_vertex[VConst.ID], v[VConst.ID],
+        self.assertEqual(another_vertex[VProps.ID], v[VProps.ID],
                          'vertex properties are saved')
-        self.assertEqual(another_vertex[VConst.TYPE], v[VConst.TYPE],
+        self.assertEqual(another_vertex[VProps.TYPE], v[VProps.TYPE],
                          'vertex properties are saved')
         self.assertEqual('DATA', v['some_meta'],
                          'vertex properties are saved')
@@ -269,8 +271,8 @@ class GraphTest(base.BaseTest):
 
         # Get it again
         e = g.get_edge(v_node.vertex_id, v_host.vertex_id, label)
-        self.assertIsNone(e.get(EConst.IS_EDGE_DELETED, None),
-                          'Change should not affect graph item')
+        self.assertEqual(False, e.get(EConst.IS_EDGE_DELETED, None),
+                         'Change should not affect graph item')
         self.assertEqual(e_node_to_host[EConst.EDGE_DELETION_TIMESTAMP],
                          e[EConst.EDGE_DELETION_TIMESTAMP],
                          'Change should not affect graph item')
@@ -372,7 +374,7 @@ class GraphTest(base.BaseTest):
 
         v1_neighbors = g.neighbors(
             v_id=v1.vertex_id,
-            vertex_attr_filter={VConst.TYPE: HOST})
+            vertex_attr_filter={VProps.TYPE: HOST})
         self._assert_set_equal({v2}, v1_neighbors,
                                'Check V1 neighbors, vertex property filter')
 
@@ -401,7 +403,7 @@ class GraphTest(base.BaseTest):
             v_id=v1.vertex_id,
             direction=Direction.IN,
             edge_attr_filter={EConst.RELATION_NAME: relation_c},
-            vertex_attr_filter={VConst.TYPE: HOST})
+            vertex_attr_filter={VProps.TYPE: HOST})
         self._assert_set_equal(
             {v2}, v1_neighbors,
             'Check V1 neighbors, vertex/edge property filter and direction')
@@ -414,20 +416,20 @@ class GraphTest(base.BaseTest):
 
         v2_neighbors = g.neighbors(
             v_id=v2.vertex_id,
-            vertex_attr_filter={VConst.TYPE: HOST})
+            vertex_attr_filter={VProps.TYPE: HOST})
         self._assert_set_equal({}, v2_neighbors,
                                'Check v2 neighbors, vertex property filter')
 
         v2_neighbors = g.neighbors(
             v_id=v2.vertex_id,
-            vertex_attr_filter={VConst.TYPE: [HOST, ALARM]})
+            vertex_attr_filter={VProps.TYPE: [HOST, ALARM]})
         self._assert_set_equal({v4}, v2_neighbors,
                                'Check v2 neighbors, vertex property filter')
 
         v2_neighbors = g.neighbors(
             v_id=v2.vertex_id,
             edge_attr_filter={EConst.RELATION_NAME: [relation_a, relation_b]},
-            vertex_attr_filter={VConst.TYPE: [HOST, ALARM, INSTANCE]})
+            vertex_attr_filter={VProps.TYPE: [HOST, ALARM, INSTANCE]})
         self._assert_set_equal({v3, v4}, v2_neighbors,
                                'Check v2 neighbors, edge property filter')
 
@@ -439,11 +441,11 @@ class GraphTest(base.BaseTest):
 
         v3_neighbors = g.neighbors(
             v_id=v3.vertex_id,
-            vertex_attr_filter={VConst.TYPE: HOST})
+            vertex_attr_filter={VProps.TYPE: HOST})
         self._assert_set_equal({}, v3_neighbors,
                                'Check neighbors for vertex without any')
         v5_neighbors = g.neighbors(
             v_id=v5.vertex_id,
-            vertex_attr_filter={VConst.TYPE: HOST})
+            vertex_attr_filter={VProps.TYPE: HOST})
         self._assert_set_equal({}, v5_neighbors,
                                'Check neighbors for not connected vertex')

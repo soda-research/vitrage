@@ -15,7 +15,7 @@
 
 from oslo_log import log as logging
 from oslo_utils import importutils
-from vitrage.common.constants import VertexConstants
+from vitrage.common.constants import VertexProperties
 from vitrage.common.exception import VitrageTransformerError
 
 LOG = logging.getLogger(__name__)
@@ -43,9 +43,9 @@ class TransformerManager(object):
 
     def get_transformer(self, key):
 
-        transformer = self.transformers.get(key, None)
-
-        if transformer is None:
+        try:
+            transformer = self.transformers[key]
+        except KeyError:
             raise VitrageTransformerError(
                 'Could not get transformer instance for %s' % key)
 
@@ -53,19 +53,19 @@ class TransformerManager(object):
 
     def transform(self, entity_event):
 
-        sync_type = entity_event.get('sync_type', None)
-
-        if sync_type is None:
+        try:
+            sync_type = entity_event['sync_type']
+        except KeyError:
             raise VitrageTransformerError(
                 'Entity Event must contains sync_type field.')
 
-        self.get_transformer(entity_event['sync_type']).transform()
+        self.get_transformer(sync_type).transform()
 
     def key_fields(self, vertex):
 
-        e_sub_type = vertex.properties.get(VertexConstants.SUB_TYPE, None)
-
-        if e_sub_type is None:
+        try:
+            e_sub_type = vertex[VertexProperties.SUB_TYPE]
+        except KeyError:
             raise VitrageTransformerError(
                 'Vertex must contains SUB_TYPE field.')
 
@@ -73,10 +73,10 @@ class TransformerManager(object):
 
     def extract_key(self, entity_event):
 
-        sync_type = entity_event.get('sync_type', None)
-
-        if sync_type is None:
+        try:
+            sync_type = entity_event['sync_type']
+        except KeyError:
             raise VitrageTransformerError(
                 'Entity Event must contains sync_type field.')
 
-        return self.get_transformer(entity_event['sync_type']).extract_key()
+        return self.get_transformer(sync_type).extract_key()

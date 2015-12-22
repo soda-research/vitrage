@@ -12,4 +12,28 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-__author__ = 'stack'
+import abc
+import six
+
+
+@six.add_metaclass(abc.ABCMeta)
+class ProcessorBase(object):
+
+    def __init__(self):
+        pass
+
+    @abc.abstractmethod
+    def process_event(self, event):
+        pass
+
+    @abc.abstractmethod
+    def create_entity(self, new_vertex, neighbors):
+        pass
+
+    @abc.abstractmethod
+    def update_entity(self, updated_vertex, neighbors):
+        pass
+
+    @abc.abstractmethod
+    def delete_entity(self, deleted_vertex, neighbors):
+        pass

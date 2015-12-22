@@ -13,7 +13,7 @@
 # under the License.
 
 
-class VertexConstants(object):
+class VertexProperties(object):
     TYPE = 'TYPE'
     SUB_TYPE = 'SUB_TYPE'
     ID = 'ID'
@@ -22,9 +22,11 @@ class VertexConstants(object):
     STATE = 'STATE'
     PROJECT = 'PROJECT'
     UPDATE_TIMESTAMP = 'UPDATE_TIMESTAMP'
+    NAME = 'NAME'
+    IS_PARTIAL_DATA = 'IS_PARTIAL_DATA'
 
 
-class EdgeConstants(object):
+class EdgeProperties(object):
     RELATION_NAME = 'RELATION_NAME'
     IS_EDGE_DELETED = 'IS_EDGE_DELETED'
     EDGE_DELETION_TIMESTAMP = 'EDGE_DELETION_TIMESTAMP'
@@ -35,7 +37,17 @@ class EdgeLabels(object):
     CONTAINS = 'contains'
 
 
-class SynchronizerMessageMode(object):
+class SyncMode(object):
     SNAPSHOT = 'snapshot'
     INIT_SNAPSHOT = 'init_snapshot'
+    UPDATE = 'update'
+
+
+class EntityTypes(object):
+    RESOURCE = 'RESOURCE'
+
+
+class EventAction(object):
+    CREATE = 'create'
+    DELETE = 'delete'
     UPDATE = 'update'

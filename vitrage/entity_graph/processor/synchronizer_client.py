@@ -12,22 +12,19 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-"""
-Graph abstraction
-"""
-
-from driver import *  # noqa
-from networkx_graph import *  # noqa
-from networkx_utils import *  # noqa
-from utils import *  # noqa
+from oslo_log import log
 
 
-def create_graph(name):
-    """Create a Graph instance
+LOG = log.getLogger(__name__)
 
-    For now only return NXGraph
 
-    :type name: str
-    :rtype: Graph
-    """
-    return NXGraph(name)
+class SynchronizerClient(object):
+
+    def __init__(self):
+        pass
+
+    def get_all(self):
+        pass
+
+    def get_all_entity(self, entity_name):
+        pass

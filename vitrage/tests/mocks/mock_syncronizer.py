@@ -20,7 +20,7 @@ of what can be returned
 
 usage example:
     test_entity_spec_list = [
-        {'filename': '../resources/mock_nova_inst_snapshot.txt',
+        {'filename': '../resources/mock_nova_inst_init_snapshot.txt',
          '#instances': 10,
          'name': 'Instance (vm) generator'
          }
@@ -28,8 +28,6 @@ usage example:
     spec_list = get_mock_generators(test_entity_spec_list)
     events = generate_random_events_list(spec_list)
 """
-
-__author__ = 'erosensw'
 
 import random
 
