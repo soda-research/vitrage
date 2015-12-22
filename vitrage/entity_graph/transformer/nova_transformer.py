@@ -13,6 +13,7 @@
 # under the License.
 
 from oslo_log import log as logging
+
 import vitrage.common.constants as cons
 from vitrage.entity_graph.transformer import base
 import vitrage.graph.utils as graph_utils
@@ -42,9 +43,9 @@ class InstanceTransformer(base.Transformer):
     def __init__(self):
 
         self.transform_methods = {
-            cons.SyncMode.SNAPSHOT: self.transform_snapshot_event,
-            cons.SyncMode.INIT_SNAPSHOT: self.transform_init_snapshot_event,
-            cons.SyncMode.UPDATE: self.transform_update_event
+            cons.SyncMode.SNAPSHOT: self._transform_snapshot_event,
+            cons.SyncMode.INIT_SNAPSHOT: self._transform_init_snapshot_event,
+            cons.SyncMode.UPDATE: self._transform_update_event
         }
 
     def transform(self, entity_event):
@@ -63,11 +64,12 @@ class InstanceTransformer(base.Transformer):
         sync_mode = entity_event['sync_mode']
         return self.transform_methods[sync_mode](entity_event)
 
-    def transform_snapshot_event(self, entity_event):
+    def _transform_snapshot_event(self, entity_event):
 
         entity_key = self.extract_key(entity_event)
         metadata = {
-            cons.VertexProperties.NAME: entity_event[self.INSTANCE_NAME]
+            cons.VertexProperties.NAME: entity_event[self.INSTANCE_NAME],
+            cons.VertexProperties.IS_PARTIAL_DATA: False
         }
 
         entity_vertex = graph_utils.create_vertex(
@@ -90,19 +92,19 @@ class InstanceTransformer(base.Transformer):
             [host_neighbor],
             cons.ActionTypes.UPDATE)
 
-    def transform_init_snapshot_event(self, entity_event):
+    def _transform_init_snapshot_event(self, entity_event):
 
-        entity_wrapper = self.transform_snapshot_event(entity_event)
+        entity_wrapper = self._transform_snapshot_event(entity_event)
         entity_wrapper.action = cons.ActionTypes.CREATE
         return entity_wrapper
 
-    def transform_update_event(self):
+    def _transform_update_event(self):
         pass
 
-    def key_fields(self):
-        return [cons.VertexProperties.TYPE,
-                cons.VertexProperties.SUB_TYPE,
-                cons.VertexProperties.ID]
+    # def key_fields(self):
+    #     return [cons.VertexProperties.TYPE,
+    #             cons.VertexProperties.SUB_TYPE,
+    #             cons.VertexProperties.ID]
 
     def extract_key(self, entity_event):
 
@@ -146,11 +148,17 @@ class InstanceTransformer(base.Transformer):
         :return: Vertex with partial data
         :rtype: Vertex
         """
+
+        metadata = {
+            cons.VertexProperties.IS_PARTIAL_DATA: True
+        }
+
         return graph_utils.create_vertex(
             InstanceTransformer.build_instance_key(instance_id),
             entity_id=instance_id,
             entity_type=cons.EntityTypes.RESOURCE,
-            entity_subtype=INSTANCE_SUBTYPE
+            entity_subtype=INSTANCE_SUBTYPE,
+            metadata=metadata
         )
 
 
@@ -168,11 +176,6 @@ class HostTransformer(base.Transformer):
         """
         pass
 
-    def key_fields(self):
-        return [cons.VertexProperties.TYPE,
-                cons.VertexProperties.SUB_TYPE,
-                cons.VertexProperties.ID]
-
     def extract_key(self, entity_event):
         pass
 
@@ -187,9 +190,14 @@ class HostTransformer(base.Transformer):
     @staticmethod
     def create_partial_vertex(host_name):
 
+        metadata = {
+            cons.VertexProperties.IS_PARTIAL_DATA: True
+        }
+
         return graph_utils.create_vertex(
             HostTransformer.build_host_key(host_name),
             entity_id=host_name,
             entity_type=cons.EntityTypes.RESOURCE,
             entity_subtype=HOST_SUBTYPE,
+            metadata=metadata
         )

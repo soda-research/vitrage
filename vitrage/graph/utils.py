@@ -69,7 +69,8 @@ def create_vertex(vertex_id,
     }
     if metadata:
         properties.update(metadata)
-    properties = dict((k, v) for k, v in properties.iteritems() if v)
+    properties = dict(
+        (k, v) for k, v in properties.iteritems() if v is not None)
     vertex = Vertex(vertex_id=vertex_id, properties=properties)
     return vertex
 
@@ -104,7 +105,8 @@ def create_edge(source_id,
     }
     if metadata:
         properties.update(metadata)
-    properties = dict((k, v) for k, v in properties.iteritems() if v)
+    properties = dict(
+        (k, v) for k, v in properties.iteritems() if v is not None)
     edge = Edge(source_id=source_id,
                 target_id=target_id,
                 label=relation_type,

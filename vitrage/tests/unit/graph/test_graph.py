@@ -146,7 +146,8 @@ entity_graph, vm_alarm_id, vm_id, vms = create_entity_graph(
 class GraphTest(base.BaseTest):
 
     def _assert_set_equal(self, d1, d2, message):
-        super(GraphTest, self).assert_dict_equal(dict(d1), dict(d2), message)
+        super(GraphTest, self).assert_dict_equal(
+            dict.fromkeys(d1, 0), dict.fromkeys(d2, 0), message)
 
     def test_graph(self):
         g = create_graph('test_graph')
@@ -269,8 +270,8 @@ class GraphTest(base.BaseTest):
 
         # Get it again
         e = g.get_edge(v_node.vertex_id, v_host.vertex_id, label)
-        self.assertIsNone(e.get(EConst.IS_EDGE_DELETED, None),
-                          'Change should not affect graph item')
+        self.assertEqual(False, e.get(EConst.IS_EDGE_DELETED, None),
+                         'Change should not affect graph item')
         self.assertEqual(e_node_to_host[EConst.EDGE_DELETION_TIMESTAMP],
                          e[EConst.EDGE_DELETION_TIMESTAMP],
                          'Change should not affect graph item')

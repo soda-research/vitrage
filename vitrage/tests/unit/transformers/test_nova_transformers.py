@@ -55,7 +55,7 @@ class NovaInstanceTransformerTest(base.BaseTest):
         instance_events = mock_sync.generate_random_events_list(spec_list)
 
         for event in instance_events:
-            entity_wrapper = transformer.transform_snapshot_event(event)
+            entity_wrapper = transformer._transform_snapshot_event(event)
 
             self.assertEqual(cons.ActionTypes.UPDATE, entity_wrapper.action)
 
@@ -76,39 +76,42 @@ class NovaInstanceTransformerTest(base.BaseTest):
 
     def _validate_snapshot_vertex_props(self, vertex, event):
 
-        properties = vertex.properties
-        self.assertEqual(7, properties.__len__())
+        # properties = vertex.properties
+        self.assertEqual(9, vertex.properties.__len__())
 
         expected_id = event[nt.InstanceTransformer.SNAPSHOT_INSTANCE_ID]
-        observed_id = properties[cons.VertexProperties.ID]
+        observed_id = vertex.get(cons.VertexProperties.ID)
         self.assertEqual(expected_id, observed_id)
 
         self.assertEqual(cons.EntityTypes.RESOURCE,
-                         properties[cons.VertexProperties.TYPE])
+                         vertex.get(cons.VertexProperties.TYPE))
 
         self.assertEqual(nt.INSTANCE_SUBTYPE,
-                         properties[cons.VertexProperties.SUB_TYPE])
+                         vertex.get(cons.VertexProperties.SUB_TYPE))
 
         expected_subtype = event[nt.InstanceTransformer.SNAPSHOT_INSTANCE_ID]
-        observed_subtype = properties[cons.VertexProperties.ID]
+        observed_subtype = vertex.get(cons.VertexProperties.ID)
         self.assertEqual(expected_subtype, observed_subtype)
 
         expected_project = event[nt.InstanceTransformer.PROJECT_ID]
-        observed_project = properties[cons.VertexProperties.PROJECT]
+        observed_project = vertex.get(cons.VertexProperties.PROJECT)
         self.assertEqual(expected_project, observed_project)
 
         expected_state = event[nt.InstanceTransformer.SNAPSHOT_INSTANCE_STATE]
-        observed_state = properties[cons.VertexProperties.STATE]
+        observed_state = vertex.get(cons.VertexProperties.STATE)
         self.assertEqual(expected_state, observed_state)
 
         expected_timestamp = event[nt.InstanceTransformer.SNAPSHOT_TIMESTAMP]
-        observed_timestamp = properties[
-            cons.VertexProperties.UPDATE_TIMESTAMP]
+        observed_timestamp = vertex.get(
+            cons.VertexProperties.UPDATE_TIMESTAMP)
         self.assertEqual(expected_timestamp, observed_timestamp)
 
         expected_name = event[nt.InstanceTransformer.INSTANCE_NAME]
-        observed_name = properties[cons.VertexProperties.NAME]
+        observed_name = vertex.get(cons.VertexProperties.NAME)
         self.assertEqual(expected_name, observed_name)
+
+        is_partial = vertex.get(cons.VertexProperties.IS_PARTIAL_DATA)
+        self.assertEqual(False, is_partial)
 
     def test_key_fields(self):
         LOG.debug('Test get key fields from nova instance transformer')
@@ -187,10 +190,13 @@ class NovaInstanceTransformerTest(base.BaseTest):
         p_vertex = nt.InstanceTransformer.create_partial_vertex(instance_id)
 
         self.assertEqual(vertex_id, p_vertex.vertex_id)
-        self.assertEqual(3, p_vertex.properties.keys().__len__())
+        self.assertEqual(5, p_vertex.properties.keys().__len__())
         self.assertEqual(instance_id,
-                         p_vertex.properties[cons.VertexProperties.ID])
+                         p_vertex.get(cons.VertexProperties.ID))
         self.assertEqual(cons.EntityTypes.RESOURCE,
-                         p_vertex.properties[cons.VertexProperties.TYPE])
+                         p_vertex.get(cons.VertexProperties.TYPE))
         self.assertEqual(nt.INSTANCE_SUBTYPE,
-                         p_vertex.properties[cons.VertexProperties.SUB_TYPE])
+                         p_vertex.get(cons.VertexProperties.SUB_TYPE))
+        self.assertEqual(True,
+                         p_vertex.get(
+                             cons.VertexProperties.IS_PARTIAL_DATA))

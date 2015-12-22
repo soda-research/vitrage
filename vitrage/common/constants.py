@@ -23,6 +23,7 @@ class VertexProperties(object):
     PROJECT = 'PROJECT'
     UPDATE_TIMESTAMP = 'UPDATE_TIMESTAMP'
     NAME = 'name'
+    IS_PARTIAL_DATA = 'IS_PARTIAL_DATA'
 
 
 class EdgeConstants(object):
