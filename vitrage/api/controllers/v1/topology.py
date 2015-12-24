@@ -14,6 +14,7 @@
 import json
 import pecan
 
+from networkx.readwrite import json_graph
 from oslo_log import log
 from pecan.core import abort
 from pecan import rest
@@ -26,20 +27,27 @@ LOG = log.getLogger(__name__)
 
 class TopologyController(rest.RestController):
     @pecan.expose('json')
-    def index(self, edges=None, vertices=None, depth=None):
+    def index(self, edges=None, vertices=None, depth=None, graph_type='graph'):
 
         enforce("get topology", pecan.request.headers,
                 pecan.request.enforcer, {})
 
         LOG.info(_LI('received get topology: edges->%(edges)s vertices->%('
-                     'vertices)s depth->%(depth)s') %
-                 {'edges': edges, 'vertices': vertices, 'depth': depth})
+                     'vertices)s depth->%(depth)s graph_type->%(graph_type)s')
+                 % {'edges': edges, 'vertices': vertices, 'depth': depth,
+                    'graph_type': graph_type})
 
         # TODO(eyal) temporary mock
         graph_file = pecan.request.cfg.find_file('graph.sample.json')
         try:
             with open(graph_file) as data_file:
-                return json.load(data_file)
+                graph = json.load(data_file)
+                if graph_type == 'graph':
+                    return graph
+                if graph_type == 'tree':
+                    return json_graph.tree_data(
+                        json_graph.node_link_graph(graph).reverse(), root=0)
+
         except Exception as e:
             LOG.exception("failed to open file ", e)
             abort(404, str(e))
