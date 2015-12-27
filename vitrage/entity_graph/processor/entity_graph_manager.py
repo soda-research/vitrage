@@ -34,6 +34,12 @@ class EntityGraphManager(object):
         self.transformer = transformer_manager.TransformerManager()
 
     def is_partial_data_vertex(self, vertex):
+        """Check if a vertex is a partial data vertex
+
+        Checks if the vertex was updated only because it's a neighbor of a
+        full data vertex
+        """
+
         # check that vertex has no neighbors
         neighbor_edges = self.graph.get_edges(vertex.vertex_id,
                                               direction=Direction.BOTH)
@@ -51,6 +57,8 @@ class EntityGraphManager(object):
                        if prop not in key_properties)
 
     def delete_partial_data_vertex(self, suspected_vertex):
+        """Checks if it is a partial data vertex, and if so deletes it """
+
         if self.is_partial_data_vertex(suspected_vertex):
             LOG.debug("Delete partial data vertex: %s", suspected_vertex)
             self.graph.remove_vertex(suspected_vertex)
@@ -64,18 +72,24 @@ class EntityGraphManager(object):
             EdgeProperties.IS_EDGE_DELETED, False)
 
     def mark_vertex_as_deleted(self, vertex):
+        """Marks the vertex as is deleted, and updates deletion timestamp"""
+
         vertex.properties[VertexProperties.IS_VERTEX_DELETED] = True
         vertex.properties[VertexProperties.VERTEX_DELETION_TIMESTAMP] = \
             datetime.datetime.now()
         self.graph.update_vertex(vertex)
 
     def mark_edge_as_deleted(self, edge):
+        """Marks the edge as is deleted, and updates delete timestamp"""
+
         edge.properties[EdgeProperties.IS_EDGE_DELETED] = True
         edge.properties[EdgeProperties.EDGE_DELETION_TIMESTAMP] = \
             datetime.datetime.now()
         self.graph.update_edge(edge)
 
     def find_neighbor_types(self, neighbors):
+        """Finds all the types (TYPE, SUB_TYPE) of the neighbors """
+
         neighbor_types = set()
         for (vertex, edge) in neighbors:
             neighbor_types.add(self.get_vertex_type(vertex))
@@ -87,7 +101,14 @@ class EntityGraphManager(object):
         return (type, sub_type)
 
     def check_update_validation(self, curr_vertex, updated_vertex):
-        return not self.is_vertex_deleted(curr_vertex) and \
+        """Checks current and updated validation
+
+        Check 2 conditions:
+        1. is the vertex not deleted
+        2. is updated timestamp bigger then current timestamp
+        """
+
+        return (not self.is_vertex_deleted(curr_vertex)) and \
             self.check_timestamp(curr_vertex, updated_vertex)
 
     def is_edge_exist_in_list(self, edge, edges_list):
