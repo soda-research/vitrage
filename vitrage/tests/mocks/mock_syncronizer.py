@@ -15,61 +15,30 @@
 
 """Methods for generating synchronizer events
 
-For each type of entity, supply a configuration file that specifies a regex
-of what can be returned
+For each type of entity, need to supply configuration files that specify (a
+regex of) what can be returned, which will be used to generate sync events
 
 usage example:
     test_entity_spec_list = [
-        {'filename': '../resources/mock_nova_inst_init_snapshot.txt',
-         '#instances': 10,
-         'name': 'Instance (vm) generator'
+        {mg.DYNAMIC_INFO_FKEY: 'dynamic_snapshot.json',
+         mg.STATIC_INFO_FKEY: 'static_snapshot.json',
+         mg.MAPPING_KEY: [('vm1', 'host1'), ('vm2', 'host1'), ('vm3','host2')],
+         mg.NAME_KEY: 'Instance (vm) generator',
+         NUM_EVENTS_KEY: 10
          }
     ]
     spec_list = get_mock_generators(test_entity_spec_list)
     events = generate_random_events_list(spec_list)
+    for e in events:
+        print e
 """
 
 import random
 
-import mock_generators as mg
-
-_NUM_EVENTS_KEY = '#events'
-_GENERATOR_KEY = 'generator'
-_INSTANCE_NUM_KEY = '#instances'
-_FILENAME_KEY = 'filename'
-_NAME_KEY = 'name'
+import vitrage.tests.mocks.trace_generator as tg
 
 
-def get_mock_generators(entity_spec_list):
-    """Returns generators of synchronizer data.
-
-    Each entry in the list should be of the format:
-    {
-     _FILENAME_KEY: name of file specifying the data returning in each entry,
-     _INSTANCE_NUM_KEY: number of instances to generate for
-     _NAME_KEY: generator name (used for logging only)
-    }
-
-    :param entity_spec_list: specification of the generators to return.
-    :type entity_spec_list: list
-    :return: list of generators
-    :rtype: list
-    """
-    generator_spec_list = []
-    for entity_spec in entity_spec_list:
-        generator = mg.MockEventGenerator(
-            entity_spec[_FILENAME_KEY],
-            entity_spec[_INSTANCE_NUM_KEY],
-            entity_spec[_NAME_KEY]
-        )
-        generator_spec_list.append({_GENERATOR_KEY: generator})
-        if _NUM_EVENTS_KEY in entity_spec.keys():
-            generator_spec_list[-1][_NUM_EVENTS_KEY] = \
-                entity_spec[_NUM_EVENTS_KEY]
-    return generator_spec_list
-
-
-def generate_random_events_list(generator_spec_list, default_num=100):
+def generate_random_events_list(generator_spec_list):
     """Generates random events for the generators given.
 
      Each element in the list of generators includes a generator and
@@ -83,10 +52,52 @@ def generate_random_events_list(generator_spec_list, default_num=100):
 
      :return list of synchronizer events
      :rtype list
+
     """
+
     data = []
     for spec in generator_spec_list:
-        event_num = spec.get(_NUM_EVENTS_KEY, default_num)
-        data += spec[_GENERATOR_KEY].generate_data_stream(event_num)
+        generator = spec[tg.GENERATOR]
+        data += tg.generate_data_stream(generator.models, spec[tg.NUM_EVENTS])
     random.shuffle(data)
     return data
+
+
+def simple_instance_generators(host_num, vm_num,
+                               snapshot_events=0, update_events=0):
+    """A function for returning vm event generators.
+
+    Returns generators for a given number of hosts and
+    instances. Instances will be distributed across hosts in round-robin style.
+
+    :param host_num: number of hosts
+    :param vm_num: number of vms
+    :param snapshot_events: number of snapshot events per instance
+    :param update_events: number of update events per instance
+    :return: generators for vm_num vms as specified
+    """
+
+    mapping = [('vm-{0}'.format(index), 'host-{0}'.format(index % host_num))
+               for index in range(vm_num)
+               ]
+
+    test_entity_spec_list = []
+    if snapshot_events:
+        test_entity_spec_list.append(
+            {tg.DYNAMIC_INFO_FKEY: tg.SYNC_INST_SNAPSHOT_D,
+             tg.STATIC_INFO_FKEY: tg.SYNC_INST_SNAPSHOT_S,
+             tg.MAPPING_KEY: mapping,
+             tg.NAME_KEY: 'Instance (vm) snapshot generator',
+             tg.NUM_EVENTS: snapshot_events
+             }
+        )
+    if update_events:
+        test_entity_spec_list.append(
+            {tg.DYNAMIC_INFO_FKEY: tg.SYNC_INST_UPDATE_D,
+             tg.STATIC_INFO_FKEY: None,
+             tg.MAPPING_KEY: mapping,
+             tg.NAME_KEY: 'Instance (vm) update generator',
+             tg.NUM_EVENTS: update_events
+             }
+        )
+    return tg.get_trace_generators(test_entity_spec_list)

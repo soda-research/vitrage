@@ -12,40 +12,32 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import copy
-import exrex
+__author__ = 'erosensw'
+
+from vitrage.tests.mocks.utils import generate_vals
+from vitrage.tests.mocks.utils import merge_vals
 
 
-class CommonEntityModel(object):
+class BasicEntityModel(object):
+    """A representation of the events generated for an entity.
 
-    def __init__(self, static_params, dynamic_params, values=None):
-        self.param_gen = copy.copy(static_params)
-        self.param_gen.update(dynamic_params)
-        self.static_keys = static_params.keys()
-        self.dynamic_keys = dynamic_params.keys()
+    Events consist of static information that does not change between events,
+    and dynamic information that is generated via regex.
+    """
 
-        self.current = {k: None for k in self.param_gen.keys()}
-
-        if values is not None:
-            for v in values:
-                self.set_param(v[0], v[1])
+    def __init__(self, dynamic_vals, static_vals=None):
+        self.static_vals = static_vals
+        self.param_specs = dynamic_vals
 
     @property
     def params(self):
-        return self.current
+        """Returns a sample event of this entity.
 
-    def set_param(self, key, value=None):
-        if key in self.static_keys and self.current[key] is not None:
-            return
-        if value is None:
-            self.current[key] = exrex.getone(self.param_gen[key])
+        :return: a sample event of this entity
+        :rtype: dict
+        """
+        dynamic_vals = generate_vals(self.param_specs)
+        if self.static_vals:
+            return merge_vals(dynamic_vals, self.static_vals)
         else:
-            self.current[key] = value
-
-    def generate_all_params(self):
-        for k in self.param_gen.keys():
-            self.set_param(k)
-
-    def generate_dynamic_params(self):
-        for k in self.dynamic_keys:
-            self.set_param(k)
+            return dynamic_vals

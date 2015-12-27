@@ -47,11 +47,7 @@ class NovaInstanceTransformerTest(base.BaseTest):
 
         transformer = get_nova_instance_transformer()
 
-        instance_specifications = [
-            get_instance_entity_spec_list('mock_nova_inst_snapshot.txt', 2),
-        ]
-
-        spec_list = mock_sync.get_mock_generators(instance_specifications)
+        spec_list = mock_sync.simple_instance_generators(1, 2, 10)
         instance_events = mock_sync.generate_random_events_list(spec_list)
 
         for event in instance_events:
@@ -129,13 +125,12 @@ class NovaInstanceTransformerTest(base.BaseTest):
 
         transformer = get_nova_instance_transformer()
 
-        instance_specifications = [
-            get_instance_entity_spec_list(
-                'mock_nova_inst_init_snapshot.txt', 1),
-            get_instance_entity_spec_list('mock_nova_inst_update.txt', 1)
-        ]
-
-        spec_list = mock_sync.get_mock_generators(instance_specifications)
+        spec_list = mock_sync.simple_instance_generators(
+            host_num=1,
+            vm_num=1,
+            snapshot_events=1,
+            update_events=0
+        )
         instance_events = mock_sync.generate_random_events_list(spec_list)
 
         for event in instance_events:

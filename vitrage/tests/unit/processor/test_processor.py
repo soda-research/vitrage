@@ -18,7 +18,7 @@ import unittest
 from vitrage.common.constants import SyncMode
 from vitrage.common.constants import VertexProperties
 from vitrage.entity_graph.processor import processor as proc
-from vitrage.tests.mocks import mock_syncronizer as mock_sync
+from vitrage.tests.mocks import mock_transformer as mock_trans
 from vitrage.tests.unit import base
 
 
@@ -221,15 +221,10 @@ class TestProcessor(base.BaseTest):
         return processor
 
     def _create_mock_events(self):
-        zone_spec = self._get_instance_entity_spec_list(
-            self.spec_list[self.ZONE_SPEC], 10, 'zone generator')
-        host_spec = self._get_instance_entity_spec_list(
-            self.spec_list[self.HOST_SPEC], 15, 'host generator')
-        vm_spec = self._get_instance_entity_spec_list(
-            self.spec_list[self.INSTANCE_SPEC], 150, 'instance generator')
-        gen_list = mock_sync.get_mock_generators(
-            [zone_spec, host_spec, vm_spec])
-        return mock_sync.generate_random_events_list(gen_list)
+        gen_list = mock_trans.simple_zone_generators(2, 10)
+        gen_list.append(mock_trans.simple_host_generators(2, 4, 15))
+        gen_list.append(mock_trans.simple_instance_generators(4, 15, 150))
+        return mock_trans.generate_random_events_list(gen_list)
 
     def _get_spec_list(self):
         spec_list = {}
@@ -242,13 +237,14 @@ class TestProcessor(base.BaseTest):
     def _create_event(self, spec_type=None, sync_mode=None,
                       event_type=None, properties=None):
         # generate event
-        spec = [self._get_instance_entity_spec_list(
-            self.spec_list[spec_type], 1, 'generator')]
-
-        spec_list = mock_sync.get_mock_generators(spec)
-
-        events_list = mock_sync.generate_random_events_list(
-            spec_list, default_num=1)
+        spec_list = mock_trans.simple_instance_generators(1, 1, 1)
+        # spec = [self._get_instance_entity_spec_list(
+        #     self.spec_list[spec_type], 1, 'generator')]
+        #
+        # spec_list = mock_trans.get_mock_generators(spec)
+        #
+        events_list = mock_trans.generate_random_events_list(
+            spec_list)
 
         # update properties
         if sync_mode is not None:

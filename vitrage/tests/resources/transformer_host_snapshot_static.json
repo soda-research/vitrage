@@ -1,0 +1,8 @@
+{
+  "sync_mode": "init_snapshot",
+  "id": "host[0-3]",
+  "name": "host[0-3]",
+  "zone_id": "zone[0-1]",
+  "event_type": "update",
+  "state": "ACTIVE|INACTIVE"
+}

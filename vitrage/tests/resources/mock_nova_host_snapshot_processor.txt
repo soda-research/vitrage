@@ -1,6 +1,0 @@
-sync_mode                            S  init_snapshot
-id                                   S  host[0-3]
-name                                 S  host[0-3]
-zone_id                              S  zone[0-1]
-event_type                           S  update
-state                                D  ACTIVE|INACTIVE
