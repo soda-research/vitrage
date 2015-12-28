@@ -174,7 +174,7 @@ class NovaInstanceTransformerTest(base.BaseTest):
         self.assertEqual(host_vertex_id, neighbor.vertex.vertex_id)
 
         # test relation edge
-        self.assertEqual(host_name, neighbor.edge.source_id)
+        self.assertEqual(host_vertex_id, neighbor.edge.source_id)
         self.assertEqual(vertex_id, neighbor.edge.target_id)
         self.assertEqual(cons.EdgeLabels.CONTAINS, neighbor.edge.label)
 

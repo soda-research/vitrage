@@ -59,7 +59,7 @@ class TransformerManager(object):
             raise VitrageTransformerError(
                 'Entity Event must contains sync_type field.')
 
-        self.get_transformer(sync_type).transform()
+        return self.get_transformer(sync_type).transform(entity_event)
 
     def key_fields(self, vertex):
 

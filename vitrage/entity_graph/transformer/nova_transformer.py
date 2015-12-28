@@ -95,10 +95,14 @@ class InstanceTransformer(base.Transformer):
     def _transform_init_snapshot_event(self, entity_event):
 
         entity_wrapper = self._transform_snapshot_event(entity_event)
-        entity_wrapper.action = cons.EventAction.CREATE
+        # TODO(Liat): check why set is forbidden
+        # entity_wrapper.action = cons.EventAction.CREATE
+        entity_wrapper = base.EntityWrapper(entity_wrapper.vertex,
+                                            entity_wrapper.neighbors,
+                                            cons.EventAction.CREATE)
         return entity_wrapper
 
-    def _transform_update_event(self):
+    def _transform_update_event(self, entity_event):
         pass
 
     # def key_fields(self):
@@ -131,7 +135,7 @@ class InstanceTransformer(base.Transformer):
         host_vertex = HostTransformer.create_partial_vertex(host_name)
 
         relation_edge = graph_utils.create_edge(
-            source_id=host_name,
+            source_id=host_vertex.vertex_id,
             target_id=vertex_id,
             relation_type=cons.EdgeLabels.CONTAINS
         )
