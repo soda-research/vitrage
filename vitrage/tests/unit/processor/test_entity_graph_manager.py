@@ -12,7 +12,6 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from vitrage.common.constants import EdgeProperties
 from vitrage.common.constants import VertexProperties
 from vitrage.entity_graph.processor import entity_graph_manager
 from vitrage.tests.unit.processor import base
@@ -29,7 +28,7 @@ class TestEntityGraphManager(base.BaseProcessor):
         # create vertex properties
         instance_vertex = self._update_vertex_to_graph(e_g_manager,
                                                        'RESOURCE', 'INSTANCE',
-                                                       '12345', {})
+                                                       '123', False, True, {})
 
         # check is partial data vertex
         is_partial_data_vertex = \
@@ -38,9 +37,8 @@ class TestEntityGraphManager(base.BaseProcessor):
 
         # add host vertex
         host_vertex = self._update_vertex_to_graph(e_g_manager, 'RESOURCE',
-                                                   'HOST', '54321', {})
-        prop = {}
-        prop[EdgeProperties.RELATION_NAME] = 'contains'
+                                                   'HOST', '321',
+                                                   False, True, {})
         edge = self._update_edge_to_graph(e_g_manager, host_vertex.vertex_id,
                                           instance_vertex.vertex_id,
                                           'contains')
@@ -63,10 +61,10 @@ class TestEntityGraphManager(base.BaseProcessor):
         e_g_manager = entity_graph_manager.EntityGraphManager()
 
         # create vertex properties
-        prop = {}
-        prop[VertexProperties.STATE] = 'ACTIVE'
+        prop = {VertexProperties.STATE: 'ACTIVE'}
         vertex = self._update_vertex_to_graph(e_g_manager, 'RESOURCE',
-                                              'INSTANCE', '12345', prop)
+                                              'INSTANCE', '12345',
+                                              False, False, prop)
 
         # check is not partial data vertex
         is_partial_data_vertex = e_g_manager.is_partial_data_vertex(vertex)
@@ -77,7 +75,8 @@ class TestEntityGraphManager(base.BaseProcessor):
 
         # create vertex properties
         vertex = self._update_vertex_to_graph(e_g_manager, 'RESOURCE',
-                                              'INSTANCE', '12345', {})
+                                              'INSTANCE', '12345',
+                                              False, True, {})
 
         # check is partial data vertex
         is_partial_data_vertex = e_g_manager.is_partial_data_vertex(vertex)
@@ -93,7 +92,8 @@ class TestEntityGraphManager(base.BaseProcessor):
 
         # create vertex properties
         vertex = self._update_vertex_to_graph(e_g_manager, 'RESOURCE',
-                                              'INSTANCE', '12345', {})
+                                              'INSTANCE', '12345',
+                                              False, True, {})
 
         # check vitrage deleted
         self.assertFalse(e_g_manager.is_vertex_deleted(vertex))
@@ -105,9 +105,11 @@ class TestEntityGraphManager(base.BaseProcessor):
 
         # create vertex properties
         vertex1 = self._update_vertex_to_graph(e_g_manager, 'RESOURCE',
-                                               'INSTANCE', '12345', {})
+                                               'INSTANCE', '12345',
+                                               False, True, {})
         vertex2 = self._update_vertex_to_graph(e_g_manager, 'RESOURCE',
-                                               'HOST', '54321', {})
+                                               'HOST', '54321',
+                                               False, True, {})
         edge = self._update_edge_to_graph(e_g_manager, vertex1.vertex_id,
                                           vertex2.vertex_id, 'contains')
 
@@ -119,17 +121,18 @@ class TestEntityGraphManager(base.BaseProcessor):
     def test_find_neighbor_types(self):
         neighbors = []
         e_g_manager = entity_graph_manager.EntityGraphManager()
-        entities_details = [('RESOURCE', 'HOST', '1'),
-                            ('RESOURCE', 'STORAGE', '2'),
-                            ('RESOURCE', 'APPLICATION', '3'),
-                            ('RESOURCE', 'STORAGE', '4'),
-                            ('ALARM', 'INSTANCE_AT_RISK', '5')]
+        entities_details = [('RESOURCE', 'HOST', '1', False, True),
+                            ('RESOURCE', 'STORAGE', '2', False, True),
+                            ('RESOURCE', 'APPLICATION', '3', False, True),
+                            ('RESOURCE', 'STORAGE', '4', False, True),
+                            ('ALARM', 'INSTANCE_AT_RISK', '5', False, True)]
 
         # add neighbors
         for details in entities_details:
             # neighbor
             vertex = self._update_vertex_to_graph(e_g_manager, details[0],
-                                                  details[1], details[2], {})
+                                                  details[1], details[2],
+                                                  details[3], details[4], {})
             neighbors.append((vertex, None))
 
         # get neighbors types

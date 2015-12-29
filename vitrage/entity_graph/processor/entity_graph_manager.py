@@ -13,6 +13,7 @@
 # under the License.
 
 import datetime
+from dateutil import parser
 
 from oslo_log import log
 
@@ -36,25 +37,19 @@ class EntityGraphManager(object):
     def is_partial_data_vertex(self, vertex):
         """Check if a vertex is a partial data vertex
 
-        Checks if the vertex was updated only because it's a neighbor of a
-        full data vertex
+        Vertex is a partial data vertex if it's IS_PARTIAL_DATA property is
+        True and if it has no neighbors
         """
+
+        if not vertex.properties[VertexProperties.IS_PARTIAL_DATA]:
+            return False
 
         # check that vertex has no neighbors
         neighbor_edges = self.graph.get_edges(vertex.vertex_id,
                                               direction=Direction.BOTH)
-        for neighbor_edge in neighbor_edges:
-            if not self.is_edge_deleted(neighbor_edge):
-                return False
 
-        # check properties
-        # TODO(Alexey): implement get_vertex_essential_properties
-        # key_properties = self.transformer.key_fields(vertex)
-        key_properties = [VertexProperties.TYPE, VertexProperties.SUB_TYPE,
-                          VertexProperties.ID]
-
-        return not any(True for prop in vertex.properties
-                       if prop not in key_properties)
+        return not any(True for neighbor_edge in neighbor_edges
+                       if not self.is_edge_deleted(neighbor_edge))
 
     def delete_partial_data_vertex(self, suspected_vertex):
         """Checks if it is a partial data vertex, and if so deletes it """
@@ -118,6 +113,11 @@ class EntityGraphManager(object):
     def check_timestamp(self, curr_vertex, new_vertex):
         is_timestamp_property_exist = VertexProperties.UPDATE_TIMESTAMP \
             not in curr_vertex.properties.keys()
-        is_old = curr_vertex.properties[VertexProperties.UPDATE_TIMESTAMP] <= \
-            new_vertex.properties[VertexProperties.UPDATE_TIMESTAMP]
-        return is_timestamp_property_exist or is_old
+        if is_timestamp_property_exist:
+            return True
+
+        current_time = parser.parse(curr_vertex.properties[
+            VertexProperties.UPDATE_TIMESTAMP])
+        new_time = parser.parse(new_vertex.properties[
+            VertexProperties.UPDATE_TIMESTAMP])
+        return current_time <= new_time

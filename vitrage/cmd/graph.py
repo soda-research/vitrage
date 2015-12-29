@@ -12,19 +12,13 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from oslo_log import log
+from oslo_service import service as os_service
+
+from vitrage import entity_graph as entity_graph_svc
+from vitrage import service
 
 
-LOG = log.getLogger(__name__)
-
-
-class SynchronizerClient(object):
-
-    def __init__(self):
-        pass
-
-    def get_all(self):
-        pass
-
-    def get_all_entity(self, entity_name):
-        pass
+def entity_graph():
+    conf = service.prepare_service()
+    os_service.launch(conf,
+                      entity_graph_svc.VitrageEntityGraphService(conf)).wait()

@@ -12,16 +12,11 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import datetime
-
 from oslo_log import log
 
 from vitrage.common.constants import EventAction
-from vitrage.common.constants import SyncMode
-from vitrage.common.constants import VertexProperties
 from vitrage.entity_graph.processor import base as processor
 from vitrage.entity_graph.processor import entity_graph_manager
-from vitrage.entity_graph.transformer import base
 from vitrage.entity_graph.transformer import transformer_manager
 from vitrage.graph import Direction
 from vitrage.graph import utils as graph_utils
@@ -137,43 +132,7 @@ class Processor(processor.ProcessorBase):
                      deleted_vertex)
 
     def transform_entity(self, event):
-        # TODO(Alexey): change back to the original call
-        # return self.transformer.transform(event)
-
-        # create vertex
-        vertex = graph_utils.create_vertex(
-            'RESOURCE_INSTANCE_' + event['id'],
-            entity_id=event['id'],
-            entity_type='RESOURCE',
-            entity_subtype='INSTANCE',
-            entity_state=event[VertexProperties.STATE.lower()],
-            update_timestamp=datetime.datetime.now().time(),
-            is_deleted=False)
-
-        # create neighbors
-        neighbor_vertex = graph_utils.create_vertex(
-            'RESOURCE_HOST_' + event['hostname'],
-            entity_id=event['hostname'],
-            entity_type='RESOURCE',
-            entity_subtype='HOST',
-            is_deleted=None)
-        neighbor_edge = graph_utils.create_edge(
-            neighbor_vertex.vertex_id,
-            vertex.vertex_id,
-            'contains',
-            is_deleted=False)
-        neighbors = [base.Neighbor(neighbor_vertex, neighbor_edge)]
-
-        # decide event type
-        if event['sync_mode'] == SyncMode.INIT_SNAPSHOT:
-            event_type = EventAction.CREATE
-        elif event['sync_mode'] == SyncMode.UPDATE:
-            if event['event_type'] == 'compute.instance.volume.attach':
-                event_type = EventAction.UPDATE
-            elif event['event_type'] == 'compute.instance.delete.end':
-                event_type = EventAction.DELETE
-
-        return base.EntityWrapper(vertex, neighbors, event_type)
+        return self.transformer.transform(event)
 
     def _update_neighbors(self, vertex, neighbors):
         """Updates vertices neighbor connections
