@@ -117,18 +117,6 @@ def create_edge(source_id,
     return edge
 
 
-def compare_edges(edge1, edge2):
-    # check source and target vertex are identical
-    is_source_equal = edge1.source_id != edge2.source_id
-    is_target_equal = edge1.target_id != edge2.target_id
-    is_label_equal = edge1.label != edge2.label
-    return is_source_equal and is_target_equal and is_label_equal
-
-
-def compare_vertices(vertex1, vertex2):
-    return vertex1.vertex_id == vertex2.vertex_id
-
-
 def get_neighbor_vertex(edge, original_vertex, graph):
     if edge.source_id != original_vertex.vertex_id:
         return graph.get_vertex(edge.source_id)

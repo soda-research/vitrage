@@ -24,7 +24,7 @@ class BaseProcessor(base.BaseTest):
         super(BaseProcessor, self).setUp()
         self.transform = transformer_manager.TransformerManager()
 
-    def _update_vertex_to_graph(self, e_g_manager, type, sub_type, id,
+    def _update_vertex_to_graph(self, entity_graph, type, sub_type, id,
                                 is_deleted, is_placeholder_data,
                                 additional_prop):
         # create vertex properties
@@ -39,11 +39,11 @@ class BaseProcessor(base.BaseTest):
         # vertex_id = self.transform.get_key(prop)
         vertex_id = type + "_" + sub_type + "_" + id
         vertex = graph.Vertex(vertex_id, prop)
-        e_g_manager.graph.add_vertex(vertex)
+        entity_graph.add_vertex(vertex)
 
         return vertex
 
-    def _update_edge_to_graph(self, e_g_manager, src_id, trgt_id, label):
+    def _update_edge_to_graph(self, entity_graph, src_id, trgt_id, label):
         edge = graph.Edge(src_id, trgt_id, label, {})
-        e_g_manager.graph.add_edge(edge)
+        entity_graph.add_edge(edge)
         return edge

@@ -16,7 +16,7 @@ from oslo_log import log
 
 from vitrage.common.constants import EventAction
 from vitrage.entity_graph.processor import base as processor
-from vitrage.entity_graph.processor import entity_graph_manager
+from vitrage.entity_graph.processor import entity_graph
 from vitrage.entity_graph.transformer import transformer_manager
 from vitrage.graph import Direction
 from vitrage.graph import utils as graph_utils
@@ -28,7 +28,7 @@ LOG = log.getLogger(__name__)
 class Processor(processor.ProcessorBase):
 
     def __init__(self):
-        self.e_g_manager = entity_graph_manager.EntityGraphManager()
+        self.entity_graph = entity_graph.EntityGraph("Entity Graph")
         self.transformer = transformer_manager.TransformerManager()
         self._initialize_events_actions()
 
@@ -63,8 +63,8 @@ class Processor(processor.ProcessorBase):
         """
 
         LOG.debug("Add entity to entity graph: %s", new_vertex)
-        self.e_g_manager.graph.add_vertex(new_vertex)
-        self._connect_neighbors(neighbors, None)
+        self.entity_graph.add_vertex(new_vertex)
+        self._connect_neighbors(neighbors, [])
 
     def update_entity(self, updated_vertex, neighbors):
         """Updates the vertex in the entity graph
@@ -81,12 +81,12 @@ class Processor(processor.ProcessorBase):
 
         LOG.debug("Update entity in entity graph: %s", updated_vertex)
 
-        curr_vertex = \
-            self.e_g_manager.graph.get_vertex(updated_vertex.vertex_id)
+        graph_vertex = \
+            self.entity_graph.get_vertex(updated_vertex.vertex_id)
 
-        if (not curr_vertex) or self.e_g_manager.check_update_validation(
-                curr_vertex, updated_vertex):
-            self.e_g_manager.graph.update_vertex(updated_vertex)
+        if (not graph_vertex) or self.entity_graph.check_update_validation(
+                graph_vertex, updated_vertex):
+            self.entity_graph.update_vertex(updated_vertex)
             # add the connecting entities
             self._update_neighbors(updated_vertex, neighbors)
         else:
@@ -107,26 +107,26 @@ class Processor(processor.ProcessorBase):
 
         LOG.debug("Delete entity from entity graph: %s", deleted_vertex)
 
-        curr_vertex = \
-            self.e_g_manager.graph.get_vertex(deleted_vertex.vertex_id)
+        graph_vertex = \
+            self.entity_graph.get_vertex(deleted_vertex.vertex_id)
 
-        if (not curr_vertex) or self.e_g_manager.check_update_validation(
-                curr_vertex, deleted_vertex):
-            neighbor_vertices = self.e_g_manager.graph.neighbors(
+        if (not graph_vertex) or self.entity_graph.check_update_validation(
+                graph_vertex, deleted_vertex):
+            neighbor_vertices = self.entity_graph.neighbors(
                 deleted_vertex.vertex_id, direction=Direction.BOTH)
-            neighbor_edges = self.e_g_manager.graph.get_edges(
+            neighbor_edges = self.entity_graph.get_edges(
                 deleted_vertex.vertex_id, direction=Direction.BOTH)
 
             # delete connected edges
             for edge in neighbor_edges:
-                self.e_g_manager.mark_edge_as_deleted(edge)
+                self.entity_graph.mark_edge_as_deleted(edge)
 
             # delete placeholder vertices that connected only to this vertex
             for vertex in neighbor_vertices:
-                self.e_g_manager.delete_placeholder_vertex(vertex)
+                self.entity_graph.delete_placeholder_vertex(vertex)
 
             # delete vertex
-            self.e_g_manager.mark_vertex_as_deleted(deleted_vertex)
+            self.entity_graph.mark_vertex_as_deleted(deleted_vertex)
         else:
             LOG.info("Delete event arrived on invalid resource: %s",
                      deleted_vertex)
@@ -152,15 +152,14 @@ class Processor(processor.ProcessorBase):
         LOG.debug("Connect neighbors. Neighbors: %s, valid_edges: %s",
                   neighbors, valid_edges)
         for (vertex, edge) in neighbors:
-            curr_vertex = self.e_g_manager.graph.get_vertex(vertex.vertex_id)
-            if (not curr_vertex) or self.e_g_manager.check_update_validation(
-                    curr_vertex, vertex):
-                if self.e_g_manager.can_update_vertex(curr_vertex, vertex):
-                    self.e_g_manager.graph.update_vertex(vertex)
+            graph_vertex = self.entity_graph.get_vertex(vertex.vertex_id)
+            if (not graph_vertex) or self.entity_graph.check_update_validation(
+                    graph_vertex, vertex):
+                if self.entity_graph.can_update_vertex(graph_vertex, vertex):
+                    self.entity_graph.update_vertex(vertex)
 
-                if not valid_edges or not \
-                    self.e_g_manager.is_edge_exist_in_list(edge, valid_edges):
-                    self.e_g_manager.graph.update_edge(edge)
+                if edge not in valid_edges:
+                    self.entity_graph.update_edge(edge)
 
     def _delete_old_connections(self, vertex, old_edges):
         """Deletes the "vertex" old connections
@@ -173,10 +172,10 @@ class Processor(processor.ProcessorBase):
                   vertex, old_edges)
         # remove old edges and placeholder vertices if exist
         for edge in old_edges:
-            self.e_g_manager.mark_edge_as_deleted(edge)
-            curr_ver = graph_utils.get_neighbor_vertex(
-                edge, vertex, self.e_g_manager.graph)
-            self.e_g_manager.delete_placeholder_vertex(curr_ver)
+            self.entity_graph.mark_edge_as_deleted(edge)
+            graph_ver = graph_utils.get_neighbor_vertex(
+                edge, vertex, self.entity_graph)
+            self.entity_graph.delete_placeholder_vertex(graph_ver)
 
     def _find_edges_status(self, vertex, neighbors):
         """Finds "vertex" valid and old connections
@@ -191,16 +190,16 @@ class Processor(processor.ProcessorBase):
 
         # set of all neighbor types in graph
         graph_neighbor_types = \
-            self.e_g_manager.find_neighbor_types(neighbors)
+            self.entity_graph.find_neighbor_types(neighbors)
 
         # iterate over current neighbor edges and check existence in new list
-        for curr_edge in self.e_g_manager.graph.get_edges(
+        for curr_edge in self.entity_graph.get_edges(
                 vertex.vertex_id, direction=Direction.BOTH):
             # check if the edge in the graph has a a connection to the
             # same type of resources in the new neighbors list
             neighbor_vertex = graph_utils.get_neighbor_vertex(
-                curr_edge, vertex, self.e_g_manager.graph)
-            is_connection_type_exist = self.e_g_manager.get_vertex_type(
+                curr_edge, vertex, self.entity_graph)
+            is_connection_type_exist = self.entity_graph.get_vertex_type(
                 neighbor_vertex) in graph_neighbor_types
 
             if not is_connection_type_exist:
@@ -208,10 +207,8 @@ class Processor(processor.ProcessorBase):
                 continue
 
             # check if the edge in the graph exists in new neighbors list
-            is_equal = any(graph_utils.compare_edges(curr_edge, new_edge)
-                           for (new_vertex, new_edge) in neighbors)
-
-            if is_equal:
+            neighbor_edges = [e for v, e in neighbors]
+            if curr_edge in neighbor_edges:
                 valid_edges.append(curr_edge)
             else:
                 old_edges.append(curr_edge)

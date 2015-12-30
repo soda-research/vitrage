@@ -12,12 +12,11 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from datetime import datetime
-import pytz
 import unittest
 
 from vitrage.common.constants import SyncMode
 from vitrage.common.constants import VertexProperties
+from vitrage.common.utils import get_timezone_aware_time
 from vitrage.entity_graph.processor import processor as proc
 from vitrage.tests.mocks import mock_transformer as mock_trans
 from vitrage.tests.unit import base
@@ -47,7 +46,7 @@ class TestProcessor(base.BaseTest):
         processor = self._create_processor_with_graph()
 
         # check number of entities
-        num_vertices = len(processor.e_g_manager.graph)
+        num_vertices = len(processor.entity_graph)
         self.assertEqual(self._num_resources_in_initial_graph(), num_vertices)
 
         # check all entities create a tree and no free floating vertices exists
@@ -95,19 +94,19 @@ class TestProcessor(base.BaseTest):
             self._create_and_check_entity(properties=prop)
 
         # check added entity
-        vertex = processor.e_g_manager.graph.get_vertex(vertex.vertex_id)
+        vertex = processor.entity_graph.get_vertex(vertex.vertex_id)
         self.assertEqual('STARTING', vertex.properties[VertexProperties.STATE])
 
         # update instance event with state running
         vertex.properties[VertexProperties.STATE] = 'RUNNING'
         vertex.properties[VertexProperties.UPDATE_TIMESTAMP] = \
-            str(datetime.utcnow().replace(tzinfo=pytz.utc))
+            get_timezone_aware_time()
         processor.update_entity(vertex, neighbors)
 
         # check state
         self._check_graph(processor, self.NUM_VERTICES_AFTER_CREATION,
                           self.NUM_EDGES_AFTER_CREATION)
-        vertex = processor.e_g_manager.graph.get_vertex(vertex.vertex_id)
+        vertex = processor.entity_graph.get_vertex(vertex.vertex_id)
         self.assertEqual('RUNNING', vertex.properties[VertexProperties.STATE])
 
     def test_change_parent(self):
@@ -126,7 +125,7 @@ class TestProcessor(base.BaseTest):
         self._check_graph(processor, self.NUM_VERTICES_AFTER_CREATION,
                           self.NUM_EDGES_AFTER_CREATION)
         neighbor_vertex = \
-            processor.e_g_manager.graph.get_vertex(old_neighbor_id)
+            processor.entity_graph.get_vertex(old_neighbor_id)
         self.assertEqual(None, neighbor_vertex)
 
     def test_delete_entity(self):
@@ -139,7 +138,7 @@ class TestProcessor(base.BaseTest):
         # check deleted entity
         self._check_graph(processor, self.NUM_VERTICES_AFTER_DELETION,
                           self.NUM_EDGES_AFTER_DELETION)
-        self.assertTrue(processor.e_g_manager.is_vertex_deleted(vertex))
+        self.assertTrue(processor.entity_graph.is_vertex_deleted(vertex))
 
     def test_update_neighbors(self):
         # create instance event with host neighbor and check validity
@@ -156,7 +155,7 @@ class TestProcessor(base.BaseTest):
         # check state
         self._check_graph(processor, self.NUM_VERTICES_AFTER_CREATION,
                           self.NUM_EDGES_AFTER_CREATION)
-        self.assertEqual(None, processor.e_g_manager.graph.
+        self.assertEqual(None, processor.entity_graph.
                          get_vertex(old_neighbor_id))
 
         # update instance with the same neighbor
@@ -210,8 +209,8 @@ class TestProcessor(base.BaseTest):
         return (vertex, neighbors, processor)
 
     def _check_graph(self, processor, num_vertices, num_edges):
-        self.assertEqual(num_vertices, len(processor.e_g_manager.graph))
-        self.assertEqual(num_edges, processor.e_g_manager.graph.num_edges())
+        self.assertEqual(num_vertices, len(processor.entity_graph))
+        self.assertEqual(num_edges, processor.entity_graph.num_edges())
 
     def _num_resources_in_initial_graph(self):
         return self.NUM_NODES + self.NUM_ZONES + \
