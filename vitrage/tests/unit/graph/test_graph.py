@@ -25,7 +25,7 @@ import random
 import time
 
 from vitrage.common.constants import EdgeLabels as ELabel
-from vitrage.common.constants import EdgeProperties as EConst
+from vitrage.common.constants import EdgeProperties as EProps
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.graph import create_graph
 from vitrage.graph import Direction
@@ -236,10 +236,10 @@ class GraphTest(base.BaseTest):
         g.add_vertex(v_host)
         g.add_edge(e_node_to_host)
         self.assertEqual(1, g.num_edges(), 'graph __len__ after add edge')
-        label = e_node_to_host[EConst.RELATION_NAME]
+        label = e_node_to_host[EProps.RELATION_NAME]
         e = g.get_edge(v_node.vertex_id, v_host.vertex_id, label)
-        self.assertEqual(e_node_to_host[EConst.RELATION_NAME],
-                         e[EConst.RELATION_NAME],
+        self.assertEqual(e_node_to_host[EProps.RELATION_NAME],
+                         e[EProps.RELATION_NAME],
                          'edge properties are saved')
         self.assertEqual(e_node_to_host.source_id, e.source_id,
                          'edge vertex_id is saved')
@@ -266,25 +266,25 @@ class GraphTest(base.BaseTest):
 
         # Changing the referenced item
         updated_e = e
-        updated_e[EConst.IS_DELETED] = 'KUKU'
-        updated_e[EConst.EDGE_DELETION_TIMESTAMP] = 'CHANGED'
+        updated_e[EProps.IS_DELETED] = 'KUKU'
+        updated_e[EProps.EDGE_DELETION_TIMESTAMP] = 'CHANGED'
 
         # Get it again
         e = g.get_edge(v_node.vertex_id, v_host.vertex_id, label)
-        self.assertEqual(False, e.get(EConst.IS_DELETED, None),
+        self.assertEqual(False, e.get(EProps.IS_DELETED, None),
                          'Change should not affect graph item')
-        self.assertEqual(e_node_to_host[EConst.EDGE_DELETION_TIMESTAMP],
-                         e[EConst.EDGE_DELETION_TIMESTAMP],
+        self.assertEqual(e_node_to_host[EProps.EDGE_DELETION_TIMESTAMP],
+                         e[EProps.EDGE_DELETION_TIMESTAMP],
                          'Change should not affect graph item')
         # Update the graph item and see changes take place
         g.update_edge(updated_e)
         # Get it again
         e = g.get_edge(v_node.vertex_id, v_host.vertex_id, label)
-        self.assertEqual(updated_e[EConst.IS_DELETED],
-                         e[EConst.IS_DELETED],
+        self.assertEqual(updated_e[EProps.IS_DELETED],
+                         e[EProps.IS_DELETED],
                          'Graph item should change after update')
-        self.assertEqual(updated_e[EConst.EDGE_DELETION_TIMESTAMP],
-                         e[EConst.EDGE_DELETION_TIMESTAMP],
+        self.assertEqual(updated_e[EProps.EDGE_DELETION_TIMESTAMP],
+                         e[EProps.EDGE_DELETION_TIMESTAMP],
                          'Graph item should change after update')
 
         # check metadata
@@ -297,8 +297,8 @@ class GraphTest(base.BaseTest):
         g.add_edge(another_edge)
         self.assertEqual(2, g.num_edges(), 'graph __len__ after add edge')
         e = g.get_edge(v_node.vertex_id, v_host.vertex_id, another_label)
-        self.assertEqual(another_edge[EConst.RELATION_NAME],
-                         e[EConst.RELATION_NAME],
+        self.assertEqual(another_edge[EProps.RELATION_NAME],
+                         e[EProps.RELATION_NAME],
                          'edge properties are saved')
         self.assertEqual('DATA', e['some_meta'],
                          'edge properties are saved')
@@ -380,7 +380,7 @@ class GraphTest(base.BaseTest):
 
         v1_neighbors = g.neighbors(
             v_id=v1.vertex_id,
-            edge_attr_filter={EConst.RELATION_NAME: relation_a})
+            edge_attr_filter={EProps.RELATION_NAME: relation_a})
         self._assert_set_equal({v2, v4}, v1_neighbors,
                                'Check V1 neighbors, edge property filter')
 
@@ -402,7 +402,7 @@ class GraphTest(base.BaseTest):
         v1_neighbors = g.neighbors(
             v_id=v1.vertex_id,
             direction=Direction.IN,
-            edge_attr_filter={EConst.RELATION_NAME: relation_c},
+            edge_attr_filter={EProps.RELATION_NAME: relation_c},
             vertex_attr_filter={VProps.TYPE: HOST})
         self._assert_set_equal(
             {v2}, v1_neighbors,
@@ -428,7 +428,7 @@ class GraphTest(base.BaseTest):
 
         v2_neighbors = g.neighbors(
             v_id=v2.vertex_id,
-            edge_attr_filter={EConst.RELATION_NAME: [relation_a, relation_b]},
+            edge_attr_filter={EProps.RELATION_NAME: [relation_a, relation_b]},
             vertex_attr_filter={VProps.TYPE: [HOST, ALARM, INSTANCE]})
         self._assert_set_equal({v3, v4}, v2_neighbors,
                                'Check v2 neighbors, edge property filter')

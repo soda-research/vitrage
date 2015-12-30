@@ -44,10 +44,6 @@ class Processor(processor.ProcessorBase):
         """
 
         entity = self.transform_entity(event)
-        if entity.action not in self.actions:
-            LOG.info("error event: %s", event)
-            return None
-
         return self.actions[entity.action](entity.vertex, entity.neighbors)
 
     def create_entity(self, new_vertex, neighbors):
@@ -87,7 +83,6 @@ class Processor(processor.ProcessorBase):
         if (not graph_vertex) or self.entity_graph.check_update_validation(
                 graph_vertex, updated_vertex):
             self.entity_graph.update_vertex(updated_vertex)
-            # add the connecting entities
             self._update_neighbors(updated_vertex, neighbors)
         else:
             LOG.info("Update event arrived on invalid resource: %s",
@@ -117,15 +112,12 @@ class Processor(processor.ProcessorBase):
             neighbor_edges = self.entity_graph.get_edges(
                 deleted_vertex.vertex_id, direction=Direction.BOTH)
 
-            # delete connected edges
             for edge in neighbor_edges:
                 self.entity_graph.mark_edge_as_deleted(edge)
 
-            # delete placeholder vertices that connected only to this vertex
             for vertex in neighbor_vertices:
                 self.entity_graph.delete_placeholder_vertex(vertex)
 
-            # delete vertex
             self.entity_graph.mark_vertex_as_deleted(deleted_vertex)
         else:
             LOG.info("Delete event arrived on invalid resource: %s",
@@ -141,9 +133,9 @@ class Processor(processor.ProcessorBase):
         2. connects the new neighbors.
         """
 
-        (valid_edges, old_edges) = self._find_edges_status(
+        (valid_edges, obsolete_edges) = self._find_edges_status(
             vertex, neighbors)
-        self._delete_old_connections(vertex, old_edges)
+        self._delete_old_connections(vertex, obsolete_edges)
         self._connect_neighbors(neighbors, valid_edges)
 
     def _connect_neighbors(self, neighbors, valid_edges):
@@ -161,7 +153,7 @@ class Processor(processor.ProcessorBase):
                 if edge not in valid_edges:
                     self.entity_graph.update_edge(edge)
 
-    def _delete_old_connections(self, vertex, old_edges):
+    def _delete_old_connections(self, vertex, obsolete_edges):
         """Deletes the "vertex" old connections
 
         Finds the old connections that are connected to updated_vertex,
@@ -169,9 +161,9 @@ class Processor(processor.ProcessorBase):
         """
 
         LOG.debug("Delete old connections. Vertex: %s, old edges: %s",
-                  vertex, old_edges)
+                  vertex, obsolete_edges)
         # remove old edges and placeholder vertices if exist
-        for edge in old_edges:
+        for edge in obsolete_edges:
             self.entity_graph.mark_edge_as_deleted(edge)
             graph_ver = graph_utils.get_neighbor_vertex(
                 edge, vertex, self.entity_graph)
@@ -186,9 +178,8 @@ class Processor(processor.ProcessorBase):
         """
 
         valid_edges = []
-        old_edges = []
+        obsolete_edges = []
 
-        # set of all neighbor types in graph
         graph_neighbor_types = \
             self.entity_graph.find_neighbor_types(neighbors)
 
@@ -198,7 +189,10 @@ class Processor(processor.ProcessorBase):
             # check if the edge in the graph has a a connection to the
             # same type of resources in the new neighbors list
             neighbor_vertex = graph_utils.get_neighbor_vertex(
-                curr_edge, vertex, self.entity_graph)
+                curr_edge,
+                vertex,
+                self.entity_graph)
+
             is_connection_type_exist = self.entity_graph.get_vertex_type(
                 neighbor_vertex) in graph_neighbor_types
 
@@ -206,17 +200,15 @@ class Processor(processor.ProcessorBase):
                 valid_edges.append(curr_edge)
                 continue
 
-            # check if the edge in the graph exists in new neighbors list
             neighbor_edges = [e for v, e in neighbors]
             if curr_edge in neighbor_edges:
                 valid_edges.append(curr_edge)
             else:
-                old_edges.append(curr_edge)
+                obsolete_edges.append(curr_edge)
 
-        return (valid_edges, old_edges)
+        return valid_edges, obsolete_edges
 
     def _initialize_events_actions(self):
-        self.actions = {}
-        self.actions[EventAction.CREATE] = self.create_entity
-        self.actions[EventAction.UPDATE] = self.update_entity
-        self.actions[EventAction.DELETE] = self.delete_entity
+        self.actions = {EventAction.CREATE: self.create_entity,
+                        EventAction.UPDATE: self.update_entity,
+                        EventAction.DELETE: self.delete_entity}

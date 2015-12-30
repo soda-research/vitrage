@@ -16,8 +16,8 @@ from dateutil import parser
 
 from oslo_log import log
 
-from vitrage.common.constants import EdgeProperties as EProp
-from vitrage.common.constants import VertexProperties as VProp
+from vitrage.common.constants import EdgeProperties as EProps
+from vitrage.common.constants import VertexProperties as VProps
 from vitrage.common.utils import get_timezone_aware_time
 from vitrage.graph import Direction
 from vitrage.graph import networkx_graph
@@ -37,7 +37,7 @@ class EntityGraph(networkx_graph.NXGraph):
         True and if it has no neighbors that aren't marked deleted
         """
 
-        if not vertex[VProp.IS_PLACEHOLDER]:
+        if not vertex[VProps.IS_PLACEHOLDER]:
             return False
 
         # check that vertex has no neighbors
@@ -54,24 +54,26 @@ class EntityGraph(networkx_graph.NXGraph):
             LOG.debug("Delete placeholder vertex: %s", suspected_vertex)
             self.remove_vertex(suspected_vertex)
 
-    def is_vertex_deleted(self, vertex):
-        return vertex.get(VProp.IS_DELETED, False)
+    @staticmethod
+    def is_vertex_deleted(vertex):
+        return vertex.get(VProps.IS_DELETED, False)
 
-    def is_edge_deleted(self, edge):
-        return edge.get(EProp.IS_DELETED, False)
+    @staticmethod
+    def is_edge_deleted(edge):
+        return edge.get(EProps.IS_DELETED, False)
 
     def mark_vertex_as_deleted(self, vertex):
         """Marks the vertex as is deleted, and updates deletion timestamp"""
 
-        vertex[VProp.IS_DELETED] = True
-        vertex[VProp.VERTEX_DELETION_TIMESTAMP] = get_timezone_aware_time()
+        vertex[VProps.IS_DELETED] = True
+        vertex[VProps.VERTEX_DELETION_TIMESTAMP] = get_timezone_aware_time()
         self.update_vertex(vertex)
 
     def mark_edge_as_deleted(self, edge):
         """Marks the edge as is deleted, and updates delete timestamp"""
 
-        edge[EProp.IS_DELETED] = True
-        edge[EProp.EDGE_DELETION_TIMESTAMP] = get_timezone_aware_time()
+        edge[EProps.IS_DELETED] = True
+        edge[EProps.EDGE_DELETION_TIMESTAMP] = get_timezone_aware_time()
         self.update_edge(edge)
 
     def find_neighbor_types(self, neighbors):
@@ -82,10 +84,11 @@ class EntityGraph(networkx_graph.NXGraph):
             neighbor_types.add(self.get_vertex_type(vertex))
         return neighbor_types
 
-    def get_vertex_type(self, vertex):
-        type = vertex[VProp.TYPE]
-        sub_type = vertex[VProp.SUB_TYPE]
-        return (type, sub_type)
+    @staticmethod
+    def get_vertex_type(vertex):
+        type = vertex[VProps.TYPE]
+        sub_type = vertex[VProps.SUB_TYPE]
+        return type, sub_type
 
     def check_update_validation(self, graph_vertex, updated_vertex):
         """Checks current and updated validation
@@ -98,16 +101,18 @@ class EntityGraph(networkx_graph.NXGraph):
         return (not self.is_vertex_deleted(graph_vertex)) and \
             self.check_timestamp(graph_vertex, updated_vertex)
 
-    def check_timestamp(self, graph_vertex, new_vertex):
-        curr_timestamp = graph_vertex.get(VProp.UPDATE_TIMESTAMP)
+    @staticmethod
+    def check_timestamp(graph_vertex, new_vertex):
+        curr_timestamp = graph_vertex.get(VProps.UPDATE_TIMESTAMP)
         if not curr_timestamp:
             return True
 
         current_time = parser.parse(curr_timestamp)
-        new_time = parser.parse(new_vertex[VProp.UPDATE_TIMESTAMP])
+        new_time = parser.parse(new_vertex[VProps.UPDATE_TIMESTAMP])
         return current_time <= new_time
 
-    def can_update_vertex(self, graph_vertex, new_vertex):
+    @staticmethod
+    def can_update_vertex(graph_vertex, new_vertex):
         return (not graph_vertex) or \
-            (not (not graph_vertex[VProp.IS_PLACEHOLDER]
-                  and new_vertex[VProp.IS_PLACEHOLDER]))
+            (not (not graph_vertex[VProps.IS_PLACEHOLDER]
+                  and new_vertex[VProps.IS_PLACEHOLDER]))
