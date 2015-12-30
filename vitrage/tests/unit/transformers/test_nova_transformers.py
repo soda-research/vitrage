@@ -42,74 +42,6 @@ def get_instance_entity_spec_list(config_file_path, number_of_instances):
 
 class NovaInstanceTransformerTest(base.BaseTest):
 
-    def test_transform_snapshot_event(self):
-        LOG.debug('Test transform snapshot event')
-
-        transformer = get_nova_instance_transformer()
-
-        spec_list = mock_sync.simple_instance_generators(1, 2, 10)
-        instance_events = mock_sync.generate_random_events_list(spec_list)
-
-        for event in instance_events:
-            entity_wrapper = transformer._transform_snapshot_event(event)
-
-            self.assertEqual(cons.EventAction.UPDATE,
-                             entity_wrapper.action)
-
-            expected_key = transformer.extract_key(event)
-            self.assertEqual(expected_key, entity_wrapper.vertex.vertex_id)
-
-            self._validate_snapshot_vertex_props(entity_wrapper.vertex, event)
-
-            self.assertEqual(1, entity_wrapper.neighbors.__len__())
-            self._validate_host_neighbor(
-                entity_wrapper.neighbors[0],
-                event[transformer.HOST_NAME])
-
-    def _validate_host_neighbor(self, h_neighbor, host_name):
-        expected_neighbor = nt.HostTransformer.\
-            create_placeholder_vertex(host_name)
-        self.assertEqual(expected_neighbor, h_neighbor.vertex)
-
-    def _validate_snapshot_vertex_props(self, vertex, event):
-
-        # properties = vertex.properties
-        self.assertEqual(9, vertex.properties.__len__())
-
-        expected_id = event[nt.InstanceTransformer.SNAPSHOT_INSTANCE_ID]
-        observed_id = vertex.get(cons.VertexProperties.ID)
-        self.assertEqual(expected_id, observed_id)
-
-        self.assertEqual(cons.EntityTypes.RESOURCE,
-                         vertex.get(cons.VertexProperties.TYPE))
-
-        self.assertEqual(nt.INSTANCE_SUBTYPE,
-                         vertex.get(cons.VertexProperties.SUB_TYPE))
-
-        expected_subtype = event[nt.InstanceTransformer.SNAPSHOT_INSTANCE_ID]
-        observed_subtype = vertex.get(cons.VertexProperties.ID)
-        self.assertEqual(expected_subtype, observed_subtype)
-
-        expected_project = event[nt.InstanceTransformer.PROJECT_ID]
-        observed_project = vertex.get(cons.VertexProperties.PROJECT)
-        self.assertEqual(expected_project, observed_project)
-
-        expected_state = event[nt.InstanceTransformer.SNAPSHOT_INSTANCE_STATE]
-        observed_state = vertex.get(cons.VertexProperties.STATE)
-        self.assertEqual(expected_state, observed_state)
-
-        expected_timestamp = event[nt.InstanceTransformer.SNAPSHOT_TIMESTAMP]
-        observed_timestamp = vertex.get(
-            cons.VertexProperties.UPDATE_TIMESTAMP)
-        self.assertEqual(expected_timestamp, observed_timestamp)
-
-        expected_name = event[nt.InstanceTransformer.INSTANCE_NAME]
-        observed_name = vertex.get(cons.VertexProperties.NAME)
-        self.assertEqual(expected_name, observed_name)
-
-        is_placeholder = vertex.get(cons.VertexProperties.IS_PLACEHOLDER)
-        self.assertEqual(False, is_placeholder)
-
     def test_key_fields(self):
         LOG.debug('Test get key fields from nova instance transformer')
         transformer = get_nova_instance_transformer()
@@ -119,6 +51,113 @@ class NovaInstanceTransformerTest(base.BaseTest):
                                cons.VertexProperties.ID]
         observed_key_fields = transformer.key_fields()
         self.assert_list_equal(expected_key_fields, observed_key_fields)
+
+    def test_transform(self):
+        LOG.debug('Test actual transform action')
+
+        transformer = get_nova_instance_transformer()
+
+        spec_list = mock_sync.simple_instance_generators(
+            host_num=1,
+            vm_num=1,
+            snapshot_events=10,
+            update_events=5
+        )
+        instance_events = mock_sync.generate_random_events_list(spec_list)
+
+        for event in instance_events:
+            wrapper = transformer.transform(event)
+            self._validate_vertex_props(wrapper.vertex, event)
+
+            # Validate the neighbor list:
+            # 1. Exactly one host neighbor and and
+            # 3. Make sure the host neighbor is correct
+            # 2. TODO(lhartal): validate volume neighbors
+            host_neighbor_exist = False
+            for neighbor in wrapper.neighbors:
+
+                neighbor_subtype = neighbor.vertex[
+                    cons.VertexProperties.SUB_TYPE
+                ]
+
+                if neighbor_subtype == nt.HOST_SUBTYPE:
+                    self.assertEqual(False,
+                                     host_neighbor_exist,
+                                     'Instance has only one host neighbor')
+                    self._validate_host_neighbor(neighbor, event)
+
+    def _validate_vertex_props(self, vertex, event):
+
+        self.assertEqual(9, vertex.properties.__len__())
+
+        sync_mode = event['sync_mode']
+
+        it = nt.InstanceTransformer
+        expected_id = trans_base.extract_field_value(
+            event,
+            it.INSTANCE_ID[sync_mode]
+        )
+        observed_id = vertex[cons.VertexProperties.ID]
+        self.assertEqual(expected_id, observed_id)
+
+        self.assertEqual(cons.EntityTypes.RESOURCE,
+                         vertex[cons.VertexProperties.TYPE])
+
+        self.assertEqual(nt.INSTANCE_SUBTYPE,
+                         vertex[cons.VertexProperties.SUB_TYPE])
+
+        expected_project = trans_base.extract_field_value(
+            event,
+            it.PROJECT_ID[sync_mode]
+        )
+        observed_project = vertex[cons.VertexProperties.PROJECT]
+        self.assertEqual(expected_project, observed_project)
+
+        expected_state = trans_base.extract_field_value(
+            event,
+            it.INSTANCE_STATE[sync_mode]
+        )
+        observed_state = vertex[cons.VertexProperties.STATE]
+        self.assertEqual(expected_state, observed_state)
+
+        expected_timestamp = trans_base.extract_field_value(
+            event,
+            it.TIMESTAMP[sync_mode]
+        )
+        observed_timestamp = vertex[cons.VertexProperties.UPDATE_TIMESTAMP]
+        self.assertEqual(expected_timestamp, observed_timestamp)
+
+        expected_name = trans_base.extract_field_value(
+            event,
+            it.INSTANCE_NAME[sync_mode]
+        )
+        observed_name = vertex[cons.VertexProperties.NAME]
+        self.assertEqual(expected_name, observed_name)
+
+        is_placeholder = vertex[cons.VertexProperties.IS_PLACEHOLDER]
+        self.assertEqual(False, is_placeholder)
+
+        is_deleted = vertex[cons.VertexProperties.IS_DELETED]
+        self.assertEqual(False, is_deleted)
+
+    def _validate_host_neighbor(self, h_neighbor, event):
+
+        it = nt.InstanceTransformer()
+        sync_mode = event['sync_mode']
+        host_name = trans_base.extract_field_value(
+            event,
+            it.HOST_NAME[sync_mode]
+        )
+        expected_neighbor = nt.HostTransformer.create_placeholder_vertex(
+            host_name
+        )
+        self.assertEqual(expected_neighbor, h_neighbor.vertex)
+
+        # Validate neighbor edge
+        edge = h_neighbor.edge
+        self.assertEqual(edge.source_id, h_neighbor.vertex.vertex_id)
+        self.assertEqual(edge.target_id, it.extract_key(event))
+        self.assertEqual(edge.label, cons.EdgeLabels.CONTAINS)
 
     def test_extract_key(self):
         LOG.debug('Test get key from nova instance transformer')
@@ -141,10 +180,10 @@ class NovaInstanceTransformerTest(base.BaseTest):
             self.assertEqual(cons.EntityTypes.RESOURCE, observed_key_fields[0])
             self.assertEqual(nt.INSTANCE_SUBTYPE, observed_key_fields[1])
 
-            if cons.SyncMode.UPDATE == event['sync_mode']:
-                event_id = event[transformer.UPDATE_INSTANCE_ID]
-            else:
-                event_id = event[transformer.SNAPSHOT_INSTANCE_ID]
+            event_id = trans_base.extract_field_value(
+                event,
+                transformer.INSTANCE_ID[event['sync_mode']]
+            )
 
             self.assertEqual(event_id, observed_key_fields[2])
 
@@ -183,8 +222,8 @@ class NovaInstanceTransformerTest(base.BaseTest):
 
         instance_id = '123456'
         vertex_id = nt.InstanceTransformer.build_instance_key(instance_id)
-        p_vertex = nt.InstanceTransformer.\
-            create_placeholder_vertex(instance_id)
+        p_vertex = nt.InstanceTransformer.create_placeholder_vertex(
+            instance_id)
 
         self.assertEqual(vertex_id, p_vertex.vertex_id)
         self.assertEqual(5, p_vertex.properties.keys().__len__())

@@ -68,6 +68,8 @@ class TestProcessor(base.BaseTest):
                           self.NUM_EDGES_AFTER_CREATION)
 
         # check update instance even
+        # TODO(Alexey): Create an event in update event structure
+        # (update snapshot fields won't work)
         event['sync_mode'] = SyncMode.UPDATE
         event['event_type'] = 'compute.instance.volume.attach'
         event['hostname'] = 'new_host'

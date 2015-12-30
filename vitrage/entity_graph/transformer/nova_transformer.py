@@ -15,6 +15,7 @@
 from oslo_log import log as logging
 
 import vitrage.common.constants as cons
+from vitrage.common.exception import VitrageTransformerError
 from vitrage.entity_graph.transformer import base
 import vitrage.graph.utils as graph_utils
 
@@ -26,27 +27,48 @@ HOST_SUBTYPE = 'nova.host'
 
 class InstanceTransformer(base.Transformer):
 
-    # # Fields returned from Nova Instance snapshot
-    SNAPSHOT_INSTANCE_ID = 'id'
-    UPDATE_INSTANCE_ID = 'instance_id'
+    # Fields returned from Nova Instance snapshot
+    INSTANCE_ID = {
+        cons.SyncMode.SNAPSHOT: ('id',),
+        cons.SyncMode.INIT_SNAPSHOT: ('id',),
+        cons.SyncMode.UPDATE: ('payload', 'instance_id')
+    }
 
-    SNAPSHOT_INSTANCE_STATE = 'status'
-    UPDATE_INSTANCE_STATE = 'state'
+    INSTANCE_STATE = {
+        cons.SyncMode.SNAPSHOT: ('status',),
+        cons.SyncMode.INIT_SNAPSHOT: ('status',),
+        cons.SyncMode.UPDATE: ('payload', 'state')
+    }
 
-    SNAPSHOT_TIMESTAMP = 'updated'
-    UPDATE_TIMESTAMP = 'metadata;timestamp'
+    TIMESTAMP = {
+        cons.SyncMode.SNAPSHOT: ('updated',),
+        cons.SyncMode.INIT_SNAPSHOT: ('updated',),
+        cons.SyncMode.UPDATE: ('metadata', 'timestamp')
+    }
 
-    PROJECT_ID = 'tenant_id'
-    INSTANCE_NAME = 'name'
-    HOST_NAME = 'OS-EXT-SRV-ATTR:host'
+    HOST_NAME = {
+        cons.SyncMode.SNAPSHOT: ('OS-EXT-SRV-ATTR:host',),
+        cons.SyncMode.INIT_SNAPSHOT: ('OS-EXT-SRV-ATTR:host',),
+        cons.SyncMode.UPDATE: ('payload', 'host')
+    }
 
-    def __init__(self):
+    PROJECT_ID = {
+        cons.SyncMode.SNAPSHOT: ('tenant_id',),
+        cons.SyncMode.INIT_SNAPSHOT: ('tenant_id',),
+        cons.SyncMode.UPDATE: ('payload', 'tenant_id')
+    }
 
-        self.transform_methods = {
-            cons.SyncMode.SNAPSHOT: self._transform_snapshot_event,
-            cons.SyncMode.INIT_SNAPSHOT: self._transform_init_snapshot_event,
-            cons.SyncMode.UPDATE: self._transform_update_event
-        }
+    INSTANCE_NAME = {
+        cons.SyncMode.SNAPSHOT: ('name',),
+        cons.SyncMode.INIT_SNAPSHOT: ('name',),
+        cons.SyncMode.UPDATE: ('payload', 'hostname')
+    }
+
+    # Event types which need to refer them differently
+    INSTANCE_EVENT_TYPES = {
+        'compute.instance.delete.end': cons.EventAction.DELETE,
+        'compute.instance.create.start': cons.EventAction.CREATE
+    }
 
     def transform(self, entity_event):
         """Transform an entity event into entity wrapper.
@@ -62,64 +84,73 @@ class InstanceTransformer(base.Transformer):
         :rtype:EntityWrapper
         """
         sync_mode = entity_event['sync_mode']
-        return self.transform_methods[sync_mode](entity_event)
 
-    def _transform_snapshot_event(self, entity_event):
+        field_value = base.extract_field_value
+
+        metadata = {
+            cons.VertexProperties.NAME: field_value(
+                entity_event,
+                self.INSTANCE_NAME[sync_mode]
+            ),
+            cons.VertexProperties.IS_PLACEHOLDER: False
+        }
 
         entity_key = self.extract_key(entity_event)
-        metadata = {
-            cons.VertexProperties.NAME: entity_event[self.INSTANCE_NAME]
-        }
+
+        entity_id = field_value(entity_event, self.INSTANCE_ID[sync_mode])
+        project = field_value(entity_event, self.PROJECT_ID[sync_mode])
+        state = field_value(entity_event, self.INSTANCE_STATE[sync_mode])
+        update_timestamp = field_value(
+            entity_event,
+            self.TIMESTAMP[sync_mode]
+        )
 
         entity_vertex = graph_utils.create_vertex(
             entity_key,
-            entity_id=entity_event[self.SNAPSHOT_INSTANCE_ID],
+            entity_id=entity_id,
             entity_type=cons.EntityTypes.RESOURCE,
             entity_subtype=INSTANCE_SUBTYPE,
-            entity_project=entity_event[self.PROJECT_ID],
-            entity_state=entity_event[self.SNAPSHOT_INSTANCE_STATE],
-            update_timestamp=entity_event[self.SNAPSHOT_TIMESTAMP],
-            is_placeholder=False,
+            entity_project=project,
+            entity_state=state,
+            update_timestamp=update_timestamp,
             metadata=metadata
         )
 
         host_neighbor = self.create_host_neighbor(
             entity_vertex.vertex_id,
-            entity_event[self.HOST_NAME])
+            field_value(entity_event, self.HOST_NAME[sync_mode])
+        )
 
         return base.EntityWrapper(
             entity_vertex,
             [host_neighbor],
-            cons.EventAction.UPDATE)
+            self._extract_action_type(entity_event))
 
-    def _transform_init_snapshot_event(self, entity_event):
-
-        entity_wrapper = self._transform_snapshot_event(entity_event)
-        # TODO(Liat): check why set is forbidden
-        # entity_wrapper.action = cons.EventAction.CREATE
-        entity_wrapper = base.EntityWrapper(entity_wrapper.vertex,
-                                            entity_wrapper.neighbors,
-                                            cons.EventAction.CREATE)
-        return entity_wrapper
-
-    def _transform_update_event(self, entity_event):
-        pass
-
-    # def key_fields(self):
-    #     return [cons.VertexProperties.TYPE,
-    #             cons.VertexProperties.SUB_TYPE,
-    #             cons.VertexProperties.ID]
-
-    def extract_key(self, entity_event):
+    def _extract_action_type(self, entity_event):
 
         sync_mode = entity_event['sync_mode']
 
-        if sync_mode == cons.SyncMode.UPDATE:
-            event_id = entity_event[self.UPDATE_INSTANCE_ID]
-        else:
-            event_id = entity_event[self.SNAPSHOT_INSTANCE_ID]
+        if cons.SyncMode.UPDATE == sync_mode:
+            return self.INSTANCE_EVENT_TYPES.get(
+                entity_event['sync_mode'],
+                cons.EventAction.UPDATE)
 
-        return self.build_instance_key(event_id)
+        if cons.SyncMode.SNAPSHOT == sync_mode:
+            return cons.EventAction.CREATE
+
+        if cons.SyncMode.INIT_SNAPSHOT == sync_mode:
+            return cons.EventAction.UPDATE
+
+        raise VitrageTransformerError(
+            'Invalid sync mode: (%s)' % sync_mode)
+        return None
+
+    def extract_key(self, entity_event):
+
+        instance_id = base.extract_field_value(
+            entity_event,
+            self.INSTANCE_ID[entity_event['sync_mode']])
+        return self.build_instance_key(instance_id)
 
     @staticmethod
     def build_instance_key(instance_id):
