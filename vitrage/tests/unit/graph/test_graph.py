@@ -266,12 +266,12 @@ class GraphTest(base.BaseTest):
 
         # Changing the referenced item
         updated_e = e
-        updated_e[EConst.IS_EDGE_DELETED] = 'KUKU'
+        updated_e[EConst.IS_DELETED] = 'KUKU'
         updated_e[EConst.EDGE_DELETION_TIMESTAMP] = 'CHANGED'
 
         # Get it again
         e = g.get_edge(v_node.vertex_id, v_host.vertex_id, label)
-        self.assertEqual(False, e.get(EConst.IS_EDGE_DELETED, None),
+        self.assertEqual(False, e.get(EConst.IS_DELETED, None),
                          'Change should not affect graph item')
         self.assertEqual(e_node_to_host[EConst.EDGE_DELETION_TIMESTAMP],
                          e[EConst.EDGE_DELETION_TIMESTAMP],
@@ -280,8 +280,8 @@ class GraphTest(base.BaseTest):
         g.update_edge(updated_e)
         # Get it again
         e = g.get_edge(v_node.vertex_id, v_host.vertex_id, label)
-        self.assertEqual(updated_e[EConst.IS_EDGE_DELETED],
-                         e[EConst.IS_EDGE_DELETED],
+        self.assertEqual(updated_e[EConst.IS_DELETED],
+                         e[EConst.IS_DELETED],
                          'Graph item should change after update')
         self.assertEqual(updated_e[EConst.EDGE_DELETION_TIMESTAMP],
                          e[EConst.EDGE_DELETION_TIMESTAMP],

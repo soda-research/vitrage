@@ -25,7 +25,7 @@ LOG = logging.getLogger(__name__)
 
 def create_vertex(entity_id, entity_type, entity_subtype=None):
 
-    """returns vertex with partial data"""
+    """returns placeholder vertex"""
 
     vertex_id = base_transformer.Transformer.KEY_SEPARATOR.join(
         [entity_type, entity_subtype, entity_id])

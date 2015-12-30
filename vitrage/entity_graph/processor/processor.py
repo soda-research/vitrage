@@ -121,9 +121,9 @@ class Processor(processor.ProcessorBase):
             for edge in neighbor_edges:
                 self.e_g_manager.mark_edge_as_deleted(edge)
 
-            # delete partial data vertices that connected only to this vertex
+            # delete placeholder vertices that connected only to this vertex
             for vertex in neighbor_vertices:
-                self.e_g_manager.delete_partial_data_vertex(vertex)
+                self.e_g_manager.delete_placeholder_vertex(vertex)
 
             # delete vertex
             self.e_g_manager.mark_vertex_as_deleted(deleted_vertex)
@@ -152,11 +152,15 @@ class Processor(processor.ProcessorBase):
         LOG.debug("Connect neighbors. Neighbors: %s, valid_edges: %s",
                   neighbors, valid_edges)
         for (vertex, edge) in neighbors:
-            if not valid_edges or not \
+            curr_vertex = self.e_g_manager.graph.get_vertex(vertex.vertex_id)
+            if (not curr_vertex) or self.e_g_manager.check_update_validation(
+                    curr_vertex, vertex):
+                if self.e_g_manager.can_update_vertex(curr_vertex, vertex):
+                    self.e_g_manager.graph.update_vertex(vertex)
+
+                if not valid_edges or not \
                     self.e_g_manager.is_edge_exist_in_list(edge, valid_edges):
-                # connect entity with neighbor
-                self.e_g_manager.graph.update_vertex(vertex)
-                self.e_g_manager.graph.update_edge(edge)
+                    self.e_g_manager.graph.update_edge(edge)
 
     def _delete_old_connections(self, vertex, old_edges):
         """Deletes the "vertex" old connections
@@ -167,12 +171,12 @@ class Processor(processor.ProcessorBase):
 
         LOG.debug("Delete old connections. Vertex: %s, old edges: %s",
                   vertex, old_edges)
-        # remove old edges and partial data vertices if exist
+        # remove old edges and placeholder vertices if exist
         for edge in old_edges:
             self.e_g_manager.mark_edge_as_deleted(edge)
             curr_ver = graph_utils.get_neighbor_vertex(
                 edge, vertex, self.e_g_manager.graph)
-            self.e_g_manager.delete_partial_data_vertex(curr_ver)
+            self.e_g_manager.delete_placeholder_vertex(curr_ver)
 
     def _find_edges_status(self, vertex, neighbors):
         """Finds "vertex" valid and old connections

@@ -54,7 +54,7 @@ class InstanceTransformer(base.Transformer):
         Entity event is received from synchronizer it need to be
         transformed into entity wrapper. The wrapper contains:
             1. Entity Vertex - The vertex itself with all fields
-            2. Neighbor list - neighbor vertex with partial data and an edge
+            2. Neighbor list - neighbor placeholder vertex and an edge
             3. Action type - CREATE/UPDATE/DELETE
 
         :param entity_event: a general event from the synchronizer
@@ -68,8 +68,7 @@ class InstanceTransformer(base.Transformer):
 
         entity_key = self.extract_key(entity_event)
         metadata = {
-            cons.VertexProperties.NAME: entity_event[self.INSTANCE_NAME],
-            cons.VertexProperties.IS_PARTIAL_DATA: False
+            cons.VertexProperties.NAME: entity_event[self.INSTANCE_NAME]
         }
 
         entity_vertex = graph_utils.create_vertex(
@@ -80,6 +79,7 @@ class InstanceTransformer(base.Transformer):
             entity_project=entity_event[self.PROJECT_ID],
             entity_state=entity_event[self.SNAPSHOT_INSTANCE_STATE],
             update_timestamp=entity_event[self.SNAPSHOT_TIMESTAMP],
+            is_placeholder=False,
             metadata=metadata
         )
 
@@ -132,7 +132,7 @@ class InstanceTransformer(base.Transformer):
     @staticmethod
     def create_host_neighbor(vertex_id, host_name):
 
-        host_vertex = HostTransformer.create_partial_vertex(host_name)
+        host_vertex = HostTransformer.create_placeholder_vertex(host_name)
 
         relation_edge = graph_utils.create_edge(
             source_id=host_vertex.vertex_id,
@@ -142,27 +142,23 @@ class InstanceTransformer(base.Transformer):
         return base.Neighbor(host_vertex, relation_edge)
 
     @staticmethod
-    def create_partial_vertex(instance_id):
+    def create_placeholder_vertex(instance_id):
 
-        """Creates Vertex with partial data.
+        """Creates placeholder vertex.
 
-        Vertex with partial data contains only mandatory fields
+        Placeholder vertex contains only mandatory fields
 
         :param instance_id: The instance ID
-        :return: Vertex with partial data
+        :return: Placeholder vertex
         :rtype: Vertex
         """
-
-        metadata = {
-            cons.VertexProperties.IS_PARTIAL_DATA: True
-        }
 
         return graph_utils.create_vertex(
             InstanceTransformer.build_instance_key(instance_id),
             entity_id=instance_id,
             entity_type=cons.EntityTypes.RESOURCE,
             entity_subtype=INSTANCE_SUBTYPE,
-            metadata=metadata
+            is_placeholder=True
         )
 
 
@@ -192,16 +188,11 @@ class HostTransformer(base.Transformer):
              host_name])
 
     @staticmethod
-    def create_partial_vertex(host_name):
-
-        metadata = {
-            cons.VertexProperties.IS_PARTIAL_DATA: True
-        }
-
+    def create_placeholder_vertex(host_name):
         return graph_utils.create_vertex(
             HostTransformer.build_host_key(host_name),
             entity_id=host_name,
             entity_type=cons.EntityTypes.RESOURCE,
             entity_subtype=HOST_SUBTYPE,
-            metadata=metadata
+            is_placeholder=True
         )

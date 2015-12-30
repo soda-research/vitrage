@@ -82,7 +82,7 @@ class TestProcessor(base.BaseTest):
         self._check_graph(processor, self.NUM_VERTICES_AFTER_DELETION,
                           self.NUM_EDGES_AFTER_DELETION)
 
-    def test_create_entity_with_partial_data_neighbor(self):
+    def test_create_entity_with_placeholder_neighbor(self):
         # create instance event with host neighbor and check validity
         self._create_and_check_entity()
 
@@ -99,7 +99,7 @@ class TestProcessor(base.BaseTest):
         # update instance event with state running
         vertex.properties[VertexProperties.STATE] = 'RUNNING'
         vertex.properties[VertexProperties.UPDATE_TIMESTAMP] = \
-            datetime.utcnow().replace(tzinfo=pytz.utc).__str__()
+            str(datetime.utcnow().replace(tzinfo=pytz.utc))
         processor.update_entity(vertex, neighbors)
 
         # check state

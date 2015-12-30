@@ -67,8 +67,8 @@ class NovaInstanceTransformerTest(base.BaseTest):
                 event[transformer.HOST_NAME])
 
     def _validate_host_neighbor(self, h_neighbor, host_name):
-
-        expected_neighbor = nt.HostTransformer.create_partial_vertex(host_name)
+        expected_neighbor = nt.HostTransformer.\
+            create_placeholder_vertex(host_name)
         self.assertEqual(expected_neighbor, h_neighbor.vertex)
 
     def _validate_snapshot_vertex_props(self, vertex, event):
@@ -107,8 +107,8 @@ class NovaInstanceTransformerTest(base.BaseTest):
         observed_name = vertex.get(cons.VertexProperties.NAME)
         self.assertEqual(expected_name, observed_name)
 
-        is_partial = vertex.get(cons.VertexProperties.IS_PARTIAL_DATA)
-        self.assertEqual(False, is_partial)
+        is_placeholder = vertex.get(cons.VertexProperties.IS_PLACEHOLDER)
+        self.assertEqual(False, is_placeholder)
 
     def test_key_fields(self):
         LOG.debug('Test get key fields from nova instance transformer')
@@ -178,12 +178,13 @@ class NovaInstanceTransformerTest(base.BaseTest):
         self.assertEqual(vertex_id, neighbor.edge.target_id)
         self.assertEqual(cons.EdgeLabels.CONTAINS, neighbor.edge.label)
 
-    def test_create_partial_vertex(self):
-        LOG.debug('Test create partial vertex')
+    def test_create_placeholder_vertex(self):
+        LOG.debug('Test create placeholder vertex')
 
         instance_id = '123456'
         vertex_id = nt.InstanceTransformer.build_instance_key(instance_id)
-        p_vertex = nt.InstanceTransformer.create_partial_vertex(instance_id)
+        p_vertex = nt.InstanceTransformer.\
+            create_placeholder_vertex(instance_id)
 
         self.assertEqual(vertex_id, p_vertex.vertex_id)
         self.assertEqual(5, p_vertex.properties.keys().__len__())
@@ -195,4 +196,4 @@ class NovaInstanceTransformerTest(base.BaseTest):
                          p_vertex.get(cons.VertexProperties.SUB_TYPE))
         self.assertEqual(True,
                          p_vertex.get(
-                             cons.VertexProperties.IS_PARTIAL_DATA))
+                             cons.VertexProperties.IS_PLACEHOLDER))

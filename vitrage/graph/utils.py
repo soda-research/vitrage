@@ -15,7 +15,6 @@
 from vitrage.common.constants import EdgeProperties as EConst
 from vitrage.common.constants import VertexProperties as VConst
 from vitrage.graph import Edge
-from vitrage.graph import Vertex
 
 
 def create_vertex(vertex_id,
@@ -27,6 +26,7 @@ def create_vertex(vertex_id,
                   is_deleted=False,
                   deletion_timestamp=None,
                   update_timestamp=None,
+                  is_placeholder=False,
                   metadata=None):
     """A builder to create a vertex
 
@@ -43,13 +43,15 @@ def create_vertex(vertex_id,
     :param entity_state:
     :type entity_state: str
     :param is_deleted:
-    :type is_deleted: str
+    :type is_deleted: boolean
     :param deletion_timestamp:
     :type deletion_timestamp: str
     :param update_timestamp:
     :type update_timestamp: str
     :param metadata:
     :type metadata: dict
+    :param is_placeholder:
+    :type is_placeholder: boolean
     :return:
     :rtype: Vertex
     """
@@ -61,8 +63,9 @@ def create_vertex(vertex_id,
         VConst.STATE: entity_state,
         VConst.SUB_TYPE: entity_subtype,
         VConst.TYPE: entity_type,
-        VConst.IS_VERTEX_DELETED: is_deleted,
-        VConst.UPDATE_TIMESTAMP: update_timestamp
+        VConst.IS_DELETED: is_deleted,
+        VConst.UPDATE_TIMESTAMP: update_timestamp,
+        VConst.IS_PLACEHOLDER: is_placeholder
     }
     if metadata:
         properties.update(metadata)
@@ -70,6 +73,9 @@ def create_vertex(vertex_id,
         (k, v) for k, v in properties.iteritems() if v is not None)
     vertex = Vertex(vertex_id=vertex_id, properties=properties)
     return vertex
+
+
+from vitrage.graph import Vertex
 
 
 def create_edge(source_id,
@@ -97,7 +103,7 @@ def create_edge(source_id,
     """
     properties = {
         EConst.EDGE_DELETION_TIMESTAMP: deletion_timestamp,
-        EConst.IS_EDGE_DELETED: is_deleted,
+        EConst.IS_DELETED: is_deleted,
         EConst.RELATION_NAME: relation_type,
     }
     if metadata:

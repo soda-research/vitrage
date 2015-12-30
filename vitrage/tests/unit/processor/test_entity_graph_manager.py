@@ -22,7 +22,7 @@ class TestEntityGraphManager(base.BaseProcessor):
     def setUp(self):
         super(TestEntityGraphManager, self).setUp()
 
-    def test_is_partial_data_vertex(self):
+    def test_can_vertex_be_deleted(self):
         e_g_manager = entity_graph_manager.EntityGraphManager()
 
         # create vertex properties
@@ -30,10 +30,10 @@ class TestEntityGraphManager(base.BaseProcessor):
                                                        'RESOURCE', 'INSTANCE',
                                                        '123', False, True, {})
 
-        # check is partial data vertex
-        is_partial_data_vertex = \
-            e_g_manager.is_partial_data_vertex(instance_vertex)
-        self.assertTrue(is_partial_data_vertex)
+        # check is placeholder vertex
+        is_placeholder_vertex = \
+            e_g_manager.can_vertex_be_deleted(instance_vertex)
+        self.assertTrue(is_placeholder_vertex)
 
         # add host vertex
         host_vertex = self._update_vertex_to_graph(e_g_manager, 'RESOURCE',
@@ -43,21 +43,21 @@ class TestEntityGraphManager(base.BaseProcessor):
                                           instance_vertex.vertex_id,
                                           'contains')
 
-        # check is partial data vertex
-        is_partial_data_vertex = \
-            e_g_manager.is_partial_data_vertex(instance_vertex)
-        self.assertFalse(is_partial_data_vertex)
+        # check is placeholder vertex
+        is_placeholder_vertex = \
+            e_g_manager.can_vertex_be_deleted(instance_vertex)
+        self.assertFalse(is_placeholder_vertex)
 
         # change host to is_deleted
         e_g_manager.mark_vertex_as_deleted(host_vertex)
         e_g_manager.mark_edge_as_deleted(edge)
 
-        # check is partial data vertex
-        is_partial_data_vertex = \
-            e_g_manager.is_partial_data_vertex(instance_vertex)
-        self.assertTrue(is_partial_data_vertex)
+        # check is placeholder vertex
+        is_placeholder_vertex = \
+            e_g_manager.can_vertex_be_deleted(instance_vertex)
+        self.assertTrue(is_placeholder_vertex)
 
-    def test_is_not_partial_data_vertex(self):
+    def test_is_not_can_vertex_be_deleted(self):
         e_g_manager = entity_graph_manager.EntityGraphManager()
 
         # create vertex properties
@@ -66,11 +66,11 @@ class TestEntityGraphManager(base.BaseProcessor):
                                               'INSTANCE', '12345',
                                               False, False, prop)
 
-        # check is not partial data vertex
-        is_partial_data_vertex = e_g_manager.is_partial_data_vertex(vertex)
-        self.assertFalse(is_partial_data_vertex)
+        # check is not placeholder vertex
+        is_placeholder_vertex = e_g_manager.can_vertex_be_deleted(vertex)
+        self.assertFalse(is_placeholder_vertex)
 
-    def test_delete_partial_data_vertex(self):
+    def test_delete_placeholder_vertex(self):
         e_g_manager = entity_graph_manager.EntityGraphManager()
 
         # create vertex properties
@@ -78,12 +78,12 @@ class TestEntityGraphManager(base.BaseProcessor):
                                               'INSTANCE', '12345',
                                               False, True, {})
 
-        # check is partial data vertex
-        is_partial_data_vertex = e_g_manager.is_partial_data_vertex(vertex)
-        self.assertTrue(is_partial_data_vertex)
+        # check is placeholder vertex
+        is_placeholder_vertex = e_g_manager.can_vertex_be_deleted(vertex)
+        self.assertTrue(is_placeholder_vertex)
 
-        # deal with partial data vertex - mark it as deleted
-        e_g_manager.delete_partial_data_vertex(vertex)
+        # deal with placeholder vertex - mark it as deleted
+        e_g_manager.delete_placeholder_vertex(vertex)
         vertex = e_g_manager.graph.get_vertex(vertex.vertex_id)
         self.assertTrue(not vertex)
 

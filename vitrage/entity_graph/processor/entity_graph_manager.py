@@ -34,14 +34,14 @@ class EntityGraphManager(object):
         self.graph = create_graph('entity graph')
         self.transformer = transformer_manager.TransformerManager()
 
-    def is_partial_data_vertex(self, vertex):
-        """Check if a vertex is a partial data vertex
+    def can_vertex_be_deleted(self, vertex):
+        """Check if the vertex can be deleted
 
-        Vertex is a partial data vertex if it's IS_PARTIAL_DATA property is
-        True and if it has no neighbors
+        Vertex can be deleted if it's IS_PLACEHOLDER property is
+        True and if it has no neighbors that aren't marked deleted
         """
 
-        if not vertex.properties[VertexProperties.IS_PARTIAL_DATA]:
+        if not vertex.properties[VertexProperties.IS_PLACEHOLDER]:
             return False
 
         # check that vertex has no neighbors
@@ -51,25 +51,25 @@ class EntityGraphManager(object):
         return not any(True for neighbor_edge in neighbor_edges
                        if not self.is_edge_deleted(neighbor_edge))
 
-    def delete_partial_data_vertex(self, suspected_vertex):
-        """Checks if it is a partial data vertex, and if so deletes it """
+    def delete_placeholder_vertex(self, suspected_vertex):
+        """Checks if it is a placeholder vertex, and if so deletes it """
 
-        if self.is_partial_data_vertex(suspected_vertex):
-            LOG.debug("Delete partial data vertex: %s", suspected_vertex)
+        if self.can_vertex_be_deleted(suspected_vertex):
+            LOG.debug("Delete placeholder vertex: %s", suspected_vertex)
             self.graph.remove_vertex(suspected_vertex)
 
     def is_vertex_deleted(self, vertex):
         return vertex.properties.get(
-            VertexProperties.IS_VERTEX_DELETED, False)
+            VertexProperties.IS_DELETED, False)
 
     def is_edge_deleted(self, edge):
         return edge.properties.get(
-            EdgeProperties.IS_EDGE_DELETED, False)
+            EdgeProperties.IS_DELETED, False)
 
     def mark_vertex_as_deleted(self, vertex):
         """Marks the vertex as is deleted, and updates deletion timestamp"""
 
-        vertex.properties[VertexProperties.IS_VERTEX_DELETED] = True
+        vertex.properties[VertexProperties.IS_DELETED] = True
         vertex.properties[VertexProperties.VERTEX_DELETION_TIMESTAMP] = \
             datetime.datetime.now()
         self.graph.update_vertex(vertex)
@@ -77,7 +77,7 @@ class EntityGraphManager(object):
     def mark_edge_as_deleted(self, edge):
         """Marks the edge as is deleted, and updates delete timestamp"""
 
-        edge.properties[EdgeProperties.IS_EDGE_DELETED] = True
+        edge.properties[EdgeProperties.IS_DELETED] = True
         edge.properties[EdgeProperties.EDGE_DELETION_TIMESTAMP] = \
             datetime.datetime.now()
         self.graph.update_edge(edge)
@@ -112,8 +112,8 @@ class EntityGraphManager(object):
 
     def check_timestamp(self, curr_vertex, new_vertex):
         is_timestamp_property_exist = VertexProperties.UPDATE_TIMESTAMP \
-            not in curr_vertex.properties.keys()
-        if is_timestamp_property_exist:
+            in curr_vertex.properties.keys()
+        if not is_timestamp_property_exist:
             return True
 
         current_time = parser.parse(curr_vertex.properties[
@@ -121,3 +121,8 @@ class EntityGraphManager(object):
         new_time = parser.parse(new_vertex.properties[
             VertexProperties.UPDATE_TIMESTAMP])
         return current_time <= new_time
+
+    def can_update_vertex(self, curr_vertex, new_vertex):
+        return (not curr_vertex) or \
+            (not (not curr_vertex.properties[VertexProperties.IS_PLACEHOLDER]
+                  and new_vertex.properties[VertexProperties.IS_PLACEHOLDER]))
