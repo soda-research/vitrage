@@ -64,7 +64,8 @@ def generate_random_events_list(generator_spec_list):
 
 
 def simple_instance_generators(host_num, vm_num,
-                               snapshot_events=0, update_events=0):
+                               snapshot_events=0, update_events=0,
+                               snap_vals=None, update_vals=None):
     """A function for returning vm event generators.
 
     Returns generators for a given number of hosts and
@@ -74,6 +75,8 @@ def simple_instance_generators(host_num, vm_num,
     :param vm_num: number of vms
     :param snapshot_events: number of snapshot events per instance
     :param update_events: number of update events per instance
+    :param snap_vals: preset vals for ALL snapshot events
+    :param update_vals: preset vals for ALL update events
     :return: generators for vm_num vms as specified
     """
 
@@ -86,6 +89,7 @@ def simple_instance_generators(host_num, vm_num,
         test_entity_spec_list.append(
             {tg.DYNAMIC_INFO_FKEY: tg.SYNC_INST_SNAPSHOT_D,
              tg.STATIC_INFO_FKEY: tg.SYNC_INST_SNAPSHOT_S,
+             tg.EXTERNAL_INFO_KEY: snap_vals,
              tg.MAPPING_KEY: mapping,
              tg.NAME_KEY: 'Instance (vm) snapshot generator',
              tg.NUM_EVENTS: snapshot_events
@@ -95,6 +99,7 @@ def simple_instance_generators(host_num, vm_num,
         test_entity_spec_list.append(
             {tg.DYNAMIC_INFO_FKEY: tg.SYNC_INST_UPDATE_D,
              tg.STATIC_INFO_FKEY: None,
+             tg.EXTERNAL_INFO_KEY: update_vals,
              tg.MAPPING_KEY: mapping,
              tg.NAME_KEY: 'Instance (vm) update generator',
              tg.NUM_EVENTS: update_events

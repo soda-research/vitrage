@@ -45,7 +45,8 @@ def generate_random_events_list(generator_spec_list):
     return data
 
 
-def simple_instance_generators(host_num, vm_num, snapshot_events=0):
+def simple_instance_generators(host_num, vm_num, snapshot_events=0,
+                               snap_vals=None):
     """A simple function for returning vm generators.
 
     Returns generators for a given number of hosts and
@@ -66,6 +67,7 @@ def simple_instance_generators(host_num, vm_num, snapshot_events=0):
         {tg.DYNAMIC_INFO_FKEY: tg.TRANS_INST_SNAPSHOT_D,
          tg.STATIC_INFO_FKEY: tg.TRANS_INST_SNAPSHOT_S,
          tg.MAPPING_KEY: mapping,
+         tg.EXTERNAL_INFO_KEY: snap_vals,
          tg.NAME_KEY: 'Instance (vm) snapshot generator',
          tg.NUM_EVENTS: snapshot_events
          }
@@ -74,7 +76,8 @@ def simple_instance_generators(host_num, vm_num, snapshot_events=0):
     return tg.get_trace_generators(test_entity_spec_list)
 
 
-def simple_host_generators(zone_num, host_num, snapshot_events=0):
+def simple_host_generators(zone_num, host_num, snapshot_events=0,
+                           snap_vals=None):
     """A simple function for returning vm generators.
 
     Returns generators for a given number of hosts and
@@ -95,6 +98,7 @@ def simple_host_generators(zone_num, host_num, snapshot_events=0):
         {tg.DYNAMIC_INFO_FKEY: tg.HOST_SNAPSHOT_D,
          tg.STATIC_INFO_FKEY: tg.HOST_SNAPSHOT_S,
          tg.MAPPING_KEY: mapping,
+         tg.EXTERNAL_INFO_KEY: snap_vals,
          tg.NAME_KEY: 'Host snapshot generator',
          tg.NUM_EVENTS: snapshot_events
          }
@@ -103,7 +107,7 @@ def simple_host_generators(zone_num, host_num, snapshot_events=0):
     return tg.get_trace_generators(test_entity_spec_list)
 
 
-def simple_zone_generators(zone_num, snapshot_events=0):
+def simple_zone_generators(zone_num, snapshot_events=0, snap_vals=None):
     """A simple function for returning vm generators.
 
     Returns generators for a given number of hosts and
@@ -122,6 +126,7 @@ def simple_zone_generators(zone_num, snapshot_events=0):
         {tg.DYNAMIC_INFO_FKEY: tg.ZONE_SNAPSHOT_D,
          tg.STATIC_INFO_FKEY: tg.ZONE_SNAPSHOT_S,
          tg.MAPPING_KEY: mapping,
+         tg.EXTERNAL_INFO_KEY: snap_vals,
          tg.NAME_KEY: 'Zone snapshot generator',
          tg.NUM_EVENTS: snapshot_events
          }

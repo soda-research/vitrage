@@ -34,6 +34,7 @@ DYNAMIC_INFO_FKEY = 'filename'
 STATIC_INFO_FKEY = 'static_filename'
 NAME_KEY = 'name'
 MAPPING_KEY = 'mapping'
+EXTERNAL_INFO_KEY = 'external'
 
 NUM_EVENTS = '#events'
 GENERATOR = 'generator'
@@ -152,9 +153,9 @@ def _get_sync_vm_snapshot_values(spec):
                    "OS-EXT-SRV-ATTR:host": host_name,
                    "OS-EXT-SRV-ATTR:hypervisor_hostname": host_name,
                    'name': vm_name}
-        vm_static_info = utils.generate_vals(static_info_re)
-        static_values.append(utils.merge_vals(vm_static_info, mapping))
-
+        static_values.append(combine_data(
+            static_info_re, mapping, spec.get(EXTERNAL_INFO_KEY, None)
+        ))
     return static_values
 
 
@@ -176,8 +177,9 @@ def _get_trans_vm_snapshot_values(spec):
         mapping = {'hostname': host_name,
                    'id': vm_name,
                    'name': vm_name}
-        vm_static_info = utils.generate_vals(static_info_re)
-        static_values.append(utils.merge_vals(vm_static_info, mapping))
+        static_values.append(combine_data(
+            static_info_re, mapping, spec.get(EXTERNAL_INFO_KEY, None)
+        ))
 
     return static_values
 
@@ -199,8 +201,9 @@ def _get_sync_vm_update_values(spec):
     for vm_name, host_name in vm_host_mapping:
         mapping = {'payload': {'host': host_name,
                                'display_name': vm_name}}
-        vm_static_info = utils.generate_vals(static_info_re)
-        static_values.append(utils.merge_vals(vm_static_info, mapping))
+        static_values.append(combine_data(
+            static_info_re, mapping, spec.get(EXTERNAL_INFO_KEY, None)
+        ))
 
     return static_values
 
@@ -223,8 +226,9 @@ def _get_host_snapshot_values(spec):
         mapping = {'zone_id': zone_name,
                    'name': host_name,
                    'id': host_name}
-        host_static_info = utils.generate_vals(static_info_re)
-        static_values.append(utils.merge_vals(host_static_info, mapping))
+        static_values.append(combine_data(
+            static_info_re, mapping, spec.get(EXTERNAL_INFO_KEY, None)
+        ))
 
     return static_values
 
@@ -246,10 +250,18 @@ def _get_zone_snapshot_values(spec):
     for zone_name, node_name in zone_node_mapping:
         mapping = {'name': zone_name,
                    'id': zone_name}
-        host_static_info = utils.generate_vals(static_info_re)
-        static_values.append(utils.merge_vals(host_static_info, mapping))
+        static_values.append(combine_data(
+            static_info_re, mapping, spec.get(EXTERNAL_INFO_KEY, None)
+        ))
 
     return static_values
+
+
+def combine_data(static_info_re, mapping_info, external_info):
+    if external_info:
+        mapping_info = utils.merge_vals(mapping_info, external_info)
+    static_info = utils.generate_vals(static_info_re)
+    return utils.merge_vals(static_info, mapping_info)
 
 
 def get_trace_generators(entity_spec_list, default_events=100):
