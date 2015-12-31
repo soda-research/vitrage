@@ -38,7 +38,7 @@ class TestProcessor(base.BaseTest):
 
     def setUp(self):
         super(TestProcessor, self).setUp()
-        self.spec_list = self._get_spec_list()
+        self._get_spec_list()
 
     # TODO(Alexey): un skip this test when host and zone transformers are ready
     @unittest.skip('Not ready yet')
@@ -189,7 +189,7 @@ class TestProcessor(base.BaseTest):
                           self.NUM_VERTICES_AFTER_CREATION,
                           self.NUM_EDGES_AFTER_CREATION)
 
-        return (vertex, neighbors, processor)
+        return vertex, neighbors, processor
 
     def _create_entity(self, processor=None, spec_type=None, sync_mode=None,
                        event_type=None, properties=None):
@@ -206,7 +206,7 @@ class TestProcessor(base.BaseTest):
         (vertex, neighbors, event_type) = processor.transform_entity(event)
         processor.create_entity(vertex, neighbors)
 
-        return (vertex, neighbors, processor)
+        return vertex, neighbors, processor
 
     def _check_graph(self, processor, num_vertices, num_edges):
         self.assertEqual(num_vertices, len(processor.entity_graph))
@@ -225,29 +225,24 @@ class TestProcessor(base.BaseTest):
 
         return processor
 
-    def _create_mock_events(self):
+    @staticmethod
+    def _create_mock_events():
         gen_list = mock_trans.simple_zone_generators(2, 10)
         gen_list.append(mock_trans.simple_host_generators(2, 4, 15))
         gen_list.append(mock_trans.simple_instance_generators(4, 15, 150))
         return mock_trans.generate_random_events_list(gen_list)
 
     def _get_spec_list(self):
-        spec_list = {}
-        spec_list[self.ZONE_SPEC] = 'mock_nova_zone_snapshot_processor.txt'
-        spec_list[self.HOST_SPEC] = 'mock_nova_host_snapshot_processor.txt'
-        spec_list[self.INSTANCE_SPEC] = \
-            'mock_nova_inst_snapshot_processor.txt'
-        return spec_list
+        self.spec_list = \
+            {self.ZONE_SPEC: 'mock_nova_zone_snapshot_processor.txt',
+             self.HOST_SPEC: 'mock_nova_host_snapshot_processor.txt',
+             self.INSTANCE_SPEC: 'mock_nova_inst_snapshot_processor.txt'}
 
-    def _create_event(self, spec_type=None, sync_mode=None,
+    @staticmethod
+    def _create_event(spec_type=None, sync_mode=None,
                       event_type=None, properties=None):
         # generate event
         spec_list = mock_trans.simple_instance_generators(1, 1, 1)
-        # spec = [self._get_instance_entity_spec_list(
-        #     self.spec_list[spec_type], 1, 'generator')]
-        #
-        # spec_list = mock_trans.get_mock_generators(spec)
-        #
         events_list = mock_trans.generate_random_events_list(
             spec_list)
 
@@ -262,12 +257,10 @@ class TestProcessor(base.BaseTest):
             for key, value in properties.iteritems():
                 events_list[0][key] = value
 
-        # TODO(Alexey): remove this and fix it in mock
-        events_list[0]['sync_type'] = "nova.instance"
-
         return events_list[0]
 
-    def _get_instance_entity_spec_list(self, config_file_path,
+    @staticmethod
+    def _get_instance_entity_spec_list(config_file_path,
                                        number_of_instances, name):
 
         """Returns a list of nova instance specifications by

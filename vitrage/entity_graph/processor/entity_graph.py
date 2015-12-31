@@ -66,14 +66,14 @@ class EntityGraph(networkx_graph.NXGraph):
         """Marks the vertex as is deleted, and updates deletion timestamp"""
 
         vertex[VProps.IS_DELETED] = True
-        vertex[VProps.VERTEX_DELETION_TIMESTAMP] = get_timezone_aware_time()
+        vertex[VProps.UPDATE_TIMESTAMP] = get_timezone_aware_time()
         self.update_vertex(vertex)
 
     def mark_edge_as_deleted(self, edge):
         """Marks the edge as is deleted, and updates delete timestamp"""
 
         edge[EProps.IS_DELETED] = True
-        edge[EProps.EDGE_DELETION_TIMESTAMP] = get_timezone_aware_time()
+        edge[EProps.UPDATE_TIMESTAMP] = get_timezone_aware_time()
         self.update_edge(edge)
 
     def find_neighbor_types(self, neighbors):

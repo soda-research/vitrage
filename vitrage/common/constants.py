@@ -18,7 +18,6 @@ class VertexProperties(object):
     SUB_TYPE = 'SUB_TYPE'
     ID = 'ID'
     IS_DELETED = 'IS_DELETED'
-    VERTEX_DELETION_TIMESTAMP = 'VERTEX_DELETION_TIMESTAMP'
     STATE = 'STATE'
     PROJECT = 'PROJECT'
     UPDATE_TIMESTAMP = 'UPDATE_TIMESTAMP'
@@ -29,7 +28,7 @@ class VertexProperties(object):
 class EdgeProperties(object):
     RELATION_NAME = 'RELATION_NAME'
     IS_DELETED = 'IS_DELETED'
-    EDGE_DELETION_TIMESTAMP = 'EDGE_DELETION_TIMESTAMP'
+    UPDATE_TIMESTAMP = 'UPDATE_TIMESTAMP'
 
 
 class EdgeLabels(object):

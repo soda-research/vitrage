@@ -65,7 +65,7 @@ e_node_to_host = utils.create_edge(
     source_id=v_node.vertex_id,
     target_id=v_host.vertex_id,
     relation_type=ELabel.CONTAINS,
-    deletion_timestamp='123')
+    update_timestamp='123')
 
 
 def add_connected_vertex(entity_type, edge_type, graph, id, other_vertex):
@@ -267,14 +267,14 @@ class GraphTest(base.BaseTest):
         # Changing the referenced item
         updated_e = e
         updated_e[EProps.IS_DELETED] = 'KUKU'
-        updated_e[EProps.EDGE_DELETION_TIMESTAMP] = 'CHANGED'
+        updated_e[EProps.UPDATE_TIMESTAMP] = 'CHANGED'
 
         # Get it again
         e = g.get_edge(v_node.vertex_id, v_host.vertex_id, label)
         self.assertEqual(False, e.get(EProps.IS_DELETED, None),
                          'Change should not affect graph item')
-        self.assertEqual(e_node_to_host[EProps.EDGE_DELETION_TIMESTAMP],
-                         e[EProps.EDGE_DELETION_TIMESTAMP],
+        self.assertEqual(e_node_to_host[EProps.UPDATE_TIMESTAMP],
+                         e[EProps.UPDATE_TIMESTAMP],
                          'Change should not affect graph item')
         # Update the graph item and see changes take place
         g.update_edge(updated_e)
@@ -283,8 +283,8 @@ class GraphTest(base.BaseTest):
         self.assertEqual(updated_e[EProps.IS_DELETED],
                          e[EProps.IS_DELETED],
                          'Graph item should change after update')
-        self.assertEqual(updated_e[EProps.EDGE_DELETION_TIMESTAMP],
-                         e[EProps.EDGE_DELETION_TIMESTAMP],
+        self.assertEqual(updated_e[EProps.UPDATE_TIMESTAMP],
+                         e[EProps.UPDATE_TIMESTAMP],
                          'Graph item should change after update')
 
         # check metadata

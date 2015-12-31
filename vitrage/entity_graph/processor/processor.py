@@ -148,10 +148,14 @@ class Processor(processor.ProcessorBase):
             if (not graph_vertex) or self.entity_graph.check_update_validation(
                     graph_vertex, vertex):
                 if self.entity_graph.can_update_vertex(graph_vertex, vertex):
+                    LOG.debug("Updates vertex: %s", vertex)
                     self.entity_graph.update_vertex(vertex)
 
                 if edge not in valid_edges:
+                    LOG.debug("Updates edge: %s", edge)
                     self.entity_graph.update_edge(edge)
+            else:
+                LOG.debug("neighbor vertex wasn't updated: %s", vertex)
 
     def _delete_old_connections(self, vertex, obsolete_edges):
         """Deletes the "vertex" old connections

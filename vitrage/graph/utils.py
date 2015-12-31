@@ -15,6 +15,7 @@
 from vitrage.common.constants import EdgeProperties as EConst
 from vitrage.common.constants import VertexProperties as VConst
 from vitrage.graph import Edge
+from vitrage.graph import Vertex
 
 
 def create_vertex(vertex_id,
@@ -24,7 +25,6 @@ def create_vertex(vertex_id,
                   entity_project=None,
                   entity_state=None,
                   is_deleted=False,
-                  deletion_timestamp=None,
                   update_timestamp=None,
                   is_placeholder=False,
                   metadata=None):
@@ -57,7 +57,6 @@ def create_vertex(vertex_id,
     """
 
     properties = {
-        VConst.VERTEX_DELETION_TIMESTAMP: deletion_timestamp,
         VConst.ID: entity_id,
         VConst.PROJECT: entity_project,
         VConst.STATE: entity_state,
@@ -75,14 +74,11 @@ def create_vertex(vertex_id,
     return vertex
 
 
-from vitrage.graph import Vertex
-
-
 def create_edge(source_id,
                 target_id,
                 relation_type,
                 is_deleted=False,
-                deletion_timestamp=None,
+                update_timestamp=None,
                 metadata=None):
     """A builder to create an edge
 
@@ -102,7 +98,7 @@ def create_edge(source_id,
     :rtype: Edge
     """
     properties = {
-        EConst.EDGE_DELETION_TIMESTAMP: deletion_timestamp,
+        EConst.UPDATE_TIMESTAMP: update_timestamp,
         EConst.IS_DELETED: is_deleted,
         EConst.RELATION_NAME: relation_type,
     }
