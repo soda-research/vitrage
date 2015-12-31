@@ -86,6 +86,33 @@ class NovaInstanceTransformerTest(base.BaseTest):
                                      'Instance has only one host neighbor')
                     self._validate_host_neighbor(neighbor, event)
 
+        values = {
+            'sync_mode': cons.SyncMode.INIT_SNAPSHOT,
+        }
+        self._check_event_action(cons.EventAction.CREATE,
+                                 True,
+                                 snap_vals=values)
+
+        values['sync_mode'] = cons.SyncMode.SNAPSHOT
+        self._check_event_action(cons.EventAction.UPDATE,
+                                 True,
+                                 snap_vals=values)
+
+        values['sync_mode'] = cons.SyncMode.UPDATE
+        self._check_event_action(cons.EventAction.UPDATE,
+                                 False,
+                                 update_vals=values)
+
+        values['event_type'] = 'compute.instance.delete.end'
+        self._check_event_action(cons.EventAction.DELETE,
+                                 False,
+                                 update_vals=values)
+
+        values['event_type'] = 'compute.instance.create.start'
+        self._check_event_action(cons.EventAction.CREATE,
+                                 False,
+                                 update_vals=values)
+
     def _validate_vertex_props(self, vertex, event):
 
         self.assertEqual(9, vertex.properties.__len__())
@@ -158,6 +185,26 @@ class NovaInstanceTransformerTest(base.BaseTest):
         self.assertEqual(edge.source_id, h_neighbor.vertex.vertex_id)
         self.assertEqual(edge.target_id, it.extract_key(event))
         self.assertEqual(edge.label, cons.EdgeLabels.CONTAINS)
+
+    def _check_event_action(self, expected_action,
+                            is_snap,
+                            snap_vals=None,
+                            update_vals=None):
+
+        spec_list = mock_sync.simple_instance_generators(
+            host_num=1,
+            vm_num=1,
+            snapshot_events=1 if is_snap else 0,
+            update_events=0 if is_snap else 1,
+            update_vals=update_vals,
+            snap_vals=snap_vals
+        )
+        event = mock_sync.generate_random_events_list(spec_list)[0]
+
+        transformer = get_nova_instance_transformer()
+        wrapper = transformer.transform(event)
+
+        self.assertEqual(expected_action, wrapper.action)
 
     def test_extract_key(self):
         LOG.debug('Test get key from nova instance transformer')

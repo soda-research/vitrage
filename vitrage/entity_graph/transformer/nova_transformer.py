@@ -64,8 +64,10 @@ class InstanceTransformer(base.Transformer):
         cons.SyncMode.UPDATE: ('payload', 'hostname')
     }
 
+    UPDATE_EVENT_TYPE = 'event_type'
+
     # Event types which need to refer them differently
-    INSTANCE_EVENT_TYPES = {
+    EVENT_TYPES = {
         'compute.instance.delete.end': cons.EventAction.DELETE,
         'compute.instance.create.start': cons.EventAction.CREATE
     }
@@ -131,19 +133,18 @@ class InstanceTransformer(base.Transformer):
         sync_mode = entity_event['sync_mode']
 
         if cons.SyncMode.UPDATE == sync_mode:
-            return self.INSTANCE_EVENT_TYPES.get(
-                entity_event['sync_mode'],
+            return self.EVENT_TYPES.get(
+                entity_event[self.UPDATE_EVENT_TYPE],
                 cons.EventAction.UPDATE)
 
         if cons.SyncMode.SNAPSHOT == sync_mode:
-            return cons.EventAction.CREATE
+            return cons.EventAction.UPDATE
 
         if cons.SyncMode.INIT_SNAPSHOT == sync_mode:
-            return cons.EventAction.UPDATE
+            return cons.EventAction.CREATE
 
         raise VitrageTransformerError(
             'Invalid sync mode: (%s)' % sync_mode)
-        return None
 
     def extract_key(self, entity_event):
 
