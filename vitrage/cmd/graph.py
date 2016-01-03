@@ -12,13 +12,27 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import multiprocessing
+
 from oslo_service import service as os_service
 
+from vitrage.common.constants import SyncMode
 from vitrage import entity_graph as entity_graph_svc
 from vitrage import service
+from vitrage import synchronizer as synchronizer_svc
 
 
-def entity_graph():
+def main():
+    event_queue = multiprocessing.Queue()
     conf = service.prepare_service()
-    os_service.launch(conf,
-                      entity_graph_svc.VitrageEntityGraphService(conf)).wait()
+    launcher = os_service.ProcessLauncher(conf)
+
+    launcher.launch_service(entity_graph_svc.VitrageEntityGraphService(
+        event_queue), workers=1)
+
+    synchronizer = synchronizer_svc.VitrageSynchronizerService(event_queue)
+    launcher.launch_service(synchronizer, workers=1)
+
+    synchronizer.get_all(sync_mode=SyncMode.INIT_SNAPSHOT)
+
+    launcher.wait()

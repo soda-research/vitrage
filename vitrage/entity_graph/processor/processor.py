@@ -44,6 +44,7 @@ class Processor(processor.ProcessorBase):
         """
 
         entity = self.transform_entity(event)
+        # TODO(Alexey): need to check here the NOT_RELEVANT action as well
         return self.actions[entity.action](entity.vertex, entity.neighbors)
 
     def create_entity(self, new_vertex, neighbors):
