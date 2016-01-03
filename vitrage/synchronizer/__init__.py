@@ -21,9 +21,9 @@ LOG = log.getLogger(__name__)
 
 class VitrageSynchronizerService(os_service.Service):
 
-    def __init__(self, event_queue):
+    def __init__(self, synchronizer):
         super(VitrageSynchronizerService, self).__init__()
-        self.queue = event_queue
+        self.synchronizer = synchronizer
 
     def start(self):
         LOG.info("Start VitrageSynchronizerService")

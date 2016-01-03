@@ -33,9 +33,9 @@ class VitrageEntityGraphService(os_service.Service):
 
         super(VitrageEntityGraphService, self).start()
 
-        # while True:
-        #    event = self.queue.get()
-        #    self.processor.process_event(event)
+        while True:
+            event = self.queue.get()
+            self.processor.process_event(event)
 
         LOG.info("Finish start VitrageEntityGraphService")
 
