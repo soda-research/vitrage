@@ -19,136 +19,14 @@ test_vitrage graph
 Tests for `vitrage` graph driver
 """
 
-from oslo_log import log as logging
-
-import random
-import time
-
-from vitrage.common.constants import EdgeLabels as ELabel
 from vitrage.common.constants import EdgeProperties as EProps
 from vitrage.common.constants import VertexProperties as VProps
-from vitrage.graph import create_graph
 from vitrage.graph import Direction
 from vitrage.graph import utils
-from vitrage.tests.unit import base
-
-LOG = logging.getLogger(__name__)
-
-ENTITY_GRAPH_HOSTS_PER_NODE = 32
-ENTITY_GRAPH_VMS_PER_HOST = 32
-ENTITY_GRAPH_ALARMS_PER_HOST = 8
-ENTITY_GRAPH_ALARMS_PER_VM = 8
-
-ALARM = 'ALARM'
-HOST = 'HOST'
-INSTANCE = 'INSTANCE'
-NODE = 'NODE'
-
-v_node = utils.create_vertex(
-    vertex_id=NODE + '111111111111',
-    entity_id='111111111111',
-    entity_type=NODE)
-v_host = utils.create_vertex(
-    vertex_id=HOST + '222222222222',
-    entity_id='222222222222',
-    entity_type=HOST)
-v_instance = utils.create_vertex(
-    vertex_id=INSTANCE + '333333333333',
-    entity_id='333333333333',
-    entity_type=INSTANCE)
-v_alarm = utils.create_vertex(
-    vertex_id=ALARM + '444444444444',
-    entity_id='444444444444',
-    entity_type=ALARM)
-
-e_node_to_host = utils.create_edge(
-    source_id=v_node.vertex_id,
-    target_id=v_host.vertex_id,
-    relation_type=ELabel.CONTAINS,
-    update_timestamp='123')
+from vitrage.tests.unit.graph.base import *  # noqa
 
 
-def add_connected_vertex(entity_type, edge_type, graph, id, other_vertex):
-    host_to_add = utils.create_vertex(
-        vertex_id=entity_type + str(id),
-        entity_id=id,
-        entity_type=entity_type)
-    edge_to_add = utils.create_edge(
-        source_id=host_to_add.vertex_id,
-        target_id=other_vertex.vertex_id,
-        relation_type=edge_type)
-    graph.add_vertex(host_to_add)
-    graph.add_edge(edge_to_add)
-    return host_to_add
-
-
-def rand_vertex_id(entity_type, items_count, max_id):
-    random_vm_entity_id = random.randint(
-        max_id - items_count, max_id - 1)
-    vertex_id = entity_type + str(random_vm_entity_id)
-    return vertex_id
-
-
-def create_entity_graph(name, num_of_alarms_per_host,
-                        num_of_alarms_per_vm,
-                        num_of_hosts_per_node,
-                        num_of_vms_per_host):
-    vms = []
-    vm_id = 10000000
-    host_alarm_id = 20000000
-    vm_alarm_id = 30000000
-    start = time.time()
-    g = create_graph(name)
-    g.add_vertex(v_node)
-
-    # Add Hosts
-    for i in xrange(num_of_hosts_per_node):
-        host_to_add = add_connected_vertex(HOST, ELabel.CONTAINS,
-                                           g, i, v_node)
-
-        # Add Host Alarms
-        for j in xrange(num_of_alarms_per_host):
-            add_connected_vertex(ALARM, ELabel.ON, g, host_alarm_id,
-                                 host_to_add)
-            host_alarm_id += 1
-
-        # Add Host Vms
-        for j in xrange(num_of_vms_per_host):
-            vm_to_add = add_connected_vertex(INSTANCE, ELabel.CONTAINS, g,
-                                             vm_id, host_to_add)
-            vm_id += 1
-            vms.append(vm_to_add)
-
-            # Add Instance Alarms
-            for k in xrange(num_of_alarms_per_vm):
-                add_connected_vertex(ALARM, ELabel.ON, g, vm_alarm_id,
-                                     vm_to_add)
-                vm_alarm_id += 1
-
-    end = time.time()
-    LOG.debug('Graph creation took ' + str(end - start) +
-              ' seconds, size is: ' + str(len(g)))
-    expected_graph_size = \
-        1 + num_of_hosts_per_node + num_of_hosts_per_node * \
-        num_of_alarms_per_host + num_of_hosts_per_node * \
-        num_of_vms_per_host + num_of_hosts_per_node * \
-        num_of_vms_per_host * num_of_alarms_per_vm
-    assert expected_graph_size == len(g), 'Graph size'
-    return g, vm_alarm_id, vm_id, vms
-
-entity_graph, vm_alarm_id, vm_id, vms = create_entity_graph(
-    'entity_graph',
-    num_of_hosts_per_node=ENTITY_GRAPH_HOSTS_PER_NODE,
-    num_of_vms_per_host=ENTITY_GRAPH_VMS_PER_HOST,
-    num_of_alarms_per_host=ENTITY_GRAPH_ALARMS_PER_HOST,
-    num_of_alarms_per_vm=ENTITY_GRAPH_ALARMS_PER_VM)
-
-
-class GraphTest(base.BaseTest):
-
-    def _assert_set_equal(self, d1, d2, message):
-        super(GraphTest, self).assert_dict_equal(
-            dict.fromkeys(d1, 0), dict.fromkeys(d2, 0), message)
+class GraphTest(GraphTestBase):
 
     def test_graph(self):
         g = create_graph('test_graph')
@@ -197,6 +75,8 @@ class GraphTest(base.BaseTest):
         v = g.get_vertex(v_node.vertex_id)
         self.assertIsNone(v.get(VProps.SUB_TYPE, None),
                           'Change should not affect graph item')
+        self.assertEqual(False, v.get(EProps.IS_DELETED, None),
+                         'Change should not affect graph item')
         self.assertEqual(v_node[VProps.TYPE], v[VProps.TYPE],
                          'Change should not affect graph item')
         # Update the graph item and see changes take place
@@ -435,13 +315,14 @@ class GraphTest(base.BaseTest):
 
         # CHECK V3
 
-        v3_neighbors = g.neighbors(v_id=v3.vertex_id)
+        v3_neighbors = g.neighbors(v_id=v3.vertex_id, direction=Direction.OUT)
         self._assert_set_equal({}, v3_neighbors,
                                'Check v3 neighbors, direction OUT')
 
         v3_neighbors = g.neighbors(
             v_id=v3.vertex_id,
-            vertex_attr_filter={VProps.TYPE: HOST})
+            vertex_attr_filter={VProps.TYPE: HOST},
+            direction=Direction.OUT)
         self._assert_set_equal({}, v3_neighbors,
                                'Check neighbors for vertex without any')
         v5_neighbors = g.neighbors(

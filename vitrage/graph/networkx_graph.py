@@ -21,12 +21,19 @@ from driver import Direction
 from driver import Edge  # noqa
 from driver import Graph
 from driver import Vertex  # noqa
-from networkx_utils import edge_copy
-from networkx_utils import filter_items
-from networkx_utils import vertex_copy
+from utils import check_filter
 
 
 LOG = logging.getLogger(__name__)
+
+
+def edge_copy(source_id, target_id, label, data):
+    return Edge(source_id=source_id, target_id=target_id,
+                label=label, properties=copy.copy(data))
+
+
+def vertex_copy(v_id, data):
+    return Vertex(vertex_id=v_id, properties=copy.copy(data))
 
 
 class NXGraph(Graph):
@@ -85,37 +92,33 @@ class NXGraph(Graph):
             return edge_copy(source_id, target_id, label, properties)
         return None
 
-    def get_edges(self, v_id, direction=Direction.OUT,
+    def get_edges(self, v_id, direction=Direction.BOTH,
                   attr_filter=None):
         """Fetch multiple edges from the graph
 
         :rtype: list of Edge
         """
-        if not direction:
-            LOG.error("get_edges: direction cannot be None")
-            raise AttributeError("get_edges: direction cannot be None")
-
-        if not v_id:
-            LOG.error("get_edges: v_id cannot be None")
-            raise AttributeError("get_edges: v_id cannot be None")
-
-        edges_by_direction = self._get_edges_by_direction(v_id, direction)
-        filtered_edges = filter_items(edges_by_direction, attr_filter)
-        return filtered_edges
+        nodes, edges = self._neighboring_nodes_edges_query(
+            v_id, edge_attr_filter=attr_filter, direction=direction)
+        edge_copies = [edge_copy(u, v, label, data)
+                       for u, v, label, data in edges]
+        return edge_copies
 
     def _get_edges_by_direction(self, v_id, direction):
-        edges = set()
+        """Get all the edges from the vertex according to the direction
+
+        :return: all the neighboring edges that match the filter
+        :rtype: list of tuples (source_id, target_id, label, data)
+        """
         if direction == Direction.BOTH:
-            edges.update(self._get_edges_by_direction(v_id, Direction.IN))
-            edges.update(self._get_edges_by_direction(v_id, Direction.OUT))
+            edges = []
+            edges.extend(self._get_edges_by_direction(v_id, Direction.IN))
+            edges.extend(self._get_edges_by_direction(v_id, Direction.OUT))
             return edges
         if direction == Direction.OUT:
-            found_items = self._g.out_edges(nbunch=v_id, data=True, keys=True)
+            return self._g.out_edges(nbunch=v_id, data=True, keys=True)
         else:  # IN
-            found_items = self._g.in_edges(nbunch=v_id, data=True, keys=True)
-        for source_id, target_id, label, data in found_items:
-            edges.add(edge_copy(source_id, target_id, label, data))
-        return edges
+            return self._g.in_edges(nbunch=v_id, data=True, keys=True)
 
     def num_vertex(self):
         return len(self._g)
@@ -162,19 +165,36 @@ class NXGraph(Graph):
         self._g.remove_edge(u=e.source_id, v=e.target_id, key=e.label)
 
     def neighbors(self, v_id, vertex_attr_filter=None, edge_attr_filter=None,
-                  direction=Direction.OUT):
+                  direction=Direction.BOTH):
+        nodes, edges = self._neighboring_nodes_edges_query(
+            v_id, vertex_attr_filter, edge_attr_filter, direction)
+        vertices = [vertex_copy(n, data) for n, data in nodes]
+        return vertices
+
+    def _neighboring_nodes_edges_query(self, v_id, vertex_attr_filter=None,
+                                       edge_attr_filter=None,
+                                       direction=Direction.BOTH):
         if not direction:
-            LOG.error("neighbors: direction cannot be None")
+            LOG.error("_neighboring_nodes_edges: direction cannot be None")
             raise AttributeError("neighbors: direction cannot be None")
 
         if not v_id:
-            LOG.error("neighbors: v_id cannot be None")
+            LOG.error("_neighboring_nodes_edges: v_id cannot be None")
             raise AttributeError("neighbors: v_id cannot be None")
 
-        edges = self.get_edges(v_id, direction, edge_attr_filter)
-        vertices_except_me = {self.get_vertex(edge.target_id)
-                              if edge.source_id == v_id else
-                              self.get_vertex(edge.source_id)
-                              for edge in edges}
-        vertices = filter_items(vertices_except_me, vertex_attr_filter)
-        return vertices
+        edges = self._get_edges_by_direction(v_id, direction)
+        edges_filtered1 = []
+        for edge in edges:
+            if check_filter(edge[3], edge_attr_filter):
+                edges_filtered1.append(edge)
+
+        edges_filtered2 = []
+        nodes = []
+
+        for source_id, target_id, label, data in edges_filtered1:
+            node_id_to_test = source_id if target_id == v_id else target_id
+            node_data = self._g.node[node_id_to_test]
+            if check_filter(node_data, vertex_attr_filter):
+                edges_filtered2.append((source_id, target_id, label, data))
+                nodes.append((node_id_to_test, node_data))
+        return nodes, edges_filtered2

@@ -1,4 +1,4 @@
-# Copyright 2015 - Alcatel-Lucent
+# Copyright 2016 - Alcatel-Lucent
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -44,8 +44,6 @@ def create_vertex(vertex_id,
     :type entity_state: str
     :param is_deleted:
     :type is_deleted: boolean
-    :param deletion_timestamp:
-    :type deletion_timestamp: str
     :param update_timestamp:
     :type update_timestamp: str
     :param metadata:
@@ -90,8 +88,6 @@ def create_edge(source_id,
     :type relation_type: str
     :param is_deleted:
     :type is_deleted: str
-    :param deletion_timestamp:
-    :type deletion_timestamp: str
     :param metadata:
     :type metadata: dict
     :return:
@@ -113,7 +109,20 @@ def create_edge(source_id,
     return edge
 
 
-def get_neighbor_vertex(edge, original_vertex, graph):
-    if edge.source_id != original_vertex.vertex_id:
-        return graph.get_vertex(edge.source_id)
-    return graph.get_vertex(edge.target_id)
+def check_filter(data, attr_filter):
+    """Check attr_filter against data
+
+    :param data: a dictionary of field_name: value
+    :param attr_filter: a dictionary of either
+    field_name : value (mandatory)
+    field_name : list of values - data[field_name] must match ANY of the values
+    :rtype: bool
+    """
+    if not attr_filter:
+        return True
+    for key, content in attr_filter.items():
+        if not isinstance(content, list):
+            content = [content]
+        if not data[key] in content:
+            return False
+    return True

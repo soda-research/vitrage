@@ -18,7 +18,6 @@ Graph abstraction
 
 from driver import *  # noqa
 from networkx_graph import *  # noqa
-from networkx_utils import *  # noqa
 from utils import *  # noqa
 
 

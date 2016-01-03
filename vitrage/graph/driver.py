@@ -218,6 +218,14 @@ class Edge(object):
     def get(self, k, d=None):
         return self.properties.get(k, d)
 
+    def other_vertex(self, v_id):
+        """If v_id == target_id return source_id, else return target_id
+
+        :param v_id: the vertex id
+        :return: the other vertex id
+        """
+        return self.source_id if self.target_id == v_id else self.target_id
+
 
 @six.add_metaclass(abc.ABCMeta)
 class Graph(object):
@@ -335,7 +343,7 @@ class Graph(object):
         pass
 
     @abc.abstractmethod
-    def get_edges(self, v_id, direction=Direction.OUT,
+    def get_edges(self, v_id, direction=Direction.BOTH,
                   attr_filter=None):
         """Fetch multiple edges from the graph,
 
@@ -411,7 +419,7 @@ class Graph(object):
 
     @abc.abstractmethod
     def neighbors(self, v_id, vertex_attr_filter=None,
-                  edge_attr_filter=None, direction=Direction.OUT):
+                  edge_attr_filter=None, direction=Direction.BOTH):
         """Get vertices that are neighboring to v_id vertex
 
         To filter the neighboring vertices, specify property values for

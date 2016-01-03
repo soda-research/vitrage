@@ -19,7 +19,6 @@ from vitrage.entity_graph.processor import base as processor
 from vitrage.entity_graph.processor import entity_graph
 from vitrage.entity_graph.transformer import transformer_manager
 from vitrage.graph import Direction
-from vitrage.graph import utils as graph_utils
 
 
 LOG = log.getLogger(__name__)
@@ -109,9 +108,9 @@ class Processor(processor.ProcessorBase):
         if (not graph_vertex) or self.entity_graph.check_update_validation(
                 graph_vertex, deleted_vertex):
             neighbor_vertices = self.entity_graph.neighbors(
-                deleted_vertex.vertex_id, direction=Direction.BOTH)
+                deleted_vertex.vertex_id)
             neighbor_edges = self.entity_graph.get_edges(
-                deleted_vertex.vertex_id, direction=Direction.BOTH)
+                deleted_vertex.vertex_id)
 
             for edge in neighbor_edges:
                 self.entity_graph.mark_edge_as_deleted(edge)
@@ -170,8 +169,8 @@ class Processor(processor.ProcessorBase):
         # remove old edges and placeholder vertices if exist
         for edge in obsolete_edges:
             self.entity_graph.mark_edge_as_deleted(edge)
-            graph_ver = graph_utils.get_neighbor_vertex(
-                edge, vertex, self.entity_graph)
+            graph_ver = self.entity_graph.get_vertex(
+                edge.other_vertex(vertex.vertex_id))
             self.entity_graph.delete_placeholder_vertex(graph_ver)
 
     def _find_edges_status(self, vertex, neighbors):
@@ -193,10 +192,8 @@ class Processor(processor.ProcessorBase):
                 vertex.vertex_id, direction=Direction.BOTH):
             # check if the edge in the graph has a a connection to the
             # same type of resources in the new neighbors list
-            neighbor_vertex = graph_utils.get_neighbor_vertex(
-                curr_edge,
-                vertex,
-                self.entity_graph)
+            neighbor_vertex = self.entity_graph.get_vertex(
+                curr_edge.other_vertex(vertex.vertex_id))
 
             is_connection_type_exist = self.entity_graph.get_vertex_type(
                 neighbor_vertex) in graph_neighbor_types
