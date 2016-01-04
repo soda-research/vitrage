@@ -1,4 +1,4 @@
-# Copyright 2015 - Alcatel-Lucent
+# Copyright 2016 - Alcatel-Lucent
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -14,20 +14,33 @@
 
 from base_plugin import BasePlugin
 from novaclient import client
+from time import gmtime
+from time import strftime
 
 
-class NovaInstancePlugin(BasePlugin):
-    def __init__(self, version, user, password, proj, auth_url):
-        self.client = client.Client(version, user, password, proj, auth_url)
+class NovaClientPlugin(BasePlugin):
+    def __init__(self, version, user, password, project, auth_url):
+        self.client = client.Client(version, user, password, project, auth_url)
 
-    def make_picklable(self, entities):
+    def get_client(self):
+        return self.client
+
+    def make_picklable(self, entities, sync_type, fields_to_remove=None):
+
         picklable_entities = []
+
         for entity in entities:
             picklable_entity = entity.__dict__
-            picklable_entity.pop('manager')
-            picklable_entity['sync_type'] = 'nova.instance'
+
+            for field in fields_to_remove:
+                picklable_entity.pop(field)
+
+            picklable_entity['sync_type'] = sync_type
             picklable_entities.append(picklable_entity)
+
         return picklable_entities
 
-    def get_all(self):
-        return self.make_picklable(self.client.servers.list())
+    def add_sampling_time(self, entity):
+        dict_entity = entity.__dict__
+        dict_entity['sample_date'] = strftime("%Y-%m-%d %H:%M:%S", gmtime())
+        return entity
