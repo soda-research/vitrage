@@ -12,6 +12,8 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import datetime
+
 from oslo_log import log
 from oslo_service import service as os_service
 
@@ -21,30 +23,50 @@ from vitrage.entity_graph.processor import processor as proc
 LOG = log.getLogger(__name__)
 
 
-class VitrageEntityGraphService(os_service.Service):
+class VitrageGraphService(os_service.Service):
 
     def __init__(self, event_queue):
-        super(VitrageEntityGraphService, self).__init__()
+        super(VitrageGraphService, self).__init__()
         self.queue = event_queue
         self.processor = proc.Processor()
 
     def start(self):
-        LOG.info("Start VitrageEntityGraphService")
+        LOG.info("Start VitrageGraphService")
 
-        super(VitrageEntityGraphService, self).start()
+        super(VitrageGraphService, self).start()
 
-        while True:
-            event = self.queue.get()
-            self.processor.process_event(event)
+        self.tg.add_timer(1.0, self._process_event_non_blocking)
 
-        LOG.info("Finish start VitrageEntityGraphService")
-
-        # Add a dummy thread to have wait() working
-        # self.tg.add_timer(604800, lambda: None)
+        LOG.info("Finish start VitrageGraphService")
 
     def stop(self):
-        LOG.info("Stop VitrageEntityGraphService")
+        LOG.info("Stop VitrageGraphService")
 
-        super(VitrageEntityGraphService, self).stop()
+        # TODO(Alexey): check if we need this command here
+        self.tg.stop_timers()
 
-        LOG.info("Finish stop VitrageEntityGraphService")
+        super(VitrageGraphService, self).stop()
+
+        LOG.info("Finish stop VitrageGraphService")
+
+    def _process_events(self):
+        while True:
+            self._process_event_non_blocking()
+
+    def _process_event_non_blocking(self):
+        """Process events received from the synchronizer
+
+        In order that other services (such as graph consistency, api handler)
+        could get work time as well, the work processing performed for 2
+        seconds and goes to sleep for 1 second. if there are more events in
+        the queue they are done when timer returns.
+        """
+
+        start_time = datetime.datetime.now()
+        while not self.queue.empty():
+            time_delta = datetime.datetime.now() - start_time
+            if time_delta.total_seconds() >= 2:
+                break
+
+            event = self.queue.get()
+            self.processor.process_event(event)

@@ -18,32 +18,41 @@ from oslo_service import service as os_service
 
 from vitrage.common.constants import SyncMode
 from vitrage import entity_graph as entity_graph_svc
+from vitrage.entity_graph import api_handler as api_handler_svc
+from vitrage.entity_graph import consistency as consistency_svc
 from vitrage import service
 from vitrage import synchronizer as synchronizer_svc
 from vitrage.synchronizer.synchronizer import Synchronizer
 
 
 def main():
-    """Runs the Entity graph service
+    """Starts all the Entity graph services
 
-    1. Starts the Processor and the Synchronizer services
-    2. Calls the initial get_all to the Synchronizer to get all the resources
-       in the system.
+    1. Starts the Entity graph service
+    2. Starts the api_handler service
+    3. Starts the Synchronizer service
+    4. Starts the Consistency service
     """
 
     event_queue = multiprocessing.Queue()
-    conf = service.prepare_service()
-    # TODO(Alexey): Need to implement "signal_handle" of ProcessLauncher in
-    #               order that the stop method of the services will be called
-    launcher = os_service.ProcessLauncher(conf)
-
-    launcher.launch_service(entity_graph_svc.VitrageEntityGraphService(
-        event_queue), workers=1)
-
     synchronizer = Synchronizer(event_queue)
-    launcher.launch_service(synchronizer_svc.VitrageSynchronizerService(
-        synchronizer), workers=1)
+    conf = service.prepare_service()
+    launcher = os_service.ServiceLauncher(conf)
 
+    launcher.launch_service(entity_graph_svc.VitrageGraphService(
+        event_queue))
+
+    launcher.launch_service(api_handler_svc.VitrageApiHandlerService(
+        event_queue))
+
+    launcher.launch_service(synchronizer_svc.VitrageSynchronizerService(
+        synchronizer))
+
+    launcher.launch_service(consistency_svc.VitrageGraphConsistencyService(
+        event_queue))
+
+    # TODO(Alexey): remove this get_all call because it's supposed to be called
+    #               Automatically from the synchronizer
     synchronizer.get_all(sync_mode=SyncMode.INIT_SNAPSHOT)
 
     launcher.wait()
