@@ -4,7 +4,7 @@
 # not use this file except in compliance with the License. You may obtain
 # a copy of the License at
 #
-#      http://www.apache.org/licenses/LICENSE-2.0
+# http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing,  software
 # distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -17,11 +17,11 @@ from nova_plugins.novaclient_plugin import NovaClientPlugin
 
 class NovaInstancePlugin(NovaClientPlugin):
     def __init__(self, version, user, password, project, auth_url):
-        super(NovaInstancePlugin).__init__(version,
-                                           user,
-                                           password,
-                                           project,
-                                           auth_url)
+        super(NovaInstancePlugin, self).__init__(version,
+                                                 user,
+                                                 password,
+                                                 project,
+                                                 auth_url)
 
     def get_all(self):
         return self.make_picklable(self.client.servers.list(),

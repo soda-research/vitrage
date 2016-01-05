@@ -18,11 +18,11 @@ from nova_plugins.novaclient_plugin import NovaClientPlugin
 class NovaHostPlugin(NovaClientPlugin):
 
     def __init__(self, version, user, password, project, auth_url):
-        super(NovaHostPlugin).__init__(version,
-                                       user,
-                                       password,
-                                       project,
-                                       auth_url)
+        super(NovaHostPlugin, self).__init__(version,
+                                             user,
+                                             password,
+                                             project,
+                                             auth_url)
 
     def filter_none_compute_hosts(self, entities):
         compute_hosts = []
