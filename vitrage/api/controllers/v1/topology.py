@@ -27,16 +27,20 @@ LOG = log.getLogger(__name__)
 
 class TopologyController(rest.RestController):
     @pecan.expose('json')
-    def index(self, edges=None, vertices=None, depth=None, graph_type='graph'):
-
+    def post(self, depth, graph_type, query, root):
         enforce("get topology", pecan.request.headers,
                 pecan.request.enforcer, {})
 
-        LOG.info(_LI('received get topology: edges->%(edges)s vertices->%('
-                     'vertices)s depth->%(depth)s graph_type->%(graph_type)s')
-                 % {'edges': edges, 'vertices': vertices, 'depth': depth,
-                    'graph_type': graph_type})
+        LOG.info(_LI('received get topology: depth->%(depth)s '
+                     'graph_type->%(graph_type)s root->%(root)s') %
+                 {'depth': depth, 'graph_type': graph_type, 'root': root})
 
+        LOG.info(_LI("query is %s") % query)
+
+        return self.get_graph(graph_type)
+
+    @staticmethod
+    def get_graph(graph_type):
         # TODO(eyal) temporary mock
         graph_file = pecan.request.cfg.find_file('graph.sample.json')
         try:
@@ -46,7 +50,8 @@ class TopologyController(rest.RestController):
                     return graph
                 if graph_type == 'tree':
                     return json_graph.tree_data(
-                        json_graph.node_link_graph(graph).reverse(), root=0)
+                        json_graph.node_link_graph(graph).reverse(),
+                        root=0)
 
         except Exception as e:
             LOG.exception("failed to open file ", e)
