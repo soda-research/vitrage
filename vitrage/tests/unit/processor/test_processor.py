@@ -38,7 +38,6 @@ class TestProcessor(base.BaseTest):
 
     def setUp(self):
         super(TestProcessor, self).setUp()
-        self._get_spec_list()
 
     # TODO(Alexey): un skip this test when host and zone transformers are ready
     @unittest.skip('Not ready yet')
@@ -232,14 +231,7 @@ class TestProcessor(base.BaseTest):
         gen_list.append(mock_trans.simple_instance_generators(4, 15, 150))
         return mock_trans.generate_random_events_list(gen_list)
 
-    def _get_spec_list(self):
-        self.spec_list = \
-            {self.ZONE_SPEC: 'mock_nova_zone_snapshot_processor.txt',
-             self.HOST_SPEC: 'mock_nova_host_snapshot_processor.txt',
-             self.INSTANCE_SPEC: 'mock_nova_inst_snapshot_processor.txt'}
-
-    @staticmethod
-    def _create_event(spec_type=None, sync_mode=None,
+    def _create_event(self, spec_type=None, sync_mode=None,
                       event_type=None, properties=None):
         # generate event
         spec_list = mock_trans.simple_instance_generators(1, 1, 1)
@@ -258,19 +250,3 @@ class TestProcessor(base.BaseTest):
                 events_list[0][key] = value
 
         return events_list[0]
-
-    @staticmethod
-    def _get_instance_entity_spec_list(config_file_path,
-                                       number_of_instances, name):
-
-        """Returns a list of nova instance specifications by
-
-        given specific configuration file.
-
-        :rtype : list
-        """
-        return {
-            'filename': config_file_path,
-            '#instances': number_of_instances,
-            'name': name
-        }

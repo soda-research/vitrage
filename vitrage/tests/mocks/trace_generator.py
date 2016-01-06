@@ -42,17 +42,18 @@ GENERATOR = 'generator'
 
 # specification files for input types
 # Mock synchronizer specs
-SYNC_INST_SNAPSHOT_D = 'dynamic_snapshot.json'
-SYNC_INST_SNAPSHOT_S = 'static_snapshot.json'
-SYNC_INST_UPDATE_D = 'dynamic_update.json'
+SYNC_INST_SNAPSHOT_D = 'sync_inst_snapshot_dynamic.json'
+SYNC_INST_SNAPSHOT_S = 'sync_inst_snapshot_static.json'
+SYNC_INST_UPDATE_D = 'sync_inst_update_dynamic.json'
+SYNC_HOST_SNAPSHOT_D = 'sync_host_snapshot_dynamic.json'
 
 # Mock transformer Specs (i.e., what the transformer outputs)
 TRANS_INST_SNAPSHOT_D = 'transformer_inst_snapshot_dynamic.json'
 TRANS_INST_SNAPSHOT_S = 'transformer_inst_snapshot_static.json'
-HOST_SNAPSHOT_D = 'transformer_host_snapshot_dynamic.json'
-HOST_SNAPSHOT_S = 'transformer_host_snapshot_static.json'
-ZONE_SNAPSHOT_D = 'transformer_zone_snapshot_dynamic.json'
-ZONE_SNAPSHOT_S = 'transformer_zone_snapshot_static.json'
+TRANS_HOST_SNAPSHOT_D = 'transformer_host_snapshot_dynamic.json'
+TRANS_HOST_SNAPSHOT_S = 'transformer_host_snapshot_static.json'
+TRANS_ZONE_SNAPSHOT_D = 'transformer_zone_snapshot_dynamic.json'
+TRANS_ZONE_SNAPSHOT_S = 'transformer_zone_snapshot_static.json'
 
 
 class EventTraceGenerator(object):
@@ -90,9 +91,10 @@ class EventTraceGenerator(object):
         static_info_parsers = \
             {SYNC_INST_SNAPSHOT_D: _get_sync_vm_snapshot_values,
              SYNC_INST_UPDATE_D: _get_sync_vm_update_values,
+             SYNC_HOST_SNAPSHOT_D: _get_sync_host_snapshot_values,
              TRANS_INST_SNAPSHOT_D: _get_trans_vm_snapshot_values,
-             HOST_SNAPSHOT_D: _get_host_snapshot_values,
-             ZONE_SNAPSHOT_D: _get_zone_snapshot_values}
+             TRANS_HOST_SNAPSHOT_D: _get_trans_host_snapshot_values,
+             TRANS_ZONE_SNAPSHOT_D: _get_trans_zone_snapshot_values}
 
         dynam_specs = utils.load_specs(spec[DYNAMIC_INFO_FKEY])
         dynamic_spec_filename = spec[DYNAMIC_INFO_FKEY].split('/')[-1]
@@ -159,6 +161,32 @@ def _get_sync_vm_snapshot_values(spec):
     return static_values
 
 
+def _get_sync_host_snapshot_values(spec):
+    """Generates the static synchronizer values for each vm.
+
+    :param spec: specification of event generation.
+    :type spec: dict
+    :return: list of static synchronizer values for each vm.
+    :rtype: list
+    """
+
+    host_zone_mapping = spec[MAPPING_KEY]
+    static_info_re = None
+    if spec[STATIC_INFO_FKEY] is not None:
+        static_info_re = utils.load_specs(spec[STATIC_INFO_FKEY])
+    static_values = []
+    for host_name, zone_name in host_zone_mapping:
+
+        mapping = {'host_name': host_name,
+                   'zone': zone_name,
+                   '_info': {'host_name': host_name,
+                             'zone': zone_name}}
+        static_values.append(combine_data(
+            static_info_re, mapping, spec.get(EXTERNAL_INFO_KEY, None)
+        ))
+    return static_values
+
+
 def _get_trans_vm_snapshot_values(spec):
     """Generates the static transformer values for each vm.
 
@@ -208,7 +236,7 @@ def _get_sync_vm_update_values(spec):
     return static_values
 
 
-def _get_host_snapshot_values(spec):
+def _get_trans_host_snapshot_values(spec):
     """Generates the static synchronizer values for each host.
 
         :param spec: specification of event generation.
@@ -233,7 +261,7 @@ def _get_host_snapshot_values(spec):
     return static_values
 
 
-def _get_zone_snapshot_values(spec):
+def _get_trans_zone_snapshot_values(spec):
     """Generates the static synchronizer values for each zone.
 
     :param spec: specification of event generation.

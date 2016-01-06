@@ -20,8 +20,8 @@ regex of) what can be returned, which will be used to generate sync events
 
 usage example:
     test_entity_spec_list = [
-        {mg.DYNAMIC_INFO_FKEY: 'dynamic_snapshot.json',
-         mg.STATIC_INFO_FKEY: 'static_snapshot.json',
+        {mg.DYNAMIC_INFO_FKEY: 'sync_inst_snapshot_dynamic.json',
+         mg.STATIC_INFO_FKEY: 'sync_inst_snapshot_static.json',
          mg.MAPPING_KEY: [('vm1', 'host1'), ('vm2', 'host1'), ('vm3','host2')],
          mg.NAME_KEY: 'Instance (vm) generator',
          NUM_EVENTS_KEY: 10
@@ -103,6 +103,40 @@ def simple_instance_generators(host_num, vm_num,
              tg.MAPPING_KEY: mapping,
              tg.NAME_KEY: 'Instance (vm) update generator',
              tg.NUM_EVENTS: update_events
+             }
+        )
+    return tg.get_trace_generators(test_entity_spec_list)
+
+
+def simple_host_generators(zone_num, host_num, snapshot_events=0,
+                           snap_vals=None):
+    """A function for returning vm event generators.
+
+    Returns generators for a given number of hosts and
+    instances. Instances will be distributed across hosts in round-robin style.
+
+    :param zone_num: number of hosts
+    :param host_num: number of vms
+    :param snapshot_events: number of snapshot events per instance
+    :param update_events: number of update events per instance
+    :param snap_vals: preset vals for ALL snapshot events
+    :param update_vals: preset vals for ALL update events
+    :return: generators for vm_num vms as specified
+    """
+
+    mapping = [('host-{0}'.format(index), 'zone-{0}'.format(index % zone_num))
+               for index in range(host_num)
+               ]
+
+    test_entity_spec_list = []
+    if snapshot_events:
+        test_entity_spec_list.append(
+            {tg.DYNAMIC_INFO_FKEY: tg.SYNC_HOST_SNAPSHOT_D,
+             tg.STATIC_INFO_FKEY: None,
+             tg.EXTERNAL_INFO_KEY: snap_vals,
+             tg.MAPPING_KEY: mapping,
+             tg.NAME_KEY: 'Host snapshot generator',
+             tg.NUM_EVENTS: snapshot_events
              }
         )
     return tg.get_trace_generators(test_entity_spec_list)

@@ -1,0 +1,12 @@
+{
+  "_info": {
+    "host_name": "compute-0-0.local",
+    "service": "compute",
+    "zone": "zone0"
+  },
+  "_loaded": "True",
+  "host_name": "compute-0-0.local",
+  "service": "compute",
+  "sync_type": "nova\\.host",
+  "zone": "zone0"
+}

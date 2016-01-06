@@ -95,8 +95,8 @@ def simple_host_generators(zone_num, host_num, snapshot_events=0,
                ]
 
     test_entity_spec_list = [
-        {tg.DYNAMIC_INFO_FKEY: tg.HOST_SNAPSHOT_D,
-         tg.STATIC_INFO_FKEY: tg.HOST_SNAPSHOT_S,
+        {tg.DYNAMIC_INFO_FKEY: tg.TRANS_HOST_SNAPSHOT_D,
+         tg.STATIC_INFO_FKEY: tg.TRANS_HOST_SNAPSHOT_S,
          tg.MAPPING_KEY: mapping,
          tg.EXTERNAL_INFO_KEY: snap_vals,
          tg.NAME_KEY: 'Host snapshot generator',
@@ -123,8 +123,8 @@ def simple_zone_generators(zone_num, snapshot_events=0, snap_vals=None):
     mapping = [('zone-{0}'.format(ind), 'node-0') for ind in range(zone_num)]
 
     test_entity_spec_list = [
-        {tg.DYNAMIC_INFO_FKEY: tg.ZONE_SNAPSHOT_D,
-         tg.STATIC_INFO_FKEY: tg.ZONE_SNAPSHOT_S,
+        {tg.DYNAMIC_INFO_FKEY: tg.TRANS_ZONE_SNAPSHOT_D,
+         tg.STATIC_INFO_FKEY: tg.TRANS_ZONE_SNAPSHOT_S,
          tg.MAPPING_KEY: mapping,
          tg.EXTERNAL_INFO_KEY: snap_vals,
          tg.NAME_KEY: 'Zone snapshot generator',
