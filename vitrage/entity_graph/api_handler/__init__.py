@@ -23,6 +23,7 @@ class VitrageApiHandlerService(os_service.Service):
 
     def __init__(self, event_queue):
         super(VitrageApiHandlerService, self).__init__()
+        self.queue = event_queue
 
     def start(self):
         LOG.info("Start VitrageApiHandlerService")

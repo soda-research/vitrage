@@ -15,25 +15,31 @@
 from oslo_log import log
 from oslo_service import service as os_service
 
+from vitrage.common.constants import SyncMode
+from vitrage.synchronizer.synchronizer import Synchronizer
+
 
 LOG = log.getLogger(__name__)
 
 
 class VitrageSynchronizerService(os_service.Service):
 
-    def __init__(self, synchronizer):
+    def __init__(self, event_queue):
         super(VitrageSynchronizerService, self).__init__()
-        self.synchronizer = synchronizer
+        self.queue = event_queue
 
     def start(self):
         LOG.info("Start VitrageSynchronizerService")
 
         super(VitrageSynchronizerService, self).start()
 
-        LOG.info("Finish start VitrageSynchronizerService")
+        synchronizer = Synchronizer(self.queue)
 
-        # Add a dummy thread to have wait() working
-        # self.tg.add_timer(604800, lambda: None)
+        # TODO(Alexey): remove this get_all call because it's supposed
+        #               to be called Automatically from the synchronizer
+        synchronizer.get_all(sync_mode=SyncMode.INIT_SNAPSHOT)
+
+        LOG.info("Finish start VitrageSynchronizerService")
 
     def stop(self):
         LOG.info("Stop VitrageSynchronizerService")

@@ -25,10 +25,10 @@ LOG = log.getLogger(__name__)
 
 class VitrageGraphService(os_service.Service):
 
-    def __init__(self, event_queue):
+    def __init__(self, event_queue, entity_graph):
         super(VitrageGraphService, self).__init__()
         self.queue = event_queue
-        self.processor = proc.Processor()
+        self.processor = proc.Processor(e_graph=entity_graph)
 
     def start(self):
         LOG.info("Start VitrageGraphService")
@@ -68,5 +68,8 @@ class VitrageGraphService(os_service.Service):
             if time_delta.total_seconds() >= 2:
                 break
 
-            event = self.queue.get()
-            self.processor.process_event(event)
+            try:
+                event = self.queue.get()
+                self.processor.process_event(event)
+            except Exception as error:
+                LOG.error("Exception: %s", error)

@@ -13,13 +13,13 @@
 # under the License.
 
 from dateutil import parser
-
 from oslo_log import log
 
 from vitrage.common.constants import EdgeProperties as EProps
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.common.utils import get_timezone_aware_time
 from vitrage.graph import networkx_graph
+
 
 LOG = log.getLogger(__name__)
 
@@ -62,12 +62,14 @@ class EntityGraph(networkx_graph.NXGraph):
 
     def mark_vertex_as_deleted(self, vertex):
         """Marks the vertex as is deleted, and updates deletion timestamp"""
+        # TODO(Alexey): change the update_vertex so it will raise a trigger
         vertex[VProps.IS_DELETED] = True
         vertex[VProps.UPDATE_TIMESTAMP] = get_timezone_aware_time()
         self.update_vertex(vertex)
 
     def mark_edge_as_deleted(self, edge):
         """Marks the edge as is deleted, and updates delete timestamp"""
+        # TODO(Alexey): change the update_edge so it will raise a trigger
         edge[EProps.IS_DELETED] = True
         edge[EProps.UPDATE_TIMESTAMP] = get_timezone_aware_time()
         self.update_edge(edge)
@@ -109,6 +111,4 @@ class EntityGraph(networkx_graph.NXGraph):
 
     @staticmethod
     def can_update_vertex(graph_vertex, new_vertex):
-        return (not graph_vertex) or \
-            (not (not graph_vertex[VProps.IS_PLACEHOLDER]
-                  and new_vertex[VProps.IS_PLACEHOLDER]))
+        return (not graph_vertex) or (not new_vertex[VProps.IS_PLACEHOLDER])

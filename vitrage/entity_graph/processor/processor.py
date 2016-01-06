@@ -26,8 +26,9 @@ LOG = log.getLogger(__name__)
 
 class Processor(processor.ProcessorBase):
 
-    def __init__(self):
-        self.entity_graph = entity_graph.EntityGraph("Entity Graph")
+    def __init__(self, e_graph=None):
+        self.entity_graph = e_graph if e_graph else entity_graph. \
+            EntityGraph("Entity Graph")
         self.transformer = transformer_manager.TransformerManager()
         self._initialize_events_actions()
 

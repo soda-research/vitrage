@@ -12,10 +12,12 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from base_plugin import BasePlugin
-from novaclient import client
 from time import gmtime
 from time import strftime
+
+from novaclient import client
+
+from vitrage.synchronizer.base_plugin import BasePlugin
 
 
 class NovaClientPlugin(BasePlugin):

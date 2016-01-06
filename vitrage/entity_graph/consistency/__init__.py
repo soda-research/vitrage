@@ -21,8 +21,9 @@ LOG = log.getLogger(__name__)
 
 class VitrageGraphConsistencyService(os_service.Service):
 
-    def __init__(self, event_queue):
+    def __init__(self, entity_graph):
         super(VitrageGraphConsistencyService, self).__init__()
+        self.entity_graph = entity_graph
 
     def start(self):
         LOG.info("Start VitrageGraphConsistencyService")

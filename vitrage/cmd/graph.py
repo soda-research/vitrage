@@ -16,13 +16,12 @@ import multiprocessing
 
 from oslo_service import service as os_service
 
-from vitrage.common.constants import SyncMode
 from vitrage import entity_graph as entity_graph_svc
 from vitrage.entity_graph import api_handler as api_handler_svc
 from vitrage.entity_graph import consistency as consistency_svc
+from vitrage.entity_graph.processor import entity_graph
 from vitrage import service
 from vitrage import synchronizer as synchronizer_svc
-from vitrage.synchronizer.synchronizer import Synchronizer
 
 
 def main():
@@ -34,25 +33,21 @@ def main():
     4. Starts the Consistency service
     """
 
+    e_graph = entity_graph.EntityGraph("Entity Graph")
     event_queue = multiprocessing.Queue()
-    synchronizer = Synchronizer(event_queue)
     conf = service.prepare_service()
     launcher = os_service.ServiceLauncher(conf)
 
     launcher.launch_service(entity_graph_svc.VitrageGraphService(
-        event_queue))
+        event_queue, e_graph))
 
     launcher.launch_service(api_handler_svc.VitrageApiHandlerService(
         event_queue))
 
     launcher.launch_service(synchronizer_svc.VitrageSynchronizerService(
-        synchronizer))
-
-    launcher.launch_service(consistency_svc.VitrageGraphConsistencyService(
         event_queue))
 
-    # TODO(Alexey): remove this get_all call because it's supposed to be called
-    #               Automatically from the synchronizer
-    synchronizer.get_all(sync_mode=SyncMode.INIT_SNAPSHOT)
+    launcher.launch_service(consistency_svc.VitrageGraphConsistencyService(
+        e_graph))
 
     launcher.wait()
