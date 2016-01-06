@@ -162,10 +162,10 @@ class NovaInstanceTransformerTest(base.BaseTest):
         self.assertEqual(expected_name, observed_name)
 
         is_placeholder = vertex[cons.VertexProperties.IS_PLACEHOLDER]
-        self.assertEqual(False, is_placeholder)
+        self.assertFalse(is_placeholder)
 
         is_deleted = vertex[cons.VertexProperties.IS_DELETED]
-        self.assertEqual(False, is_deleted)
+        self.assertFalse(is_deleted)
 
     def _validate_host_neighbor(self, h_neighbor, event):
 
