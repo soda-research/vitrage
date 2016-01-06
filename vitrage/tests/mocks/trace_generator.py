@@ -46,6 +46,7 @@ SYNC_INST_SNAPSHOT_D = 'sync_inst_snapshot_dynamic.json'
 SYNC_INST_SNAPSHOT_S = 'sync_inst_snapshot_static.json'
 SYNC_INST_UPDATE_D = 'sync_inst_update_dynamic.json'
 SYNC_HOST_SNAPSHOT_D = 'sync_host_snapshot_dynamic.json'
+SYNC_ZONE_SNAPSHOT_D = 'sync_zone_snapshot_dynamic.json'
 
 # Mock transformer Specs (i.e., what the transformer outputs)
 TRANS_INST_SNAPSHOT_D = 'transformer_inst_snapshot_dynamic.json'
@@ -92,6 +93,7 @@ class EventTraceGenerator(object):
             {SYNC_INST_SNAPSHOT_D: _get_sync_vm_snapshot_values,
              SYNC_INST_UPDATE_D: _get_sync_vm_update_values,
              SYNC_HOST_SNAPSHOT_D: _get_sync_host_snapshot_values,
+             SYNC_ZONE_SNAPSHOT_D: _get_sync_zone_snapshot_values,
              TRANS_INST_SNAPSHOT_D: _get_trans_vm_snapshot_values,
              TRANS_HOST_SNAPSHOT_D: _get_trans_host_snapshot_values,
              TRANS_ZONE_SNAPSHOT_D: _get_trans_zone_snapshot_values}
@@ -162,11 +164,11 @@ def _get_sync_vm_snapshot_values(spec):
 
 
 def _get_sync_host_snapshot_values(spec):
-    """Generates the static synchronizer values for each vm.
+    """Generates the static synchronizer values for each host.
 
     :param spec: specification of event generation.
     :type spec: dict
-    :return: list of static synchronizer values for each vm.
+    :return: list of static synchronizer values for each host.
     :rtype: list
     """
 
@@ -181,6 +183,48 @@ def _get_sync_host_snapshot_values(spec):
                    'zone': zone_name,
                    '_info': {'host_name': host_name,
                              'zone': zone_name}}
+        static_values.append(combine_data(
+            static_info_re, mapping, spec.get(EXTERNAL_INFO_KEY, None)
+        ))
+    return static_values
+
+
+def _get_sync_zone_snapshot_values(spec):
+    """Generates the static synchronizer values for each zone.
+
+    :param spec: specification of event generation.
+    :type spec: dict
+    :return: list of static synchronizer values for each host.
+    :rtype: list
+    """
+
+    host_zone_mapping = spec[MAPPING_KEY]
+    static_info_re = None
+    if spec[STATIC_INFO_FKEY] is not None:
+        static_info_re = utils.load_specs(spec[STATIC_INFO_FKEY])
+    static_values = []
+    host_info = {
+        "nova-compute": {
+            "active": "True",
+            "available": "False",
+            "updated_at": "2016-01-05T06:39:52\\.000000"
+        }
+    }
+
+    zones_info = {}
+    for host_name, zone_name in host_zone_mapping:
+        zone_info = zones_info.get(zone_name, {})
+        zone_info[host_name] = host_info
+        zones_info[zone_name] = zone_info
+
+    for zone_name in zones_info.keys():
+        mapping = {
+            'zoneName': zone_name,
+            'hosts': zones_info.get(zone_name, {}),
+            '_info': {'zoneName': zone_name,
+                      'hosts': zones_info.get(zone_name, {})
+                      }
+        }
         static_values.append(combine_data(
             static_info_re, mapping, spec.get(EXTERNAL_INFO_KEY, None)
         ))

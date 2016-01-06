@@ -1,0 +1,17 @@
+{
+  "_info": {
+    "hosts": {},
+    "zoneName": "zone0",
+    "zoneState": {
+      "available": "True|False"
+    }
+  },
+  "_loaded": "True",
+  "hosts": {},
+  "sample_date": "2016-01-05 06:40:07",
+  "sync_type": "nova\\.zone",
+  "zoneName": "zone0",
+  "zoneState": {
+    "available": "True|False"
+  }
+}
