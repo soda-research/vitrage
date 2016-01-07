@@ -21,9 +21,9 @@ LOG = log.getLogger(__name__)
 
 class VitrageApiHandlerService(os_service.Service):
 
-    def __init__(self, event_queue):
+    def __init__(self, e_graph):
         super(VitrageApiHandlerService, self).__init__()
-        self.queue = event_queue
+        self.entity_graph = e_graph
 
     def start(self):
         LOG.info("Start VitrageApiHandlerService")

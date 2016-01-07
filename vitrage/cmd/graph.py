@@ -42,7 +42,7 @@ def main():
         event_queue, e_graph))
 
     launcher.launch_service(api_handler_svc.VitrageApiHandlerService(
-        event_queue))
+        e_graph))
 
     launcher.launch_service(synchronizer_svc.VitrageSynchronizerService(
         event_queue))
