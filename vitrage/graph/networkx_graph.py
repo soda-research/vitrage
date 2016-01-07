@@ -1,4 +1,4 @@
-# Copyright 2015 - Alcatel-Lucent
+# Copyright 2016 - Alcatel-Lucent
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -40,15 +40,16 @@ class NXGraph(Graph):
 
     GRAPH_TYPE = "networkx"
 
-    def __init__(self, name):
+    def __init__(self, name='networkx_graph', root_id=None):
         self._g = nx.MultiDiGraph()
+        self.root_id = root_id
         super(NXGraph, self).__init__(name=name, graph_type=NXGraph.GRAPH_TYPE)
 
     def __len__(self):
         return len(self._g)
 
     def copy(self):
-        self_copy = NXGraph(self.name)
+        self_copy = NXGraph(self.name, self.root_id)
         self_copy._g = self._g.copy()
         return self_copy
 
@@ -57,6 +58,7 @@ class NXGraph(Graph):
 
         :type v: Vertex
         """
+        super(NXGraph, self).add_vertex(v=v)
         properties_copy = copy.copy(v.properties)
         self._g.add_node(n=v.vertex_id, attr_dict=properties_copy)
 
@@ -98,8 +100,11 @@ class NXGraph(Graph):
 
         :rtype: list of Edge
         """
+        def check_edge(edge_data):
+            return check_filter(edge_data, attr_filter)
+
         nodes, edges = self._neighboring_nodes_edges_query(
-            v_id, edge_attr_filter=attr_filter, direction=direction)
+            v_id, edge_predicate=check_edge, direction=direction)
         edge_copies = [edge_copy(u, v, label, data)
                        for u, v, label, data in edges]
         return edge_copies
@@ -166,14 +171,24 @@ class NXGraph(Graph):
 
     def neighbors(self, v_id, vertex_attr_filter=None, edge_attr_filter=None,
                   direction=Direction.BOTH):
+
+        def check_edge(edge_data):
+            return check_filter(edge_data, edge_attr_filter)
+
+        def check_vertex(edge_data):
+            return check_filter(edge_data, vertex_attr_filter)
+
         nodes, edges = self._neighboring_nodes_edges_query(
-            v_id, vertex_attr_filter, edge_attr_filter, direction)
+            v_id=v_id, vertex_predicate=check_vertex,
+            edge_predicate=check_edge, direction=direction)
         vertices = [vertex_copy(n, data) for n, data in nodes]
         return vertices
 
-    def _neighboring_nodes_edges_query(self, v_id, vertex_attr_filter=None,
-                                       edge_attr_filter=None,
-                                       direction=Direction.BOTH):
+    def _neighboring_nodes_edges_query(self, v_id,
+                                       vertex_predicate=None,
+                                       edge_predicate=None,
+                                       direction=Direction.BOTH,
+                                       ):
         if not direction:
             LOG.error("_neighboring_nodes_edges: direction cannot be None")
             raise AttributeError("neighbors: direction cannot be None")
@@ -185,7 +200,7 @@ class NXGraph(Graph):
         edges = self._get_edges_by_direction(v_id, direction)
         edges_filtered1 = []
         for edge in edges:
-            if check_filter(edge[3], edge_attr_filter):
+            if not edge_predicate or edge_predicate(edge[3]):
                 edges_filtered1.append(edge)
 
         edges_filtered2 = []
@@ -194,7 +209,7 @@ class NXGraph(Graph):
         for source_id, target_id, label, data in edges_filtered1:
             node_id_to_test = source_id if target_id == v_id else target_id
             node_data = self._g.node[node_id_to_test]
-            if check_filter(node_data, vertex_attr_filter):
+            if not vertex_predicate or vertex_predicate(node_data):
                 edges_filtered2.append((source_id, target_id, label, data))
                 nodes.append((node_id_to_test, node_data))
         return nodes, edges_filtered2

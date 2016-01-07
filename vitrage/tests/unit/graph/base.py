@@ -1,4 +1,4 @@
-# Copyright 2015 - Alcatel-Lucent
+# Copyright 2016 - Alcatel-Lucent
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -36,33 +36,43 @@ ENTITY_GRAPH_ALARMS_PER_HOST = 8
 ENTITY_GRAPH_TESTS_PER_HOST = 20
 ENTITY_GRAPH_ALARMS_PER_VM = 8
 
+RESOURCE = 'RESOURCE'
 ALARM = 'ALARM'
+
 HOST = 'HOST'
 INSTANCE = 'INSTANCE'
 NODE = 'NODE'
 TEST = 'TEST'
 SWITCH = 'SWITCH'
+ALARM_ON_VM = 'ALARM_ON_VM'
+ALARM_ON_HOST = 'ALARM_ON_HOST'
+TEST_ON_HOST = 'TEST_ON_HOST'
 
 v_node = graph_utils.create_vertex(
     vertex_id=NODE + '111111111111',
     entity_id='111111111111',
-    entity_type=NODE)
+    entity_subtype=NODE,
+    entity_type=RESOURCE)
 v_host = graph_utils.create_vertex(
     vertex_id=HOST + '222222222222',
     entity_id='222222222222',
-    entity_type=HOST)
+    entity_subtype=HOST,
+    entity_type=RESOURCE)
 v_instance = graph_utils.create_vertex(
     vertex_id=INSTANCE + '333333333333',
     entity_id='333333333333',
-    entity_type=INSTANCE)
+    entity_subtype=INSTANCE,
+    entity_type=RESOURCE)
 v_alarm = graph_utils.create_vertex(
     vertex_id=ALARM + '444444444444',
     entity_id='444444444444',
+    entity_subtype=ALARM_ON_VM,
     entity_type=ALARM)
 v_switch = graph_utils.create_vertex(
     vertex_id=SWITCH + '1212121212',
     entity_id='1212121212',
-    entity_type=SWITCH)
+    entity_subtype=SWITCH,
+    entity_type=RESOURCE)
 
 e_node_to_host = graph_utils.create_edge(
     source_id=v_node.vertex_id,
@@ -76,12 +86,13 @@ e_node_to_switch = graph_utils.create_edge(
     relation_type=ELabel.CONTAINS)
 
 
-def add_connected_vertex(graph, entity_type, entity_id, edge_type,
-                         other_vertex, reverse=False):
+def add_connected_vertex(graph, entity_type, entity_subtype, entity_id,
+                         edge_type, other_vertex, reverse=False):
     vertex = graph_utils.create_vertex(
-        vertex_id=entity_type + str(entity_id),
+        vertex_id=entity_subtype + str(entity_id),
         entity_id=entity_id,
-        entity_type=entity_type)
+        entity_type=entity_type,
+        entity_subtype=entity_subtype)
     edge = graph_utils.create_edge(
         source_id=other_vertex.vertex_id if reverse else vertex.vertex_id,
         target_id=vertex.vertex_id if reverse else other_vertex.vertex_id,
@@ -134,7 +145,7 @@ class GraphTestBase(base.BaseTest):
 
         # Add Hosts
         for host_id in xrange(num_of_hosts_per_node):
-            host_to_add = add_connected_vertex(g, HOST, host_id,
+            host_to_add = add_connected_vertex(g, RESOURCE, HOST, host_id,
                                                ELabel.CONTAINS, v_node, True)
 
             g.add_edge(graph_utils.create_edge(host_to_add.vertex_id,
@@ -142,27 +153,29 @@ class GraphTestBase(base.BaseTest):
 
             # Add Host Alarms
             for j in xrange(num_of_alarms_per_host):
-                add_connected_vertex(g, ALARM, self.host_alarm_id, ELabel.ON,
+                add_connected_vertex(g, ALARM, ALARM_ON_HOST,
+                                     self.host_alarm_id, ELabel.ON,
                                      host_to_add)
                 self.host_alarm_id += 1
 
             # Add Host Tests
             for j in xrange(num_of_tests_per_host):
-                add_connected_vertex(g, TEST, self.host_test_id, ELabel.ON,
-                                     host_to_add)
+                add_connected_vertex(g, TEST, TEST_ON_HOST, self.host_test_id,
+                                     ELabel.ON, host_to_add)
                 self.host_test_id += 1
 
             # Add Host Vms
             for j in xrange(num_of_vms_per_host):
-                vm_to_add = add_connected_vertex(g, INSTANCE, self.vm_id,
-                                                 ELabel.CONTAINS, host_to_add,
-                                                 True)
+                vm_to_add = add_connected_vertex(g, RESOURCE, INSTANCE,
+                                                 self.vm_id, ELabel.CONTAINS,
+                                                 host_to_add, True)
                 self.vm_id += 1
                 self.vms.append(vm_to_add)
 
                 # Add Instance Alarms
                 for k in xrange(num_of_alarms_per_vm):
-                    add_connected_vertex(g, ALARM, self.vm_alarm_id, ELabel.ON,
+                    add_connected_vertex(g, ALARM, ALARM_ON_VM,
+                                         self.vm_alarm_id, ELabel.ON,
                                          vm_to_add)
                     self.vm_alarm_id += 1
 

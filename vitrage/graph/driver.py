@@ -1,4 +1,4 @@
-# Copyright 2015 - Alcatel-Lucent
+# Copyright 2016 - Alcatel-Lucent
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -238,6 +238,7 @@ class Graph(object):
         """
         self.name = name
         self.graph_type = graph_type
+        self.root_id = None
 
     @abc.abstractmethod
     def copy(self):
@@ -281,7 +282,8 @@ class Graph(object):
         :param v: the vertex to add
         :type v: Vertex
         """
-        pass
+        if v and v.vertex_id and not self.root_id:
+            self.root_id = v.vertex_id
 
     @abc.abstractmethod
     def add_edge(self, e):
