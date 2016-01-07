@@ -75,7 +75,7 @@ class GraphTest(GraphTestBase):
         v = g.get_vertex(v_node.vertex_id)
         self.assertIsNone(v.get(VProps.SUB_TYPE, None),
                           'Change should not affect graph item')
-        self.assertEqual(False, v.get(EProps.IS_DELETED, None),
+        self.assertFalse(v.get(EProps.IS_DELETED, None),
                          'Change should not affect graph item')
         self.assertEqual(v_node[VProps.TYPE], v[VProps.TYPE],
                          'Change should not affect graph item')
@@ -151,7 +151,7 @@ class GraphTest(GraphTestBase):
 
         # Get it again
         e = g.get_edge(v_node.vertex_id, v_host.vertex_id, label)
-        self.assertEqual(False, e.get(EProps.IS_DELETED, None),
+        self.assertFalse(e.get(EProps.IS_DELETED, None),
                          'Change should not affect graph item')
         self.assertEqual(e_node_to_host[EProps.UPDATE_TIMESTAMP],
                          e[EProps.UPDATE_TIMESTAMP],
