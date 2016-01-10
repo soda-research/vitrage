@@ -91,10 +91,18 @@ def generate_vals(param_specs):
         # convert tuples to lists
         current_info = [generate_vals(param) for param in param_specs]
     elif param_specs:  # assumes primitive type
-        current_info = str(exrex.getone(str(param_specs)))
+        if _is_regex(str(param_specs)):
+            current_info = str(exrex.getone(str(param_specs)))
+        else:
+            current_info = str(param_specs)
     else:
         current_info = None
     return current_info
+
+
+def _is_regex(s):
+    regex_chars = r'|}{+?\[]'
+    return any(c in s for c in regex_chars)
 
 
 def merge_vals(current, update):
