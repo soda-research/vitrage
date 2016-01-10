@@ -115,13 +115,11 @@ def simple_host_generators(zone_num, host_num, snapshot_events=0,
     Returns generators for a given number of hosts and
     instances. Instances will be distributed across hosts in round-robin style.
 
-    :param zone_num: number of hosts
-    :param host_num: number of vms
-    :param snapshot_events: number of snapshot events per instance
-    :param update_events: number of update events per instance
+    :param zone_num: number of zones
+    :param host_num: number of hosts
+    :param snapshot_events: number of snapshot events per host
     :param snap_vals: preset vals for ALL snapshot events
-    :param update_vals: preset vals for ALL update events
-    :return: generators for vm_num vms as specified
+    :return: generators for host_num hosts as specified
     """
 
     mapping = [('host-{0}'.format(index), 'zone-{0}'.format(index % zone_num))
@@ -136,6 +134,38 @@ def simple_host_generators(zone_num, host_num, snapshot_events=0,
              tg.EXTERNAL_INFO_KEY: snap_vals,
              tg.MAPPING_KEY: mapping,
              tg.NAME_KEY: 'Host snapshot generator',
+             tg.NUM_EVENTS: snapshot_events
+             }
+        )
+    return tg.get_trace_generators(test_entity_spec_list)
+
+
+def simple_zone_generators(zone_num, host_num, snapshot_events=0,
+                           snap_vals=None):
+    """A function for returning zone event generators.
+
+    Returns generators for a given number of hosts and
+    zones. Hosts will be distributed across zones in round-robin style.
+
+    :param zone_num: number of zones
+    :param host_num: number of hosts
+    :param snapshot_events: number of snapshot events per zone
+    :param snap_vals: preset vals for ALL snapshot events
+    :return: generators for zone_num zones as specified
+    """
+
+    mapping = [('host-{0}'.format(index), 'zone-{0}'.format(index % zone_num))
+               for index in range(host_num)
+               ]
+
+    test_entity_spec_list = []
+    if snapshot_events:
+        test_entity_spec_list.append(
+            {tg.DYNAMIC_INFO_FKEY: tg.SYNC_ZONE_SNAPSHOT_D,
+             tg.STATIC_INFO_FKEY: None,
+             tg.EXTERNAL_INFO_KEY: snap_vals,
+             tg.MAPPING_KEY: mapping,
+             tg.NAME_KEY: 'Zone snapshot generator',
              tg.NUM_EVENTS: snapshot_events
              }
         )
