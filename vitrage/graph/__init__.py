@@ -1,4 +1,4 @@
-# Copyright 2015 - Alcatel-Lucent
+# Copyright 2016 - Alcatel-Lucent
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -16,8 +16,10 @@
 Graph abstraction
 """
 
+from algorithm_driver import *  # noqa
 from driver import *  # noqa
 from networkx_graph import *  # noqa
+from networkx_algorithm import *  # noqa
 from utils import *  # noqa
 
 
@@ -30,3 +32,15 @@ def create_graph(name):
     :rtype: Graph
     """
     return NXGraph(name)
+
+
+def create_algorithm(graph):
+    """Create a Graph algorithm instance
+
+    For now only return NXAlgorithm
+
+    :param graph:
+    :type graph: Graph
+    :rtype: GraphAlgorithm
+    """
+    return NXAlgorithm(graph=graph)
