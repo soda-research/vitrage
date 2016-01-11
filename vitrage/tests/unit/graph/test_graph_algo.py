@@ -28,7 +28,7 @@ class GraphAlgorithmTest(GraphTestBase):
     def test_graph_query_vertices(self):
         ga = create_algorithm(self.entity_graph)
 
-        query = {'==': {VProps.SUB_TYPE: NODE}}
+        query = {'==': {VProps.SUBTYPE: NODE}}
         subgraph = ga.graph_query_vertices(query)
         self.assertEqual(
             1,  # For NODE
@@ -36,8 +36,8 @@ class GraphAlgorithmTest(GraphTestBase):
 
         query = {
             'or': [
-                {'==': {VProps.SUB_TYPE: HOST}},
-                {'==': {VProps.SUB_TYPE: NODE}}
+                {'==': {VProps.SUBTYPE: HOST}},
+                {'==': {VProps.SUBTYPE: NODE}}
             ]
         }
 
@@ -48,10 +48,10 @@ class GraphAlgorithmTest(GraphTestBase):
 
         query = {
             'or': [
-                {'==': {VProps.SUB_TYPE: INSTANCE}},
+                {'==': {VProps.SUBTYPE: INSTANCE}},
                 {'==': {VProps.TYPE: ALARM}},
-                {'==': {VProps.SUB_TYPE: HOST}},
-                {'==': {VProps.SUB_TYPE: NODE}}
+                {'==': {VProps.SUBTYPE: HOST}},
+                {'==': {VProps.SUBTYPE: NODE}}
             ]
         }
         subgraph = ga.graph_query_vertices(query)
@@ -65,7 +65,7 @@ class GraphAlgorithmTest(GraphTestBase):
 
         # Get first host ID
         neighboring_hosts = self.entity_graph.neighbors(
-            v_node.vertex_id, {VProps.SUB_TYPE: HOST})
+            v_node.vertex_id, {VProps.SUBTYPE: HOST})
         first_host_id = neighboring_hosts.pop().vertex_id
 
         query = {'!=': {'NOTHING': 'IS EVERYTHING'}}
@@ -82,8 +82,8 @@ class GraphAlgorithmTest(GraphTestBase):
 
         query = {
             'or': [
-                {'==': {VProps.SUB_TYPE: SWITCH}},
-                {'==': {VProps.SUB_TYPE: HOST}},
+                {'==': {VProps.SUBTYPE: SWITCH}},
+                {'==': {VProps.SUBTYPE: HOST}},
             ]
         }
         subgraph = ga.graph_query_vertices(
@@ -104,8 +104,8 @@ class GraphAlgorithmTest(GraphTestBase):
 
         query = {
             'and': [
-                {'!=': {VProps.SUB_TYPE: ALARM_ON_VM}},
-                {'!=': {VProps.SUB_TYPE: ALARM_ON_HOST}},
+                {'!=': {VProps.SUBTYPE: ALARM_ON_VM}},
+                {'!=': {VProps.SUBTYPE: ALARM_ON_HOST}},
                 {'!=': {VProps.TYPE: ALARM}}
             ]
         }
@@ -119,7 +119,7 @@ class GraphAlgorithmTest(GraphTestBase):
 
         query = {
             'or': [
-                {'==': {VProps.SUB_TYPE: NODE}},
+                {'==': {VProps.SUBTYPE: NODE}},
                 {'==': {VProps.TYPE: ALARM}},
             ]
         }

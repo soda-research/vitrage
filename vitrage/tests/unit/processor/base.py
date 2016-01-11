@@ -30,7 +30,7 @@ class BaseProcessor(base.BaseTest):
         # create vertex properties
         prop = {key: value for key, value in additional_prop.iteritems()}
         prop[VertexProperties.TYPE] = type
-        prop[VertexProperties.SUB_TYPE] = sub_type
+        prop[VertexProperties.SUBTYPE] = sub_type
         prop[VertexProperties.ID] = id
         prop[VertexProperties.IS_DELETED] = is_deleted
         prop[VertexProperties.IS_PLACEHOLDER] = is_placeholder_data

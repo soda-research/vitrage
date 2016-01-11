@@ -1,17 +1,16 @@
-# Copyright 2014 - Mirantis, Inc.
-# Copyright 2014 - StackStorm, Inc.
+# Copyright 2015 - Alcatel-Lucent
 #
-#    Licensed under the Apache License, Version 2.0 (the "License");
-#    you may not use this file except in compliance with the License.
-#    You may obtain a copy of the License at
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
 #
-#        http://www.apache.org/licenses/LICENSE-2.0
+#      http://www.apache.org/licenses/LICENSE-2.0
 #
-#    Unless required by applicable law or agreed to in writing, software
-#    distributed under the License is distributed on an "AS IS" BASIS,
-#    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-#    See the License for the specific language governing permissions and
-#    limitations under the License.
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
 
 from oslo_log import log as logging
 from oslo_utils import importutils
@@ -32,12 +31,20 @@ class TransformerManager(object):
         transformers = {}
 
         transformers['nova.instance'] = importutils.import_object(
-            'vitrage.entity_graph.transformer.nova_transformer.' +
-            'InstanceTransformer')
+            'vitrage.entity_graph.transformer.nova_transformers.'
+            + 'InstanceTransformer')
 
         transformers['nova.host'] = importutils.import_object(
-            'vitrage.entity_graph.transformer.nova_transformer.' +
-            'HostTransformer')
+            'vitrage.entity_graph.transformer.nova_transformers.'
+            + 'HostTransformer')
+
+        transformers['nova.zone'] = importutils.import_object(
+            'vitrage.entity_graph.transformer.nova_transformers.'
+            + 'ZoneTransformer')
+
+        transformers['nova.zone'] = importutils.import_object(
+            'vitrage.entity_graph.transformer.nova_transformers.'
+            + 'ZoneTransformer')
 
         return transformers
 
@@ -64,7 +71,7 @@ class TransformerManager(object):
     def key_fields(self, vertex):
 
         try:
-            e_sub_type = vertex[VertexProperties.SUB_TYPE]
+            e_sub_type = vertex[VertexProperties.SUBTYPE]
         except KeyError:
             raise VitrageTransformerError(
                 'Vertex must contains SUB_TYPE field.')

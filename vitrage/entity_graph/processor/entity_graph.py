@@ -85,7 +85,7 @@ class EntityGraph(networkx_graph.NXGraph):
     @staticmethod
     def get_vertex_type(vertex):
         type = vertex[VProps.TYPE]
-        sub_type = vertex[VProps.SUB_TYPE]
+        sub_type = vertex[VProps.SUBTYPE]
         return type, sub_type
 
     def check_update_validation(self, graph_vertex, updated_vertex):

@@ -10,6 +10,7 @@
   "hosts": {},
   "sample_date": "2016-01-05 06:40:07",
   "sync_type": "nova\\.zone",
+  "sync_mode": "snapshot|init_snapshot",
   "zoneName": "zone0",
   "zoneState": {
     "available": "True|False"

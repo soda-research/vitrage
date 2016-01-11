@@ -53,7 +53,7 @@ class GraphTest(GraphTestBase):
         v_from_graph_copy = graph_copy.get_vertex(v_host.vertex_id)
         self.assertEqual(ALARM, v_from_g[VProps.TYPE],
                          'graph vertex changed after update')
-        self.assertEqual(HOST, v_from_graph_copy[VProps.SUB_TYPE],
+        self.assertEqual(HOST, v_from_graph_copy[VProps.SUBTYPE],
                          'graph copy vertex unchanged after update')
 
     def test_vertex_crud(self):
@@ -254,7 +254,7 @@ class GraphTest(GraphTestBase):
 
         v1_neighbors = g.neighbors(
             v_id=v1.vertex_id,
-            vertex_attr_filter={VProps.SUB_TYPE: HOST})
+            vertex_attr_filter={VProps.SUBTYPE: HOST})
         self._assert_set_equal({v2}, v1_neighbors,
                                'Check V1 neighbors, vertex property filter')
 
@@ -283,7 +283,7 @@ class GraphTest(GraphTestBase):
             v_id=v1.vertex_id,
             direction=Direction.IN,
             edge_attr_filter={EProps.RELATION_NAME: relation_c},
-            vertex_attr_filter={VProps.SUB_TYPE: HOST})
+            vertex_attr_filter={VProps.SUBTYPE: HOST})
         self._assert_set_equal(
             {v2}, v1_neighbors,
             'Check V1 neighbors, vertex/edge property filter and direction')
@@ -310,8 +310,8 @@ class GraphTest(GraphTestBase):
             v_id=v2.vertex_id,
             edge_attr_filter={EProps.RELATION_NAME: [relation_a, relation_b]},
             vertex_attr_filter={VProps.TYPE: [RESOURCE, ALARM],
-                                VProps.SUB_TYPE: [HOST, INSTANCE, ALARM_ON_VM,
-                                                  ALARM_ON_HOST]})
+                                VProps.SUBTYPE: [HOST, INSTANCE, ALARM_ON_VM,
+                                                 ALARM_ON_HOST]})
         self._assert_set_equal({v3, v4}, v2_neighbors,
                                'Check v2 neighbors, edge property filter')
 

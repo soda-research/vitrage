@@ -8,5 +8,7 @@
   "host_name": "compute-0-0.local",
   "service": "compute",
   "sync_type": "nova\\.host",
-  "zone": "zone0"
+  "zone": "zone0",
+  "sync_mode": "snapshot|init_snapshot",
+  "sample_date": "2015-12-01T12:46:41Z"
 }

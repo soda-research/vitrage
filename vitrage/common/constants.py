@@ -15,7 +15,7 @@
 
 class VertexProperties(object):
     TYPE = 'TYPE'
-    SUB_TYPE = 'SUB_TYPE'
+    SUBTYPE = 'SUBTYPE'
     ID = 'ID'
     IS_DELETED = 'IS_DELETED'
     STATE = 'STATE'

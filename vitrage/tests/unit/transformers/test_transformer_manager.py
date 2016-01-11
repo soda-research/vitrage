@@ -46,7 +46,7 @@ class TransformerManagerTest(base.BaseTest):
         manager = transformer_manager.TransformerManager()
 
         expected_instance_key_fields = [vertex_cons.TYPE,
-                                        vertex_cons.SUB_TYPE,
+                                        vertex_cons.SUBTYPE,
                                         vertex_cons.ID]
 
         instance_vertex = create_vertex('123', 'RESOURCE', 'nova.instance')
