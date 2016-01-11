@@ -15,7 +15,7 @@
 from oslo_log import log as logging
 from vitrage.common.constants import VertexProperties as vertex_cons
 from vitrage.common.exception import VitrageTransformerError
-import vitrage.entity_graph.transformer.base as base_transformer
+from vitrage.entity_graph.transformer.base import TransformerBase
 from vitrage.entity_graph.transformer import transformer_manager
 import vitrage.graph.utils as graph_utils
 from vitrage.tests.unit import base
@@ -27,7 +27,7 @@ def create_vertex(entity_id, entity_type, entity_subtype=None):
 
     """returns placeholder vertex"""
 
-    vertex_id = base_transformer.Transformer.KEY_SEPARATOR.join(
+    vertex_id = TransformerBase.KEY_SEPARATOR.join(
         [entity_type, entity_subtype, entity_id])
 
     return graph_utils.create_vertex(

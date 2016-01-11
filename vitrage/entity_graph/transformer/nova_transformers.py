@@ -27,7 +27,7 @@ HOST_SUBTYPE = 'nova.host'
 ZONE_SUBTYPE = 'nova.zone'
 
 
-class InstanceTransformer(base.Transformer):
+class InstanceTransformer(base.TransformerBase):
 
     # Fields returned from Nova Instance snapshot
     INSTANCE_ID = {
@@ -175,7 +175,7 @@ class InstanceTransformer(base.Transformer):
         return [cons.EntityTypes.RESOURCE, INSTANCE_SUBTYPE] + mutable_fields
 
 
-class HostTransformer(base.Transformer):
+class HostTransformer(base.TransformerBase):
 
     # Fields returned from Nova Availability Zone snapshot
     HOST_NAME = {
@@ -279,7 +279,7 @@ class HostTransformer(base.Transformer):
         )
 
 
-class ZoneTransformer(base.Transformer):
+class ZoneTransformer(base.TransformerBase):
 
     STATE_AVAILABLE = 'available'
     STATE_UNAVAILABLE = 'unavailable'

@@ -18,7 +18,9 @@ from oslo_log import log as logging
 
 import vitrage.common.constants as cons
 from vitrage.entity_graph.transformer import base as tbase
+from vitrage.entity_graph.transformer.base import TransformerBase
 from vitrage.entity_graph.transformer import nova_transformers
+from vitrage.entity_graph.transformer.nova_transformers import ZoneTransformer
 from vitrage.tests.mocks import mock_syncronizer as mock_sync
 from vitrage.tests.unit import base
 
@@ -41,7 +43,7 @@ class NovaZoneTransformerTest(base.BaseTest):
         )
 
         observed_id_values = placeholder.vertex_id.split(
-            tbase.Transformer.KEY_SEPARATOR)
+            TransformerBase.KEY_SEPARATOR)
         expected_id_values = zt.key_values([zone_name])
         self.assertEqual(observed_id_values, expected_id_values)
 
@@ -180,14 +182,14 @@ class NovaZoneTransformerTest(base.BaseTest):
 
     def _validate_vertex_props(self, vertex, event):
 
-        zt = nova_transformers.ZoneTransformer
+        # zt = nova_transformers.ZoneTransformer
 
         sync_mode = event['sync_mode']
         extract_value = tbase.extract_field_value
 
         expected_id = extract_value(
             event,
-            zt().ZONE_NAME[sync_mode]
+            ZoneTransformer().ZONE_NAME[sync_mode]
         )
         observed_id = vertex[cons.VertexProperties.ID]
         self.assertEqual(expected_id, observed_id)
@@ -204,24 +206,28 @@ class NovaZoneTransformerTest(base.BaseTest):
 
         expected_timestamp = extract_value(
             event,
-            zt().TIMESTAMP[sync_mode]
+            ZoneTransformer().TIMESTAMP[sync_mode]
         )
         observed_timestamp = vertex[cons.VertexProperties.UPDATE_TIMESTAMP]
         self.assertEqual(expected_timestamp, observed_timestamp)
 
         expected_name = extract_value(
             event,
-            zt().ZONE_NAME[sync_mode]
+            ZoneTransformer().ZONE_NAME[sync_mode]
         )
         observed_name = vertex[cons.VertexProperties.NAME]
         self.assertEqual(expected_name, observed_name)
 
         is_zone_available = extract_value(
             event,
-            zt().ZONE_STATE[sync_mode]
+            ZoneTransformer().ZONE_STATE[sync_mode]
         )
-        expected_state = \
-            zt.STATE_AVAILABLE if is_zone_available else zt.STATE_UNAVAILABLE
+
+        if is_zone_available:
+            expected_state = ZoneTransformer.STATE_AVAILABLE
+        else:
+            expected_state = ZoneTransformer.STATE_UNAVAILABLE
+
         observed_state = vertex[cons.VertexProperties.STATE]
         self.assertEqual(expected_state, observed_state)
 

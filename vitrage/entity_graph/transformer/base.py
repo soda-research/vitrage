@@ -43,7 +43,7 @@ def extract_field_value(entity_event, key_names):
 
 
 def build_key(key_fields):
-    return Transformer.KEY_SEPARATOR.join(key_fields)
+    return TransformerBase.KEY_SEPARATOR.join(key_fields)
 
 
 def create_node_placeholder_vertex():
@@ -62,7 +62,7 @@ def create_node_placeholder_vertex():
 
 
 @six.add_metaclass(abc.ABCMeta)
-class Transformer(object):
+class TransformerBase(object):
 
     KEY_SEPARATOR = ':'
 

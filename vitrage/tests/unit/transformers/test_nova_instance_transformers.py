@@ -17,8 +17,10 @@ import datetime
 from oslo_log import log as logging
 
 import vitrage.common.constants as cons
-from vitrage.entity_graph.transformer import base as transformer_base
+from vitrage.entity_graph.transformer import base as tbase
+from vitrage.entity_graph.transformer.base import TransformerBase
 from vitrage.entity_graph.transformer import nova_transformers
+
 from vitrage.tests.mocks import mock_syncronizer as mock_sync
 from vitrage.tests.unit import base
 
@@ -41,7 +43,7 @@ class NovaInstanceTransformerTest(base.BaseTest):
         )
 
         observed_id_values = placeholder.vertex_id.split(
-            transformer_base.Transformer.KEY_SEPARATOR)
+            TransformerBase.KEY_SEPARATOR)
         expected_id_values = it.key_values(
             [instance_id]
         )
@@ -148,7 +150,7 @@ class NovaInstanceTransformerTest(base.BaseTest):
 
         sync_mode = event['sync_mode']
 
-        extract_value = transformer_base.extract_field_value
+        extract_value = tbase.extract_field_value
         expected_id = extract_value(
             event,
             nova_transformers.InstanceTransformer.INSTANCE_ID[sync_mode]
@@ -204,11 +206,11 @@ class NovaInstanceTransformerTest(base.BaseTest):
 
         it = nova_transformers.InstanceTransformer()
         sync_mode = event['sync_mode']
-        host_name = transformer_base.extract_field_value(
+        host_name = tbase.extract_field_value(
             event,
             it.HOST_NAME[sync_mode]
         )
-        time = transformer_base.extract_field_value(
+        time = tbase.extract_field_value(
             event,
             it.TIMESTAMP[sync_mode]
         )
@@ -260,7 +262,7 @@ class NovaInstanceTransformerTest(base.BaseTest):
         for event in instance_events:
             observed_key = it.extract_key(event)
             observed_key_fields = observed_key.split(
-                transformer_base.Transformer.KEY_SEPARATOR)
+                TransformerBase.KEY_SEPARATOR)
 
             self.assertEqual(cons.EntityTypes.RESOURCE, observed_key_fields[0])
             self.assertEqual(
@@ -268,7 +270,7 @@ class NovaInstanceTransformerTest(base.BaseTest):
                 observed_key_fields[1]
             )
 
-            instance_id = transformer_base.extract_field_value(
+            instance_id = tbase.extract_field_value(
                 event,
                 it.INSTANCE_ID[event['sync_mode']]
             )
@@ -276,7 +278,7 @@ class NovaInstanceTransformerTest(base.BaseTest):
             self.assertEqual(instance_id, observed_key_fields[2])
 
             key_values = it.key_values([instance_id])
-            expected_key = transformer_base.build_key(key_values)
+            expected_key = tbase.build_key(key_values)
 
             self.assertEqual(expected_key, observed_key)
 
@@ -288,7 +290,7 @@ class NovaInstanceTransformerTest(base.BaseTest):
 
         it = nova_transformers.InstanceTransformer()
         key_fields = it.key_values([instance_id])
-        observed_key = transformer_base.build_key(key_fields)
+        observed_key = tbase.build_key(key_fields)
 
         self.assertEqual(expected_key, observed_key)
 

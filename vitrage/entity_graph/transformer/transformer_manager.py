@@ -42,10 +42,6 @@ class TransformerManager(object):
             'vitrage.entity_graph.transformer.nova_transformers.'
             + 'ZoneTransformer')
 
-        transformers['nova.zone'] = importutils.import_object(
-            'vitrage.entity_graph.transformer.nova_transformers.'
-            + 'ZoneTransformer')
-
         return transformers
 
     def get_transformer(self, key):
