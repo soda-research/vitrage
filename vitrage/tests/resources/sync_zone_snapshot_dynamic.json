@@ -8,7 +8,7 @@
   },
   "_loaded": "True",
   "hosts": {},
-  "sample_date": "2016-01-05 06:40:07",
+  "sample_date": "2015-12-01T12:46:41Z",
   "sync_type": "nova\\.zone",
   "sync_mode": "snapshot|init_snapshot",
   "zoneName": "zone0",

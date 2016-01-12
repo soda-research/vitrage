@@ -1,6 +1,7 @@
 {
   "OS-EXT-STS:task_state": null,
   "sync_mode": "snapshot|init_snapshot",
+  "sync_type": "nova\\.instance",
   "addresses": {
     "public": [
       {

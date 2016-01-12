@@ -63,6 +63,31 @@ def generate_random_events_list(generator_spec_list):
     return data
 
 
+def generate_sequential_events_list(generator_spec_list):
+    """Generates random events for the generators given.
+
+     Each element in the list of generators includes a generator and
+     number of events to generate for it's entities
+
+     :param generator_spec_list: list of generators
+     :type generator_spec_list: list
+
+     :param default_num: default number of events to generate
+     :type default_num: list
+
+     :return list of synchronizer events
+     :rtype list
+
+    """
+
+    data = []
+    for spec in generator_spec_list:
+        generator = spec[tg.GENERATOR]
+        data += tg.generate_round_robin_data_stream(generator.models,
+                                                    spec[tg.NUM_EVENTS])
+    return data
+
+
 def simple_instance_generators(host_num, vm_num,
                                snapshot_events=0, update_events=0,
                                snap_vals=None, update_vals=None):

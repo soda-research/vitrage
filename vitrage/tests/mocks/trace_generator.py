@@ -133,6 +133,23 @@ def generate_data_stream(models, event_num=100):
     return data_stream
 
 
+def generate_round_robin_data_stream(models, event_num=100):
+    """Generates a list of events.
+
+    :param event_num: number of events to generate
+    :type event_num: int
+    :return: list of generated events
+    :rtype: list
+    """
+
+    instance_num = len(models)
+    data_stream = []
+    for i in xrange(event_num):
+        next_model = models[i % instance_num]
+        data_stream.append(next_model.params)
+    return data_stream
+
+
 def _get_sync_vm_snapshot_values(spec):
     """Generates the static synchronizer values for each vm.
 

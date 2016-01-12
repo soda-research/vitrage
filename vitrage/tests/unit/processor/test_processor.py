@@ -15,10 +15,11 @@
 import unittest
 
 from vitrage.common.constants import SyncMode
+
 from vitrage.common.constants import VertexProperties
 from vitrage.common.utils import get_timezone_aware_time
 from vitrage.entity_graph.processor import processor as proc
-from vitrage.tests.mocks import mock_transformer as mock_trans
+from vitrage.tests.mocks import mock_syncronizer as mock_sync
 from vitrage.tests.unit import base
 
 
@@ -27,7 +28,7 @@ class TestProcessor(base.BaseTest):
     NUM_NODES = 1
     NUM_ZONES = 2
     NUM_HOSTS = 4
-    NUM_INSTANCES = 20
+    NUM_INSTANCES = 15
     ZONE_SPEC = 'ZONE_SPEC'
     HOST_SPEC = 'HOST_SPEC'
     INSTANCE_SPEC = 'INSTANCE_SPEC'
@@ -39,8 +40,6 @@ class TestProcessor(base.BaseTest):
     def setUp(self):
         super(TestProcessor, self).setUp()
 
-    # TODO(Alexey): un skip this test when host and zone transformers are ready
-    @unittest.skip('Not ready yet')
     def test_create_entity_graph(self):
         processor = self._create_processor_with_graph()
 
@@ -48,6 +47,7 @@ class TestProcessor(base.BaseTest):
         num_vertices = len(processor.entity_graph)
         self.assertEqual(self._num_resources_in_initial_graph(), num_vertices)
 
+        # TODO(Alexey): add this check and to check also the number of edges
         # check all entities create a tree and no free floating vertices exists
         # it will be done only after we will have zone plugin
         # vertex = graph.find_vertex_in_graph()
@@ -115,9 +115,9 @@ class TestProcessor(base.BaseTest):
         # update instance event with state running
         (neighbor_vertex, neighbor_edge) = neighbors[0]
         old_neighbor_id = neighbor_vertex.vertex_id
-        neighbor_vertex.properties[VertexProperties.ID] = 'host-2'
-        neighbor_vertex.vertex_id = 'RESOURCE_HOST_host-2'
-        neighbor_edge.source_id = 'RESOURCE_HOST_host-2'
+        neighbor_vertex.properties[VertexProperties.ID] = 'newhost-2'
+        neighbor_vertex.vertex_id = 'RESOURCE_HOST_newhost-2'
+        neighbor_edge.source_id = 'RESOURCE_HOST_newhost-2'
         processor.update_entity(vertex, neighbors)
 
         # check state
@@ -146,9 +146,9 @@ class TestProcessor(base.BaseTest):
         # update instance event with state running
         (neighbor_vertex, neighbor_edge) = neighbors[0]
         old_neighbor_id = neighbor_vertex.vertex_id
-        neighbor_vertex.properties[VertexProperties.ID] = 'host-2'
-        neighbor_vertex.vertex_id = 'RESOURCE_HOST_host-2'
-        neighbor_edge.source_id = 'RESOURCE_HOST_host-2'
+        neighbor_vertex.properties[VertexProperties.ID] = 'newhost-2'
+        neighbor_vertex.vertex_id = 'RESOURCE_HOST_newhost-2'
+        neighbor_edge.source_id = 'RESOURCE_HOST_newhost-2'
         processor._update_neighbors(vertex, neighbors)
 
         # check state
@@ -226,16 +226,19 @@ class TestProcessor(base.BaseTest):
 
     @staticmethod
     def _create_mock_events():
-        gen_list = mock_trans.simple_zone_generators(2, 10)
-        gen_list.append(mock_trans.simple_host_generators(2, 4, 15))
-        gen_list.append(mock_trans.simple_instance_generators(4, 15, 150))
-        return mock_trans.generate_random_events_list(gen_list)
+        gen_list = mock_sync.simple_zone_generators(
+            2, 4, snapshot_events=2, snap_vals={'sync_mode': 'init_snapshot'})
+        gen_list += mock_sync.simple_host_generators(
+            2, 4, 4, snap_vals={'sync_mode': 'init_snapshot'})
+        gen_list += mock_sync.simple_instance_generators(
+            4, 15, 15, snap_vals={'sync_mode': 'init_snapshot'})
+        return mock_sync.generate_sequential_events_list(gen_list)
 
     def _create_event(self, spec_type=None, sync_mode=None,
                       event_type=None, properties=None):
         # generate event
-        spec_list = mock_trans.simple_instance_generators(1, 1, 1)
-        events_list = mock_trans.generate_random_events_list(
+        spec_list = mock_sync.simple_instance_generators(1, 1, 1)
+        events_list = mock_sync.generate_random_events_list(
             spec_list)
 
         # update properties
