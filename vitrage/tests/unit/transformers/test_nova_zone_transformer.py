@@ -15,8 +15,9 @@ import datetime
 
 from oslo_log import log as logging
 
-
-import vitrage.common.constants as cons
+from vitrage.common.constants import EdgeLabels
+from vitrage.common.constants import EntityTypes
+from vitrage.common.constants import VertexProperties
 from vitrage.entity_graph.transformer import base as tbase
 from vitrage.entity_graph.transformer.base import TransformerBase
 from vitrage.entity_graph.transformer import nova_transformers
@@ -33,55 +34,48 @@ class NovaZoneTransformerTest(base.BaseTest):
 
         LOG.debug('Zone transformer test: create placeholder vertex')
 
+        # Test setup
         zone_name = 'zone123'
         timestamp = datetime.datetime.utcnow()
 
-        zt = nova_transformers.ZoneTransformer()
-        placeholder = zt.create_placeholder_vertex(
+        # Test action
+        placeholder = ZoneTransformer().create_placeholder_vertex(
             zone_name,
             timestamp
         )
 
+        # Test assertions
         observed_id_values = placeholder.vertex_id.split(
             TransformerBase.KEY_SEPARATOR)
-        expected_id_values = zt.key_values([zone_name])
+        expected_id_values = ZoneTransformer()._key_values([zone_name])
         self.assertEqual(observed_id_values, expected_id_values)
 
-        observed_time = placeholder.get(
-            cons.VertexProperties.UPDATE_TIMESTAMP
-        )
+        observed_time = placeholder.get(VertexProperties.UPDATE_TIMESTAMP)
         self.assertEqual(observed_time, timestamp)
 
-        observed_subtype = placeholder.get(
-            cons.VertexProperties.SUBTYPE
-        )
+        observed_subtype = placeholder.get(VertexProperties.SUBTYPE)
         self.assertEqual(observed_subtype, nova_transformers.ZONE_SUBTYPE)
 
-        observed_entity_id = placeholder.get(
-            cons.VertexProperties.ID
-        )
+        observed_entity_id = placeholder.get(VertexProperties.ID)
         self.assertEqual(observed_entity_id, zone_name)
 
-        observed_type = placeholder.get(
-            cons.VertexProperties.TYPE
-        )
-        self.assertEqual(observed_type, cons.EntityTypes.RESOURCE)
+        observed_type = placeholder.get(VertexProperties.TYPE)
+        self.assertEqual(observed_type, EntityTypes.RESOURCE)
 
-        is_placeholder = placeholder.get(
-            cons.VertexProperties.IS_PLACEHOLDER
-        )
+        is_placeholder = placeholder.get(VertexProperties.IS_PLACEHOLDER)
         self.assertEqual(is_placeholder, True)
 
     def test_key_values(self):
-
         LOG.debug('Zone transformer test: get key values')
 
+        # Test setup
         zone_name = 'zone123'
-        observed_key_fields = nova_transformers.ZoneTransformer().key_values(
-            [zone_name]
-        )
 
-        self.assertEqual(cons.EntityTypes.RESOURCE, observed_key_fields[0])
+        # Test action
+        observed_key_fields = ZoneTransformer()._key_values([zone_name])
+
+        # Test assertions
+        self.assertEqual(EntityTypes.RESOURCE, observed_key_fields[0])
         self.assertEqual(
             nova_transformers.ZONE_SUBTYPE,
             observed_key_fields[1]
@@ -92,9 +86,9 @@ class NovaZoneTransformerTest(base.BaseTest):
         pass
 
     def test_snapshot_transform(self):
-
         LOG.debug('Nova zone transformer test: transform entity event')
 
+        # Test setup
         spec_list = mock_sync.simple_zone_generators(
             zone_num=2,
             host_num=3,
@@ -103,7 +97,10 @@ class NovaZoneTransformerTest(base.BaseTest):
         zone_events = mock_sync.generate_random_events_list(spec_list)
 
         for event in zone_events:
-            wrapper = nova_transformers.ZoneTransformer().transform(event)
+            # Test action
+            wrapper = ZoneTransformer().transform(event)
+
+            # Test assertions
             vertex = wrapper.vertex
             self._validate_vertex_props(vertex, event)
 
@@ -115,7 +112,7 @@ class NovaZoneTransformerTest(base.BaseTest):
         node_neighbors_counter = 0
 
         for neighbor in neighbors:
-            vertex_subtype = neighbor.vertex.get(cons.VertexProperties.SUBTYPE)
+            vertex_subtype = neighbor.vertex.get(VertexProperties.SUBTYPE)
 
             if tbase.NODE_SUBTYPE == vertex_subtype:
                 node_neighbors_counter += 1
@@ -138,36 +135,36 @@ class NovaZoneTransformerTest(base.BaseTest):
                                 sync_mode):
 
         host_vertex = host_neighbor.vertex
-        host_vertex_id = host_vertex.get(cons.VertexProperties.ID)
+        host_vertex_id = host_vertex.get(VertexProperties.ID)
 
         host_dic = hosts[host_vertex_id]
         self.assertIsNotNone(hosts[host_vertex_id])
 
         host_available = tbase.extract_field_value(
             host_dic,
-            nova_transformers.ZoneTransformer.HOST_AVAILABLE[sync_mode]
+            ZoneTransformer.HOST_AVAILABLE[sync_mode]
         )
         host_active = tbase.extract_field_value(
             host_dic,
-            nova_transformers.ZoneTransformer.HOST_ACTIVE[sync_mode]
+            ZoneTransformer.HOST_ACTIVE[sync_mode]
         )
         expected_host_state = host_available and host_active
         self.assertEqual(
             expected_host_state,
-            host_vertex.get(cons.VertexProperties.STATE)
+            host_vertex.get(VertexProperties.STATE)
         )
 
-        is_placeholder = host_vertex[cons.VertexProperties.IS_PLACEHOLDER]
+        is_placeholder = host_vertex[VertexProperties.IS_PLACEHOLDER]
         self.assertFalse(is_placeholder)
 
-        is_deleted = host_vertex[cons.VertexProperties.IS_DELETED]
+        is_deleted = host_vertex[VertexProperties.IS_DELETED]
         self.assertFalse(is_deleted)
 
         # Validate neighbor edge
         edge = host_neighbor.edge
         self.assertEqual(edge.target_id, host_neighbor.vertex.vertex_id)
         self.assertEqual(edge.source_id, zone_vertex_id)
-        self.assertEqual(edge.label, cons.EdgeLabels.CONTAINS)
+        self.assertEqual(edge.label, EdgeLabels.CONTAINS)
 
     def _validate_node_neighbor(self, node_neighbor, zone_vertex_id):
 
@@ -178,7 +175,7 @@ class NovaZoneTransformerTest(base.BaseTest):
         edge = node_neighbor.edge
         self.assertEqual(edge.source_id, node_neighbor.vertex.vertex_id)
         self.assertEqual(edge.target_id, zone_vertex_id)
-        self.assertEqual(edge.label, cons.EdgeLabels.CONTAINS)
+        self.assertEqual(edge.label, EdgeLabels.CONTAINS)
 
     def _validate_vertex_props(self, vertex, event):
 
@@ -191,31 +188,31 @@ class NovaZoneTransformerTest(base.BaseTest):
             event,
             ZoneTransformer().ZONE_NAME[sync_mode]
         )
-        observed_id = vertex[cons.VertexProperties.ID]
+        observed_id = vertex[VertexProperties.ID]
         self.assertEqual(expected_id, observed_id)
 
         self.assertEqual(
-            cons.EntityTypes.RESOURCE,
-            vertex[cons.VertexProperties.TYPE]
+            EntityTypes.RESOURCE,
+            vertex[VertexProperties.TYPE]
         )
 
         self.assertEqual(
             nova_transformers.ZONE_SUBTYPE,
-            vertex[cons.VertexProperties.SUBTYPE]
+            vertex[VertexProperties.SUBTYPE]
         )
 
         expected_timestamp = extract_value(
             event,
             ZoneTransformer().TIMESTAMP[sync_mode]
         )
-        observed_timestamp = vertex[cons.VertexProperties.UPDATE_TIMESTAMP]
+        observed_timestamp = vertex[VertexProperties.UPDATE_TIMESTAMP]
         self.assertEqual(expected_timestamp, observed_timestamp)
 
         expected_name = extract_value(
             event,
             ZoneTransformer().ZONE_NAME[sync_mode]
         )
-        observed_name = vertex[cons.VertexProperties.NAME]
+        observed_name = vertex[VertexProperties.NAME]
         self.assertEqual(expected_name, observed_name)
 
         is_zone_available = extract_value(
@@ -228,11 +225,11 @@ class NovaZoneTransformerTest(base.BaseTest):
         else:
             expected_state = ZoneTransformer.STATE_UNAVAILABLE
 
-        observed_state = vertex[cons.VertexProperties.STATE]
+        observed_state = vertex[VertexProperties.STATE]
         self.assertEqual(expected_state, observed_state)
 
-        is_placeholder = vertex[cons.VertexProperties.IS_PLACEHOLDER]
+        is_placeholder = vertex[VertexProperties.IS_PLACEHOLDER]
         self.assertFalse(is_placeholder)
 
-        is_deleted = vertex[cons.VertexProperties.IS_DELETED]
+        is_deleted = vertex[VertexProperties.IS_DELETED]
         self.assertFalse(is_deleted)

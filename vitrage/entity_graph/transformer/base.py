@@ -42,8 +42,8 @@ def extract_field_value(entity_event, key_names):
     return value
 
 
-def build_key(key_fields):
-    return TransformerBase.KEY_SEPARATOR.join(key_fields)
+def build_key(key_values):
+    return TransformerBase.KEY_SEPARATOR.join(key_values)
 
 
 def create_node_placeholder_vertex():
@@ -82,18 +82,8 @@ class TransformerBase(object):
         """
         pass
 
-    def key_fields(self):
-        """Returns a field list that are must to create the entity key.
-
-        The field order is important to.
-        :return: field list
-        """
-        return [cons.VertexProperties.TYPE,
-                cons.VertexProperties.SUBTYPE,
-                cons.VertexProperties.ID]
-
     @abc.abstractmethod
-    def key_values(self, mutable_fields=None):
+    def _key_values(self, mutable_fields=None):
         """A list of key fields
 
         The fields which consist the entity key
@@ -127,7 +117,7 @@ class TransformerBase(object):
         """
         pass
 
-    def extract_action_type(self, entity_event):
+    def _extract_action_type(self, entity_event):
 
         sync_mode = entity_event['sync_mode']
 

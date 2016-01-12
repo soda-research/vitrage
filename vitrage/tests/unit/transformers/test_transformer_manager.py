@@ -13,10 +13,7 @@
 # under the License.
 
 from oslo_log import log as logging
-from vitrage.common.constants import VertexProperties as vertex_cons
-from vitrage.common.exception import VitrageTransformerError
 from vitrage.entity_graph.transformer.base import TransformerBase
-from vitrage.entity_graph.transformer import transformer_manager
 import vitrage.graph.utils as graph_utils
 from vitrage.tests.unit import base
 
@@ -39,24 +36,4 @@ def create_vertex(entity_id, entity_type, entity_subtype=None):
 
 
 class TransformerManagerTest(base.BaseTest):
-
-    def test_key_fields(self):
-
-        LOG.debug('Test get key fields from by given entity_event')
-        manager = transformer_manager.TransformerManager()
-
-        expected_instance_key_fields = [vertex_cons.TYPE,
-                                        vertex_cons.SUBTYPE,
-                                        vertex_cons.ID]
-
-        instance_vertex = create_vertex('123', 'RESOURCE', 'nova.instance')
-        observed_instance_key_fields = manager.key_fields(instance_vertex)
-        self.assert_list_equal(
-            expected_instance_key_fields,
-            observed_instance_key_fields
-        )
-
-        no_entity_vertex = create_vertex('123', 'RESOURCE', 'no.transformer')
-
-        self.assertRaises(
-            VitrageTransformerError, manager.key_fields, no_entity_vertex)
+    pass

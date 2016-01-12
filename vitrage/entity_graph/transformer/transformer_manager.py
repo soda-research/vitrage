@@ -14,7 +14,6 @@
 
 from oslo_log import log as logging
 from oslo_utils import importutils
-from vitrage.common.constants import VertexProperties
 from vitrage.common.exception import VitrageTransformerError
 
 LOG = logging.getLogger(__name__)
@@ -63,16 +62,6 @@ class TransformerManager(object):
                 'Entity Event must contains sync_type field.')
 
         return self.get_transformer(sync_type).transform(entity_event)
-
-    def key_fields(self, vertex):
-
-        try:
-            e_sub_type = vertex[VertexProperties.SUBTYPE]
-        except KeyError:
-            raise VitrageTransformerError(
-                'Vertex must contains SUB_TYPE field.')
-
-        return self.get_transformer(e_sub_type).key_fields()
 
     def extract_key(self, entity_event):
 

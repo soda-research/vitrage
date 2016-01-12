@@ -1,7 +1,7 @@
 {
   "sync_mode": "update",
   "publisher_id": "compute.emalin-devstack",
-  "event_type": "compute.instance.pause.end",
+  "event_type": "compute.instance.pause.end|compute.instance.delete.end|compute.instance.create.start",
   "payload" :
   {
     "state_description": "",
