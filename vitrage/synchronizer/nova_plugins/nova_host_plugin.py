@@ -12,7 +12,8 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from nova_plugins.novaclient_plugin import NovaClientPlugin
+from vitrage.synchronizer.nova_plugins.novaclient_plugin \
+    import NovaClientPlugin
 
 
 class NovaHostPlugin(NovaClientPlugin):

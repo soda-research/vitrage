@@ -70,6 +70,7 @@ class VitrageGraphService(os_service.Service):
 
             try:
                 event = self.queue.get()
+                LOG.debug("got event: %s" % event)
                 self.processor.process_event(event)
             except Exception as error:
                 LOG.error("Exception: %s", error)

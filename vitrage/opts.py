@@ -33,4 +33,9 @@ def list_opts():
 
         cfg.BoolOpt('pecan_debug', default=False,
                     help='Toggle Pecan Debug Middleware.')
+    )), ("synchronizer", (
+        cfg.IntOpt('snapshots_interval',
+                   default=600,
+                   min=10,
+                   help='interval between full snapshots'),
     ))]

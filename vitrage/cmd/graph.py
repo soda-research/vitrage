@@ -13,6 +13,7 @@
 # under the License.
 
 import multiprocessing
+import sys
 
 from oslo_service import service as os_service
 
@@ -21,7 +22,7 @@ from vitrage.entity_graph import api_handler as api_handler_svc
 from vitrage.entity_graph import consistency as consistency_svc
 from vitrage.entity_graph.processor import entity_graph
 from vitrage import service
-from vitrage import synchronizer as synchronizer_svc
+from vitrage.synchronizer import launcher as synchronizer_launcher
 
 
 def main():
@@ -37,6 +38,8 @@ def main():
     event_queue = multiprocessing.Queue()
     conf = service.prepare_service()
     launcher = os_service.ServiceLauncher(conf)
+    synchronizer = synchronizer_launcher.Launcher(
+        conf, launcher.create_send_to_queue_callback(event_queue))
 
     launcher.launch_service(entity_graph_svc.VitrageGraphService(
         event_queue, e_graph))
@@ -44,10 +47,12 @@ def main():
     launcher.launch_service(api_handler_svc.VitrageApiHandlerService(
         e_graph))
 
-    launcher.launch_service(synchronizer_svc.VitrageSynchronizerService(
-        event_queue))
+    synchronizer.launch()
 
     launcher.launch_service(consistency_svc.VitrageGraphConsistencyService(
         e_graph))
 
     launcher.wait()
+
+if __name__ == "__main__":
+    sys.exit(main())
