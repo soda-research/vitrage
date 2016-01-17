@@ -39,7 +39,7 @@ def main():
     conf = service.prepare_service()
     launcher = os_service.ServiceLauncher(conf)
     synchronizer = synchronizer_launcher.Launcher(
-        conf, launcher.create_send_to_queue_callback(event_queue))
+        conf, synchronizer_launcher.create_send_to_queue_callback(event_queue))
 
     launcher.launch_service(entity_graph_svc.VitrageGraphService(
         event_queue, e_graph))
