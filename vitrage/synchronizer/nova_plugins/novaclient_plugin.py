@@ -37,13 +37,12 @@ class NovaClientPlugin(BasePlugin):
                 picklable_entity.pop(field)
 
             picklable_entity['sync_type'] = sync_type
+            self._add_sampling_time(picklable_entity)
             picklable_entities.append(picklable_entity)
-            self._add_sampling_time(entity)
 
         return picklable_entities
 
     @staticmethod
     def _add_sampling_time(entity):
-        dict_entity = entity.__dict__
-        dict_entity['sample_date'] = utils.get_timezone_aware_time()
+        entity['sample_date'] = utils.get_timezone_aware_time()
         return entity
