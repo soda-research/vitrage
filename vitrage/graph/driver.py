@@ -20,6 +20,7 @@ vitrage.graph.driver namespace.
 
 """
 import abc
+
 import six
 
 
@@ -465,4 +466,8 @@ class Graph(object):
         :return: A list of vertices that match the requested query
         :rtype: set of Vertex
         """
+        pass
+
+    @abc.abstractmethod
+    def output_graph(self):
         pass

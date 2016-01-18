@@ -48,8 +48,8 @@ class InstanceTransformer(base.TransformerBase):
     }
 
     TIMESTAMP = {
-        SyncMode.SNAPSHOT: ('updated',),
-        SyncMode.INIT_SNAPSHOT: ('updated',),
+        SyncMode.SNAPSHOT: ('sample_date',),
+        SyncMode.INIT_SNAPSHOT: ('sample_date',),
         SyncMode.UPDATE: ('metadata', 'timestamp')
     }
 

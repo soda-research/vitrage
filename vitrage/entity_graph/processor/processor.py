@@ -27,10 +27,12 @@ LOG = log.getLogger(__name__)
 class Processor(processor.ProcessorBase):
 
     def __init__(self, e_graph=None):
-        self.entity_graph = e_graph if e_graph else entity_graph. \
-            EntityGraph("Entity Graph")
         self.transformer = transformer_manager.TransformerManager()
         self._initialize_events_actions()
+        if e_graph is None:
+            self.entity_graph = entity_graph.EntityGraph("Entity Graph")
+        else:
+            self.entity_graph = e_graph
 
     def process_event(self, event):
         """Decides which action to run on given event
@@ -141,7 +143,6 @@ class Processor(processor.ProcessorBase):
 
     def _connect_neighbors(self, neighbors, valid_edges):
         """Updates the neighbor vertex and adds the connection edges """
-
         LOG.debug("Connect neighbors. Neighbors: %s, valid_edges: %s",
                   neighbors, valid_edges)
         for (vertex, edge) in neighbors:

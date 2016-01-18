@@ -12,17 +12,20 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from oslo_log import log as logging
-
 import copy
+import json
+
 import networkx as nx
+
+from networkx.readwrite import json_graph
+
+from oslo_log import log as logging
 
 from driver import Direction
 from driver import Edge  # noqa
 from driver import Graph
 from driver import Vertex  # noqa
 from utils import check_filter
-
 
 LOG = logging.getLogger(__name__)
 
@@ -213,3 +216,6 @@ class NXGraph(Graph):
                 edges_filtered2.append((source_id, target_id, label, data))
                 nodes.append((node_id_to_test, node_data))
         return nodes, edges_filtered2
+
+    def output_graph(self):
+        return json.dumps(json_graph.node_link_data(self._g))
