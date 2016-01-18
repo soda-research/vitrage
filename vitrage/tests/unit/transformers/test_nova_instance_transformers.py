@@ -169,7 +169,7 @@ class NovaInstanceTransformerTest(base.BaseTest):
             event,
             nova_transformers.InstanceTransformer.PROJECT_ID[sync_mode]
         )
-        observed_project = vertex[VertexProperties.PROJECT]
+        observed_project = vertex[VertexProperties.PROJECT_ID]
         self.assertEqual(expected_project, observed_project)
 
         expected_state = extract_value(

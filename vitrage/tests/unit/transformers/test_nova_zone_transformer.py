@@ -148,7 +148,11 @@ class NovaZoneTransformerTest(base.BaseTest):
             host_dic,
             ZoneTransformer.HOST_ACTIVE[sync_mode]
         )
-        expected_host_state = host_available and host_active
+
+        if host_available and host_active:
+            expected_host_state = ZoneTransformer.STATE_AVAILABLE
+        else:
+            expected_host_state = ZoneTransformer.STATE_UNAVAILABLE
         self.assertEqual(
             expected_host_state,
             host_vertex.get(VertexProperties.STATE)

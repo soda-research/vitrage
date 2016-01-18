@@ -373,7 +373,12 @@ class ZoneTransformer(base.TransformerBase):
                 hosts[key],
                 self.HOST_ACTIVE[sync_mode]
             )
-            host_state = host_available and host_active
+
+            if host_available and host_active:
+                host_state = self.STATE_AVAILABLE
+            else:
+                host_state = self.STATE_UNAVAILABLE
+
             host_neighbor = self._create_host_neighbor(
                 entity_vertex.vertex_id,
                 key,

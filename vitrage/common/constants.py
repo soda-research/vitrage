@@ -14,15 +14,15 @@
 
 
 class VertexProperties(object):
-    TYPE = 'TYPE'
-    SUBTYPE = 'SUBTYPE'
-    ID = 'ID'
-    IS_DELETED = 'IS_DELETED'
-    STATE = 'STATE'
-    PROJECT = 'PROJECT'
-    UPDATE_TIMESTAMP = 'UPDATE_TIMESTAMP'
-    NAME = 'NAME'
-    IS_PLACEHOLDER = 'IS_PLACEHOLDER'
+    TYPE = 'type'
+    SUBTYPE = 'subtype'
+    ID = 'id'
+    IS_DELETED = 'is_deleted'
+    STATE = 'state'
+    PROJECT_ID = 'project_id'
+    UPDATE_TIMESTAMP = 'update_timestamp'
+    NAME = 'name'
+    IS_PLACEHOLDER = 'is_placeholder'
 
 
 class EdgeProperties(object):

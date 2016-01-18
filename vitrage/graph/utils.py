@@ -56,7 +56,7 @@ def create_vertex(vertex_id,
 
     properties = {
         VConst.ID: entity_id,
-        VConst.PROJECT: entity_project,
+        VConst.PROJECT_ID: entity_project,
         VConst.STATE: entity_state,
         VConst.SUBTYPE: entity_subtype,
         VConst.TYPE: entity_type,
