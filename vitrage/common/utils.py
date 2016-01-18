@@ -17,8 +17,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from datetime import datetime
-import pytz
+from oslo_utils import timeutils
 import six
 
 
@@ -32,5 +31,6 @@ def recursive_keypairs(d, separator='.'):
             yield name, value
 
 
-def get_timezone_aware_time():
-    return str(datetime.utcnow().replace(tzinfo=pytz.utc))
+def utcnow():
+    """Better version of utcnow() that returns utcnow with a correct TZ."""
+    return timeutils.utcnow(True)

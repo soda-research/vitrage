@@ -17,7 +17,7 @@ import unittest
 from vitrage.common.constants import SyncMode
 
 from vitrage.common.constants import VertexProperties
-from vitrage.common.utils import get_timezone_aware_time
+from vitrage.common.utils import utcnow
 from vitrage.entity_graph.processor import processor as proc
 from vitrage.tests.mocks import mock_syncronizer as mock_sync
 from vitrage.tests.unit import base
@@ -98,8 +98,7 @@ class TestProcessor(base.BaseTest):
 
         # update instance event with state running
         vertex.properties[VertexProperties.STATE] = 'RUNNING'
-        vertex.properties[VertexProperties.UPDATE_TIMESTAMP] = \
-            get_timezone_aware_time()
+        vertex.properties[VertexProperties.UPDATE_TIMESTAMP] = str(utcnow())
         processor.update_entity(vertex, neighbors)
 
         # check state
