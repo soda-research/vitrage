@@ -197,7 +197,7 @@ class Processor(processor.ProcessorBase):
             neighbor_vertex = self.entity_graph.get_vertex(
                 curr_edge.other_vertex(vertex.vertex_id))
 
-            is_connection_type_exist = self.entity_graph.get_vertex_type(
+            is_connection_type_exist = self.entity_graph.get_vertex_category(
                 neighbor_vertex) in graph_neighbor_types
 
             if not is_connection_type_exist:

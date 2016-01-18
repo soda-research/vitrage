@@ -60,14 +60,14 @@ class NovaInstanceTransformerTest(base.BaseTest):
         observed_time = placeholder.get(VertexProperties.UPDATE_TIMESTAMP)
         self.assertEqual(observed_time, timestamp)
 
-        observed_subtype = placeholder.get(VertexProperties.SUBTYPE)
-        self.assertEqual(observed_subtype, nova_transformers.INSTANCE_SUBTYPE)
+        observed_type = placeholder.get(VertexProperties.TYPE)
+        self.assertEqual(observed_type, nova_transformers.INSTANCE_TYPE)
 
         observed_entity_id = placeholder.get(VertexProperties.ID)
         self.assertEqual(observed_entity_id, instance_id)
 
-        observed_type = placeholder.get(VertexProperties.TYPE)
-        self.assertEqual(observed_type, EntityTypes.RESOURCE)
+        observed_category = placeholder.get(VertexProperties.CATEGORY)
+        self.assertEqual(observed_category, EntityTypes.RESOURCE)
 
         is_placeholder = placeholder.get(VertexProperties.IS_PLACEHOLDER)
         self.assertEqual(is_placeholder, True)
@@ -158,11 +158,14 @@ class NovaInstanceTransformerTest(base.BaseTest):
         observed_id = vertex[VertexProperties.ID]
         self.assertEqual(expected_id, observed_id)
 
-        self.assertEqual(EntityTypes.RESOURCE, vertex[VertexProperties.TYPE])
+        self.assertEqual(
+            EntityTypes.RESOURCE,
+            vertex[VertexProperties.CATEGORY]
+        )
 
         self.assertEqual(
-            nova_transformers.INSTANCE_SUBTYPE,
-            vertex[VertexProperties.SUBTYPE]
+            nova_transformers.INSTANCE_TYPE,
+            vertex[VertexProperties.TYPE]
         )
 
         expected_project = extract_value(
@@ -244,7 +247,7 @@ class NovaInstanceTransformerTest(base.BaseTest):
 
             self.assertEqual(EntityTypes.RESOURCE, observed_key_fields[0])
             self.assertEqual(
-                nova_transformers.INSTANCE_SUBTYPE,
+                nova_transformers.INSTANCE_TYPE,
                 observed_key_fields[1]
             )
 

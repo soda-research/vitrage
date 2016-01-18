@@ -79,14 +79,14 @@ class EntityGraph(networkx_graph.NXGraph):
 
         neighbor_types = set()
         for (vertex, edge) in neighbors:
-            neighbor_types.add(self.get_vertex_type(vertex))
+            neighbor_types.add(self.get_vertex_category(vertex))
         return neighbor_types
 
     @staticmethod
-    def get_vertex_type(vertex):
+    def get_vertex_category(vertex):
+        category = vertex[VProps.CATEGORY]
         type = vertex[VProps.TYPE]
-        sub_type = vertex[VProps.SUBTYPE]
-        return type, sub_type
+        return category, type
 
     def check_update_validation(self, graph_vertex, updated_vertex):
         """Checks current and updated validation

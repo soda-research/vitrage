@@ -27,9 +27,9 @@ import vitrage.graph.utils as graph_utils
 LOG = logging.getLogger(__name__)
 
 
-INSTANCE_SUBTYPE = 'nova.instance'
-HOST_SUBTYPE = 'nova.host'
-ZONE_SUBTYPE = 'nova.zone'
+INSTANCE_TYPE = 'nova.instance'
+HOST_TYPE = 'nova.host'
+ZONE_TYPE = 'nova.zone'
 
 
 class InstanceTransformer(base.TransformerBase):
@@ -109,8 +109,8 @@ class InstanceTransformer(base.TransformerBase):
         entity_vertex = graph_utils.create_vertex(
             entity_key,
             entity_id=entity_id,
-            entity_type=EntityTypes.RESOURCE,
-            entity_subtype=INSTANCE_SUBTYPE,
+            entity_category=EntityTypes.RESOURCE,
+            entity_type=INSTANCE_TYPE,
             entity_project=project,
             entity_state=state,
             update_timestamp=update_timestamp,
@@ -163,7 +163,7 @@ class InstanceTransformer(base.TransformerBase):
         relation_edge = graph_utils.create_edge(
             source_id=host_vertex.vertex_id,
             target_id=vertex_id,
-            relation_type=EdgeLabels.CONTAINS
+            relationship_type=EdgeLabels.CONTAINS
         )
         return base.Neighbor(host_vertex, relation_edge)
 
@@ -174,14 +174,14 @@ class InstanceTransformer(base.TransformerBase):
         return graph_utils.create_vertex(
             base.build_key(key_fields),
             entity_id=instance_id,
-            entity_type=EntityTypes.RESOURCE,
-            entity_subtype=INSTANCE_SUBTYPE,
+            entity_category=EntityTypes.RESOURCE,
+            entity_type=INSTANCE_TYPE,
             update_timestamp=timestamp,
             is_placeholder=True
         )
 
     def _key_values(self, mutable_fields):
-        return [EntityTypes.RESOURCE, INSTANCE_SUBTYPE] + mutable_fields
+        return [EntityTypes.RESOURCE, INSTANCE_TYPE] + mutable_fields
 
 
 class HostTransformer(base.TransformerBase):
@@ -223,8 +223,8 @@ class HostTransformer(base.TransformerBase):
         entity_vertex = graph_utils.create_vertex(
             entity_key,
             entity_id=host_name,
-            entity_type=EntityTypes.RESOURCE,
-            entity_subtype=HOST_SUBTYPE,
+            entity_category=EntityTypes.RESOURCE,
+            entity_type=HOST_TYPE,
             update_timestamp=timestamp,
             metadata=metadata
         )
@@ -253,13 +253,13 @@ class HostTransformer(base.TransformerBase):
         relation_edge = graph_utils.create_edge(
             source_id=zone_neighbor.vertex_id,
             target_id=host_vertex_id,
-            relation_type=EdgeLabels.CONTAINS
+            relationship_type=EdgeLabels.CONTAINS
         )
         return base.Neighbor(zone_neighbor, relation_edge)
 
     def _key_values(self, mutable_fields):
 
-        fixed_fields = [EntityTypes.RESOURCE, HOST_SUBTYPE]
+        fixed_fields = [EntityTypes.RESOURCE, HOST_TYPE]
         return fixed_fields + mutable_fields
 
     def extract_key(self, entity_event):
@@ -279,8 +279,8 @@ class HostTransformer(base.TransformerBase):
         return graph_utils.create_vertex(
             base.build_key(key_fields),
             entity_id=host_name,
-            entity_type=EntityTypes.RESOURCE,
-            entity_subtype=HOST_SUBTYPE,
+            entity_category=EntityTypes.RESOURCE,
+            entity_type=HOST_TYPE,
             update_timestamp=timestamp,
             is_placeholder=True
         )
@@ -352,8 +352,8 @@ class ZoneTransformer(base.TransformerBase):
         entity_vertex = graph_utils.create_vertex(
             entity_key,
             entity_id=zone_name,
-            entity_type=EntityTypes.RESOURCE,
-            entity_subtype=ZONE_SUBTYPE,
+            entity_category=EntityTypes.RESOURCE,
+            entity_type=ZONE_TYPE,
             entity_state=state,
             update_timestamp=timestamp,
             metadata=metadata
@@ -399,7 +399,7 @@ class ZoneTransformer(base.TransformerBase):
         relation_edge = graph_utils.create_edge(
             source_id=node_vertex.vertex_id,
             target_id=zone_vertex.vertex_id,
-            relation_type=EdgeLabels.CONTAINS
+            relationship_type=EdgeLabels.CONTAINS
         )
         return base.Neighbor(node_vertex, relation_edge)
 
@@ -408,8 +408,8 @@ class ZoneTransformer(base.TransformerBase):
         host_vertex = graph_utils.create_vertex(
             base.build_key(HostTransformer()._key_values([host_name])),
             entity_id=host_name,
-            entity_type=EntityTypes.RESOURCE,
-            entity_subtype=ZONE_SUBTYPE,
+            entity_category=EntityTypes.RESOURCE,
+            entity_type=ZONE_TYPE,
             entity_state=host_state,
             update_timestamp=timestamp,
         )
@@ -417,7 +417,7 @@ class ZoneTransformer(base.TransformerBase):
         relation_edge = graph_utils.create_edge(
             source_id=zone_id,
             target_id=host_vertex.vertex_id,
-            relation_type=EdgeLabels.CONTAINS
+            relationship_type=EdgeLabels.CONTAINS
         )
         return base.Neighbor(host_vertex, relation_edge)
 
@@ -433,7 +433,7 @@ class ZoneTransformer(base.TransformerBase):
 
     def _key_values(self, mutable_fields):
 
-        fixed_fields = [EntityTypes.RESOURCE, ZONE_SUBTYPE]
+        fixed_fields = [EntityTypes.RESOURCE, ZONE_TYPE]
         return fixed_fields + mutable_fields
 
     def create_placeholder_vertex(self, zone_name, timestamp):
@@ -442,8 +442,8 @@ class ZoneTransformer(base.TransformerBase):
         return graph_utils.create_vertex(
             key,
             entity_id=zone_name,
-            entity_type=EntityTypes.RESOURCE,
-            entity_subtype=ZONE_SUBTYPE,
+            entity_category=EntityTypes.RESOURCE,
+            entity_type=ZONE_TYPE,
             update_timestamp=timestamp,
             is_placeholder=True
         )

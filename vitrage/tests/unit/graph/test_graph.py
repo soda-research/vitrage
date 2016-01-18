@@ -47,13 +47,13 @@ class GraphTest(GraphTestBase):
         self.assertEqual(2, len(graph_copy), 'graph copy __len__')
 
         updated_vertex = g.get_vertex(v_host.vertex_id)
-        updated_vertex[VProps.TYPE] = ALARM
+        updated_vertex[VProps.CATEGORY] = ALARM
         g.update_vertex(updated_vertex)
         v_from_g = g.get_vertex(v_host.vertex_id)
         v_from_graph_copy = graph_copy.get_vertex(v_host.vertex_id)
-        self.assertEqual(ALARM, v_from_g[VProps.TYPE],
+        self.assertEqual(ALARM, v_from_g[VProps.CATEGORY],
                          'graph vertex changed after update')
-        self.assertEqual(HOST, v_from_graph_copy[VProps.SUBTYPE],
+        self.assertEqual(HOST, v_from_graph_copy[VProps.TYPE],
                          'graph copy vertex unchanged after update')
 
     def test_vertex_crud(self):
@@ -62,7 +62,7 @@ class GraphTest(GraphTestBase):
         v = g.get_vertex(v_node.vertex_id)
         self.assertEqual(v_node[VProps.ID], v[VProps.ID],
                          'vertex properties are saved')
-        self.assertEqual(v_node[VProps.TYPE], v[VProps.TYPE],
+        self.assertEqual(v_node[VProps.CATEGORY], v[VProps.CATEGORY],
                          'vertex properties are saved')
         self.assertEqual(v_node.vertex_id, v.vertex_id,
                          'vertex vertex_id is saved')
@@ -70,14 +70,14 @@ class GraphTest(GraphTestBase):
         # Changing the referenced item
         updated_v = v
         updated_v['KUKU'] = 'KUKU'
-        updated_v[VProps.TYPE] = 'CHANGED'
+        updated_v[VProps.CATEGORY] = 'CHANGED'
         # Get it again
         v = g.get_vertex(v_node.vertex_id)
         self.assertIsNone(v.get('KUKU', None),
                           'Change should not affect graph item')
         self.assertFalse(v.get(EProps.IS_DELETED, None),
                          'Change should not affect graph item')
-        self.assertEqual(v_node[VProps.TYPE], v[VProps.TYPE],
+        self.assertEqual(v_node[VProps.CATEGORY], v[VProps.CATEGORY],
                          'Change should not affect graph item')
         # Update the graph item and see changes take place
         g.update_vertex(updated_v)
@@ -85,19 +85,19 @@ class GraphTest(GraphTestBase):
         v = g.get_vertex(v_node.vertex_id)
         self.assertEqual(updated_v['KUKU'], v['KUKU'],
                          'Graph item should change after update')
-        self.assertEqual(updated_v[VProps.TYPE], v[VProps.TYPE],
+        self.assertEqual(updated_v[VProps.CATEGORY], v[VProps.CATEGORY],
                          'Graph item should change after update')
 
         # check metadata
         another_vertex = utils.create_vertex(
-            vertex_id='123', entity_id='456', entity_type=INSTANCE,
+            vertex_id='123', entity_id='456', entity_category=INSTANCE,
             metadata={'some_meta': 'DATA'}
         )
         g.add_vertex(another_vertex)
         v = g.get_vertex(another_vertex.vertex_id)
         self.assertEqual(another_vertex[VProps.ID], v[VProps.ID],
                          'vertex properties are saved')
-        self.assertEqual(another_vertex[VProps.TYPE], v[VProps.TYPE],
+        self.assertEqual(another_vertex[VProps.CATEGORY], v[VProps.CATEGORY],
                          'vertex properties are saved')
         self.assertEqual('DATA', v['some_meta'],
                          'vertex properties are saved')
@@ -116,10 +116,10 @@ class GraphTest(GraphTestBase):
         g.add_vertex(v_host)
         g.add_edge(e_node_to_host)
         self.assertEqual(1, g.num_edges(), 'graph __len__ after add edge')
-        label = e_node_to_host[EProps.RELATION_NAME]
+        label = e_node_to_host[EProps.RELATIONSHIP_NAME]
         e = g.get_edge(v_node.vertex_id, v_host.vertex_id, label)
-        self.assertEqual(e_node_to_host[EProps.RELATION_NAME],
-                         e[EProps.RELATION_NAME],
+        self.assertEqual(e_node_to_host[EProps.RELATIONSHIP_NAME],
+                         e[EProps.RELATIONSHIP_NAME],
                          'edge properties are saved')
         self.assertEqual(e_node_to_host.source_id, e.source_id,
                          'edge vertex_id is saved')
@@ -172,13 +172,13 @@ class GraphTest(GraphTestBase):
         another_edge = utils.create_edge(
             source_id=v_node.vertex_id,
             target_id=v_host.vertex_id,
-            relation_type=another_label,
+            relationship_type=another_label,
             metadata={'some_meta': 'DATA'})
         g.add_edge(another_edge)
         self.assertEqual(2, g.num_edges(), 'graph __len__ after add edge')
         e = g.get_edge(v_node.vertex_id, v_host.vertex_id, another_label)
-        self.assertEqual(another_edge[EProps.RELATION_NAME],
-                         e[EProps.RELATION_NAME],
+        self.assertEqual(another_edge[EProps.RELATIONSHIP_NAME],
+                         e[EProps.RELATIONSHIP_NAME],
                          'edge properties are saved')
         self.assertEqual('DATA', e['some_meta'],
                          'edge properties are saved')
@@ -200,9 +200,9 @@ class GraphTest(GraphTestBase):
         self.assertIsNone(edge)
 
     def test_neighbors(self):
-        relation_a = 'RELATION_A'
-        relation_b = 'RELATION_B'
-        relation_c = 'RELATION_C'
+        relationship_a = 'RELATIONSHIP_A'
+        relationship_b = 'RELATIONSHIP_B'
+        relationship_c = 'RELATIONSHIP_C'
 
         v1 = v_node
         v2 = v_host
@@ -210,7 +210,7 @@ class GraphTest(GraphTestBase):
         v4 = v_alarm
         v5 = utils.create_vertex(
             vertex_id='kuku',
-            entity_type=HOST)
+            entity_category=HOST)
 
         g = create_graph('test_neighbors')
         g.add_vertex(v1)
@@ -221,31 +221,31 @@ class GraphTest(GraphTestBase):
 
         g.add_edge(utils.create_edge(source_id=v1.vertex_id,
                                      target_id=v2.vertex_id,
-                                     relation_type=relation_a))
+                                     relationship_type=relationship_a))
         g.add_edge(utils.create_edge(source_id=v1.vertex_id,
                                      target_id=v2.vertex_id,
-                                     relation_type=relation_b))
+                                     relationship_type=relationship_b))
         g.add_edge(utils.create_edge(source_id=v1.vertex_id,
                                      target_id=v4.vertex_id,
-                                     relation_type=relation_a))
+                                     relationship_type=relationship_a))
         g.add_edge(utils.create_edge(source_id=v1.vertex_id,
                                      target_id=v4.vertex_id,
-                                     relation_type=relation_b))
+                                     relationship_type=relationship_b))
         g.add_edge(utils.create_edge(source_id=v2.vertex_id,
                                      target_id=v1.vertex_id,
-                                     relation_type=relation_c))
+                                     relationship_type=relationship_c))
         g.add_edge(utils.create_edge(source_id=v2.vertex_id,
                                      target_id=v3.vertex_id,
-                                     relation_type=relation_a))
+                                     relationship_type=relationship_a))
         g.add_edge(utils.create_edge(source_id=v2.vertex_id,
                                      target_id=v3.vertex_id,
-                                     relation_type=relation_b))
+                                     relationship_type=relationship_b))
         g.add_edge(utils.create_edge(source_id=v2.vertex_id,
                                      target_id=v4.vertex_id,
-                                     relation_type=relation_a))
+                                     relationship_type=relationship_a))
         g.add_edge(utils.create_edge(source_id=v4.vertex_id,
                                      target_id=v1.vertex_id,
-                                     relation_type=relation_c))
+                                     relationship_type=relationship_c))
 
         # CHECK V1
 
@@ -254,13 +254,13 @@ class GraphTest(GraphTestBase):
 
         v1_neighbors = g.neighbors(
             v_id=v1.vertex_id,
-            vertex_attr_filter={VProps.SUBTYPE: HOST})
+            vertex_attr_filter={VProps.TYPE: HOST})
         self._assert_set_equal({v2}, v1_neighbors,
                                'Check V1 neighbors, vertex property filter')
 
         v1_neighbors = g.neighbors(
             v_id=v1.vertex_id,
-            edge_attr_filter={EProps.RELATION_NAME: relation_a})
+            edge_attr_filter={EProps.RELATIONSHIP_NAME: relationship_a})
         self._assert_set_equal({v2, v4}, v1_neighbors,
                                'Check V1 neighbors, edge property filter')
 
@@ -282,8 +282,8 @@ class GraphTest(GraphTestBase):
         v1_neighbors = g.neighbors(
             v_id=v1.vertex_id,
             direction=Direction.IN,
-            edge_attr_filter={EProps.RELATION_NAME: relation_c},
-            vertex_attr_filter={VProps.SUBTYPE: HOST})
+            edge_attr_filter={EProps.RELATIONSHIP_NAME: relationship_c},
+            vertex_attr_filter={VProps.TYPE: HOST})
         self._assert_set_equal(
             {v2}, v1_neighbors,
             'Check V1 neighbors, vertex/edge property filter and direction')
@@ -296,22 +296,26 @@ class GraphTest(GraphTestBase):
 
         v2_neighbors = g.neighbors(
             v_id=v2.vertex_id,
-            vertex_attr_filter={VProps.TYPE: HOST})
+            vertex_attr_filter={VProps.CATEGORY: HOST})
         self._assert_set_equal({}, v2_neighbors,
                                'Check v2 neighbors, vertex property filter')
 
         v2_neighbors = g.neighbors(
             v_id=v2.vertex_id,
-            vertex_attr_filter={VProps.TYPE: [HOST, ALARM]})
+            vertex_attr_filter={VProps.CATEGORY: [HOST, ALARM]})
         self._assert_set_equal({v4}, v2_neighbors,
                                'Check v2 neighbors, vertex property filter')
 
         v2_neighbors = g.neighbors(
             v_id=v2.vertex_id,
-            edge_attr_filter={EProps.RELATION_NAME: [relation_a, relation_b]},
-            vertex_attr_filter={VProps.TYPE: [RESOURCE, ALARM],
-                                VProps.SUBTYPE: [HOST, INSTANCE, ALARM_ON_VM,
-                                                 ALARM_ON_HOST]})
+            edge_attr_filter={
+                EProps.RELATIONSHIP_NAME: [relationship_a, relationship_b]
+            },
+            vertex_attr_filter={
+                VProps.CATEGORY: [RESOURCE, ALARM],
+                VProps.TYPE: [HOST, INSTANCE, ALARM_ON_VM, ALARM_ON_HOST]
+            }
+        )
         self._assert_set_equal({v3, v4}, v2_neighbors,
                                'Check v2 neighbors, edge property filter')
 
@@ -323,12 +327,12 @@ class GraphTest(GraphTestBase):
 
         v3_neighbors = g.neighbors(
             v_id=v3.vertex_id,
-            vertex_attr_filter={VProps.TYPE: HOST},
+            vertex_attr_filter={VProps.CATEGORY: HOST},
             direction=Direction.OUT)
         self._assert_set_equal({}, v3_neighbors,
                                'Check neighbors for vertex without any')
         v5_neighbors = g.neighbors(
             v_id=v5.vertex_id,
-            vertex_attr_filter={VProps.TYPE: HOST})
+            vertex_attr_filter={VProps.CATEGORY: HOST})
         self._assert_set_equal({}, v5_neighbors,
                                'Check neighbors for not connected vertex')

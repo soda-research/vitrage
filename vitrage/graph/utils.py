@@ -20,8 +20,8 @@ from vitrage.graph import Vertex
 
 def create_vertex(vertex_id,
                   entity_id=None,
+                  entity_category=None,
                   entity_type=None,
-                  entity_subtype=None,
                   entity_project=None,
                   entity_state=None,
                   is_deleted=False,
@@ -34,10 +34,10 @@ def create_vertex(vertex_id,
     :type vertex_id: str
     :param entity_id:
     :type entity_id: str
+    :param entity_category:
+    :type entity_category: str
     :param entity_type:
     :type entity_type: str
-    :param entity_subtype:
-    :type entity_subtype: str
     :param entity_project:
     :type entity_project: str
     :param entity_state:
@@ -58,8 +58,8 @@ def create_vertex(vertex_id,
         VConst.ID: entity_id,
         VConst.PROJECT_ID: entity_project,
         VConst.STATE: entity_state,
-        VConst.SUBTYPE: entity_subtype,
         VConst.TYPE: entity_type,
+        VConst.CATEGORY: entity_category,
         VConst.IS_DELETED: is_deleted,
         VConst.UPDATE_TIMESTAMP: update_timestamp,
         VConst.IS_PLACEHOLDER: is_placeholder
@@ -74,7 +74,7 @@ def create_vertex(vertex_id,
 
 def create_edge(source_id,
                 target_id,
-                relation_type,
+                relationship_type,
                 is_deleted=False,
                 update_timestamp=None,
                 metadata=None):
@@ -84,8 +84,8 @@ def create_edge(source_id,
     :type source_id: str
     :param target_id:
     :type target_id: str
-    :param relation_type:
-    :type relation_type: str
+    :param relationship_type:
+    :type relationship_type: str
     :param is_deleted:
     :type is_deleted: str
     :param metadata:
@@ -96,7 +96,7 @@ def create_edge(source_id,
     properties = {
         EConst.UPDATE_TIMESTAMP: update_timestamp,
         EConst.IS_DELETED: is_deleted,
-        EConst.RELATION_NAME: relation_type,
+        EConst.RELATIONSHIP_NAME: relationship_type,
     }
     if metadata:
         properties.update(metadata)
@@ -104,7 +104,7 @@ def create_edge(source_id,
         (k, v) for k, v in properties.iteritems() if v is not None)
     edge = Edge(source_id=source_id,
                 target_id=target_id,
-                label=relation_type,
+                label=relationship_type,
                 properties=properties)
     return edge
 

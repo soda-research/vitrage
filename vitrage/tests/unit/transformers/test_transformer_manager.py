@@ -30,8 +30,8 @@ def create_vertex(entity_id, entity_type, entity_subtype=None):
     return graph_utils.create_vertex(
         vertex_id,
         entity_id=entity_id,
-        entity_type=entity_type,
-        entity_subtype=entity_subtype
+        entity_category=entity_type,
+        entity_type=entity_subtype
     )
 
 

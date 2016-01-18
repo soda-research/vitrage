@@ -28,7 +28,7 @@ class GraphAlgorithmTest(GraphTestBase):
     def test_graph_query_vertices(self):
         ga = create_algorithm(self.entity_graph)
 
-        query = {'==': {VProps.SUBTYPE: NODE}}
+        query = {'==': {VProps.TYPE: NODE}}
         subgraph = ga.graph_query_vertices(query)
         self.assertEqual(
             1,  # For NODE
@@ -36,8 +36,8 @@ class GraphAlgorithmTest(GraphTestBase):
 
         query = {
             'or': [
-                {'==': {VProps.SUBTYPE: HOST}},
-                {'==': {VProps.SUBTYPE: NODE}}
+                {'==': {VProps.TYPE: HOST}},
+                {'==': {VProps.TYPE: NODE}}
             ]
         }
 
@@ -48,10 +48,10 @@ class GraphAlgorithmTest(GraphTestBase):
 
         query = {
             'or': [
-                {'==': {VProps.SUBTYPE: INSTANCE}},
-                {'==': {VProps.TYPE: ALARM}},
-                {'==': {VProps.SUBTYPE: HOST}},
-                {'==': {VProps.SUBTYPE: NODE}}
+                {'==': {VProps.TYPE: INSTANCE}},
+                {'==': {VProps.CATEGORY: ALARM}},
+                {'==': {VProps.TYPE: HOST}},
+                {'==': {VProps.TYPE: NODE}}
             ]
         }
         subgraph = ga.graph_query_vertices(query)
@@ -65,7 +65,7 @@ class GraphAlgorithmTest(GraphTestBase):
 
         # Get first host ID
         neighboring_hosts = self.entity_graph.neighbors(
-            v_node.vertex_id, {VProps.SUBTYPE: HOST})
+            v_node.vertex_id, {VProps.TYPE: HOST})
         first_host_id = neighboring_hosts.pop().vertex_id
 
         query = {'!=': {'NOTHING': 'IS EVERYTHING'}}
@@ -82,8 +82,8 @@ class GraphAlgorithmTest(GraphTestBase):
 
         query = {
             'or': [
-                {'==': {VProps.SUBTYPE: SWITCH}},
-                {'==': {VProps.SUBTYPE: HOST}},
+                {'==': {VProps.TYPE: SWITCH}},
+                {'==': {VProps.TYPE: HOST}},
             ]
         }
         subgraph = ga.graph_query_vertices(
@@ -104,9 +104,9 @@ class GraphAlgorithmTest(GraphTestBase):
 
         query = {
             'and': [
-                {'!=': {VProps.SUBTYPE: ALARM_ON_VM}},
-                {'!=': {VProps.SUBTYPE: ALARM_ON_HOST}},
-                {'!=': {VProps.TYPE: ALARM}}
+                {'!=': {VProps.TYPE: ALARM_ON_VM}},
+                {'!=': {VProps.TYPE: ALARM_ON_HOST}},
+                {'!=': {VProps.CATEGORY: ALARM}}
             ]
         }
         subgraph = ga.graph_query_vertices(query_dict=query, depth=3)
@@ -119,8 +119,8 @@ class GraphAlgorithmTest(GraphTestBase):
 
         query = {
             'or': [
-                {'==': {VProps.SUBTYPE: NODE}},
-                {'==': {VProps.TYPE: ALARM}},
+                {'==': {VProps.TYPE: NODE}},
+                {'==': {VProps.CATEGORY: ALARM}},
             ]
         }
         subgraph = ga.graph_query_vertices(query_dict=query, depth=3)

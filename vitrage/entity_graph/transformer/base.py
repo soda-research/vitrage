@@ -55,8 +55,8 @@ def create_node_placeholder_vertex():
 
     return graph_utils.create_vertex(
         key,
-        entity_type=cons.EntityTypes.RESOURCE,
-        entity_subtype=NODE_SUBTYPE,
+        entity_category=cons.EntityTypes.RESOURCE,
+        entity_type=NODE_SUBTYPE,
         metadata=metadata
     )
 

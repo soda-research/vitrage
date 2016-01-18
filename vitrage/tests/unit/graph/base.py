@@ -51,39 +51,39 @@ TEST_ON_HOST = 'TEST_ON_HOST'
 v_node = graph_utils.create_vertex(
     vertex_id=NODE + '111111111111',
     entity_id='111111111111',
-    entity_subtype=NODE,
-    entity_type=RESOURCE)
+    entity_type=NODE,
+    entity_category=RESOURCE)
 v_host = graph_utils.create_vertex(
     vertex_id=HOST + '222222222222',
     entity_id='222222222222',
-    entity_subtype=HOST,
-    entity_type=RESOURCE)
+    entity_type=HOST,
+    entity_category=RESOURCE)
 v_instance = graph_utils.create_vertex(
     vertex_id=INSTANCE + '333333333333',
     entity_id='333333333333',
-    entity_subtype=INSTANCE,
-    entity_type=RESOURCE)
+    entity_type=INSTANCE,
+    entity_category=RESOURCE)
 v_alarm = graph_utils.create_vertex(
     vertex_id=ALARM + '444444444444',
     entity_id='444444444444',
-    entity_subtype=ALARM_ON_VM,
-    entity_type=ALARM)
+    entity_type=ALARM_ON_VM,
+    entity_category=ALARM)
 v_switch = graph_utils.create_vertex(
     vertex_id=SWITCH + '1212121212',
     entity_id='1212121212',
-    entity_subtype=SWITCH,
-    entity_type=RESOURCE)
+    entity_type=SWITCH,
+    entity_category=RESOURCE)
 
 e_node_to_host = graph_utils.create_edge(
     source_id=v_node.vertex_id,
     target_id=v_host.vertex_id,
-    relation_type=ELabel.CONTAINS,
+    relationship_type=ELabel.CONTAINS,
     update_timestamp='123')
 
 e_node_to_switch = graph_utils.create_edge(
     source_id=v_node.vertex_id,
     target_id=v_switch.vertex_id,
-    relation_type=ELabel.CONTAINS)
+    relationship_type=ELabel.CONTAINS)
 
 
 def add_connected_vertex(graph, entity_type, entity_subtype, entity_id,
@@ -91,12 +91,12 @@ def add_connected_vertex(graph, entity_type, entity_subtype, entity_id,
     vertex = graph_utils.create_vertex(
         vertex_id=entity_subtype + str(entity_id),
         entity_id=entity_id,
-        entity_type=entity_type,
-        entity_subtype=entity_subtype)
+        entity_category=entity_type,
+        entity_type=entity_subtype)
     edge = graph_utils.create_edge(
         source_id=other_vertex.vertex_id if reverse else vertex.vertex_id,
         target_id=vertex.vertex_id if reverse else other_vertex.vertex_id,
-        relation_type=edge_type)
+        relationship_type=edge_type)
     graph.add_vertex(vertex)
     graph.add_edge(edge)
     return vertex

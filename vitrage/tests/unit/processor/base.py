@@ -24,20 +24,20 @@ class BaseProcessor(base.BaseTest):
         super(BaseProcessor, self).setUp()
         self.transform = transformer_manager.TransformerManager()
 
-    def _update_vertex_to_graph(self, entity_graph, type, sub_type, id,
+    def _update_vertex_to_graph(self, entity_graph, category, type, id,
                                 is_deleted, is_placeholder_data,
                                 additional_prop):
         # create vertex properties
         prop = {key: value for key, value in additional_prop.iteritems()}
+        prop[VertexProperties.CATEGORY] = category
         prop[VertexProperties.TYPE] = type
-        prop[VertexProperties.SUBTYPE] = sub_type
         prop[VertexProperties.ID] = id
         prop[VertexProperties.IS_DELETED] = is_deleted
         prop[VertexProperties.IS_PLACEHOLDER] = is_placeholder_data
 
         # TODO(Alexey): change back to original method
         # vertex_id = self.transform.get_key(prop)
-        vertex_id = type + "_" + sub_type + "_" + id
+        vertex_id = category + "_" + type + "_" + id
         vertex = graph.Vertex(vertex_id, prop)
         entity_graph.add_vertex(vertex)
 

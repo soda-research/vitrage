@@ -53,14 +53,14 @@ class NovaZoneTransformerTest(base.BaseTest):
         observed_time = placeholder.get(VertexProperties.UPDATE_TIMESTAMP)
         self.assertEqual(observed_time, timestamp)
 
-        observed_subtype = placeholder.get(VertexProperties.SUBTYPE)
-        self.assertEqual(observed_subtype, nova_transformers.ZONE_SUBTYPE)
+        observed_subtype = placeholder.get(VertexProperties.TYPE)
+        self.assertEqual(observed_subtype, nova_transformers.ZONE_TYPE)
 
         observed_entity_id = placeholder.get(VertexProperties.ID)
         self.assertEqual(observed_entity_id, zone_name)
 
-        observed_type = placeholder.get(VertexProperties.TYPE)
-        self.assertEqual(observed_type, EntityTypes.RESOURCE)
+        observed_category = placeholder.get(VertexProperties.CATEGORY)
+        self.assertEqual(observed_category, EntityTypes.RESOURCE)
 
         is_placeholder = placeholder.get(VertexProperties.IS_PLACEHOLDER)
         self.assertEqual(is_placeholder, True)
@@ -77,7 +77,7 @@ class NovaZoneTransformerTest(base.BaseTest):
         # Test assertions
         self.assertEqual(EntityTypes.RESOURCE, observed_key_fields[0])
         self.assertEqual(
-            nova_transformers.ZONE_SUBTYPE,
+            nova_transformers.ZONE_TYPE,
             observed_key_fields[1]
         )
         self.assertEqual(zone_name, observed_key_fields[2])
@@ -112,9 +112,9 @@ class NovaZoneTransformerTest(base.BaseTest):
         node_neighbors_counter = 0
 
         for neighbor in neighbors:
-            vertex_subtype = neighbor.vertex.get(VertexProperties.SUBTYPE)
+            vertex_type = neighbor.vertex.get(VertexProperties.TYPE)
 
-            if tbase.NODE_SUBTYPE == vertex_subtype:
+            if tbase.NODE_SUBTYPE == vertex_type:
                 node_neighbors_counter += 1
                 self._validate_node_neighbor(neighbor, zone_vertex_id)
             else:
@@ -197,12 +197,12 @@ class NovaZoneTransformerTest(base.BaseTest):
 
         self.assertEqual(
             EntityTypes.RESOURCE,
-            vertex[VertexProperties.TYPE]
+            vertex[VertexProperties.CATEGORY]
         )
 
         self.assertEqual(
-            nova_transformers.ZONE_SUBTYPE,
-            vertex[VertexProperties.SUBTYPE]
+            nova_transformers.ZONE_TYPE,
+            vertex[VertexProperties.TYPE]
         )
 
         expected_timestamp = extract_value(

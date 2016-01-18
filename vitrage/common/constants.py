@@ -14,8 +14,8 @@
 
 
 class VertexProperties(object):
+    CATEGORY = 'category'
     TYPE = 'type'
-    SUBTYPE = 'subtype'
     ID = 'id'
     IS_DELETED = 'is_deleted'
     STATE = 'state'
@@ -26,9 +26,9 @@ class VertexProperties(object):
 
 
 class EdgeProperties(object):
-    RELATION_NAME = 'RELATION_NAME'
-    IS_DELETED = 'IS_DELETED'
-    UPDATE_TIMESTAMP = 'UPDATE_TIMESTAMP'
+    RELATIONSHIP_NAME = 'relationship_name'
+    IS_DELETED = 'is_deleted'
+    UPDATE_TIMESTAMP = 'update_timestamp'
 
 
 class EdgeLabels(object):
