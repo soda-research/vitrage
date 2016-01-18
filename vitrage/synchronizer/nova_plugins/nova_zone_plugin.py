@@ -24,12 +24,12 @@ class NovaZonePlugin(NovaClientPlugin):
                                              project,
                                              auth_url)
 
-    def filter_internal_zone(self, zones):
+    @staticmethod
+    def filter_internal_zone(zones):
         zones_res = []
         for zone in zones:
             zone_dict = zone.__dict__
             if zone_dict['zoneName'] and zone_dict['zoneName'] != 'internal':
-                self.add_sampling_time(zone)
                 zones_res.append(zone)
         return zones_res
 

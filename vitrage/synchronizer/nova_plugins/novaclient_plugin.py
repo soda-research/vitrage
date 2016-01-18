@@ -12,16 +12,15 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from time import gmtime
-from time import strftime
 
 from novaclient import client
-
+from vitrage.common import utils
 from vitrage.synchronizer.base_plugin import BasePlugin
 
 
 class NovaClientPlugin(BasePlugin):
     def __init__(self, version, user, password, project, auth_url):
+        super(NovaClientPlugin, self).__init__()
         self.client = client.Client(version, user, password, project, auth_url)
 
     def get_client(self):
@@ -39,10 +38,12 @@ class NovaClientPlugin(BasePlugin):
 
             picklable_entity['sync_type'] = sync_type
             picklable_entities.append(picklable_entity)
+            self._add_sampling_time(entity)
 
         return picklable_entities
 
-    def add_sampling_time(self, entity):
+    @staticmethod
+    def _add_sampling_time(entity):
         dict_entity = entity.__dict__
-        dict_entity['sample_date'] = strftime("%Y-%m-%d %H:%M:%S", gmtime())
+        dict_entity['sample_date'] = utils.get_timezone_aware_time()
         return entity

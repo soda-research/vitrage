@@ -25,7 +25,8 @@ class NovaHostPlugin(NovaClientPlugin):
                                              project,
                                              auth_url)
 
-    def filter_none_compute_hosts(self, entities):
+    @staticmethod
+    def filter_none_compute_hosts(entities):
         compute_hosts = []
         for host in entities:
             host_dict = host.__dict__
