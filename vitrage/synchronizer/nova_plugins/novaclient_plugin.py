@@ -44,5 +44,5 @@ class NovaClientPlugin(BasePlugin):
 
     @staticmethod
     def _add_sampling_time(entity):
-        entity['sample_date'] = utils.get_timezone_aware_time()
+        entity['sample_date'] = str(utils.utcnow())
         return entity
