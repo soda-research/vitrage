@@ -3,9 +3,9 @@ Vitrage Graph Design
 ====================
 
 .. image:: ./images/vitrage_graph_architecture.png
-:width: 60%
+   :width: 100%
+   :align: center
 
-..
 
 Main Components
 ===============
@@ -82,9 +82,9 @@ Use Cases
 Use Case - Add Nova Instance
 ----------------------------
 .. image:: ./images/add_nova_instance_flow.png
-:width: 60%
+   :width: 100%
+   :align: center
 
-..
 
 #. Nova Synchronizer plugin queries all Nova instances, or gets a message bus notification about a new Nova instance
 #. Nova Synchronizer plugin sends corresponding events to the Entity Queue
@@ -93,17 +93,16 @@ Use Case - Add Nova Instance
 #. The Entity Processor adds the new vertex and edge to the Graph
 
 .. image:: ./images/add_nova_instance_graph.png
-:width: 60%
-
-..
+   :width: 100%
+   :align: center
 
 
 Use Case - Add Aodh Alarm
 -------------------------
 .. image:: ./images/add_aodh_alarm_flow.png
-:width: 60%
+   :width: 100%
+   :align: center
 
-..
 
 #. Aodh Synchronizer plugin queries all Aodh alarms, or gets a notification (TBD) about an Aodh alarm state change
 #. Aodh Synchronizer plugin sends corresponding events to the Entity Queue
@@ -112,17 +111,16 @@ Use Case - Add Aodh Alarm
 #. The Entity Processor adds the new vertex and edge to the Graph
 
 .. image:: ./images/add_aodh_alarm_graph.png
-:width: 60%
-
-..
+   :width: 100%
+   :align: center
 
 
 Use Case - Nagios Alarm Causes Deduced Alarm
 --------------------------------------------
 .. image:: ./images/nagios_causes_deduced_flow.png
-:width: 60%
+   :width: 100%
+   :align: center
 
-..
 
 5.  (steps 1-5) Nagios Synchronizer plugin pushes a nagios alarm on a switch to the Entity Queue, which is converted by Nagios Transformer to a vertex and inserted to the Graph
 6. The Evaluator is notified about a new Vertex (Nagios switch alarm) that was added to the graph
@@ -132,30 +130,29 @@ Use Case - Nagios Alarm Causes Deduced Alarm
 10. Aodh Notifier creates new alarm definitions in Aodh, and sets their states to "alarm"
 
 .. image:: ./images/nagios_causes_deduced_graph.png
-:width: 60%
-
-..
+   :width: 100%
+   :align: center
 
 
 Use Case - Create RCA Insights
 ------------------------------
 .. image:: ./images/rca_flow.png
-:width: 60%
+   :width: 100%
+   :align: center
 
-..
 
 #. The Evaluator is notified of a new alarm.
 #. The Evaluator evaluates the templates and the Graph (TBD), and decides that there is a root cause relation between two alarms. It adds a "causes" edge to the Graph
 
 .. image:: ./images/rca_graph.png
-:width: 60%
+   :width: 100%
+   :align: center
 
-..
 
 Note that in future versions the graph with RCA information may become more complex, for example:
 
 .. image:: ./images/complex_rca_graph.png
-:width: 60%
+   :width: 100%
+   :align: center
 
-..
 
