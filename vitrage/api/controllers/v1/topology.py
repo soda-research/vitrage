@@ -1,3 +1,5 @@
+# Copyright 2016 - Alcatel-Lucent
+#
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
 # a copy of the License at
@@ -12,13 +14,17 @@
 
 
 import json
-import pecan
 
 from networkx.readwrite import json_graph
+from oslo_config import cfg
 from oslo_log import log
+import oslo_messaging
+import pecan
 from pecan.core import abort
 from pecan import rest
+
 from vitrage.api.policy import enforce
+
 # noinspection PyProtectedMember
 from vitrage.i18n import _LI
 
@@ -26,6 +32,14 @@ LOG = log.getLogger(__name__)
 
 
 class TopologyController(rest.RestController):
+
+    def __init__(self):
+        transport = oslo_messaging.get_transport(cfg.CONF)
+        cfg.CONF.set_override('rpc_backend', 'rabbit')
+        target = oslo_messaging.Target(topic='rpcapiv1')
+        self.client = oslo_messaging.RPCClient(transport, target)
+        self.ctxt = {}
+
     @pecan.expose('json')
     def post(self, depth, graph_type, query, root):
         enforce("get topology", pecan.request.headers,
@@ -39,20 +53,19 @@ class TopologyController(rest.RestController):
 
         return self.get_graph(graph_type)
 
-    @staticmethod
-    def get_graph(graph_type):
-        # TODO(eyal) temporary mock
-        graph_file = pecan.request.cfg.find_file('graph.sample.json')
+    def get_graph(self, graph_type):
+        graph_data = self.client.call(self.ctxt, 'get_topology', arg=None)
+        LOG.info(graph_data)
+
+        # graph_file = pecan.request.cfg.find_file('graph.sample.json')
         try:
-            with open(graph_file) as data_file:
-                graph = json.load(data_file)
-                if graph_type == 'graph':
-                    return graph
-                if graph_type == 'tree':
-                    return json_graph.tree_data(
-                        json_graph.node_link_graph(graph).reverse(),
-                        root=0)
+            if graph_type == 'graph':
+                return json.loads(graph_data)
+            if graph_type == 'tree':
+                return json_graph.tree_data(
+                    json_graph.node_link_graph(json.loads(graph_data)),
+                    root='RESOURCE:node')
 
         except Exception as e:
-            LOG.exception("failed to open file ", e)
+            LOG.exception("failed to open file %s ", e)
             abort(404, str(e))
