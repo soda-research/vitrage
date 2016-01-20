@@ -1,3 +1,5 @@
 {
-  "get topology": "role:admin"
+  "get topology": "role:admin",
+  "get resource": "role:admin",
+  "list resources": "role:admin"
 }

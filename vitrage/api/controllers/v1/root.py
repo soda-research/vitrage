@@ -10,8 +10,10 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from vitrage.api.controllers.v1 import resource
 from vitrage.api.controllers.v1 import topology
 
 
 class V1Controller(object):
     topology = topology.TopologyController()
+    resources = resource.ResourcesController()
