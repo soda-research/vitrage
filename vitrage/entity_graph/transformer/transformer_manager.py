@@ -30,16 +30,16 @@ class TransformerManager(object):
         transformers = {}
 
         transformers['nova.instance'] = importutils.import_object(
-            'vitrage.entity_graph.transformer.nova_transformers.'
-            + 'InstanceTransformer')
+            'vitrage.entity_graph.transformer.instance_transformer.'
+            + 'InstanceTransformer', transformers)
 
         transformers['nova.host'] = importutils.import_object(
-            'vitrage.entity_graph.transformer.nova_transformers.'
-            + 'HostTransformer')
+            'vitrage.entity_graph.transformer.host_transformer.'
+            + 'HostTransformer', transformers)
 
         transformers['nova.zone'] = importutils.import_object(
-            'vitrage.entity_graph.transformer.nova_transformers.'
-            + 'ZoneTransformer')
+            'vitrage.entity_graph.transformer.zone_transformer.'
+            + 'ZoneTransformer', transformers)
 
         return transformers
 

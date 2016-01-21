@@ -13,27 +13,15 @@
 # under the License.
 
 from oslo_log import log as logging
-from vitrage.entity_graph.transformer.base import TransformerBase
-import vitrage.graph.utils as graph_utils
+# from vitrage.entity_graph.transformer.transformer_manager import \
+#     TransformerManager
 from vitrage.tests.unit import base
 
 LOG = logging.getLogger(__name__)
 
 
-def create_vertex(entity_id, entity_type, entity_subtype=None):
-
-    """returns placeholder vertex"""
-
-    vertex_id = TransformerBase.KEY_SEPARATOR.join(
-        [entity_type, entity_subtype, entity_id])
-
-    return graph_utils.create_vertex(
-        vertex_id,
-        entity_id=entity_id,
-        entity_category=entity_type,
-        entity_type=entity_subtype
-    )
-
-
 class TransformerManagerTest(base.BaseTest):
-    pass
+
+    def test_register_transformer_classes(self):
+        # manager = TransformerManager()
+        pass
