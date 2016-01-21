@@ -48,7 +48,7 @@ class HostTransformer(base.TransformerBase):
     def __init__(self, transformers):
         self.transformers = transformers
 
-    def transform(self, entity_event):
+    def _create_entity_vertex(self, entity_event):
 
         sync_mode = entity_event['sync_mode']
 
@@ -56,9 +56,8 @@ class HostTransformer(base.TransformerBase):
             entity_event,
             self.HOST_NAME[sync_mode]
         )
-        metadata = {
-            VertexProperties.NAME: host_name
-        }
+        metadata = {VertexProperties.NAME: host_name}
+
         entity_key = self.extract_key(entity_event)
 
         timestamp = extract_field_value(
@@ -66,7 +65,7 @@ class HostTransformer(base.TransformerBase):
             self.TIMESTAMP[sync_mode]
         )
 
-        entity_vertex = graph_utils.create_vertex(
+        return graph_utils.create_vertex(
             entity_key,
             entity_id=host_name,
             entity_category=EntityTypes.RESOURCE,
@@ -75,41 +74,52 @@ class HostTransformer(base.TransformerBase):
             metadata=metadata
         )
 
+    def _create_neighbors(self, entity_event):
+
+        sync_mode = entity_event['sync_mode']
+
         neighbors = []
+
+        timestamp = extract_field_value(
+            entity_event,
+            self.TIMESTAMP[sync_mode]
+        )
+
+        zone_neighbor = self._create_zone_neighbor(
+            entity_event,
+            timestamp,
+            self.extract_key(entity_event),
+            self.ZONE_NAME[sync_mode]
+        )
+
+        if zone_neighbor is not None:
+            neighbors.append(zone_neighbor)
+
+        return neighbors
+
+    def _create_zone_neighbor(
+            self, entity_event, timestamp, host_vertex_id, zone_name_path):
+
         zone_transformer = self.transformers['nova.zone']
 
         if zone_transformer:
-            zone_name = extract_field_value(
-                entity_event,
-                self.ZONE_NAME[sync_mode]
-            )
-            zone_neighbor = self.create_zone_neighbor(
+
+            zone_name = extract_field_value(entity_event, zone_name_path)
+
+            zone_neighbor = zone_transformer.create_placeholder_vertex(
                 zone_name,
-                timestamp,
-                entity_key
+                timestamp
             )
-            neighbors.append(zone_neighbor)
+            relation_edge = graph_utils.create_edge(
+                source_id=zone_neighbor.vertex_id,
+                target_id=host_vertex_id,
+                relationship_type=EdgeLabels.CONTAINS
+            )
+            return base.Neighbor(zone_neighbor, relation_edge)
         else:
             LOG.warning('Cannot find zone transformer')
 
-        return base.EntityWrapper(
-            entity_vertex,
-            neighbors,
-            self._extract_action_type(entity_event))
-
-    def create_zone_neighbor(self, zone_name, timestamp, host_vertex_id):
-
-        zone_transformer = self.transformers['nova.zone']
-        zone_neighbor = zone_transformer.create_placeholder_vertex(
-            zone_name,
-            timestamp
-        )
-        relation_edge = graph_utils.create_edge(
-            source_id=zone_neighbor.vertex_id,
-            target_id=host_vertex_id,
-            relationship_type=EdgeLabels.CONTAINS
-        )
-        return base.Neighbor(zone_neighbor, relation_edge)
+        return None
 
     def _key_values(self, mutable_fields):
 

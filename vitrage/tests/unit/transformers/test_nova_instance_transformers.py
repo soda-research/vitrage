@@ -292,7 +292,8 @@ class NovaInstanceTransformerTest(base.BaseTest):
         time = datetime.datetime.utcnow()
 
         # Test action
-        neighbor = InstanceTransformer(self.transformers).create_host_neighbor(
+        instance_transformer = InstanceTransformer(self.transformers)
+        neighbor = instance_transformer._create_host_neighbor(
             vertex_id,
             host_name,
             time,

@@ -68,7 +68,8 @@ class ZoneTransformer(base.TransformerBase):
     def __init__(self, transformers):
         self.transformers = transformers
 
-    def transform(self, entity_event):
+    def _create_entity_vertex(self, entity_event):
+
         sync_mode = entity_event['sync_mode']
 
         zone_name = extract_field_value(
@@ -93,7 +94,7 @@ class ZoneTransformer(base.TransformerBase):
             self.TIMESTAMP[sync_mode]
         )
 
-        entity_vertex = graph_utils.create_vertex(
+        return graph_utils.create_vertex(
             entity_key,
             entity_id=zone_name,
             entity_category=EntityTypes.RESOURCE,
@@ -103,11 +104,24 @@ class ZoneTransformer(base.TransformerBase):
             metadata=metadata
         )
 
-        neighbors = [self._create_node_neighbor(entity_vertex)]
+    def _create_neighbors(self, entity_event):
+
+        sync_mode = entity_event['sync_mode']
+
+        zone_vertex_id = self.extract_key(entity_event)
+
+        neighbors = [self._create_node_neighbor(zone_vertex_id)]
 
         hosts = extract_field_value(entity_event, self.HOSTS[sync_mode])
         host_transformer = self.transformers['nova.host']
+
         if host_transformer:
+
+            timestamp = extract_field_value(
+                entity_event,
+                self.TIMESTAMP[sync_mode]
+            )
+
             for key in hosts:
 
                 host_available = extract_field_value(
@@ -125,25 +139,24 @@ class ZoneTransformer(base.TransformerBase):
                     host_state = self.STATE_UNAVAILABLE
 
                 host_neighbor = self._create_host_neighbor(
-                    entity_vertex.vertex_id,
+                    zone_vertex_id,
                     key,
                     host_state,
                     timestamp
                 )
                 neighbors.append(host_neighbor)
+        else:
+            LOG.warning('Cannot find host transformer')
 
-        return base.EntityWrapper(
-            entity_vertex,
-            neighbors,
-            self._extract_action_type(entity_event))
+        return neighbors
 
-    def _create_node_neighbor(self, zone_vertex):
+    def _create_node_neighbor(self, zone_vertex_id):
 
         node_vertex = base.create_node_placeholder_vertex()
 
         relation_edge = graph_utils.create_edge(
             source_id=node_vertex.vertex_id,
-            target_id=zone_vertex.vertex_id,
+            target_id=zone_vertex_id,
             relationship_type=EdgeLabels.CONTAINS
         )
         return base.Neighbor(node_vertex, relation_edge)

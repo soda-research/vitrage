@@ -66,7 +66,6 @@ class TransformerBase(object):
 
     KEY_SEPARATOR = ':'
 
-    @abc.abstractmethod
     def transform(self, entity_event):
         """Transform an entity event into entity wrapper.
 
@@ -80,7 +79,34 @@ class TransformerBase(object):
         :return: entity wrapper
         :rtype:EntityWrapper
         """
-        pass
+        entity_vertex = self._create_entity_vertex(entity_event)
+        neighbors = self._create_neighbors(entity_event)
+        action = self._extract_action_type(entity_event)
+
+        return EntityWrapper(entity_vertex, neighbors, action)
+
+    @abc.abstractmethod
+    def _create_entity_vertex(self, entity_event):
+        """Creates entity vertex received from given entity event.
+
+         Extracting vertex fields from a given event provided by synchronizer
+
+         :param entity_event: an event provided by synchronizer
+         :return: vertex - contains the entity data
+         :rtype:Vertex
+         """
+
+    @abc.abstractmethod
+    def _create_neighbors(self, entity_event):
+        """Extracts entity neighbors received from a given entity event.
+
+         Extracting entity neighbors from a given event provided
+         by synchronizer
+
+         :param entity_event: an event provided by synchronizer
+         :return: neigbors - a list of neighbors
+         :rtype:[]
+         """
 
     @abc.abstractmethod
     def _key_values(self, mutable_fields=None):

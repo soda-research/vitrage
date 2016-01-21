@@ -79,7 +79,8 @@ class InstanceTransformer(base.TransformerBase):
     def __init__(self, transformers):
         self.transformers = transformers
 
-    def transform(self, entity_event):
+    def _create_entity_vertex(self, entity_event):
+
         sync_mode = entity_event['sync_mode']
 
         metadata = {
@@ -106,7 +107,7 @@ class InstanceTransformer(base.TransformerBase):
             self.TIMESTAMP[sync_mode]
         )
 
-        entity_vertex = graph_utils.create_vertex(
+        return graph_utils.create_vertex(
             entity_key,
             entity_id=entity_id,
             entity_category=EntityTypes.RESOURCE,
@@ -117,12 +118,22 @@ class InstanceTransformer(base.TransformerBase):
             metadata=metadata
         )
 
+    def _create_neighbors(self, entity_event):
+
+        sync_mode = entity_event['sync_mode']
+
         neighbors = []
         host_transformer = self.transformers['nova.host']
 
         if host_transformer:
-            host_neighbor = self.create_host_neighbor(
-                entity_vertex.vertex_id,
+
+            update_timestamp = extract_field_value(
+                entity_event,
+                self.TIMESTAMP[sync_mode]
+            )
+
+            host_neighbor = self._create_host_neighbor(
+                self.extract_key(entity_event),
                 extract_field_value(entity_event, self.HOST_NAME[sync_mode]),
                 update_timestamp,
                 host_transformer
@@ -131,10 +142,7 @@ class InstanceTransformer(base.TransformerBase):
         else:
             LOG.warning('Cannot find host transformer')
 
-        return base.EntityWrapper(
-            entity_vertex,
-            neighbors,
-            self._extract_action_type(entity_event))
+        return neighbors
 
     def _extract_action_type(self, entity_event):
 
@@ -163,7 +171,7 @@ class InstanceTransformer(base.TransformerBase):
         key_fields = self._key_values([instance_id])
         return base.build_key(key_fields)
 
-    def create_host_neighbor(
+    def _create_host_neighbor(
             self,
             vertex_id,
             host_name,
