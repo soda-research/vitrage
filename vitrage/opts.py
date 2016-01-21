@@ -11,31 +11,12 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from oslo_config import cfg
+import vitrage.api
+import vitrage.synchronizer
 
 
 def list_opts():
-    return [("api", (
-        cfg.PortOpt('port',
-                    default=8999,
-                    help='The port for the vitrage API server.',
-                    ),
-        cfg.StrOpt('host',
-                   default='0.0.0.0',
-                   help='The listen IP for the vitrage API server.',
-                   ),
-        cfg.StrOpt('paste_config', default='api-paste.ini',
-                   help='Configuration file for WSGI definition of API.'),
-
-        cfg.IntOpt('workers', default=1,
-                   min=1,
-                   help='Number of workers for vitrage API server.'),
-
-        cfg.BoolOpt('pecan_debug', default=False,
-                    help='Toggle Pecan Debug Middleware.')
-    )), ("synchronizer", (
-        cfg.IntOpt('snapshots_interval',
-                   default=600,
-                   min=10,
-                   help='interval between full snapshots'),
-    ))]
+    return [
+        ('api', vitrage.api.OPTS),
+        ('synchronizer', vitrage.synchronizer.OPTS)
+    ]

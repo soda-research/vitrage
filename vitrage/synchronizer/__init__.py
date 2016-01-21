@@ -12,4 +12,11 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-__author__ = 'stack'
+from oslo_config import cfg
+
+OPTS = [
+    cfg.IntOpt('snapshots_interval',
+               default=600,
+               min=10,
+               help='interval between full snapshots'),
+]
