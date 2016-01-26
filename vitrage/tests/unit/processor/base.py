@@ -15,7 +15,7 @@
 from vitrage.common.constants import VertexProperties
 from vitrage.entity_graph.transformer import transformer_manager
 from vitrage.graph import driver as graph
-from vitrage.tests.unit import base
+from vitrage.tests import base
 
 
 class BaseProcessor(base.BaseTest):

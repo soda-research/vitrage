@@ -11,13 +11,12 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-
+from oslo_utils import timeutils
 from oslotest import base
 import sys
 
 
 class BaseTest(base.BaseTestCase):
-
     """Test case base class for all unit tests."""
 
     def assert_list_equal(self, l1, l2):
@@ -33,6 +32,31 @@ class BaseTest(base.BaseTestCase):
             self.assertEqual(d1, d2)
         else:
             super(BaseTest, self).assertDictEqual(d1, d2, message)
+
+    def assert_timestamp_equal(self, first, second, msg=None):
+        """Checks that two timestamps are equals.
+
+        This relies on assertAlmostEqual to avoid rounding problem, and only
+        checks up the first microsecond values.
+
+        """
+        return self.assertAlmostEqual(timeutils.delta_seconds(first, second),
+                                      0.0,
+                                      places=5)
+
+    def assert_is_empty(self, obj):
+        try:
+            if len(obj) != 0:
+                self.fail("%s is not empty" % type(obj))
+        except (TypeError, AttributeError):
+            self.fail("%s doesn't have length" % type(obj))
+
+    def assert_is_not_empty(self, obj):
+        try:
+            if len(obj) == 0:
+                self.fail("%s is empty" % type(obj))
+        except (TypeError, AttributeError):
+            self.fail("%s doesn't have length" % type(obj))
 
     def setUp(self):
         super(BaseTest, self).setUp()
