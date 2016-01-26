@@ -1,4 +1,5 @@
-# Copyright 2015 - Alcatel-Lucent
+# Copyright 2016 - Alcatel-Lucent
+#
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
 # a copy of the License at
@@ -11,14 +12,13 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import vitrage.api
-import vitrage.evaluator
-import vitrage.synchronizer
+from oslo_config import cfg
 
 
-def list_opts():
-    return [
-        ('api', vitrage.api.OPTS),
-        ('synchronizer', vitrage.synchronizer.OPTS),
-        ('evaluator', vitrage.evaluator.OPTS)
-    ]
+# Register options for the service
+OPTS = [
+    cfg.StrOpt('templates_dir',
+               default='/etc/vitrage/templates',
+               help='A path for the templates used by the evaluator'
+               ),
+]
