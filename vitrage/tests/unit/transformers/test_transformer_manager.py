@@ -15,7 +15,7 @@
 from oslo_log import log as logging
 # from vitrage.entity_graph.transformer.transformer_manager import \
 #     TransformerManager
-from vitrage.tests.unit import base
+from vitrage.tests import base
 
 LOG = logging.getLogger(__name__)
 

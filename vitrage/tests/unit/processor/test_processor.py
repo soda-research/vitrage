@@ -15,12 +15,11 @@
 import unittest
 
 from vitrage.common.constants import SyncMode
-
 from vitrage.common.constants import VertexProperties
 from vitrage.common.utils import utcnow
 from vitrage.entity_graph.processor import processor as proc
+from vitrage.tests import base
 from vitrage.tests.mocks import mock_syncronizer as mock_sync
-from vitrage.tests.unit import base
 
 
 class TestProcessor(base.BaseTest):

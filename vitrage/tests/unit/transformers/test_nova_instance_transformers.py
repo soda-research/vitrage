@@ -26,9 +26,8 @@ from vitrage.entity_graph.transformer.base import TransformerBase
 from vitrage.entity_graph.transformer.host_transformer import HostTransformer
 from vitrage.entity_graph.transformer.instance_transformer import \
     InstanceTransformer
-
+from vitrage.tests import base
 from vitrage.tests.mocks import mock_syncronizer as mock_sync
-from vitrage.tests.unit import base
 
 LOG = logging.getLogger(__name__)
 

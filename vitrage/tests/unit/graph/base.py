@@ -18,15 +18,15 @@ test_vitrage graph
 
 Tests for `vitrage` graph driver
 """
-from oslo_log import log as logging
-
 import random
 import time
+
+from oslo_log import log as logging
 
 from vitrage.common.constants import EdgeLabels as ELabel
 from vitrage.graph import create_graph
 from vitrage.graph import utils as graph_utils
-from vitrage.tests.unit import base
+from vitrage.tests import base
 
 LOG = logging.getLogger(__name__)
 
