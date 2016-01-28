@@ -53,7 +53,7 @@ class AlarmsController(rest.RestController):
             abort(404, "file alarms.sample.json not found")
         try:
             with open(alarms_file) as data_file:
-                return json.load(data_file)
+                return json.load(data_file)['alarms']
 
         except Exception as e:
             LOG.exception("failed to open file %s", e)
