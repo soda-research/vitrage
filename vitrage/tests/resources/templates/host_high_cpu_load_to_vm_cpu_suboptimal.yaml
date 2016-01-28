@@ -1,0 +1,36 @@
+metadata:
+ id=host_high_cpu_load_to_instance_cpu_suboptimal
+definitions:
+ entities:
+  - entity:
+     category: ALARM
+     type: HOST_HIGH_CPU_LOAD
+     internal_id: 1
+  - entity:
+     category: ALARM
+     type: VM_CPU_SUBOPTIMAL_PERFORMANCE
+     internal_id: 2
+  - entity:
+     category: RESOURCE
+     type: HOST
+     internal_id: 3
+  - entity:
+     category: RESOURCE
+     type: INSTANCE
+     internal_id: 4
+ relationships:
+  - relationship:
+     source: 1
+     target: 3
+     type: on
+     internal_id : alarm_on_host
+  - relationship:
+     source: 2
+     target: 4
+     type: on
+     internal_id : alarm_on_instance
+  - relationship:
+     source: 3
+     target: 4
+     type: contains
+     internal_id : host_contains_instance

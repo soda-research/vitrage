@@ -1,4 +1,4 @@
-# Copyright 2015 - Alcatel-Lucent
+# Copyright 2016 - Nokia
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -57,12 +57,12 @@ def _get_full_path(target_filename, target_folder):
     """
 
     if target_folder is None:
-        target_folder = _get_resources_dir()
+        target_folder = get_resources_dir()
     target = '{0}/{1}'.format(target_folder, target_filename)
     return target
 
 
-def _get_resources_dir(filename=None, target_folder='resources'):
+def get_resources_dir(filename=None, target_folder='resources'):
     """Locates the resources directory dynamically.
 
     :param filename: file to locate in directory
