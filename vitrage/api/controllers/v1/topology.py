@@ -23,12 +23,20 @@ import pecan
 from pecan.core import abort
 from pecan import rest
 
+from vitrage.api.controllers.v1 import mock_file
 from vitrage.api.policy import enforce
 
 # noinspection PyProtectedMember
 from vitrage.i18n import _LI
 
 LOG = log.getLogger(__name__)
+
+
+def as_tree(graph, root='RESOURCE:node', reverse=False):
+    linked_graph = json_graph.node_link_graph(graph)
+    if reverse:
+        linked_graph = linked_graph.reverse()
+    return json_graph.tree_data(linked_graph, root=root)
 
 
 class TopologyController(rest.RestController):
@@ -51,21 +59,38 @@ class TopologyController(rest.RestController):
 
         LOG.info(_LI("query is %s") % query)
 
-        return self.get_graph(graph_type)
+        if mock_file:
+            return self.get_mock_graph(graph_type)
+        else:
+            return self.get_graph(graph_type)
 
     def get_graph(self, graph_type):
         graph_data = self.client.call(self.ctxt, 'get_topology', arg=None)
         LOG.info(graph_data)
 
-        # graph_file = pecan.request.cfg.find_file('graph.sample.json')
         try:
+            graph = json.loads(graph_data)
             if graph_type == 'graph':
-                return json.loads(graph_data)
+                return graph
             if graph_type == 'tree':
-                return json_graph.tree_data(
-                    json_graph.node_link_graph(json.loads(graph_data)),
-                    root='RESOURCE:node')
+                return as_tree(graph)
 
         except Exception as e:
             LOG.exception("failed to open file %s ", e)
+            abort(404, str(e))
+
+    @staticmethod
+    def get_mock_graph(graph_type):
+        # TODO(eyal) temporary mock
+        graph_file = pecan.request.cfg.find_file('graph.sample.json')
+        try:
+            with open(graph_file) as data_file:
+                graph = json.load(data_file)
+                if graph_type == 'graph':
+                    return graph
+                if graph_type == 'tree':
+                    return as_tree(graph, root=0, reverse=True)
+
+        except Exception as e:
+            LOG.exception("failed to open file ", e)
             abort(404, str(e))
