@@ -83,6 +83,8 @@ class TopologyController(rest.RestController):
     def get_mock_graph(graph_type):
         # TODO(eyal) temporary mock
         graph_file = pecan.request.cfg.find_file('graph.sample.json')
+        if graph_file is None:
+            abort(404, "file graph.sample.json not found")
         try:
             with open(graph_file) as data_file:
                 graph = json.load(data_file)

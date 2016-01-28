@@ -49,12 +49,14 @@ class AlarmsController(rest.RestController):
     def get_mock_alarms():
         # TODO(eyal) temporary mock
         alarms_file = pecan.request.cfg.find_file('alarms.sample.json')
+        if alarms_file is None:
+            abort(404, "file alarms.sample.json not found")
         try:
             with open(alarms_file) as data_file:
                 return json.load(data_file)
 
         except Exception as e:
-            LOG.exception("failed to open file ", e)
+            LOG.exception("failed to open file %s", e)
             abort(404, str(e))
 
     @staticmethod
