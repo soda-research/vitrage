@@ -11,11 +11,14 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+
 from oslo_log import log as logging
 
 from vitrage.common.constants import EdgeLabels
-from vitrage.common.constants import EntityTypes
+from vitrage.common.constants import EntityCategory
+from vitrage.common.constants import EntityType
 from vitrage.common.constants import EventAction
+from vitrage.common.constants import SynchronizerProperties as SyncProps
 from vitrage.common.constants import SyncMode
 from vitrage.common.constants import VertexProperties
 from vitrage.common.exception import VitrageTransformerError
@@ -29,7 +32,7 @@ LOG = logging.getLogger(__name__)
 
 class InstanceTransformer(base.TransformerBase):
 
-    INSTANCE_TYPE = 'nova.instance'
+    INSTANCE_TYPE = EntityType.NOVA_INSTANCE
 
     # Fields returned from Nova Instance snapshot
     INSTANCE_ID = {
@@ -45,8 +48,8 @@ class InstanceTransformer(base.TransformerBase):
     }
 
     TIMESTAMP = {
-        SyncMode.SNAPSHOT: ('sample_date',),
-        SyncMode.INIT_SNAPSHOT: ('sample_date',),
+        SyncMode.SNAPSHOT: (SyncProps.SAMPLE_DATE,),
+        SyncMode.INIT_SNAPSHOT: (SyncProps.SAMPLE_DATE,),
         SyncMode.UPDATE: ('metadata', 'timestamp')
     }
 
@@ -68,7 +71,7 @@ class InstanceTransformer(base.TransformerBase):
         SyncMode.UPDATE: ('payload', 'hostname')
     }
 
-    UPDATE_EVENT_TYPE = 'event_type'
+    UPDATE_EVENT_TYPE = SyncProps.EVENT_TYPE
 
     # Event types which need to refer them differently
     EVENT_TYPES = {
@@ -81,7 +84,7 @@ class InstanceTransformer(base.TransformerBase):
 
     def _create_entity_vertex(self, entity_event):
 
-        sync_mode = entity_event['sync_mode']
+        sync_mode = entity_event[SyncProps.SYNC_MODE]
 
         metadata = {
             VertexProperties.NAME: extract_field_value(
@@ -110,7 +113,7 @@ class InstanceTransformer(base.TransformerBase):
         return graph_utils.create_vertex(
             entity_key,
             entity_id=entity_id,
-            entity_category=EntityTypes.RESOURCE,
+            entity_category=EntityCategory.RESOURCE,
             entity_type=self.INSTANCE_TYPE,
             entity_project=project,
             entity_state=state,
@@ -120,10 +123,10 @@ class InstanceTransformer(base.TransformerBase):
 
     def _create_neighbors(self, entity_event):
 
-        sync_mode = entity_event['sync_mode']
+        sync_mode = entity_event[SyncProps.SYNC_MODE]
 
         neighbors = []
-        host_transformer = self.transformers['nova.host']
+        host_transformer = self.transformers[EntityType.NOVA_HOST]
 
         if host_transformer:
 
@@ -146,7 +149,7 @@ class InstanceTransformer(base.TransformerBase):
 
     def _extract_action_type(self, entity_event):
 
-        sync_mode = entity_event['sync_mode']
+        sync_mode = entity_event[SyncProps.SYNC_MODE]
 
         if SyncMode.UPDATE == sync_mode:
             return self.EVENT_TYPES.get(
@@ -166,7 +169,7 @@ class InstanceTransformer(base.TransformerBase):
 
         instance_id = extract_field_value(
             entity_event,
-            self.INSTANCE_ID[entity_event['sync_mode']])
+            self.INSTANCE_ID[entity_event[SyncProps.SYNC_MODE]])
 
         key_fields = self._key_values([instance_id])
         return base.build_key(key_fields)
@@ -198,11 +201,11 @@ class InstanceTransformer(base.TransformerBase):
         return graph_utils.create_vertex(
             base.build_key(key_fields),
             entity_id=instance_id,
-            entity_category=EntityTypes.RESOURCE,
+            entity_category=EntityCategory.RESOURCE,
             entity_type=self.INSTANCE_TYPE,
             update_timestamp=timestamp,
             is_placeholder=True
         )
 
     def _key_values(self, mutable_fields):
-        return [EntityTypes.RESOURCE, self.INSTANCE_TYPE] + mutable_fields
+        return [EntityCategory.RESOURCE, self.INSTANCE_TYPE] + mutable_fields

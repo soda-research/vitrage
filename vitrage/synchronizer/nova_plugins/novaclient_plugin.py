@@ -14,7 +14,7 @@
 
 
 from novaclient import client
-from vitrage.common import utils
+
 from vitrage.synchronizer.base_plugin import BasePlugin
 
 
@@ -25,24 +25,3 @@ class NovaClientPlugin(BasePlugin):
 
     def get_client(self):
         return self.client
-
-    def make_picklable(self, entities, sync_type, fields_to_remove=None):
-
-        picklable_entities = []
-
-        for entity in entities:
-            picklable_entity = entity.__dict__
-
-            for field in fields_to_remove:
-                picklable_entity.pop(field)
-
-            picklable_entity['sync_type'] = sync_type
-            self._add_sampling_time(picklable_entity)
-            picklable_entities.append(picklable_entity)
-
-        return picklable_entities
-
-    @staticmethod
-    def _add_sampling_time(entity):
-        entity['sample_date'] = str(utils.utcnow())
-        return entity

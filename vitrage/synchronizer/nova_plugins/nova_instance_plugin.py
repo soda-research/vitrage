@@ -12,6 +12,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from vitrage.common.constants import EntityType
 from vitrage.synchronizer.nova_plugins.novaclient_plugin \
     import NovaClientPlugin
 
@@ -25,5 +26,5 @@ class NovaInstancePlugin(NovaClientPlugin):
                                                  auth_url)
 
     def get_all(self):
-        return self.make_picklable(self.client.servers.list(),
-                                   'nova.instance', ['manager'])
+        return self.make_pickleable(self.client.servers.list(),
+                                    EntityType.NOVA_INSTANCE, ['manager'])

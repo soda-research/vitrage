@@ -15,6 +15,7 @@
 from oslo_log import log
 from oslo_service import service as os_service
 
+from vitrage.common.constants import SynchronizerProperties as SyncProps
 from vitrage.common.constants import SyncMode
 
 LOG = log.getLogger(__name__)
@@ -65,6 +66,7 @@ class SnapshotsService(SynchronizerService):
         LOG.debug("end get all with sync mode %s" % sync_mode)
         self.first_time = False
 
-    def _mark_snapshot_entities(self, dicts, sync_mode):
-        [x.setdefault('sync_mode', sync_mode) for x in dicts]
+    @staticmethod
+    def _mark_snapshot_entities(dicts, sync_mode):
+        [x.setdefault(SyncProps.SYNC_MODE, sync_mode) for x in dicts]
         return dicts
