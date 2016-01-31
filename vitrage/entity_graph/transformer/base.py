@@ -13,15 +13,15 @@
 # under the License.
 
 import abc
+from collections import namedtuple
+
+from oslo_log import log as logging
 import six
 
-from collections import namedtuple
-from oslo_log import log as logging
-
 import vitrage.common.constants as cons
+from vitrage.common.constants import SynchronizerProperties as SyncProps
 from vitrage.common.exception import VitrageTransformerError
 import vitrage.graph.utils as graph_utils
-
 
 LOG = logging.getLogger(__name__)
 NODE_SUBTYPE = 'node'
@@ -47,7 +47,7 @@ def build_key(key_values):
 
 
 def create_node_placeholder_vertex():
-    key = build_key([cons.EntityTypes.RESOURCE, NODE_SUBTYPE])
+    key = build_key([cons.EntityCategory.RESOURCE, NODE_SUBTYPE])
 
     metadata = {
         cons.VertexProperties.NAME: NODE_SUBTYPE
@@ -55,7 +55,7 @@ def create_node_placeholder_vertex():
 
     return graph_utils.create_vertex(
         key,
-        entity_category=cons.EntityTypes.RESOURCE,
+        entity_category=cons.EntityCategory.RESOURCE,
         entity_type=NODE_SUBTYPE,
         metadata=metadata
     )
@@ -145,7 +145,7 @@ class TransformerBase(object):
 
     def _extract_action_type(self, entity_event):
 
-        sync_mode = entity_event['sync_mode']
+        sync_mode = entity_event[SyncProps.SYNC_MODE]
 
         if cons.SyncMode.UPDATE == sync_mode:
             return cons.EventAction.UPDATE

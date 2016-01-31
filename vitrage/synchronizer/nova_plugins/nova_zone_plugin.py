@@ -12,6 +12,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from vitrage.common.constants import EntityType
 from vitrage.synchronizer.nova_plugins.novaclient_plugin \
     import NovaClientPlugin
 
@@ -34,5 +35,6 @@ class NovaZonePlugin(NovaClientPlugin):
         return zones_res
 
     def get_all(self):
-        return self.make_picklable(self.filter_internal_zone(
-            self.client.availability_zones.list()), 'nova.zone', ['manager'])
+        return self.make_pickleable(self.filter_internal_zone(
+            self.client.availability_zones.list()),
+            EntityType.NOVA_ZONE, ['manager'])

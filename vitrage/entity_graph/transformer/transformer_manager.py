@@ -14,6 +14,9 @@
 
 from oslo_log import log as logging
 from oslo_utils import importutils
+
+from vitrage.common.constants import EntityType
+from vitrage.common.constants import SynchronizerProperties as SyncProps
 from vitrage.common.exception import VitrageTransformerError
 
 LOG = logging.getLogger(__name__)
@@ -29,15 +32,15 @@ class TransformerManager(object):
 
         transformers = {}
 
-        transformers['nova.instance'] = importutils.import_object(
+        transformers[EntityType.NOVA_INSTANCE] = importutils.import_object(
             'vitrage.entity_graph.transformer.instance_transformer.'
             + 'InstanceTransformer', transformers)
 
-        transformers['nova.host'] = importutils.import_object(
+        transformers[EntityType.NOVA_HOST] = importutils.import_object(
             'vitrage.entity_graph.transformer.host_transformer.'
             + 'HostTransformer', transformers)
 
-        transformers['nova.zone'] = importutils.import_object(
+        transformers[EntityType.NOVA_ZONE] = importutils.import_object(
             'vitrage.entity_graph.transformer.zone_transformer.'
             + 'ZoneTransformer', transformers)
 
@@ -56,7 +59,7 @@ class TransformerManager(object):
     def transform(self, entity_event):
 
         try:
-            sync_type = entity_event['sync_type']
+            sync_type = entity_event[SyncProps.SYNC_TYPE]
         except KeyError:
             raise VitrageTransformerError(
                 'Entity Event must contains sync_type field.')
@@ -66,7 +69,7 @@ class TransformerManager(object):
     def extract_key(self, entity_event):
 
         try:
-            sync_type = entity_event['sync_type']
+            sync_type = entity_event[SyncProps.SYNC_TYPE]
         except KeyError:
             raise VitrageTransformerError(
                 'Entity Event must contains sync_type field.')

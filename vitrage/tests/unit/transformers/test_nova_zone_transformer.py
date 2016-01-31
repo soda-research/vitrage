@@ -11,12 +11,15 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+
 import datetime
 
 from oslo_log import log as logging
 
 from vitrage.common.constants import EdgeLabels
-from vitrage.common.constants import EntityTypes
+from vitrage.common.constants import EntityCategory
+from vitrage.common.constants import EntityType
+from vitrage.common.constants import SynchronizerProperties as SyncProps
 from vitrage.common.constants import VertexProperties
 from vitrage.entity_graph.transformer import base as tbase
 from vitrage.entity_graph.transformer.base import TransformerBase
@@ -35,7 +38,7 @@ class NovaZoneTransformerTest(base.BaseTest):
 
         self.transformers = {}
         host_transformer = HostTransformer(self.transformers)
-        self.transformers['nova.host'] = host_transformer
+        self.transformers[EntityType.NOVA_HOST] = host_transformer
 
     def test_create_placeholder_vertex(self):
 
@@ -70,7 +73,7 @@ class NovaZoneTransformerTest(base.BaseTest):
         self.assertEqual(observed_entity_id, zone_name)
 
         observed_category = placeholder.get(VertexProperties.CATEGORY)
-        self.assertEqual(observed_category, EntityTypes.RESOURCE)
+        self.assertEqual(observed_category, EntityCategory.RESOURCE)
 
         is_placeholder = placeholder.get(VertexProperties.IS_PLACEHOLDER)
         self.assertEqual(is_placeholder, True)
@@ -86,7 +89,7 @@ class NovaZoneTransformerTest(base.BaseTest):
         observed_key_fields = zone_transformer._key_values([zone_name])
 
         # Test assertions
-        self.assertEqual(EntityTypes.RESOURCE, observed_key_fields[0])
+        self.assertEqual(EntityCategory.RESOURCE, observed_key_fields[0])
         self.assertEqual(
             ZoneTransformer(self.transformers).ZONE_TYPE,
             observed_key_fields[1]
@@ -133,7 +136,7 @@ class NovaZoneTransformerTest(base.BaseTest):
                 self._validate_host_neighbor(neighbor,
                                              zone_vertex_id,
                                              hosts,
-                                             event['sync_mode'])
+                                             event[SyncProps.SYNC_MODE])
 
         self.assertEqual(1,
                          node_neighbors_counter,
@@ -196,7 +199,7 @@ class NovaZoneTransformerTest(base.BaseTest):
 
         zone_transform = ZoneTransformer(self.transformers)
 
-        sync_mode = event['sync_mode']
+        sync_mode = event[SyncProps.SYNC_MODE]
         extract_value = tbase.extract_field_value
 
         expected_id = extract_value(event, zone_transform.ZONE_NAME[sync_mode])
@@ -205,7 +208,7 @@ class NovaZoneTransformerTest(base.BaseTest):
         self.assertEqual(expected_id, observed_id)
 
         self.assertEqual(
-            EntityTypes.RESOURCE,
+            EntityCategory.RESOURCE,
             vertex[VertexProperties.CATEGORY]
         )
 

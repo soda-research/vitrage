@@ -12,6 +12,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from vitrage.common.constants import EntityType
 from vitrage.synchronizer.nova_plugins.novaclient_plugin \
     import NovaClientPlugin
 
@@ -35,5 +36,5 @@ class NovaHostPlugin(NovaClientPlugin):
         return compute_hosts
 
     def get_all(self):
-        return self.make_picklable(self.filter_none_compute_hosts(
-            self.client.hosts.list()), 'nova.host', ['manager'])
+        return self.make_pickleable(self.filter_none_compute_hosts(
+            self.client.hosts.list()), EntityType.NOVA_HOST, ['manager'])

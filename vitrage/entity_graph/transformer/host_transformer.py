@@ -11,10 +11,13 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+
 from oslo_log import log as logging
 
 from vitrage.common.constants import EdgeLabels
-from vitrage.common.constants import EntityTypes
+from vitrage.common.constants import EntityCategory
+from vitrage.common.constants import EntityType
+from vitrage.common.constants import SynchronizerProperties as SyncProps
 from vitrage.common.constants import SyncMode
 from vitrage.common.constants import VertexProperties
 from vitrage.entity_graph.transformer import base
@@ -27,7 +30,7 @@ LOG = logging.getLogger(__name__)
 
 class HostTransformer(base.TransformerBase):
 
-    HOST_TYPE = 'nova.host'
+    HOST_TYPE = EntityType.NOVA_HOST
 
     # Fields returned from Nova Availability Zone snapshot
     HOST_NAME = {
@@ -41,8 +44,8 @@ class HostTransformer(base.TransformerBase):
     }
 
     TIMESTAMP = {
-        SyncMode.SNAPSHOT: ('sample_date',),
-        SyncMode.INIT_SNAPSHOT: ('sample_date',)
+        SyncMode.SNAPSHOT: (SyncProps.SAMPLE_DATE,),
+        SyncMode.INIT_SNAPSHOT: (SyncProps.SAMPLE_DATE,)
     }
 
     def __init__(self, transformers):
@@ -50,7 +53,7 @@ class HostTransformer(base.TransformerBase):
 
     def _create_entity_vertex(self, entity_event):
 
-        sync_mode = entity_event['sync_mode']
+        sync_mode = entity_event[SyncProps.SYNC_MODE]
 
         host_name = extract_field_value(
             entity_event,
@@ -68,7 +71,7 @@ class HostTransformer(base.TransformerBase):
         return graph_utils.create_vertex(
             entity_key,
             entity_id=host_name,
-            entity_category=EntityTypes.RESOURCE,
+            entity_category=EntityCategory.RESOURCE,
             entity_type=self.HOST_TYPE,
             update_timestamp=timestamp,
             metadata=metadata
@@ -76,7 +79,7 @@ class HostTransformer(base.TransformerBase):
 
     def _create_neighbors(self, entity_event):
 
-        sync_mode = entity_event['sync_mode']
+        sync_mode = entity_event[SyncProps.SYNC_MODE]
 
         neighbors = []
 
@@ -100,7 +103,7 @@ class HostTransformer(base.TransformerBase):
     def _create_zone_neighbor(
             self, entity_event, timestamp, host_vertex_id, zone_name_path):
 
-        zone_transformer = self.transformers['nova.zone']
+        zone_transformer = self.transformers[EntityType.NOVA_ZONE]
 
         if zone_transformer:
 
@@ -123,14 +126,14 @@ class HostTransformer(base.TransformerBase):
 
     def _key_values(self, mutable_fields):
 
-        fixed_fields = [EntityTypes.RESOURCE, self.HOST_TYPE]
+        fixed_fields = [EntityCategory.RESOURCE, self.HOST_TYPE]
         return fixed_fields + mutable_fields
 
     def extract_key(self, entity_event):
 
         host_name = extract_field_value(
             entity_event,
-            self.HOST_NAME[entity_event['sync_mode']]
+            self.HOST_NAME[entity_event[SyncProps.SYNC_MODE]]
         )
 
         key_fields = self._key_values([host_name])
@@ -143,7 +146,7 @@ class HostTransformer(base.TransformerBase):
         return graph_utils.create_vertex(
             base.build_key(key_fields),
             entity_id=host_name,
-            entity_category=EntityTypes.RESOURCE,
+            entity_category=EntityCategory.RESOURCE,
             entity_type=self.HOST_TYPE,
             update_timestamp=timestamp,
             is_placeholder=True

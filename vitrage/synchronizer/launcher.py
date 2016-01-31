@@ -12,13 +12,13 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from oslo_log import log
+from oslo_service import service as os_service
+
 from nova_plugins.nova_host_plugin import NovaHostPlugin
 from nova_plugins.nova_instance_plugin import NovaInstancePlugin
 from nova_plugins.nova_zone_plugin import NovaZonePlugin
-from oslo_log import log
-from oslo_service import service as os_service
 from services import SnapshotsService
-
 
 LOG = log.getLogger(__name__)
 
@@ -45,7 +45,8 @@ class Launcher(object):
             service.set_callback(self.callback)
             launcher.launch_service(service, 1)
 
-    def _init_registered_plugins(self):
+    @staticmethod
+    def _init_registered_plugins():
         version = 2.0
         user = 'admin'
         password = 'password'

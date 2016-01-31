@@ -1,4 +1,5 @@
-# Copyright 2015 - Alcatel-Lucent
+# Copyright 2016 - Nokia
+#
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
 # a copy of the License at
@@ -11,16 +12,13 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import vitrage.api
-import vitrage.evaluator
-import vitrage.synchronizer
-import vitrage.synchronizer.other_plugins
+from oslo_config import cfg
 
 
-def list_opts():
-    return [
-        ('api', vitrage.api.OPTS),
-        ('synchronizer', vitrage.synchronizer.OPTS),
-        ('evaluator', vitrage.evaluator.OPTS),
-        ('static_synchronizer_plugin', vitrage.synchronizer.other_plugins.OPTS)
-    ]
+# Register options for the service
+OPTS = [
+    cfg.StrOpt('static_plugins_dir',
+               default='/etc/vitrage/static_plugins',
+               help='A path for the static plugins for the syncronizer'
+               ),
+]

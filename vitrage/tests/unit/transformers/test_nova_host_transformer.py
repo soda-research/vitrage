@@ -11,13 +11,16 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+
 import datetime
 
 from oslo_log import log as logging
 
 from vitrage.common.constants import EdgeLabels
-from vitrage.common.constants import EntityTypes
+from vitrage.common.constants import EntityCategory
+from vitrage.common.constants import EntityType
 from vitrage.common.constants import EventAction
+from vitrage.common.constants import SynchronizerProperties as SyncProps
 from vitrage.common.constants import SyncMode
 from vitrage.common.constants import VertexProperties
 from vitrage.entity_graph.transformer import base as tbase
@@ -37,7 +40,7 @@ class NovaHostTransformerTest(base.BaseTest):
 
         self.transformers = {}
         zone_transformer = ZoneTransformer(self.transformers)
-        self.transformers['nova.zone'] = zone_transformer
+        self.transformers[EntityType.NOVA_ZONE] = zone_transformer
 
     def test_create_placeholder_vertex(self):
         LOG.debug('Nova host transformer test: Test create placeholder vertex')
@@ -69,7 +72,7 @@ class NovaHostTransformerTest(base.BaseTest):
         self.assertEqual(observed_entity_id, host_name)
 
         observed_category = placeholder.get(VertexProperties.CATEGORY)
-        self.assertEqual(observed_category, EntityTypes.RESOURCE)
+        self.assertEqual(observed_category, EntityCategory.RESOURCE)
 
         is_placeholder = placeholder.get(VertexProperties.IS_PLACEHOLDER)
         self.assertEqual(is_placeholder, True)
@@ -88,7 +91,7 @@ class NovaHostTransformerTest(base.BaseTest):
         )
 
         # Test assertions
-        self.assertEqual(EntityTypes.RESOURCE, observed_key_fields[0])
+        self.assertEqual(EntityCategory.RESOURCE, observed_key_fields[0])
         self.assertEqual(
             host_transformer.HOST_TYPE,
             observed_key_fields[1]
@@ -117,14 +120,14 @@ class NovaHostTransformerTest(base.BaseTest):
             self.assertEqual(1, len(neighbors))
             self._validate_zone_neighbor(neighbors[0], event)
 
-            if SyncMode.SNAPSHOT == event['sync_mode']:
+            if SyncMode.SNAPSHOT == event[SyncProps.SYNC_MODE]:
                 self.assertEqual(EventAction.UPDATE, wrapper.action)
             else:
                 self.assertEqual(EventAction.CREATE, wrapper.action)
 
     def _validate_zone_neighbor(self, zone, event):
 
-        sync_mode = event['sync_mode']
+        sync_mode = event[SyncProps.SYNC_MODE]
         zone_name = tbase.extract_field_value(
             event,
             HostTransformer(self.transformers).ZONE_NAME[sync_mode]
@@ -134,7 +137,7 @@ class NovaHostTransformerTest(base.BaseTest):
             HostTransformer(self.transformers).TIMESTAMP[sync_mode]
         )
 
-        zt = self.transformers['nova.zone']
+        zt = self.transformers[EntityType.NOVA_ZONE]
         expected_neighbor = zt.create_placeholder_vertex(zone_name, time)
         self.assertEqual(expected_neighbor, zone.vertex)
 
@@ -149,7 +152,7 @@ class NovaHostTransformerTest(base.BaseTest):
 
     def _validate_vertex_props(self, vertex, event):
 
-        sync_mode = event['sync_mode']
+        sync_mode = event[SyncProps.SYNC_MODE]
         extract_value = tbase.extract_field_value
 
         expected_id = extract_value(
@@ -159,7 +162,7 @@ class NovaHostTransformerTest(base.BaseTest):
         observed_id = vertex[VertexProperties.ID]
         self.assertEqual(expected_id, observed_id)
         self.assertEqual(
-            EntityTypes.RESOURCE,
+            EntityCategory.RESOURCE,
             vertex[VertexProperties.CATEGORY]
         )
 
@@ -196,7 +199,7 @@ class NovaHostTransformerTest(base.BaseTest):
             zone_num=1,
             host_num=1,
             snapshot_events=1,
-            snap_vals={'sync_mode': SyncMode.SNAPSHOT})
+            snap_vals={SyncProps.SYNC_MODE: SyncMode.SNAPSHOT})
 
         hosts_events = mock_sync.generate_random_events_list(spec_list)
         host_transformer = HostTransformer(self.transformers)
@@ -212,7 +215,7 @@ class NovaHostTransformerTest(base.BaseTest):
             zone_num=1,
             host_num=1,
             snapshot_events=1,
-            snap_vals={'sync_mode': SyncMode.INIT_SNAPSHOT})
+            snap_vals={SyncProps.SYNC_MODE: SyncMode.INIT_SNAPSHOT})
         hosts_events = mock_sync.generate_random_events_list(spec_list)
         host_transformer = HostTransformer(self.transformers)
 

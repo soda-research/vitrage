@@ -14,6 +14,7 @@
 
 import unittest
 
+from vitrage.common.constants import SynchronizerProperties as SyncProps
 from vitrage.common.constants import SyncMode
 from vitrage.common.constants import VertexProperties
 from vitrage.common.utils import utcnow
@@ -67,16 +68,16 @@ class TestProcessor(base.BaseTest):
         # check update instance even
         # TODO(Alexey): Create an event in update event structure
         # (update snapshot fields won't work)
-        event['sync_mode'] = SyncMode.UPDATE
-        event['event_type'] = 'compute.instance.volume.attach'
+        event[SyncProps.SYNC_MODE] = SyncMode.UPDATE
+        event[SyncProps.EVENT_TYPE] = 'compute.instance.volume.attach'
         event['hostname'] = 'new_host'
         processor.process_event(event)
         self._check_graph(processor, self.NUM_VERTICES_AFTER_CREATION,
                           self.NUM_EDGES_AFTER_CREATION)
 
         # check delete instance event
-        event['sync_mode'] = SyncMode.UPDATE
-        event['event_type'] = 'compute.instance.delete.end'
+        event[SyncProps.SYNC_MODE] = SyncMode.UPDATE
+        event[SyncProps.EVENT_TYPE] = 'compute.instance.delete.end'
         processor.process_event(event)
         self._check_graph(processor, self.NUM_VERTICES_AFTER_DELETION,
                           self.NUM_EDGES_AFTER_DELETION)
@@ -225,11 +226,12 @@ class TestProcessor(base.BaseTest):
     @staticmethod
     def _create_mock_events():
         gen_list = mock_sync.simple_zone_generators(
-            2, 4, snapshot_events=2, snap_vals={'sync_mode': 'init_snapshot'})
+            2, 4, snapshot_events=2,
+            snap_vals={SyncProps.SYNC_MODE: SyncMode.INIT_SNAPSHOT})
         gen_list += mock_sync.simple_host_generators(
-            2, 4, 4, snap_vals={'sync_mode': 'init_snapshot'})
+            2, 4, 4, snap_vals={SyncProps.SYNC_MODE: SyncMode.INIT_SNAPSHOT})
         gen_list += mock_sync.simple_instance_generators(
-            4, 15, 15, snap_vals={'sync_mode': 'init_snapshot'})
+            4, 15, 15, snap_vals={SyncProps.SYNC_MODE: SyncMode.INIT_SNAPSHOT})
         return mock_sync.generate_sequential_events_list(gen_list)
 
     def _create_event(self, spec_type=None, sync_mode=None,
@@ -241,10 +243,10 @@ class TestProcessor(base.BaseTest):
 
         # update properties
         if sync_mode is not None:
-            events_list[0]['sync_mode'] = sync_mode
+            events_list[0][SyncProps.SYNC_MODE] = sync_mode
 
         if event_type is not None:
-            events_list[0]['event_type'] = event_type
+            events_list[0][SyncProps.EVENT_TYPE] = event_type
 
         if properties is not None:
             for key, value in properties.iteritems():

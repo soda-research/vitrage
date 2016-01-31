@@ -42,7 +42,7 @@ class SyncMode(object):
     UPDATE = 'update'
 
 
-class EntityTypes(object):
+class EntityCategory(object):
     RESOURCE = 'RESOURCE'
 
 
@@ -50,3 +50,16 @@ class EventAction(object):
     CREATE = 'create'
     DELETE = 'delete'
     UPDATE = 'update'
+
+
+class SynchronizerProperties(object):
+    SYNC_TYPE = 'sync_type'
+    SYNC_MODE = 'sync_mode'
+    SAMPLE_DATE = 'sample_date'
+    EVENT_TYPE = 'event_type'
+
+
+class EntityType(object):
+    NOVA_INSTANCE = 'nova.instance'
+    NOVA_HOST = 'nova.host'
+    NOVA_ZONE = 'nova.zone'
