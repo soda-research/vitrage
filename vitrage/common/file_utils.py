@@ -12,6 +12,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 import os
+import yaml
 
 
 def load_files(dir_path, suffix=None):
@@ -22,3 +23,18 @@ def load_files(dir_path, suffix=None):
         loaded_files = [f for f in loaded_files if f.endswith(suffix)]
 
     return loaded_files
+
+
+def load_yaml_files(dir_path):
+
+    files = load_files(dir_path, '.yaml')
+
+    yaml_files = []
+    for file in files:
+
+        full_path = dir_path + '/' + file
+        with open(full_path, 'r') as stream:
+            config = yaml.load(stream)
+            yaml_files.append(config)
+
+    return yaml_files
