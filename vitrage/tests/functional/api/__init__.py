@@ -1,4 +1,5 @@
 #
+# Copyright 2016 - Nokia Corporation
 # Copyright 2012 New Dream Network, LLC (DreamHost)
 # Copyright 2015 Red Hat, Inc.
 #
@@ -35,6 +36,7 @@ class FunctionalTest(base.BaseTest):
 
     PATH_PREFIX = ''
 
+    # noinspection PyAttributeOutsideInit
     def setUp(self):
         super(FunctionalTest, self).setUp()
         conf = service.prepare_service(args=[])
@@ -101,7 +103,7 @@ class FunctionalTest(base.BaseTest):
             params=params,
             headers=headers,
             status=status,
-            extra_aodhenviron=extra_environ,
+            extra_environ=extra_environ,
             expect_errors=expect_errors
         )
         return response

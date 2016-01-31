@@ -11,6 +11,8 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+import os
+
 from oslo_utils import timeutils
 from oslotest import base
 import sys
@@ -57,6 +59,18 @@ class BaseTest(base.BaseTestCase):
                 self.fail("%s is empty" % type(obj))
         except (TypeError, AttributeError):
             self.fail("%s doesn't have length" % type(obj))
+
+    @staticmethod
+    def path_get(project_file=None):
+        root = os.path.abspath(os.path.join(os.path.dirname(__file__),
+                                            '..',
+                                            '..',
+                                            )
+                               )
+        if project_file:
+            return os.path.join(root, project_file)
+        else:
+            return root
 
     def setUp(self):
         super(BaseTest, self).setUp()
