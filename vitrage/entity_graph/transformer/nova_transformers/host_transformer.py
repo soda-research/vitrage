@@ -34,8 +34,8 @@ class HostTransformer(base.TransformerBase):
 
     # Fields returned from Nova Availability Zone snapshot
     HOST_NAME = {
-        SyncMode.SNAPSHOT: ('host_name',),
-        SyncMode.INIT_SNAPSHOT: ('host_name',)
+        SyncMode.SNAPSHOT: ('_info', 'host_name',),
+        SyncMode.INIT_SNAPSHOT: ('_info', 'host_name',)
     }
 
     ZONE_NAME = {
