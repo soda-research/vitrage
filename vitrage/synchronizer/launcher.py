@@ -15,9 +15,9 @@
 from oslo_log import log
 from oslo_service import service as os_service
 
-from nova_plugins.nova_host_plugin import NovaHostPlugin
-from nova_plugins.nova_instance_plugin import NovaInstancePlugin
-from nova_plugins.nova_zone_plugin import NovaZonePlugin
+from plugins.nova.nova_host_plugin import NovaHostPlugin
+from plugins.nova.nova_instance_plugin import NovaInstancePlugin
+from plugins.nova.nova_zone_plugin import NovaZonePlugin
 from services import SnapshotsService
 
 LOG = log.getLogger(__name__)
