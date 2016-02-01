@@ -11,6 +11,7 @@
 # under the License.
 
 from vitrage.api.controllers.v1 import alarms
+from vitrage.api.controllers.v1 import rca
 from vitrage.api.controllers.v1 import resource
 from vitrage.api.controllers.v1 import topology
 
@@ -19,3 +20,4 @@ class V1Controller(object):
     topology = topology.TopologyController()
     resources = resource.ResourcesController()
     alarms = alarms.AlarmsController()
+    rca = rca.RCAController()

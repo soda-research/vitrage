@@ -2,5 +2,6 @@
   "get topology": "role:admin",
   "get resource": "role:admin",
   "list resources": "role:admin",
-  "list alarms": "role:admin"
+  "list alarms": "role:admin",
+  "get rca": "role:admin"
 }
