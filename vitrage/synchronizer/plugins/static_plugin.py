@@ -29,7 +29,7 @@ class StaticPlugin(BasePlugin):
     def get_instances(self):
         static_entities = []
         static_plugin_configs = file_utils.load_yaml_files(
-            self.cfg_opts.synchronizer.other_plugins.static_plugins_dir)
+            self.cfg_opts.synchronizer.plugins.static_plugins_dir)
 
         for config in static_plugin_configs:
             for entity in config:

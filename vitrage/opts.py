@@ -14,7 +14,7 @@
 import vitrage.api
 import vitrage.evaluator
 import vitrage.synchronizer
-import vitrage.synchronizer.other_plugins
+import vitrage.synchronizer.plugins
 
 
 def list_opts():
@@ -22,5 +22,5 @@ def list_opts():
         ('api', vitrage.api.OPTS),
         ('synchronizer', vitrage.synchronizer.OPTS),
         ('evaluator', vitrage.evaluator.OPTS),
-        ('static_synchronizer_plugin', vitrage.synchronizer.other_plugins.OPTS)
+        ('synchronizer_plugins', vitrage.synchronizer.plugins.OPTS)
     ]

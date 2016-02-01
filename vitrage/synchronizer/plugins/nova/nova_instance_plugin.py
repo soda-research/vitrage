@@ -13,7 +13,7 @@
 # under the License.
 
 from vitrage.common.constants import EntityType
-from vitrage.synchronizer.nova_plugins.novaclient_plugin \
+from vitrage.synchronizer.plugins.nova.novaclient_plugin \
     import NovaClientPlugin
 
 
