@@ -40,7 +40,7 @@ class BasePlugin(object):
             for field in fields_to_remove:
                 pickleable_entity.pop(field)
 
-            self._add_sync_type(pickleable_entity)
+            self._add_sync_type(pickleable_entity, sync_type)
             self._add_sampling_time(pickleable_entity)
             pickleable_entities.append(pickleable_entity)
 

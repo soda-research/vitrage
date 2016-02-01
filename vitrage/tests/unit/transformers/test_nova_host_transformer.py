@@ -25,8 +25,10 @@ from vitrage.common.constants import SyncMode
 from vitrage.common.constants import VertexProperties
 from vitrage.entity_graph.transformer import base as tbase
 from vitrage.entity_graph.transformer.base import TransformerBase
-from vitrage.entity_graph.transformer.host_transformer import HostTransformer
-from vitrage.entity_graph.transformer.zone_transformer import ZoneTransformer
+from vitrage.entity_graph.transformer.nova_transformers.host_transformer \
+    import HostTransformer
+from vitrage.entity_graph.transformer.nova_transformers.zone_transformer \
+    import ZoneTransformer
 from vitrage.tests import base
 from vitrage.tests.mocks import mock_syncronizer as mock_sync
 
