@@ -11,12 +11,9 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-import yaml
-
 from oslo_log import log
 
 from vitrage.common import file_utils
-
 
 LOG = log.getLogger(__name__)
 
@@ -24,14 +21,7 @@ LOG = log.getLogger(__name__)
 def load_templates_files(conf):
 
     templates_dir_path = conf.evaluator.templates_dir
-    templates_files = file_utils.load_files(templates_dir_path, '.yaml')
+    template_files = file_utils.load_yaml_files(templates_dir_path)
 
-    templates_configs = []
-    for template_file in templates_files:
-
-        full_path = templates_dir_path + '/' + template_file
-        with open(full_path, 'r') as stream:
-            config = yaml.load(stream)
-            templates_configs.append(config)
-
-    return templates_configs
+    for template_file in template_files:
+        pass
