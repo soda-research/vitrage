@@ -49,6 +49,10 @@ class TopologyController(rest.RestController):
         self.ctxt = {}
 
     @pecan.expose('json')
+    def index(self, depth=None, graph_type='graph', query=None, root=None):
+        return self.post(depth, graph_type, query, root)
+
+    @pecan.expose('json')
     def post(self, depth, graph_type, query, root):
         enforce("get topology", pecan.request.headers,
                 pecan.request.enforcer, {})
