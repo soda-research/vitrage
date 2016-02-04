@@ -28,7 +28,7 @@ import vitrage.graph.utils as graph_utils
 LOG = logging.getLogger(__name__)
 
 
-class Compute(base.TransformerBase):
+class Host(base.TransformerBase):
 
     HOST_TYPE = EntityType.NOVA_HOST
 

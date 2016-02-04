@@ -13,8 +13,7 @@
 # under the License.
 
 from vitrage.common.constants import EntityType
-from vitrage.synchronizer.plugins.nova.base \
-    import NovaBase
+from vitrage.synchronizer.plugins.nova.base import NovaBase
 
 
 class Zone(NovaBase):
@@ -31,7 +30,7 @@ class Zone(NovaBase):
         for zone in zones:
             zone_dict = zone.__dict__
             if zone_dict['zoneName'] and zone_dict['zoneName'] != 'internal':
-                zones_res.append(zone)
+                zones_res.append(zone_dict)
         return zones_res
 
     def get_all(self):

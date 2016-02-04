@@ -18,7 +18,7 @@ from oslo_utils import importutils
 from vitrage.common.constants import EntityType
 from vitrage.common.constants import SynchronizerProperties as SyncProps
 from vitrage.common.exception import VitrageTransformerError
-from vitrage.entity_graph.transformer.plugins.nova.host import Compute
+from vitrage.entity_graph.transformer.plugins.nova.host import Host
 from vitrage.entity_graph.transformer.plugins.nova.instance import Instance
 from vitrage.entity_graph.transformer.plugins.nova.zone import Zone
 
@@ -40,7 +40,7 @@ class TransformerManager(object):
                        Instance.__name__), transformers)
 
         transformers[EntityType.NOVA_HOST] = importutils.import_object(
-            "%s.%s" % (Compute.__module__, Compute.__name__),
+            "%s.%s" % (Host.__module__, Host.__name__),
             transformers)
 
         transformers[EntityType.NOVA_ZONE] = importutils.import_object(

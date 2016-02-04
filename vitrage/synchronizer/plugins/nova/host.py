@@ -13,18 +13,17 @@
 # under the License.
 
 from vitrage.common.constants import EntityType
-from vitrage.synchronizer.plugins.nova.base \
-    import NovaBase
+from vitrage.synchronizer.plugins.nova.base import NovaBase
 
 
-class Compute(NovaBase):
+class Host(NovaBase):
 
     def __init__(self, version, user, password, project, auth_url):
-        super(Compute, self).__init__(version,
-                                      user,
-                                      password,
-                                      project,
-                                      auth_url)
+        super(Host, self).__init__(version,
+                                   user,
+                                   password,
+                                   project,
+                                   auth_url)
 
     @staticmethod
     def filter_none_compute_hosts(entities):
@@ -32,7 +31,7 @@ class Compute(NovaBase):
         for host in entities:
             host_dict = host.__dict__
             if host_dict['service'] and host_dict['service'] == 'compute':
-                compute_hosts.append(host)
+                compute_hosts.append(host_dict)
         return compute_hosts
 
     def get_all(self):

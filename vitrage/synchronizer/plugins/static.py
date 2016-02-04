@@ -8,31 +8,29 @@
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
-# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# WARRANTIES OR  CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-
-from oslo_config import cfg
 
 from vitrage.common import file_utils
 from vitrage.synchronizer.base import SynchronizerBase
 
 
 class Static(SynchronizerBase):
-    def __init__(self):
+    def __init__(self, conf):
         super(Static, self).__init__()
-        self.cfg_opts = cfg.ConfigOpts()
+        self.cfg = conf
 
     def get_all(self):
-        return self.make_pickleable(self.get_instances(), None, ['manager'])
+        return self.make_pickleable(self.get_instances(), None, [])
 
     def get_instances(self):
         static_entities = []
         static_plugin_configs = file_utils.load_yaml_files(
-            self.cfg_opts.synchronizer.plugins.static_plugins_dir)
+            self.cfg.synchronizer_plugins.static_plugins_dir)
 
         for config in static_plugin_configs:
-            for entity in config:
+            for entity in config['entities']:
                 static_entities.append(entity)
 
         return static_entities

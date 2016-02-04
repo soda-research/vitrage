@@ -15,10 +15,11 @@
 from oslo_log import log
 from oslo_service import service as os_service
 
-from plugins.nova.host import Compute
-from plugins.nova.instance import Instance
-from plugins.nova.zone import Zone
 from services import SnapshotsService
+from vitrage.synchronizer.plugins.nova.host import Host
+from vitrage.synchronizer.plugins.nova.instance import Instance
+from vitrage.synchronizer.plugins.nova.zone import Zone
+from vitrage.synchronizer.plugins.static import Static
 
 LOG = log.getLogger(__name__)
 
@@ -45,8 +46,7 @@ class Launcher(object):
             service.set_callback(self.callback)
             launcher.launch_service(service, 1)
 
-    @staticmethod
-    def _init_registered_plugins():
+    def _init_registered_plugins(self):
         version = 2.0
         user = 'admin'
         password = 'password'
@@ -54,7 +54,8 @@ class Launcher(object):
         auth_url = "http://localhost:5000/v2.0/"
         registered_plugins = \
             [Zone(version, user, password, project, auth_url),
-             Compute(version, user, password, project, auth_url),
-             Instance(version, user, password, project, auth_url)
+             Host(version, user, password, project, auth_url),
+             Instance(version, user, password, project, auth_url),
+             Static(self.conf)
              ]
         return registered_plugins

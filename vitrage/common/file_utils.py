@@ -12,11 +12,11 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 import os
+
 import yaml
 
 
 def load_files(dir_path, suffix=None):
-
     loaded_files = os.listdir(dir_path)
 
     if suffix:
@@ -26,14 +26,13 @@ def load_files(dir_path, suffix=None):
 
 
 def load_yaml_files(dir_path):
-
     files = load_files(dir_path, '.yaml')
 
     yaml_files = []
     for file in files:
-
         full_path = dir_path + '/' + file
         with open(full_path, 'r') as stream:
+            # TODO(alexey): check what to do if parse of one of the files fails
             config = yaml.load(stream)
             yaml_files.append(config)
 

@@ -13,8 +13,7 @@
 # under the License.
 
 from vitrage.common.constants import EntityType
-from vitrage.synchronizer.plugins.nova.base \
-    import NovaBase
+from vitrage.synchronizer.plugins.nova.base import NovaBase
 
 
 class Instance(NovaBase):
@@ -25,6 +24,14 @@ class Instance(NovaBase):
                                        project,
                                        auth_url)
 
+    @staticmethod
+    def filter_instances(instances):
+        instances_res = []
+        for instance in instances:
+            instances_res.append(instance.__dict__)
+        return instances_res
+
     def get_all(self):
-        return self.make_pickleable(self.client.servers.list(),
-                                    EntityType.NOVA_INSTANCE, ['manager'])
+        return self.make_pickleable(
+            self.filter_instances(self.client.servers.list()),
+            EntityType.NOVA_INSTANCE, ['manager'])

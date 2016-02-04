@@ -23,7 +23,7 @@ from vitrage.common.constants import SynchronizerProperties as SyncProps
 from vitrage.common.constants import VertexProperties
 from vitrage.entity_graph.transformer import base as tbase
 from vitrage.entity_graph.transformer.base import TransformerBase
-from vitrage.entity_graph.transformer.plugins.nova.host import Compute
+from vitrage.entity_graph.transformer.plugins.nova.host import Host
 from vitrage.entity_graph.transformer.plugins.nova.zone import Zone
 from vitrage.tests import base
 from vitrage.tests.mocks import mock_syncronizer as mock_sync
@@ -37,7 +37,7 @@ class NovaZoneTransformerTest(base.BaseTest):
         super(NovaZoneTransformerTest, self).setUp()
 
         self.transformers = {}
-        host_transformer = Compute(self.transformers)
+        host_transformer = Host(self.transformers)
         self.transformers[EntityType.NOVA_HOST] = host_transformer
 
     def test_create_placeholder_vertex(self):
