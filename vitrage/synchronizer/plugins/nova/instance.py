@@ -13,17 +13,17 @@
 # under the License.
 
 from vitrage.common.constants import EntityType
-from vitrage.synchronizer.plugins.nova.novaclient_plugin \
-    import NovaClientPlugin
+from vitrage.synchronizer.plugins.nova.base \
+    import NovaBase
 
 
-class NovaInstancePlugin(NovaClientPlugin):
+class Instance(NovaBase):
     def __init__(self, version, user, password, project, auth_url):
-        super(NovaInstancePlugin, self).__init__(version,
-                                                 user,
-                                                 password,
-                                                 project,
-                                                 auth_url)
+        super(Instance, self).__init__(version,
+                                       user,
+                                       password,
+                                       project,
+                                       auth_url)
 
     def get_all(self):
         return self.make_pickleable(self.client.servers.list(),

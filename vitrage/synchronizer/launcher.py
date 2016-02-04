@@ -15,9 +15,9 @@
 from oslo_log import log
 from oslo_service import service as os_service
 
-from plugins.nova.nova_host_plugin import NovaHostPlugin
-from plugins.nova.nova_instance_plugin import NovaInstancePlugin
-from plugins.nova.nova_zone_plugin import NovaZonePlugin
+from plugins.nova.host import Compute
+from plugins.nova.instance import Instance
+from plugins.nova.zone import Zone
 from services import SnapshotsService
 
 LOG = log.getLogger(__name__)
@@ -53,8 +53,8 @@ class Launcher(object):
         project = 'admin'
         auth_url = "http://localhost:5000/v2.0/"
         registered_plugins = \
-            [NovaZonePlugin(version, user, password, project, auth_url),
-             NovaHostPlugin(version, user, password, project, auth_url),
-             NovaInstancePlugin(version, user, password, project, auth_url)
+            [Zone(version, user, password, project, auth_url),
+             Compute(version, user, password, project, auth_url),
+             Instance(version, user, password, project, auth_url)
              ]
         return registered_plugins

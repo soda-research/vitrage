@@ -15,12 +15,12 @@
 from oslo_config import cfg
 
 from vitrage.common import file_utils
-from vitrage.synchronizer.base_plugin import BasePlugin
+from vitrage.synchronizer.base import SynchronizerBase
 
 
-class StaticPlugin(BasePlugin):
+class Static(SynchronizerBase):
     def __init__(self):
-        super(StaticPlugin, self).__init__()
+        super(Static, self).__init__()
         self.cfg_opts = cfg.ConfigOpts()
 
     def get_all(self):

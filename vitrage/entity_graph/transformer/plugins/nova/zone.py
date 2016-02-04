@@ -28,7 +28,7 @@ import vitrage.graph.utils as graph_utils
 LOG = logging.getLogger(__name__)
 
 
-class ZoneTransformer(base.TransformerBase):
+class Zone(base.TransformerBase):
 
     ZONE_TYPE = EntityType.NOVA_ZONE
 

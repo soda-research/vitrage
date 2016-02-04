@@ -21,7 +21,7 @@ from vitrage.common import utils
 
 
 @six.add_metaclass(abc.ABCMeta)
-class BasePlugin(object):
+class SynchronizerBase(object):
 
     def __init__(self):
         pass

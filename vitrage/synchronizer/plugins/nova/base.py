@@ -15,12 +15,12 @@
 
 from novaclient import client
 
-from vitrage.synchronizer.base_plugin import BasePlugin
+from vitrage.synchronizer.base import SynchronizerBase
 
 
-class NovaClientPlugin(BasePlugin):
+class NovaBase(SynchronizerBase):
     def __init__(self, version, user, password, project, auth_url):
-        super(NovaClientPlugin, self).__init__()
+        super(NovaBase, self).__init__()
         self.client = client.Client(version, user, password, project, auth_url)
 
     def get_client(self):

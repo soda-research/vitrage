@@ -23,10 +23,8 @@ from vitrage.common.constants import SynchronizerProperties as SyncProps
 from vitrage.common.constants import VertexProperties
 from vitrage.entity_graph.transformer import base as tbase
 from vitrage.entity_graph.transformer.base import TransformerBase
-from vitrage.entity_graph.transformer.nova_transformers.host_transformer \
-    import HostTransformer
-from vitrage.entity_graph.transformer.nova_transformers.zone_transformer \
-    import ZoneTransformer
+from vitrage.entity_graph.transformer.plugins.nova.host import Compute
+from vitrage.entity_graph.transformer.plugins.nova.zone import Zone
 from vitrage.tests import base
 from vitrage.tests.mocks import mock_syncronizer as mock_sync
 
@@ -39,7 +37,7 @@ class NovaZoneTransformerTest(base.BaseTest):
         super(NovaZoneTransformerTest, self).setUp()
 
         self.transformers = {}
-        host_transformer = HostTransformer(self.transformers)
+        host_transformer = Compute(self.transformers)
         self.transformers[EntityType.NOVA_HOST] = host_transformer
 
     def test_create_placeholder_vertex(self):
@@ -49,7 +47,7 @@ class NovaZoneTransformerTest(base.BaseTest):
         # Test setup
         zone_name = 'zone123'
         timestamp = datetime.datetime.utcnow()
-        zone_transformer = ZoneTransformer(self.transformers)
+        zone_transformer = Zone(self.transformers)
 
         # Test action
         placeholder = zone_transformer.create_placeholder_vertex(
@@ -60,7 +58,7 @@ class NovaZoneTransformerTest(base.BaseTest):
         # Test assertions
         observed_id_values = placeholder.vertex_id.split(
             TransformerBase.KEY_SEPARATOR)
-        expected_id_values = ZoneTransformer(self.transformers)._key_values(
+        expected_id_values = Zone(self.transformers)._key_values(
             [zone_name]
         )
         self.assertEqual(observed_id_values, expected_id_values)
@@ -85,7 +83,7 @@ class NovaZoneTransformerTest(base.BaseTest):
 
         # Test setup
         zone_name = 'zone123'
-        zone_transformer = ZoneTransformer(self.transformers)
+        zone_transformer = Zone(self.transformers)
 
         # Test action
         observed_key_fields = zone_transformer._key_values([zone_name])
@@ -93,7 +91,7 @@ class NovaZoneTransformerTest(base.BaseTest):
         # Test assertions
         self.assertEqual(EntityCategory.RESOURCE, observed_key_fields[0])
         self.assertEqual(
-            ZoneTransformer(self.transformers).ZONE_TYPE,
+            Zone(self.transformers).ZONE_TYPE,
             observed_key_fields[1]
         )
         self.assertEqual(zone_name, observed_key_fields[2])
@@ -114,7 +112,7 @@ class NovaZoneTransformerTest(base.BaseTest):
 
         for event in zone_events:
             # Test action
-            wrapper = ZoneTransformer(self.transformers).transform(event)
+            wrapper = Zone(self.transformers).transform(event)
 
             # Test assertions
             vertex = wrapper.vertex
@@ -158,17 +156,17 @@ class NovaZoneTransformerTest(base.BaseTest):
 
         host_available = tbase.extract_field_value(
             host_dic,
-            ZoneTransformer.HOST_AVAILABLE[sync_mode]
+            Zone.HOST_AVAILABLE[sync_mode]
         )
         host_active = tbase.extract_field_value(
             host_dic,
-            ZoneTransformer.HOST_ACTIVE[sync_mode]
+            Zone.HOST_ACTIVE[sync_mode]
         )
 
         if host_available and host_active:
-            expected_host_state = ZoneTransformer.STATE_AVAILABLE
+            expected_host_state = Zone.STATE_AVAILABLE
         else:
-            expected_host_state = ZoneTransformer.STATE_UNAVAILABLE
+            expected_host_state = Zone.STATE_UNAVAILABLE
         self.assertEqual(
             expected_host_state,
             host_vertex.get(VertexProperties.STATE)
@@ -199,7 +197,7 @@ class NovaZoneTransformerTest(base.BaseTest):
 
     def _validate_vertex_props(self, vertex, event):
 
-        zone_transform = ZoneTransformer(self.transformers)
+        zone_transform = Zone(self.transformers)
 
         sync_mode = event[SyncProps.SYNC_MODE]
         extract_value = tbase.extract_field_value

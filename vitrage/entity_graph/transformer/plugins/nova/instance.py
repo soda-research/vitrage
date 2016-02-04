@@ -30,7 +30,7 @@ import vitrage.graph.utils as graph_utils
 LOG = logging.getLogger(__name__)
 
 
-class InstanceTransformer(base.TransformerBase):
+class Instance(base.TransformerBase):
 
     INSTANCE_TYPE = EntityType.NOVA_INSTANCE
 

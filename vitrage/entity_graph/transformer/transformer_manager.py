@@ -18,12 +18,9 @@ from oslo_utils import importutils
 from vitrage.common.constants import EntityType
 from vitrage.common.constants import SynchronizerProperties as SyncProps
 from vitrage.common.exception import VitrageTransformerError
-from vitrage.entity_graph.transformer.nova_transformers.host_transformer \
-    import HostTransformer
-from vitrage.entity_graph.transformer.nova_transformers.instance_transformer \
-    import InstanceTransformer
-from vitrage.entity_graph.transformer.nova_transformers.zone_transformer \
-    import ZoneTransformer
+from vitrage.entity_graph.transformer.plugins.nova.host import Compute
+from vitrage.entity_graph.transformer.plugins.nova.instance import Instance
+from vitrage.entity_graph.transformer.plugins.nova.zone import Zone
 
 LOG = logging.getLogger(__name__)
 
@@ -39,15 +36,15 @@ class TransformerManager(object):
         transformers = {}
 
         transformers[EntityType.NOVA_INSTANCE] = importutils.import_object(
-            "%s.%s" % (InstanceTransformer.__module__,
-                       InstanceTransformer.__name__), transformers)
+            "%s.%s" % (Instance.__module__,
+                       Instance.__name__), transformers)
 
         transformers[EntityType.NOVA_HOST] = importutils.import_object(
-            "%s.%s" % (HostTransformer.__module__, HostTransformer.__name__),
+            "%s.%s" % (Compute.__module__, Compute.__name__),
             transformers)
 
         transformers[EntityType.NOVA_ZONE] = importutils.import_object(
-            "%s.%s" % (ZoneTransformer.__module__, ZoneTransformer.__name__),
+            "%s.%s" % (Zone.__module__, Zone.__name__),
             transformers)
 
         return transformers

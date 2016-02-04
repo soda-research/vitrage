@@ -13,17 +13,17 @@
 # under the License.
 
 from vitrage.common.constants import EntityType
-from vitrage.synchronizer.plugins.nova.novaclient_plugin \
-    import NovaClientPlugin
+from vitrage.synchronizer.plugins.nova.base \
+    import NovaBase
 
 
-class NovaZonePlugin(NovaClientPlugin):
+class Zone(NovaBase):
     def __init__(self, version, user, password, project, auth_url):
-        super(NovaZonePlugin, self).__init__(version,
-                                             user,
-                                             password,
-                                             project,
-                                             auth_url)
+        super(Zone, self).__init__(version,
+                                   user,
+                                   password,
+                                   project,
+                                   auth_url)
 
     @staticmethod
     def filter_internal_zone(zones):

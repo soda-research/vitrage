@@ -13,18 +13,18 @@
 # under the License.
 
 from vitrage.common.constants import EntityType
-from vitrage.synchronizer.plugins.nova.novaclient_plugin \
-    import NovaClientPlugin
+from vitrage.synchronizer.plugins.nova.base \
+    import NovaBase
 
 
-class NovaHostPlugin(NovaClientPlugin):
+class Compute(NovaBase):
 
     def __init__(self, version, user, password, project, auth_url):
-        super(NovaHostPlugin, self).__init__(version,
-                                             user,
-                                             password,
-                                             project,
-                                             auth_url)
+        super(Compute, self).__init__(version,
+                                      user,
+                                      password,
+                                      project,
+                                      auth_url)
 
     @staticmethod
     def filter_none_compute_hosts(entities):
