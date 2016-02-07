@@ -19,7 +19,7 @@ from services import SnapshotsService
 from vitrage.synchronizer.plugins.nova.host import Host
 from vitrage.synchronizer.plugins.nova.instance import Instance
 from vitrage.synchronizer.plugins.nova.zone import Zone
-from vitrage.synchronizer.plugins.static import Static
+from vitrage.synchronizer.plugins.static_physical import StaticPhysical
 
 LOG = log.getLogger(__name__)
 
@@ -56,6 +56,6 @@ class Launcher(object):
             [Zone(version, user, password, project, auth_url),
              Host(version, user, password, project, auth_url),
              Instance(version, user, password, project, auth_url),
-             Static(self.conf)
+             StaticPhysical(self.conf)
              ]
         return registered_plugins

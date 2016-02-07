@@ -109,7 +109,7 @@ class TransformerBase(object):
          """
 
     @abc.abstractmethod
-    def _key_values(self, mutable_fields=None):
+    def key_values(self, mutable_fields=[]):
         """A list of key fields
 
         The fields which consist the entity key
@@ -132,12 +132,12 @@ class TransformerBase(object):
         pass
 
     @abc.abstractmethod
-    def create_placeholder_vertex(self, entity_id):
+    def create_placeholder_vertex(self, properties={}):
         """Creates placeholder vertex.
 
         Placeholder vertex contains only mandatory fields
 
-        :param instance_id: The instance ID
+        :param properties: the properties for the placeholder vertex
         :return: Placeholder vertex
         :rtype: Vertex
         """

@@ -51,17 +51,17 @@ class NovaInstanceTransformerTest(base.BaseTest):
 
         # Test action
         instance_transformer = Instance(self.transformers)
+        properties = {
+            VertexProperties.ID: instance_id,
+            VertexProperties.UPDATE_TIMESTAMP: timestamp
+        }
         placeholder = instance_transformer.create_placeholder_vertex(
-            instance_id,
-            timestamp
-        )
+            properties)
 
         # Test assertions
         observed_id_values = placeholder.vertex_id.split(
             TransformerBase.KEY_SEPARATOR)
-        expected_id_values = instance_transformer._key_values(
-            [instance_id]
-        )
+        expected_id_values = instance_transformer.key_values([instance_id])
         self.assertEqual(observed_id_values, expected_id_values)
 
         observed_time = placeholder.get(VertexProperties.UPDATE_TIMESTAMP)
@@ -220,7 +220,11 @@ class NovaInstanceTransformerTest(base.BaseTest):
         time = tbase.extract_field_value(event, it.TIMESTAMP[sync_mode])
 
         ht = self.transformers[EntityType.NOVA_HOST]
-        expected_neighbor = ht.create_placeholder_vertex(host_name, time)
+        properties = {
+            VertexProperties.ID: host_name,
+            VertexProperties.UPDATE_TIMESTAMP: time
+        }
+        expected_neighbor = ht.create_placeholder_vertex(properties)
         self.assertEqual(expected_neighbor, h_neighbor.vertex)
 
         # Validate neighbor edge
@@ -263,7 +267,7 @@ class NovaInstanceTransformerTest(base.BaseTest):
 
             self.assertEqual(instance_id, observed_key_fields[2])
 
-            key_values = instance_transformer._key_values([instance_id])
+            key_values = instance_transformer.key_values([instance_id])
             expected_key = tbase.build_key(key_values)
 
             self.assertEqual(expected_key, observed_key)
@@ -277,7 +281,7 @@ class NovaInstanceTransformerTest(base.BaseTest):
 
         instance_transformer = Instance(self.transformers)
         # Test action
-        key_fields = instance_transformer._key_values([instance_id])
+        key_fields = instance_transformer.key_values([instance_id])
 
         # Test assertions
         observed_key = tbase.build_key(key_fields)

@@ -19,7 +19,7 @@ from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import EntityType
 from vitrage.common.constants import SynchronizerProperties as SyncProps
 from vitrage.common.constants import SyncMode
-from vitrage.common.constants import VertexProperties
+from vitrage.common.constants import VertexProperties as VProps
 from vitrage.entity_graph.transformer import base
 from vitrage.entity_graph.transformer.base import extract_field_value
 import vitrage.graph.utils as graph_utils
@@ -57,16 +57,14 @@ class Host(base.TransformerBase):
 
         host_name = extract_field_value(
             entity_event,
-            self.HOST_NAME[sync_mode]
-        )
-        metadata = {VertexProperties.NAME: host_name}
+            self.HOST_NAME[sync_mode])
+        metadata = {VProps.NAME: host_name}
 
         entity_key = self.extract_key(entity_event)
 
         timestamp = extract_field_value(
             entity_event,
-            self.TIMESTAMP[sync_mode]
-        )
+            self.TIMESTAMP[sync_mode])
 
         return graph_utils.create_vertex(
             entity_key,
@@ -74,8 +72,7 @@ class Host(base.TransformerBase):
             entity_category=EntityCategory.RESOURCE,
             entity_type=self.HOST_TYPE,
             update_timestamp=timestamp,
-            metadata=metadata
-        )
+            metadata=metadata)
 
     def _create_neighbors(self, entity_event):
 
@@ -85,23 +82,24 @@ class Host(base.TransformerBase):
 
         timestamp = extract_field_value(
             entity_event,
-            self.TIMESTAMP[sync_mode]
-        )
+            self.TIMESTAMP[sync_mode])
 
         zone_neighbor = self._create_zone_neighbor(
             entity_event,
             timestamp,
             self.extract_key(entity_event),
-            self.ZONE_NAME[sync_mode]
-        )
+            self.ZONE_NAME[sync_mode])
 
         if zone_neighbor is not None:
             neighbors.append(zone_neighbor)
 
         return neighbors
 
-    def _create_zone_neighbor(
-            self, entity_event, timestamp, host_vertex_id, zone_name_path):
+    def _create_zone_neighbor(self,
+                              entity_event,
+                              timestamp,
+                              host_vertex_id,
+                              zone_name_path):
 
         zone_transformer = self.transformers[EntityType.NOVA_ZONE]
 
@@ -109,45 +107,45 @@ class Host(base.TransformerBase):
 
             zone_name = extract_field_value(entity_event, zone_name_path)
 
+            properties = {
+                VProps.ID: zone_name,
+                VProps.UPDATE_TIMESTAMP: timestamp
+            }
             zone_neighbor = zone_transformer.create_placeholder_vertex(
-                zone_name,
-                timestamp
-            )
+                properties)
             relation_edge = graph_utils.create_edge(
                 source_id=zone_neighbor.vertex_id,
                 target_id=host_vertex_id,
-                relationship_type=EdgeLabels.CONTAINS
-            )
+                relationship_type=EdgeLabels.CONTAINS)
             return base.Neighbor(zone_neighbor, relation_edge)
         else:
             LOG.warning('Cannot find zone transformer')
 
         return None
 
-    def _key_values(self, mutable_fields):
-
-        fixed_fields = [EntityCategory.RESOURCE, self.HOST_TYPE]
-        return fixed_fields + mutable_fields
+    def key_values(self, mutable_fields=[]):
+        return [EntityCategory.RESOURCE, self.HOST_TYPE] + mutable_fields
 
     def extract_key(self, entity_event):
 
         host_name = extract_field_value(
             entity_event,
-            self.HOST_NAME[entity_event[SyncProps.SYNC_MODE]]
-        )
+            self.HOST_NAME[entity_event[SyncProps.SYNC_MODE]])
 
-        key_fields = self._key_values([host_name])
+        key_fields = self.key_values([host_name])
         return base.build_key(key_fields)
 
-    def create_placeholder_vertex(self, host_name, timestamp):
+    def create_placeholder_vertex(self, properties={}):
+        if VProps.ID not in properties:
+            LOG.error('Cannot create placeholder vertex. Missing property ID')
+            raise ValueError('Missing property ID')
 
-        key_fields = self._key_values([host_name])
+        key_fields = self.key_values([properties[VProps.ID]])
 
         return graph_utils.create_vertex(
             base.build_key(key_fields),
-            entity_id=host_name,
+            entity_id=properties[VProps.ID],
             entity_category=EntityCategory.RESOURCE,
             entity_type=self.HOST_TYPE,
-            update_timestamp=timestamp,
-            is_placeholder=True
-        )
+            update_timestamp=properties[VProps.UPDATE_TIMESTAMP],
+            is_placeholder=True)

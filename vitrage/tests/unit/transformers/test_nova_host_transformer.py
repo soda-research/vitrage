@@ -51,15 +51,16 @@ class NovaHostTransformerTest(base.BaseTest):
         host_transformer = Host(self.transformers)
 
         # Test action
-        placeholder = host_transformer.create_placeholder_vertex(
-            host_name,
-            timestamp
-        )
+        properties = {
+            VertexProperties.ID: host_name,
+            VertexProperties.UPDATE_TIMESTAMP: timestamp
+        }
+        placeholder = host_transformer.create_placeholder_vertex(properties)
 
         # Test assertions
         observed_id_values = placeholder.vertex_id.split(
             TransformerBase.KEY_SEPARATOR)
-        expected_id_values = host_transformer._key_values([host_name])
+        expected_id_values = host_transformer.key_values([host_name])
         self.assertEqual(observed_id_values, expected_id_values)
 
         observed_time = placeholder.get(VertexProperties.UPDATE_TIMESTAMP)
@@ -86,26 +87,20 @@ class NovaHostTransformerTest(base.BaseTest):
         host_transformer = Host(self.transformers)
 
         # Test action
-        observed_key_fields = host_transformer._key_values(
-            [host_name]
-        )
+        observed_key_fields = host_transformer.key_values([host_name])
 
         # Test assertions
         self.assertEqual(EntityCategory.RESOURCE, observed_key_fields[0])
-        self.assertEqual(
-            host_transformer.HOST_TYPE,
-            observed_key_fields[1]
-        )
+        self.assertEqual(host_transformer.HOST_TYPE, observed_key_fields[1])
         self.assertEqual(host_name, observed_key_fields[2])
 
     def test_snapshot_transform(self):
         LOG.debug('Nova host transformer test: transform entity event')
 
         # Test setup
-        spec_list = mock_sync.simple_host_generators(
-            zone_num=2,
-            host_num=4,
-            snapshot_events=5)
+        spec_list = mock_sync.simple_host_generators(zone_num=2,
+                                                     host_num=4,
+                                                     snapshot_events=5)
 
         host_events = mock_sync.generate_random_events_list(spec_list)
 
@@ -138,7 +133,11 @@ class NovaHostTransformerTest(base.BaseTest):
         )
 
         zt = self.transformers[EntityType.NOVA_ZONE]
-        expected_neighbor = zt.create_placeholder_vertex(zone_name, time)
+        properties = {
+            VertexProperties.ID: zone_name,
+            VertexProperties.UPDATE_TIMESTAMP: time
+        }
+        expected_neighbor = zt.create_placeholder_vertex(properties)
         self.assertEqual(expected_neighbor, zone.vertex)
 
         # Validate neighbor edge

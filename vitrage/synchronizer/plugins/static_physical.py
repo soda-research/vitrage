@@ -16,9 +16,9 @@ from vitrage.common import file_utils
 from vitrage.synchronizer.base import SynchronizerBase
 
 
-class Static(SynchronizerBase):
+class StaticPhysical(SynchronizerBase):
     def __init__(self, conf):
-        super(Static, self).__init__()
+        super(StaticPhysical, self).__init__()
         self.cfg = conf
 
     def get_all(self):
