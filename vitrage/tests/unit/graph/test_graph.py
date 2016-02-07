@@ -336,3 +336,28 @@ class GraphTest(GraphTestBase):
             vertex_attr_filter={VProps.CATEGORY: HOST})
         self._assert_set_equal({}, v5_neighbors,
                                'Check neighbors for not connected vertex')
+
+    def test_get_vertices(self):
+        g = create_graph('test_get_vertices')
+        g.add_vertex(v_node)
+        g.add_vertex(v_host)
+        g.add_edge(e_node_to_host)
+
+        all_vertices = g.get_vertices()
+        self.assertEqual(2, len(all_vertices),
+                         'get_vertices __len__ all vertices')
+
+        node_vertices = g.get_vertices(vertex_attr_filter={VProps.TYPE: NODE})
+        self.assertEqual(1, len(node_vertices),
+                         'get_vertices __len__ node vertices')
+        found_vertex = node_vertices.pop()
+        self.assertEqual(NODE, found_vertex[VProps.TYPE],
+                         'get_vertices check node vertex')
+
+        node_vertices = g.get_vertices(
+            vertex_attr_filter={VProps.TYPE: NODE, VProps.CATEGORY: RESOURCE})
+        self.assertEqual(1, len(node_vertices),
+                         'get_vertices __len__ node vertices')
+        found_vertex = node_vertices.pop()
+        self.assertEqual(NODE, found_vertex[VProps.TYPE],
+                         'get_vertices check node vertex')

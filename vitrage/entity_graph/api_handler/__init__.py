@@ -16,6 +16,8 @@ from oslo_config import cfg
 from oslo_log import log
 import oslo_messaging
 from oslo_service import service as os_service
+from vitrage.common.constants import EntityCategory
+from vitrage.common.constants import VertexProperties as VProps
 
 
 LOG = log.getLogger(__name__)
@@ -70,6 +72,10 @@ class VitrageApiHandlerService(os_service.Service):
 class EntityGraphApis(object):
     def __init__(self, entity_graph):
         self.entity_graph = entity_graph
+
+    def get_alarms(self, ctx, arg):
+        return self.entity_graph.get_vertices(
+            {VProps.CATEGORY: EntityCategory.ALARM})
 
     def get_topology(self, ctx, arg):
         return self.entity_graph.output_graph()

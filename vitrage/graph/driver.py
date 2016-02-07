@@ -421,6 +421,40 @@ class Graph(object):
         pass
 
     @abc.abstractmethod
+    def get_vertices(self, vertex_attr_filter=None):
+        """Get vertices list with an optional match filter
+
+        To filter the vertices, specify property values for
+        the vertices
+
+        Example:
+        --------
+        graph = Graph()
+
+        v1_prop = {'prop_key':'some value for my first vertex'}
+        v2_prop = {'prop_key':'another value for my second vertex'}
+        v3_prop = {'prop_key':'YES'}
+        v1 = Vertex(vertex_id=1, properties=v1_prop)
+        v2 = Vertex(vertex_id=2, properties=v2_prop)
+        v3 = Vertex(vertex_id=3, properties=v3_prop)
+        graph.add_vertex(v1)
+        graph.add_vertex(v2)
+        graph.add_vertex(v3)
+
+        all_vertices = graph.get_vertices()
+        for v in all_vertices:
+            do something with v
+        filtered_vertices_list = graph.get_vertices(
+                                    vertex_attr_filter={'prop_key':['YES']})
+
+        :param vertex_attr_filter: expected keys and values
+        :type vertex_attr_filter dict
+        :return: A list of vertices that match the requested query
+        :rtype: set of Vertex
+        """
+        pass
+
+    @abc.abstractmethod
     def neighbors(self, v_id, vertex_attr_filter=None,
                   edge_attr_filter=None, direction=Direction.BOTH):
         """Get vertices that are neighboring to v_id vertex

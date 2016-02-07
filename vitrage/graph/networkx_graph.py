@@ -172,14 +172,21 @@ class NXGraph(Graph):
         """
         self._g.remove_edge(u=e.source_id, v=e.target_id, key=e.label)
 
+    def get_vertices(self, vertex_attr_filter=None):
+        def check_vertex((v_id, vertex_data)):
+            return check_filter(vertex_data, vertex_attr_filter)
+
+        items = filter(check_vertex, self._g.nodes_iter(data=True))
+        return [vertex_copy(node, node_data) for node, node_data in items]
+
     def neighbors(self, v_id, vertex_attr_filter=None, edge_attr_filter=None,
                   direction=Direction.BOTH):
 
         def check_edge(edge_data):
             return check_filter(edge_data, edge_attr_filter)
 
-        def check_vertex(edge_data):
-            return check_filter(edge_data, vertex_attr_filter)
+        def check_vertex(vertex_data):
+            return check_filter(vertex_data, vertex_attr_filter)
 
         nodes, edges = self._neighboring_nodes_edges_query(
             v_id=v_id, vertex_predicate=check_vertex,

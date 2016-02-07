@@ -44,6 +44,7 @@ class SyncMode(object):
 
 class EntityCategory(object):
     RESOURCE = 'RESOURCE'
+    ALARM = 'ALARM'
 
 
 class SynchronizerProperties(object):
