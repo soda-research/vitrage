@@ -19,10 +19,10 @@ from oslo_log import log as logging
 from vitrage.common.constants import EdgeLabels
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import EntityType
-from vitrage.common.constants import EventAction
 from vitrage.common.constants import SynchronizerProperties as SyncProps
 from vitrage.common.constants import SyncMode
 from vitrage.common.constants import VertexProperties
+from vitrage.entity_graph.event_action import EventAction
 from vitrage.entity_graph.transformer import base as tbase
 from vitrage.entity_graph.transformer.base import TransformerBase
 from vitrage.entity_graph.transformer.plugins.nova.host import Host

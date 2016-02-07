@@ -13,8 +13,7 @@
 # under the License.
 
 from oslo_log import log
-
-from vitrage.common.constants import EventAction
+from vitrage.entity_graph.event_action import EventAction
 from vitrage.entity_graph.processor import base as processor
 from vitrage.entity_graph.processor import entity_graph
 from vitrage.entity_graph.transformer import transformer_manager
@@ -189,9 +188,9 @@ class Processor(processor.ProcessorBase):
         graph_neighbor_types = \
             self.entity_graph.find_neighbor_types(neighbors)
 
-        # iterate over current neighbor edges and check existence in new list
         for curr_edge in self.entity_graph.get_edges(
-                vertex.vertex_id, direction=Direction.BOTH):
+                vertex.vertex_id,
+                direction=Direction.BOTH):
             # check if the edge in the graph has a a connection to the
             # same type of resources in the new neighbors list
             neighbor_vertex = self.entity_graph.get_vertex(
@@ -213,6 +212,8 @@ class Processor(processor.ProcessorBase):
         return valid_edges, obsolete_edges
 
     def _initialize_events_actions(self):
-        self.actions = {EventAction.CREATE: self.create_entity,
-                        EventAction.UPDATE: self.update_entity,
-                        EventAction.DELETE: self.delete_entity}
+        self.actions = {
+            EventAction.CREATE: self.create_entity,
+            EventAction.UPDATE: self.update_entity,
+            EventAction.DELETE: self.delete_entity
+        }

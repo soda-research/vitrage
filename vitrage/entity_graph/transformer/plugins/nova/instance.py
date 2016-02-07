@@ -17,11 +17,11 @@ from oslo_log import log as logging
 from vitrage.common.constants import EdgeLabels
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import EntityType
-from vitrage.common.constants import EventAction
 from vitrage.common.constants import SynchronizerProperties as SyncProps
 from vitrage.common.constants import SyncMode
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.common.exception import VitrageTransformerError
+from vitrage.entity_graph.event_action import EventAction
 from vitrage.entity_graph.transformer import base
 from vitrage.entity_graph.transformer.base import extract_field_value
 import vitrage.graph.utils as graph_utils

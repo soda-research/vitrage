@@ -21,6 +21,8 @@ import six
 import vitrage.common.constants as cons
 from vitrage.common.constants import SynchronizerProperties as SyncProps
 from vitrage.common.exception import VitrageTransformerError
+import vitrage.entity_graph
+import vitrage.entity_graph.event_action
 import vitrage.graph.utils as graph_utils
 
 LOG = logging.getLogger(__name__)
@@ -148,13 +150,13 @@ class TransformerBase(object):
         sync_mode = entity_event[SyncProps.SYNC_MODE]
 
         if cons.SyncMode.UPDATE == sync_mode:
-            return cons.EventAction.UPDATE
+            return vitrage.entity_graph.event_action.EventAction.UPDATE
 
         if cons.SyncMode.SNAPSHOT == sync_mode:
-            return cons.EventAction.UPDATE
+            return vitrage.entity_graph.event_action.EventAction.UPDATE
 
         if cons.SyncMode.INIT_SNAPSHOT == sync_mode:
-            return cons.EventAction.CREATE
+            return vitrage.entity_graph.event_action.EventAction.CREATE
 
         raise VitrageTransformerError(
             'Invalid sync mode: (%s)' % sync_mode)

@@ -46,12 +46,6 @@ class EntityCategory(object):
     RESOURCE = 'RESOURCE'
 
 
-class EventAction(object):
-    CREATE = 'create'
-    DELETE = 'delete'
-    UPDATE = 'update'
-
-
 class SynchronizerProperties(object):
     SYNC_TYPE = 'sync_type'
     SYNC_MODE = 'sync_mode'
