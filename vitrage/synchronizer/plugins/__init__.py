@@ -21,4 +21,14 @@ OPTS = [
                default='/etc/vitrage/static_plugins',
                help='A path for the static plugins for the syncronizer'
                ),
+    cfg.StrOpt('nagios_user',
+               help='Nagios user'
+               ),
+    cfg.StrOpt('nagios_password',
+               help='Nagios password'
+               ),
+    cfg.StrOpt('nagios_url',
+               help='Nagios url for querying the data. Example: '
+               ' http://<ip>/monitoring/nagios/cgi-bin/status.cgi'
+               ),
 ]
