@@ -18,6 +18,7 @@ from oslo_utils import importutils
 from vitrage.common.constants import EntityType
 from vitrage.common.constants import SynchronizerProperties as SyncProps
 from vitrage.common.exception import VitrageTransformerError
+from vitrage.entity_graph.transformer.plugins.nagios import NagiosAlarm
 from vitrage.entity_graph.transformer.plugins.nova.host import Host
 from vitrage.entity_graph.transformer.plugins.nova.instance import Instance
 from vitrage.entity_graph.transformer.plugins.nova.zone import Zone
@@ -51,6 +52,10 @@ class TransformerManager(object):
 
         transformers[EntityType.SWITCH] = importutils.import_object(
             "%s.%s" % (StaticPhysical.__module__, StaticPhysical.__name__),
+            transformers)
+
+        transformers[EntityType.NAGIOS] = importutils.import_object(
+            "%s.%s" % (NagiosAlarm.__module__, NagiosAlarm.__name__),
             transformers)
 
         return transformers
