@@ -14,10 +14,11 @@
 
 __author__ = 'erosensw'
 
-import exrex
 import json
 from os.path import dirname
 from os import walk
+
+import exrex
 
 
 def store_specs(spec, target_filename, target_folder=None):
@@ -122,7 +123,10 @@ def merge_vals(current, update):
     elif isinstance(update, list):
         # assumes the update is <= from current - use nicely!
         for i in range(len(update)):
-            current[i] = merge_vals(current[i], update[i])
+            if i < len(current):
+                current[i] = merge_vals(current[i], update[i])
+            else:
+                current.append(update[i])
     else:
         current = update
     return current

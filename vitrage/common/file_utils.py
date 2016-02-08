@@ -11,11 +11,11 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+
 import os
 import yaml
 
 from oslo_log import log
-
 
 LOG = log.getLogger(__name__)
 
@@ -42,7 +42,7 @@ def load_yaml_files(dir_path, with_exception=False):
                 if with_exception:
                     raise e
                 else:
-                    LOG.error('Fails to parse file: %s. %s' % full_path, e)
+                    LOG.error("Fails to parse file: %s. %s" % (full_path, e))
 
             yaml_files.append(config)
 

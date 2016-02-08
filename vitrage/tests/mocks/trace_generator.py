@@ -47,6 +47,7 @@ SYNC_INST_SNAPSHOT_S = 'sync_inst_snapshot_static.json'
 SYNC_INST_UPDATE_D = 'sync_inst_update_dynamic.json'
 SYNC_HOST_SNAPSHOT_D = 'sync_host_snapshot_dynamic.json'
 SYNC_ZONE_SNAPSHOT_D = 'sync_zone_snapshot_dynamic.json'
+SYNC_SWITCH_SNAPSHOT_D = 'sync_switch_snapshot_static.json'
 
 # Mock transformer Specs (i.e., what the transformer outputs)
 TRANS_INST_SNAPSHOT_D = 'transformer_inst_snapshot_dynamic.json'
@@ -94,6 +95,8 @@ class EventTraceGenerator(object):
              SYNC_INST_UPDATE_D: _get_sync_vm_update_values,
              SYNC_HOST_SNAPSHOT_D: _get_sync_host_snapshot_values,
              SYNC_ZONE_SNAPSHOT_D: _get_sync_zone_snapshot_values,
+             SYNC_SWITCH_SNAPSHOT_D: _get_sync_switch_snapshot_values,
+
              TRANS_INST_SNAPSHOT_D: _get_trans_vm_snapshot_values,
              TRANS_HOST_SNAPSHOT_D: _get_trans_host_snapshot_values,
              TRANS_ZONE_SNAPSHOT_D: _get_trans_zone_snapshot_values}
@@ -290,6 +293,48 @@ def _get_sync_vm_update_values(spec):
     for vm_name, host_name in vm_host_mapping:
         mapping = {'payload': {'host': host_name,
                                'display_name': vm_name}}
+        static_values.append(combine_data(
+            static_info_re, mapping, spec.get(EXTERNAL_INFO_KEY, None)
+        ))
+
+    return static_values
+
+
+def _get_sync_switch_snapshot_values(spec):
+    """Generates the static synchronizer values for each zone.
+
+    :param spec: specification of event generation.
+    :type spec: dict
+    :return: list of static synchronizer values for each zone.
+    :rtype: list
+    """
+
+    host_switch_mapping = spec[MAPPING_KEY]
+    static_info_re = None
+    if spec[STATIC_INFO_FKEY] is not None:
+        static_info_re = utils.load_specs(spec[STATIC_INFO_FKEY])
+
+    static_values = []
+
+    switches_info = {}
+    for host_name, switch_name in host_switch_mapping:
+        switch_info = switches_info.get(switch_name, [])
+
+        relationship_info = {"sync_type": "nova.host",
+                             "name": host_name,
+                             "id": host_name,
+                             "relation_type": "contains"
+                             }
+
+        switch_info.append(relationship_info)
+        switches_info[switch_name] = switch_info
+
+    for host_name, switch_name in host_switch_mapping:
+
+        mapping = {'name': switch_name,
+                   'id': switch_name,
+                   'relationships': switches_info[switch_name]
+                   }
         static_values.append(combine_data(
             static_info_re, mapping, spec.get(EXTERNAL_INFO_KEY, None)
         ))

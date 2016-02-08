@@ -21,6 +21,8 @@ from vitrage.common.exception import VitrageTransformerError
 from vitrage.entity_graph.transformer.plugins.nova.host import Host
 from vitrage.entity_graph.transformer.plugins.nova.instance import Instance
 from vitrage.entity_graph.transformer.plugins.nova.zone import Zone
+from vitrage.entity_graph.transformer.plugins.static_physical \
+    import StaticPhysical
 
 LOG = logging.getLogger(__name__)
 
@@ -45,6 +47,10 @@ class TransformerManager(object):
 
         transformers[EntityType.NOVA_ZONE] = importutils.import_object(
             "%s.%s" % (Zone.__module__, Zone.__name__),
+            transformers)
+
+        transformers[EntityType.SWITCH] = importutils.import_object(
+            "%s.%s" % (StaticPhysical.__module__, StaticPhysical.__name__),
             transformers)
 
         return transformers

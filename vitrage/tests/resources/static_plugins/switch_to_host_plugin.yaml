@@ -1,0 +1,40 @@
+entities:
+  - name: switch-1
+    id: 12345
+    sync_type: switch
+    state: available
+    relationships:
+      - sync_type: nova.host
+        name: host-1
+        id: 1
+        relation_type: contains
+      - sync_type: nova.host
+        name: host-2
+        id: 2
+        relation_type: contains
+  - name: switch-2
+    id: 23456
+    sync_type: switch
+    state: available
+    relationships:
+      - sync_type: nova.host
+        name: host-2
+        id: 2
+        relation_type: contains
+      - sync_type: nova.host
+        name: host-3
+        id: 3
+        relation_type: contains
+  - name: switch-3
+    id: 34567
+    sync_type: switch
+    state: available
+    relationships:
+      - sync_type: nova.host
+        name: host-3
+        id: 3
+        relation_type: contains
+      - sync_type: nova.host
+        name: host-4
+        id: 4
+        relation_type: contains

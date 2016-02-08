@@ -60,4 +60,4 @@ class TestStaticPlugin(base.BaseTest):
                 static_entities.append(entity)
 
         # Test assertions
-        self.assertEqual(4, len(static_entities))
+        self.assertEqual(5, len(static_entities))
