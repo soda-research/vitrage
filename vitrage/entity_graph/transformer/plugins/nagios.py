@@ -91,7 +91,7 @@ class NagiosAlarm(base.TransformerBase):
 
             properties = {
                 VProps.ID: host_name,
-                VProps.UPDATE_TIMESTAMP: timestamp,
+                VProps.UPDATE_TIMESTAMP: timestamp
             }
             host_vertex = transformer.create_placeholder_vertex(properties)
 

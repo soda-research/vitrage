@@ -61,4 +61,5 @@ class EntityType(object):
     NOVA_INSTANCE = 'nova.instance'
     NOVA_HOST = 'nova.host'
     NOVA_ZONE = 'nova.zone'
-    SWITCH = "switch"
+    SWITCH = 'switch'
+    NAGIOS = 'nagios'
