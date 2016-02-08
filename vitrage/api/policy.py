@@ -25,7 +25,7 @@ def enforce(rule, headers, enforcer, target):
 
     """
     creds = {
-        'roles': headers.get("X-Roles", "").split(","),
+        'roles': headers.get('X-Roles', '').split(','),
         'user_id': headers.get('X-User-Id'),
         'project_id': headers.get('X-Project-Id'),
     }

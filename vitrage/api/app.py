@@ -81,7 +81,7 @@ def build_server(conf):
     host, port = conf.api.host, conf.api.port
 
     LOG.info(_LI('Starting server in PID %s') % os.getpid())
-    LOG.info(_LI("Configuration:"))
+    LOG.info(_LI('Configuration:'))
     conf.log_opt_values(LOG, logging.INFO)
 
     if host == '0.0.0.0':
