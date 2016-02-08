@@ -47,7 +47,8 @@ SYNC_INST_SNAPSHOT_S = 'sync_inst_snapshot_static.json'
 SYNC_INST_UPDATE_D = 'sync_inst_update_dynamic.json'
 SYNC_HOST_SNAPSHOT_D = 'sync_host_snapshot_dynamic.json'
 SYNC_ZONE_SNAPSHOT_D = 'sync_zone_snapshot_dynamic.json'
-SYNC_SWITCH_SNAPSHOT_D = 'sync_switch_snapshot_static.json'
+SYNC_SWITCH_SNAPSHOT_D = 'sync_switch_snapshot_dynamic.json'
+SYNC_NAGIOS_SNAPSHOT_D = 'sync_nagios_snapshot_dynamic.json'
 
 # Mock transformer Specs (i.e., what the transformer outputs)
 TRANS_INST_SNAPSHOT_D = 'transformer_inst_snapshot_dynamic.json'
@@ -96,6 +97,7 @@ class EventTraceGenerator(object):
              SYNC_HOST_SNAPSHOT_D: _get_sync_host_snapshot_values,
              SYNC_ZONE_SNAPSHOT_D: _get_sync_zone_snapshot_values,
              SYNC_SWITCH_SNAPSHOT_D: _get_sync_switch_snapshot_values,
+             SYNC_NAGIOS_SNAPSHOT_D: _get_sync_nagios_alarm_values,
 
              TRANS_INST_SNAPSHOT_D: _get_trans_vm_snapshot_values,
              TRANS_HOST_SNAPSHOT_D: _get_trans_host_snapshot_values,
@@ -335,10 +337,26 @@ def _get_sync_switch_snapshot_values(spec):
                    'id': switch_name,
                    'relationships': switches_info[switch_name]
                    }
-        static_values.append(combine_data(
-            static_info_re, mapping, spec.get(EXTERNAL_INFO_KEY, None)
-        ))
+        static_values.append(combine_data(static_info_re,
+                                          mapping,
+                                          spec.get(EXTERNAL_INFO_KEY, None)))
 
+    return static_values
+
+
+def _get_sync_nagios_alarm_values(spec):
+
+    hosts = spec[MAPPING_KEY]
+
+    static_info_re = None
+
+    static_values = []
+
+    for host_name in hosts:
+        host_info = {'resource_name': host_name}
+        static_values.append(combine_data(
+            static_info_re, host_info, spec.get(EXTERNAL_INFO_KEY, None)
+        ))
     return static_values
 
 

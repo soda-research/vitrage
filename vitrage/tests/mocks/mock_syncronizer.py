@@ -229,3 +229,31 @@ def simple_switch_generators(switch_num, host_num, snapshot_events=0,
              }
         )
     return tg.get_trace_generators(test_entity_spec_list)
+
+
+def simple_nagios_alarm_generators(host_num,
+                                   events_num=0,
+                                   snap_vals=None):
+    """A function for returning Nagios alarm event generators.
+
+    Returns generators for a given number of Nagios alarms.
+
+    :param host_num: number of hosts
+    :param snapshot_events: number of snapshot alarms per hosts
+    :param snap_vals: preset vals for ALL snapshot events
+    :return: generators for zone_num zones as specified
+    """
+
+    hosts = ['host-{0}'.format(index) for index in range(host_num)]
+
+    test_entity_spec_list = []
+    if events_num:
+        test_entity_spec_list.append({
+            tg.DYNAMIC_INFO_FKEY: tg.SYNC_NAGIOS_SNAPSHOT_D,
+            tg.STATIC_INFO_FKEY: None,
+            tg.EXTERNAL_INFO_KEY: snap_vals,
+            tg.MAPPING_KEY: hosts,
+            tg.NAME_KEY: 'Nagios alarm generator',
+            tg.NUM_EVENTS: events_num
+        })
+    return tg.get_trace_generators(test_entity_spec_list)

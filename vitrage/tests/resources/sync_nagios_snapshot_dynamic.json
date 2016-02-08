@@ -1,0 +1,13 @@
+{
+  "sync_type": "nagios",
+  "resource_type": "nova\\.host",
+  "resource_name": "compute-[1-9]",
+  "service": "CPU utilization|Check_MK|Uptime",
+  "status": "OK|CRITICAL|WARNING|UNKNOWN",
+  "last_check": "2016-02-07 15:26:04",
+  "duration": "61d 21h 52m 38s",
+  "attempt": "1/1",
+  "status_info": "OK - user: 0\\.6%, system: 0\\.3%, wait: 0\\.4%",
+  "event_type": "CREATE|UPDATE|DELETE",
+  "sync_mode": "snapshot|init_snapshot|update"
+}
