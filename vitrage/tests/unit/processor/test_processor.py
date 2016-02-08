@@ -17,7 +17,7 @@ import unittest
 from vitrage.common.constants import SynchronizerProperties as SyncProps
 from vitrage.common.constants import SyncMode
 from vitrage.common.constants import VertexProperties
-from vitrage.common.utils import utcnow
+from vitrage.common.datetime_utils import utcnow
 from vitrage.entity_graph.processor import processor as proc
 from vitrage.tests import base
 from vitrage.tests.mocks import mock_syncronizer as mock_sync

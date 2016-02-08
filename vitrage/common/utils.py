@@ -17,7 +17,6 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from oslo_utils import timeutils
 import six
 
 
@@ -29,8 +28,3 @@ def recursive_keypairs(d, separator='.'):
                 yield ('%s%s%s' % (name, separator, subname), subvalue)
         else:
             yield name, value
-
-
-def utcnow():
-    """Better version of utcnow() that returns utcnow with a correct TZ."""
-    return timeutils.utcnow(True)
