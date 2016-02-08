@@ -35,7 +35,7 @@ EntityWrapper = \
 Neighbor = namedtuple('Neighbor', ['vertex', 'edge'])
 
 
-TIMESTAMP_FORMAT = '%Y-%m-%d %H:%M:%S'
+TIMESTAMP_FORMAT = '%Y-%m-%dT%H:%M:%SZ'
 
 Neighbor = namedtuple('Neighbor', ['vertex', 'edge'])
 

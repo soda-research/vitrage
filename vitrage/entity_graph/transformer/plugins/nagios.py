@@ -34,6 +34,7 @@ class NagiosAlarm(base.TransformerBase):
     EVENT_TYPE = 'event_type'
     TIMESTAMP = 'last_check'
     STATUS = 'status'
+    STATUS_INFO = 'status_info'
 
     NAGIOS_ALARM_STATE = 'Active'
 
@@ -41,6 +42,7 @@ class NagiosAlarm(base.TransformerBase):
         self.transformers = transformers
 
     def create_placeholder_vertex(self, properties={}):
+        LOG.info('Nagios alarm cannot be a placeholder')
         pass
 
     def _create_entity_vertex(self, entity_event):
@@ -52,7 +54,8 @@ class NagiosAlarm(base.TransformerBase):
 
         metadata = {
             VProps.NAME: entity_event[self.ALARM_NAME],
-            VProps.SEVERITY: entity_event[self.STATUS]
+            VProps.SEVERITY: entity_event[self.STATUS],
+            VProps.INFO: entity_event[self.STATUS_INFO]
         }
 
         return graph_utils.create_vertex(
@@ -88,7 +91,7 @@ class NagiosAlarm(base.TransformerBase):
 
             properties = {
                 VProps.ID: host_name,
-                VProps.UPDATE_TIMESTAMP: timestamp
+                VProps.UPDATE_TIMESTAMP: timestamp,
             }
             host_vertex = transformer.create_placeholder_vertex(properties)
 
