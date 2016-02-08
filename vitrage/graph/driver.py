@@ -251,7 +251,7 @@ class Graph(object):
         pass
 
     @abc.abstractmethod
-    def num_vertex(self):
+    def num_vertices(self):
         """Number of vertices in the graph
 
         :return:
@@ -450,7 +450,7 @@ class Graph(object):
         :param vertex_attr_filter: expected keys and values
         :type vertex_attr_filter dict
         :return: A list of vertices that match the requested query
-        :rtype: set of Vertex
+        :rtype: list of Vertex
         """
         pass
 
@@ -498,7 +498,7 @@ class Graph(object):
         :param edge_attr_filter: expected keys and values
         :type edge_attr_filter: dict
         :return: A list of vertices that match the requested query
-        :rtype: set of Vertex
+        :rtype: list of Vertex
         """
         pass
 

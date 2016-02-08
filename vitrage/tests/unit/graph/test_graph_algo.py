@@ -32,7 +32,7 @@ class GraphAlgorithmTest(GraphTestBase):
         subgraph = ga.graph_query_vertices(query)
         self.assertEqual(
             1,  # For NODE
-            subgraph.num_vertex(), 'num of vertex node')
+            subgraph.num_vertices(), 'num of vertex node')
 
         query = {
             'or': [
@@ -126,5 +126,5 @@ class GraphAlgorithmTest(GraphTestBase):
         subgraph = ga.graph_query_vertices(query_dict=query, depth=3)
         self.assertEqual(0, subgraph.num_edges(),
                          'num of BOTH edges Node (depth 3)')
-        self.assertEqual(1, subgraph.num_vertex(),
+        self.assertEqual(1, subgraph.num_vertices(),
                          'num of BOTH vertices Node (depth 3)')

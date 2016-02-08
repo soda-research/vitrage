@@ -90,7 +90,7 @@ class GraphTest(GraphTestBase):
 
         # check metadata
         another_vertex = utils.create_vertex(
-            vertex_id='123', entity_id='456', entity_category=INSTANCE,
+            vitrage_id='123', entity_id='456', entity_category=INSTANCE,
             metadata={'some_meta': 'DATA'}
         )
         g.add_vertex(another_vertex)
@@ -209,7 +209,7 @@ class GraphTest(GraphTestBase):
         v3 = v_instance
         v4 = v_alarm
         v5 = utils.create_vertex(
-            vertex_id='kuku',
+            vitrage_id='kuku',
             entity_category=HOST)
 
         g = create_graph('test_neighbors')

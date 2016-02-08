@@ -155,7 +155,7 @@ class NovaInstanceTransformerTest(base.BaseTest):
 
     def _validate_vertex_props(self, vertex, event):
 
-        self.assertEqual(9, vertex.properties.__len__())
+        self.assertEqual(10, len(vertex.properties))
 
         sync_mode = event[SyncProps.SYNC_MODE]
 

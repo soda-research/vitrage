@@ -18,7 +18,7 @@ from vitrage.graph import Edge
 from vitrage.graph import Vertex
 
 
-def create_vertex(vertex_id,
+def create_vertex(vitrage_id,
                   entity_id=None,
                   entity_category=None,
                   entity_type=None,
@@ -30,8 +30,8 @@ def create_vertex(vertex_id,
                   metadata=None):
     """A builder to create a vertex
 
-    :param vertex_id:
-    :type vertex_id: str
+    :param vitrage_id:
+    :type vitrage_id: str
     :param entity_id:
     :type entity_id: str
     :param entity_category:
@@ -62,13 +62,14 @@ def create_vertex(vertex_id,
         VConst.CATEGORY: entity_category,
         VConst.IS_DELETED: is_deleted,
         VConst.UPDATE_TIMESTAMP: update_timestamp,
-        VConst.IS_PLACEHOLDER: is_placeholder
+        VConst.IS_PLACEHOLDER: is_placeholder,
+        VConst.VITRAGE_ID: vitrage_id
     }
     if metadata:
         properties.update(metadata)
     properties = dict(
         (k, v) for k, v in properties.iteritems() if v is not None)
-    vertex = Vertex(vertex_id=vertex_id, properties=properties)
+    vertex = Vertex(vertex_id=vitrage_id, properties=properties)
     return vertex
 
 

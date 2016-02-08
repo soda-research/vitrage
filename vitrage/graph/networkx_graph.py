@@ -128,7 +128,7 @@ class NXGraph(Graph):
         else:  # IN
             return self._g.in_edges(nbunch=v_id, data=True, keys=True)
 
-    def num_vertex(self):
+    def num_vertices(self):
         return len(self._g)
 
     def num_edges(self):

@@ -12,13 +12,15 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import json
+
 from oslo_config import cfg
 from oslo_log import log
 import oslo_messaging
 from oslo_service import service as os_service
+
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import VertexProperties as VProps
-
 
 LOG = log.getLogger(__name__)
 
@@ -74,8 +76,17 @@ class EntityGraphApis(object):
         self.entity_graph = entity_graph
 
     def get_alarms(self, ctx, arg):
-        return self.entity_graph.get_vertices(
-            {VProps.CATEGORY: EntityCategory.ALARM})
+        LOG.info("EntityGraphApis get_alarms arg:%s", str(arg))
+        vitrage_id = arg
+        if not vitrage_id or vitrage_id == 'all':
+            items_list = self.entity_graph.get_vertices(
+                {VProps.CATEGORY: EntityCategory.ALARM})
+        else:
+            items_list = self.entity_graph.neighbors(
+                vitrage_id,
+                vertex_attr_filter={VProps.CATEGORY: EntityCategory.ALARM})
+        LOG.info("EntityGraphApis get_alarms result:%s", str(items_list))
+        return json.dumps({'alarms': [v.properties for v in items_list]})
 
     def get_topology(self, ctx, arg):
         return self.entity_graph.output_graph()
