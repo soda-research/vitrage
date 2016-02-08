@@ -253,7 +253,16 @@ def simple_nagios_alarm_generators(host_num,
             tg.STATIC_INFO_FKEY: None,
             tg.EXTERNAL_INFO_KEY: snap_vals,
             tg.MAPPING_KEY: hosts,
-            tg.NAME_KEY: 'Nagios alarm generator',
-            tg.NUM_EVENTS: events_num
+            tg.NAME_KEY: 'Nagios alarm generator (alarm on)',
+            tg.NUM_EVENTS: max(events_num - len(hosts), 0)
         })
+        test_entity_spec_list.append({
+            tg.DYNAMIC_INFO_FKEY: tg.SYNC_NAGIOS_SNAPSHOT_D,
+            tg.STATIC_INFO_FKEY: tg.SYNC_NAGIOS_SNAPSHOT_S,
+            tg.EXTERNAL_INFO_KEY: snap_vals,
+            tg.MAPPING_KEY: hosts,
+            tg.NAME_KEY: 'Nagios alarm generator (alarm off)',
+            tg.NUM_EVENTS: len(hosts)
+        })
+
     return tg.get_trace_generators(test_entity_spec_list)

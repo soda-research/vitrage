@@ -49,6 +49,7 @@ SYNC_HOST_SNAPSHOT_D = 'sync_host_snapshot_dynamic.json'
 SYNC_ZONE_SNAPSHOT_D = 'sync_zone_snapshot_dynamic.json'
 SYNC_SWITCH_SNAPSHOT_D = 'sync_switch_snapshot_dynamic.json'
 SYNC_NAGIOS_SNAPSHOT_D = 'sync_nagios_snapshot_dynamic.json'
+SYNC_NAGIOS_SNAPSHOT_S = 'sync_nagios_snapshot_static.json'
 
 # Mock transformer Specs (i.e., what the transformer outputs)
 TRANS_INST_SNAPSHOT_D = 'transformer_inst_snapshot_dynamic.json'
@@ -332,7 +333,6 @@ def _get_sync_switch_snapshot_values(spec):
         switches_info[switch_name] = switch_info
 
     for host_name, switch_name in host_switch_mapping:
-
         mapping = {'name': switch_name,
                    'id': switch_name,
                    'relationships': switches_info[switch_name]
@@ -340,18 +340,16 @@ def _get_sync_switch_snapshot_values(spec):
         static_values.append(combine_data(static_info_re,
                                           mapping,
                                           spec.get(EXTERNAL_INFO_KEY, None)))
-
     return static_values
 
 
 def _get_sync_nagios_alarm_values(spec):
-
     hosts = spec[MAPPING_KEY]
-
     static_info_re = None
+    if spec[STATIC_INFO_FKEY] is not None:
+        static_info_re = utils.load_specs(spec[STATIC_INFO_FKEY])
 
     static_values = []
-
     for host_name in hosts:
         host_info = {'resource_name': host_name}
         static_values.append(combine_data(
