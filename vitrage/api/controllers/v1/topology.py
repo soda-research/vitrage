@@ -80,7 +80,7 @@ class TopologyController(rest.RestController):
                 return as_tree(graph)
 
         except Exception as e:
-            LOG.exception("failed to open file %s ", e)
+            LOG.exception('failed to open file %s ', e)
             abort(404, str(e))
 
     @staticmethod
@@ -88,7 +88,7 @@ class TopologyController(rest.RestController):
         # TODO(eyal) temporary mock
         graph_file = pecan.request.cfg.find_file('graph.sample.json')
         if graph_file is None:
-            abort(404, "file graph.sample.json not found")
+            abort(404, 'file graph.sample.json not found')
         try:
             with open(graph_file) as data_file:
                 graph = json.load(data_file)
@@ -98,5 +98,5 @@ class TopologyController(rest.RestController):
                     return as_tree(graph, root=0, reverse=True)
 
         except Exception as e:
-            LOG.exception("failed to open file ", e)
+            LOG.exception('failed to open file ', e)
             abort(404, str(e))

@@ -32,7 +32,7 @@ class ResourcesController(rest.RestController):
 
     @pecan.expose('json')
     def index(self, resource_type=None):
-        enforce("list resources", pecan.request.headers,
+        enforce('list resources', pecan.request.headers,
                 pecan.request.enforcer, {})
 
         LOG.info(_LI('received list resources with filter %s') % resource_type)
@@ -40,7 +40,7 @@ class ResourcesController(rest.RestController):
         try:
             return self.get_resources(resource_type)
         except Exception as e:
-            LOG.exception("failed to get resources %s", e)
+            LOG.exception('failed to get resources %s', e)
             abort(404, str(e))
 
     @staticmethod
@@ -55,14 +55,14 @@ class ResourceController(rest.RestController):
 
     @pecan.expose('json')
     def get(self):
-        enforce("get resource", pecan.request.headers,
+        enforce('get resource', pecan.request.headers,
                 pecan.request.enforcer, {})
 
         LOG.info(_LI('received get resource with id %s') % self.id)
         try:
             return self.get_resource(self.id)
         except Exception as e:
-            LOG.exception("failed to get resource %s", e)
+            LOG.exception('failed to get resource %s', e)
             abort(404, str(e))
 
     @staticmethod

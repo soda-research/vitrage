@@ -80,7 +80,7 @@ class FunctionalTest(base.BaseTest):
         return self.post_json(path=path, params=params,
                               expect_errors=expect_errors,
                               headers=headers, extra_environ=extra_environ,
-                              status=status, method="put")
+                              status=status, method='put')
 
     def post_json(self, path, params, expect_errors=False, headers=None,
                   method="post", extra_environ=None, status=None):
@@ -98,7 +98,7 @@ class FunctionalTest(base.BaseTest):
         :param status: Expected status code of response
         """
         full_path = self.PATH_PREFIX + path
-        response = getattr(self.app, "%s_json" % method)(
+        response = getattr(self.app, '%s_json' % method)(
             str(full_path),
             params=params,
             headers=headers,

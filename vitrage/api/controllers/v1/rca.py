@@ -28,11 +28,11 @@ LOG = log.getLogger(__name__)
 class RCAController(rest.RestController):
     @pecan.expose('json')
     def get(self, alarm_id):
-        enforce("get rca", pecan.request.headers,
+        enforce('get rca', pecan.request.headers,
                 pecan.request.enforcer, {})
 
         LOG.info(_LI('received show rca with alarm id %s') %
                  alarm_id)
         params = urllib.parse.urlencode(dict(query=None, root=alarm_id,
-                                             graph_type="graph"))
+                                             graph_type='graph'))
         redirect('/v1/topology?' + params, internal=True)
