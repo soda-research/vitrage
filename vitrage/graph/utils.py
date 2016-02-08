@@ -123,6 +123,6 @@ def check_filter(data, attr_filter):
     for key, content in attr_filter.items():
         if not isinstance(content, list):
             content = [content]
-        if not data[key] in content:
+        if not data.get(key) in content:
             return False
     return True
