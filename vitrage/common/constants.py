@@ -23,6 +23,7 @@ class VertexProperties(object):
     UPDATE_TIMESTAMP = 'update_timestamp'
     NAME = 'name'
     IS_PLACEHOLDER = 'is_placeholder'
+    SEVERITY = 'severity'
     VITRAGE_ID = 'vitrage_id'
 
 

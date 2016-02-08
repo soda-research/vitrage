@@ -178,12 +178,12 @@ class Instance(base.TransformerBase):
         }
         host_vertex = host_transformer.create_placeholder_vertex(properties)
 
-        relation_edge = graph_utils.create_edge(
+        relationship_edge = graph_utils.create_edge(
             source_id=host_vertex.vertex_id,
             target_id=vertex_id,
             relationship_type=EdgeLabels.CONTAINS)
 
-        return base.Neighbor(host_vertex, relation_edge)
+        return base.Neighbor(host_vertex, relationship_edge)
 
     def create_placeholder_vertex(self, properties={}):
         if VProps.ID not in properties:

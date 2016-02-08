@@ -17,7 +17,7 @@ from oslo_log import log
 
 from vitrage.common.constants import EdgeProperties as EProps
 from vitrage.common.constants import VertexProperties as VProps
-from vitrage.common.utils import utcnow
+from vitrage.common.datetime_utils import utcnow
 from vitrage.graph import networkx_graph
 
 

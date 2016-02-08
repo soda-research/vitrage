@@ -35,6 +35,11 @@ EntityWrapper = \
 Neighbor = namedtuple('Neighbor', ['vertex', 'edge'])
 
 
+TIMESTAMP_FORMAT = '%Y-%m-%d %H:%M:%S'
+
+Neighbor = namedtuple('Neighbor', ['vertex', 'edge'])
+
+
 def extract_field_value(entity_event, key_names):
 
     value = entity_event

@@ -17,7 +17,7 @@ import abc
 import six
 
 from vitrage.common.constants import SynchronizerProperties as SyncProps
-from vitrage.common import utils
+import vitrage.common.datetime_utils
 
 
 @six.add_metaclass(abc.ABCMeta)
@@ -51,4 +51,5 @@ class SynchronizerBase(object):
 
     @staticmethod
     def _add_sampling_time(entity):
-        entity[SyncProps.SAMPLE_DATE] = str(utils.utcnow())
+        entity[SyncProps.SAMPLE_DATE] = str(
+            vitrage.common.datetime_utils.utcnow())
