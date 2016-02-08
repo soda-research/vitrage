@@ -25,6 +25,7 @@ class VertexProperties(object):
     IS_PLACEHOLDER = 'is_placeholder'
     SEVERITY = 'severity'
     VITRAGE_ID = 'vitrage_id'
+    INFO = 'info'
 
 
 class EdgeProperties(object):
