@@ -20,6 +20,7 @@ from vitrage.common.constants import EntityType
 from vitrage.common.constants import SynchronizerProperties as SyncProps
 from vitrage.common.constants import SyncMode
 from vitrage.common.constants import VertexProperties as VProps
+from vitrage.common.exception import VitrageTransformerError
 from vitrage.entity_graph.event_action import EventAction
 from vitrage.entity_graph.transformer import base
 import vitrage.graph.utils as graph_utils
@@ -110,12 +111,15 @@ class NagiosAlarm(base.TransformerBase):
         return None
 
     def _extract_action_type(self, entity_event):
-        if (entity_event[self.STATUS] == self.STATUS_OK):
-            return EventAction.DELETE
-        elif (entity_event[SyncProps.SYNC_MODE] == SyncMode.INIT_SNAPSHOT):
+        sync_mode = entity_event[SyncProps.SYNC_MODE]
+        if sync_mode in (SyncMode.UPDATE, SyncMode.SNAPSHOT):
+            if entity_event[self.STATUS] == 'OK':
+                return EventAction.CREATE
+            else:
+                return EventAction.UPDATE
+        if SyncMode.INIT_SNAPSHOT == sync_mode:
             return EventAction.CREATE
-        else:
-            return EventAction.UPDATE
+        raise VitrageTransformerError('Invalid sync mode: (%s)' % sync_mode)
 
     def extract_key(self, entity_event):
 

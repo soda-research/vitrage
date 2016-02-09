@@ -74,7 +74,7 @@ class NagiosParser(object):
 
     def _parse_service_columns(self, columns):
         host_name = self._parse_host_name(columns[0], self.NAME_XPATH)
-        service_name = self._parse_cell(columns[1], self.NAME_XPATH)
+        service_name = self._get_column_data(columns[1], self.NAME_XPATH)
         status = columns[2].text
         last_check = columns[3].text
         duration = columns[4].text
@@ -93,13 +93,14 @@ class NagiosParser(object):
 
         return service
 
-    def _parse_cell(self, column, xpath):
+    def _get_column_data(self, column, xpath):
         contents = column.xpath(xpath)
 
         if len(contents) == 1:
             return contents[0].text
         elif len(contents) > 1:
-            LOG.warn('Multiple entries for nagios test: %s', contents.toString)
+            LOG.warn('Multiple entries for nagios service column: %s',
+                     contents.toString)
             return contents[0].text
         else:
             # len(contents) might be 0 for a host, since each host name appears
@@ -107,10 +108,17 @@ class NagiosParser(object):
             return ''
 
     def _parse_host_name(self, column, xpath):
-        host_name = self._parse_cell(column, xpath)
+        """Parse the host name and return it
 
-        # host name appears only once in the table, so keep
-        # using the same host name until found a new one
+        host name appears only once in the table, so keep using the same host
+        name until found a new one
+
+        :param column: the html column data
+        :param xpath: the path of the host name in the column structure
+        :return: the host name
+        """
+        host_name = self._get_column_data(column, xpath)
+
         if host_name:
             self.last_host_name = host_name
         else:
