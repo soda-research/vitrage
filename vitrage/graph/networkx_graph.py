@@ -16,9 +16,7 @@ import copy
 import json
 
 import networkx as nx
-
 from networkx.readwrite import json_graph
-
 from oslo_log import log as logging
 
 from driver import Direction
@@ -26,6 +24,7 @@ from driver import Edge  # noqa
 from driver import Graph
 from driver import Vertex  # noqa
 from utils import check_filter
+from vitrage.common.constants import VertexProperties as VProps
 
 LOG = logging.getLogger(__name__)
 
@@ -225,4 +224,8 @@ class NXGraph(Graph):
         return nodes, edges_filtered2
 
     def output_graph(self):
-        return json.dumps(json_graph.node_link_data(self._g))
+        node_link_data = json_graph.node_link_data(self._g)
+        for node in node_link_data['nodes']:
+            if VProps.ID in self._g.node[node[VProps.ID]]:
+                node[VProps.ID] = self._g.node[node[VProps.ID]][VProps.ID]
+        return json.dumps(node_link_data)
