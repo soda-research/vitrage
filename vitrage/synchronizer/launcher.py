@@ -16,6 +16,7 @@ from oslo_log import log
 from oslo_service import service as os_service
 
 from services import SnapshotsService
+from vitrage.synchronizer.plugins.nagios.plugin import Nagios
 from vitrage.synchronizer.plugins.nova.host import Host
 from vitrage.synchronizer.plugins.nova.instance import Instance
 from vitrage.synchronizer.plugins.nova.zone import Zone
@@ -56,6 +57,7 @@ class Launcher(object):
             [Zone(version, user, password, project, auth_url),
              Host(version, user, password, project, auth_url),
              Instance(version, user, password, project, auth_url),
+             Nagios(self.conf),
              StaticPhysical(self.conf)
              ]
         return registered_plugins

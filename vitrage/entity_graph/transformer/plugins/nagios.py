@@ -17,7 +17,10 @@ from vitrage.common import datetime_utils
 from vitrage.common.constants import EdgeLabels
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import EntityType
+from vitrage.common.constants import SynchronizerProperties as SyncProps
+from vitrage.common.constants import SyncMode
 from vitrage.common.constants import VertexProperties as VProps
+from vitrage.entity_graph.event_action import EventAction
 from vitrage.entity_graph.transformer import base
 import vitrage.graph.utils as graph_utils
 
@@ -35,6 +38,7 @@ class NagiosAlarm(base.TransformerBase):
     TIMESTAMP = 'last_check'
     STATUS = 'status'
     STATUS_INFO = 'status_info'
+    STATUS_OK = 'OK'
 
     NAGIOS_ALARM_STATE = 'Active'
 
@@ -106,7 +110,12 @@ class NagiosAlarm(base.TransformerBase):
         return None
 
     def _extract_action_type(self, entity_event):
-        return entity_event[self.EVENT_TYPE]
+        if (entity_event[self.STATUS] == self.STATUS_OK):
+            return EventAction.DELETE
+        elif (entity_event[SyncProps.SYNC_MODE] == SyncMode.INIT_SNAPSHOT):
+            return EventAction.CREATE
+        else:
+            return EventAction.UPDATE
 
     def extract_key(self, entity_event):
 

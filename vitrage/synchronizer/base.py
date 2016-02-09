@@ -30,7 +30,7 @@ class SynchronizerBase(object):
     def get_all(self):
         pass
 
-    def make_pickleable(self, entities, sync_type, fields_to_remove=None):
+    def make_pickleable(self, entities, sync_type, fields_to_remove=[]):
 
         pickleable_entities = []
 
