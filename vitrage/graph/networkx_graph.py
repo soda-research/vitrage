@@ -16,7 +16,9 @@ import copy
 import json
 
 import networkx as nx
+
 from networkx.readwrite import json_graph
+
 from oslo_log import log as logging
 
 from driver import Direction
@@ -25,6 +27,7 @@ from driver import Graph
 from driver import Vertex  # noqa
 from utils import check_filter
 from vitrage.common.constants import VertexProperties as VProps
+from vitrage.graph.query import create_predicate
 
 LOG = logging.getLogger(__name__)
 
@@ -171,12 +174,23 @@ class NXGraph(Graph):
         """
         self._g.remove_edge(u=e.source_id, v=e.target_id, key=e.label)
 
-    def get_vertices(self, vertex_attr_filter=None):
+    def get_vertices(self, vertex_attr_filter=None, query_dict=None):
         def check_vertex((v_id, vertex_data)):
             return check_filter(vertex_data, vertex_attr_filter)
 
-        items = filter(check_vertex, self._g.nodes_iter(data=True))
-        return [vertex_copy(node, node_data) for node, node_data in items]
+        if not query_dict:
+            items = filter(check_vertex, self._g.nodes_iter(data=True))
+            return [vertex_copy(node, node_data) for node, node_data in items]
+        elif not vertex_attr_filter:
+            vertices = []
+            match_func = create_predicate(query_dict)
+            for node, node_data in self._g.nodes_iter(data=True):
+                v = vertex_copy(node, node_data)
+                if match_func(v):
+                    vertices.append(v)
+            return vertices
+        else:
+            return []
 
     def neighbors(self, v_id, vertex_attr_filter=None, edge_attr_filter=None,
                   direction=Direction.BOTH):

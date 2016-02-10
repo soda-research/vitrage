@@ -128,7 +128,7 @@ class NovaZoneTransformerTest(base.BaseTest):
         for neighbor in neighbors:
             vertex_type = neighbor.vertex.get(VertexProperties.TYPE)
 
-            if tbase.NODE_SUBTYPE == vertex_type:
+            if EntityType.NODE == vertex_type:
                 node_neighbors_counter += 1
                 self._validate_node_neighbor(neighbor, zone_vertex_id)
             else:

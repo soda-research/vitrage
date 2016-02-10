@@ -19,8 +19,11 @@ from oslo_log import log
 import oslo_messaging
 from oslo_service import service as os_service
 
+from vitrage.common.constants import EdgeLabels
+from vitrage.common.constants import EdgeProperties as EProps
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import VertexProperties as VProps
+from vitrage.graph import Direction
 
 LOG = log.getLogger(__name__)
 
@@ -85,6 +88,16 @@ class EntityGraphApis(object):
             items_list = self.entity_graph.neighbors(
                 vitrage_id,
                 vertex_attr_filter={VProps.CATEGORY: EntityCategory.ALARM})
+
+        # TODO(alexey) this should not be here, but in the transformer
+        for alarm in items_list:
+            related_resource = self.entity_graph.neighbors(
+                v_id=alarm.vertex_id,
+                edge_attr_filter={EProps.RELATIONSHIP_NAME: EdgeLabels.ON},
+                direction=Direction.OUT)
+            alarm["resource_id"] = related_resource.vertex_id
+            alarm["resource_name"] = related_resource[VProps.NAME]
+
         LOG.info("EntityGraphApis get_alarms result:%s", str(items_list))
         return json.dumps({'alarms': [v.properties for v in items_list]})
 

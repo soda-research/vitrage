@@ -58,6 +58,7 @@ class SynchronizerProperties(object):
 
 
 class EntityType(object):
+    NODE = 'node'
     NOVA_INSTANCE = 'nova.instance'
     NOVA_HOST = 'nova.host'
     NOVA_ZONE = 'nova.zone'
