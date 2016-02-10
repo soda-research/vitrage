@@ -66,10 +66,12 @@ class TopologyController(rest.RestController):
         if mock_file:
             return self.get_mock_graph(graph_type)
         else:
-            return self.get_graph(graph_type)
+            return self.get_graph(graph_type, depth, json.loads(query), root)
 
-    def get_graph(self, graph_type):
-        graph_data = self.client.call(self.ctxt, 'get_topology', arg=None)
+    def get_graph(self, graph_type, depth, query, root):
+        graph_data = self.client.call(self.ctxt, 'get_topology',
+                                      graph_type=graph_type, depth=depth,
+                                      query=query, root=root)
         LOG.info(graph_data)
 
         try:
