@@ -14,8 +14,8 @@
 from oslo_log import log as logging
 
 from vitrage.common.constants import EntityType
-from vitrage.entity_graph.transformer.plugins.nagios import NagiosAlarm
-from vitrage.entity_graph.transformer.plugins.nova.host import Host
+from vitrage.synchronizer.plugins.nagios.transformer import NagiosTransformer
+from vitrage.synchronizer.plugins.nova.host.transformer import HostTransformer
 from vitrage.tests import base
 from vitrage.tests.mocks import mock_syncronizer as mock_sync
 
@@ -29,7 +29,7 @@ class NagiosTransformerTest(base.BaseTest):
         super(NagiosTransformerTest, self).setUp()
 
         self.transformers = {}
-        host_transformer = Host(self.transformers)
+        host_transformer = HostTransformer(self.transformers)
         self.transformers[EntityType.NOVA_HOST] = host_transformer
 
     def test_nagios_alarm_transform(self):
@@ -42,4 +42,4 @@ class NagiosTransformerTest(base.BaseTest):
 
         # Test action
         for alarm in nagios_alarms:
-            NagiosAlarm(self.transformers)._create_entity_vertex(alarm)
+            NagiosTransformer(self.transformers)._create_entity_vertex(alarm)

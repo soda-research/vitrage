@@ -16,13 +16,13 @@ from vitrage.common.constants import EntityType
 from vitrage.synchronizer.plugins.nova.base import NovaBase
 
 
-class Zone(NovaBase):
+class ZoneSynchronizer(NovaBase):
     def __init__(self, version, user, password, project, auth_url):
-        super(Zone, self).__init__(version,
-                                   user,
-                                   password,
-                                   project,
-                                   auth_url)
+        super(ZoneSynchronizer, self).__init__(version,
+                                               user,
+                                               password,
+                                               project,
+                                               auth_url)
 
     @staticmethod
     def filter_internal_zone(zones):

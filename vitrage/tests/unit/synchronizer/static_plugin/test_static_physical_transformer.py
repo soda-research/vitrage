@@ -21,10 +21,10 @@ from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import EntityType
 from vitrage.common.constants import SynchronizerProperties as SyncProps
 from vitrage.common.constants import VertexProperties as VProps
-from vitrage.entity_graph.transformer.base import TransformerBase
-from vitrage.entity_graph.transformer.plugins.nova.host import Host
-from vitrage.entity_graph.transformer.plugins.static_physical \
+from vitrage.synchronizer.plugins.nova.host.transformer import HostTransformer
+from vitrage.synchronizer.plugins.static_physical.transformer \
     import StaticPhysical
+from vitrage.synchronizer.plugins.transformer_base import TransformerBase
 from vitrage.tests import base
 from vitrage.tests.mocks import mock_syncronizer as mock_sync
 
@@ -37,7 +37,7 @@ class TestStaticPhysicalTransformer(base.BaseTest):
         super(TestStaticPhysicalTransformer, self).setUp()
 
         self.transformers = {}
-        host_transformer = Host(self.transformers)
+        host_transformer = HostTransformer(self.transformers)
         static_transformer = StaticPhysical(self.transformers)
         self.transformers[EntityType.NOVA_HOST] = host_transformer
         self.transformers[EntityType.SWITCH] = static_transformer

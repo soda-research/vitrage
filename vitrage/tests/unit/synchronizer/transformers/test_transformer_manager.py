@@ -12,4 +12,14 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-__author__ = 'stack'
+from oslo_log import log as logging
+from vitrage.tests import base
+
+LOG = logging.getLogger(__name__)
+
+
+class TransformerManagerTest(base.BaseTest):
+
+    def test_register_transformer_classes(self):
+        # manager = TransformerManager()
+        pass

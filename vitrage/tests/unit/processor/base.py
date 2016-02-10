@@ -13,7 +13,7 @@
 # under the License.
 
 from vitrage.common.constants import VertexProperties
-from vitrage.entity_graph.transformer import transformer_manager
+from vitrage.entity_graph import transformer_manager
 from vitrage.graph import driver as graph
 from vitrage.tests import base
 

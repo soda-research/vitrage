@@ -13,12 +13,12 @@
 # under the License.
 
 from oslo_log import log
-from vitrage.entity_graph.event_action import EventAction
+
+from vitrage.common.constants import EventAction
 from vitrage.entity_graph.processor import base as processor
 from vitrage.entity_graph.processor import entity_graph
-from vitrage.entity_graph.transformer import transformer_manager
+from vitrage.entity_graph import transformer_manager
 from vitrage.graph import Direction
-
 
 LOG = log.getLogger(__name__)
 

@@ -16,14 +16,14 @@ from vitrage.common.constants import EntityType
 from vitrage.synchronizer.plugins.nova.base import NovaBase
 
 
-class Host(NovaBase):
+class HostSynchronizer(NovaBase):
 
     def __init__(self, version, user, password, project, auth_url):
-        super(Host, self).__init__(version,
-                                   user,
-                                   password,
-                                   project,
-                                   auth_url)
+        super(HostSynchronizer, self).__init__(version,
+                                               user,
+                                               password,
+                                               project,
+                                               auth_url)
 
     @staticmethod
     def filter_none_compute_hosts(entities):

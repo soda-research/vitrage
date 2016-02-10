@@ -17,20 +17,20 @@ from oslo_log import log as logging
 from vitrage.common.constants import EdgeLabels
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import EntityType
+from vitrage.common.constants import EventAction
 from vitrage.common.constants import SynchronizerProperties as SyncProps
 from vitrage.common.constants import SyncMode
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.common.exception import VitrageTransformerError
-from vitrage.entity_graph.event_action import EventAction
-from vitrage.entity_graph.transformer import base
-from vitrage.entity_graph.transformer.base import extract_field_value
 import vitrage.graph.utils as graph_utils
+from vitrage.synchronizer.plugins import transformer_base
+from vitrage.synchronizer.plugins.transformer_base import extract_field_value
 
 
 LOG = logging.getLogger(__name__)
 
 
-class Instance(base.TransformerBase):
+class InstanceTransformer(transformer_base.TransformerBase):
 
     INSTANCE_TYPE = EntityType.NOVA_INSTANCE
 
@@ -165,7 +165,7 @@ class Instance(base.TransformerBase):
             self.INSTANCE_ID[entity_event[SyncProps.SYNC_MODE]])
 
         key_fields = self.key_values([instance_id])
-        return base.build_key(key_fields)
+        return transformer_base.build_key(key_fields)
 
     @staticmethod
     def _create_host_neighbor(vertex_id,
@@ -183,7 +183,7 @@ class Instance(base.TransformerBase):
             target_id=vertex_id,
             relationship_type=EdgeLabels.CONTAINS)
 
-        return base.Neighbor(host_vertex, relationship_edge)
+        return transformer_base.Neighbor(host_vertex, relationship_edge)
 
     def create_placeholder_vertex(self, properties={}):
         if VProps.ID not in properties:
@@ -193,7 +193,7 @@ class Instance(base.TransformerBase):
         key_fields = self.key_values([properties[VProps.ID]])
 
         return graph_utils.create_vertex(
-            base.build_key(key_fields),
+            transformer_base.build_key(key_fields),
             entity_id=properties[VProps.ID],
             entity_category=EntityCategory.RESOURCE,
             entity_type=self.INSTANCE_TYPE,

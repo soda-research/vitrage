@@ -18,14 +18,13 @@ from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import EntityType
 from vitrage.common.constants import SynchronizerProperties as SyncProps
 from vitrage.common.constants import VertexProperties as VProps
-from vitrage.entity_graph.transformer import base
 import vitrage.graph.utils as graph_utils
-
+from vitrage.synchronizer.plugins import transformer_base
 
 LOG = logging.getLogger(__name__)
 
 
-class StaticPhysical(base.TransformerBase):
+class StaticPhysical(transformer_base.TransformerBase):
 
     RELATION_TYPE = 'relation_type'
 
@@ -89,7 +88,7 @@ class StaticPhysical(base.TransformerBase):
                 target_id=entity_key if is_source else neighbor.vertex_id,
                 relationship_type=relation_type)
 
-            return base.Neighbor(neighbor, relation_edge)
+            return transformer_base.Neighbor(neighbor, relation_edge)
         else:
             LOG.warning('Cannot find zone transformer')
             return None
@@ -98,7 +97,7 @@ class StaticPhysical(base.TransformerBase):
         entity_id = entity_event[VProps.ID]
         sync_type = entity_event[SyncProps.SYNC_TYPE]
         key_fields = self.key_values([sync_type, entity_id])
-        return base.build_key(key_fields)
+        return transformer_base.build_key(key_fields)
 
     def key_values(self, mutable_fields=[]):
         return [EntityCategory.RESOURCE] + mutable_fields
@@ -116,7 +115,7 @@ class StaticPhysical(base.TransformerBase):
                                       properties[VProps.ID]])
 
         return graph_utils.create_vertex(
-            base.build_key(key_fields),
+            transformer_base.build_key(key_fields),
             entity_id=properties[VProps.ID],
             entity_category=EntityCategory.RESOURCE,
             entity_type=properties[VProps.TYPE],

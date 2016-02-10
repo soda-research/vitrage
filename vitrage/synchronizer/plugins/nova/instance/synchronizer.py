@@ -16,13 +16,13 @@ from vitrage.common.constants import EntityType
 from vitrage.synchronizer.plugins.nova.base import NovaBase
 
 
-class Instance(NovaBase):
+class InstanceSynchronizer(NovaBase):
     def __init__(self, version, user, password, project, auth_url):
-        super(Instance, self).__init__(version,
-                                       user,
-                                       password,
-                                       project,
-                                       auth_url)
+        super(InstanceSynchronizer, self).__init__(version,
+                                                   user,
+                                                   password,
+                                                   project,
+                                                   auth_url)
 
     @staticmethod
     def filter_instances(instances):

@@ -20,15 +20,15 @@ from vitrage.common.constants import EntityType
 from vitrage.common.constants import SynchronizerProperties as SyncProps
 from vitrage.common.constants import SyncMode
 from vitrage.common.constants import VertexProperties as VProps
-from vitrage.entity_graph.transformer import base
-from vitrage.entity_graph.transformer.base import extract_field_value
 import vitrage.graph.utils as graph_utils
+from vitrage.synchronizer.plugins import transformer_base
+from vitrage.synchronizer.plugins.transformer_base import extract_field_value
 
 
 LOG = logging.getLogger(__name__)
 
 
-class Host(base.TransformerBase):
+class HostTransformer(transformer_base.TransformerBase):
 
     HOST_TYPE = EntityType.NOVA_HOST
 
@@ -117,7 +117,7 @@ class Host(base.TransformerBase):
                 source_id=zone_neighbor.vertex_id,
                 target_id=host_vertex_id,
                 relationship_type=EdgeLabels.CONTAINS)
-            return base.Neighbor(zone_neighbor, relation_edge)
+            return transformer_base.Neighbor(zone_neighbor, relation_edge)
         else:
             LOG.warning('Cannot find zone transformer')
 
@@ -133,7 +133,7 @@ class Host(base.TransformerBase):
             self.HOST_NAME[entity_event[SyncProps.SYNC_MODE]])
 
         key_fields = self.key_values([host_name])
-        return base.build_key(key_fields)
+        return transformer_base.build_key(key_fields)
 
     def create_placeholder_vertex(self, properties={}):
         if VProps.ID not in properties:
@@ -143,7 +143,7 @@ class Host(base.TransformerBase):
         key_fields = self.key_values([properties[VProps.ID]])
 
         return graph_utils.create_vertex(
-            base.build_key(key_fields),
+            transformer_base.build_key(key_fields),
             entity_id=properties[VProps.ID],
             entity_category=EntityCategory.RESOURCE,
             entity_type=self.HOST_TYPE,

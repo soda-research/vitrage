@@ -21,10 +21,10 @@ from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import EntityType
 from vitrage.common.constants import SynchronizerProperties as SyncProps
 from vitrage.common.constants import VertexProperties
-from vitrage.entity_graph.transformer import base as tbase
-from vitrage.entity_graph.transformer.base import TransformerBase
-from vitrage.entity_graph.transformer.plugins.nova.host import Host
-from vitrage.entity_graph.transformer.plugins.nova.zone import Zone
+from vitrage.synchronizer.plugins.nova.host.transformer import HostTransformer
+from vitrage.synchronizer.plugins.nova.zone.transformer import ZoneTransformer
+from vitrage.synchronizer.plugins import transformer_base as tbase
+from vitrage.synchronizer.plugins.transformer_base import TransformerBase
 from vitrage.tests import base
 from vitrage.tests.mocks import mock_syncronizer as mock_sync
 
@@ -37,7 +37,7 @@ class NovaZoneTransformerTest(base.BaseTest):
         super(NovaZoneTransformerTest, self).setUp()
 
         self.transformers = {}
-        host_transformer = Host(self.transformers)
+        host_transformer = HostTransformer(self.transformers)
         self.transformers[EntityType.NOVA_HOST] = host_transformer
 
     def test_create_placeholder_vertex(self):
@@ -47,7 +47,7 @@ class NovaZoneTransformerTest(base.BaseTest):
         # Test setup
         zone_name = 'zone123'
         timestamp = datetime.datetime.utcnow()
-        zone_transformer = Zone(self.transformers)
+        zone_transformer = ZoneTransformer(self.transformers)
 
         # Test action
         properties = {
@@ -59,7 +59,8 @@ class NovaZoneTransformerTest(base.BaseTest):
         # Test assertions
         observed_id_values = placeholder.vertex_id.split(
             TransformerBase.KEY_SEPARATOR)
-        expected_id_values = Zone(self.transformers).key_values([zone_name])
+        expected_id_values = ZoneTransformer(self.transformers).key_values(
+            [zone_name])
         self.assertEqual(observed_id_values, expected_id_values)
 
         observed_time = placeholder.get(VertexProperties.UPDATE_TIMESTAMP)
@@ -82,7 +83,7 @@ class NovaZoneTransformerTest(base.BaseTest):
 
         # Test setup
         zone_name = 'zone123'
-        zone_transformer = Zone(self.transformers)
+        zone_transformer = ZoneTransformer(self.transformers)
 
         # Test action
         observed_key_fields = zone_transformer.key_values([zone_name])
@@ -90,7 +91,7 @@ class NovaZoneTransformerTest(base.BaseTest):
         # Test assertions
         self.assertEqual(EntityCategory.RESOURCE, observed_key_fields[0])
         self.assertEqual(
-            Zone(self.transformers).ZONE_TYPE,
+            ZoneTransformer(self.transformers).ZONE_TYPE,
             observed_key_fields[1]
         )
         self.assertEqual(zone_name, observed_key_fields[2])
@@ -111,7 +112,7 @@ class NovaZoneTransformerTest(base.BaseTest):
 
         for event in zone_events:
             # Test action
-            wrapper = Zone(self.transformers).transform(event)
+            wrapper = ZoneTransformer(self.transformers).transform(event)
 
             # Test assertions
             vertex = wrapper.vertex
@@ -155,17 +156,17 @@ class NovaZoneTransformerTest(base.BaseTest):
 
         host_available = tbase.extract_field_value(
             host_dic,
-            Zone.HOST_AVAILABLE[sync_mode]
+            ZoneTransformer.HOST_AVAILABLE[sync_mode]
         )
         host_active = tbase.extract_field_value(
             host_dic,
-            Zone.HOST_ACTIVE[sync_mode]
+            ZoneTransformer.HOST_ACTIVE[sync_mode]
         )
 
         if host_available and host_active:
-            expected_host_state = Zone.STATE_AVAILABLE
+            expected_host_state = ZoneTransformer.STATE_AVAILABLE
         else:
-            expected_host_state = Zone.STATE_UNAVAILABLE
+            expected_host_state = ZoneTransformer.STATE_UNAVAILABLE
         self.assertEqual(
             expected_host_state,
             host_vertex.get(VertexProperties.STATE)
@@ -196,7 +197,7 @@ class NovaZoneTransformerTest(base.BaseTest):
 
     def _validate_vertex_props(self, vertex, event):
 
-        zone_transform = Zone(self.transformers)
+        zone_transform = ZoneTransformer(self.transformers)
 
         sync_mode = event[SyncProps.SYNC_MODE]
         extract_value = tbase.extract_field_value

@@ -19,14 +19,14 @@ from oslo_log import log as logging
 from vitrage.common.constants import EdgeLabels
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import EntityType
+from vitrage.common.constants import EventAction
 from vitrage.common.constants import SynchronizerProperties as SyncProps
 from vitrage.common.constants import SyncMode
 from vitrage.common.constants import VertexProperties
-from vitrage.entity_graph.event_action import EventAction
-from vitrage.entity_graph.transformer import base as tbase
-from vitrage.entity_graph.transformer.base import TransformerBase
-from vitrage.entity_graph.transformer.plugins.nova.host import Host
-from vitrage.entity_graph.transformer.plugins.nova.zone import Zone
+from vitrage.synchronizer.plugins.nova.host.transformer import HostTransformer
+from vitrage.synchronizer.plugins.nova.zone.transformer import ZoneTransformer
+from vitrage.synchronizer.plugins import transformer_base as tbase
+from vitrage.synchronizer.plugins.transformer_base import TransformerBase
 from vitrage.tests import base
 from vitrage.tests.mocks import mock_syncronizer as mock_sync
 
@@ -39,7 +39,7 @@ class NovaHostTransformerTest(base.BaseTest):
         super(NovaHostTransformerTest, self).setUp()
 
         self.transformers = {}
-        zone_transformer = Zone(self.transformers)
+        zone_transformer = ZoneTransformer(self.transformers)
         self.transformers[EntityType.NOVA_ZONE] = zone_transformer
 
     def test_create_placeholder_vertex(self):
@@ -48,7 +48,7 @@ class NovaHostTransformerTest(base.BaseTest):
         # Test setup
         host_name = 'host123'
         timestamp = datetime.datetime.utcnow()
-        host_transformer = Host(self.transformers)
+        host_transformer = HostTransformer(self.transformers)
 
         # Test action
         properties = {
@@ -84,7 +84,7 @@ class NovaHostTransformerTest(base.BaseTest):
 
         # Test setup
         host_name = 'host123456'
-        host_transformer = Host(self.transformers)
+        host_transformer = HostTransformer(self.transformers)
 
         # Test action
         observed_key_fields = host_transformer.key_values([host_name])
@@ -106,7 +106,7 @@ class NovaHostTransformerTest(base.BaseTest):
 
         for event in host_events:
             # Test action
-            wrapper = Host(self.transformers).transform(event)
+            wrapper = HostTransformer(self.transformers).transform(event)
 
             # Test assertions
             self._validate_vertex_props(wrapper.vertex, event)
@@ -125,11 +125,11 @@ class NovaHostTransformerTest(base.BaseTest):
         sync_mode = event[SyncProps.SYNC_MODE]
         zone_name = tbase.extract_field_value(
             event,
-            Host(self.transformers).ZONE_NAME[sync_mode]
+            HostTransformer(self.transformers).ZONE_NAME[sync_mode]
         )
         time = tbase.extract_field_value(
             event,
-            Host(self.transformers).TIMESTAMP[sync_mode]
+            HostTransformer(self.transformers).TIMESTAMP[sync_mode]
         )
 
         zt = self.transformers[EntityType.NOVA_ZONE]
@@ -145,7 +145,7 @@ class NovaHostTransformerTest(base.BaseTest):
         self.assertEqual(edge.source_id, zone.vertex.vertex_id)
         self.assertEqual(
             edge.target_id,
-            Host(self.transformers).extract_key(event)
+            HostTransformer(self.transformers).extract_key(event)
         )
         self.assertEqual(edge.label, EdgeLabels.CONTAINS)
 
@@ -156,7 +156,7 @@ class NovaHostTransformerTest(base.BaseTest):
 
         expected_id = extract_value(
             event,
-            Host(self.transformers).HOST_NAME[sync_mode]
+            HostTransformer(self.transformers).HOST_NAME[sync_mode]
         )
         observed_id = vertex[VertexProperties.ID]
         self.assertEqual(expected_id, observed_id)
@@ -166,20 +166,20 @@ class NovaHostTransformerTest(base.BaseTest):
         )
 
         self.assertEqual(
-            Host(self.transformers).HOST_TYPE,
+            HostTransformer(self.transformers).HOST_TYPE,
             vertex[VertexProperties.TYPE]
         )
 
         expected_timestamp = extract_value(
             event,
-            Host.TIMESTAMP[sync_mode]
+            HostTransformer.TIMESTAMP[sync_mode]
         )
         observed_timestamp = vertex[VertexProperties.UPDATE_TIMESTAMP]
         self.assertEqual(expected_timestamp, observed_timestamp)
 
         expected_name = extract_value(
             event,
-            Host.HOST_NAME[sync_mode]
+            HostTransformer.HOST_NAME[sync_mode]
         )
         observed_name = vertex[VertexProperties.NAME]
         self.assertEqual(expected_name, observed_name)
@@ -201,7 +201,7 @@ class NovaHostTransformerTest(base.BaseTest):
             snap_vals={SyncProps.SYNC_MODE: SyncMode.SNAPSHOT})
 
         hosts_events = mock_sync.generate_random_events_list(spec_list)
-        host_transformer = Host(self.transformers)
+        host_transformer = HostTransformer(self.transformers)
 
         # Test action
         action = host_transformer._extract_action_type(hosts_events[0])
@@ -216,7 +216,7 @@ class NovaHostTransformerTest(base.BaseTest):
             snapshot_events=1,
             snap_vals={SyncProps.SYNC_MODE: SyncMode.INIT_SNAPSHOT})
         hosts_events = mock_sync.generate_random_events_list(spec_list)
-        host_transformer = Host(self.transformers)
+        host_transformer = HostTransformer(self.transformers)
 
         # Test action
         action = host_transformer._extract_action_type(hosts_events[0])

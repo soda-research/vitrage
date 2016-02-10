@@ -28,11 +28,11 @@ from vitrage.synchronizer.plugins.nagios.properties import NagiosStatus
 LOG = log.getLogger(__name__)
 
 
-class Nagios(SynchronizerBase):
+class NagiosSynchronizer(SynchronizerBase):
     ServiceKey = namedtuple('ServiceKey', ['host_name', 'service'])
 
     def __init__(self, conf):
-        super(Nagios, self).__init__()
+        super(NagiosSynchronizer, self).__init__()
         self.conf = conf
         self.cache = dict()
 

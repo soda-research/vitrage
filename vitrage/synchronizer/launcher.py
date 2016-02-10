@@ -16,11 +16,16 @@ from oslo_log import log
 from oslo_service import service as os_service
 
 from services import SnapshotsService
-from vitrage.synchronizer.plugins.nagios.plugin import Nagios
-from vitrage.synchronizer.plugins.nova.host import Host
-from vitrage.synchronizer.plugins.nova.instance import Instance
-from vitrage.synchronizer.plugins.nova.zone import Zone
-from vitrage.synchronizer.plugins.static_physical import StaticPhysical
+from vitrage.synchronizer.plugins.nagios.synchronizer import NagiosSynchronizer
+from vitrage.synchronizer.plugins.nova.host.synchronizer import \
+    HostSynchronizer
+from vitrage.synchronizer.plugins.nova.instance.synchronizer import \
+    InstanceSynchronizer
+from vitrage.synchronizer.plugins.nova.zone.synchronizer import \
+    ZoneSynchronizer
+from vitrage.synchronizer.plugins.static_physical.synchronizer import \
+    StaticPhysical
+
 
 LOG = log.getLogger(__name__)
 
@@ -54,10 +59,10 @@ class Launcher(object):
         project = 'admin'
         auth_url = "http://localhost:5000/v2.0/"
         registered_plugins = \
-            [Zone(version, user, password, project, auth_url),
-             Host(version, user, password, project, auth_url),
-             Instance(version, user, password, project, auth_url),
-             Nagios(self.conf),
+            [ZoneSynchronizer(version, user, password, project, auth_url),
+             HostSynchronizer(version, user, password, project, auth_url),
+             InstanceSynchronizer(version, user, password, project, auth_url),
+             NagiosSynchronizer(self.conf),
              StaticPhysical(self.conf)
              ]
         return registered_plugins

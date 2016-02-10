@@ -12,35 +12,26 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 from oslo_log import log as logging
-from vitrage.common import datetime_utils
 
 from vitrage.common.constants import EdgeLabels
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import EntityType
+from vitrage.common.constants import EventAction
 from vitrage.common.constants import SynchronizerProperties as SyncProps
 from vitrage.common.constants import SyncMode
 from vitrage.common.constants import VertexProperties as VProps
+from vitrage.common import datetime_utils
 from vitrage.common.exception import VitrageTransformerError
-from vitrage.entity_graph.event_action import EventAction
-from vitrage.entity_graph.transformer import base
 import vitrage.graph.utils as graph_utils
-
+from vitrage.synchronizer.plugins.nagios.properties import NagiosProperties
+from vitrage.synchronizer.plugins import transformer_base as tbase
 
 LOG = logging.getLogger(__name__)
 
 
-class NagiosAlarm(base.TransformerBase):
+class NagiosTransformer(tbase.TransformerBase):
 
-    TYPE = 'sync_type'
-    RESOURCE_TYPE = 'resource_type'
-    RESOURCE_NAME = 'resource_name'
-    ALARM_NAME = 'service'
-    EVENT_TYPE = 'event_type'
-    TIMESTAMP = 'last_check'
-    STATUS = 'status'
-    STATUS_INFO = 'status_info'
     STATUS_OK = 'OK'
-
     NAGIOS_ALARM_STATE = 'Active'
 
     def __init__(self, transformers):
@@ -53,20 +44,20 @@ class NagiosAlarm(base.TransformerBase):
     def _create_entity_vertex(self, entity_event):
 
         timestamp = datetime_utils.change_time_str_format(
-            entity_event[self.TIMESTAMP],
+            entity_event[NagiosProperties.LAST_CHECK],
             '%Y-%m-%d %H:%M:%S',
-            base.TIMESTAMP_FORMAT)
+            tbase.TIMESTAMP_FORMAT)
 
         metadata = {
-            VProps.NAME: entity_event[self.ALARM_NAME],
-            VProps.SEVERITY: entity_event[self.STATUS],
-            VProps.INFO: entity_event[self.STATUS_INFO]
+            VProps.NAME: entity_event[NagiosProperties.SERVICE],
+            VProps.SEVERITY: entity_event[NagiosProperties.STATUS],
+            VProps.INFO: entity_event[NagiosProperties.STATUS_INFO]
         }
 
         return graph_utils.create_vertex(
             self.extract_key(entity_event),
             entity_category=EntityCategory.ALARM,
-            entity_type=entity_event[self.TYPE],
+            entity_type=entity_event[SyncProps.SYNC_TYPE],
             entity_state=self.NAGIOS_ALARM_STATE,
             update_timestamp=timestamp,
             metadata=metadata)
@@ -77,14 +68,14 @@ class NagiosAlarm(base.TransformerBase):
         timestamp = datetime_utils.change_time_str_format(
             entity_event[self.TIMESTAMP],
             '%Y-%m-%d %H:%M:%S',
-            base.TIMESTAMP_FORMAT)
+            tbase.TIMESTAMP_FORMAT)
 
-        resource_type = entity_event[self.RESOURCE_TYPE]
+        resource_type = entity_event[NagiosProperties.RESOURCE_TYPE]
         if resource_type == EntityType.NOVA_HOST:
             return [self._create_host_neighbor(
                 vitrage_id,
                 timestamp,
-                entity_event[self.RESOURCE_NAME])]
+                entity_event[NagiosProperties.RESOURCE_NAME])]
 
         return []
 
@@ -105,7 +96,7 @@ class NagiosAlarm(base.TransformerBase):
                 target_id=host_vertex.vertex_id,
                 relationship_type=EdgeLabels.ON)
 
-            return base.Neighbor(host_vertex, relationship_edge)
+            return tbase.Neighbor(host_vertex, relationship_edge)
 
         LOG.warning('Cannot transform host, host transformer does not exist')
         return None
@@ -123,10 +114,10 @@ class NagiosAlarm(base.TransformerBase):
 
     def extract_key(self, entity_event):
 
-        type = entity_event[self.TYPE]
-        alarm_name = entity_event[self.ALARM_NAME]
-        resource_name = entity_event[self.RESOURCE_NAME]
-        return base.build_key(self.key_values([type,
+        type = entity_event[SyncProps.SYNC_TYPE]
+        alarm_name = entity_event[NagiosProperties.SERVICE]
+        resource_name = entity_event[NagiosProperties.RESOURCE_NAME]
+        return tbase.build_key(self.key_values([type,
                                                resource_name,
                                                alarm_name]))
 

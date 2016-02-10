@@ -20,15 +20,15 @@ from vitrage.common.constants import EntityType
 from vitrage.common.constants import SynchronizerProperties as SyncProps
 from vitrage.common.constants import SyncMode
 from vitrage.common.constants import VertexProperties as VProps
-from vitrage.entity_graph.transformer import base
-from vitrage.entity_graph.transformer.base import extract_field_value
 import vitrage.graph.utils as graph_utils
+from vitrage.synchronizer.plugins import transformer_base
+from vitrage.synchronizer.plugins.transformer_base import extract_field_value
 
 
 LOG = logging.getLogger(__name__)
 
 
-class Zone(base.TransformerBase):
+class ZoneTransformer(transformer_base.TransformerBase):
 
     ZONE_TYPE = EntityType.NOVA_ZONE
 
@@ -148,32 +148,35 @@ class Zone(base.TransformerBase):
     @staticmethod
     def _create_node_neighbor(zone_vertex_id):
 
-        node_vertex = base.create_node_placeholder_vertex()
+        node_vertex = transformer_base.create_node_placeholder_vertex()
 
         relation_edge = graph_utils.create_edge(
             source_id=node_vertex.vertex_id,
             target_id=zone_vertex_id,
             relationship_type=EdgeLabels.CONTAINS)
-        return base.Neighbor(node_vertex, relation_edge)
+        return transformer_base.Neighbor(node_vertex, relation_edge)
 
     def _create_host_neighbor(self, zone_id, host_name, host_state, timestamp):
 
         host_transformer = self.transformers['nova.host']
 
+        vitrage_id = transformer_base.build_key(
+            host_transformer.key_values([host_name]))
+
         host_vertex = graph_utils.create_vertex(
-            base.build_key(host_transformer.key_values([host_name])),
+            vitrage_id,
             entity_id=host_name,
             entity_category=EntityCategory.RESOURCE,
             entity_type=self.ZONE_TYPE,
             entity_state=host_state,
-            update_timestamp=timestamp,)
+            update_timestamp=timestamp)
 
         relation_edge = graph_utils.create_edge(
             source_id=zone_id,
             target_id=host_vertex.vertex_id,
             relationship_type=EdgeLabels.CONTAINS)
 
-        return base.Neighbor(host_vertex, relation_edge)
+        return transformer_base.Neighbor(host_vertex, relation_edge)
 
     def extract_key(self, entity_event):
 
@@ -182,7 +185,7 @@ class Zone(base.TransformerBase):
             self.ZONE_NAME[entity_event[SyncProps.SYNC_MODE]])
 
         key_fields = self.key_values([zone_name])
-        return base.build_key(key_fields)
+        return transformer_base.build_key(key_fields)
 
     def key_values(self, mutable_fields=[]):
         return [EntityCategory.RESOURCE, self.ZONE_TYPE] + mutable_fields
@@ -192,7 +195,8 @@ class Zone(base.TransformerBase):
             LOG.error('Cannot create placeholder vertex. Missing property ID')
             raise ValueError('Missing property ID')
 
-        key = base.build_key(self.key_values([properties[VProps.ID]]))
+        key = transformer_base.build_key(
+            self.key_values([properties[VProps.ID]]))
 
         return graph_utils.create_vertex(
             key,

@@ -18,12 +18,14 @@ from oslo_utils import importutils
 from vitrage.common.constants import EntityType
 from vitrage.common.constants import SynchronizerProperties as SyncProps
 from vitrage.common.exception import VitrageTransformerError
-from vitrage.entity_graph.transformer.plugins.nagios import NagiosAlarm
-from vitrage.entity_graph.transformer.plugins.nova.host import Host
-from vitrage.entity_graph.transformer.plugins.nova.instance import Instance
-from vitrage.entity_graph.transformer.plugins.nova.zone import Zone
-from vitrage.entity_graph.transformer.plugins.static_physical \
-    import StaticPhysical
+from vitrage.synchronizer.plugins.nagios.transformer import NagiosTransformer
+from vitrage.synchronizer.plugins.nova.host.transformer import HostTransformer
+from vitrage.synchronizer.plugins.nova.instance.transformer import \
+    InstanceTransformer
+from vitrage.synchronizer.plugins.nova.zone.transformer import ZoneTransformer
+from vitrage.synchronizer.plugins.static_physical.transformer import \
+    StaticPhysical
+
 
 LOG = logging.getLogger(__name__)
 
@@ -39,15 +41,16 @@ class TransformerManager(object):
         transformers = {}
 
         transformers[EntityType.NOVA_INSTANCE] = importutils.import_object(
-            "%s.%s" % (Instance.__module__,
-                       Instance.__name__), transformers)
+            "%s.%s" % (InstanceTransformer.__module__,
+                       InstanceTransformer.__name__),
+            transformers)
 
         transformers[EntityType.NOVA_HOST] = importutils.import_object(
-            "%s.%s" % (Host.__module__, Host.__name__),
+            "%s.%s" % (HostTransformer.__module__, HostTransformer.__name__),
             transformers)
 
         transformers[EntityType.NOVA_ZONE] = importutils.import_object(
-            "%s.%s" % (Zone.__module__, Zone.__name__),
+            "%s.%s" % (ZoneTransformer.__module__, ZoneTransformer.__name__),
             transformers)
 
         transformers[EntityType.SWITCH] = importutils.import_object(
@@ -55,7 +58,8 @@ class TransformerManager(object):
             transformers)
 
         transformers[EntityType.NAGIOS] = importutils.import_object(
-            "%s.%s" % (NagiosAlarm.__module__, NagiosAlarm.__name__),
+            "%s.%s" % (NagiosTransformer.__module__,
+                       NagiosTransformer.__name__),
             transformers)
 
         return transformers

@@ -63,3 +63,9 @@ class EntityType(object):
     NOVA_ZONE = 'nova.zone'
     SWITCH = 'switch'
     NAGIOS = 'nagios'
+
+
+class EventAction(object):
+    CREATE = 'create'
+    DELETE = 'delete'
+    UPDATE = 'update'
