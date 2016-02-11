@@ -19,16 +19,11 @@ from vitrage.common.constants import SyncMode
 from vitrage.common.constants import VertexProperties
 from vitrage.common.datetime_utils import utcnow
 from vitrage.entity_graph.processor import processor as proc
-from vitrage.tests import base
-from vitrage.tests.mocks import mock_syncronizer as mock_sync
+from vitrage.tests.unit.entity_graph import TestEntityGraph
 
 
-class TestProcessor(base.BaseTest):
+class TestProcessor(TestEntityGraph):
 
-    NUM_NODES = 1
-    NUM_ZONES = 2
-    NUM_HOSTS = 4
-    NUM_INSTANCES = 15
     ZONE_SPEC = 'ZONE_SPEC'
     HOST_SPEC = 'HOST_SPEC'
     INSTANCE_SPEC = 'INSTANCE_SPEC'
@@ -45,7 +40,7 @@ class TestProcessor(base.BaseTest):
 
         # check number of entities
         num_vertices = len(processor.entity_graph)
-        self.assertEqual(self._num_resources_in_initial_graph(), num_vertices)
+        self.assertEqual(self._num_total_expected_vertices(), num_vertices)
 
         # TODO(Alexey): add this check and to check also the number of edges
         # check all entities create a tree and no free floating vertices exists
@@ -209,47 +204,3 @@ class TestProcessor(base.BaseTest):
     def _check_graph(self, processor, num_vertices, num_edges):
         self.assertEqual(num_vertices, len(processor.entity_graph))
         self.assertEqual(num_edges, processor.entity_graph.num_edges())
-
-    def _num_resources_in_initial_graph(self):
-        return self.NUM_NODES + self.NUM_ZONES + \
-            self.NUM_HOSTS + self.NUM_INSTANCES
-
-    def _create_processor_with_graph(self):
-        events = self._create_mock_events()
-        processor = proc.Processor()
-
-        for event in events:
-            processor.process_event(event)
-
-        return processor
-
-    @staticmethod
-    def _create_mock_events():
-        gen_list = mock_sync.simple_zone_generators(
-            2, 4, snapshot_events=2,
-            snap_vals={SyncProps.SYNC_MODE: SyncMode.INIT_SNAPSHOT})
-        gen_list += mock_sync.simple_host_generators(
-            2, 4, 4, snap_vals={SyncProps.SYNC_MODE: SyncMode.INIT_SNAPSHOT})
-        gen_list += mock_sync.simple_instance_generators(
-            4, 15, 15, snap_vals={SyncProps.SYNC_MODE: SyncMode.INIT_SNAPSHOT})
-        return mock_sync.generate_sequential_events_list(gen_list)
-
-    def _create_event(self, spec_type=None, sync_mode=None,
-                      event_type=None, properties=None):
-        # generate event
-        spec_list = mock_sync.simple_instance_generators(1, 1, 1)
-        events_list = mock_sync.generate_random_events_list(
-            spec_list)
-
-        # update properties
-        if sync_mode is not None:
-            events_list[0][SyncProps.SYNC_MODE] = sync_mode
-
-        if event_type is not None:
-            events_list[0][SyncProps.EVENT_TYPE] = event_type
-
-        if properties is not None:
-            for key, value in properties.iteritems():
-                events_list[0][key] = value
-
-        return events_list[0]

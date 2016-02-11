@@ -1,4 +1,5 @@
 # Copyright 2015 - Alcatel-Lucent
+# Copyright 2016 - Nokia
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -19,7 +20,7 @@ from oslo_service import service as os_service
 
 from vitrage import entity_graph as entity_graph_svc
 from vitrage.entity_graph import api_handler as api_handler_svc
-from vitrage.entity_graph import consistency as consistency_svc
+from vitrage.entity_graph.consistency import service as consistency_svc
 from vitrage.entity_graph.processor import entity_graph
 from vitrage import service
 from vitrage.synchronizer import launcher as synchronizer_launcher
@@ -50,7 +51,7 @@ def main():
     synchronizer.launch()
 
     launcher.launch_service(consistency_svc.VitrageGraphConsistencyService(
-        e_graph))
+        conf, e_graph))
 
     launcher.wait()
 

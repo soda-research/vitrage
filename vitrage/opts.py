@@ -1,4 +1,6 @@
 # Copyright 2015 - Alcatel-Lucent
+# Copyright 2016 - Nokia
+#
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
 # a copy of the License at
@@ -12,6 +14,7 @@
 # under the License.
 
 import vitrage.api
+import vitrage.entity_graph.consistency
 import vitrage.evaluator
 import vitrage.synchronizer
 import vitrage.synchronizer.plugins
@@ -22,5 +25,6 @@ def list_opts():
         ('api', vitrage.api.OPTS),
         ('synchronizer', vitrage.synchronizer.OPTS),
         ('evaluator', vitrage.evaluator.OPTS),
-        ('synchronizer_plugins', vitrage.synchronizer.plugins.OPTS)
+        ('synchronizer_plugins', vitrage.synchronizer.plugins.OPTS),
+        ('consistency', vitrage.entity_graph.consistency.OPTS)
     ]

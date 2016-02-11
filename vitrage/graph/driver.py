@@ -421,7 +421,7 @@ class Graph(object):
         pass
 
     @abc.abstractmethod
-    def get_vertices(self, vertex_attr_filter=None):
+    def get_vertices(self, vertex_attr_filter=None, query_dict=None):
         """Get vertices list with an optional match filter
 
         To filter the vertices, specify property values for
@@ -449,6 +449,8 @@ class Graph(object):
 
         :param vertex_attr_filter: expected keys and values
         :type vertex_attr_filter dict
+        :param query_dict: expected query
+        :type query_dict dict
         :return: A list of vertices that match the requested query
         :rtype: list of Vertex
         """

@@ -12,6 +12,8 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import os
+
 from vitrage.common import file_utils
 from vitrage.synchronizer.base import SynchronizerBase
 
@@ -26,11 +28,12 @@ class StaticPhysical(SynchronizerBase):
 
     def get_instances(self):
         static_entities = []
-        static_plugin_configs = file_utils.load_yaml_files(
-            self.cfg.synchronizer_plugins.static_plugins_dir)
+        if os.path.isdir(self.cfg.synchronizer_plugins.static_plugins_dir):
+            static_plugin_configs = file_utils.load_yaml_files(
+                self.cfg.synchronizer_plugins.static_plugins_dir)
 
-        for config in static_plugin_configs:
-            for entity in config['entities']:
-                static_entities.append(entity)
+            for config in static_plugin_configs:
+                for entity in config['entities']:
+                    static_entities.append(entity)
 
         return static_entities

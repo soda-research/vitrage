@@ -14,7 +14,7 @@
 
 from vitrage.common.constants import VertexProperties
 from vitrage.entity_graph.processor import entity_graph as entity_g
-from vitrage.tests.unit.processor import base
+from vitrage.tests.unit.entity_graph.processor import base
 
 
 class TestEntityGraphManager(base.BaseProcessor):

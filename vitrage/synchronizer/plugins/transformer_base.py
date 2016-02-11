@@ -19,12 +19,12 @@ from oslo_log import log as logging
 import six
 
 import vitrage.common.constants as cons
+from vitrage.common.constants import EntityType
 from vitrage.common.constants import SynchronizerProperties as SyncProps
 from vitrage.common.exception import VitrageTransformerError
 import vitrage.graph.utils as graph_utils
 
 LOG = logging.getLogger(__name__)
-NODE_SUBTYPE = 'node'
 
 
 EntityWrapper = \
@@ -52,16 +52,16 @@ def build_key(key_values):
 
 
 def create_node_placeholder_vertex():
-    key = build_key([cons.EntityCategory.RESOURCE, NODE_SUBTYPE])
+    key = build_key([cons.EntityCategory.RESOURCE, EntityType.NODE])
 
     metadata = {
-        cons.VertexProperties.NAME: NODE_SUBTYPE
+        cons.VertexProperties.NAME: EntityType.NODE
     }
 
     return graph_utils.create_vertex(
         key,
         entity_category=cons.EntityCategory.RESOURCE,
-        entity_type=NODE_SUBTYPE,
+        entity_type=EntityType.NODE,
         metadata=metadata
     )
 
