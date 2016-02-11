@@ -18,10 +18,10 @@ import sys
 
 from oslo_service import service as os_service
 
-from vitrage import entity_graph as entity_graph_svc
-from vitrage.entity_graph import api_handler as api_handler_svc
+from vitrage.entity_graph.api_handler import service as api_handler_svc
 from vitrage.entity_graph.consistency import service as consistency_svc
 from vitrage.entity_graph.processor import entity_graph
+from vitrage.entity_graph import service as entity_graph_svc
 from vitrage import service
 from vitrage.synchronizer import launcher as synchronizer_launcher
 
