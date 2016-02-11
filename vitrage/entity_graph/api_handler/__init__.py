@@ -88,5 +88,5 @@ class EntityGraphApis(object):
         LOG.info("EntityGraphApis get_alarms result:%s", str(items_list))
         return json.dumps({'alarms': [v.properties for v in items_list]})
 
-    def get_topology(self, ctx, arg):
+    def get_topology(self, ctx, graph_type, depth, query, root):
         return self.entity_graph.output_graph()
