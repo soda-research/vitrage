@@ -111,7 +111,7 @@ class Vertex(object):
     def __iter__(self):
         return self.properties.itervalues()
 
-    def __str__(self):
+    def __repr__(self):
         return '{vertex_id : %s, properties : %s}' % \
                (str(self.vertex_id), str(self.properties))
 

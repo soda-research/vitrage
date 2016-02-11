@@ -19,10 +19,10 @@ from vitrage.common.constants import SyncMode
 from vitrage.common.constants import VertexProperties
 from vitrage.common.datetime_utils import utcnow
 from vitrage.entity_graph.processor import processor as proc
-from vitrage.tests.unit.entity_graph import TestEntityGraph
+from vitrage.tests.unit.entity_graph import TestEntityGraphBase
 
 
-class TestProcessor(TestEntityGraph):
+class TestProcessorBase(TestEntityGraphBase):
 
     ZONE_SPEC = 'ZONE_SPEC'
     HOST_SPEC = 'HOST_SPEC'
@@ -33,7 +33,7 @@ class TestProcessor(TestEntityGraph):
     NUM_EDGES_AFTER_DELETION = 0
 
     def setUp(self):
-        super(TestProcessor, self).setUp()
+        super(TestProcessorBase, self).setUp()
 
     def test_create_entity_graph(self):
         processor = self._create_processor_with_graph()

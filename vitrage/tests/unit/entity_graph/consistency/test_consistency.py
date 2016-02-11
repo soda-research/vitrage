@@ -24,10 +24,10 @@ from vitrage.common.datetime_utils import utcnow
 from vitrage.entity_graph.consistency.consistency_enforcer \
     import ConsistencyEnforcer
 from vitrage.entity_graph.processor.processor import Processor
-from vitrage.tests.unit.entity_graph import TestEntityGraph
+from vitrage.tests.unit.entity_graph import TestEntityGraphBase
 
 
-class TestConsistency(TestEntityGraph):
+class TestConsistencyBase(TestEntityGraphBase):
 
     OPTS = [
         cfg.IntOpt('consistency_interval',
@@ -39,7 +39,7 @@ class TestConsistency(TestEntityGraph):
     ]
 
     def setUp(self):
-        super(TestConsistency, self).setUp()
+        super(TestConsistencyBase, self).setUp()
         self.processor = Processor()
         self.conf = cfg.ConfigOpts()
         self.conf.register_opts(self.OPTS, group='consistency')

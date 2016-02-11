@@ -43,10 +43,8 @@ class ConsistencyEnforcer(object):
             old_deleted_entities = self._find_old_deleted_entities()
             vertices_to_delete = stale_entities.union(old_deleted_entities)
 
-            LOG.debug('Found %s vertices to be deleted by consistency service',
-                      len(stale_entities))
-            for item in vertices_to_delete:
-                LOG.debug(item)
+            LOG.debug('Found %s vertices to be deleted by consistency service'
+                      ': %s', len(stale_entities), vertices_to_delete)
 
             self._delete_vertices(vertices_to_delete)
         except Exception:
@@ -82,9 +80,7 @@ class ConsistencyEnforcer(object):
 
     @staticmethod
     def _filter_vertices_to_be_deleted(vertices):
-        for vertex in vertices:
-            if vertex.properties[VProps.CATEGORY] == EntityCategory.RESOURCE \
-                    and vertex.properties[VProps.TYPE] == EntityType.NODE:
-                vertices.remove(vertex)
-
-        return vertices
+        return filter(
+            lambda ver:
+            not (ver.properties[VProps.CATEGORY] == EntityCategory.RESOURCE
+                 and ver.properties[VProps.TYPE] == EntityType.NODE), vertices)

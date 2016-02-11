@@ -21,7 +21,7 @@ from vitrage.tests import base
 from vitrage.tests.mocks import mock_syncronizer as mock_sync
 
 
-class TestEntityGraph(base.BaseTest):
+class TestEntityGraphBase(base.BaseTest):
 
     NUM_NODES = 1
     NUM_ZONES = 2
