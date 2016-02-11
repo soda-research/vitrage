@@ -12,7 +12,6 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import json
 import pecan
 
 from oslo_log import log
@@ -38,7 +37,8 @@ class RCAController(rest.RestController):
         LOG.info(_LI('received show rca with alarm id %s') % alarm_id)
 
         vals = {'category': VProps.CATEGORY, 'alarm': EntityCategory.ALARM}
-        query = "{'==':{%(category)s:%(alarm)s}}" % vals
+        query = '{"==":{"%(category)s":"%(alarm)s"}}' % vals
+        LOG.info(_LI('query is %s') % query)
         params = urllib.parse.urlencode(
-            dict(query=json.loads(query), root=alarm_id, graph_type='graph'))
+            dict(query=query, root=alarm_id, graph_type='graph'))
         redirect('/v1/topology?' + params, internal=True)
