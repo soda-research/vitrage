@@ -45,7 +45,8 @@ class ResourcesController(rest.RestController):
 
     @staticmethod
     def get_resources(resource_type):
-        return dict()
+        # todo(eyalb1) need a mock for this
+        return [{'None': None}]
 
 
 class ResourceController(rest.RestController):
@@ -67,4 +68,5 @@ class ResourceController(rest.RestController):
 
     @staticmethod
     def get_resource(id_):
-        return dict()
+        # todo(eyalb1) need a mock for this
+        return {'None': None}
