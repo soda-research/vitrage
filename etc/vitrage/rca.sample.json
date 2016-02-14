@@ -1,0 +1,55 @@
+{
+  "directed": true,
+  "graph": {
+    
+  },
+  "nodes": [
+    {
+      "category": "ALARM",
+      "type": "nagios",
+      "name": "CPU load",
+      "state": "Active",
+      "severity": "WARNING",
+      "timestamp": "2015-12-01T12:46:41Z",
+      "info": "WARNING - 15min load 1.66 at 32 CPUs",
+      "resource_type": "nova.host",
+      "resource_name": "host0",
+      "id": 0
+    },
+    {
+      "category": "ALARM",
+      "type": "vitrage",
+      "name": "Machine might be suffering due to high CPU load on the host",
+      "state": "Active",
+      "severity": "WARNING",
+      "timestamp": "2015-12-01T12:46:41Z",
+      "resource_type": "nova.instance",
+      "resource_name": "vm0",
+      "id": 1
+    },
+    {
+      "category": "ALARM",
+      "type": "vitrage",
+      "name": "Machine might be suffering due to high CPU load on the host",
+      "state": "Active",
+      "severity": "WARNING",
+      "timestamp": "2015-12-01T12:46:41Z",
+      "resource_type": "nova.instance",
+      "resource_name": "vm1",
+      "id": 2
+    }
+  ],
+  "links": [
+    {
+      "source": 0,
+      "target": 1,
+      "relationship": "causes"
+    },
+    {
+      "source": 0,
+      "target": 2,
+      "relationship": "causes"
+    }
+  ],
+  "multigraph": false
+}

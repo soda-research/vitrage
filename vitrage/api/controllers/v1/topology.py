@@ -24,6 +24,8 @@ from pecan.core import abort
 from pecan import rest
 
 from vitrage.api.controllers.v1 import mock_file
+from vitrage.api.controllers.v1 import RCA_QUERY
+
 from vitrage.api.policy import enforce
 
 # noinspection PyProtectedMember
@@ -40,7 +42,6 @@ def as_tree(graph, root='RESOURCE:node', reverse=False):
 
 
 class TopologyController(rest.RestController):
-
     def __init__(self):
         transport = oslo_messaging.get_transport(cfg.CONF)
         cfg.CONF.set_override('rpc_backend', 'rabbit')
@@ -67,7 +68,7 @@ class TopologyController(rest.RestController):
         LOG.info(_LI("query is %s") % query)
 
         if mock_file:
-            return self.get_mock_graph(graph_type)
+            return self.get_mock_graph(graph_type, query)
         else:
             return self.get_graph(graph_type, depth, query, root)
 
@@ -89,11 +90,12 @@ class TopologyController(rest.RestController):
             abort(404, str(e))
 
     @staticmethod
-    def get_mock_graph(graph_type):
-        # TODO(eyal) temporary mock
-        graph_file = pecan.request.cfg.find_file('graph.sample.json')
+    def get_mock_graph(graph_type, query):
+        file_name = 'rca.sample.json' if query == RCA_QUERY \
+            else 'graph.sample.json'
+        graph_file = pecan.request.cfg.find_file(file_name)
         if graph_file is None:
-            abort(404, 'file graph.sample.json not found')
+            abort(404, 'file %s not found' % file_name)
         try:
             with open(graph_file) as data_file:
                 graph = json.load(data_file)

@@ -12,15 +12,15 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import json
 import pecan
 
 from oslo_log import log
 from pecan import redirect
 from pecan import rest
 from six.moves import urllib
+from vitrage.api.controllers.v1 import RCA_QUERY
 from vitrage.api.policy import enforce
-from vitrage.common.constants import EntityCategory
-from vitrage.common.constants import VertexProperties as VProps
 
 # noinspection PyProtectedMember
 from vitrage.i18n import _LI
@@ -35,9 +35,7 @@ class RCAController(rest.RestController):
                 pecan.request.enforcer, {})
 
         LOG.info(_LI('received show rca with alarm id %s') % alarm_id)
-
-        vals = {'category': VProps.CATEGORY, 'alarm': EntityCategory.ALARM}
-        query = '{"==":{"%(category)s":"%(alarm)s"}}' % vals
+        query = json.dumps(RCA_QUERY)
         LOG.info(_LI('query is %s') % query)
         params = urllib.parse.urlencode(
             dict(query=query, root=alarm_id, graph_type='graph'))

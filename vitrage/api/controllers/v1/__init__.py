@@ -12,4 +12,8 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from vitrage.common.constants import EntityCategory
+from vitrage.common.constants import VertexProperties as VProps
+
 mock_file = True
+RCA_QUERY = {'==': {VProps. CATEGORY: EntityCategory.ALARM}}

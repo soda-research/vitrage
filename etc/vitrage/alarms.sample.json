@@ -1,0 +1,36 @@
+{
+    "alarms":
+     [
+        {
+            "id": "04cf683b-58a8-4b59-941a-9a1594fa0fe7",
+            "project_id": "da3a1ab32-1c62-22cb-bf04-660bd33cd74d",
+            "state": "available",
+            "update_timestamp": "2016-01-18T06:14:20.782134+00:00",
+            "category": "alarm",
+            "type": "CPU_HIGH",
+            "name": "cpu high",
+            "severity": "major"
+        },
+        {
+           "id": "05af123a-56a2-4b59-741a-7b1482dabac2",
+           "project_id": "da3a1ab32-1c62-22cb-bf04-660bd33cd74d",
+           "state": "available",
+           "update_timestamp": "2016-01-18T06:12:28.987651+00:00",
+           "category": "alarm",
+           "type": "NO_SPACE_ON_DISK",
+           "name": "no space on disk",
+           "severity": "critical"
+        },
+        {
+          "id": "123f456a-12b2-9c51-345d-8b2604adbada7",
+          "project_id": "da3a1ab32-1c62-22cb-bf04-660bd33cd74d",
+          "state": "available",
+          "update_timestamp": "2016-01-18T06:14:38.123456+00:00",
+          "category": "alarm",
+          "type": "OUT_OF_MEMORY",
+          "name": "out of memory",
+          "severity": "critical"
+        }
+    ]
+}
+

@@ -1,0 +1,276 @@
+{
+  "directed": true,
+  "graph": {
+    
+  },
+  "nodes": [
+    {
+      "state": "RUNNING",
+      "name": "node1",
+      "id": 0
+    },
+    {
+      "state": "ERROR",
+      "name": "zone0",
+      "id": 1
+    },
+    {
+      "state": "SUBOPTIMAL",
+      "name": "zone1",
+      "id": 2
+    },
+    {
+      "state": "RUNNING",
+      "name": "zone2",
+      "id": 3
+    },
+    {
+      "state": "ERROR",
+      "name": "host0",
+      "id": 4
+    },
+    {
+      "state": "SUBOPTIMAL",
+      "name": "host1",
+      "id": 5
+    },
+    {
+      "state": "RUNNING",
+      "name": "host2",
+      "id": 6
+    },
+    {
+      "state": "ERROR",
+      "name": "host3",
+      "id": 7
+    },
+    {
+      "state": "SUBOPTIMAL",
+      "name": "host4",
+      "id": 8
+    },
+    {
+      "state": "RUNNING",
+      "name": "host5",
+      "id": 9
+    },
+    {
+      "state": "ERROR",
+      "name": "host6",
+      "id": 10
+    },
+    {
+      "state": "SUBOPTIMAL",
+      "name": "vm0",
+      "id": 11
+    },
+    {
+      "state": "RUNNING",
+      "name": "vm1",
+      "id": 12
+    },
+    {
+      "state": "ERROR",
+      "name": "vm2",
+      "id": 13
+    },
+    {
+      "state": "SUBOPTIMAL",
+      "name": "vm3",
+      "id": 14
+    },
+    {
+      "state": "RUNNING",
+      "name": "vm4",
+      "id": 15
+    },
+    {
+      "state": "ERROR",
+      "name": "vm5",
+      "id": 16
+    },
+    {
+      "state": "SUBOPTIMAL",
+      "name": "vm6",
+      "id": 17
+    },
+    {
+      "state": "RUNNING",
+      "name": "vm7",
+      "id": 18
+    },
+    {
+      "state": "ERROR",
+      "name": "vm8",
+      "id": 19
+    },
+    {
+      "state": "SUBOPTIMAL",
+      "name": "vm9",
+      "id": 20
+    },
+    {
+      "state": "RUNNING",
+      "name": "vm10",
+      "id": 21
+    },
+    {
+      "state": "ERROR",
+      "name": "vm11",
+      "id": 22
+    },
+    {
+      "state": "SUBOPTIMAL",
+      "name": "vm12",
+      "id": 23
+    },
+    {
+      "state": "RUNNING",
+      "name": "vm13",
+      "id": 24
+    },
+    {
+      "state": "ERROR",
+      "name": "vm14",
+      "id": 25
+    },
+    {
+      "state": "SUBOPTIMAL",
+      "name": "vm15",
+      "id": 26
+    }
+  ],
+  "links": [
+    {
+      "source": 1,
+      "target": 0,
+      "relationship": "contains"
+    },
+    {
+      "source": 2,
+      "target": 0,
+      "relationship": "contains"
+    },
+    {
+      "source": 3,
+      "target": 0,
+      "relationship": "contains"
+    },
+    {
+      "source": 4,
+      "target": 2,
+      "relationship": "contains"
+    },
+    {
+      "source": 5,
+      "target": 1,
+      "relationship": "contains"
+    },
+    {
+      "source": 6,
+      "target": 3,
+      "relationship": "contains"
+    },
+    {
+      "source": 7,
+      "target": 2,
+      "relationship": "contains"
+    },
+    {
+      "source": 8,
+      "target": 1,
+      "relationship": "contains"
+    },
+    {
+      "source": 9,
+      "target": 3,
+      "relationship": "contains"
+    },
+    {
+      "source": 10,
+      "target": 2,
+      "relationship": "contains"
+    },
+    {
+      "source": 11,
+      "target": 6,
+      "relationship": "contains"
+    },
+    {
+      "source": 12,
+      "target": 5,
+      "relationship": "contains"
+    },
+    {
+      "source": 13,
+      "target": 4,
+      "relationship": "contains"
+    },
+    {
+      "source": 14,
+      "target": 10,
+      "relationship": "contains"
+    },
+    {
+      "source": 15,
+      "target": 9,
+      "relationship": "contains"
+    },
+    {
+      "source": 16,
+      "target": 8,
+      "relationship": "contains"
+    },
+    {
+      "source": 17,
+      "target": 7,
+      "relationship": "contains"
+    },
+    {
+      "source": 18,
+      "target": 6,
+      "relationship": "contains"
+    },
+    {
+      "source": 19,
+      "target": 5,
+      "relationship": "contains"
+    },
+    {
+      "source": 20,
+      "target": 4,
+      "relationship": "contains"
+    },
+    {
+      "source": 21,
+      "target": 10,
+      "relationship": "contains"
+    },
+    {
+      "source": 22,
+      "target": 9,
+      "relationship": "contains"
+    },
+    {
+      "source": 23,
+      "target": 8,
+      "relationship": "contains"
+    },
+    {
+      "source": 24,
+      "target": 7,
+      "relationship": "contains"
+    },
+    {
+      "source": 25,
+      "target": 6,
+      "relationship": "contains"
+    },
+    {
+      "source": 26,
+      "target": 5,
+      "relationship": "contains"
+    }
+  ],
+  "multigraph": false
+}
