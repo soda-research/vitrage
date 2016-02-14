@@ -19,7 +19,7 @@ from oslo_config import cfg
 OPTS = [
     cfg.StrOpt('static_plugins_dir',
                default='/etc/vitrage/static_plugins',
-               help='A path for the static plugins for the syncronizer'
+               help='A path for the static plugins for the synchronizer'
                ),
     cfg.StrOpt('nagios_user',
                help='Nagios user'

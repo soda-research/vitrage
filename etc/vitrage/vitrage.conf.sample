@@ -410,7 +410,7 @@
 # From vitrage
 #
 
-# A path for the static plugins for the syncronizer (string value)
+# A path for the static plugins for the synchronizer (string value)
 #static_plugins_dir = /etc/vitrage/static_plugins
 
 # Nagios user (string value)
