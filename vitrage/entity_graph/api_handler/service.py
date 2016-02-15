@@ -67,10 +67,10 @@ class VitrageApiHandlerService(os_service.Service):
 
         LOG.info("Finish start VitrageApiHandlerService")
 
-    def stop(self):
+    def stop(self, graceful=False):
         LOG.info("Stop VitrageApiHandlerService")
 
-        super(VitrageApiHandlerService, self).stop()
+        super(VitrageApiHandlerService, self).stop(graceful)
 
         LOG.info("Finish stop VitrageApiHandlerService")
 
@@ -102,7 +102,7 @@ class EntityGraphApis(object):
         LOG.info("EntityGraphApis get_alarms result:%s", str(items_list))
         return json.dumps({'alarms': [v.properties for v in items_list]})
 
-    def get_topology(self, ctx, arg):
+    def get_topology(self, ctx, graph_type, depth, query, root):
         ga = create_algorithm(self.entity_graph)
         found_graph = ga.graph_query_vertices(
             {'!=': {VProps.CATEGORY: EntityCategory.ALARM}})
