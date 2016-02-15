@@ -66,7 +66,7 @@ class NagiosTransformer(tbase.TransformerBase):
 
         vitrage_id = self.extract_key(entity_event)
         timestamp = datetime_utils.change_time_str_format(
-            entity_event[self.TIMESTAMP],
+            entity_event[NagiosProperties.LAST_CHECK],
             '%Y-%m-%d %H:%M:%S',
             tbase.TIMESTAMP_FORMAT)
 
