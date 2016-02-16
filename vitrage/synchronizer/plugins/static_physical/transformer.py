@@ -24,9 +24,10 @@ from vitrage.synchronizer.plugins import transformer_base
 LOG = logging.getLogger(__name__)
 
 
-class StaticPhysical(transformer_base.TransformerBase):
+class StaticPhysicalTransformer(transformer_base.TransformerBase):
 
     RELATION_TYPE = 'relation_type'
+    RELATIONSHIPS_SECTION = 'relationships'
 
     def __init__(self, transformers):
         self.transformers = transformers
@@ -55,7 +56,7 @@ class StaticPhysical(transformer_base.TransformerBase):
         entity_key = self.extract_key(entity_event)
         timestamp = entity_event[SyncProps.SAMPLE_DATE]
 
-        for neighbor_details in entity_event['relationships']:
+        for neighbor_details in entity_event[self.RELATIONSHIPS_SECTION]:
             # TODO(alexey): need to decide what to do if one of the entities
             #               fails
             neighbor = self._create_neighbor(neighbor_details, entity_type,

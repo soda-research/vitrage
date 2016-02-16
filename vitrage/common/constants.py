@@ -70,3 +70,4 @@ class EventAction(object):
     CREATE = 'create'
     DELETE = 'delete'
     UPDATE = 'update'
+    END_MESSAGE = 'end_message'

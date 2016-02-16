@@ -1,4 +1,5 @@
 # Copyright 2016 - Alcatel-Lucent
+# Copyright 2016 - Nokia
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -15,6 +16,7 @@
 from oslo_log import log
 from oslo_service import service as os_service
 
+from services import ChangesService
 from services import SnapshotsService
 from vitrage.synchronizer.plugins.nagios.synchronizer import NagiosSynchronizer
 from vitrage.synchronizer.plugins.nova.host.synchronizer import \
@@ -24,8 +26,7 @@ from vitrage.synchronizer.plugins.nova.instance.synchronizer import \
 from vitrage.synchronizer.plugins.nova.zone.synchronizer import \
     ZoneSynchronizer
 from vitrage.synchronizer.plugins.static_physical.synchronizer import \
-    StaticPhysical
-
+    StaticPhysicalSynchronizer
 
 LOG = log.getLogger(__name__)
 
@@ -40,11 +41,10 @@ def create_send_to_queue_callback(queue):
 class Launcher(object):
 
     def __init__(self, conf, callback):
-
         self.conf = conf
         self.callback = callback
-        self.plugins = self._init_registered_plugins()
-        self.services = [SnapshotsService(conf, self.plugins)]
+        self.snapshot_plugins = self._register_snapshot_plugins()
+        self.services = self._register_services()
 
     def launch(self):
         launcher = os_service.ProcessLauncher(self.conf)
@@ -52,7 +52,7 @@ class Launcher(object):
             service.set_callback(self.callback)
             launcher.launch_service(service, 1)
 
-    def _init_registered_plugins(self):
+    def _register_snapshot_plugins(self):
         version = 2.0
         user = 'admin'
         password = 'password'
@@ -63,6 +63,19 @@ class Launcher(object):
              HostSynchronizer(version, user, password, project, auth_url),
              InstanceSynchronizer(version, user, password, project, auth_url),
              NagiosSynchronizer(self.conf),
-             StaticPhysical(self.conf)
-             ]
+             StaticPhysicalSynchronizer(self.conf)]
         return registered_plugins
+
+    def _register_services(self):
+        nagios_changes_interval = self.conf.synchronizer.\
+            nagios_changes_interval
+        static_physical_changes_interval = self.conf.synchronizer.\
+            static_physical_changes_interval
+
+        return [SnapshotsService(self.conf, self.snapshot_plugins),
+                ChangesService(self.conf,
+                               [NagiosSynchronizer(self.conf)],
+                               nagios_changes_interval),
+                ChangesService(self.conf,
+                               [StaticPhysicalSynchronizer(self.conf)],
+                               static_physical_changes_interval)]

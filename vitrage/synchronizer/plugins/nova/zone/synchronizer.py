@@ -33,7 +33,12 @@ class ZoneSynchronizer(NovaBase):
                 zones_res.append(zone_dict)
         return zones_res
 
-    def get_all(self):
+    def get_all(self, sync_mode):
         return self.make_pickleable(self.filter_internal_zone(
             self.client.availability_zones.list()),
-            EntityType.NOVA_ZONE, ['manager'])
+            EntityType.NOVA_ZONE,
+            sync_mode,
+            ['manager'])
+
+    def get_changes(self, sync_mode):
+        pass

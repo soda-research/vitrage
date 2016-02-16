@@ -16,7 +16,10 @@ import abc
 
 import six
 
+from vitrage.common.constants import EventAction
+
 from vitrage.common.constants import SynchronizerProperties as SyncProps
+from vitrage.common.constants import SyncMode
 import vitrage.common.datetime_utils
 
 
@@ -27,11 +30,24 @@ class SynchronizerBase(object):
         pass
 
     @abc.abstractmethod
-    def get_all(self):
+    def get_all(self, sync_mode):
         pass
 
-    def make_pickleable(self, entities, sync_type, fields_to_remove=[]):
+    @staticmethod
+    def _get_end_message(sync_type):
+        end_message = {
+            SyncProps.SYNC_TYPE: sync_type,
+            SyncProps.SYNC_MODE: SyncMode.INIT_SNAPSHOT,
+            SyncProps.EVENT_TYPE: EventAction.END_MESSAGE
+        }
+        return end_message
 
+    @abc.abstractmethod
+    def get_changes(self, sync_mode):
+        pass
+
+    def make_pickleable(self, entities, sync_type,
+                        sync_mode, fields_to_remove=[]):
         pickleable_entities = []
 
         for entity in entities:
@@ -39,17 +55,25 @@ class SynchronizerBase(object):
                 entity.pop(field)
 
             self._add_sync_type(entity, sync_type)
+            self._add_sync_mode(entity, sync_mode)
             self._add_sampling_time(entity)
             pickleable_entities.append(entity)
+
+        if sync_mode == SyncMode.INIT_SNAPSHOT:
+            pickleable_entities.append(self._get_end_message(sync_type))
 
         return pickleable_entities
 
     @staticmethod
     def _add_sync_type(entity, sync_type):
-        if sync_type:
+        if SyncProps.SYNC_TYPE not in entity:
             entity[SyncProps.SYNC_TYPE] = sync_type
 
     @staticmethod
     def _add_sampling_time(entity):
         entity[SyncProps.SAMPLE_DATE] = str(
             vitrage.common.datetime_utils.utcnow())
+
+    @staticmethod
+    def _add_sync_mode(entity, sync_mode):
+        entity[SyncProps.SYNC_MODE] = sync_mode

@@ -16,7 +16,9 @@ from oslo_log import log as logging
 from oslo_utils import importutils
 
 from vitrage.common.constants import EntityType
+from vitrage.common.constants import EventAction
 from vitrage.common.constants import SynchronizerProperties as SyncProps
+from vitrage.common.constants import SyncMode
 from vitrage.common.exception import VitrageTransformerError
 from vitrage.synchronizer.plugins.nagios.transformer import NagiosTransformer
 from vitrage.synchronizer.plugins.nova.host.transformer import HostTransformer
@@ -24,8 +26,8 @@ from vitrage.synchronizer.plugins.nova.instance.transformer import \
     InstanceTransformer
 from vitrage.synchronizer.plugins.nova.zone.transformer import ZoneTransformer
 from vitrage.synchronizer.plugins.static_physical.transformer import \
-    StaticPhysical
-
+    StaticPhysicalTransformer
+from vitrage.synchronizer.plugins import transformer_base
 
 LOG = logging.getLogger(__name__)
 
@@ -54,7 +56,8 @@ class TransformerManager(object):
             transformers)
 
         transformers[EntityType.SWITCH] = importutils.import_object(
-            "%s.%s" % (StaticPhysical.__module__, StaticPhysical.__name__),
+            "%s.%s" % (StaticPhysicalTransformer.__module__,
+                       StaticPhysicalTransformer.__name__),
             transformers)
 
         transformers[EntityType.NAGIOS] = importutils.import_object(
@@ -75,14 +78,18 @@ class TransformerManager(object):
         return transformer
 
     def transform(self, entity_event):
+        if not self._is_end_message(entity_event):
+            try:
+                sync_type = entity_event[SyncProps.SYNC_TYPE]
+            except KeyError:
+                raise VitrageTransformerError(
+                    'Entity Event must contains sync_type field.')
 
-        try:
-            sync_type = entity_event[SyncProps.SYNC_TYPE]
-        except KeyError:
-            raise VitrageTransformerError(
-                'Entity Event must contains sync_type field.')
-
-        return self.get_transformer(sync_type).transform(entity_event)
+            return self.get_transformer(sync_type).transform(entity_event)
+        else:
+            return transformer_base.EntityWrapper(None,
+                                                  None,
+                                                  EventAction.END_MESSAGE)
 
     def extract_key(self, entity_event):
 
@@ -93,3 +100,9 @@ class TransformerManager(object):
                 'Entity Event must contains sync_type field.')
 
         return self.get_transformer(sync_type).extract_key()
+
+    @staticmethod
+    def _is_end_message(entity_event):
+        return entity_event[SyncProps.SYNC_MODE] == SyncMode.INIT_SNAPSHOT and\
+            SyncProps.EVENT_TYPE in entity_event and \
+            entity_event[SyncProps.EVENT_TYPE] == EventAction.END_MESSAGE

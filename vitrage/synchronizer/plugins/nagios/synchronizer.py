@@ -11,7 +11,9 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+
 from collections import namedtuple
+
 from oslo_log import log
 import requests
 
@@ -19,11 +21,11 @@ from vitrage.common.constants import EntityType
 from vitrage.common.constants import SynchronizerProperties as SyncProps
 from vitrage.i18n import _LE
 from vitrage.i18n import _LW
-from vitrage.synchronizer.base import SynchronizerBase
 from vitrage.synchronizer.plugins.nagios.parser import NagiosParser
 from vitrage.synchronizer.plugins.nagios.properties import NagiosProperties \
     as NagiosProps
 from vitrage.synchronizer.plugins.nagios.properties import NagiosStatus
+from vitrage.synchronizer.plugins.synchronizer_base import SynchronizerBase
 
 LOG = log.getLogger(__name__)
 
@@ -36,8 +38,13 @@ class NagiosSynchronizer(SynchronizerBase):
         self.conf = conf
         self.cache = dict()
 
-    def get_all(self):
-        return self.make_pickleable(self._get_services(), EntityType.NAGIOS)
+    def get_all(self, sync_mode):
+        return self.make_pickleable(self._get_services(),
+                                    EntityType.NAGIOS,
+                                    sync_mode)
+
+    def get_changes(self, sync_mode):
+        return []
 
     def _get_services(self):
         nagios_user = self.conf.synchronizer_plugins.nagios_user
@@ -71,7 +78,8 @@ class NagiosSynchronizer(SynchronizerBase):
                       response.status_code)
             return []
 
-    def _enrich_services(self, nagios_services):
+    @staticmethod
+    def _enrich_services(nagios_services):
         for service in nagios_services:
             # TODO(ifat_afek) - add a configuration file for resource types
             service[NagiosProps.RESOURCE_TYPE] = EntityType.NOVA_HOST

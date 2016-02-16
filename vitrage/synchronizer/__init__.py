@@ -19,4 +19,13 @@ OPTS = [
                default=600,
                min=10,
                help='interval between full snapshots'),
+    cfg.IntOpt('nagios_changes_interval',
+               default=30,
+               min=30,
+               help='interval between checking changes in nagios plugin'),
+    cfg.IntOpt('static_physical_changes_interval',
+               default=30,
+               min=30,
+               help='interval between checking changes in the configuration '
+                    'files of the physical topology plugin'),
 ]

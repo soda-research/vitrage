@@ -31,7 +31,12 @@ class InstanceSynchronizer(NovaBase):
             instances_res.append(instance.__dict__)
         return instances_res
 
-    def get_all(self):
+    def get_all(self, sync_mode):
         return self.make_pickleable(
             self.filter_instances(self.client.servers.list()),
-            EntityType.NOVA_INSTANCE, ['manager'])
+            EntityType.NOVA_INSTANCE,
+            sync_mode,
+            ['manager'])
+
+    def get_changes(self, sync_mode):
+        pass

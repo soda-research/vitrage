@@ -14,6 +14,7 @@
 
 import json
 
+import eventlet
 from oslo_config import cfg
 from oslo_log import log
 import oslo_messaging
@@ -27,6 +28,8 @@ from vitrage.graph import create_algorithm
 from vitrage.graph import Direction
 
 LOG = log.getLogger(__name__)
+
+eventlet.monkey_patch()
 
 
 class VitrageApiHandlerService(os_service.Service):
@@ -61,7 +64,7 @@ class VitrageApiHandlerService(os_service.Service):
 
         # TODO(Dany) use eventlet instead of threading
         server = oslo_messaging.get_rpc_server(transport, target,
-                                               endpoints, executor='threading')
+                                               endpoints, executor='eventlet')
 
         server.start()
 

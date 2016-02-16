@@ -13,9 +13,9 @@
 # under the License.
 
 import os
-import yaml
 
 from oslo_log import log
+import yaml
 
 LOG = log.getLogger(__name__)
 
@@ -35,15 +35,21 @@ def load_yaml_files(dir_path, with_exception=False):
     yaml_files = []
     for file in files:
         full_path = dir_path + '/' + file
-        with open(full_path, 'r') as stream:
-            try:
-                config = yaml.load(stream, Loader=yaml.BaseLoader)
-            except Exception as e:
-                if with_exception:
-                    raise e
-                else:
-                    LOG.error("Fails to parse file: %s. %s" % (full_path, e))
 
+        config = load_yaml_file(full_path, with_exception)
+        if config:
             yaml_files.append(config)
 
     return yaml_files
+
+
+def load_yaml_file(full_path, with_exception=False):
+    with open(full_path, 'r') as stream:
+        try:
+            return yaml.load(stream, Loader=yaml.BaseLoader)
+        except Exception as e:
+            if with_exception:
+                raise e
+            else:
+                LOG.error("Fails to parse file: %s. %s" % (full_path, e))
+                return None

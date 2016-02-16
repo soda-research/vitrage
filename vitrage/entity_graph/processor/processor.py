@@ -125,6 +125,9 @@ class Processor(processor.ProcessorBase):
             LOG.info("Delete event arrived on invalid resource: %s",
                      deleted_vertex)
 
+    def handle_end_message(self, vertex, neighbors):
+        return
+
     def transform_entity(self, event):
         return self.transformer.transform(event)
 
@@ -146,8 +149,8 @@ class Processor(processor.ProcessorBase):
                   neighbors, valid_edges)
         for (vertex, edge) in neighbors:
             graph_vertex = self.entity_graph.get_vertex(vertex.vertex_id)
-            if (not graph_vertex) or self.entity_graph.check_update_validation(
-                    graph_vertex, vertex):
+            if not graph_vertex or \
+                    not self.entity_graph.is_vertex_deleted(graph_vertex):
                 if self.entity_graph.can_update_vertex(graph_vertex, vertex):
                     LOG.debug("Updates vertex: %s", vertex)
                     self.entity_graph.update_vertex(vertex)
@@ -215,5 +218,6 @@ class Processor(processor.ProcessorBase):
         self.actions = {
             EventAction.CREATE: self.create_entity,
             EventAction.UPDATE: self.update_entity,
-            EventAction.DELETE: self.delete_entity
+            EventAction.DELETE: self.delete_entity,
+            EventAction.END_MESSAGE: self.handle_end_message
         }

@@ -13,6 +13,7 @@
 # under the License.
 
 import abc
+
 import six
 
 
@@ -36,4 +37,8 @@ class ProcessorBase(object):
 
     @abc.abstractmethod
     def delete_entity(self, deleted_vertex, neighbors):
+        pass
+
+    @abc.abstractmethod
+    def handle_end_message(self, event):
         pass

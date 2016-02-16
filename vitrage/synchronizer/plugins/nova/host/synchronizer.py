@@ -34,6 +34,12 @@ class HostSynchronizer(NovaBase):
                 compute_hosts.append(host_dict)
         return compute_hosts
 
-    def get_all(self):
-        return self.make_pickleable(self.filter_none_compute_hosts(
-            self.client.hosts.list()), EntityType.NOVA_HOST, ['manager'])
+    def get_all(self, sync_mode):
+        return self.make_pickleable(
+            self.filter_none_compute_hosts(self.client.hosts.list()),
+            EntityType.NOVA_HOST,
+            sync_mode,
+            ['manager'])
+
+    def get_changes(self, sync_mode):
+        pass

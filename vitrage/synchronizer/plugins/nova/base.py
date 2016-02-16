@@ -15,7 +15,7 @@
 
 from novaclient import client
 
-from vitrage.synchronizer.base import SynchronizerBase
+from vitrage.synchronizer.plugins.synchronizer_base import SynchronizerBase
 
 
 class NovaBase(SynchronizerBase):

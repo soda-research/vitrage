@@ -1,4 +1,5 @@
 # Copyright 2016 - Alcatel-Lucent
+# Copyright 2016 - Nokia
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -15,7 +16,6 @@
 from oslo_log import log
 from oslo_service import service as os_service
 
-from vitrage.common.constants import SynchronizerProperties as SyncProps
 from vitrage.common.constants import SyncMode
 
 LOG = log.getLogger(__name__)
@@ -40,17 +40,19 @@ class SnapshotsService(SynchronizerService):
 
     def start(self):
         LOG.info("Start VitrageSnapshotsService")
+
         super(SnapshotsService, self).start()
         interval = self.conf.synchronizer.snapshots_interval
         self.tg.add_timer(interval, self._get_all)
+
         LOG.info("Finish start VitrageSnapshotsService")
 
     def stop(self):
-        LOG.info("Stop VitrageSynchronizerService")
+        LOG.info("Stop VitrageSnapshotsService")
 
         super(SnapshotsService, self).stop()
 
-        LOG.info("Finish stop VitrageSynchronizerService")
+        LOG.info("Finish stop VitrageSnapshotsService")
 
     def _get_all(self):
         sync_mode = SyncMode.INIT_SNAPSHOT \
@@ -58,15 +60,44 @@ class SnapshotsService(SynchronizerService):
         LOG.debug("start get all with sync mode %s" % sync_mode)
 
         for plugin in self.registered_plugins:
-            entities_dictionaries = \
-                self._mark_snapshot_entities(plugin.get_all(), sync_mode)
+            entities_dictionaries = plugin.get_all(sync_mode)
             for entity in entities_dictionaries:
                 self.callback_function(entity)
 
         LOG.debug("end get all with sync mode %s" % sync_mode)
         self.first_time = False
 
-    @staticmethod
-    def _mark_snapshot_entities(dicts, sync_mode):
-        [x.setdefault(SyncProps.SYNC_MODE, sync_mode) for x in dicts]
-        return dicts
+
+class ChangesService(SynchronizerService):
+
+    def __init__(self, conf, registered_plugins, changes_interval):
+        super(ChangesService, self).__init__(conf, registered_plugins)
+        self.changes_interval = changes_interval
+
+    def start(self):
+        LOG.info("Start VitrageChangesService - %s",
+                 self.registered_plugins[0].__class__.__name__)
+
+        super(ChangesService, self).start()
+        self.tg.add_timer(self.changes_interval, self._get_changes)
+
+        LOG.info("Finish start VitrageChangesService - %s",
+                 self.registered_plugins[0].__class__.__name__)
+
+    def stop(self):
+        LOG.info("Stop VitrageChangesService - %s",
+                 self.registered_plugins[0].__class__.__name__)
+
+        super(ChangesService, self).stop()
+
+        LOG.info("Finish stop VitrageChangesService - %s",
+                 self.registered_plugins[0].__class__.__name__)
+
+    def _get_changes(self):
+        LOG.debug("start get changes")
+
+        for plugin in self.registered_plugins:
+            for entity in plugin.get_changes(SyncMode.UPDATE):
+                self.callback_function(entity)
+
+        LOG.debug("end get changes")

@@ -23,7 +23,7 @@ from vitrage.common.constants import SynchronizerProperties as SyncProps
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.synchronizer.plugins.nova.host.transformer import HostTransformer
 from vitrage.synchronizer.plugins.static_physical.transformer \
-    import StaticPhysical
+    import StaticPhysicalTransformer
 from vitrage.synchronizer.plugins.transformer_base import TransformerBase
 from vitrage.tests import base
 from vitrage.tests.mocks import mock_syncronizer as mock_sync
@@ -38,7 +38,7 @@ class TestStaticPhysicalTransformer(base.BaseTest):
 
         self.transformers = {}
         host_transformer = HostTransformer(self.transformers)
-        static_transformer = StaticPhysical(self.transformers)
+        static_transformer = StaticPhysicalTransformer(self.transformers)
         self.transformers[EntityType.NOVA_HOST] = host_transformer
         self.transformers[EntityType.SWITCH] = static_transformer
 
@@ -51,7 +51,7 @@ class TestStaticPhysicalTransformer(base.BaseTest):
         switch_type = EntityType.SWITCH
         switch_name = 'switch-1'
         timestamp = datetime.datetime.utcnow()
-        static_transformer = StaticPhysical(self.transformers)
+        static_transformer = StaticPhysicalTransformer(self.transformers)
 
         # Test action
         properties = {
@@ -65,7 +65,7 @@ class TestStaticPhysicalTransformer(base.BaseTest):
         observed_id_values = placeholder.vertex_id.split(
             TransformerBase.KEY_SEPARATOR)
         expected_id_values = \
-            StaticPhysical(self.transformers).key_values(
+            StaticPhysicalTransformer(self.transformers).key_values(
                 [switch_type, switch_name])
         self.assertEqual(observed_id_values, expected_id_values)
 
@@ -90,7 +90,7 @@ class TestStaticPhysicalTransformer(base.BaseTest):
         # Test setup
         switch_type = EntityType.SWITCH
         switch_name = 'switch-1'
-        static_transformer = StaticPhysical(self.transformers)
+        static_transformer = StaticPhysicalTransformer(self.transformers)
 
         # Test action
         observed_key_fields = static_transformer.key_values(
@@ -112,7 +112,8 @@ class TestStaticPhysicalTransformer(base.BaseTest):
 
         for event in static_events:
             # Test action
-            wrapper = StaticPhysical(self.transformers).transform(event)
+            wrapper = StaticPhysicalTransformer(self.transformers).\
+                transform(event)
 
             # Test assertions
             vertex = wrapper.vertex
