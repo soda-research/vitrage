@@ -13,9 +13,17 @@
 # under the License.
 from oslo_log import log as logging
 
+from vitrage.common.constants import EdgeLabels
+from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import EntityType
+from vitrage.common.constants import EventAction
+from vitrage.common.constants import SynchronizerProperties as SyncProps
+from vitrage.common.constants import SyncMode
+from vitrage.common.constants import VertexProperties as VProps
+from vitrage.synchronizer.plugins.nagios.properties import NagiosProperties
 from vitrage.synchronizer.plugins.nagios.transformer import NagiosTransformer
 from vitrage.synchronizer.plugins.nova.host.transformer import HostTransformer
+from vitrage.synchronizer.plugins.transformer_base import TransformerBase
 from vitrage.tests import base
 from vitrage.tests.mocks import mock_syncronizer as mock_sync
 
@@ -32,14 +40,101 @@ class NagiosTransformerTest(base.BaseTest):
         host_transformer = HostTransformer(self.transformers)
         self.transformers[EntityType.NOVA_HOST] = host_transformer
 
+    def test_extract_key(self):
+        LOG.debug('Test get key from nova instance transformer')
+
+        # Test setup
+        spec_list = mock_sync.simple_nagios_alarm_generators(host_num=1,
+                                                             events_num=1)
+        nagios_alarms = mock_sync.generate_sequential_events_list(spec_list)
+        transformer = NagiosTransformer(self.transformers)
+
+        event = nagios_alarms[0]
+        # Test action
+        observed_key = transformer.extract_key(event)
+
+        # Test assertions
+        observed_key_fields = observed_key.split(
+            TransformerBase.KEY_SEPARATOR)
+
+        self.assertEqual(EntityCategory.ALARM, observed_key_fields[0])
+        self.assertEqual(event[SyncProps.SYNC_TYPE], observed_key_fields[1])
+        self.assertEqual(event[NagiosProperties.RESOURCE_NAME],
+                         observed_key_fields[2])
+        self.assertEqual(event[NagiosProperties.SERVICE],
+                         observed_key_fields[3])
+
     def test_nagios_alarm_transform(self):
         LOG.debug('Nagios alarm transformer test: transform entity event')
 
         # Test setup
         spec_list = mock_sync.simple_nagios_alarm_generators(host_num=4,
-                                                             events_num=4)
+                                                             events_num=10)
         nagios_alarms = mock_sync.generate_sequential_events_list(spec_list)
 
-        # Test action
         for alarm in nagios_alarms:
-            NagiosTransformer(self.transformers)._create_entity_vertex(alarm)
+            # Test action
+            wrapper = NagiosTransformer(self.transformers).transform(alarm)
+            self._validate_vertex(wrapper.vertex, alarm)
+
+            neighbors = wrapper.neighbors
+            self.assertEqual(1, len(neighbors))
+            neighbor = neighbors[0]
+
+            # Right now we are support only host as a resource
+            if neighbor.vertex[VProps.TYPE] == EntityType.NOVA_HOST:
+                self._validate_host_neighbor(neighbors[0], alarm)
+
+            self._validate_action(alarm, wrapper)
+
+    def _validate_action(self, alarm, wrapper):
+        sync_mode = alarm[SyncProps.SYNC_MODE]
+        if sync_mode in (SyncMode.SNAPSHOT, SyncMode.UPDATE):
+            if alarm[NagiosProperties.STATUS] == 'OK':
+                self.assertEqual(EventAction.DELETE, wrapper.action)
+            else:
+                self.assertEqual(EventAction.UPDATE, wrapper.action)
+        else:
+            self.assertEqual(EventAction.CREATE, wrapper.action)
+
+    def _validate_vertex(self, vertex, event):
+
+        self.assertEqual(EntityCategory.ALARM, vertex[VProps.CATEGORY])
+        self.assertEqual(event[SyncProps.SYNC_TYPE], vertex[VProps.TYPE])
+        self.assertEqual(event[NagiosProperties.SERVICE], vertex[VProps.NAME])
+        self.assertEqual(NagiosTransformer.NAGIOS_ALARM_STATE,
+                         vertex[VProps.STATE])
+
+        self.assertEqual(event[NagiosProperties.STATUS],
+                         vertex[VProps.SEVERITY])
+
+        self.assertEqual(event[NagiosProperties.STATUS_INFO],
+                         vertex[VProps.INFO])
+
+        self.assertFalse(vertex[VProps.IS_DELETED])
+        self.assertFalse(vertex[VProps.IS_PLACEHOLDER])
+
+    def _validate_host_neighbor(self, neighbor, event):
+
+        host_vertex = neighbor.vertex
+
+        key_fields = host_vertex.vertex_id.split(TransformerBase.KEY_SEPARATOR)
+
+        self.assertEqual(EntityCategory.RESOURCE, key_fields[0])
+        self.assertEqual(EntityType.NOVA_HOST, key_fields[1])
+        self.assertEqual(event[NagiosProperties.RESOURCE_NAME], key_fields[2])
+
+        self.assertFalse(host_vertex[VProps.IS_DELETED])
+        self.assertTrue(host_vertex[VProps.IS_PLACEHOLDER])
+
+        self.assertEqual(EntityCategory.RESOURCE, host_vertex[VProps.CATEGORY])
+        self.assertEqual(event[NagiosProperties.RESOURCE_NAME],
+                         host_vertex[VProps.ID])
+        self.assertEqual(EntityType.NOVA_HOST, host_vertex[VProps.TYPE])
+
+        edge = neighbor.edge
+        self.assertEqual(EdgeLabels.ON, edge.label)
+
+        alarm_key = NagiosTransformer(self.transformers).extract_key(event)
+        self.assertEqual(alarm_key, edge.source_id)
+        self.assertEqual(host_vertex.vertex_id, edge.target_id)

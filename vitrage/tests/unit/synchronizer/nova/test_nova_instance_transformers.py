@@ -49,20 +49,19 @@ class NovaInstanceTransformerTest(base.BaseTest):
         # Tests setup
         instance_id = 'Instance123'
         timestamp = datetime.datetime.utcnow()
-
-        # Test action
-        instance_transformer = InstanceTransformer(self.transformers)
         properties = {
             VertexProperties.ID: instance_id,
             VertexProperties.UPDATE_TIMESTAMP: timestamp
         }
-        placeholder = instance_transformer.create_placeholder_vertex(
-            properties)
+        transformer = InstanceTransformer(self.transformers)
+
+        # Test action
+        placeholder = transformer.create_placeholder_vertex(properties)
 
         # Test assertions
         observed_id_values = placeholder.vertex_id.split(
             TransformerBase.KEY_SEPARATOR)
-        expected_id_values = instance_transformer.key_values([instance_id])
+        expected_id_values = transformer.key_values([instance_id])
         self.assertEqual(observed_id_values, expected_id_values)
 
         observed_time = placeholder.get(VertexProperties.UPDATE_TIMESTAMP)

@@ -104,8 +104,8 @@ class NagiosTransformer(tbase.TransformerBase):
     def _extract_action_type(self, entity_event):
         sync_mode = entity_event[SyncProps.SYNC_MODE]
         if sync_mode in (SyncMode.UPDATE, SyncMode.SNAPSHOT):
-            if entity_event[self.STATUS] == 'OK':
-                return EventAction.CREATE
+            if entity_event[NagiosProperties.STATUS] == self.STATUS_OK:
+                return EventAction.DELETE
             else:
                 return EventAction.UPDATE
         if SyncMode.INIT_SNAPSHOT == sync_mode:
@@ -114,12 +114,12 @@ class NagiosTransformer(tbase.TransformerBase):
 
     def extract_key(self, entity_event):
 
-        type = entity_event[SyncProps.SYNC_TYPE]
+        sync_type = entity_event[SyncProps.SYNC_TYPE]
         alarm_name = entity_event[NagiosProperties.SERVICE]
         resource_name = entity_event[NagiosProperties.RESOURCE_NAME]
-        return tbase.build_key(self.key_values([type,
-                                               resource_name,
-                                               alarm_name]))
+        return tbase.build_key(self.key_values([sync_type,
+                                                resource_name,
+                                                alarm_name]))
 
     def key_values(self, mutable_fields=[]):
         return [EntityCategory.ALARM] + mutable_fields
