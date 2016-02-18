@@ -23,7 +23,7 @@ from networkx_algorithm import *  # noqa
 from utils import *  # noqa
 
 
-def create_graph(name):
+def create_graph(name, root_id=None):
     """Create a Graph instance
 
     For now only return NXGraph
@@ -31,7 +31,7 @@ def create_graph(name):
     :type name: str
     :rtype: Graph
     """
-    return NXGraph(name)
+    return NXGraph(name, root_id)
 
 
 def create_algorithm(graph):

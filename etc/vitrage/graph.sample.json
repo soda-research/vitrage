@@ -11,7 +11,8 @@
       "state": "ACTIVE",
       "project_id": "0683517e1e354d2ba25cba6937f44e79",
       "type": "nova.instance",
-      "id": "RESOURCE:nova.instance:20d12a8a-ea9a-89c6-5947-83bea959362e"
+      "id": "20d12a8a-ea9a-89c6-5947-83bea959362e",
+      "vitrage_id": "RESOURCE:nova.instance:20d12a8a-ea9a-89c6-5947-83bea959362e"
     },
     {
       "category": "RESOURCE",
@@ -22,7 +23,8 @@
       "state": "ACTIVE",
       "project_id": "0683517e1e354d2ba25cba6937f44e79",
       "type": "nova.instance",
-      "id": "RESOURCE:nova.instance:dc35fa2f-4515-1653-ef6b-03b471bb395b"
+      "id": "dc35fa2f-4515-1653-ef6b-03b471bb395b",
+      "vitrage_id": "RESOURCE:nova.instance:dc35fa2f-4515-1653-ef6b-03b471bb395b"
     },
     {
       "category": "RESOURCE",
@@ -33,7 +35,8 @@
       "state": "ACTIVE",
       "project_id": "0683517e1e354d2ba25cba6937f44e79",
       "type": "nova.instance",
-      "id": "RESOURCE:nova.instance:9879cf5a-bdcf-3651-3017-961ed887ec86"
+      "id": "9879cf5a-bdcf-3651-3017-961ed887ec86",
+      "vitrage_id": "RESOURCE:nova.instance:9879cf5a-bdcf-3651-3017-961ed887ec86"
     },
     {
       "category": "RESOURCE",
@@ -44,7 +47,8 @@
       "state": "ACTIVE",
       "project_id": "0683517e1e354d2ba25cba6937f44e79",
       "type": "nova.instance",
-      "id": "RESOURCE:nova.instance:fe124f4b-9ed7-4591-fcd1-803cf5c33cb1"
+      "id": "fe124f4b-9ed7-4591-fcd1-803cf5c33cb1",
+      "vitrage_id": "RESOURCE:nova.instance:fe124f4b-9ed7-4591-fcd1-803cf5c33cb1"
     },
     {
       "category": "RESOURCE",
@@ -55,7 +59,8 @@
       "state": "ACTIVE",
       "project_id": "0683517e1e354d2ba25cba6937f44e79",
       "type": "nova.instance",
-      "id": "RESOURCE:nova.instance:f2e48a97-7350-061e-12d3-84c6dc3e67c0"
+      "id": "f2e48a97-7350-061e-12d3-84c6dc3e67c0",
+      "vitrage_id": "RESOURCE:nova.instance:f2e48a97-7350-061e-12d3-84c6dc3e67c0"
     },
     {
       "category": "RESOURCE",
@@ -65,7 +70,8 @@
       "update_timestamp": "2015-12-01T12:46:41Z",
       "state": "available",
       "type": "nova.host",
-      "id": "RESOURCE:nova.host:host-2"
+      "id": "host-2",
+      "vitrage_id": "RESOURCE:nova.host:host-2"
     },
     {
       "category": "RESOURCE",
@@ -75,7 +81,8 @@
       "update_timestamp": "2015-12-01T12:46:41Z",
       "state": "available",
       "type": "nova.host",
-      "id": "RESOURCE:nova.host:host-3"
+      "id": "host-3",
+      "vitrage_id": "RESOURCE:nova.host:host-3"
     },
     {
       "category": "RESOURCE",
@@ -85,7 +92,8 @@
       "update_timestamp": "2015-12-01T12:46:41Z",
       "state": "available",
       "type": "nova.host",
-      "id": "RESOURCE:nova.host:host-0"
+      "id": "host-0",
+      "vitrage_id": "RESOURCE:nova.host:host-0"
     },
     {
       "category": "RESOURCE",
@@ -95,7 +103,8 @@
       "update_timestamp": "2015-12-01T12:46:41Z",
       "state": "available",
       "type": "nova.host",
-      "id": "RESOURCE:nova.host:host-1"
+      "id": "host-1",
+      "vitrage_id": "RESOURCE:nova.host:host-1"
     },
     {
       "category": "RESOURCE",
@@ -106,7 +115,8 @@
       "state": "ACTIVE",
       "project_id": "0683517e1e354d2ba25cba6937f44e79",
       "type": "nova.instance",
-      "id": "RESOURCE:nova.instance:275097cf-954e-8e24-b185-9514e24b8591"
+      "id": "275097cf-954e-8e24-b185-9514e24b8591",
+      "vitrage_id": "RESOURCE:nova.instance:275097cf-954e-8e24-b185-9514e24b8591"
     },
     {
       "category": "RESOURCE",
@@ -117,7 +127,8 @@
       "state": "ACTIVE",
       "project_id": "0683517e1e354d2ba25cba6937f44e79",
       "type": "nova.instance",
-      "id": "RESOURCE:nova.instance:a0f0805f-c804-cffe-c25a-1b38f555ed68"
+      "id": "a0f0805f-c804-cffe-c25a-1b38f555ed68",
+      "vitrage_id": "RESOURCE:nova.instance:a0f0805f-c804-cffe-c25a-1b38f555ed68"
     },
     {
       "category": "RESOURCE",
@@ -128,7 +139,8 @@
       "state": "ACTIVE",
       "project_id": "0683517e1e354d2ba25cba6937f44e79",
       "type": "nova.instance",
-      "id": "RESOURCE:nova.instance:56af57d2-34a4-19b1-5106-b613637a11a7"
+      "id": "56af57d2-34a4-19b1-5106-b613637a11a7",
+      "vitrage_id": "RESOURCE:nova.instance:56af57d2-34a4-19b1-5106-b613637a11a7"
     },
     {
       "category": "RESOURCE",
@@ -138,7 +150,8 @@
       "update_timestamp": "2015-12-01T12:46:41Z",
       "state": "available",
       "type": "nova.zone",
-      "id": "RESOURCE:nova.zone:zone-1"
+      "id": "zone-1",
+      "vitrage_id": "RESOURCE:nova.zone:zone-1"
     },
     {
       "category": "RESOURCE",
@@ -149,7 +162,8 @@
       "state": "ACTIVE",
       "project_id": "0683517e1e354d2ba25cba6937f44e79",
       "type": "nova.instance",
-      "id": "RESOURCE:nova.instance:16e14c58-d254-2bec-53e4-c766e48810aa"
+      "id": "16e14c58-d254-2bec-53e4-c766e48810aa",
+      "vitrage_id": "RESOURCE:nova.instance:16e14c58-d254-2bec-53e4-c766e48810aa"
     },
     {
       "category": "RESOURCE",
@@ -160,7 +174,8 @@
       "state": "ACTIVE",
       "project_id": "0683517e1e354d2ba25cba6937f44e79",
       "type": "nova.instance",
-      "id": "RESOURCE:nova.instance:f35a1e10-74ff-7332-8edf-83cd6ffcb2de"
+      "id": "f35a1e10-74ff-7332-8edf-83cd6ffcb2de",
+      "vitrage_id": "RESOURCE:nova.instance:f35a1e10-74ff-7332-8edf-83cd6ffcb2de"
     },
     {
       "category": "RESOURCE",
@@ -171,7 +186,8 @@
       "state": "ACTIVE",
       "project_id": "0683517e1e354d2ba25cba6937f44e79",
       "type": "nova.instance",
-      "id": "RESOURCE:nova.instance:ea8a450e-cab1-2272-f431-494b40c5c378"
+      "id": "ea8a450e-cab1-2272-f431-494b40c5c378",
+      "vitrage_id": "RESOURCE:nova.instance:ea8a450e-cab1-2272-f431-494b40c5c378"
     },
     {
       "category": "RESOURCE",
@@ -182,7 +198,8 @@
       "state": "ACTIVE",
       "project_id": "0683517e1e354d2ba25cba6937f44e79",
       "type": "nova.instance",
-      "id": "RESOURCE:nova.instance:6e42bdc3-b776-1b2c-2c7d-b7a8bb98f721"
+      "id": "6e42bdc3-b776-1b2c-2c7d-b7a8bb98f721",
+      "vitrage_id": "RESOURCE:nova.instance:6e42bdc3-b776-1b2c-2c7d-b7a8bb98f721"
     },
     {
       "category": "RESOURCE",
@@ -193,7 +210,8 @@
       "state": "ACTIVE",
       "project_id": "0683517e1e354d2ba25cba6937f44e79",
       "type": "nova.instance",
-      "id": "RESOURCE:nova.instance:8c951613-c660-87c0-c18b-0fa3293ce8d8"
+      "id": "8c951613-c660-87c0-c18b-0fa3293ce8d8",
+      "vitrage_id": "RESOURCE:nova.instance:8c951613-c660-87c0-c18b-0fa3293ce8d8"
     },
     {
       "category": "RESOURCE",
@@ -203,7 +221,8 @@
       "update_timestamp": "2015-12-01T12:46:41Z",
       "state": "available",
       "type": "nova.zone",
-      "id": "RESOURCE:nova.zone:zone-0"
+      "id": "zone-0",
+      "vitrage_id": "RESOURCE:nova.zone:zone-0"
     },
     {
       "category": "RESOURCE",
@@ -214,7 +233,8 @@
       "state": "ACTIVE",
       "project_id": "0683517e1e354d2ba25cba6937f44e79",
       "type": "nova.instance",
-      "id": "RESOURCE:nova.instance:78353ce4-2710-49b5-1341-b8cbb6000ebc"
+      "id": "78353ce4-2710-49b5-1341-b8cbb6000ebc",
+      "vitrage_id": "RESOURCE:nova.instance:78353ce4-2710-49b5-1341-b8cbb6000ebc"
     },
     {
       "category": "RESOURCE",
@@ -225,7 +245,8 @@
       "state": "ACTIVE",
       "project_id": "0683517e1e354d2ba25cba6937f44e79",
       "type": "nova.instance",
-      "id": "RESOURCE:nova.instance:35bf479a-75d9-80a9-874e-d3b50fb2dd2e"
+      "id": "35bf479a-75d9-80a9-874e-d3b50fb2dd2e",
+      "vitrage_id": "RESOURCE:nova.instance:35bf479a-75d9-80a9-874e-d3b50fb2dd2e"
     },
     {
       "category": "RESOURCE",
@@ -233,7 +254,8 @@
       "is_deleted": false,
       "name": "node",
       "type": "node",
-      "id": "RESOURCE:node"
+      "id": "node",
+      "vitrage_id": "RESOURCE:node"
     }
   ],
   "links": [

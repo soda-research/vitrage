@@ -27,12 +27,30 @@ LOG = log.getLogger(__name__)
 
 class ConsistencyEnforcer(object):
 
-    def __init__(self, cfg, entity_graph):
+    def __init__(self, cfg, entity_graph, initialization_status):
         self.cfg = cfg
         self.graph = entity_graph
+        self.initialization_status = initialization_status
+        self.notifier = None
 
-    def starting_process(self):
-        pass
+    def initializing_process(self):
+        try:
+            LOG.debug('Started consistency starting check')
+            if self.initialization_status.is_received_all_end_messages():
+                LOG.debug('All end messages were received')
+                timestamp = utcnow()
+                all_vertices = self.graph.get_vertices()
+
+                for vertex in all_vertices:
+                    self.run_evaluator(vertex)
+
+                self._notify_deletion_of_deduced_alarms(timestamp)
+
+                self.initialization_status.status = \
+                    self.initialization_status.FINISHED
+        except Exception:
+            LOG.error("Error in deleting vertices from entity_graph: %s",
+                      traceback.print_exc())
 
     def periodic_process(self):
         try:
@@ -73,6 +91,22 @@ class ConsistencyEnforcer(object):
         vertices = self.graph.get_vertices(query_dict=query)
 
         return set(self._filter_vertices_to_be_deleted(vertices))
+
+    def _find_old_deduced_alarms(self, timestamp):
+        query = {
+            'and': [
+                {'==': {VProps.CATEGORY: EntityCategory.ALARM}},
+                {'==': {VProps.TYPE: EntityType.VITRAGE}},
+                {'>=': {VProps.UPDATE_TIMESTAMP: timestamp}}
+            ]
+        }
+        return self.graph.get_vertices(query_dict=query)
+
+    def _notify_deletion_of_deduced_alarms(self, timestamp):
+        old_deduced_alarms = self._find_old_deduced_alarms(timestamp)
+        for vertex in old_deduced_alarms:
+            # TODO(Alexey): use notifier to inform aodh
+            self.notifier(vertex)
 
     def _delete_vertices(self, vertices):
         for vertex in vertices:

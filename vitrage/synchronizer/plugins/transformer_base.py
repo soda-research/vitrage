@@ -1,4 +1,5 @@
 # Copyright 2015 - Alcatel-Lucent
+# Copyright 2016 - Nokia
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -20,7 +21,9 @@ import six
 
 import vitrage.common.constants as cons
 from vitrage.common.constants import EntityType
+from vitrage.common.constants import EventAction
 from vitrage.common.constants import SynchronizerProperties as SyncProps
+from vitrage.common.constants import SyncMode
 from vitrage.common.exception import VitrageTransformerError
 import vitrage.graph.utils as graph_utils
 
@@ -84,11 +87,17 @@ class TransformerBase(object):
         :return: entity wrapper
         :rtype:EntityWrapper
         """
-        entity_vertex = self._create_entity_vertex(entity_event)
-        neighbors = self._create_neighbors(entity_event)
-        action = self._extract_action_type(entity_event)
 
-        return EntityWrapper(entity_vertex, neighbors, action)
+        if not self._is_end_message(entity_event):
+            entity_vertex = self._create_entity_vertex(entity_event)
+            neighbors = self._create_neighbors(entity_event)
+            action = self._extract_action_type(entity_event)
+
+            return EntityWrapper(entity_vertex, neighbors, action)
+        else:
+            return EntityWrapper(self._create_end_vertex(entity_event),
+                                 None,
+                                 EventAction.END_MESSAGE)
 
     @abc.abstractmethod
     def _create_entity_vertex(self, entity_event):
@@ -163,3 +172,16 @@ class TransformerBase(object):
 
         raise VitrageTransformerError(
             'Invalid sync mode: (%s)' % sync_mode)
+
+    @staticmethod
+    def _create_end_vertex(entity_event):
+        sync_type = entity_event[SyncProps.SYNC_TYPE]
+        return graph_utils.create_vertex(
+            'END_MESSAGE:' + sync_type,
+            entity_type=sync_type)
+
+    @staticmethod
+    def _is_end_message(entity_event):
+        return entity_event[SyncProps.SYNC_MODE] == SyncMode.INIT_SNAPSHOT and\
+            SyncProps.EVENT_TYPE in entity_event and \
+            entity_event[SyncProps.EVENT_TYPE] == EventAction.END_MESSAGE

@@ -23,19 +23,27 @@ LOG = log.getLogger(__name__)
 
 class VitrageGraphConsistencyService(os_service.Service):
 
-    def __init__(self, conf, entity_graph):
+    def __init__(self, conf, entity_graph, initialization_status):
         super(VitrageGraphConsistencyService, self).__init__()
         self.cfg = conf
         self.entity_graph = entity_graph
+        self.initialization_status = initialization_status
 
     def start(self):
         LOG.info("Start VitrageGraphConsistencyService")
 
         super(VitrageGraphConsistencyService, self).start()
 
-        consistency_enf = ConsistencyEnforcer(self.cfg, self.entity_graph)
+        consistency_enf = ConsistencyEnforcer(self.cfg,
+                                              self.entity_graph,
+                                              self.initialization_status)
         self.tg.add_timer(self.cfg.consistency.consistency_interval,
                           consistency_enf.periodic_process)
+
+        # TODO(Alexey): uncomment this when evaluator is ready
+        # self.tg.add_timer(self.cfg.consistency.
+        #                   consistency_initialization_interval,
+        #                   consistency_enf.initializing_process)
 
         LOG.info("Finish start VitrageGraphConsistencyService")
 

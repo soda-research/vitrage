@@ -12,12 +12,14 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import SynchronizerProperties as SyncProps
 from vitrage.common.constants import SyncMode
+from vitrage.common.datetime_utils import utcnow
+from vitrage.entity_graph.initialization_status import InitializationStatus
 from vitrage.entity_graph.processor import processor as proc
-
+import vitrage.graph.utils as graph_utils
 from vitrage.tests import base
-
 from vitrage.tests.mocks import mock_syncronizer as mock_sync
 
 
@@ -26,13 +28,13 @@ class TestEntityGraphBase(base.BaseTest):
     NUM_NODES = 1
     NUM_ZONES = 2
     NUM_HOSTS = 4
-    NUM_INSTANCES = 15
+    NUM_INSTANCES = 16
 
     def _create_processor_with_graph(self, processor=None):
         events = self._create_mock_events()
 
         if not processor:
-            processor = proc.Processor()
+            processor = proc.Processor(InitializationStatus())
 
         for event in events:
             processor.process_event(event)
@@ -77,6 +79,19 @@ class TestEntityGraphBase(base.BaseTest):
                 events_list[0][key] = value
 
         return events_list[0]
+
+    @staticmethod
+    def _create_alarm(vitrage_id, alarm_type):
+        return graph_utils.create_vertex(
+            vitrage_id,
+            entity_id=vitrage_id,
+            entity_category=EntityCategory.ALARM,
+            entity_type=alarm_type,
+            entity_state='Running',
+            is_deleted=False,
+            update_timestamp=utcnow(),
+            is_placeholder=False,
+        )
 
     def _num_total_expected_vertices(self):
         return self.NUM_NODES + self.NUM_ZONES + self.NUM_HOSTS + \

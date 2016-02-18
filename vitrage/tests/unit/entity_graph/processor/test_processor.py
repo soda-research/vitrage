@@ -18,6 +18,7 @@ from vitrage.common.constants import SynchronizerProperties as SyncProps
 from vitrage.common.constants import SyncMode
 from vitrage.common.constants import VertexProperties
 from vitrage.common.datetime_utils import utcnow
+from vitrage.entity_graph.initialization_status import InitializationStatus
 from vitrage.entity_graph.processor import processor as proc
 from vitrage.tests.unit.entity_graph import TestEntityGraphBase
 
@@ -53,7 +54,7 @@ class TestProcessorBase(TestEntityGraphBase):
     @unittest.skip('Not ready yet')
     def test_process_event(self):
         # check create instance event
-        processor = proc.Processor()
+        processor = proc.Processor(InitializationStatus())
         event = self._create_event(spec_type=self.INSTANCE_SPEC,
                                    sync_mode=SyncMode.INIT_SNAPSHOT)
         processor.process_event(event)
@@ -194,7 +195,7 @@ class TestProcessorBase(TestEntityGraphBase):
 
         # add instance entity with host
         if processor is None:
-            processor = proc.Processor()
+            processor = proc.Processor(InitializationStatus())
 
         (vertex, neighbors, event_type) = processor.transform_entity(event)
         processor.create_entity(vertex, neighbors)

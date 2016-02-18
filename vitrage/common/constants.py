@@ -64,6 +64,7 @@ class EntityType(object):
     NOVA_ZONE = 'nova.zone'
     SWITCH = 'switch'
     NAGIOS = 'nagios'
+    VITRAGE = 'vitrage'
 
 
 class EventAction(object):

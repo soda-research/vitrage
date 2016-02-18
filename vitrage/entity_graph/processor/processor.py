@@ -15,6 +15,7 @@
 from oslo_log import log
 
 from vitrage.common.constants import EventAction
+from vitrage.common.constants import VertexProperties as VProps
 from vitrage.entity_graph.processor import base as processor
 from vitrage.entity_graph.processor import entity_graph
 from vitrage.entity_graph import transformer_manager
@@ -25,13 +26,14 @@ LOG = log.getLogger(__name__)
 
 class Processor(processor.ProcessorBase):
 
-    def __init__(self, e_graph=None):
+    NUMBER_OF_PLUGINS = 5
+
+    def __init__(self, initialization_status, e_graph=None):
         self.transformer = transformer_manager.TransformerManager()
         self._initialize_events_actions()
-        if e_graph is None:
-            self.entity_graph = entity_graph.EntityGraph("Entity Graph")
-        else:
-            self.entity_graph = e_graph
+        self.initialization_status = initialization_status
+        self.entity_graph = entity_graph.EntityGraph("Entity Graph") if \
+            e_graph is None else e_graph
 
     def process_event(self, event):
         """Decides which action to run on given event
@@ -126,7 +128,11 @@ class Processor(processor.ProcessorBase):
                      deleted_vertex)
 
     def handle_end_message(self, vertex, neighbors):
-        return
+        self.initialization_status.end_messages[vertex[VProps.TYPE]] = True
+        if len(self.initialization_status.end_messages) == \
+                self.NUMBER_OF_PLUGINS:
+            self.initialization_status.status = \
+                self.initialization_status.RECEIVED_ALL_END_MESSAGES
 
     def transform_entity(self, event):
         return self.transformer.transform(event)

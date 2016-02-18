@@ -140,7 +140,7 @@ class GraphTestBase(base.BaseTest):
                              num_of_tests_per_host):
 
         start = time.time()
-        g = create_graph(name)
+        g = create_graph(name, EntityCategory.RESOURCE + ':' + EntityType.NODE)
         g.add_vertex(v_node)
         g.add_vertex(v_switch)
         g.add_edge(e_node_to_switch)

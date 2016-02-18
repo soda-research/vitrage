@@ -13,22 +13,23 @@
 # under the License.
 
 import datetime
+import traceback
 
 from oslo_log import log
 from oslo_service import service as os_service
 
 from vitrage.entity_graph.processor import processor as proc
 
-
 LOG = log.getLogger(__name__)
 
 
 class VitrageGraphService(os_service.Service):
 
-    def __init__(self, event_queue, entity_graph):
+    def __init__(self, event_queue, entity_graph, initialization_status):
         super(VitrageGraphService, self).__init__()
         self.queue = event_queue
-        self.processor = proc.Processor(e_graph=entity_graph)
+        self.processor = proc.Processor(initialization_status,
+                                        e_graph=entity_graph)
 
     def start(self):
         LOG.info("Start VitrageGraphService")
@@ -72,5 +73,5 @@ class VitrageGraphService(os_service.Service):
                 event = self.queue.get()
                 LOG.debug("got event: %s" % event)
                 self.processor.process_event(event)
-            except Exception as error:
-                LOG.error("Exception: %s", error)
+            except Exception:
+                LOG.error("Exception: %s", traceback.print_exc())

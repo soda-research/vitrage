@@ -24,4 +24,10 @@ OPTS = [
                default=60,
                min=60,
                help='minimum time until deleting entity (in seconds)'),
+    cfg.IntOpt('consistency_initialization_interval',
+               default=5,
+               min=1,
+               help='interval between consistency initialization checks for '
+                    'finding old deduced alarms after initialization '
+                    '(in seconds)'),
 ]

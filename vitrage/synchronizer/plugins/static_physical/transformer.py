@@ -16,8 +16,11 @@ from oslo_log import log as logging
 
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import EntityType
+from vitrage.common.constants import EventAction
 from vitrage.common.constants import SynchronizerProperties as SyncProps
+from vitrage.common.constants import SyncMode
 from vitrage.common.constants import VertexProperties as VProps
+from vitrage.common.exception import VitrageTransformerError
 import vitrage.graph.utils as graph_utils
 from vitrage.synchronizer.plugins import transformer_base
 
@@ -93,6 +96,26 @@ class StaticPhysicalTransformer(transformer_base.TransformerBase):
         else:
             LOG.warning('Cannot find zone transformer')
             return None
+
+    def _extract_action_type(self, entity_event):
+        sync_mode = entity_event[SyncProps.SYNC_MODE]
+
+        if SyncMode.INIT_SNAPSHOT == sync_mode:
+            return EventAction.CREATE
+
+        if SyncMode.SNAPSHOT == sync_mode:
+            return EventAction.UPDATE
+
+        if SyncMode.UPDATE == sync_mode:
+            if SyncProps.EVENT_TYPE in entity_event:
+                sync_type = entity_event[SyncProps.EVENT_TYPE]
+                return EventAction.DELETE if sync_type == EventAction.DELETE \
+                    else EventAction.UPDATE
+            else:
+                return EventAction.UPDATE
+
+        raise VitrageTransformerError(
+            'Invalid sync mode: (%s)' % sync_mode)
 
     def extract_key(self, entity_event):
         entity_id = entity_event[VProps.ID]

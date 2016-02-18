@@ -20,6 +20,7 @@ from oslo_service import service as os_service
 
 from vitrage.entity_graph.api_handler import service as api_handler_svc
 from vitrage.entity_graph.consistency import service as consistency_svc
+from vitrage.entity_graph.initialization_status import InitializationStatus
 from vitrage.entity_graph.processor import entity_graph
 from vitrage.entity_graph import service as entity_graph_svc
 from vitrage import service
@@ -38,12 +39,13 @@ def main():
     e_graph = entity_graph.EntityGraph("Entity Graph")
     event_queue = multiprocessing.Queue()
     conf = service.prepare_service()
+    initialization_status = InitializationStatus()
     launcher = os_service.ServiceLauncher(conf)
     synchronizer = synchronizer_launcher.Launcher(
         conf, synchronizer_launcher.create_send_to_queue_callback(event_queue))
 
     launcher.launch_service(entity_graph_svc.VitrageGraphService(
-        event_queue, e_graph))
+        event_queue, e_graph, initialization_status))
 
     launcher.launch_service(api_handler_svc.VitrageApiHandlerService(
         e_graph))
@@ -51,7 +53,7 @@ def main():
     synchronizer.launch()
 
     launcher.launch_service(consistency_svc.VitrageGraphConsistencyService(
-        conf, e_graph))
+        conf, e_graph, initialization_status))
 
     launcher.wait()
 

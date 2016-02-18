@@ -2,34 +2,58 @@
     "alarms":
      [
         {
-            "id": "04cf683b-58a8-4b59-941a-9a1594fa0fe7",
-            "project_id": "da3a1ab32-1c62-22cb-bf04-660bd33cd74d",
-            "state": "available",
-            "update_timestamp": "2016-01-18T06:14:20.782134+00:00",
-            "category": "alarm",
-            "type": "CPU_HIGH",
-            "name": "cpu high",
-            "severity": "major"
+          "category": "ALARM",
+          "type": "nagios",
+          "name": "CPU load",
+          "state": "Active",
+          "severity": "WARNING",
+          "timestamp": "2015-12-01T12:46:41Z",
+          "info": "WARNING - 15min load 1.66 at 32 CPUs",
+          "resource_type": "nova.host",
+          "resource_name": "host-0",
+          "resource_id": "host-0",
+          "id": 0,
+          "vitrage_id": "ALARM:nagios:host0:CPU load"
         },
         {
-           "id": "05af123a-56a2-4b59-741a-7b1482dabac2",
-           "project_id": "da3a1ab32-1c62-22cb-bf04-660bd33cd74d",
-           "state": "available",
-           "update_timestamp": "2016-01-18T06:12:28.987651+00:00",
-           "category": "alarm",
-           "type": "NO_SPACE_ON_DISK",
-           "name": "no space on disk",
-           "severity": "critical"
+          "category": "ALARM",
+          "type": "vitrage",
+          "name": "Machine Suboptimal",
+          "state": "Active",
+          "severity": "WARNING",
+          "timestamp": "2015-12-01T12:46:41Z",
+          "resource_type": "nova.instance",
+          "resource_name": "vm0",
+          "resource_id": "20d12a8a-ea9a-89c6-5947-83bea959362e",
+          "id": 1,
+          "vitrage_id": "ALARM:vitrage:vm0:Machine Suboptimal"
         },
         {
-          "id": "123f456a-12b2-9c51-345d-8b2604adbada7",
-          "project_id": "da3a1ab32-1c62-22cb-bf04-660bd33cd74d",
-          "state": "available",
-          "update_timestamp": "2016-01-18T06:14:38.123456+00:00",
-          "category": "alarm",
-          "type": "OUT_OF_MEMORY",
-          "name": "out of memory",
-          "severity": "critical"
+          "category": "ALARM",
+          "type": "vitrage",
+          "name": "Machine Suboptimal",
+          "state": "Active",
+          "severity": "WARNING",
+          "timestamp": "2015-12-01T12:46:41Z",
+          "resource_type": "nova.instance",
+          "resource_name": "vm1",
+          "resource_id": "275097cf-954e-8e24-b185-9514e24b8591",
+          "id": 2,
+          "vitrage_id": "ALARM:vitrage:vm1:Machine Suboptimal"
+        },
+        {
+          "category": "ALARM",
+          "type": "aodh",
+          "name": "Memory overload",
+          "state": "Active",
+          "severity": "WARNING",
+          "timestamp": "2015-12-01T12:46:41Z",
+          "info": "WARNING - 15min load 1.66 at 32 CPUs",
+          "resource_type": "nova.host",
+          "resource_name": "host-0",
+          "resource_id": "host-0",
+          "id": 3,
+          "vitrage_id": "ALARM:aodh:host0:Memory overload"
         }
     ]
 }
