@@ -24,6 +24,8 @@ import time
 from oslo_log import log as logging
 
 from vitrage.common.constants import EdgeLabels as ELabel
+from vitrage.common.constants import EntityCategory
+from vitrage.common.constants import EntityType
 from vitrage.graph import create_graph
 from vitrage.graph import utils as graph_utils
 from vitrage.tests import base
@@ -36,14 +38,14 @@ ENTITY_GRAPH_ALARMS_PER_HOST = 8
 ENTITY_GRAPH_TESTS_PER_HOST = 20
 ENTITY_GRAPH_ALARMS_PER_VM = 8
 
-RESOURCE = 'RESOURCE'
-ALARM = 'ALARM'
+RESOURCE = EntityCategory.RESOURCE
+ALARM = EntityCategory.ALARM
 
-HOST = 'HOST'
-INSTANCE = 'INSTANCE'
-NODE = 'NODE'
+HOST = EntityType.NOVA_HOST
+INSTANCE = EntityType.NOVA_INSTANCE
+NODE = EntityType.NODE
 TEST = 'TEST'
-SWITCH = 'SWITCH'
+SWITCH = EntityType.SWITCH
 ALARM_ON_VM = 'ALARM_ON_VM'
 ALARM_ON_HOST = 'ALARM_ON_HOST'
 TEST_ON_HOST = 'TEST_ON_HOST'

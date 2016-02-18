@@ -13,9 +13,10 @@
 # under the License.
 
 import abc
+from collections import namedtuple
 import six
 
-from driver import Graph  # noqa
+Mapping = namedtuple('Mapping', ['sub_graph_v_id', 'graph_v_id'])
 
 
 @six.add_metaclass(abc.ABCMeta)
@@ -25,7 +26,7 @@ class GraphAlgorithm(object):
         """Create a new GraphAlgorithm
 
         :param graph: graph instance
-        :type graph: Graph
+        :type graph: driver.Graph
         """
         self.graph = graph
 
@@ -36,6 +37,20 @@ class GraphAlgorithm(object):
         BFS traversal over the graph starting from root, each vertex is
         checked according to the query. A matching vertex will be added to the
         resulting sub graph and traversal will continue to its neighbors
-        :rtype: Graph
+        :rtype: driver.Graph
+        """
+        pass
+
+    @abc.abstractmethod
+    def sub_graph_matching(self, sub_graph, known_mappings):
+        """Search for occurrences of of a template graph in the graph
+
+        In sub-graph matching algorithms complexity is high in the general case
+        Here it is considerably mitigated  as we have an anchor in the graph.
+        TODO(ihefetz)  document this
+
+        :type known_mappings: list
+        :type sub_graph: driver.Graph
+        :rtype: list of dict
         """
         pass

@@ -118,6 +118,9 @@ class Vertex(object):
     def get(self, k, d=None):
         return self.properties.get(k, d)
 
+    def items(self):
+        return self.properties.items()
+
 
 class Edge(object):
     """Class Edge represents a directional edge between two vertices
@@ -226,6 +229,9 @@ class Edge(object):
         :return: the other vertex id
         """
         return self.source_id if self.target_id == v_id else self.target_id
+
+    def items(self):
+        return self.properties.items()
 
 
 @six.add_metaclass(abc.ABCMeta)
