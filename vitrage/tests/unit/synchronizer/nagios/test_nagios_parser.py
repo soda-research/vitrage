@@ -15,13 +15,14 @@ from oslo_log import log as logging
 
 from vitrage.synchronizer.plugins.nagios.parser import NagiosParser
 from vitrage.synchronizer.plugins.nagios.properties import NagiosProperties
-from vitrage.tests import base
 from vitrage.tests.mocks import utils
+from vitrage.tests.unit.synchronizer.nagios.nagios_base_test \
+    import NagiosBaseTest
 
 LOG = logging.getLogger(__name__)
 
 
-class NagiosParserTest(base.BaseTest):
+class NagiosParserTest(NagiosBaseTest):
 
     expected_service1 = {NagiosProperties.RESOURCE_NAME: 'compute-0-0.local',
                          NagiosProperties.SERVICE: 'CPU load',
@@ -64,25 +65,6 @@ class NagiosParserTest(base.BaseTest):
 
         # Test assertions
         self.assertTrue(nagios_services)
-        self._assert_contains(nagios_services, self.expected_service1)
-        self._assert_contains(nagios_services, self.expected_service2)
-        self._assert_contains(nagios_services, self.expected_service3)
-
-    def _assert_contains(self, services, expected_service):
-        for service in services:
-            if service[NagiosProperties.RESOURCE_NAME] == \
-                    expected_service[NagiosProperties.RESOURCE_NAME] and \
-                    service[NagiosProperties.SERVICE] == \
-                    expected_service[NagiosProperties.SERVICE]:
-                self._assert_expected_service(expected_service, service)
-                return
-
-        self.fail("service not found: %(resource_name)s %(service_name)s" %
-                  {'resource_name':
-                   expected_service[NagiosProperties.RESOURCE_NAME],
-                   'service_name':
-                   expected_service[NagiosProperties.SERVICE]})
-
-    def _assert_expected_service(self, expected_service, service):
-        for key, value in expected_service.items():
-            self.assertEqual(value, service[key], 'wrong value for ' + key)
+        self._assert_contains(self.expected_service1, nagios_services)
+        self._assert_contains(self.expected_service2, nagios_services)
+        self._assert_contains(self.expected_service3, nagios_services)

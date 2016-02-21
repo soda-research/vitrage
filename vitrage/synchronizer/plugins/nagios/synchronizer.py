@@ -47,6 +47,11 @@ class NagiosSynchronizer(SynchronizerBase):
         return []
 
     def _get_services(self):
+        nagios_services = self._get_services_from_nagios()
+        self._enrich_services(nagios_services)
+        return self._cache_and_filter_services(nagios_services)
+
+    def _get_services_from_nagios(self):
         nagios_user = self.conf.synchronizer_plugins.nagios_user
         nagios_password = self.conf.synchronizer_plugins.nagios_password
         nagios_url = self.conf.synchronizer_plugins.nagios_url
@@ -71,8 +76,7 @@ class NagiosSynchronizer(SynchronizerBase):
 
         if response.status_code == requests.codes.ok:
             nagios_services = NagiosParser().parse(response.text)
-            self._enrich_services(nagios_services)
-            return self._cache_and_filter_services(nagios_services)
+            return nagios_services
         else:
             LOG.error(_LE('Failed to get nagios data. Response code: %s') %
                       response.status_code)

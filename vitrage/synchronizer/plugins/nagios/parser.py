@@ -27,29 +27,28 @@ class NagiosParser(object):
     NAME_XPATH = 'table/tr/td[position()=1]/table/tr/td/a'
 
     def __init__(self):
-        self.last_host_name = ''
-        return
+        self.last_host_name = None
 
     def parse(self, html):
-        services = []
-        parser = etree.HTMLParser()
-
         try:
-            tree = etree.parse(StringIO(html), parser)
+            tree = etree.parse(StringIO(html), etree.HTMLParser())
             status_tables = tree.xpath(self.STATUS_TABLE_XPATH)
 
-            for status_table in status_tables:
-                service_rows = status_table.xpath(self.SERVICE_ROWS_XPATH)
-
-                for service_row in service_rows:
-                    service = self._parse_service_row(service_row)
-                    if service:
-                        services.append(service)
+            return self._parse_services(status_tables)
 
         except Exception as e:
             LOG.exception('Failed to get nagios services %s', e)
-            return services
+            return None
 
+    def _parse_services(self, status_tables):
+        services = []
+        for status_table in status_tables:
+            service_rows = status_table.xpath(self.SERVICE_ROWS_XPATH)
+
+            for service_row in service_rows:
+                service = self._parse_service_row(service_row)
+                if service:
+                    services.append(service)
         return services
 
     def _parse_service_row(self, service_row):
@@ -59,41 +58,34 @@ class NagiosParser(object):
         # there are also two blank lines between different hosts,
         # so len(columns)==1 is also valid
         # TODO(ifat_afek): get column names by the header line
-        if (len(columns) == NagiosProperties.NUM_COLUMNS):
+        if len(columns) == NagiosProperties.NUM_COLUMNS:
             return self._parse_service_columns(columns)
 
-        elif (len(columns) > NagiosProperties.NUM_COLUMNS):
+        elif len(columns) > NagiosProperties.NUM_COLUMNS:
             LOG.warn('Too many columns in nagios service row. '
                      'Found %d', len(columns))
 
-        elif (len(columns) > 1):
+        elif len(columns) > 1:
             LOG.warn('Missing columns in nagios service row. '
                      'Found only %d', len(columns))
 
         return None
 
     def _parse_service_columns(self, columns):
-        host_name = self._parse_host_name(columns[0], self.NAME_XPATH)
-        service_name = self._get_column_data(columns[1], self.NAME_XPATH)
-        status = columns[2].text
-        last_check = columns[3].text
-        duration = columns[4].text
-        attempt = columns[5].text
-        status_information = columns[6].text
-
-        service = {
-            NagiosProperties.RESOURCE_NAME: host_name,
-            NagiosProperties.SERVICE: service_name,
-            NagiosProperties.STATUS: status,
-            NagiosProperties.LAST_CHECK: last_check,
-            NagiosProperties.DURATION: duration,
-            NagiosProperties.ATTEMPT: attempt,
-            NagiosProperties.STATUS_INFO: status_information
+        return {
+            NagiosProperties.RESOURCE_NAME:
+                self._parse_host_name(columns[0], self.NAME_XPATH),
+            NagiosProperties.SERVICE:
+                self._get_column_data(columns[1], self.NAME_XPATH),
+            NagiosProperties.STATUS: columns[2].text,
+            NagiosProperties.LAST_CHECK: columns[3].text,
+            NagiosProperties.DURATION: columns[4].text,
+            NagiosProperties.ATTEMPT: columns[5].text,
+            NagiosProperties.STATUS_INFO: columns[6].text
         }
 
-        return service
-
-    def _get_column_data(self, column, xpath):
+    @staticmethod
+    def _get_column_data(column, xpath):
         contents = column.xpath(xpath)
 
         if len(contents) == 1:
@@ -105,7 +97,7 @@ class NagiosParser(object):
         else:
             # len(contents) might be 0 for a host, since each host name appears
             # only once in the table
-            return ''
+            return None
 
     def _parse_host_name(self, column, xpath):
         """Parse the host name and return it
