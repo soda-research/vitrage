@@ -32,7 +32,7 @@ DICT_STRUCTURE_SCHEMA_ERROR = '%s must refer to dictionary.'
 SCHEMA_CONTENT_ERROR = '%s must contain %s Fields.'
 
 
-def validate(template_conf):
+def syntax_validate(template_conf):
 
     is_valid = validate_template_sections(template_conf)
 

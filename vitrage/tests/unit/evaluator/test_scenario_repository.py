@@ -11,10 +11,10 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-
 from oslo_config import cfg
 from oslo_log import log as logging
-from vitrage.common import file_utils
+from vitrage.evaluator.scenario_repository import ScenarioRepository
+
 from vitrage.tests import base
 from vitrage.tests.mocks import utils
 
@@ -22,7 +22,7 @@ from vitrage.tests.mocks import utils
 LOG = logging.getLogger(__name__)
 
 
-class TemplateLoaderTest(base.BaseTest):
+class ScenarioRepositoryTest(base.BaseTest):
 
     OPTS = [
         cfg.StrOpt('templates_dir',
@@ -30,17 +30,12 @@ class TemplateLoaderTest(base.BaseTest):
                    ),
     ]
 
-    def setUp(self):
-        super(TemplateLoaderTest, self).setUp()
+    @classmethod
+    def setUpClass(cls):
 
-        self.template_dir_path = utils.get_resources_dir() + '/templates'
-
-        self.conf = cfg.ConfigOpts()
-        self.conf.register_opts(self.OPTS, group='evaluator')
-
-        self.template_yamls = file_utils.load_yaml_files(
-            self.template_dir_path
-        )
+        cls.conf = cfg.ConfigOpts()
+        cls.conf.register_opts(cls.OPTS, group='evaluator')
 
     def test_template_loader(self):
-        pass
+        repository = ScenarioRepository(self.conf)
+        print(repository)
