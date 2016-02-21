@@ -82,7 +82,7 @@ class NXGraph(Graph):
         :rtype: Vertex
         """
         properties = self._g.node.get(v_id, None)
-        if properties:
+        if properties is not None:
             return vertex_copy(v_id, properties)
         LOG.debug("get_vertex item not found. v_id=" + str(v_id))
         return None
@@ -95,7 +95,7 @@ class NXGraph(Graph):
                       ", target_id=" + str(target_id) +
                       ", label=" + str(label))
             return None
-        if properties:
+        if properties is not None:
             return edge_copy(source_id, target_id, label, properties)
         return None
 

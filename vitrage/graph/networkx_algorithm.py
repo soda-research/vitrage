@@ -17,6 +17,7 @@ from oslo_log import log as logging
 from algorithm_driver import GraphAlgorithm
 from query import create_predicate
 from vitrage.graph import NXGraph
+from vitrage.graph.sub_graph_matching import sub_graph_matching
 
 LOG = logging.getLogger(__name__)
 
@@ -27,7 +28,7 @@ class NXAlgorithm(GraphAlgorithm):
         """Create a new GraphAlgorithm
 
         :param graph: graph instance
-        :type graph: NXGraph
+        :type graph: driver.Graph
         """
         self.graph = graph
 
@@ -64,3 +65,6 @@ class NXAlgorithm(GraphAlgorithm):
         graph = NXGraph('graph')
         graph._g = self.graph._g.subgraph(n_result)
         return graph
+
+    def sub_graph_matching(self, sub_graph, known_matches):
+        return sub_graph_matching(self.graph, sub_graph, known_matches)
