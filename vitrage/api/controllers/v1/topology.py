@@ -102,8 +102,8 @@ class TopologyController(rest.RestController):
                 if graph_type == 'graph':
                     return graph
                 if graph_type == 'tree':
-                    return as_tree(graph, root=0, reverse=True)
+                    return as_tree(graph, root='node')
 
         except Exception as e:
-            LOG.exception('failed to open file ', e)
+            LOG.exception('failed to open file %s', e)
             abort(404, str(e))
