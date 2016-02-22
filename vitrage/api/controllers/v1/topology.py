@@ -72,12 +72,12 @@ class TopologyController(rest.RestController):
             return self.get_graph(graph_type, depth, query, root)
 
     def get_graph(self, graph_type, depth, query, root):
-        graph_data = self.client.call(self.ctxt, 'get_topology',
-                                      graph_type=graph_type, depth=depth,
-                                      query=query, root=root)
-        LOG.info(graph_data)
 
         try:
+            graph_data = self.client.call(self.ctxt, 'get_topology',
+                                          graph_type=graph_type, depth=depth,
+                                          query=query, root=root)
+            LOG.info(graph_data)
             graph = json.loads(graph_data)
             if graph_type == 'graph':
                 return graph
@@ -85,7 +85,7 @@ class TopologyController(rest.RestController):
                 return as_tree(graph)
 
         except Exception as e:
-            LOG.exception('failed to open file %s ', e)
+            LOG.exception('failed to get topology %s ', e)
             abort(404, str(e))
 
     @staticmethod
