@@ -44,8 +44,8 @@ class NXAlgorithm(GraphAlgorithm):
             match_func = create_predicate(query_dict)
 
         if not match_func(root_data):
-            LOG.info('graph_query_vertices: root ' + str(root_id) +
-                     ' does not match filter ' + str(query_dict) + ')')
+            LOG.info('graph_query_vertices: root %s does not match filter %s',
+                     str(root_id), str(query_dict))
             return None
 
         n_result = []

@@ -64,12 +64,14 @@ def create_predicate(query_dict):
     """
     try:
         expression = _create_query_expression(query=query_dict)
-        LOG.debug('create_predicate::', expression)
+        LOG.debug('create_predicate::%s', expression)
         expression = 'lambda item: ' + expression
         return eval(expression)
     except Exception as e:
-        LOG.error('invalid query format', query_dict, e)
-        raise VitrageError('invalid query format', query_dict, e)
+        LOG.error('invalid query format %s. Exception: %s',
+                  query_dict, e)
+        raise VitrageError('invalid query format %s. Exception: %s',
+                           query_dict, e)
 
 
 def _create_query_expression(query, parent_operator=None):

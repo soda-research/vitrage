@@ -128,7 +128,8 @@ def sub_graph_matching(_graph_, sub_graph, known_matches):
     initial_sg = create_initial_sub_graph(_graph_, known_matches, sub_graph)
     if not initial_sg:
         LOG.warning('sub_graph_matching: Initial sub-graph creation failed')
-        LOG.warning('sub_graph_matching: Known matches: ' + str(known_matches))
+        LOG.warning('sub_graph_matching: Known matches: %s',
+                    str(known_matches))
         return final_sub_graphs
     _queue_ = [initial_sg]
 
