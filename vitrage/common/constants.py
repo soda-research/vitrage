@@ -58,7 +58,7 @@ class SynchronizerProperties(object):
 
 
 class EntityType(object):
-    NODE = 'node'
+    OPENSTACK_NODE = 'openstack.node'
     NOVA_INSTANCE = 'nova.instance'
     NOVA_HOST = 'nova.host'
     NOVA_ZONE = 'nova.zone'

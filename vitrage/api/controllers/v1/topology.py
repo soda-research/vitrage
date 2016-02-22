@@ -25,7 +25,6 @@ from pecan import rest
 
 from vitrage.api.controllers.v1 import mock_file
 from vitrage.api.controllers.v1 import RCA_QUERY
-
 from vitrage.api.policy import enforce
 
 # noinspection PyProtectedMember
@@ -34,7 +33,7 @@ from vitrage.i18n import _LI
 LOG = log.getLogger(__name__)
 
 
-def as_tree(graph, root='RESOURCE:node', reverse=False):
+def as_tree(graph, root='RESOURCE:openstack.node', reverse=False):
     linked_graph = json_graph.node_link_graph(graph)
     if reverse:
         linked_graph = linked_graph.reverse()
@@ -102,7 +101,7 @@ class TopologyController(rest.RestController):
                 if graph_type == 'graph':
                     return graph
                 if graph_type == 'tree':
-                    return as_tree(graph, root='node')
+                    return as_tree(graph)
 
         except Exception as e:
             LOG.exception('failed to open file %s', e)

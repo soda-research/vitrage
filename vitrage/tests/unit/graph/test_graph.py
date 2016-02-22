@@ -347,17 +347,19 @@ class GraphTest(GraphTestBase):
         self.assertEqual(2, len(all_vertices),
                          'get_vertices __len__ all vertices')
 
-        node_vertices = g.get_vertices(vertex_attr_filter={VProps.TYPE: NODE})
+        node_vertices = g.get_vertices(
+            vertex_attr_filter={VProps.TYPE: OPENSTACK_NODE})
         self.assertEqual(1, len(node_vertices),
                          'get_vertices __len__ node vertices')
         found_vertex = node_vertices.pop()
-        self.assertEqual(NODE, found_vertex[VProps.TYPE],
+        self.assertEqual(OPENSTACK_NODE, found_vertex[VProps.TYPE],
                          'get_vertices check node vertex')
 
         node_vertices = g.get_vertices(
-            vertex_attr_filter={VProps.TYPE: NODE, VProps.CATEGORY: RESOURCE})
+            vertex_attr_filter={VProps.TYPE: OPENSTACK_NODE,
+                                VProps.CATEGORY: RESOURCE})
         self.assertEqual(1, len(node_vertices),
                          'get_vertices __len__ node vertices')
         found_vertex = node_vertices.pop()
-        self.assertEqual(NODE, found_vertex[VProps.TYPE],
+        self.assertEqual(OPENSTACK_NODE, found_vertex[VProps.TYPE],
                          'get_vertices check node vertex')

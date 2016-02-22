@@ -43,7 +43,7 @@ ALARM = EntityCategory.ALARM
 
 HOST = EntityType.NOVA_HOST
 INSTANCE = EntityType.NOVA_INSTANCE
-NODE = EntityType.NODE
+OPENSTACK_NODE = EntityType.OPENSTACK_NODE
 TEST = 'TEST'
 SWITCH = EntityType.SWITCH
 ALARM_ON_VM = 'ALARM_ON_VM'
@@ -51,9 +51,9 @@ ALARM_ON_HOST = 'ALARM_ON_HOST'
 TEST_ON_HOST = 'TEST_ON_HOST'
 
 v_node = graph_utils.create_vertex(
-    vitrage_id=NODE + '111111111111',
+    vitrage_id=OPENSTACK_NODE + '111111111111',
     entity_id='111111111111',
-    entity_type=NODE,
+    entity_type=OPENSTACK_NODE,
     entity_category=RESOURCE)
 v_host = graph_utils.create_vertex(
     vitrage_id=HOST + '222222222222',
@@ -140,7 +140,8 @@ class GraphTestBase(base.BaseTest):
                              num_of_tests_per_host):
 
         start = time.time()
-        g = create_graph(name, EntityCategory.RESOURCE + ':' + EntityType.NODE)
+        g = create_graph(name, EntityCategory.RESOURCE + ':' +
+                         EntityType.OPENSTACK_NODE)
         g.add_vertex(v_node)
         g.add_vertex(v_switch)
         g.add_edge(e_node_to_switch)

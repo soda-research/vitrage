@@ -28,7 +28,7 @@ class GraphAlgorithmTest(GraphTestBase):
     def test_graph_query_vertices(self):
         ga = create_algorithm(self.entity_graph)
 
-        query = {'==': {VProps.TYPE: NODE}}
+        query = {'==': {VProps.TYPE: OPENSTACK_NODE}}
         subgraph = ga.graph_query_vertices(query)
         self.assertEqual(
             1,  # For NODE
@@ -37,7 +37,7 @@ class GraphAlgorithmTest(GraphTestBase):
         query = {
             'or': [
                 {'==': {VProps.TYPE: HOST}},
-                {'==': {VProps.TYPE: NODE}}
+                {'==': {VProps.TYPE: OPENSTACK_NODE}}
             ]
         }
 
@@ -51,7 +51,7 @@ class GraphAlgorithmTest(GraphTestBase):
                 {'==': {VProps.TYPE: INSTANCE}},
                 {'==': {VProps.CATEGORY: ALARM}},
                 {'==': {VProps.TYPE: HOST}},
-                {'==': {VProps.TYPE: NODE}}
+                {'==': {VProps.TYPE: OPENSTACK_NODE}}
             ]
         }
         subgraph = ga.graph_query_vertices(query)
@@ -119,7 +119,7 @@ class GraphAlgorithmTest(GraphTestBase):
 
         query = {
             'or': [
-                {'==': {VProps.TYPE: NODE}},
+                {'==': {VProps.TYPE: OPENSTACK_NODE}},
                 {'==': {VProps.CATEGORY: ALARM}},
             ]
         }
@@ -158,10 +158,12 @@ class GraphAlgorithmTest(GraphTestBase):
         t_v_switch = graph_utils.create_vertex(
             vitrage_id='5', entity_category=RESOURCE, entity_type=SWITCH)
         t_v_node = graph_utils.create_vertex(
-            vitrage_id='6', entity_category=RESOURCE, entity_type=NODE)
+            vitrage_id='6',
+            entity_category=RESOURCE,
+            entity_type=OPENSTACK_NODE)
         t_v_node_not_in_graph = graph_utils.create_vertex(
             vitrage_id='7', entity_category=RESOURCE,
-            entity_type=NODE + ' not in graph')
+            entity_type=OPENSTACK_NODE + ' not in graph')
 
         e_alarm_on_host = graph_utils.create_edge(
             t_v_host_alarm.vertex_id, t_v_host.vertex_id, ELabel.ON)

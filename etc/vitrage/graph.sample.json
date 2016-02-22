@@ -252,10 +252,10 @@
       "category": "RESOURCE",
       "is_placeholder": false,
       "is_deleted": false,
-      "name": "node",
-      "type": "node",
-      "id": "node",
-      "vitrage_id": "RESOURCE:node"
+      "name": "openstack.node",
+      "type": "openstack.node",
+      "id": "openstack.node",
+      "vitrage_id": "RESOURCE:openstack.node"
     }
   ],
   "links": [

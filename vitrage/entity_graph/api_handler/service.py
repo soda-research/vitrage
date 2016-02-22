@@ -107,6 +107,9 @@ class EntityGraphApis(object):
 
     def get_topology(self, ctx, graph_type, depth, query, root):
         ga = create_algorithm(self.entity_graph)
+        query = query if query else \
+            {'!=': {VProps.CATEGORY: EntityCategory.ALARM}}
         found_graph = ga.graph_query_vertices(
-            {'!=': {VProps.CATEGORY: EntityCategory.ALARM}})
+            query_dict=query,
+            root_id=root)
         return found_graph.output_graph()

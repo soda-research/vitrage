@@ -116,5 +116,5 @@ class ConsistencyEnforcer(object):
     def _filter_vertices_to_be_deleted(vertices):
         return filter(
             lambda ver:
-            not (ver.properties[VProps.CATEGORY] == EntityCategory.RESOURCE
-                 and ver.properties[VProps.TYPE] == EntityType.NODE), vertices)
+            not (ver[VProps.CATEGORY] == EntityCategory.RESOURCE and
+                 ver[VProps.TYPE] == EntityType.OPENSTACK_NODE), vertices)

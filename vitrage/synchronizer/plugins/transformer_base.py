@@ -55,16 +55,17 @@ def build_key(key_values):
 
 
 def create_node_placeholder_vertex():
-    key = build_key([cons.EntityCategory.RESOURCE, EntityType.NODE])
+    key = build_key([cons.EntityCategory.RESOURCE,
+                     EntityType.OPENSTACK_NODE])
 
     metadata = {
-        cons.VertexProperties.NAME: EntityType.NODE
+        cons.VertexProperties.NAME: EntityType.OPENSTACK_NODE
     }
 
     return graph_utils.create_vertex(
         key,
         entity_category=cons.EntityCategory.RESOURCE,
-        entity_type=EntityType.NODE,
+        entity_type=EntityType.OPENSTACK_NODE,
         metadata=metadata
     )
 

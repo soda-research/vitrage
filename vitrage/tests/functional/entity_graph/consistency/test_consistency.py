@@ -31,7 +31,7 @@ import vitrage.graph.utils as graph_utils
 from vitrage.tests.unit.entity_graph import TestEntityGraphBase
 
 
-class TestConsistencyBase(TestEntityGraphBase):
+class TestConsistency(TestEntityGraphBase):
 
     OPTS = [
         cfg.IntOpt('consistency_interval',
@@ -43,7 +43,7 @@ class TestConsistencyBase(TestEntityGraphBase):
     ]
 
     def setUp(self):
-        super(TestConsistencyBase, self).setUp()
+        super(TestConsistency, self).setUp()
         self.initialization_status = InitializationStatus()
         self.processor = Processor(self.initialization_status)
         self.conf = cfg.ConfigOpts()
@@ -88,11 +88,11 @@ class TestConsistencyBase(TestEntityGraphBase):
 
     def test_periodic_process(self):
         # Setup
-        consistency_inteval = self.conf.consistency.consistency_interval
-        self._periodic_process_setup_stage(consistency_inteval)
+        consistency_interval = self.conf.consistency.consistency_interval
+        self._periodic_process_setup_stage(consistency_interval)
 
         # Action
-        time.sleep(2 * consistency_inteval + 1)
+        time.sleep(2 * consistency_interval + 1)
         self.consistency_enforcer.periodic_process()
 
         # Test Assertions
@@ -104,14 +104,14 @@ class TestConsistencyBase(TestEntityGraphBase):
         self.assertEqual(self._num_total_expected_vertices() - 6,
                          len(self.processor.entity_graph.get_vertices()))
 
-    def _periodic_process_setup_stage(self, consistency_inteval):
+    def _periodic_process_setup_stage(self, consistency_interval):
         self._create_processor_with_graph(processor=self.processor)
         current_time = utcnow()
 
         # set all vertices to be have timestamp that consistency won't get
         self._update_timestamp(self.processor.entity_graph.get_vertices(),
                                current_time +
-                               timedelta(seconds=1.5 * consistency_inteval))
+                               timedelta(seconds=1.5 * consistency_interval))
 
         # check number of instances in graph
         instance_vertices = self.processor.entity_graph.get_vertices({
@@ -132,7 +132,7 @@ class TestConsistencyBase(TestEntityGraphBase):
         for i in range(6, 9):
             instance_vertices[i][VProps.IS_DELETED] = True
             instance_vertices[i][VProps.UPDATE_TIMESTAMP] = str(
-                current_time + timedelta(seconds=2 * consistency_inteval + 1))
+                current_time + timedelta(seconds=2 * consistency_interval + 1))
             self.processor.entity_graph.update_vertex(instance_vertices[i])
 
     def _set_end_messages(self):
