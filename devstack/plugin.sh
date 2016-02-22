@@ -57,7 +57,7 @@ function _vitrage_config_apache_wsgi {
         s|%APACHE_NAME%|$APACHE_NAME|g;
         s|%WSGIAPP%|$VITRAGE_WSGI_DIR/app|g;
         s|%USER%|$STACK_USER|g;
-        s|%APIWORKERS%|$VITRAGE_API_WORKERS|g;
+        s|%APIWORKERS%|$API_WORKERS|g;
         s|%VIRTUALENV%|$venv_path|g
     " -i $vitrage_apache_conf
 }
