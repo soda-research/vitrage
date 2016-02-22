@@ -147,7 +147,7 @@ function install_vitrageclient {
     if use_library_from_git "python-vitrageclient"; then
         git_clone_by_name "python-vitrageclient"
         setup_dev_lib "python-vitrageclient"
-        sudo install -D -m 0644 -o $STACK_USER {${GITDIR["python-vitrageclient"]}/tools/,/etc/bash_completion .d/}vitrage.bash_completion
+        sudo install -D -m 0644 -o $STACK_USER {${GITDIR["python-vitrageclient"]}/tools/,/etc/bash_completion.d/}vitrage.bash_completion
     else
         pip_install_gr python-vitrageclient
     fi
