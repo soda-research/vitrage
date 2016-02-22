@@ -70,7 +70,7 @@ function _vitrage_create_accounts {
         create_service_user "vitrage" "admin"
 
         local vitrage_service=$(get_or_create_service "vitrage" \
-            "rca" "Root Cause Analysis service")
+            "rca" "Root Cause Analysis Service")
         get_or_create_endpoint $vitrage_service \
             "$REGION_NAME" \
             "$(vitrage_service_url)" \
@@ -128,7 +128,7 @@ function configure_vitrage {
 # init_vitrage() - Initialize etc.
 function init_vitrage {
     # Get vitrage keystone settings in place
-    _vitrtage_create_accounts
+    _vitrage_create_accounts
     # Create cache dir
     sudo install -d -o $STACK_USER $VITRAGE_AUTH_CACHE_DIR
     rm -f $VITRAGE_AUTH_CACHE_DIR/*
