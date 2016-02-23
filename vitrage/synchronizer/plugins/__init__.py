@@ -31,4 +31,8 @@ OPTS = [
                help='Nagios url for querying the data. Example: '
                ' http://<ip>/monitoring/nagios/cgi-bin/status.cgi'
                ),
+    cfg.StrOpt('nagios_config_file',
+               default='/etc/vitrage/nagios_conf.yaml',
+               help='Nagios configuration file'
+               ),
 ]
