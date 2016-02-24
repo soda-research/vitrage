@@ -16,7 +16,6 @@ import os
 
 from vitrage.common.constants import EntityType
 from vitrage.common.constants import EventAction
-
 from vitrage.common.constants import SynchronizerProperties as SyncProps
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.common import file_utils
@@ -117,7 +116,7 @@ class StaticPhysicalSynchronizer(SynchronizerBase):
     @staticmethod
     def _find_entity(new_entity, entities):
         for entity in entities:
-            if entity[SyncProps.SYNC_TYPE] == new_entity[SyncProps.SYNC_TYPE] \
+            if entity[VProps.TYPE] == new_entity[VProps.TYPE] \
                     and entity[VProps.ID] == new_entity[VProps.ID]:
                 return entity
         return None

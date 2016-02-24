@@ -89,24 +89,24 @@ class TestStaticPhysicalSynchronizer(base.BaseTest):
             EventAction.UPDATE)
 
         # Test Assertions
-        status = any(change[SyncProps.SYNC_TYPE] == EntityType.SWITCH and
+        status = any(change[VProps.TYPE] == EntityType.SWITCH and
                      change[VProps.ID] == '12345' for change in changes)
         self.assertEqual(False, status)
 
-        status = any(change[SyncProps.SYNC_TYPE] == EntityType.SWITCH and
+        status = any(change[VProps.TYPE] == EntityType.SWITCH and
                      change[VProps.ID] == '23456' and
                      change[SyncProps.EVENT_TYPE] == 'delete'
                      for change in changes)
         self.assertEqual(True, status)
 
-        status = any(change[SyncProps.SYNC_TYPE] == EntityType.SWITCH and
+        status = any(change[VProps.TYPE] == EntityType.SWITCH and
                      change[VProps.ID] == '34567' for change in changes)
         self.assertEqual(True, status)
 
-        status = any(change[SyncProps.SYNC_TYPE] == EntityType.SWITCH and
+        status = any(change[VProps.TYPE] == EntityType.SWITCH and
                      change[VProps.ID] == '45678' for change in changes)
         self.assertEqual(True, status)
-        status = any(change[SyncProps.SYNC_TYPE] == EntityType.SWITCH and
+        status = any(change[VProps.TYPE] == EntityType.SWITCH and
                      change[VProps.ID] == '56789' for change in changes)
         self.assertEqual(True, status)
 

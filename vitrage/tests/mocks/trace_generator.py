@@ -323,7 +323,7 @@ def _get_sync_switch_snapshot_values(spec):
     for host_name, switch_name in host_switch_mapping:
         switch_info = switches_info.get(switch_name, [])
 
-        relationship_info = {"sync_type": "nova.host",
+        relationship_info = {"type": "nova.host",
                              "name": host_name,
                              "id": host_name,
                              "relation_type": "contains"

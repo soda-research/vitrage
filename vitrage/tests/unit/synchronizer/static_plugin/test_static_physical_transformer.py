@@ -150,7 +150,7 @@ class TestStaticPhysicalTransformer(base.BaseTest):
 
     def _validate_common_vertex_props(self, vertex, event):
         self.assertEqual(EntityCategory.RESOURCE, vertex[VProps.CATEGORY])
-        self.assertEqual(event[SyncProps.SYNC_TYPE], vertex[VProps.TYPE])
+        self.assertEqual(event[VProps.TYPE], vertex[VProps.TYPE])
         self.assertEqual(event[VProps.ID], vertex[VProps.ID])
 
     def _validate_switch_vertex_props(self, vertex, event):

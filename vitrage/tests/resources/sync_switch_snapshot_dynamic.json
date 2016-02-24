@@ -1,6 +1,6 @@
 {
   "relationships": [
-      {"sync_type": "nova\\.host",
+      {"type": "nova\\.host",
       "name": "host-[1-9]|switch-[1-9]",
       "id": "[1-9]{5}",
       "relation_type": "contains"
@@ -9,7 +9,7 @@
   "name": "switch-[0-9]",
   "id": "[1-9]{5}",
   "sample_date": "2015-12-01T12:46:41Z",
-  "sync_type": "switch",
+  "type": "switch",
   "sync_mode": "snapshot|init_snapshot",
   "state": "available"
 }

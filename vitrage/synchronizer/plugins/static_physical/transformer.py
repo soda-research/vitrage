@@ -37,7 +37,7 @@ class StaticPhysicalTransformer(transformer_base.TransformerBase):
         self._register_relations_direction()
 
     def _create_entity_vertex(self, entity_event):
-        sync_type = entity_event[SyncProps.SYNC_TYPE]
+        sync_type = entity_event[VProps.TYPE]
         entity_id = entity_event[VProps.ID]
         timestamp = entity_event[SyncProps.SAMPLE_DATE]
         state = entity_event[VProps.STATE]
@@ -55,7 +55,7 @@ class StaticPhysicalTransformer(transformer_base.TransformerBase):
 
     def _create_neighbors(self, entity_event):
         neighbors = []
-        entity_type = entity_event[SyncProps.SYNC_TYPE]
+        entity_type = entity_event[VProps.TYPE]
         entity_key = self.extract_key(entity_event)
         timestamp = entity_event[SyncProps.SAMPLE_DATE]
 
@@ -71,7 +71,7 @@ class StaticPhysicalTransformer(transformer_base.TransformerBase):
 
     def _create_neighbor(self, neighbor_details, entity_type,
                          entity_key, timestamp):
-        neighbor_type = neighbor_details[SyncProps.SYNC_TYPE]
+        neighbor_type = neighbor_details[VProps.TYPE]
         entity_transformer = self.transformers[neighbor_type]
 
         if entity_transformer:
@@ -108,8 +108,8 @@ class StaticPhysicalTransformer(transformer_base.TransformerBase):
 
         if SyncMode.UPDATE == sync_mode:
             if SyncProps.EVENT_TYPE in entity_event:
-                sync_type = entity_event[SyncProps.EVENT_TYPE]
-                return EventAction.DELETE if sync_type == EventAction.DELETE \
+                event_type = entity_event[SyncProps.EVENT_TYPE]
+                return EventAction.DELETE if event_type == EventAction.DELETE \
                     else EventAction.UPDATE
             else:
                 return EventAction.UPDATE
@@ -119,7 +119,7 @@ class StaticPhysicalTransformer(transformer_base.TransformerBase):
 
     def extract_key(self, entity_event):
         entity_id = entity_event[VProps.ID]
-        sync_type = entity_event[SyncProps.SYNC_TYPE]
+        sync_type = entity_event[VProps.TYPE]
         key_fields = self.key_values([sync_type, entity_id])
         return transformer_base.build_key(key_fields)
 
