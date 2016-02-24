@@ -16,6 +16,7 @@ from oslo_log import log as logging
 
 from vitrage.synchronizer.plugins.nagios.properties import NagiosProperties \
     as NagiosProps
+from vitrage.tests.mocks import utils
 from vitrage.tests.unit.synchronizer.nagios.nagios_base_test \
     import NagiosBaseTest
 from vitrage.tests.unit.synchronizer.nagios.synchronizer_with_mock_data \
@@ -26,9 +27,18 @@ LOG = logging.getLogger(__name__)
 
 class NagiosSynchronizerTest(NagiosBaseTest):
 
-    def setUp(self):
-        super(NagiosSynchronizerTest, self).setUp()
-        self.conf = cfg.ConfigOpts()
+    OPTS = [
+        cfg.StrOpt('nagios_config_file',
+                   default=utils.get_resources_dir() +
+                   '/nagios/nagios_conf.yaml',
+                   help='Nagios configuation file'
+                   ),
+    ]
+
+    @classmethod
+    def setUpClass(cls):
+        cls.conf = cfg.ConfigOpts()
+        cls.conf.register_opts(cls.OPTS, group='synchronizer_plugins')
 
     def test_get_all(self):
         """Check get_all functionality.
@@ -62,7 +72,7 @@ class NagiosSynchronizerTest(NagiosBaseTest):
         self.assertIsNotNone(services, 'No services returned')
         self.assertEqual(0, len(services))
 
-    # Action
+        # Action
         service_data1 = {NagiosProps.RESOURCE_NAME: 'compute-0',
                          NagiosProps.SERVICE: 'CPU utilization',
                          NagiosProps.STATUS: 'WARNING'}

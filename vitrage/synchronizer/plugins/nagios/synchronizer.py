@@ -21,6 +21,7 @@ from vitrage.common.constants import EntityType
 from vitrage.common.constants import SynchronizerProperties as SyncProps
 from vitrage.i18n import _LE
 from vitrage.i18n import _LW
+from vitrage.synchronizer.plugins.nagios.config import NagiosConfig
 from vitrage.synchronizer.plugins.nagios.parser import NagiosParser
 from vitrage.synchronizer.plugins.nagios.properties import NagiosProperties \
     as NagiosProps
@@ -37,6 +38,7 @@ class NagiosSynchronizer(SynchronizerBase):
         super(NagiosSynchronizer, self).__init__()
         self.conf = conf
         self.cache = dict()
+        self.config = NagiosConfig(conf)
 
     def get_all(self, sync_mode):
         return self.make_pickleable(self._get_services(),
@@ -82,12 +84,20 @@ class NagiosSynchronizer(SynchronizerBase):
                       response.status_code)
             return []
 
-    @staticmethod
-    def _enrich_services(nagios_services):
+    def _enrich_services(self, nagios_services):
         for service in nagios_services:
-            # TODO(ifat_afek) - add a configuration file for resource types
-            service[NagiosProps.RESOURCE_TYPE] = EntityType.NOVA_HOST
+            # based on nagios configuration file, convert nagios host name
+            # to vitrage resource type and name
             service[SyncProps.SYNC_TYPE] = NagiosProps.NAGIOS
+
+            nagios_host = service[NagiosProps.RESOURCE_NAME]
+            vitrage_resource = self.config.get_vitrage_resource(nagios_host)
+
+            service[NagiosProps.RESOURCE_TYPE] = \
+                vitrage_resource[0] if vitrage_resource else None
+            service[NagiosProps.RESOURCE_NAME] = \
+                vitrage_resource[1] if vitrage_resource \
+                else service[NagiosProps.RESOURCE_NAME]
 
     def _cache_and_filter_services(self, nagios_services):
         services_to_update = []
