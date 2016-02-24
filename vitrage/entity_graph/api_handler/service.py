@@ -13,6 +13,7 @@
 # under the License.
 
 import json
+import traceback
 
 import eventlet
 from oslo_config import cfg
@@ -94,16 +95,10 @@ class EntityGraphApis(object):
                 vertex_attr_filter={VProps.CATEGORY: EntityCategory.ALARM})
 
         # TODO(alexey) this should not be here, but in the transformer
-        for alarm in items_list:
-            related_resource = self.entity_graph.neighbors(
-                v_id=alarm.vertex_id,
-                edge_attr_filter={EProps.RELATIONSHIP_NAME: EdgeLabels.ON},
-                direction=Direction.OUT)
-            alarm["resource_id"] = related_resource.vertex_id
-            alarm["resource_name"] = related_resource[VProps.NAME]
+        modified_alarms = self._add_resource_details_to_alarms(items_list)
 
-        LOG.info("EntityGraphApis get_alarms result:%s", str(items_list))
-        return json.dumps({'alarms': [v.properties for v in items_list]})
+        LOG.info("EntityGraphApis get_alarms result:%s", str(modified_alarms))
+        return json.dumps({'alarms': [v.properties for v in modified_alarms]})
 
     def get_topology(self, ctx, graph_type, depth, query, root):
         ga = create_algorithm(self.entity_graph)
@@ -113,3 +108,29 @@ class EntityGraphApis(object):
             query_dict=query,
             root_id=root)
         return found_graph.output_graph()
+
+    @staticmethod
+    def _get_first(lst):
+        if len(lst) == 1:
+            return lst[0]
+        else:
+            raise ValueError("Incorrect number of items in lst: %s.\n "
+                             "Exception: %s", lst, traceback.print_exc())
+
+    def _add_resource_details_to_alarms(self, alarms):
+        incorrect_alarms = []
+        for alarm in alarms:
+            try:
+                resources = self.entity_graph.neighbors(
+                    v_id=alarm.vertex_id,
+                    edge_attr_filter={EProps.RELATIONSHIP_NAME: EdgeLabels.ON},
+                    direction=Direction.OUT)
+
+                resource = self._get_first(resources)
+                alarm["resource_id"] = resource.get(VProps.ID, '')
+                alarm["resource_type"] = resource.get(VProps.TYPE, '')
+            except ValueError as ve:
+                incorrect_alarms.append(alarm)
+                LOG.error(ve)
+
+        return [item for item in alarms if item not in incorrect_alarms]
