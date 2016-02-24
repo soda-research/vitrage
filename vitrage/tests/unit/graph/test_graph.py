@@ -18,12 +18,15 @@ test_vitrage graph
 
 Tests for `vitrage` graph driver
 """
+from oslo_log import log as logging
 
 from vitrage.common.constants import EdgeProperties as EProps
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.graph import Direction
 from vitrage.graph import utils
 from vitrage.tests.unit.graph.base import *  # noqa
+
+LOG = logging.getLogger(__name__)
 
 
 class GraphTest(GraphTestBase):
@@ -363,3 +366,55 @@ class GraphTest(GraphTestBase):
         found_vertex = node_vertices.pop()
         self.assertEqual(OPENSTACK_NODE, found_vertex[VProps.TYPE],
                          'get_vertices check node vertex')
+
+    def _check_callback_result(self, exp_prev, exp_curr, result):
+        self.assertIsNotNone(result, 'Callback was not called')
+        self.assertEqual(exp_curr, result[1], 'curr_item unexpected')
+        self.assertEqual(exp_prev, result[0], 'prev_item unexpected')
+
+    def test_graph_callbacks(self):
+
+        g = create_graph('test_graph_callbacks')
+        self.result = None
+
+        def callback(pre_event_item, current_item):
+            LOG.info('called with: pre_event_item ' + str(pre_event_item) +
+                     ' current_item ' + str(current_item))
+            self.assertIsNotNone(current_item)
+            self.result = pre_event_item, current_item
+
+        # Check there is no notification without subscribing
+        g.add_vertex(v_alarm)
+        self.assertIsNone(
+            self.result,
+            'Got notification, but add_vertex notification is not registered')
+
+        # subscribe
+        g.subscribe(callback)
+
+        # These actions will trigger callbacks:
+        self.result = None
+        g.add_vertex(v_node)
+        self._check_callback_result(None, v_node, self.result)
+
+        self.result = None
+        g.add_vertex(v_host)
+        self._check_callback_result(None, v_host, self.result)
+
+        self.result = None
+        g.add_edge(e_node_to_host)
+        self._check_callback_result(None, e_node_to_host, self.result)
+
+        updated_vertex = g.get_vertex(v_host.vertex_id)
+        updated_vertex[VProps.CATEGORY] = ALARM
+        self.result = None
+        g.update_vertex(updated_vertex)
+        self._check_callback_result(v_host, updated_vertex, self.result)
+
+        updated_edge = g.get_edge(e_node_to_host.source_id,
+                                  e_node_to_host.target_id,
+                                  e_node_to_host.label)
+        updated_edge['ZIG'] = 'ZAG'
+        self.result = None
+        g.update_edge(updated_edge)
+        self._check_callback_result(e_node_to_host, updated_edge, self.result)

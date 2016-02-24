@@ -12,20 +12,22 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import copy
-import json
 
-import networkx as nx
-from networkx.readwrite import json_graph
 from oslo_log import log as logging
 
+import copy
+import json
+import networkx as nx
+from networkx.readwrite import json_graph
+
 from driver import Direction
-from driver import Edge  # noqa
+from driver import Edge
 from driver import Graph
-from driver import Vertex  # noqa
+from driver import Vertex
+from query import create_predicate
 from utils import check_filter
 from vitrage.common.constants import VertexProperties as VProps
-from vitrage.graph.query import create_predicate
+from vitrage.graph import Notifier
 
 LOG = logging.getLogger(__name__)
 
@@ -56,20 +58,30 @@ class NXGraph(Graph):
         self_copy._g = self._g.copy()
         return self_copy
 
+    @Notifier.add_notify
     def add_vertex(self, v):
         """Add a vertex to the graph
 
         :type v: Vertex
         """
+        # Call a private method, so to separate the notifier from logic
+        self._add_vertex(v)
+
+    def _add_vertex(self, v):
         super(NXGraph, self).add_vertex(v=v)
         properties_copy = copy.copy(v.properties)
         self._g.add_node(n=v.vertex_id, attr_dict=properties_copy)
 
+    @Notifier.add_notify
     def add_edge(self, e):
         """Add an edge to the graph
 
         :type e: Edge
         """
+        # Call a private method, so to separate the notifier from logic
+        self._add_edge(e)
+
+    def _add_edge(self, e):
         properties_copy = copy.copy(e.properties)
         self._g.add_edge(u=e.source_id, v=e.target_id,
                          key=e.label, attr_dict=properties_copy)
@@ -133,6 +145,7 @@ class NXGraph(Graph):
     def num_edges(self):
         return self._g.number_of_edges()
 
+    @Notifier.update_notify
     def update_vertex(self, v, hard_update=False):
         """Update the vertex properties
 
@@ -142,8 +155,9 @@ class NXGraph(Graph):
             properties = self._g.node.get(v.vertex_id, None)
             if properties:
                 properties.clear()
-        self.add_vertex(v)
+        self._add_vertex(v)
 
+    @Notifier.update_notify
     def update_edge(self, e, hard_update=False):
         """Update the edge properties
 
@@ -155,7 +169,7 @@ class NXGraph(Graph):
                                                    e.label)
             if properties:
                 properties.clear()
-        self.add_edge(e)
+        self._add_edge(e)
 
     def remove_vertex(self, v):
         """Remove Vertex v and its edges from the graph

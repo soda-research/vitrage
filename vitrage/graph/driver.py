@@ -20,8 +20,8 @@ vitrage.graph.driver namespace.
 
 """
 import abc
-
 import six
+from vitrage.graph.notifier import Notifier
 
 
 class Direction(object):
@@ -246,6 +246,19 @@ class Graph(object):
         self.name = name
         self.graph_type = graph_type
         self.root_id = None
+        self.notifier = Notifier()
+
+    def subscribe(self, function):
+        self.notifier.subscribe(function)
+
+    def is_subscribed(self):
+        return self.notifier.is_subscribed()
+
+    def get_item(self, item):
+        if isinstance(item, Edge):
+            return self.get_edge(item.source_id, item.target_id, item.label)
+        if isinstance(item, Vertex):
+            return self.get_vertex(item.vertex_id)
 
     @abc.abstractmethod
     def copy(self):
