@@ -14,10 +14,10 @@
 
 from oslo_log import log as logging
 
-from algorithm_driver import GraphAlgorithm
-from query import create_predicate
-from vitrage.graph import NXGraph
-from vitrage.graph.sub_graph_matching import sub_graph_matching
+from algorithm import GraphAlgorithm
+from sub_graph_matching import sub_graph_matching
+from vitrage.graph.driver import NXGraph
+from vitrage.graph.query import create_predicate
 
 LOG = logging.getLogger(__name__)
 

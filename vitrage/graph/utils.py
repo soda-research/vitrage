@@ -12,10 +12,10 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from driver.elements import Edge
+from driver.elements import Vertex
 from vitrage.common.constants import EdgeProperties as EConst
 from vitrage.common.constants import VertexProperties as VConst
-from vitrage.graph import Edge
-from vitrage.graph import Vertex
 
 
 def create_vertex(vitrage_id,
@@ -98,7 +98,7 @@ def create_edge(source_id,
         EConst.UPDATE_TIMESTAMP: update_timestamp,
         EConst.IS_DELETED: is_deleted,
         EConst.RELATIONSHIP_NAME: relationship_type,
-    }
+        }
     if metadata:
         properties.update(metadata)
     properties = dict(
@@ -108,22 +108,3 @@ def create_edge(source_id,
                 label=relationship_type,
                 properties=properties)
     return edge
-
-
-def check_filter(data, attr_filter):
-    """Check attr_filter against data
-
-    :param data: a dictionary of field_name: value
-    :param attr_filter: a dictionary of either
-    field_name : value (mandatory)
-    field_name : list of values - data[field_name] must match ANY of the values
-    :rtype: bool
-    """
-    if not attr_filter:
-        return True
-    for key, content in attr_filter.items():
-        if not isinstance(content, list):
-            content = [content]
-        if not data.get(key) in content:
-            return False
-    return True

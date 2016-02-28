@@ -20,14 +20,15 @@ import json
 import networkx as nx
 from networkx.readwrite import json_graph
 
-from driver import Direction
-from driver import Edge
-from driver import Graph
-from driver import Vertex
-from query import create_predicate
-from utils import check_filter
+from elements import Edge
+from elements import Vertex
+from graph import Direction
+from graph import Graph
+from notifier import Notifier
 from vitrage.common.constants import VertexProperties as VProps
-from vitrage.graph import Notifier
+from vitrage.graph.filter import check_filter
+from vitrage.graph.query import create_predicate
+
 
 LOG = logging.getLogger(__name__)
 

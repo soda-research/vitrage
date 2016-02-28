@@ -14,7 +14,7 @@
 from oslo_log import log as logging
 
 from vitrage.common.exception import VitrageAlgorithmError
-from vitrage.graph import check_filter
+from vitrage.graph.filter import check_filter
 
 LOG = logging.getLogger(__name__)
 
