@@ -13,6 +13,30 @@
 # under the License.
 import functools
 
+from elements import Edge
+
+
+def _before_func(graph, item):
+    if not graph.is_subscribed():
+        return
+    if isinstance(item, Edge):
+        return graph.get_edge(item.source_id, item.target_id, item.label)
+    else:
+        return graph.get_vertex(item.vertex_id)
+
+
+def _after_func(graph, item, data_before=None):
+    if not graph.is_subscribed():
+        return
+    if isinstance(item, Edge):
+        edge = graph.get_edge(item.source_id, item.target_id, item.label)
+        edge_source_v = graph.get_vertex(item.source_id)
+        edge_target_v = graph.get_vertex(item.target_id)
+        data_after = edge, edge_source_v, edge_target_v
+    else:
+        data_after = graph.get_vertex(item.vertex_id),
+    graph.notifier.notify(data_before, *data_after)
+
 
 class Notifier(object):
     def __init__(self):
@@ -24,24 +48,17 @@ class Notifier(object):
     def is_subscribed(self):
         return len(self._subscriptions) != 0
 
-    def do_notify(self, prev_item, current_item):
+    def notify(self, *args, **kwargs):
         for func in self._subscriptions:
-            func(prev_item, current_item)
-
-    @staticmethod
-    def notify(graph, curr_item, prev_item=None):
-        if not graph.is_subscribed():
-            return
-        curr_item = graph.get_item(curr_item)
-        graph.notifier.do_notify(prev_item, curr_item)
+            func(*args, **kwargs)
 
     @staticmethod
     def update_notify(func):
         @functools.wraps(func)
         def notified_func(graph, item, *args, **kwargs):
-            prev_item = graph.get_item(item) if graph.is_subscribed() else None
+            data_before = _before_func(graph, item)
             func(graph, item, *args, **kwargs)
-            Notifier.notify(graph, item, prev_item)
+            _after_func(graph, item, data_before)
         return notified_func
 
     @staticmethod
@@ -49,5 +66,5 @@ class Notifier(object):
         @functools.wraps(func)
         def notified_func(graph, item, *args, **kwargs):
             func(graph, item, *args, **kwargs)
-            Notifier.notify(graph, item)
+            _after_func(graph, item)
         return notified_func

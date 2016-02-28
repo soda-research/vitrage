@@ -367,21 +367,45 @@ class GraphTest(GraphTestBase):
         self.assertEqual(OPENSTACK_NODE, found_vertex[VProps.TYPE],
                          'get_vertices check node vertex')
 
-    def _check_callback_result(self, exp_prev, exp_curr, result):
-        self.assertIsNotNone(result, 'Callback was not called')
-        self.assertEqual(exp_curr, result[1], 'curr_item unexpected')
-        self.assertEqual(exp_prev, result[0], 'prev_item unexpected')
+    def _check_callback_result(self, result, msg, exp_prev, exp_curr,
+                               exp_source_v=None, exp_target_v=None):
+
+        def assert_none_or_equals(exp, act, msg):
+            if exp:
+                self.assertEqual(exp, act, msg)
+            else:
+                self.assertIsNone(act, msg)
+
+        self.assertIsNotNone(result, msg + ' Callback was not called')
+        assert_none_or_equals(exp_prev, result[0],
+                              msg + ' prev_item unexpected')
+        assert_none_or_equals(exp_curr, result[1],
+                              msg + ' curr_item unexpected')
+        assert_none_or_equals(exp_source_v, result[2],
+                              msg + ' edge_source_v unexpected')
+        assert_none_or_equals(exp_target_v, result[3],
+                              msg + ' edge_target_v unexpected')
+        self.result = None
+
+    def _assert_none_or_equals(self, exp, act, msg):
+            if exp:
+                self.assertEqual(exp, act, msg)
+            else:
+                self.assertIsNone(act, msg)
 
     def test_graph_callbacks(self):
 
         g = create_graph('test_graph_callbacks')
         self.result = None
 
-        def callback(pre_event_item, current_item):
-            LOG.info('called with: pre_event_item ' + str(pre_event_item) +
+        def callback(pre_item,
+                     current_item,
+                     edge_source_v=None,
+                     edge_target_v=None):
+            LOG.info('called with: pre_event_item ' + str(pre_item) +
                      ' current_item ' + str(current_item))
             self.assertIsNotNone(current_item)
-            self.result = pre_event_item, current_item
+            self.result = pre_item, current_item, edge_source_v, edge_target_v
 
         # Check there is no notification without subscribing
         g.add_vertex(v_alarm)
@@ -393,28 +417,26 @@ class GraphTest(GraphTestBase):
         g.subscribe(callback)
 
         # These actions will trigger callbacks:
-        self.result = None
         g.add_vertex(v_node)
-        self._check_callback_result(None, v_node, self.result)
+        self._check_callback_result(self.result, 'add vertex', None, v_node)
 
-        self.result = None
         g.add_vertex(v_host)
-        self._check_callback_result(None, v_host, self.result)
+        self._check_callback_result(self.result, 'add vertex', None, v_host)
 
-        self.result = None
         g.add_edge(e_node_to_host)
-        self._check_callback_result(None, e_node_to_host, self.result)
+        self._check_callback_result(self.result, 'add edge', None,
+                                    e_node_to_host, v_node, v_host)
 
         updated_vertex = g.get_vertex(v_host.vertex_id)
         updated_vertex[VProps.CATEGORY] = ALARM
-        self.result = None
         g.update_vertex(updated_vertex)
-        self._check_callback_result(v_host, updated_vertex, self.result)
+        self._check_callback_result(self.result, 'update vertex',
+                                    v_host, updated_vertex)
 
         updated_edge = g.get_edge(e_node_to_host.source_id,
                                   e_node_to_host.target_id,
                                   e_node_to_host.label)
         updated_edge['ZIG'] = 'ZAG'
-        self.result = None
         g.update_edge(updated_edge)
-        self._check_callback_result(e_node_to_host, updated_edge, self.result)
+        self._check_callback_result(self.result, 'update edge', e_node_to_host,
+                                    updated_edge, v_node, updated_vertex)
