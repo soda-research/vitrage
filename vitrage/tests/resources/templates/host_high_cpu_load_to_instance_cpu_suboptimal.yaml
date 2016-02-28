@@ -12,11 +12,11 @@ definitions:
      template_id: 2
   - entity:
      category: RESOURCE
-     type: HOST
+     type: nova.host
      template_id: 3
   - entity:
      category: RESOURCE
-     type: INSTANCE
+     type: nova.instance
      template_id: 4
  relationships:
   - relationship:

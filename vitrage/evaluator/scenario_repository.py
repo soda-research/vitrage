@@ -11,63 +11,126 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+from collections import defaultdict
+from collections import namedtuple
 from oslo_log import log
 
 from vitrage.common import file_utils
+from vitrage.evaluator.template import RELATIONSHIP
 from vitrage.evaluator.template import Template
-from vitrage.evaluator.template_syntax_validator import syntax_validate
+from vitrage.evaluator.template_fields import TemplateFields
+from vitrage.evaluator.template_syntax_validator import syntax_valid
 
 
 LOG = log.getLogger(__name__)
 
 
-action_types = {
-    'RAISE_ALARM': 'raise_alarm',
-    'ADD_CAUSAL_RELATIONSHIP': 'add_causal_relationship',
-    'SET_STATE': 'set_state'
-}
+EdgeKeyScenario = namedtuple('EdgeKeyScenario', ['label', 'source', 'target'])
 
 
 class ScenarioRepository(object):
 
     def __init__(self, conf):
+        self.templates = defaultdict(list)
+        self.relationship_scenarios = defaultdict(list)
+        self.entity_scenarios = defaultdict(list)
         self._load_templates_files(conf)
-        self.scenarios = {}
 
-    def add_template(self, template_definition):
+    def get_scenarios_by_vertex(self, vertex):
 
-        if syntax_validate(template_definition):
-            template = Template(template_definition)
-            print(template)
+        entity_key = frozenset(vertex.properties)
 
-    def get_relevant_scenarios(self, element_before, element_now):
-        """Returns scenarios triggered by an event.
+        return [value for scenario_key, value in self.entity_scenarios
+                if scenario_key.issubset(entity_key)]
 
-        Returned scenarios are divided into two disjoint lists, based on the
-        element state (before/now) that triggered the scenario condition.
+    def get_scenarios_by_edge(self, edge_description):
 
-        Note that this should intuitively mean that the "before" scenarios will
-        activate their "undo" operation, while the "now" will activate the
-        "execute" operation.
+        key = self._create_edge_scenario_key(edge_description)
+        scenarios = []
 
-        :param element_before:
-        :param element_now:
-        :return:
-        :rtype: dict
-        """
+        for scenario_key, value in self.relationship_scenarios:
 
-        # trigger_id_before = 'template_id of trigger for before scenario'
-        # trigger_id_now = 'template_id of trigger for now scenario'
+            check_label = key.label == scenario_key.label
+            check_source_issubset = scenario_key.source.issubset(key.source)
+            check_target_issubset = scenario_key.target.issubset(key.target)
 
-        # return {'before': [(scenario., trigger_id_before)],
-        #         'now': [(scenario.Scenario, trigger_id_now)]}
+            if check_label and check_source_issubset and check_target_issubset:
+                scenarios.append(value)
 
-        pass
+        return scenarios
+
+    def add_template(self, template_def):
+
+        if syntax_valid(template_def):
+            template = Template(template_def)
+            self.templates[template.name] = template
+            self._add_template_scenarios(template)
+        else:
+            metadata = template_def.get(TemplateFields.METADATA, None)
+            if metadata:
+                template_id = metadata.get(TemplateFields.ID, None)
+                LOG.info('Unable to load template: %s' % template_id)
+            else:
+                LOG.info('Unable to load template with invalid metadata')
 
     def _load_templates_files(self, conf):
 
-        templates_dir_path = conf.evaluator.templates_dir
-        template_definitions = file_utils.load_yaml_files(templates_dir_path)
+        templates_dir = conf.evaluator.templates_dir
+        template_defs = file_utils.load_yaml_files(templates_dir)
 
-        for template_definition in template_definitions:
-            self.add_template(template_definition)
+        for template_def in template_defs:
+            self.add_template(template_def)
+
+    def _add_template_scenarios(self, template):
+
+        for scenario in template.scenarios:
+
+            condition_vars = self._extract_condition_vars(scenario.condition)
+            for condition_var in condition_vars:
+
+                if condition_var.type == RELATIONSHIP:
+                    edge_desc = condition_var.variable
+                    self._add_relationship(scenario, edge_desc)
+                    self._add_entity(scenario, edge_desc.source)
+                    self._add_entity(scenario, edge_desc.target)
+                else:  # Entity
+                    self._add_entity(scenario, condition_var.variable)
+
+    @staticmethod
+    def _create_scenario_key(properties):
+        return frozenset(properties)
+
+    @staticmethod
+    def _extract_condition_vars(condition):
+
+        condition_vars = []
+        for and_condition in condition:
+            condition_vars = condition_vars + and_condition
+
+        return condition_vars
+
+    def _add_relationship(self, scenario, edge_desc):
+
+        key = self._create_edge_scenario_key(edge_desc)
+        scenarios = self.relationship_scenarios[key]
+
+        if not self.contains(scenarios, scenario):
+            self.relationship_scenarios[key].append((edge_desc, scenario))
+
+    def _create_edge_scenario_key(self, edge_desc):
+
+        return EdgeKeyScenario(edge_desc.edge.label,
+                               frozenset(edge_desc.source.properties),
+                               frozenset(edge_desc.target.properties))
+
+    def _add_entity(self, scenario, entity):
+
+        key = frozenset(list(entity.properties.items()))
+        scenarios = self.entity_scenarios[key]
+
+        if not self.contains(scenarios, scenario):
+            self.entity_scenarios[key].append((entity, scenario))
+
+    @staticmethod
+    def contains(scenarios, scenario):
+        return any(s[1].id == scenario.id for s in scenarios)
