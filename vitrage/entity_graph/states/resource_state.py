@@ -1,4 +1,3 @@
-# Copyright 2015 - Alcatel-Lucent
 # Copyright 2016 - Nokia
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -13,12 +12,21 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from oslo_config import cfg
 
-
-OPTS = [
-    cfg.StrOpt('states_plugins_dir',
-               default='/etc/vitrage/states_plugins',
-               help='A path for the configuration files of the plugins states'
-               ),
-]
+class ResourceState(object):
+    TERMINATED = 'TERMINATED'
+    ERROR = 'ERROR'
+    UNRECOGNIZED = 'UNRECOGNIZED'
+    UNAVAILABLE = 'UNAVAILABLE'
+    SUSPENDED = 'SUSPENDED'
+    HIBERNATE = 'HIBERNATE'
+    PAUSED = 'PAUSED'
+    TERMINATING = 'TERMINATING'
+    SUSPENDING = 'SUSPENDING'
+    REBUILDING = 'REBUILDING'
+    STARTING = 'STARTING'
+    SUBOPTIMAL = 'SUBOPTIMAL'
+    AVAILABLE = 'AVAILABLE'
+    RUNNING = 'RUNNING'
+    CREATING = 'CREATING'
+    UNDEFINED = 'UNDEFINED'

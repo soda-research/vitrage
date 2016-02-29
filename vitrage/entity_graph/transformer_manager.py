@@ -1,4 +1,5 @@
 # Copyright 2015 - Alcatel-Lucent
+# Copyright 2016 - Nokia
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -32,10 +33,10 @@ LOG = logging.getLogger(__name__)
 class TransformerManager(object):
 
     def __init__(self):
-        self.transformers = self.register_transformer_classes()
+        self.transformers = self._register_transformer_classes()
 
     @staticmethod
-    def register_transformer_classes():
+    def _register_transformer_classes():
 
         transformers = {}
 

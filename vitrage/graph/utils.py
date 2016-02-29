@@ -22,7 +22,6 @@ def create_vertex(vitrage_id,
                   entity_id=None,
                   entity_category=None,
                   entity_type=None,
-                  entity_project=None,
                   entity_state=None,
                   is_deleted=False,
                   update_timestamp=None,
@@ -38,8 +37,6 @@ def create_vertex(vitrage_id,
     :type entity_category: str
     :param entity_type:
     :type entity_type: str
-    :param entity_project:
-    :type entity_project: str
     :param entity_state:
     :type entity_state: str
     :param is_deleted:
@@ -56,7 +53,6 @@ def create_vertex(vitrage_id,
 
     properties = {
         VConst.ID: entity_id,
-        VConst.PROJECT_ID: entity_project,
         VConst.STATE: entity_state,
         VConst.TYPE: entity_type,
         VConst.CATEGORY: entity_category,

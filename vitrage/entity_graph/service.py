@@ -25,10 +25,12 @@ LOG = log.getLogger(__name__)
 
 class VitrageGraphService(os_service.Service):
 
-    def __init__(self, event_queue, entity_graph, initialization_status):
+    def __init__(self, cfg, event_queue, entity_graph, initialization_status):
         super(VitrageGraphService, self).__init__()
         self.queue = event_queue
-        self.processor = proc.Processor(initialization_status,
+        self.cfg = cfg
+        self.processor = proc.Processor(self.cfg,
+                                        initialization_status,
                                         e_graph=entity_graph)
 
     def start(self):

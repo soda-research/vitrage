@@ -26,5 +26,6 @@ def list_opts():
         ('synchronizer', vitrage.synchronizer.OPTS),
         ('evaluator', vitrage.evaluator.OPTS),
         ('synchronizer_plugins', vitrage.synchronizer.plugins.OPTS),
-        ('consistency', vitrage.entity_graph.consistency.OPTS)
+        ('consistency', vitrage.entity_graph.consistency.OPTS),
+        ('entity_graph', vitrage.entity_graph.OPTS)
     ]

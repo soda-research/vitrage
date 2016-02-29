@@ -20,7 +20,8 @@ import yaml
 LOG = log.getLogger(__name__)
 
 
-def load_files(dir_path, suffix=None,
+def load_files(dir_path,
+               suffix=None,
                with_pathname=False,
                with_exception=False):
     try:

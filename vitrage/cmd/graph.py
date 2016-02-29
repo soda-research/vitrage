@@ -45,7 +45,7 @@ def main():
         conf, synchronizer_launcher.create_send_to_queue_callback(event_queue))
 
     launcher.launch_service(entity_graph_svc.VitrageGraphService(
-        event_queue, e_graph, initialization_status))
+        conf, event_queue, e_graph, initialization_status))
 
     launcher.launch_service(api_handler_svc.VitrageApiHandlerService(
         e_graph))

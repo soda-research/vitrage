@@ -28,12 +28,13 @@ from vitrage.entity_graph.consistency.consistency_enforcer \
 from vitrage.entity_graph.initialization_status import InitializationStatus
 from vitrage.entity_graph.processor.processor import Processor
 import vitrage.graph.utils as graph_utils
-from vitrage.tests.unit.entity_graph import TestEntityGraphBase
+from vitrage.tests.functional.entity_graph.base import \
+    TestEntityGraphFunctionalBase
 
 
-class TestConsistency(TestEntityGraphBase):
+class TestConsistencyFunctional(TestEntityGraphFunctionalBase):
 
-    OPTS = [
+    CONSISTENCY_OPTS = [
         cfg.IntOpt('consistency_interval',
                    default=1,
                    min=1),
@@ -43,11 +44,12 @@ class TestConsistency(TestEntityGraphBase):
     ]
 
     def setUp(self):
-        super(TestConsistency, self).setUp()
+        super(TestConsistencyFunctional, self).setUp()
         self.initialization_status = InitializationStatus()
-        self.processor = Processor(self.initialization_status)
         self.conf = cfg.ConfigOpts()
-        self.conf.register_opts(self.OPTS, group='consistency')
+        self.conf.register_opts(self.CONSISTENCY_OPTS, group='consistency')
+        self.conf.register_opts(self.PROCESSOR_OPTS, group='entity_graph')
+        self.processor = Processor(self.conf, self.initialization_status)
         self.consistency_enforcer = ConsistencyEnforcer(
             self.conf, self.processor.entity_graph, self.initialization_status)
 
@@ -57,7 +59,7 @@ class TestConsistency(TestEntityGraphBase):
         # Setup
         num_external_alarms = self.NUM_HOSTS - 2
         num_instances_per_host = 4
-        self._create_processor_with_graph(processor=self.processor)
+        self._create_processor_with_graph(self.conf, processor=self.processor)
         self._add_alarms()
         self._set_end_messages()
         self.assertEqual(self._num_total_expected_vertices() +
@@ -105,7 +107,7 @@ class TestConsistency(TestEntityGraphBase):
                          len(self.processor.entity_graph.get_vertices()))
 
     def _periodic_process_setup_stage(self, consistency_interval):
-        self._create_processor_with_graph(processor=self.processor)
+        self._create_processor_with_graph(self.conf, processor=self.processor)
         current_time = utcnow()
 
         # set all vertices to be have timestamp that consistency won't get

@@ -18,13 +18,14 @@ from vitrage.graph import driver as graph
 from vitrage.tests import base
 
 
-class BaseProcessor(base.BaseTest):
+class TestBaseProcessor(base.BaseTest):
 
     def setUp(self):
-        super(BaseProcessor, self).setUp()
+        super(TestBaseProcessor, self).setUp()
         self.transform = transformer_manager.TransformerManager()
 
-    def _update_vertex_to_graph(self, entity_graph, category, type, id,
+    @staticmethod
+    def _update_vertex_to_graph(entity_graph, category, type, id,
                                 is_deleted, is_placeholder_data,
                                 additional_prop):
         # create vertex properties

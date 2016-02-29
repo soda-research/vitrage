@@ -69,36 +69,35 @@ class StaticPhysicalSynchronizer(SynchronizerBase):
     def _get_changes_entities(self):
         entities_updates = []
 
-        if os.path.isdir(self.cfg.synchronizer_plugins.static_plugins_dir):
-            entities_updates = []
-            files = file_utils.load_files(
-                self.cfg.synchronizer_plugins.static_plugins_dir, '.yaml')
+        entities_updates = []
+        files = file_utils.load_files(
+            self.cfg.synchronizer_plugins.static_plugins_dir, '.yaml')
 
-            for file in files:
-                full_path = self.cfg.synchronizer_plugins.static_plugins_dir +\
-                    '/' + file
-                config = file_utils.load_yaml_file(full_path)
-                if config:
-                    if file in self.cache:
-                        if str(config) != str(self.cache[file]):
-                            # TODO(alexey_weyl): need also to remove deleted
-                            #                   files from cache
+        for file in files:
+            full_path = self.cfg.synchronizer_plugins.static_plugins_dir +\
+                '/' + file
+            config = file_utils.load_yaml_file(full_path)
+            if config:
+                if file in self.cache:
+                    if str(config) != str(self.cache[file]):
+                        # TODO(alexey_weyl): need also to remove deleted
+                        #                   files from cache
 
-                            self._update_on_existing_entities(
-                                self.cache[file][self.ENTITIES_SECTION],
-                                config[self.ENTITIES_SECTION],
-                                entities_updates)
+                        self._update_on_existing_entities(
+                            self.cache[file][self.ENTITIES_SECTION],
+                            config[self.ENTITIES_SECTION],
+                            entities_updates)
 
-                            self._update_on_new_entities(
-                                config[self.ENTITIES_SECTION],
-                                self.cache[file][self.ENTITIES_SECTION],
-                                entities_updates)
+                        self._update_on_new_entities(
+                            config[self.ENTITIES_SECTION],
+                            self.cache[file][self.ENTITIES_SECTION],
+                            entities_updates)
 
-                            self.cache[file] = config
-                    else:
                         self.cache[file] = config
-                        entities_updates += \
-                            self._get_entities_from_file(file, full_path)
+                else:
+                    self.cache[file] = config
+                    entities_updates += \
+                        self._get_entities_from_file(file, full_path)
 
         return entities_updates
 

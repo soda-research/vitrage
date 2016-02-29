@@ -1,0 +1,28 @@
+category: ALARM
+states:
+  - normalized state:
+      name: UNKNOWN
+      priority: 50
+      original states:
+        - name: UNKNOWN
+  - normalized state:
+      name: HIGH
+      priority: 40
+      original states:
+        - name: CRITITCAL
+        - name: DOWN
+  - normalized state:
+      name: MEDIUM
+      priority: 30
+      original states:
+        - name: WARNING
+  - normalized state:
+      name: LOW
+      priority: 20
+      original states:
+  - normalized state:
+      name: OK
+      priority: 10
+      original states:
+        - name: OK
+        - name: UP

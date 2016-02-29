@@ -17,7 +17,7 @@ from vitrage.entity_graph.processor import entity_graph as entity_g
 from vitrage.tests.unit.entity_graph.processor import base
 
 
-class TestEntityGraphManager(base.BaseProcessor):
+class TestEntityGraphManager(base.TestBaseProcessor):
 
     def setUp(self):
         super(TestEntityGraphManager, self).setUp()

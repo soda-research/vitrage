@@ -85,12 +85,13 @@ class InstanceTransformer(transformer_base.TransformerBase):
     def _create_entity_vertex(self, entity_event):
 
         sync_mode = entity_event[SyncProps.SYNC_MODE]
+        project = extract_field_value(entity_event, self.PROJECT_ID[sync_mode])
 
         metadata = {
-            VProps.NAME: extract_field_value(
-                entity_event,
-                self.INSTANCE_NAME[sync_mode]),
-            VProps.IS_PLACEHOLDER: False
+            VProps.NAME: extract_field_value(entity_event,
+                                             self.INSTANCE_NAME[sync_mode]),
+            VProps.IS_PLACEHOLDER: False,
+            VProps.PROJECT_ID: project
         }
 
         entity_key = self.extract_key(entity_event)
@@ -98,7 +99,6 @@ class InstanceTransformer(transformer_base.TransformerBase):
         entity_id = extract_field_value(
             entity_event,
             self.INSTANCE_ID[sync_mode])
-        project = extract_field_value(entity_event, self.PROJECT_ID[sync_mode])
         state = extract_field_value(
             entity_event,
             self.INSTANCE_STATE[sync_mode])
@@ -111,7 +111,6 @@ class InstanceTransformer(transformer_base.TransformerBase):
             entity_id=entity_id,
             entity_category=EntityCategory.RESOURCE,
             entity_type=self.INSTANCE_TYPE,
-            entity_project=project,
             entity_state=state,
             update_timestamp=update_timestamp,
             metadata=metadata)

@@ -1,4 +1,5 @@
 # Copyright 2015 - Alcatel-Lucent
+# Copyright 2016 - Nokia
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -19,6 +20,8 @@ class VertexProperties(object):
     ID = 'id'
     IS_DELETED = 'is_deleted'
     STATE = 'state'
+    VITRAGE_STATE = 'vitrage_state'
+    AGGREGATED_STATE = 'aggregated_state'
     PROJECT_ID = 'project_id'
     UPDATE_TIMESTAMP = 'update_timestamp'
     NAME = 'name'

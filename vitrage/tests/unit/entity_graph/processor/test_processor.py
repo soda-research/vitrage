@@ -14,16 +14,20 @@
 
 import unittest
 
+from oslo_config import cfg
+
+from vitrage.common.constants import EventAction
 from vitrage.common.constants import SynchronizerProperties as SyncProps
 from vitrage.common.constants import SyncMode
-from vitrage.common.constants import VertexProperties
+from vitrage.common.constants import VertexProperties as VProps
 from vitrage.common.datetime_utils import utcnow
 from vitrage.entity_graph.initialization_status import InitializationStatus
 from vitrage.entity_graph.processor import processor as proc
-from vitrage.tests.unit.entity_graph import TestEntityGraphBase
+from vitrage.entity_graph.states.resource_state import ResourceState
+from vitrage.tests.unit.entity_graph.base import TestEntityGraphUnitBase
 
 
-class TestProcessorBase(TestEntityGraphBase):
+class TestProcessor(TestEntityGraphUnitBase):
 
     ZONE_SPEC = 'ZONE_SPEC'
     HOST_SPEC = 'HOST_SPEC'
@@ -34,27 +38,15 @@ class TestProcessorBase(TestEntityGraphBase):
     NUM_EDGES_AFTER_DELETION = 0
 
     def setUp(self):
-        super(TestProcessorBase, self).setUp()
-
-    def test_create_entity_graph(self):
-        processor = self._create_processor_with_graph()
-
-        # check number of entities
-        num_vertices = len(processor.entity_graph)
-        self.assertEqual(self._num_total_expected_vertices(), num_vertices)
-
-        # TODO(Alexey): add this check and to check also the number of edges
-        # check all entities create a tree and no free floating vertices exists
-        # it will be done only after we will have zone plugin
-        # vertex = graph.find_vertex_in_graph()
-        # bfs_list = graph.algo.bfs(graph)
-        # self.assertEqual(num_vertices, len(bfs_list))
+        super(TestProcessor, self).setUp()
+        self.conf = cfg.ConfigOpts()
+        self.conf.register_opts(self.PROCESSOR_OPTS, group='entity_graph')
 
     # TODO(Alexey): un skip this test when instance transformer update is ready
     @unittest.skip('Not ready yet')
     def test_process_event(self):
         # check create instance event
-        processor = proc.Processor(InitializationStatus())
+        processor = proc.Processor(self.conf, InitializationStatus())
         event = self._create_event(spec_type=self.INSTANCE_SPEC,
                                    sync_mode=SyncMode.INIT_SNAPSHOT)
         processor.process_event(event)
@@ -90,18 +82,18 @@ class TestProcessorBase(TestEntityGraphBase):
 
         # check added entity
         vertex = processor.entity_graph.get_vertex(vertex.vertex_id)
-        self.assertEqual('STARTING', vertex.properties[VertexProperties.STATE])
+        self.assertEqual('STARTING', vertex.properties[VProps.STATE])
 
         # update instance event with state running
-        vertex.properties[VertexProperties.STATE] = 'RUNNING'
-        vertex.properties[VertexProperties.UPDATE_TIMESTAMP] = str(utcnow())
+        vertex.properties[VProps.STATE] = 'RUNNING'
+        vertex.properties[VProps.UPDATE_TIMESTAMP] = str(utcnow())
         processor.update_entity(vertex, neighbors)
 
         # check state
         self._check_graph(processor, self.NUM_VERTICES_AFTER_CREATION,
                           self.NUM_EDGES_AFTER_CREATION)
         vertex = processor.entity_graph.get_vertex(vertex.vertex_id)
-        self.assertEqual('RUNNING', vertex.properties[VertexProperties.STATE])
+        self.assertEqual('RUNNING', vertex.properties[VProps.STATE])
 
     def test_change_parent(self):
         # create instance event with host neighbor and check validity
@@ -110,7 +102,7 @@ class TestProcessorBase(TestEntityGraphBase):
         # update instance event with state running
         (neighbor_vertex, neighbor_edge) = neighbors[0]
         old_neighbor_id = neighbor_vertex.vertex_id
-        neighbor_vertex.properties[VertexProperties.ID] = 'newhost-2'
+        neighbor_vertex.properties[VProps.ID] = 'newhost-2'
         neighbor_vertex.vertex_id = 'RESOURCE_HOST_newhost-2'
         neighbor_edge.source_id = 'RESOURCE_HOST_newhost-2'
         processor.update_entity(vertex, neighbors)
@@ -141,7 +133,7 @@ class TestProcessorBase(TestEntityGraphBase):
         # update instance event with state running
         (neighbor_vertex, neighbor_edge) = neighbors[0]
         old_neighbor_id = neighbor_vertex.vertex_id
-        neighbor_vertex.properties[VertexProperties.ID] = 'newhost-2'
+        neighbor_vertex.properties[VProps.ID] = 'newhost-2'
         neighbor_vertex.vertex_id = 'RESOURCE_HOST_newhost-2'
         neighbor_edge.source_id = 'RESOURCE_HOST_newhost-2'
         processor._update_neighbors(vertex, neighbors)
@@ -171,6 +163,66 @@ class TestProcessorBase(TestEntityGraphBase):
                           self.NUM_VERTICES_AFTER_DELETION,
                           self.NUM_EDGES_AFTER_DELETION)
 
+    def test_calculate_aggregated_state(self):
+        # setup
+        instances = []
+        for i in range(6):
+            (vertex, neighbors, processor) = self._create_and_check_entity()
+            instances.append((vertex, processor))
+
+        # action
+        # state already exists and its updated
+        instances[0][0][VProps.STATE] = 'SUSPENDED'
+        instances[0][1]._calculate_aggregated_state(instances[0][0],
+                                                    EventAction.UPDATE)
+
+        # vitrage state doesn't exist and its updated
+        del instances[1][0][VProps.STATE]
+        instances[1][1].entity_graph.update_vertex(instances[1][0])
+        instances[1][0][VProps.VITRAGE_STATE] = 'SUBOPTIMAL'
+        instances[1][1]._calculate_aggregated_state(instances[1][0],
+                                                    EventAction.UPDATE)
+
+        # state exists and vitrage state changes
+        instances[2][0][VProps.VITRAGE_STATE] = 'SUBOPTIMAL'
+        instances[2][1]._calculate_aggregated_state(instances[2][0],
+                                                    EventAction.UPDATE)
+
+        # vitrage state exists and state changes
+        del instances[3][0][VProps.STATE]
+        instances[3][0][VProps.VITRAGE_STATE] = 'SUBOPTIMAL'
+        instances[3][1].entity_graph.update_vertex(instances[3][0])
+        instances[3][0][VProps.STATE] = 'SUSPENDED'
+        instances[3][1]._calculate_aggregated_state(instances[3][0],
+                                                    EventAction.UPDATE)
+
+        # state and vitrage state exists and state changes
+        instances[4][0][VProps.VITRAGE_STATE] = 'SUBOPTIMAL'
+        instances[4][1].entity_graph.update_vertex(instances[4][0])
+        instances[4][0][VProps.STATE] = 'SUSPENDED'
+        instances[4][1]._calculate_aggregated_state(instances[4][0],
+                                                    EventAction.UPDATE)
+
+        # state and vitrage state exists and vitrage state changes
+        instances[5][0][VProps.VITRAGE_STATE] = 'SUBOPTIMAL'
+        instances[5][1].entity_graph.update_vertex(instances[5][0])
+        instances[5][1]._calculate_aggregated_state(instances[5][0],
+                                                    EventAction.UPDATE)
+
+        # test assertions
+        self.assertEqual(ResourceState.SUSPENDED,
+                         instances[0][0][VProps.AGGREGATED_STATE])
+        self.assertEqual(ResourceState.SUBOPTIMAL,
+                         instances[1][0][VProps.AGGREGATED_STATE])
+        self.assertEqual(ResourceState.SUBOPTIMAL,
+                         instances[2][0][VProps.AGGREGATED_STATE])
+        self.assertEqual(ResourceState.SUSPENDED,
+                         instances[3][0][VProps.AGGREGATED_STATE])
+        self.assertEqual(ResourceState.SUSPENDED,
+                         instances[4][0][VProps.AGGREGATED_STATE])
+        self.assertEqual(ResourceState.SUBOPTIMAL,
+                         instances[5][0][VProps.AGGREGATED_STATE])
+
     def _create_and_check_entity(self, properties={}):
         # create instance event with host neighbor
         (vertex, neighbors, processor) = self._create_entity(
@@ -182,23 +234,6 @@ class TestProcessorBase(TestEntityGraphBase):
         self._check_graph(processor,
                           self.NUM_VERTICES_AFTER_CREATION,
                           self.NUM_EDGES_AFTER_CREATION)
-
-        return vertex, neighbors, processor
-
-    def _create_entity(self, processor=None, spec_type=None, sync_mode=None,
-                       event_type=None, properties=None):
-        # create instance event with host neighbor
-        event = self._create_event(spec_type=spec_type,
-                                   sync_mode=sync_mode,
-                                   event_type=event_type,
-                                   properties=properties)
-
-        # add instance entity with host
-        if processor is None:
-            processor = proc.Processor(InitializationStatus())
-
-        (vertex, neighbors, event_type) = processor.transform_entity(event)
-        processor.create_entity(vertex, neighbors)
 
         return vertex, neighbors, processor
 

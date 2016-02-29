@@ -1,0 +1,26 @@
+category: RESOURCE
+states:
+  - normalized state:
+      name: TERMINATED
+      priority: 150
+      original states:
+        - name: DELETED
+  - normalized state:
+      name: ERROR
+      priority: 140
+      original states:
+        - name: ERROR
+  - normalized state:
+      name: UNRECOGNIZED
+      priority: 130
+      original states:
+  - normalized state:
+      name: SUBOPTIMAL
+      priority: 40
+      original states:
+        - name: SUBOPTIMAL
+  - normalized state:
+      name: AVAILABLE
+      priority: 30
+      original states:
+        - name: available

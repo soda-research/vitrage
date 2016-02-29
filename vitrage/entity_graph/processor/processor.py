@@ -1,4 +1,5 @@
 # Copyright 2015 - Alcatel-Lucent
+# Copyright 2016 - Nokia
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -18,7 +19,8 @@ from vitrage.common.constants import EventAction
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.entity_graph.processor import base as processor
 from vitrage.entity_graph.processor import entity_graph
-from vitrage.entity_graph import transformer_manager
+from vitrage.entity_graph.states.state_manager import StateManager
+from vitrage.entity_graph.transformer_manager import TransformerManager
 from vitrage.graph import Direction
 
 LOG = log.getLogger(__name__)
@@ -28,8 +30,10 @@ class Processor(processor.ProcessorBase):
 
     NUMBER_OF_PLUGINS = 5
 
-    def __init__(self, initialization_status, e_graph=None):
-        self.transformer = transformer_manager.TransformerManager()
+    def __init__(self, cfg, initialization_status, e_graph=None):
+        self.cfg = cfg
+        self.transformer_manager = TransformerManager()
+        self.state_manager = StateManager(self.cfg)
         self._initialize_events_actions()
         self.initialization_status = initialization_status
         self.entity_graph = entity_graph.EntityGraph("Entity Graph") if \
@@ -47,7 +51,7 @@ class Processor(processor.ProcessorBase):
         """
 
         entity = self.transform_entity(event)
-        # TODO(Alexey): need to check here the NOT_RELEVANT action as well
+        self._calculate_aggregated_state(entity.vertex, entity.action)
         return self.actions[entity.action](entity.vertex, entity.neighbors)
 
     def create_entity(self, new_vertex, neighbors):
@@ -64,7 +68,7 @@ class Processor(processor.ProcessorBase):
 
         LOG.debug("Add entity to entity graph: %s", new_vertex)
         self.entity_graph.add_vertex(new_vertex)
-        self._connect_neighbors(neighbors, [])
+        self._connect_neighbors(neighbors, [], EventAction.CREATE)
 
     def update_entity(self, updated_vertex, neighbors):
         """Updates the vertex in the entity graph
@@ -135,7 +139,9 @@ class Processor(processor.ProcessorBase):
                 self.initialization_status.RECEIVED_ALL_END_MESSAGES
 
     def transform_entity(self, event):
-        return self.transformer.transform(event)
+        entity = self.transformer_manager.transform(event)
+        LOG.debug('Transformed entity: %s', entity)
+        return entity
 
     def _update_neighbors(self, vertex, neighbors):
         """Updates vertices neighbor connections
@@ -147,9 +153,9 @@ class Processor(processor.ProcessorBase):
         (valid_edges, obsolete_edges) = self._find_edges_status(
             vertex, neighbors)
         self._delete_old_connections(vertex, obsolete_edges)
-        self._connect_neighbors(neighbors, valid_edges)
+        self._connect_neighbors(neighbors, valid_edges, EventAction.UPDATE)
 
-    def _connect_neighbors(self, neighbors, valid_edges):
+    def _connect_neighbors(self, neighbors, valid_edges, action):
         """Updates the neighbor vertex and adds the connection edges """
         LOG.debug("Connect neighbors. Neighbors: %s, valid_edges: %s",
                   neighbors, valid_edges)
@@ -159,6 +165,7 @@ class Processor(processor.ProcessorBase):
                     not self.entity_graph.is_vertex_deleted(graph_vertex):
                 if self.entity_graph.can_update_vertex(graph_vertex, vertex):
                     LOG.debug("Updates vertex: %s", vertex)
+                    self._calculate_aggregated_state(vertex, action)
                     self.entity_graph.update_vertex(vertex)
 
                 if edge not in valid_edges:
@@ -227,3 +234,36 @@ class Processor(processor.ProcessorBase):
             EventAction.DELETE: self.delete_entity,
             EventAction.END_MESSAGE: self.handle_end_message
         }
+
+    def _calculate_aggregated_state(self, vertex, action):
+        LOG.debug("calculate event state")
+
+        if action == EventAction.UPDATE or action == EventAction.DELETE:
+            graph_vertex = self.entity_graph.get_vertex(vertex.vertex_id)
+        elif action == EventAction.CREATE:
+            graph_vertex = None
+        elif action == EventAction.END_MESSAGE:
+            return None
+        else:
+            LOG.info('not recognized action: %s for vertex: %s',
+                     action, vertex)
+
+        state = self._get_updated_property(vertex,
+                                           graph_vertex,
+                                           VProps.STATE)
+        vitrage_state = self._get_updated_property(vertex,
+                                                   graph_vertex,
+                                                   VProps.VITRAGE_STATE)
+
+        vertex[VProps.AGGREGATED_STATE] = self.state_manager.aggregated_state(
+            state, vitrage_state, vertex[VProps.TYPE])
+
+    @staticmethod
+    def _get_updated_property(new_vertex, graph_vertex, prop):
+        if new_vertex and prop in new_vertex.properties and new_vertex[prop]:
+            return new_vertex[prop]
+        elif graph_vertex and prop in graph_vertex.properties \
+                and graph_vertex[prop]:
+            return graph_vertex[prop]
+
+        return None
