@@ -51,7 +51,7 @@ class ScenarioRepositoryTest(base.BaseTest):
 
         # Test assertions
         self.assertIsNotNone(scenario_repository)
-        self.assertEqual(1, len(scenario_repository.templates))
+        self.assertEqual(2, len(scenario_repository.templates))
 
     def test_init_scenario_repository(self):
 
@@ -74,6 +74,4 @@ class ScenarioRepositoryTest(base.BaseTest):
         pass
 
     def test_add_template(self):
-
-        # Test Assertions
-        print('lol')
+        pass

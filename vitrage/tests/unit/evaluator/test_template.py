@@ -13,7 +13,9 @@
 # under the License.
 from oslo_log import log as logging
 
+from vitrage.common.constants import EdgeLabels
 from vitrage.common import file_utils
+from vitrage.evaluator.template import ConditionVar
 from vitrage.evaluator.template import EdgeDescription
 from vitrage.evaluator.template import Template
 from vitrage.evaluator.template_fields import TemplateFields as TFields
@@ -24,15 +26,15 @@ from vitrage.tests.mocks import utils
 LOG = logging.getLogger(__name__)
 
 
-class TemplateTest(base.BaseTest):
+class BasicTemplateTest(base.BaseTest):
 
-    VALID_TEMPLATE_NAME = 'host_high_cpu_load_to_instance_cpu_suboptimal.yaml'
+    BASIC_TEMPLATE = 'basic.yaml'
 
-    def test_valid_template(self):
+    def test_basic_template(self):
 
         # Test setup
         template_path = '%s/templates/%s' % (utils.get_resources_dir(),
-                                             self.VALID_TEMPLATE_NAME)
+                                             self.BASIC_TEMPLATE)
         template_definition = file_utils.load_yaml_file(template_path, True)
 
         template = Template(template_definition)
@@ -47,9 +49,7 @@ class TemplateTest(base.BaseTest):
 
         relate_def = definitions[TFields.RELATIONSHIPS]
         self._validate_relationships(relationships, relate_def, entities)
-
-        scenarios_definition = template_definition[TFields.SCENARIOS]
-        self._validate_scenarios(scenarios, scenarios_definition)
+        self._validate_scenarios(scenarios, entities)
 
     def _validate_entities(self, entities, entities_def):
 
@@ -102,12 +102,51 @@ class TemplateTest(base.BaseTest):
                     continue
                 self.assertEqual(value, relationship.properties[key])
 
-    def _validate_scenarios(self, scenarios, scenarios_definition):
+    def _validate_scenarios(self, scenarios, entities):
+        """Validates scenario parsing
 
+        Expects to single scenario:
+         1. condition consitsts from one variable (type EdgeDescription)
+         2. Actions - set state action
+        :param scenarios: parsed scenarios
+        :param scenarios_definition:
+        """
         self.assertIsNotNone(scenarios)
-        self.assertEqual(len(scenarios), len(scenarios_definition))
+        self.assertEqual(len(scenarios), 1)
 
-        for scenario in scenarios:
+        scenario = scenarios[0]
 
-            self.assert_is_not_empty(scenario.condition)
-            self.assert_is_not_empty(scenario.actions)
+        condition = scenario.condition
+        self.assertEqual(len(condition), 1)
+
+        condition_var = condition[0]
+        self.assertTrue(isinstance(condition_var, ConditionVar))
+
+        variable = condition_var.variable
+        self.assertTrue(isinstance(variable, EdgeDescription))
+
+        edge = variable[0]
+        self.assertEqual(edge.source_id, '1')
+        self.assertEqual(edge.target_id, '2')
+        self.assertEqual(edge.label, EdgeLabels.ON)
+
+        source = variable[1]
+        self.assertEqual(source, entities[source.vertex_id])
+
+        target = variable[2]
+        self.assertEqual(target, entities[target.vertex_id])
+
+        actions = scenario.actions
+        self.assert_is_not_empty(scenario.actions)
+        self.assertEqual(len(actions), 1)
+
+        action = actions[0]
+        self.assertEqual(action.type, 'SET_STATE')
+
+        targets = action.targets
+        self.assertEqual(len(targets), 1)
+        self.assertEqual(targets['target'], '2')
+
+        properties = action.properties
+        self.assertEqual(len(properties), 1)
+        self.assertEqual(properties['state'], 'SUBOPTIMAL')

@@ -126,7 +126,7 @@ def validate_entity(entity):
         Required(TemplateFields.CATEGORY): Any(str, basestring),
         TemplateFields.TYPE: Any(str, basestring),
         Required(TemplateFields.TEMPLATE_ID): Any(str, basestring, int)
-    })
+    }, extra=True)
     error_msg = SCHEMA_CONTENT_ERROR % (
         TemplateFields.ENTITY,
         '"%s" and "%s"' % (TemplateFields.CATEGORY, TemplateFields.TEMPLATE_ID)
