@@ -84,9 +84,7 @@ class ScenarioRepository(object):
     def _add_template_scenarios(self, template):
 
         for scenario in template.scenarios:
-
-            condition_vars = self._extract_condition_vars(scenario.condition)
-            for condition_var in condition_vars:
+            for condition_var in scenario.condition:
 
                 if condition_var.type == RELATIONSHIP:
                     edge_desc = condition_var.variable
@@ -99,15 +97,6 @@ class ScenarioRepository(object):
     @staticmethod
     def _create_scenario_key(properties):
         return frozenset(properties)
-
-    @staticmethod
-    def _extract_condition_vars(condition):
-
-        condition_vars = []
-        for and_condition in condition:
-            condition_vars = condition_vars + and_condition
-
-        return condition_vars
 
     def _add_relationship(self, scenario, edge_desc):
 

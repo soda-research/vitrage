@@ -178,7 +178,7 @@ class Template(object):
             return self._extract_or_condition(condition_dnf)
 
         if isinstance(condition_dnf, And):
-            return [self._extract_and_condition(condition_dnf)]
+            return self._extract_and_condition(condition_dnf)
 
         if isinstance(condition_dnf, Not):
             return [(self._extract_condition_var(condition_dnf, False))]
