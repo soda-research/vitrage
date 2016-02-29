@@ -20,23 +20,29 @@ import yaml
 LOG = log.getLogger(__name__)
 
 
-def load_files(dir_path, suffix=None):
-    loaded_files = os.listdir(dir_path)
-
+def load_files(dir_path, suffix=None,
+               with_pathname=False,
+               with_exception=False):
+    try:
+        loaded_files = os.listdir(dir_path)
+    except Exception as e:
+        if with_exception:
+            raise e
+        else:
+            return []
     if suffix:
-        loaded_files = [f for f in loaded_files if f.endswith(suffix)]
+        loaded_files = [dir_path + '/' + f if with_pathname else f
+                        for f in loaded_files if f.endswith(suffix)]
 
     return loaded_files
 
 
 def load_yaml_files(dir_path, with_exception=False):
-    files = load_files(dir_path, '.yaml')
+    files = load_files(dir_path, '.yaml', with_pathname=True)
 
     yaml_files = []
-    for file in files:
-        full_path = dir_path + '/' + file
-
-        config = load_yaml_file(full_path, with_exception)
+    for f in files:
+        config = load_yaml_file(f, with_exception)
         if config:
             yaml_files.append(config)
 
