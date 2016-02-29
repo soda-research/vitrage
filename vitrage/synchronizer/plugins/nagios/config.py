@@ -11,33 +11,38 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-import os
+from oslo_log import log
 import re
+import traceback
 
 from vitrage.common import file_utils
 
+LOG = log.getLogger(__name__)
 NAGIOS_HOST = 'nagios_host'
+NAGIOS = 'nagios'
+HOST = 'host'
+TYPE = 'type'
+NAME = 'name'
 
 
 class NagiosConfig(object):
-
-    NAGIOS = 'nagios'
-    HOST = 'host'
-    TYPE = 'type'
-    NAME = 'name'
-
     def __init__(self, conf):
-        self.mappings = []
-
-        nagios_config_file = conf.synchronizer_plugins.nagios_config_file
-
-        if nagios_config_file and os.path.isfile(nagios_config_file):
+        try:
+            nagios_config_file = conf.synchronizer_plugins.nagios_config_file
             nagios_config = file_utils.load_yaml_file(nagios_config_file)
+            nagios = nagios_config[NAGIOS]      # nagios root in the yaml file
 
-            for config in nagios_config[self.NAGIOS]:
-                self.mappings.append(NagiosHostMapping(config[NAGIOS_HOST],
-                                                       config[self.TYPE],
-                                                       config[self.NAME]))
+            self.mappings = [self._create_mapping(config) for config in nagios]
+
+        except Exception:
+            LOG.error("Exception: %s", traceback.print_exc())
+            self.mappings = []
+
+    @staticmethod
+    def _create_mapping(config):
+        return NagiosHostMapping(config[NAGIOS_HOST],
+                                 config[TYPE],
+                                 config[NAME])
 
     def get_vitrage_resource(self, nagios_host):
         """Get Vitrage resource type and name for the given nagios host name
