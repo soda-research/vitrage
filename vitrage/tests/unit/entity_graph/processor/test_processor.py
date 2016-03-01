@@ -112,7 +112,7 @@ class TestProcessor(TestEntityGraphUnitBase):
                           self.NUM_EDGES_AFTER_CREATION)
         neighbor_vertex = \
             processor.entity_graph.get_vertex(old_neighbor_id)
-        self.assertEqual(None, neighbor_vertex)
+        self.assertIsNone(neighbor_vertex)
 
     def test_delete_entity(self):
         # create instance event with host neighbor and check validity
@@ -141,8 +141,7 @@ class TestProcessor(TestEntityGraphUnitBase):
         # check state
         self._check_graph(processor, self.NUM_VERTICES_AFTER_CREATION,
                           self.NUM_EDGES_AFTER_CREATION)
-        self.assertEqual(None, processor.entity_graph.
-                         get_vertex(old_neighbor_id))
+        self.assertIsNone(processor.entity_graph.get_vertex(old_neighbor_id))
 
         # update instance with the same neighbor
         processor._update_neighbors(vertex, neighbors)
