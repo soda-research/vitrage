@@ -38,6 +38,8 @@ Neighbor = namedtuple('Neighbor', ['vertex', 'edge'])
 
 TIMESTAMP_FORMAT = '%Y-%m-%dT%H:%M:%SZ'
 
+AVAILABLE = 'available'
+
 Neighbor = namedtuple('Neighbor', ['vertex', 'edge'])
 
 
@@ -66,6 +68,7 @@ def create_node_placeholder_vertex():
         key,
         entity_category=cons.EntityCategory.RESOURCE,
         entity_type=EntityType.OPENSTACK_NODE,
+        entity_state=AVAILABLE,
         metadata=metadata
     )
 
