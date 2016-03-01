@@ -32,6 +32,8 @@ class TestProcessorFunctional(TestEntityGraphFunctionalBase):
         super(TestProcessorFunctional, self).setUp()
         self.conf = cfg.ConfigOpts()
         self.conf.register_opts(self.PROCESSOR_OPTS, group='entity_graph')
+        self.conf.register_opts(self.PLUGINS_OPTS,
+                                group='synchronizer_plugins')
 
     def test_create_entity_graph(self):
         processor = self._create_processor_with_graph(self.conf)

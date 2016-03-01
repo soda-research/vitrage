@@ -16,53 +16,25 @@
 from oslo_log import log as logging
 from oslo_utils import importutils
 
-from vitrage.common.constants import EntityType
 from vitrage.common.constants import SynchronizerProperties as SyncProps
 from vitrage.common.exception import VitrageTransformerError
-from vitrage.synchronizer.plugins.nagios.transformer import NagiosTransformer
-from vitrage.synchronizer.plugins.nova.host.transformer import HostTransformer
-from vitrage.synchronizer.plugins.nova.instance.transformer import \
-    InstanceTransformer
-from vitrage.synchronizer.plugins.nova.zone.transformer import ZoneTransformer
-from vitrage.synchronizer.plugins.static_physical.transformer import \
-    StaticPhysicalTransformer
 
 LOG = logging.getLogger(__name__)
 
 
 class TransformerManager(object):
 
-    def __init__(self):
-        self.transformers = self._register_transformer_classes()
+    def __init__(self, conf):
+        self.transformers = self.register_transformer_classes(conf)
 
     @staticmethod
-    def _register_transformer_classes():
+    def register_transformer_classes(conf):
 
         transformers = {}
-
-        transformers[EntityType.NOVA_INSTANCE] = importutils.import_object(
-            "%s.%s" % (InstanceTransformer.__module__,
-                       InstanceTransformer.__name__),
-            transformers)
-
-        transformers[EntityType.NOVA_HOST] = importutils.import_object(
-            "%s.%s" % (HostTransformer.__module__, HostTransformer.__name__),
-            transformers)
-
-        transformers[EntityType.NOVA_ZONE] = importutils.import_object(
-            "%s.%s" % (ZoneTransformer.__module__, ZoneTransformer.__name__),
-            transformers)
-
-        transformers[EntityType.SWITCH] = importutils.import_object(
-            "%s.%s" % (StaticPhysicalTransformer.__module__,
-                       StaticPhysicalTransformer.__name__),
-            transformers)
-
-        transformers[EntityType.NAGIOS] = importutils.import_object(
-            "%s.%s" % (NagiosTransformer.__module__,
-                       NagiosTransformer.__name__),
-            transformers)
-
+        for plugin in conf.synchronizer_plugins.plugin_type:
+                transformers[plugin] = importutils.import_object(
+                    conf.synchronizer_plugins[plugin]['transformer'],
+                    transformers)
         return transformers
 
     def get_transformer(self, key):

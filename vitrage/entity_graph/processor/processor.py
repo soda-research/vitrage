@@ -32,7 +32,7 @@ class Processor(processor.ProcessorBase):
 
     def __init__(self, cfg, initialization_status, e_graph=None):
         self.cfg = cfg
-        self.transformer_manager = TransformerManager()
+        self.transformer_manager = TransformerManager(self.cfg)
         self.state_manager = StateManager(self.cfg)
         self._initialize_events_actions()
         self.initialization_status = initialization_status

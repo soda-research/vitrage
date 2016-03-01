@@ -12,17 +12,22 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from oslo_config import cfg
+
 from vitrage.common.constants import VertexProperties
 from vitrage.entity_graph import transformer_manager
 from vitrage.graph import driver as graph
-from vitrage.tests import base
+from vitrage.tests.unit.entity_graph.base import TestEntityGraphUnitBase
 
 
-class TestBaseProcessor(base.BaseTest):
+class TestBaseProcessor(TestEntityGraphUnitBase):
 
     def setUp(self):
         super(TestBaseProcessor, self).setUp()
-        self.transform = transformer_manager.TransformerManager()
+        self.conf = cfg.ConfigOpts()
+        self.conf.register_opts(self.PLUGINS_OPTS,
+                                group='synchronizer_plugins')
+        self.transform = transformer_manager.TransformerManager(self.conf)
 
     @staticmethod
     def _update_vertex_to_graph(entity_graph, category, type, id,

@@ -28,11 +28,18 @@ LOG = logging.getLogger(__name__)
 class NagiosSynchronizerTest(NagiosBaseTest):
 
     OPTS = [
-        cfg.StrOpt('nagios_config_file',
-                   default=utils.get_resources_dir() +
-                   '/nagios/nagios_conf.yaml',
-                   help='Nagios configuation file'
-                   ),
+        cfg.DictOpt('nagios',
+                    default={
+                        'synchronizer':
+                            'vitrage.synchronizer.plugins.nagios.synchronizer'
+                            '.NagiosSynchronizer',
+                        'transformer': 'vitrage.synchronizer.plugins'
+                                       '.nagios.transformer.NagiosTransformer',
+                        'user': '',
+                        'password': '',
+                        'url': '',
+                        'config_file': utils.get_resources_dir() +
+                                       '/nagios/nagios_conf.yaml'},)
     ]
 
     @classmethod

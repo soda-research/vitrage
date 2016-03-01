@@ -34,16 +34,28 @@ LOG = logging.getLogger(__name__)
 class TestStaticPhysicalSynchronizer(base.BaseTest):
 
     OPTS = [
-        cfg.StrOpt('static_plugins_dir',
-                   default=utils.get_resources_dir() + '/static_plugins',
-                   ),
+        cfg.DictOpt('switch',
+                    default={
+                        'synchronizer':
+                            'vitrage.synchronizer.plugins.static_physical'
+                            '.synchronizer.StaticPhysicalSynchronizer',
+                        'transformer':
+                            'vitrage.synchronizer.plugins.static_physical.'
+                            'transformer.StaticPhysicalTransformer',
+                        'dir': utils.get_resources_dir() + '/static_plugins'},)
     ]
 
     CHANGES_OPTS = [
-        cfg.StrOpt('static_plugins_dir',
-                   default=utils.get_resources_dir() + '/static_plugins/'
-                                                       'changes_plugins',
-                   ),
+        cfg.DictOpt('switch',
+                    default={
+                        'synchronizer':
+                            'vitrage.synchronizer.plugins.static_physical'
+                            '.synchronizer.StaticPhysicalSynchronizer',
+                        'transformer':
+                            'vitrage.synchronizer.plugins.static_physical.'
+                            'transformer.StaticPhysicalTransformer',
+                        'dir': utils.get_resources_dir() + '/static_plugins/'
+                                                           'changes_plugins'},)
     ]
 
     def setUp(self):
@@ -56,11 +68,11 @@ class TestStaticPhysicalSynchronizer(base.BaseTest):
     def test_static_plugins_loader(self):
         # Setup
         total_static_plugins = \
-            os.listdir(self.conf.synchronizer_plugins.static_plugins_dir)
+            os.listdir(self.conf.synchronizer_plugins.switch['dir'])
 
         # Action
         static_configs = file_utils.load_yaml_files(
-            self.conf.synchronizer_plugins.static_plugins_dir)
+            self.conf.synchronizer_plugins.switch['dir'])
 
         # Test assertions
         # -1 is because there are 2 files and a folder in static_plugins_dir

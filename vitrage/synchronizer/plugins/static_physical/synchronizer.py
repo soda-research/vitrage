@@ -43,12 +43,12 @@ class StaticPhysicalSynchronizer(SynchronizerBase):
     def _get_all_entities(self):
         static_entities = []
 
-        if os.path.isdir(self.cfg.synchronizer_plugins.static_plugins_dir):
+        if os.path.isdir(self.cfg.synchronizer_plugins.switch['dir']):
             files = file_utils.load_files(
-                self.cfg.synchronizer_plugins.static_plugins_dir, '.yaml')
+                self.cfg.synchronizer_plugins.switch['dir'], '.yaml')
 
             for file in files:
-                full_path = self.cfg.synchronizer_plugins.static_plugins_dir \
+                full_path = self.cfg.synchronizer_plugins.switch['dir'] \
                     + '/' + file
                 static_entities += self._get_entities_from_file(file,
                                                                 full_path)
@@ -71,10 +71,10 @@ class StaticPhysicalSynchronizer(SynchronizerBase):
 
         entities_updates = []
         files = file_utils.load_files(
-            self.cfg.synchronizer_plugins.static_plugins_dir, '.yaml')
+            self.cfg.synchronizer_plugins.switch['dir'], '.yaml')
 
         for file in files:
-            full_path = self.cfg.synchronizer_plugins.static_plugins_dir +\
+            full_path = self.cfg.synchronizer_plugins.switch['dir'] +\
                 '/' + file
             config = file_utils.load_yaml_file(full_path)
             if config:
