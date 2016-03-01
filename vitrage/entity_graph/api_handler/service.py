@@ -17,8 +17,10 @@ import traceback
 
 import eventlet
 from oslo_config import cfg
+
 from oslo_log import log
 import oslo_messaging
+
 from oslo_service import service as os_service
 
 from vitrage.common.constants import EdgeLabels
@@ -101,13 +103,22 @@ class EntityGraphApis(object):
         return json.dumps({'alarms': [v.properties for v in modified_alarms]})
 
     def get_topology(self, ctx, graph_type, depth, query, root):
+        found_graph = self._get_topology(ctx, graph_type, depth, query, root)
+        return found_graph.output_graph()
+
+    def get_rca(self, ctx, graph_type, depth, query, root):
+        found_graph = self._get_topology(ctx, graph_type, depth, query, root)
+        found_graph['inspected_index'] = \
+            self._find_rca_index(found_graph, root)
+        return found_graph.output_graph()
+
+    def _get_topology(self, ctx, graph_type, depth, query, root):
         ga = create_algorithm(self.entity_graph)
         query = query if query else \
             {'!=': {VProps.CATEGORY: EntityCategory.ALARM}}
-        found_graph = ga.graph_query_vertices(
+        return ga.graph_query_vertices(
             query_dict=query,
             root_id=root)
-        return found_graph.output_graph()
 
     @staticmethod
     def _get_first(lst):
@@ -134,3 +145,12 @@ class EntityGraphApis(object):
                 LOG.error(ve)
 
         return [item for item in alarms if item not in incorrect_alarms]
+
+    @staticmethod
+    def _find_rca_index(found_graph, root):
+        root_index = 0
+        for vertex in found_graph._g:
+            if vertex.vertex_id == root:
+                break
+            root_index += 1
+        return root_index

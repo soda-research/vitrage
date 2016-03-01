@@ -57,5 +57,6 @@
       "relationship": "causes"
     }
   ],
-  "multigraph": false
+  "multigraph": false,
+  "inspected_index": 0
 }
