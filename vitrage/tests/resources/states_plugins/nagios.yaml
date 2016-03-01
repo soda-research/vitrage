@@ -6,20 +6,20 @@ states:
       original states:
         - name: UNKNOWN
   - normalized state:
-      name: HIGH
+      name: CRITICAL
       priority: 40
       original states:
         - name: CRITITCAL
         - name: DOWN
   - normalized state:
-      name: MEDIUM
+      name: SEVER
       priority: 30
       original states:
-        - name: WARNING
   - normalized state:
-      name: LOW
+      name: WARNING
       priority: 20
       original states:
+        - name: WARNING
   - normalized state:
       name: OK
       priority: 10

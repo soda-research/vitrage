@@ -134,7 +134,7 @@ The following template demonstrates
 
 Example 2: Deduced state based on alarm
 ---------------------------------------
-The following template will change the state of a resource to "ERROR" if there is any alarm of severity "HIGH" on it. Also note that entity ids can be strings as well.
+The following template will change the state of a resource to "ERROR" if there is any alarm of severity "CRITICAL" on it. Also note that entity ids can be strings as well.
 
  ::
 
@@ -147,7 +147,7 @@ The following template will change the state of a resource to "ERROR" if there i
                 template_id: a_resource # entity ids are any string
             - entity:
                 category: ALARM
-                severity: HIGH
+                severity: CRITICAL
                 template_id: high_alarm # entity ids are any string
         relationships:
             - relationship:

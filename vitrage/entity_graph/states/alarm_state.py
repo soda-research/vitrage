@@ -14,8 +14,8 @@
 
 
 class AlarmState(object):
-    HIGH = 'HIGH'
-    MEDIUM = 'MEDIUM'
-    LOW = 'LOW'
-    OK = 'OK'
+    CRITICAL = 'CRITICAL'
+    SEVER = 'SEVER'
+    WARNING = 'WARNING'
+    DISABLED = 'DISABLED'
     UNKNOWN = 'UNKNOWN'

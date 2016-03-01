@@ -50,21 +50,24 @@ class StateManager(object):
 
     def aggregated_state(self, state1, state2, plugin_name,
                          is_normalized=False):
-        upper_state1 = state1 if not state1 else state1.upper()
-        upper_state2 = state2 if not state2 else state2.upper()
+        if plugin_name in self.states_plugins:
+            upper_state1 = state1 if not state1 else state1.upper()
+            upper_state2 = state2 if not state2 else state2.upper()
 
-        normalized_state1 = upper_state1.upper() if is_normalized else \
-            self.normalize_state(plugin_name, upper_state1)
-        normalized_state2 = upper_state2.upper() if is_normalized else \
-            self.normalize_state(plugin_name, upper_state2)
+            normalized_state1 = upper_state1.upper() if is_normalized else \
+                self.normalize_state(plugin_name, upper_state1)
+            normalized_state2 = upper_state2.upper() if is_normalized else \
+                self.normalize_state(plugin_name, upper_state2)
 
-        priority_state1 = self.state_priority(plugin_name,
-                                              normalized_state1)
-        priority_state2 = self.state_priority(plugin_name,
-                                              normalized_state2)
+            priority_state1 = self.state_priority(plugin_name,
+                                                  normalized_state1)
+            priority_state2 = self.state_priority(plugin_name,
+                                                  normalized_state2)
 
-        return normalized_state1 if priority_state1 > priority_state2 \
-            else normalized_state2
+            return normalized_state1 if priority_state1 > priority_state2 \
+                else normalized_state2
+        else:
+            return ResourceState.UNDEFINED
 
     def _load_state_configurations(self):
         states_plugins = {}
