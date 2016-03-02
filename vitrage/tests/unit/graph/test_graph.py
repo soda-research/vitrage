@@ -18,7 +18,6 @@ test_vitrage graph
 
 Tests for `vitrage` graph driver
 """
-from oslo_log import log as logging
 
 from vitrage.common.constants import EdgeProperties as EProps
 from vitrage.common.constants import VertexProperties as VProps
@@ -90,6 +89,14 @@ class GraphTest(GraphTestBase):
                          'Graph item should change after update')
         self.assertEqual(updated_v[VProps.CATEGORY], v[VProps.CATEGORY],
                          'Graph item should change after update')
+
+        # Update the graph item and see changes take place
+        updated_v['KUKU'] = None
+        g.update_vertex(updated_v)
+        # Get it again
+        v = g.get_vertex(v_node.vertex_id)
+        self.assertFalse('KUKU' in v.properties,
+                         'Update value to None should entirly remove the key')
 
         # check metadata
         another_vertex = utils.create_vertex(
@@ -169,6 +176,14 @@ class GraphTest(GraphTestBase):
         self.assertEqual(updated_e[EProps.UPDATE_TIMESTAMP],
                          e[EProps.UPDATE_TIMESTAMP],
                          'Graph item should change after update')
+
+        # Update the graph item and see changes take place
+        updated_e[EProps.IS_DELETED] = None
+        g.update_edge(updated_e)
+        # Get it again
+        e = g.get_edge(v_node.vertex_id, v_host.vertex_id, label)
+        self.assertFalse(EProps.IS_DELETED in e.properties,
+                         'Update value to None should entirly remove the key')
 
         # check metadata
         another_label = 'ANOTHER_LABEL'

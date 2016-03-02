@@ -13,12 +13,13 @@
 # under the License.
 
 
-from oslo_log import log as logging
-
 import copy
 import json
+
 import networkx as nx
 from networkx.readwrite import json_graph
+
+from oslo_log import log as logging
 
 from elements import Edge
 from elements import Vertex
@@ -28,7 +29,6 @@ from notifier import Notifier
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.graph.filter import check_filter
 from vitrage.graph.query import create_predicate
-
 
 LOG = logging.getLogger(__name__)
 
@@ -152,10 +152,10 @@ class NXGraph(Graph):
 
         :type v: Vertex
         """
-        if hard_update:
-            properties = self._g.node.get(v.vertex_id, None)
-            if properties:
-                properties.clear()
+        orig_prop = self._g.node.get(v.vertex_id, None)
+        if orig_prop and hard_update:
+            orig_prop.clear()
+        v.properties = self._update_properties(orig_prop, v.properties)
         self._add_vertex(v)
 
     @Notifier.update_notify
@@ -164,13 +164,26 @@ class NXGraph(Graph):
 
         :type e: Edge
         """
-        if hard_update:
-            properties = self._get_edge_properties(e.source_id,
-                                                   e.target_id,
-                                                   e.label)
-            if properties:
-                properties.clear()
+        orig_prop = self._g.edge.get(
+            e.source_id, {}).get(
+            e.target_id, {}).get(
+            e.label, None)
+        if orig_prop and hard_update:
+            orig_prop.clear()
+        e.properties = self._update_properties(orig_prop, e.properties)
         self._add_edge(e)
+
+    @staticmethod
+    def _update_properties(orig_props, new_props):
+        if orig_props is None:
+            orig_props = dict()
+        keys_to_remove = [key for key, val in new_props.items() if val is None]
+        for key in keys_to_remove:
+            del new_props[key]
+            if key in orig_props:
+                del orig_props[key]
+        orig_props.update(new_props)
+        return orig_props
 
     def remove_vertex(self, v):
         """Remove Vertex v and its edges from the graph
