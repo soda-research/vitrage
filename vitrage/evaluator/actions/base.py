@@ -13,7 +13,11 @@
 # under the License.
 
 import abc
+from collections import namedtuple
 import six
+
+
+ActionWrapper = namedtuple('ActionWrapper', ['func', 'params'])
 
 
 @six.add_metaclass(abc.ABCMeta)
