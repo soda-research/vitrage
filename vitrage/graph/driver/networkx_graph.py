@@ -153,10 +153,11 @@ class NXGraph(Graph):
         :type v: Vertex
         """
         orig_prop = self._g.node.get(v.vertex_id, None)
-        if orig_prop and hard_update:
-            orig_prop.clear()
-        v.properties = self._update_properties(orig_prop, v.properties)
-        self._add_vertex(v)
+        if not orig_prop:
+            self._add_vertex(v)
+            return
+        new_prop = self._merge_properties(orig_prop, v.properties, hard_update)
+        self._g.node[v.vertex_id] = new_prop
 
     @Notifier.update_notify
     def update_edge(self, e, hard_update=False):
@@ -168,22 +169,19 @@ class NXGraph(Graph):
             e.source_id, {}).get(
             e.target_id, {}).get(
             e.label, None)
-        if orig_prop and hard_update:
-            orig_prop.clear()
-        e.properties = self._update_properties(orig_prop, e.properties)
-        self._add_edge(e)
+        if not orig_prop:
+            self._add_edge(e)
+            return
+        new_prop = self._merge_properties(orig_prop, e.properties, hard_update)
+        self._g.edge[e.source_id][e.target_id][e.label] = new_prop
 
     @staticmethod
-    def _update_properties(orig_props, new_props):
-        if orig_props is None:
-            orig_props = dict()
-        keys_to_remove = [key for key, val in new_props.items() if val is None]
-        for key in keys_to_remove:
-            del new_props[key]
-            if key in orig_props:
-                del orig_props[key]
-        orig_props.update(new_props)
-        return orig_props
+    def _merge_properties(base_props, new_props, hard_update):
+        if base_props is None or hard_update:
+            base_props = copy.copy(new_props)
+        else:
+            base_props.update(copy.copy(new_props))
+        return {k: v for k, v in base_props.items() if v is not None}
 
     def remove_vertex(self, v):
         """Remove Vertex v and its edges from the graph
