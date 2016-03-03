@@ -116,9 +116,9 @@ class NovaHostTransformerTest(base.BaseTest):
             self._validate_zone_neighbor(neighbors[0], event)
 
             if SyncMode.SNAPSHOT == event[SyncProps.SYNC_MODE]:
-                self.assertEqual(EventAction.UPDATE, wrapper.action)
+                self.assertEqual(EventAction.UPDATE_ENTITY, wrapper.action)
             else:
-                self.assertEqual(EventAction.CREATE, wrapper.action)
+                self.assertEqual(EventAction.CREATE_ENTITY, wrapper.action)
 
     def _validate_zone_neighbor(self, zone, event):
 
@@ -207,7 +207,7 @@ class NovaHostTransformerTest(base.BaseTest):
         action = host_transformer._extract_action_type(hosts_events[0])
 
         # Test assertion
-        self.assertEqual(EventAction.UPDATE, action)
+        self.assertEqual(EventAction.UPDATE_ENTITY, action)
 
         # Test setup
         spec_list = mock_sync.simple_host_generators(
@@ -222,6 +222,6 @@ class NovaHostTransformerTest(base.BaseTest):
         action = host_transformer._extract_action_type(hosts_events[0])
 
         # Test assertions
-        self.assertEqual(EventAction.CREATE, action)
+        self.assertEqual(EventAction.CREATE_ENTITY, action)
 
         # TODO(lhartal): To add extract action from update event

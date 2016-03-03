@@ -24,6 +24,8 @@ from vitrage.common.datetime_utils import utcnow
 from vitrage.entity_graph.initialization_status import InitializationStatus
 from vitrage.entity_graph.processor import processor as proc
 from vitrage.entity_graph.states.resource_state import NormalizedResourceState
+import vitrage.graph.utils as graph_utils
+from vitrage.synchronizer.plugins import transformer_base
 from vitrage.tests.unit.entity_graph.base import TestEntityGraphUnitBase
 
 
@@ -126,6 +128,52 @@ class TestProcessor(TestEntityGraphUnitBase):
                           self.NUM_EDGES_AFTER_DELETION)
         self.assertTrue(processor.entity_graph.is_vertex_deleted(vertex))
 
+    def test_update_relationship(self):
+        # setup
+        vertex1, neighbors1, processor = self._create_entity(
+            spec_type=self.INSTANCE_SPEC,
+            sync_mode=SyncMode.INIT_SNAPSHOT)
+        vertex2, neighbors2, processor = self._create_entity(
+            spec_type=self.INSTANCE_SPEC,
+            sync_mode=SyncMode.INIT_SNAPSHOT,
+            processor=processor)
+        self.assertEqual(2, processor.entity_graph.num_edges())
+
+        new_edge = graph_utils.create_edge(vertex1.vertex_id,
+                                           vertex2.vertex_id,
+                                           'backup')
+        new_neighbors = [transformer_base.Neighbor(None, new_edge)]
+
+        # action
+        processor.update_relationship(None, new_neighbors)
+
+        # test assertions
+        self.assertEqual(3, processor.entity_graph.num_edges())
+
+    def test_delete_relationship(self):
+        # setup
+        vertex1, neighbors1, processor = self._create_entity(
+            spec_type=self.INSTANCE_SPEC,
+            sync_mode=SyncMode.INIT_SNAPSHOT)
+        vertex2, neighbors2, processor = self._create_entity(
+            spec_type=self.INSTANCE_SPEC,
+            sync_mode=SyncMode.INIT_SNAPSHOT,
+            processor=processor)
+        self.assertEqual(2, processor.entity_graph.num_edges())
+
+        new_edge = graph_utils.create_edge(vertex1.vertex_id,
+                                           vertex2.vertex_id,
+                                           'backup')
+        processor.entity_graph.add_edge(new_edge)
+        self.assertEqual(3, processor.entity_graph.num_edges())
+        new_neighbors = [transformer_base.Neighbor(None, new_edge)]
+
+        # action
+        processor.delete_relationship(None, new_neighbors)
+
+        # test assertions
+        self.assertEqual(2, processor.entity_graph.num_edges())
+
     def test_update_neighbors(self):
         # create instance event with host neighbor and check validity
         (vertex, neighbors, processor) = self._create_and_check_entity()
@@ -173,19 +221,19 @@ class TestProcessor(TestEntityGraphUnitBase):
         # state already exists and its updated
         instances[0][0][VProps.STATE] = 'SUSPENDED'
         instances[0][1]._calculate_aggregated_state(instances[0][0],
-                                                    EventAction.UPDATE)
+                                                    EventAction.UPDATE_ENTITY)
 
         # vitrage state doesn't exist and its updated
         instances[1][0][VProps.STATE] = None
         instances[1][1].entity_graph.update_vertex(instances[1][0])
         instances[1][0][VProps.VITRAGE_STATE] = 'SUBOPTIMAL'
         instances[1][1]._calculate_aggregated_state(instances[1][0],
-                                                    EventAction.UPDATE)
+                                                    EventAction.UPDATE_ENTITY)
 
         # state exists and vitrage state changes
         instances[2][0][VProps.VITRAGE_STATE] = 'SUBOPTIMAL'
         instances[2][1]._calculate_aggregated_state(instances[2][0],
-                                                    EventAction.UPDATE)
+                                                    EventAction.UPDATE_ENTITY)
 
         # vitrage state exists and state changes
         instances[3][0][VProps.STATE] = None
@@ -193,20 +241,20 @@ class TestProcessor(TestEntityGraphUnitBase):
         instances[3][1].entity_graph.update_vertex(instances[3][0])
         instances[3][0][VProps.STATE] = 'SUSPENDED'
         instances[3][1]._calculate_aggregated_state(instances[3][0],
-                                                    EventAction.UPDATE)
+                                                    EventAction.UPDATE_ENTITY)
 
         # state and vitrage state exists and state changes
         instances[4][0][VProps.VITRAGE_STATE] = 'SUBOPTIMAL'
         instances[4][1].entity_graph.update_vertex(instances[4][0])
         instances[4][0][VProps.STATE] = 'SUSPENDED'
         instances[4][1]._calculate_aggregated_state(instances[4][0],
-                                                    EventAction.UPDATE)
+                                                    EventAction.UPDATE_ENTITY)
 
         # state and vitrage state exists and vitrage state changes
         instances[5][0][VProps.VITRAGE_STATE] = 'SUBOPTIMAL'
         instances[5][1].entity_graph.update_vertex(instances[5][0])
         instances[5][1]._calculate_aggregated_state(instances[5][0],
-                                                    EventAction.UPDATE)
+                                                    EventAction.UPDATE_ENTITY)
 
         # test assertions
         self.assertEqual(NormalizedResourceState.SUSPENDED,
@@ -222,12 +270,13 @@ class TestProcessor(TestEntityGraphUnitBase):
         self.assertEqual(NormalizedResourceState.SUBOPTIMAL,
                          instances[5][0][VProps.AGGREGATED_STATE])
 
-    def _create_and_check_entity(self, properties={}):
+    def _create_and_check_entity(self, properties={}, processor=None):
         # create instance event with host neighbor
         (vertex, neighbors, processor) = self._create_entity(
             spec_type=self.INSTANCE_SPEC,
             sync_mode=SyncMode.INIT_SNAPSHOT,
-            properties=properties)
+            properties=properties,
+            processor=processor)
 
         # check the data in the graph is correct
         self._check_graph(processor,

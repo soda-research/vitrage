@@ -101,18 +101,18 @@ class StaticPhysicalTransformer(transformer_base.TransformerBase):
         sync_mode = entity_event[SyncProps.SYNC_MODE]
 
         if SyncMode.INIT_SNAPSHOT == sync_mode:
-            return EventAction.CREATE
+            return EventAction.CREATE_ENTITY
 
         if SyncMode.SNAPSHOT == sync_mode:
-            return EventAction.UPDATE
+            return EventAction.UPDATE_ENTITY
 
         if SyncMode.UPDATE == sync_mode:
             if SyncProps.EVENT_TYPE in entity_event:
                 event_type = entity_event[SyncProps.EVENT_TYPE]
-                return EventAction.DELETE if event_type == EventAction.DELETE \
-                    else EventAction.UPDATE
+                return EventAction.DELETE_ENTITY if event_type == EventAction.DELETE_ENTITY \
+                    else EventAction.UPDATE_ENTITY
             else:
-                return EventAction.UPDATE
+                return EventAction.UPDATE_ENTITY
 
         raise VitrageTransformerError(
             'Invalid sync mode: (%s)' % sync_mode)
