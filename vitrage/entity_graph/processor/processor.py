@@ -135,12 +135,14 @@ class Processor(processor.ProcessorBase):
         LOG.debug("Update relationship in entity graph: %s", neighbors)
 
         for neighbor in neighbors:
+            # TODO(Alexey): maybe to check if the vertices exists
             self.entity_graph.update_edge(neighbor.edge)
 
     def delete_relationship(self, updated_vertex, neighbors):
         LOG.debug("Delete relationship from entity graph: %s", neighbors)
 
         for neighbor in neighbors:
+            # TODO(Alexey): maybe to check if the vertices exists
             self.entity_graph.remove_edge(neighbor.edge)
 
     def handle_end_message(self, vertex, neighbors):
