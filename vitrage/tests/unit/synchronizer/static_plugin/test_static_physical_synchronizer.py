@@ -86,7 +86,7 @@ class TestStaticPhysicalSynchronizer(base.BaseTest):
 
         # Action
         changes = self.static_physical_synchronizer.get_changes(
-            EventAction.UPDATE)
+            EventAction.UPDATE_ENTITY)
 
         # Test Assertions
         status = any(change[VProps.TYPE] == EntityType.SWITCH and
@@ -95,7 +95,7 @@ class TestStaticPhysicalSynchronizer(base.BaseTest):
 
         status = any(change[VProps.TYPE] == EntityType.SWITCH and
                      change[VProps.ID] == '23456' and
-                     change[SyncProps.EVENT_TYPE] == 'delete'
+                     change[SyncProps.EVENT_TYPE] == EventAction.DELETE_ENTITY
                      for change in changes)
         self.assertEqual(True, status)
 
@@ -114,7 +114,7 @@ class TestStaticPhysicalSynchronizer(base.BaseTest):
 
         # Action
         changes = self.static_physical_synchronizer.get_changes(
-            EventAction.UPDATE)
+            EventAction.UPDATE_ENTITY)
 
         # Test Assertions
         self.assertEqual(0, len(changes))

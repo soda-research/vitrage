@@ -166,13 +166,13 @@ class TransformerBase(object):
         sync_mode = entity_event[SyncProps.SYNC_MODE]
 
         if cons.SyncMode.UPDATE == sync_mode:
-            return cons.EventAction.UPDATE
+            return cons.EventAction.UPDATE_ENTITY
 
         if cons.SyncMode.SNAPSHOT == sync_mode:
-            return cons.EventAction.UPDATE
+            return cons.EventAction.UPDATE_ENTITY
 
         if cons.SyncMode.INIT_SNAPSHOT == sync_mode:
-            return cons.EventAction.CREATE
+            return cons.EventAction.CREATE_ENTITY
 
         raise VitrageTransformerError(
             'Invalid sync mode: (%s)' % sync_mode)

@@ -128,4 +128,4 @@ class StaticPhysicalSynchronizer(SynchronizerBase):
 
     @staticmethod
     def _delete_event(entity):
-        entity[SyncProps.EVENT_TYPE] = EventAction.DELETE
+        entity[SyncProps.EVENT_TYPE] = EventAction.DELETE_ENTITY

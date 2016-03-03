@@ -71,7 +71,9 @@ class EntityType(object):
 
 
 class EventAction(object):
-    CREATE = 'create'
-    DELETE = 'delete'
-    UPDATE = 'update'
+    CREATE_ENTITY = 'create_entity'
+    DELETE_ENTITY = 'delete_entity'
+    UPDATE_ENTITY = 'update_entity'
+    DELETE_RELATIONSHIP = 'delete_relationship'
+    UPDATE_RELATIONSHIP = 'update_relationship'
     END_MESSAGE = 'end_message'

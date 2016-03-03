@@ -112,9 +112,9 @@ class NovaInstanceTransformerTest(base.BaseTest):
             sync_mode = event[SyncProps.SYNC_MODE]
 
             if sync_mode == SyncMode.INIT_SNAPSHOT:
-                self.assertEqual(EventAction.CREATE, wrapper.action)
+                self.assertEqual(EventAction.CREATE_ENTITY, wrapper.action)
             elif sync_mode == SyncMode.SNAPSHOT:
-                self.assertEqual(EventAction.UPDATE, wrapper.action)
+                self.assertEqual(EventAction.UPDATE_ENTITY, wrapper.action)
 
     def test_update_event_transform(self):
         LOG.debug('Test tactual transform action for update events')
@@ -147,11 +147,11 @@ class NovaInstanceTransformerTest(base.BaseTest):
 
             event_type = event[SyncProps.EVENT_TYPE]
             if event_type == 'compute.instance.delete.end':
-                self.assertEqual(EventAction.DELETE, wrapper.action)
+                self.assertEqual(EventAction.DELETE_ENTITY, wrapper.action)
             elif event_type == 'compute.instance.create.start':
-                self.assertEqual(EventAction.CREATE, wrapper.action)
+                self.assertEqual(EventAction.CREATE_ENTITY, wrapper.action)
             else:
-                self.assertEqual(EventAction.UPDATE, wrapper.action)
+                self.assertEqual(EventAction.UPDATE_ENTITY, wrapper.action)
 
     def _validate_vertex_props(self, vertex, event):
 

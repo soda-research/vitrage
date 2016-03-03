@@ -60,7 +60,7 @@ class TestStateManagerFunctional(TestEntityGraphFunctionalBase):
         neighbors[0].vertex[VProps.IS_PLACEHOLDER] = False
 
         # action
-        processor._connect_neighbors(neighbors, [], EventAction.UPDATE)
+        processor._connect_neighbors(neighbors, [], EventAction.UPDATE_ENTITY)
 
         # test assertions
         neighbor_vertex = processor.entity_graph.get_vertex(

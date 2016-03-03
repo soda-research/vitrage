@@ -68,7 +68,7 @@ class Processor(processor.ProcessorBase):
 
         LOG.debug("Add entity to entity graph: %s", new_vertex)
         self.entity_graph.add_vertex(new_vertex)
-        self._connect_neighbors(neighbors, [], EventAction.CREATE)
+        self._connect_neighbors(neighbors, [], EventAction.CREATE_ENTITY)
 
     def update_entity(self, updated_vertex, neighbors):
         """Updates the vertex in the entity graph
@@ -131,6 +131,18 @@ class Processor(processor.ProcessorBase):
             LOG.info("Delete event arrived on invalid resource: %s",
                      deleted_vertex)
 
+    def update_relationship(self, updated_vertex, neighbors):
+        LOG.debug("Update relationship in entity graph: %s", neighbors)
+
+        for neighbor in neighbors:
+            self.entity_graph.update_edge(neighbor.edge)
+
+    def delete_relationship(self, updated_vertex, neighbors):
+        LOG.debug("Delete relationship from entity graph: %s", neighbors)
+
+        for neighbor in neighbors:
+            self.entity_graph.remove_edge(neighbor.edge)
+
     def handle_end_message(self, vertex, neighbors):
         self.initialization_status.end_messages[vertex[VProps.TYPE]] = True
         if len(self.initialization_status.end_messages) == \
@@ -153,7 +165,9 @@ class Processor(processor.ProcessorBase):
         (valid_edges, obsolete_edges) = self._find_edges_status(
             vertex, neighbors)
         self._delete_old_connections(vertex, obsolete_edges)
-        self._connect_neighbors(neighbors, valid_edges, EventAction.UPDATE)
+        self._connect_neighbors(neighbors,
+                                valid_edges,
+                                EventAction.UPDATE_ENTITY)
 
     def _connect_neighbors(self, neighbors, valid_edges, action):
         """Updates the neighbor vertex and adds the connection edges """
@@ -229,18 +243,21 @@ class Processor(processor.ProcessorBase):
 
     def _initialize_events_actions(self):
         self.actions = {
-            EventAction.CREATE: self.create_entity,
-            EventAction.UPDATE: self.update_entity,
-            EventAction.DELETE: self.delete_entity,
+            EventAction.CREATE_ENTITY: self.create_entity,
+            EventAction.UPDATE_ENTITY: self.update_entity,
+            EventAction.DELETE_ENTITY: self.delete_entity,
+            EventAction.UPDATE_RELATIONSHIP: self.update_relationship,
+            EventAction.DELETE_RELATIONSHIP: self.delete_relationship,
             EventAction.END_MESSAGE: self.handle_end_message
         }
 
     def _calculate_aggregated_state(self, vertex, action):
         LOG.debug("calculate event state")
 
-        if action == EventAction.UPDATE or action == EventAction.DELETE:
+        if action == EventAction.UPDATE_ENTITY or \
+                action == EventAction.DELETE_ENTITY:
             graph_vertex = self.entity_graph.get_vertex(vertex.vertex_id)
-        elif action == EventAction.CREATE:
+        elif action == EventAction.CREATE_ENTITY:
             graph_vertex = None
         elif action == EventAction.END_MESSAGE:
             return None

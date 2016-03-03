@@ -91,11 +91,11 @@ class NagiosTransformerTest(base.BaseTest):
         sync_mode = alarm[SyncProps.SYNC_MODE]
         if sync_mode in (SyncMode.SNAPSHOT, SyncMode.UPDATE):
             if alarm[NagiosProperties.STATUS] == 'OK':
-                self.assertEqual(EventAction.DELETE, wrapper.action)
+                self.assertEqual(EventAction.DELETE_ENTITY, wrapper.action)
             else:
-                self.assertEqual(EventAction.UPDATE, wrapper.action)
+                self.assertEqual(EventAction.UPDATE_ENTITY, wrapper.action)
         else:
-            self.assertEqual(EventAction.CREATE, wrapper.action)
+            self.assertEqual(EventAction.CREATE_ENTITY, wrapper.action)
 
     def _validate_vertex(self, vertex, event):
 

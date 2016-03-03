@@ -105,11 +105,11 @@ class NagiosTransformer(tbase.TransformerBase):
         sync_mode = entity_event[SyncProps.SYNC_MODE]
         if sync_mode in (SyncMode.UPDATE, SyncMode.SNAPSHOT):
             if entity_event[NagiosProperties.STATUS] == self.STATUS_OK:
-                return EventAction.DELETE
+                return EventAction.DELETE_ENTITY
             else:
-                return EventAction.UPDATE
+                return EventAction.UPDATE_ENTITY
         if SyncMode.INIT_SNAPSHOT == sync_mode:
-            return EventAction.CREATE
+            return EventAction.CREATE_ENTITY
         raise VitrageTransformerError('Invalid sync mode: (%s)' % sync_mode)
 
     def extract_key(self, entity_event):

@@ -129,7 +129,7 @@ class Edge(PropertiesElement):
         return hash('%s%s%s' % (str(self.source_id), str(self.target_id),
                                 str(self.label)))
 
-    def __str__(self):
+    def __repr__(self):
         return '{source_id : %s, target_id : %s, ' \
                'label = %s, properties : %s}' % (self.source_id,
                                                  self.target_id,

@@ -75,8 +75,8 @@ class InstanceTransformer(transformer_base.TransformerBase):
 
     # Event types which need to refer them differently
     EVENT_TYPES = {
-        'compute.instance.delete.end': EventAction.DELETE,
-        'compute.instance.create.start': EventAction.CREATE
+        'compute.instance.delete.end': EventAction.DELETE_ENTITY,
+        'compute.instance.create.start': EventAction.CREATE_ENTITY
     }
 
     def __init__(self, transformers):
@@ -146,13 +146,13 @@ class InstanceTransformer(transformer_base.TransformerBase):
         if SyncMode.UPDATE == sync_mode:
             return self.EVENT_TYPES.get(
                 entity_event[self.UPDATE_EVENT_TYPE],
-                EventAction.UPDATE)
+                EventAction.UPDATE_ENTITY)
 
         if SyncMode.SNAPSHOT == sync_mode:
-            return EventAction.UPDATE
+            return EventAction.UPDATE_ENTITY
 
         if SyncMode.INIT_SNAPSHOT == sync_mode:
-            return EventAction.CREATE
+            return EventAction.CREATE_ENTITY
 
         raise VitrageTransformerError(
             'Invalid sync mode: (%s)' % sync_mode)
