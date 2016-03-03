@@ -14,7 +14,7 @@
 
 from oslo_config import cfg
 
-from vitrage.entity_graph.states.resource_state import ResourceState
+from vitrage.entity_graph.states.resource_state import NormalizedResourceState
 from vitrage.entity_graph.states.state_manager import StateManager
 from vitrage.tests import base
 from vitrage.tests.mocks import utils
@@ -50,10 +50,10 @@ class TestStateManager(base.BaseTest):
 
         # action
         normalized_state = \
-            state_manager.normalize_state('nova.instance', 'REBUILD')
+            state_manager.normalize_state('nova.instance', 'BUILDING')
 
         # test assertions
-        self.assertEqual(ResourceState.REBUILDING, normalized_state)
+        self.assertEqual(NormalizedResourceState.TRANSIENT, normalized_state)
 
     def test_state_priority(self):
         # setup
@@ -62,10 +62,10 @@ class TestStateManager(base.BaseTest):
         # action
         state_priority = \
             state_manager.state_priority('nova.instance',
-                                         ResourceState.REBUILDING)
+                                         NormalizedResourceState.RUNNING)
 
         # test assertions
-        self.assertEqual(60, state_priority)
+        self.assertEqual(10, state_priority)
 
     def test_aggregated_state_normalized(self):
         # setup
@@ -73,16 +73,18 @@ class TestStateManager(base.BaseTest):
 
         # action
         aggregated_state_nova_instance_1 = state_manager.aggregated_state(
-            ResourceState.REBUILDING, ResourceState.SUBOPTIMAL,
+            NormalizedResourceState.SUSPENDED,
+            NormalizedResourceState.SUBOPTIMAL,
             'nova.instance', True)
         aggregated_state_nova_instance_2 = state_manager.aggregated_state(
-            ResourceState.SUBOPTIMAL, ResourceState.REBUILDING,
+            NormalizedResourceState.SUBOPTIMAL,
+            NormalizedResourceState.SUSPENDED,
             'nova.instance', True)
 
         # test assertions
-        self.assertEqual(ResourceState.REBUILDING,
+        self.assertEqual(NormalizedResourceState.SUSPENDED,
                          aggregated_state_nova_instance_1)
-        self.assertEqual(ResourceState.REBUILDING,
+        self.assertEqual(NormalizedResourceState.SUSPENDED,
                          aggregated_state_nova_instance_2)
 
     def test_aggregated_state_not_normalized(self):
@@ -91,14 +93,14 @@ class TestStateManager(base.BaseTest):
 
         # action
         aggregated_state_nova_instance_1 = state_manager.aggregated_state(
-            'REBOOT', 'REBUILD', 'nova.instance')
+            'ACTIVE', 'SUSPENDED', 'nova.instance')
         aggregated_state_nova_instance_2 = state_manager.aggregated_state(
-            'REBUILD', 'REBOOT', 'nova.instance')
+            'SUSPENDED', 'ACTIVE', 'nova.instance')
 
         # test assertions
-        self.assertEqual(ResourceState.REBUILDING,
+        self.assertEqual(NormalizedResourceState.SUSPENDED,
                          aggregated_state_nova_instance_1)
-        self.assertEqual(ResourceState.REBUILDING,
+        self.assertEqual(NormalizedResourceState.SUSPENDED,
                          aggregated_state_nova_instance_2)
 
     def test_aggregated_state_functionalities(self):
@@ -114,9 +116,9 @@ class TestStateManager(base.BaseTest):
             None, None, 'nova.instance')
 
         # test assertions
-        self.assertEqual(ResourceState.RUNNING,
+        self.assertEqual(NormalizedResourceState.RUNNING,
                          aggregated_state_nova_instance_1)
-        self.assertEqual(ResourceState.RUNNING,
+        self.assertEqual(NormalizedResourceState.RUNNING,
                          aggregated_state_nova_instance_2)
-        self.assertEqual(ResourceState.UNDEFINED,
+        self.assertEqual(NormalizedResourceState.UNDEFINED,
                          aggregated_state_nova_instance_3)
