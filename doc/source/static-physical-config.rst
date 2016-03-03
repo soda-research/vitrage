@@ -22,7 +22,7 @@ Physical configuration is made for configuring statically physical entities, and
 
 Some physical entities, such as switches, can not be retrieved from OpenStack, so for now we will configure them statically.
 
-There may be more than one configuration file. All files will be read from ...
+There may be more than one configuration file. All files will be read from /etc/vitrage/static_plugins/.
 
 **Format**
 ::

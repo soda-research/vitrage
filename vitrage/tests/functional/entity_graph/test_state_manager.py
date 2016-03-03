@@ -19,7 +19,7 @@ from vitrage.common.constants import SyncMode
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.entity_graph.initialization_status import InitializationStatus
 from vitrage.entity_graph.processor import processor as proc
-from vitrage.entity_graph.states.resource_state import ResourceState
+from vitrage.entity_graph.states.resource_state import NormalizedResourceState
 from vitrage.synchronizer.plugins.nova.instance.transformer import \
     InstanceTransformer
 from vitrage.tests.functional.entity_graph.base import \
@@ -46,7 +46,7 @@ class TestStateManagerFunctional(TestEntityGraphFunctionalBase):
         instance_transformer = InstanceTransformer({})
         vitrage_id = instance_transformer.extract_key(event)
         vertex = processor.entity_graph.get_vertex(vitrage_id)
-        self.assertEqual(ResourceState.RUNNING,
+        self.assertEqual(NormalizedResourceState.RUNNING,
                          vertex[VProps.AGGREGATED_STATE])
 
     def test_state_on_neighbor_update(self):
@@ -65,5 +65,5 @@ class TestStateManagerFunctional(TestEntityGraphFunctionalBase):
         # test assertions
         neighbor_vertex = processor.entity_graph.get_vertex(
             neighbors[0].vertex.vertex_id)
-        self.assertEqual(ResourceState.AVAILABLE,
+        self.assertEqual(NormalizedResourceState.RUNNING,
                          neighbor_vertex[VProps.AGGREGATED_STATE])

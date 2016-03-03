@@ -2,45 +2,54 @@ category: RESOURCE
 states:
   - normalized state:
       name: TERMINATED
-      priority: 150
+      priority: 90
       original states:
         - name: DELETED
+        - name: HARD_DELETED
+        - name: SHELVED_OFFLOADED
+        - name: SOFT_DELETED
   - normalized state:
       name: ERROR
-      priority: 140
+      priority: 80
       original states:
         - name: ERROR
   - normalized state:
       name: UNRECOGNIZED
-      priority: 130
+      priority: 70
       original states:
+        - name: UNRECOGNIZED
   - normalized state:
       name: SUSPENDED
-      priority: 110
-      original states:
-        - name: SUSPENDED
-  - normalized state:
-      name: REBUILDING
       priority: 60
       original states:
-        - name: REBUILD
+        - name: SUSPENDED
+        - name: PAUSED
+        - name: STOPPED
+        - name: SHELVED
   - normalized state:
-      name: STARTING
+      name: RESCUED
       priority: 50
       original states:
-        - name: VERIFY_RESIZE
-        - name: REVERT_RESIZE
-        - name: PASSWORD
-        - name: REBOOT
-        - name: BUILD
-        - name: HARD_REBOOT
+        - name: RESCUED
+  - normalized state:
+      name: RESIZED
+      priority: 40
+      original states:
+        - name: RESIZED
+  - normalized state:
+      name: TRANSIENT
+      priority: 30
+      original states:
+        - name: BUILDING
+        - name: INITIALIZED
   - normalized state:
       name: SUBOPTIMAL
-      priority: 40
+      priority: 20
       original states:
         - name: SUBOPTIMAL
   - normalized state:
       name: RUNNING
-      priority: 20
+      priority: 10
       original states:
         - name: ACTIVE
+        - name: RESIZED

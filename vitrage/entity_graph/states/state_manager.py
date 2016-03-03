@@ -13,13 +13,14 @@
 # under the License.
 
 import os
+import traceback
 
 from oslo_log import log
 
 from vitrage.common.constants import EntityCategory
 from vitrage.common import file_utils
-from vitrage.entity_graph.states.alarm_state import AlarmState
-from vitrage.entity_graph.states.resource_state import ResourceState
+from vitrage.entity_graph.states.alarm_state import NormalizedAlarmState
+from vitrage.entity_graph.states.resource_state import NormalizedResourceState
 
 LOG = log.getLogger(__name__)
 
@@ -51,23 +52,19 @@ class StateManager(object):
     def aggregated_state(self, state1, state2, plugin_name,
                          is_normalized=False):
         if plugin_name in self.states_plugins:
-            upper_state1 = state1 if not state1 else state1.upper()
-            upper_state2 = state2 if not state2 else state2.upper()
+            normalized_state1, state_priority1 = \
+                self._find_normalized_state_and_priority(state1,
+                                                         plugin_name,
+                                                         is_normalized)
+            normalized_state2, state_priority2 = \
+                self._find_normalized_state_and_priority(state2,
+                                                         plugin_name,
+                                                         is_normalized)
 
-            normalized_state1 = upper_state1.upper() if is_normalized else \
-                self.normalize_state(plugin_name, upper_state1)
-            normalized_state2 = upper_state2.upper() if is_normalized else \
-                self.normalize_state(plugin_name, upper_state2)
-
-            priority_state1 = self.state_priority(plugin_name,
-                                                  normalized_state1)
-            priority_state2 = self.state_priority(plugin_name,
-                                                  normalized_state2)
-
-            return normalized_state1 if priority_state1 > priority_state2 \
+            return normalized_state1 if state_priority1 > state_priority2 \
                 else normalized_state2
         else:
-            return ResourceState.UNDEFINED
+            return NormalizedResourceState.UNDEFINED
 
     def _load_state_configurations(self):
         states_plugins = {}
@@ -76,15 +73,18 @@ class StateManager(object):
             self.cfg.entity_graph.states_plugins_dir, '.yaml')
 
         for file_name in files:
-            full_path = self.cfg.entity_graph.states_plugins_dir + '/' \
-                + file_name
-            states, priorities, unknown_type = \
-                self._retrieve_states_and_priorities_from_file(full_path)
-            states_plugins[os.path.splitext(file_name)[0]] = {
-                self.STATES: states,
-                self.PRIORITIES: priorities,
-                self.UNKNOWN_TYPE: unknown_type
-            }
+            try:
+                full_path = self.cfg.entity_graph.states_plugins_dir + '/' \
+                    + file_name
+                states, priorities, unknown_type = \
+                    self._retrieve_states_and_priorities_from_file(full_path)
+                states_plugins[os.path.splitext(file_name)[0]] = {
+                    self.STATES: states,
+                    self.PRIORITIES: priorities,
+                    self.UNKNOWN_TYPE: unknown_type
+                }
+            except Exception:
+                LOG.error("Exception: %s", traceback.print_exc())
 
         # TODO(Alexey): implement this after finishing implement load
         #               specific plugins from configuration
@@ -120,14 +120,14 @@ class StateManager(object):
 
     @staticmethod
     def _add_default_states(states, priorities):
-        states[None] = ResourceState.UNDEFINED
-        priorities[ResourceState.UNDEFINED] = 0
+        states[None] = NormalizedResourceState.UNDEFINED
+        priorities[NormalizedResourceState.UNDEFINED] = 0
 
     @staticmethod
     def _init_category_unknown_type():
         return {
-            EntityCategory.RESOURCE: ResourceState.UNRECOGNIZED,
-            EntityCategory.ALARM: AlarmState.UNKNOWN
+            EntityCategory.RESOURCE: NormalizedResourceState.UNRECOGNIZED,
+            EntityCategory.ALARM: NormalizedAlarmState.UNKNOWN
         }
 
     def _init_category_additional_data(self):
@@ -138,12 +138,44 @@ class StateManager(object):
 
     @staticmethod
     def _resource_additional_states(states, priorities, full_path):
-        if ResourceState.UNRECOGNIZED not in priorities:
-            raise ValueError('%s state is not defined in %s',
-                             ResourceState.UNRECOGNIZED, full_path)
+        StateManager._additional_states(states, priorities, full_path,
+                                        NormalizedResourceState.UNRECOGNIZED,
+                                        NormalizedResourceState())
 
     @staticmethod
     def _alarm_additional_states(states, priorities, full_path):
-        if AlarmState.UNKNOWN not in priorities:
+        StateManager._additional_states(states, priorities, full_path,
+                                        NormalizedAlarmState.UNKNOWN,
+                                        NormalizedAlarmState())
+
+    @staticmethod
+    def _additional_states(states, priorities, full_path,
+                           unknown_state, state_class_instance):
+        if unknown_state not in priorities:
             raise ValueError('%s state is not defined in %s',
-                             AlarmState.UNKNOWN, full_path)
+                             NormalizedAlarmState.UNKNOWN, full_path)
+
+        # check that all the normalized states exists
+        normalized_states = StateManager._get_all_local_variables_of_class(
+            state_class_instance)
+        for key in priorities.keys():
+            if key not in normalized_states:
+                raise ValueError('Normalized state %s for %s is not in %s',
+                                 key, full_path,
+                                 state_class_instance.__class__.__name__)
+
+    def _find_normalized_state_and_priority(self, state,
+                                            plugin_name, is_normalized):
+        upper_state1 = state if not state else state.upper()
+
+        normalized_state = upper_state1.upper() if is_normalized else \
+            self.normalize_state(plugin_name, upper_state1)
+
+        state_priority = self.state_priority(plugin_name, normalized_state)
+
+        return normalized_state, state_priority
+
+    @staticmethod
+    def _get_all_local_variables_of_class(class_instance):
+        return [attr for attr in dir(class_instance) if not callable(attr)
+                and not attr.startswith("__")]

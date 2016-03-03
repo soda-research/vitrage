@@ -13,9 +13,10 @@
 # under the License.
 
 
-class AlarmState(object):
+class NormalizedAlarmState(object):
     CRITICAL = 'CRITICAL'
     SEVER = 'SEVER'
     WARNING = 'WARNING'
     DISABLED = 'DISABLED'
     UNKNOWN = 'UNKNOWN'
+    UNDEFINED = 'UNDEFINED'
