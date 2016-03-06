@@ -116,6 +116,15 @@ function configure_vitrage {
     # copy the mock sample files
     cp $VITRAGE_DIR/etc/vitrage/*.sample.json $VITRAGE_CONF_DIR
 
+    # create some folders
+    mkdir -p /etc/states_plugins
+    mkdir -p /etc/static_plugins
+    mkdir -p /etc/templates
+
+    # copy plugins
+    cp $VITRAGE_DIR/etc/vitrage/states_plugins/*.yaml $VITRAGE_CONF_DIR/states_plugins
+
+
     configure_auth_token_middleware $VITRAGE_CONF vitrage $VITRAGE_AUTH_CACHE_DIR
 
     if [ "$VITRAGE_USE_MOD_WSGI" == "True" ]; then
