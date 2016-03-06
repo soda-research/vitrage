@@ -25,8 +25,6 @@ from vitrage.synchronizer.plugins.nova.instance.transformer import \
     InstanceTransformer
 from vitrage.synchronizer.plugins.nova.zone.transformer import \
     ZoneTransformer
-from vitrage.synchronizer.plugins.static_physical.transformer import \
-    StaticPhysicalTransformer
 from vitrage.tests import base
 
 LOG = logging.getLogger(__name__)
@@ -40,8 +38,7 @@ class TransformerManagerTest(base.BaseTest):
                     default=['nagios',
                              'nova.host',
                              'nova.instance',
-                             'nova.zone',
-                             'switch'],
+                             'nova.zone'],
                     help='Names of supported synchronizer plugins'),
 
         cfg.DictOpt('nagios',
@@ -94,16 +91,6 @@ class TransformerManagerTest(base.BaseTest):
                         'url': '',
                         'version': '2.0',
                         'project': 'admin'},),
-
-        cfg.DictOpt('switch',
-                    default={
-                        'synchronizer':
-                            'vitrage.synchronizer.plugins.static_physical'
-                            '.synchronizer',
-                        'transformer':
-                            'vitrage.synchronizer.plugins.static_physical.'
-                            'transformer.StaticPhysicalTransformer',
-                        'dir': '/etc/vitrage/static_plugins'},),
     ]
 
     @classmethod
@@ -127,7 +114,3 @@ class TransformerManagerTest(base.BaseTest):
     def test_transformer_registration_nova_zone(self):
         self.assertIsInstance(self.manager.get_transformer
                               (EntityType.NOVA_ZONE), ZoneTransformer)
-
-    def test_transformer_registration_switch(self):
-        self.assertIsInstance(self.manager.get_transformer
-                              (EntityType.SWITCH), StaticPhysicalTransformer)

@@ -38,8 +38,7 @@ class TestEntityGraphUnitBase(base.BaseTest):
                     default=['nagios',
                              'nova.host',
                              'nova.instance',
-                             'nova.zone',
-                             'switch'],
+                             'nova.zone'],
                     help='Names of supported synchronizer plugins'),
 
         cfg.DictOpt('nagios',
@@ -92,16 +91,6 @@ class TestEntityGraphUnitBase(base.BaseTest):
                         'url': '',
                         'version': '2.0',
                         'project': 'admin'},),
-
-        cfg.DictOpt('switch',
-                    default={
-                        'synchronizer':
-                            'vitrage.synchronizer.plugins.static_physical'
-                            '.synchronizer',
-                        'transformer':
-                            'vitrage.synchronizer.plugins.static_physical.'
-                            'transformer.StaticPhysicalTransformer',
-                        'dir': '/etc/vitrage/static_plugins'},),
     ]
     NUM_NODES = 1
     NUM_ZONES = 2

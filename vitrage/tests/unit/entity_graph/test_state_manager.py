@@ -14,6 +14,8 @@
 
 from oslo_config import cfg
 
+from vitrage.common.constants import EntityType
+
 from vitrage.entity_graph.states.resource_state import NormalizedResourceState
 from vitrage.entity_graph.states.state_manager import StateManager
 from vitrage.tests import base
@@ -22,27 +24,107 @@ from vitrage.tests.mocks import utils
 
 class TestStateManager(base.BaseTest):
 
-    OPTS = [
+    ENTITY_GRAPH_OPTS = [
         cfg.StrOpt('states_plugins_dir',
                    default=utils.get_resources_dir() + '/states_plugins'),
+    ]
+    PLUGINS_OPTS = [
+
+        cfg.ListOpt('plugin_type',
+                    default=['nagios',
+                             'nova.host',
+                             'nova.instance',
+                             'nova.zone'],
+                    help='Names of supported synchronizer plugins'),
+
+        cfg.DictOpt('nagios',
+                    default={
+                        'synchronizer':
+                            'vitrage.synchronizer.plugins.nagios.synchronizer',
+                        'transformer': 'vitrage.synchronizer.plugins'
+                                       '.nagios.transformer.NagiosTransformer',
+                        'user': '',
+                        'password': '',
+                        'url': '',
+                        'config_file': '/etc/vitrage/nagios_conf.yaml'},),
+
+        cfg.DictOpt('nova.host',
+                    default={
+                        'synchronizer':
+                            'vitrage.synchronizer.plugins.nova.host'
+                            '.synchronizer',
+                        'transformer': 'vitrage.synchronizer.plugins.nova'
+                                       '.host.transformer.HostTransformer',
+                        'user': '',
+                        'password': '',
+                        'url': '',
+                        'version': '2.0',
+                        'project': 'admin'},),
+
+        cfg.DictOpt('nova.instance',
+                    default={
+                        'synchronizer':
+                            'vitrage.synchronizer.plugins.nova.instance'
+                            '.synchronizer',
+                        'transformer':
+                            'vitrage.synchronizer.plugins'
+                            '.nova.instance.transformer.InstanceTransformer',
+                        'user': '',
+                        'password': '',
+                        'url': '',
+                        'version': '2.0',
+                        'project': 'admin'},),
+
+        cfg.DictOpt('nova.zone',
+                    default={
+                        'synchronizer':
+                            'vitrage.synchronizer.plugins.nova.zone'
+                            '.synchronizer',
+                        'transformer': 'vitrage.synchronizer.plugins.nova'
+                                       '.zone.transformer.ZoneTransformer',
+                        'user': '',
+                        'password': '',
+                        'url': '',
+                        'version': '2.0',
+                        'project': 'admin'},),
     ]
 
     def setUp(self):
         super(TestStateManager, self).setUp()
         self.conf = cfg.ConfigOpts()
-        self.conf.register_opts(self.OPTS, group='entity_graph')
+        self.conf.register_opts(self.ENTITY_GRAPH_OPTS, group='entity_graph')
+        self.conf.register_opts(self.PLUGINS_OPTS,
+                                group='synchronizer_plugins')
 
-    def test_load_state_plugins(self):
+    def test_load_state_plugins_without_errors(self):
         # action
-        StateManager(self.conf)
+        state_manager = StateManager(self.conf)
 
         # test assertions
-        # TODO(Alexey): check that UNRECOGNIZED exists
-        # TODO(Alexey): check that if UNRECOGNIZED is missing then it throws
-        #               exception
-        # TODO(Alexey): check that all of the state plugins configured exists
-        # TODO(Alexey): check that if one of the state plugins is missing then
-        #               it throws an exception
+        self.assertEqual(len(self.conf.synchronizer_plugins.plugin_type),
+                         len(state_manager.states_plugins))
+
+    def test_load_state_plugins_with_errors(self):
+        # setup
+        entity_graph_opts = [
+            cfg.StrOpt('states_plugins_dir',
+                       default=utils.get_resources_dir() +
+                       '/states_plugins/erroneous_states_plugins'),
+        ]
+        conf = cfg.ConfigOpts()
+        conf.register_opts(entity_graph_opts, group='entity_graph')
+        conf.register_opts(self.PLUGINS_OPTS, group='synchronizer_plugins')
+
+        # action
+        state_manager = StateManager(conf)
+
+        # test assertions
+        missing_states_plugins = 1
+        erroneous_states_plugins = 2
+        num_valid_plugins = len(state_manager.states_plugins) + \
+            missing_states_plugins + erroneous_states_plugins
+        self.assertEqual(len(conf.synchronizer_plugins.plugin_type),
+                         num_valid_plugins)
 
     def test_normalize_state(self):
         # setup
@@ -50,7 +132,7 @@ class TestStateManager(base.BaseTest):
 
         # action
         normalized_state = \
-            state_manager.normalize_state('nova.instance', 'BUILDING')
+            state_manager.normalize_state(EntityType.NOVA_INSTANCE, 'BUILDING')
 
         # test assertions
         self.assertEqual(NormalizedResourceState.TRANSIENT, normalized_state)
@@ -61,7 +143,7 @@ class TestStateManager(base.BaseTest):
 
         # action
         state_priority = \
-            state_manager.state_priority('nova.instance',
+            state_manager.state_priority(EntityType.NOVA_INSTANCE,
                                          NormalizedResourceState.RUNNING)
 
         # test assertions
@@ -75,11 +157,11 @@ class TestStateManager(base.BaseTest):
         aggregated_state_nova_instance_1 = state_manager.aggregated_state(
             NormalizedResourceState.SUSPENDED,
             NormalizedResourceState.SUBOPTIMAL,
-            'nova.instance', True)
+            EntityType.NOVA_INSTANCE, True)
         aggregated_state_nova_instance_2 = state_manager.aggregated_state(
             NormalizedResourceState.SUBOPTIMAL,
             NormalizedResourceState.SUSPENDED,
-            'nova.instance', True)
+            EntityType.NOVA_INSTANCE, True)
 
         # test assertions
         self.assertEqual(NormalizedResourceState.SUSPENDED,
@@ -93,9 +175,9 @@ class TestStateManager(base.BaseTest):
 
         # action
         aggregated_state_nova_instance_1 = state_manager.aggregated_state(
-            'ACTIVE', 'SUSPENDED', 'nova.instance')
+            'ACTIVE', 'SUSPENDED', EntityType.NOVA_INSTANCE)
         aggregated_state_nova_instance_2 = state_manager.aggregated_state(
-            'SUSPENDED', 'ACTIVE', 'nova.instance')
+            'SUSPENDED', 'ACTIVE', EntityType.NOVA_INSTANCE)
 
         # test assertions
         self.assertEqual(NormalizedResourceState.SUSPENDED,
@@ -109,11 +191,11 @@ class TestStateManager(base.BaseTest):
 
         # action
         aggregated_state_nova_instance_1 = state_manager.aggregated_state(
-            'ACTIVE', None, 'nova.instance')
+            'ACTIVE', None, EntityType.NOVA_INSTANCE)
         aggregated_state_nova_instance_2 = state_manager.aggregated_state(
-            None, 'ACTIVE', 'nova.instance')
+            None, 'ACTIVE', EntityType.NOVA_INSTANCE)
         aggregated_state_nova_instance_3 = state_manager.aggregated_state(
-            None, None, 'nova.instance')
+            None, None, EntityType.NOVA_INSTANCE)
 
         # test assertions
         self.assertEqual(NormalizedResourceState.RUNNING,
