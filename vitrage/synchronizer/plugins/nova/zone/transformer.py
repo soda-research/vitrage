@@ -167,7 +167,7 @@ class ZoneTransformer(transformer_base.TransformerBase):
             vitrage_id,
             entity_id=host_name,
             entity_category=EntityCategory.RESOURCE,
-            entity_type=self.ZONE_TYPE,
+            entity_type=EntityType.NOVA_HOST,
             entity_state=host_state,
             update_timestamp=timestamp)
 

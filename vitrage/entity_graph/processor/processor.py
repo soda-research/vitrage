@@ -256,11 +256,9 @@ class Processor(processor.ProcessorBase):
     def _calculate_aggregated_state(self, vertex, action):
         LOG.debug("calculate event state")
 
-        if action == EventAction.UPDATE_ENTITY or \
-                action == EventAction.DELETE_ENTITY:
+        if action in [EventAction.UPDATE_ENTITY, EventAction.DELETE_ENTITY,
+                      EventAction.CREATE_ENTITY]:
             graph_vertex = self.entity_graph.get_vertex(vertex.vertex_id)
-        elif action == EventAction.CREATE_ENTITY:
-            graph_vertex = None
         elif action == EventAction.END_MESSAGE:
             return None
         else:
