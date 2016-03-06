@@ -15,38 +15,22 @@
 
 import json
 
-from networkx.readwrite import json_graph
-from oslo_config import cfg
 from oslo_log import log
-import oslo_messaging
 import pecan
 from pecan.core import abort
-from pecan import rest
 
+from vitrage.api.controllers.rest import RootRestController
 from vitrage.api.controllers.v1 import mock_file
-from vitrage.api.controllers.v1 import RCA_QUERY
 from vitrage.api.policy import enforce
 
 # noinspection PyProtectedMember
 from vitrage.i18n import _LI
 
+
 LOG = log.getLogger(__name__)
 
 
-def as_tree(graph, root='RESOURCE:openstack.node', reverse=False):
-    linked_graph = json_graph.node_link_graph(graph)
-    if reverse:
-        linked_graph = linked_graph.reverse()
-    return json_graph.tree_data(linked_graph, root=root)
-
-
-class TopologyController(rest.RestController):
-    def __init__(self):
-        transport = oslo_messaging.get_transport(cfg.CONF)
-        cfg.CONF.set_override('rpc_backend', 'rabbit')
-        target = oslo_messaging.Target(topic='rpcapiv1')
-        self.client = oslo_messaging.RPCClient(transport, target)
-        self.ctxt = {}
+class TopologyController(RootRestController):
 
     @pecan.expose('json')
     def post(self, depth, graph_type, query, root):
@@ -63,42 +47,25 @@ class TopologyController(rest.RestController):
         LOG.info(_LI("query is %s") % query)
 
         if mock_file:
-            return self.get_mock_graph(graph_type, query)
+            return self.get_mock_data('graph.sample.json', graph_type)
         else:
             return self.get_graph(graph_type, depth, query, root)
 
-    def get_graph(self, graph_type, depth, query, root):
+    @staticmethod
+    def get_graph(graph_type, depth, query, root):
 
         try:
-            graph_data = self.client.call(self.ctxt, 'get_topology',
-                                          graph_type=graph_type, depth=depth,
-                                          query=query, root=root)
+            graph_data = pecan.request.client.call({}, 'get_topology',
+                                                   graph_type=graph_type,
+                                                   depth=depth,
+                                                   query=query, root=root)
             LOG.info(graph_data)
             graph = json.loads(graph_data)
             if graph_type == 'graph':
                 return graph
             if graph_type == 'tree':
-                return as_tree(graph)
+                return RootRestController.as_tree(graph)
 
         except Exception as e:
             LOG.exception('failed to get topology %s ', e)
-            abort(404, str(e))
-
-    @staticmethod
-    def get_mock_graph(graph_type, query):
-        file_name = 'rca.sample.json' if query == RCA_QUERY \
-            else 'graph.sample.json'
-        graph_file = pecan.request.cfg.find_file(file_name)
-        if graph_file is None:
-            abort(404, 'file %s not found' % file_name)
-        try:
-            with open(graph_file) as data_file:
-                graph = json.load(data_file)
-                if graph_type == 'graph':
-                    return graph
-                if graph_type == 'tree':
-                    return as_tree(graph)
-
-        except Exception as e:
-            LOG.exception('failed to open file %s', e)
             abort(404, str(e))

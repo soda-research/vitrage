@@ -13,30 +13,22 @@
 # under the License.
 
 import json
-from oslo_config import cfg
-import oslo_messaging
 import pecan
 
 from oslo_log import log
 from pecan.core import abort
-from pecan import rest
 
+from vitrage.api.controllers.rest import RootRestController
 from vitrage.api.controllers.v1 import mock_file
 from vitrage.api.policy import enforce
 # noinspection PyProtectedMember
 from vitrage.i18n import _LI
 
+
 LOG = log.getLogger(__name__)
 
 
-class AlarmsController(rest.RestController):
-
-    def __init__(self):
-        transport = oslo_messaging.get_transport(cfg.CONF)
-        cfg.CONF.set_override('rpc_backend', 'rabbit')
-        target = oslo_messaging.Target(topic='rpcapiv1')
-        self.client = oslo_messaging.RPCClient(transport, target)
-        self.ctxt = {}
+class AlarmsController(RootRestController):
 
     @pecan.expose('json')
     def index(self, vitrage_id=None):
@@ -52,7 +44,7 @@ class AlarmsController(rest.RestController):
 
         try:
             if mock_file:
-                return self.get_mock_alarms()
+                return self.get_mock_data('alarms.sample.json')
             else:
                 return self.get_alarms(vitrage_id)
         except Exception as e:
@@ -60,21 +52,8 @@ class AlarmsController(rest.RestController):
             abort(404, str(e))
 
     @staticmethod
-    def get_mock_alarms():
-        # TODO(eyal) temporary mock
-        alarms_file = pecan.request.cfg.find_file('alarms.sample.json')
-        if alarms_file is None:
-            abort(404, 'file alarms.sample.json not found')
-        try:
-            with open(alarms_file) as data_file:
-                return json.load(data_file)['alarms']
-
-        except Exception as e:
-            LOG.exception('failed to open file %s', e)
-            abort(404, str(e))
-
-    def get_alarms(self, vitrage_id=None):
-        alarms_json = self.client.call(self.ctxt, 'get_alarms', arg=vitrage_id)
+    def get_alarms(vitrage_id=None):
+        alarms_json = pecan.request.call({}, 'get_alarms', arg=vitrage_id)
         LOG.info(alarms_json)
 
         try:

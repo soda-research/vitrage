@@ -41,7 +41,8 @@ def setup_app(pecan_config=PECAN_CONFIG, conf=None):
     if conf is None:
         raise RuntimeError('Config is actually mandatory')
     app_hooks = [hooks.ConfigHook(conf),
-                 hooks.TranslationHook()]
+                 hooks.TranslationHook(),
+                 hooks.RPCHook(conf)]
 
     pecan.configuration.set_config(dict(pecan_config), overwrite=True)
     pecan_debug = conf.api.pecan_debug

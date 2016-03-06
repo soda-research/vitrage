@@ -10,6 +10,8 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import oslo_messaging
+
 from oslo_policy import policy
 from pecan import hooks
 
@@ -24,6 +26,19 @@ class ConfigHook(hooks.PecanHook):
     def before(self, state):
         state.request.cfg = self.conf
         state.request.enforcer = self.enforcer
+
+
+class RPCHook(hooks.PecanHook):
+    """Create and attach an rpc to the request. """
+
+    def __init__(self, conf):
+        transport = oslo_messaging.get_transport(conf)
+        target = oslo_messaging.Target(topic='rpcapiv1')
+        self.client = oslo_messaging.RPCClient(transport, target)
+        self.ctxt = {}
+
+    def before(self, state):
+        state.request.client = self.client
 
 
 class TranslationHook(hooks.PecanHook):
