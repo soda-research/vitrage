@@ -32,7 +32,77 @@ class TestEntityGraphUnitBase(base.BaseTest):
         cfg.StrOpt('states_plugins_dir',
                    default=utils.get_resources_dir() + '/states_plugins'),
     ]
+    PLUGINS_OPTS = [
 
+        cfg.ListOpt('plugin_type',
+                    default=['nagios',
+                             'nova.host',
+                             'nova.instance',
+                             'nova.zone',
+                             'switch'],
+                    help='Names of supported synchronizer plugins'),
+
+        cfg.DictOpt('nagios',
+                    default={
+                        'synchronizer':
+                            'vitrage.synchronizer.plugins.nagios.synchronizer',
+                        'transformer': 'vitrage.synchronizer.plugins'
+                                       '.nagios.transformer.NagiosTransformer',
+                        'user': '',
+                        'password': '',
+                        'url': '',
+                        'config_file': '/etc/vitrage/nagios_conf.yaml'},),
+
+        cfg.DictOpt('nova.host',
+                    default={
+                        'synchronizer':
+                            'vitrage.synchronizer.plugins.nova.host'
+                            '.synchronizer',
+                        'transformer': 'vitrage.synchronizer.plugins.nova'
+                                       '.host.transformer.HostTransformer',
+                        'user': '',
+                        'password': '',
+                        'url': '',
+                        'version': '2.0',
+                        'project': 'admin'},),
+
+        cfg.DictOpt('nova.instance',
+                    default={
+                        'synchronizer':
+                            'vitrage.synchronizer.plugins.nova.instance'
+                            '.synchronizer',
+                        'transformer':
+                            'vitrage.synchronizer.plugins'
+                            '.nova.instance.transformer.InstanceTransformer',
+                        'user': '',
+                        'password': '',
+                        'url': '',
+                        'version': '2.0',
+                        'project': 'admin'},),
+
+        cfg.DictOpt('nova.zone',
+                    default={
+                        'synchronizer':
+                            'vitrage.synchronizer.plugins.nova.zone'
+                            '.synchronizer',
+                        'transformer': 'vitrage.synchronizer.plugins.nova'
+                                       '.zone.transformer.ZoneTransformer',
+                        'user': '',
+                        'password': '',
+                        'url': '',
+                        'version': '2.0',
+                        'project': 'admin'},),
+
+        cfg.DictOpt('switch',
+                    default={
+                        'synchronizer':
+                            'vitrage.synchronizer.plugins.static_physical'
+                            '.synchronizer',
+                        'transformer':
+                            'vitrage.synchronizer.plugins.static_physical.'
+                            'transformer.StaticPhysicalTransformer',
+                        'dir': '/etc/vitrage/static_plugins'},),
+    ]
     NUM_NODES = 1
     NUM_ZONES = 2
     NUM_HOSTS = 4

@@ -65,9 +65,9 @@ class NagiosSynchronizer(SynchronizerBase):
             NagiosSynchronizer._filter_get_changes)
 
     def _get_services_from_nagios(self):
-        nagios_user = self.conf.synchronizer_plugins.nagios_user
-        nagios_password = self.conf.synchronizer_plugins.nagios_password
-        nagios_url = self.conf.synchronizer_plugins.nagios_url
+        nagios_user = self.conf.synchronizer_plugins.nagios['user']
+        nagios_password = self.conf.synchronizer_plugins.nagios['password']
+        nagios_url = self.conf.synchronizer_plugins.nagios['url']
 
         if not nagios_user:
             return []

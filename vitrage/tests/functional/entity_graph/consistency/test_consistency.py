@@ -49,6 +49,8 @@ class TestConsistencyFunctional(TestEntityGraphFunctionalBase):
         self.conf = cfg.ConfigOpts()
         self.conf.register_opts(self.CONSISTENCY_OPTS, group='consistency')
         self.conf.register_opts(self.PROCESSOR_OPTS, group='entity_graph')
+        self.conf.register_opts(self.PLUGINS_OPTS,
+                                group='synchronizer_plugins')
         self.processor = Processor(self.conf, self.initialization_status)
         self.consistency_enforcer = ConsistencyEnforcer(
             self.conf, self.processor.entity_graph, self.initialization_status)
