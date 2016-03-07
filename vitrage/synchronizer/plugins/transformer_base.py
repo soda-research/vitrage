@@ -66,6 +66,7 @@ def create_node_placeholder_vertex():
 
     return graph_utils.create_vertex(
         key,
+        entity_id=EntityType.OPENSTACK_NODE,
         entity_category=cons.EntityCategory.RESOURCE,
         entity_type=EntityType.OPENSTACK_NODE,
         entity_state=AVAILABLE,
