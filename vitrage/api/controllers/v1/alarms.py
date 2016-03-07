@@ -53,7 +53,8 @@ class AlarmsController(RootRestController):
 
     @staticmethod
     def get_alarms(vitrage_id=None):
-        alarms_json = pecan.request.call({}, 'get_alarms', arg=vitrage_id)
+        alarms_json = pecan.request.client.call({}, 'get_alarms',
+                                                arg=vitrage_id)
         LOG.info(alarms_json)
 
         try:
