@@ -1,0 +1,23 @@
+# erroneous yaml file - missing normalized UNRECOGNIZED state
+category: RESOURCE
+states:
+  - normalized state:
+      name: TERMINATED
+      priority: 50
+      original states:
+        - name: DELETED
+  - normalized state:
+      name: ERROR
+      priority: 40
+      original states:
+        - name: ERROR
+  - normalized state:
+      name: SUBOPTIMAL
+      priority: 20
+      original states:
+        - name: SUBOPTIMAL
+  - normalized state:
+      name: RUNNING
+      priority: 10
+      original states:
+        - name: available

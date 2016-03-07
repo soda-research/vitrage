@@ -68,6 +68,7 @@ class StateManager(object):
 
     def _load_state_configurations(self):
         states_plugins = {}
+        erroneous_plugins = []
 
         files = file_utils.load_files(
             self.cfg.entity_graph.states_plugins_dir, '.yaml')
@@ -85,10 +86,11 @@ class StateManager(object):
                 }
             except Exception:
                 LOG.error("Exception: %s", traceback.print_exc())
+                erroneous_plugins.append(os.path.splitext(file_name)[0])
 
-        # TODO(Alexey): implement this after finishing implement load
-        #               specific plugins from configuration
-        # self._is_all_plugins_states_exists()
+        self._is_all_plugins_states_exists(
+            [key for key in states_plugins.keys()],
+            erroneous_plugins)
 
         return states_plugins
 
@@ -153,7 +155,7 @@ class StateManager(object):
                            unknown_state, state_class_instance):
         if unknown_state not in priorities:
             raise ValueError('%s state is not defined in %s',
-                             NormalizedAlarmState.UNKNOWN, full_path)
+                             unknown_state, full_path)
 
         # check that all the normalized states exists
         normalized_states = StateManager._get_all_local_variables_of_class(
@@ -179,3 +181,11 @@ class StateManager(object):
     def _get_all_local_variables_of_class(class_instance):
         return [attr for attr in dir(class_instance) if not callable(attr)
                 and not attr.startswith("__")]
+
+    def _is_all_plugins_states_exists(self, states_plugins, error_plugins):
+        plugins = self.cfg.synchronizer_plugins.plugin_type
+        all_state_loaded_plugins = states_plugins + error_plugins
+
+        for plugin in plugins:
+            if plugin not in all_state_loaded_plugins:
+                LOG.error("No state configuration file for: %s", plugin)

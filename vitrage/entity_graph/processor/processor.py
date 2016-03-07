@@ -28,8 +28,6 @@ LOG = log.getLogger(__name__)
 
 class Processor(processor.ProcessorBase):
 
-    NUMBER_OF_PLUGINS = 5
-
     def __init__(self, cfg, initialization_status, e_graph=None):
         self.cfg = cfg
         self.transformer_manager = TransformerManager(self.cfg)
@@ -148,7 +146,7 @@ class Processor(processor.ProcessorBase):
     def handle_end_message(self, vertex, neighbors):
         self.initialization_status.end_messages[vertex[VProps.TYPE]] = True
         if len(self.initialization_status.end_messages) == \
-                self.NUMBER_OF_PLUGINS:
+                len(self.cfg.synchronizer_plugins.plugin_type):
             self.initialization_status.status = \
                 self.initialization_status.RECEIVED_ALL_END_MESSAGES
 
