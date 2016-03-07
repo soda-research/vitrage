@@ -12,15 +12,19 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-
-class ActionType(object):
-
-    SET_STATE = 'set_state'
-    RAISE_ALARM = 'raise_alarm'
-    ADD_CAUSAL_RELATIONSHIP = 'add_causal_relationship'
+from vitrage.evaluator.actions.recipes import base
 
 
-class ActionMode(object):
+class RaiseAlarm(base.Recipe):
 
-    DO = 'do'
-    UNDO = 'undo'
+    @staticmethod
+    def get_do_recipe(params):
+        # Add vertex
+        # Notify
+        pass
+
+    @staticmethod
+    def get_undo_recipe(params):
+        # Remove vertex
+        # Notify
+        pass

@@ -12,15 +12,9 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from vitrage.evaluator.actions import base
-
-
-class RaiseAlarm(base.Action):
-
-    @staticmethod
-    def execute_action(params):
-        pass
-
-    @staticmethod
-    def undo_action(params):
-        pass
+ADD_VERTEX = 'add_vertex'
+REMOVE_VERTEX = 'remove_vertex'
+UPDATE_VERTEX = 'update_vertex'
+ADD_EDGE = 'add_edge'
+REMOVE_EDGE = 'remove_edge'
+NOTIFY = 'notify'

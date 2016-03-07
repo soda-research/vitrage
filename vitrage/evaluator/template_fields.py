@@ -41,3 +41,4 @@ class TemplateFields(object):
     TYPE = 'type'
 
     ID = 'id'
+    STATE = 'state'

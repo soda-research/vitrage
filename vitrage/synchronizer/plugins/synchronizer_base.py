@@ -11,16 +11,13 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-
 import abc
-
 import six
 
 from vitrage.common.constants import EventAction
-
 from vitrage.common.constants import SynchronizerProperties as SyncProps
 from vitrage.common.constants import SyncMode
-import vitrage.common.datetime_utils
+from vitrage.common import datetime_utils
 
 
 @six.add_metaclass(abc.ABCMeta)
@@ -71,8 +68,7 @@ class SynchronizerBase(object):
 
     @staticmethod
     def _add_sampling_time(entity):
-        entity[SyncProps.SAMPLE_DATE] = str(
-            vitrage.common.datetime_utils.utcnow())
+        entity[SyncProps.SAMPLE_DATE] = str(datetime_utils.utcnow())
 
     @staticmethod
     def _add_sync_mode(entity, sync_mode):

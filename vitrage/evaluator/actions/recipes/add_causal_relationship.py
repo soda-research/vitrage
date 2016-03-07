@@ -12,15 +12,17 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from vitrage.evaluator.actions import base
+from vitrage.evaluator.actions.recipes import base
 
 
-class AddCausalRelationship(base.Action):
+class AddCausalRelationship(base.Recipe):
 
     @staticmethod
-    def execute_action(params):
+    def get_do_recipe(params):
+        # Add edge
         pass
 
     @staticmethod
-    def undo_action(params):
+    def get_undo_recipe(params):
+        # Remove edge
         pass

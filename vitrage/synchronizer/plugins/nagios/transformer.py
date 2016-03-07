@@ -39,7 +39,6 @@ class NagiosTransformer(tbase.TransformerBase):
 
     def create_placeholder_vertex(self, properties={}):
         LOG.info('Nagios alarm cannot be a placeholder')
-        pass
 
     def _create_entity_vertex(self, entity_event):
 

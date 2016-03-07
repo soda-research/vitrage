@@ -263,22 +263,22 @@ class Processor(processor.ProcessorBase):
             LOG.info('not recognized action: %s for vertex: %s',
                      action, vertex)
 
-        state = self._get_updated_property(vertex,
-                                           graph_vertex,
-                                           VProps.STATE)
+        state = self._get_updated_property(vertex, graph_vertex, VProps.STATE)
         vitrage_state = self._get_updated_property(vertex,
                                                    graph_vertex,
                                                    VProps.VITRAGE_STATE)
 
+        vertex_type = vertex[VProps.TYPE] if VProps.TYPE in vertex.properties \
+            else graph_vertex[VProps.TYPE]
+
         vertex[VProps.AGGREGATED_STATE] = self.state_manager.aggregated_state(
-            state, vitrage_state, vertex[VProps.TYPE])
+            state, vitrage_state, vertex_type)
 
     @staticmethod
     def _get_updated_property(new_vertex, graph_vertex, prop):
-        if new_vertex and prop in new_vertex.properties and new_vertex[prop]:
+        if new_vertex and prop in new_vertex.properties:
             return new_vertex[prop]
-        elif graph_vertex and prop in graph_vertex.properties \
-                and graph_vertex[prop]:
+        elif graph_vertex and prop in graph_vertex.properties:
             return graph_vertex[prop]
 
         return None

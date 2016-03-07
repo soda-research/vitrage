@@ -49,17 +49,17 @@ class StateManager(object):
             normalized_state.upper()
         return self.states_plugins[plugin_name][self.PRIORITIES][upper_state]
 
-    def aggregated_state(self, state1, state2, plugin_name,
-                         is_normalized=False):
+    def aggregated_state(self, state1, state2, plugin_name, normalized=False):
+
         if plugin_name in self.states_plugins:
             normalized_state1, state_priority1 = \
                 self._find_normalized_state_and_priority(state1,
                                                          plugin_name,
-                                                         is_normalized)
+                                                         normalized)
             normalized_state2, state_priority2 = \
                 self._find_normalized_state_and_priority(state2,
                                                          plugin_name,
-                                                         is_normalized)
+                                                         normalized)
 
             return normalized_state1 if state_priority1 > state_priority2 \
                 else normalized_state2

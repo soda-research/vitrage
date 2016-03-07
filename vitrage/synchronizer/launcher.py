@@ -32,8 +32,8 @@ LOG = log.getLogger(__name__)
 
 
 def create_send_to_queue_callback(queue):
-    def send_to_queue_callback(entity):
-        queue.put(entity)
+    def send_to_queue_callback(event):
+        queue.put(event)
 
     return send_to_queue_callback
 
