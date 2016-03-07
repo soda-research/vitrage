@@ -117,9 +117,9 @@ function configure_vitrage {
     cp $VITRAGE_DIR/etc/vitrage/*.sample.json $VITRAGE_CONF_DIR
 
     # create some folders
-    mkdir -p /etc/states_plugins
-    mkdir -p /etc/static_plugins
-    mkdir -p /etc/templates
+    mkdir -p $VITRAGE_CONF_DIR/states_plugins
+    mkdir -p $VITRAGE_CONF_DIR/static_plugins
+    mkdir -p $VITRAGE_CONF_DIR/templates
 
     # copy plugins
     cp $VITRAGE_DIR/etc/vitrage/states_plugins/*.yaml $VITRAGE_CONF_DIR/states_plugins
