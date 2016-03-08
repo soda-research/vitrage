@@ -15,6 +15,7 @@
 import json
 
 import eventlet
+from oslo_config import cfg
 from oslo_log import log
 import oslo_messaging
 from oslo_service import service as os_service
@@ -44,9 +45,10 @@ class VitrageApiHandlerService(os_service.Service):
 
         super(VitrageApiHandlerService, self).start()
 
-        transport = oslo_messaging.get_transport(self.conf.CONF)
-
-        target = oslo_messaging.Target(topic=self.conf.rpc_topic)
+        transport = oslo_messaging.get_transport(cfg.CONF)
+        rabbit_hosts = cfg.CONF.oslo_messaging_rabbit.rabbit_hosts
+        target = oslo_messaging.Target(topic=self.conf.rpc_topic,
+                                       server=rabbit_hosts)
 
         endpoints = [EntityGraphApis(self.entity_graph), ]
 
