@@ -16,7 +16,6 @@ import json
 import traceback
 
 import eventlet
-from oslo_config import cfg
 from oslo_log import log
 import oslo_messaging
 
@@ -28,6 +27,7 @@ from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.graph import create_algorithm
 from vitrage.graph import Direction
+from vitrage import rpc as vitrage_rpc
 
 LOG = log.getLogger(__name__)
 
@@ -36,8 +36,9 @@ eventlet.monkey_patch()
 
 class VitrageApiHandlerService(os_service.Service):
 
-    def __init__(self, e_graph):
+    def __init__(self, conf, e_graph):
         super(VitrageApiHandlerService, self).__init__()
+        self.conf = conf
         self.entity_graph = e_graph
 
     def start(self):
@@ -45,28 +46,13 @@ class VitrageApiHandlerService(os_service.Service):
 
         super(VitrageApiHandlerService, self).start()
 
-        transport = oslo_messaging.get_transport(cfg.CONF)
+        transport = oslo_messaging.get_transport(self.conf.CONF)
 
-        # TODO(Dany) add real server
-        target = oslo_messaging.Target(topic='rpcapiv1', server='localhost')
-
-        # TODO(Dany) add rabbit configuratipn
-        # target = om.Target(topic='testme', server='192.168.56.102')
-        # target = oslo_messaging.Target(
-        #     topic='testme', server='135.248.18.223')
-        # cfg.CONF.set_override('rabbit_host', '135.248.18.223')
-        # cfg.CONF.set_override('rabbit_port', 5672)
-        # cfg.CONF.set_override('rabbit_userid', 'guest')
-        # cfg.CONF.set_override('rabbit_password', 'cloud')
-        # cfg.CONF.set_override('rabbit_login_method', 'AMQPLAIN')
-        # cfg.CONF.set_override('rabbit_virtual_host', '/')
-        cfg.CONF.set_override('rpc_backend', 'rabbit')
+        target = oslo_messaging.Target(topic=self.conf.rpc_topic)
 
         endpoints = [EntityGraphApis(self.entity_graph), ]
 
-        # TODO(Dany) use eventlet instead of threading
-        server = oslo_messaging.get_rpc_server(transport, target,
-                                               endpoints, executor='eventlet')
+        server = vitrage_rpc.get_server(target, endpoints, transport)
 
         server.start()
 

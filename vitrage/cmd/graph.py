@@ -48,7 +48,7 @@ def main():
         conf, event_queue, e_graph, initialization_status))
 
     launcher.launch_service(api_handler_svc.VitrageApiHandlerService(
-        e_graph))
+        conf, e_graph))
 
     synchronizer.launch()
 

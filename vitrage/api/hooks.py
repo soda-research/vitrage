@@ -15,6 +15,8 @@ import oslo_messaging
 from oslo_policy import policy
 from pecan import hooks
 
+from vitrage import rpc as vitrage_rpc
+
 
 class ConfigHook(hooks.PecanHook):
     """Attach the configuration and policy enforcer object to the request. """
@@ -24,6 +26,7 @@ class ConfigHook(hooks.PecanHook):
         self.enforcer = policy.Enforcer(conf)
 
     def before(self, state):
+        # TODO(dany) add Context
         state.request.cfg = self.conf
         state.request.enforcer = self.enforcer
 
@@ -33,8 +36,8 @@ class RPCHook(hooks.PecanHook):
 
     def __init__(self, conf):
         transport = oslo_messaging.get_transport(conf)
-        target = oslo_messaging.Target(topic='rpcapiv1')
-        self.client = oslo_messaging.RPCClient(transport, target)
+        target = oslo_messaging.Target(topic=conf.rpc_topic)
+        self.client = vitrage_rpc.get_client(transport, target)
         self.ctxt = {}
 
     def before(self, state):
