@@ -45,6 +45,7 @@ class TestProcessor(TestEntityGraphUnitBase):
         self.conf.register_opts(self.PROCESSOR_OPTS, group='entity_graph')
         self.conf.register_opts(self.PLUGINS_OPTS,
                                 group='synchronizer_plugins')
+        self.load_plugins(self.conf)
 
     # TODO(Alexey): un skip this test when instance transformer update is ready
     @unittest.skip('Not ready yet')

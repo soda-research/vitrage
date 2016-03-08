@@ -31,6 +31,7 @@ class StaticPhysicalTransformer(transformer_base.TransformerBase):
 
     RELATION_TYPE = 'relation_type'
     RELATIONSHIPS_SECTION = 'relationships'
+    SWITCH = 'switch'
 
     def __init__(self, transformers):
         self.transformers = transformers
@@ -159,8 +160,8 @@ class StaticPhysicalTransformer(transformer_base.TransformerBase):
     def _register_relations_direction(self):
         self.relation_direction = {}
 
-        relationship = (EntityType.SWITCH, EntityType.NOVA_HOST)
+        relationship = (self.SWITCH, EntityType.NOVA_HOST)
         self.relation_direction[relationship] = True
 
-        relationship = (EntityType.SWITCH, EntityType.SWITCH)
+        relationship = (self.SWITCH, self.SWITCH)
         self.relation_direction[relationship] = True

@@ -34,6 +34,7 @@ class TestProcessorFunctional(TestEntityGraphFunctionalBase):
         self.conf.register_opts(self.PROCESSOR_OPTS, group='entity_graph')
         self.conf.register_opts(self.PLUGINS_OPTS,
                                 group='synchronizer_plugins')
+        self.load_plugins(self.conf)
 
     def test_create_entity_graph(self):
         processor = self._create_processor_with_graph(self.conf)
@@ -41,7 +42,6 @@ class TestProcessorFunctional(TestEntityGraphFunctionalBase):
         # check number of entities
         num_vertices = len(processor.entity_graph)
         self.assertEqual(self._num_total_expected_vertices(), num_vertices)
-
         # TODO(Alexey): add this check and to check also the number of edges
         # check all entities create a tree and no free floating vertices exists
         # it will be done only after we will have zone plugin

@@ -12,4 +12,23 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-__author__ = 'stack'
+from oslo_config import cfg
+
+OPTS = [
+    cfg.StrOpt('transformer',
+               default='vitrage.synchronizer.plugins.nova.instance.'
+                       'transformer.InstanceTransformer',
+               help='Nova instance transformer class path',
+               required=True),
+    cfg.StrOpt('synchronizer',
+               default='vitrage.synchronizer.plugins.nova.instance'
+                       '.synchronizer.InstanceSynchronizer',
+               help='Nova instance synchronizer class path',
+               required=True),
+    cfg.StrOpt('user', default='admin', help='Nova user name'),
+    cfg.StrOpt('password', default='password', help='Nova user password'),
+    cfg.StrOpt('url', default='http://localhost:5000/v2.0/',
+               help='Nova authentication url'),
+    cfg.FloatOpt('version', default='2.0', help='Nova version'),
+    cfg.StrOpt('project', default='admin', help='Nova project'),
+]

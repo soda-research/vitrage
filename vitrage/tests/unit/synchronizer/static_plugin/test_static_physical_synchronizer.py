@@ -33,46 +33,59 @@ LOG = logging.getLogger(__name__)
 
 class TestStaticPhysicalSynchronizer(base.BaseTest):
 
+    SWITCH = 'switch'
+    STATIC_PHYSICAL = EntityType.STATIC_PHYSICAL
+
     OPTS = [
-        cfg.DictOpt('switch',
-                    default={
-                        'synchronizer':
-                            'vitrage.synchronizer.plugins.static_physical'
-                            '.synchronizer.StaticPhysicalSynchronizer',
-                        'transformer':
-                            'vitrage.synchronizer.plugins.static_physical.'
-                            'transformer.StaticPhysicalTransformer',
-                        'dir': utils.get_resources_dir() + '/static_plugins'},)
+        cfg.StrOpt('transformer',
+                   default='vitrage.synchronizer.plugins.static_physical.'
+                           'transformer.StaticPhysicalTransformer'),
+        cfg.StrOpt('synchronizer',
+                   default='vitrage.synchronizer.plugins.static_physical'
+                           '.synchronizer.StaticPhysicalTransformer'),
+        cfg.IntOpt('changes_interval',
+                   default=30,
+                   min=30,
+                   help='interval between checking changes in the '
+                        'configuration files of the physical topology plugin'),
+        cfg.StrOpt('directory',
+                   default=utils.get_resources_dir() + '/static_plugins'),
+        cfg.ListOpt('entities',
+                    default=['switch'])
     ]
 
     CHANGES_OPTS = [
-        cfg.DictOpt('switch',
-                    default={
-                        'synchronizer':
-                            'vitrage.synchronizer.plugins.static_physical'
-                            '.synchronizer.StaticPhysicalSynchronizer',
-                        'transformer':
-                            'vitrage.synchronizer.plugins.static_physical.'
-                            'transformer.StaticPhysicalTransformer',
-                        'dir': utils.get_resources_dir() + '/static_plugins/'
-                                                           'changes_plugins'},)
+        cfg.StrOpt('transformer',
+                   default='vitrage.synchronizer.plugins.static_physical.'
+                           'transformer.StaticPhysicalTransformer'),
+        cfg.StrOpt('synchronizer',
+                   default='vitrage.synchronizer.plugins.static_physical'
+                           '.synchronizer.StaticPhysicalTransformer'),
+        cfg.IntOpt('changes_interval',
+                   default=30,
+                   min=30,
+                   help='interval between checking changes in the '
+                        'configuration files of the physical topology plugin'),
+        cfg.StrOpt('directory',
+                   default=utils.get_resources_dir() +
+                   '/static_plugins/changes_plugins'),
     ]
 
     def setUp(self):
         super(TestStaticPhysicalSynchronizer, self).setUp()
         self.conf = cfg.ConfigOpts()
-        self.conf.register_opts(self.OPTS, group='synchronizer_plugins')
+        self.conf.register_opts(self.OPTS, group=self.STATIC_PHYSICAL)
         self.static_physical_synchronizer = \
             synchronizer.StaticPhysicalSynchronizer(self.conf)
 
     def test_static_plugins_loader(self):
         # Setup
         total_static_plugins = \
-            os.listdir(self.conf.synchronizer_plugins.switch['dir'])
+            os.listdir(self.conf.static_physical.directory)
 
         # Action
         static_configs = file_utils.load_yaml_files(
-            self.conf.synchronizer_plugins.switch['dir'])
+            self.conf.static_physical.directory)
 
         # Test assertions
         # -1 is because there are 2 files and a folder in static_plugins_dir
@@ -93,7 +106,7 @@ class TestStaticPhysicalSynchronizer(base.BaseTest):
 
         self.conf = cfg.ConfigOpts()
         self.conf.register_opts(self.CHANGES_OPTS,
-                                group='synchronizer_plugins')
+                                group=self.STATIC_PHYSICAL)
         self.static_physical_synchronizer.cfg = self.conf
 
         # Action
@@ -101,24 +114,24 @@ class TestStaticPhysicalSynchronizer(base.BaseTest):
             EventAction.UPDATE_ENTITY)
 
         # Test Assertions
-        status = any(change[VProps.TYPE] == EntityType.SWITCH and
+        status = any(change[VProps.TYPE] == self.SWITCH and
                      change[VProps.ID] == '12345' for change in changes)
         self.assertEqual(False, status)
 
-        status = any(change[VProps.TYPE] == EntityType.SWITCH and
+        status = any(change[VProps.TYPE] == self.SWITCH and
                      change[VProps.ID] == '23456' and
                      change[SyncProps.EVENT_TYPE] == EventAction.DELETE_ENTITY
                      for change in changes)
         self.assertEqual(True, status)
 
-        status = any(change[VProps.TYPE] == EntityType.SWITCH and
+        status = any(change[VProps.TYPE] == self.SWITCH and
                      change[VProps.ID] == '34567' for change in changes)
         self.assertEqual(True, status)
 
-        status = any(change[VProps.TYPE] == EntityType.SWITCH and
+        status = any(change[VProps.TYPE] == self.SWITCH and
                      change[VProps.ID] == '45678' for change in changes)
         self.assertEqual(True, status)
-        status = any(change[VProps.TYPE] == EntityType.SWITCH and
+        status = any(change[VProps.TYPE] == self.SWITCH and
                      change[VProps.ID] == '56789' for change in changes)
         self.assertEqual(True, status)
 

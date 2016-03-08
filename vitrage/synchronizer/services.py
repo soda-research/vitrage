@@ -59,7 +59,7 @@ class SnapshotsService(SynchronizerService):
             if self.first_time else SyncMode.SNAPSHOT
         LOG.debug("start get all with sync mode %s" % sync_mode)
 
-        for plugin in self.registered_plugins:
+        for plugin in self.registered_plugins.values():
             entities_dictionaries = plugin.get_all(sync_mode)
             for entity in entities_dictionaries:
                 self.callback_function(entity)

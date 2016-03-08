@@ -15,9 +15,9 @@
 from oslo_config import cfg
 
 from vitrage.common.constants import EntityType
-
 from vitrage.entity_graph.states.resource_state import NormalizedResourceState
 from vitrage.entity_graph.states.state_manager import StateManager
+from vitrage.service import load_plugin
 from vitrage.tests import base
 from vitrage.tests.mocks import utils
 
@@ -28,66 +28,20 @@ class TestStateManager(base.BaseTest):
         cfg.StrOpt('states_plugins_dir',
                    default=utils.get_resources_dir() + '/states_plugins'),
     ]
-    PLUGINS_OPTS = [
 
+    PLUGINS_OPTS = [
         cfg.ListOpt('plugin_type',
                     default=['nagios',
                              'nova.host',
                              'nova.instance',
                              'nova.zone'],
                     help='Names of supported synchronizer plugins'),
-
-        cfg.DictOpt('nagios',
-                    default={
-                        'synchronizer':
-                            'vitrage.synchronizer.plugins.nagios.synchronizer',
-                        'transformer': 'vitrage.synchronizer.plugins'
-                                       '.nagios.transformer.NagiosTransformer',
-                        'user': '',
-                        'password': '',
-                        'url': '',
-                        'config_file': '/etc/vitrage/nagios_conf.yaml'},),
-
-        cfg.DictOpt('nova.host',
-                    default={
-                        'synchronizer':
-                            'vitrage.synchronizer.plugins.nova.host'
-                            '.synchronizer',
-                        'transformer': 'vitrage.synchronizer.plugins.nova'
-                                       '.host.transformer.HostTransformer',
-                        'user': '',
-                        'password': '',
-                        'url': '',
-                        'version': '2.0',
-                        'project': 'admin'},),
-
-        cfg.DictOpt('nova.instance',
-                    default={
-                        'synchronizer':
-                            'vitrage.synchronizer.plugins.nova.instance'
-                            '.synchronizer',
-                        'transformer':
-                            'vitrage.synchronizer.plugins'
-                            '.nova.instance.transformer.InstanceTransformer',
-                        'user': '',
-                        'password': '',
-                        'url': '',
-                        'version': '2.0',
-                        'project': 'admin'},),
-
-        cfg.DictOpt('nova.zone',
-                    default={
-                        'synchronizer':
-                            'vitrage.synchronizer.plugins.nova.zone'
-                            '.synchronizer',
-                        'transformer': 'vitrage.synchronizer.plugins.nova'
-                                       '.zone.transformer.ZoneTransformer',
-                        'user': '',
-                        'password': '',
-                        'url': '',
-                        'version': '2.0',
-                        'project': 'admin'},),
     ]
+
+    @staticmethod
+    def _load_plugins(conf):
+        for plugin_name in conf.synchronizer_plugins.plugin_type:
+            load_plugin(conf, plugin_name)
 
     def setUp(self):
         super(TestStateManager, self).setUp()
@@ -95,6 +49,7 @@ class TestStateManager(base.BaseTest):
         self.conf.register_opts(self.ENTITY_GRAPH_OPTS, group='entity_graph')
         self.conf.register_opts(self.PLUGINS_OPTS,
                                 group='synchronizer_plugins')
+        self._load_plugins(self.conf)
 
     def test_load_state_plugins_without_errors(self):
         # action
@@ -114,6 +69,7 @@ class TestStateManager(base.BaseTest):
         conf = cfg.ConfigOpts()
         conf.register_opts(entity_graph_opts, group='entity_graph')
         conf.register_opts(self.PLUGINS_OPTS, group='synchronizer_plugins')
+        self._load_plugins(conf)
 
         # action
         state_manager = StateManager(conf)

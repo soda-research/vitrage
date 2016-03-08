@@ -32,23 +32,23 @@ class StaticPhysicalSynchronizer(SynchronizerBase):
 
     def get_all(self, sync_mode):
         return self.make_pickleable(self._get_all_entities(),
-                                    EntityType.SWITCH,
+                                    EntityType.STATIC_PHYSICAL,
                                     sync_mode)
 
     def get_changes(self, sync_mode):
         return self.make_pickleable(self._get_changes_entities(),
-                                    EntityType.SWITCH,
+                                    EntityType.STATIC_PHYSICAL,
                                     sync_mode)
 
     def _get_all_entities(self):
         static_entities = []
 
-        if os.path.isdir(self.cfg.synchronizer_plugins.switch['dir']):
+        if os.path.isdir(self.cfg.static_physical.directory):
             files = file_utils.load_files(
-                self.cfg.synchronizer_plugins.switch['dir'], '.yaml')
+                self.cfg.static_physical.directory, '.yaml')
 
             for file in files:
-                full_path = self.cfg.synchronizer_plugins.switch['dir'] \
+                full_path = self.cfg.static_physical.directory \
                     + '/' + file
                 static_entities += self._get_entities_from_file(file,
                                                                 full_path)
@@ -71,10 +71,10 @@ class StaticPhysicalSynchronizer(SynchronizerBase):
 
         entities_updates = []
         files = file_utils.load_files(
-            self.cfg.synchronizer_plugins.switch['dir'], '.yaml')
+            self.cfg.static_physical.directory, '.yaml')
 
         for file in files:
-            full_path = self.cfg.synchronizer_plugins.switch['dir'] +\
+            full_path = self.cfg.static_physical.directory +\
                 '/' + file
             config = file_utils.load_yaml_file(full_path)
             if config:

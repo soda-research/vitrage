@@ -15,20 +15,14 @@
 
 from oslo_log import log
 from oslo_service import service as os_service
+from oslo_utils import importutils
 
 from services import ChangesService
 from services import SnapshotsService
-from vitrage.synchronizer.plugins.nagios.synchronizer import NagiosSynchronizer
-from vitrage.synchronizer.plugins.nova.host.synchronizer import \
-    HostSynchronizer
-from vitrage.synchronizer.plugins.nova.instance.synchronizer import \
-    InstanceSynchronizer
-from vitrage.synchronizer.plugins.nova.zone.synchronizer import \
-    ZoneSynchronizer
-from vitrage.synchronizer.plugins.static_physical.synchronizer import \
-    StaticPhysicalSynchronizer
+from vitrage.common.utils import oslo_config_opt_exists
 
 LOG = log.getLogger(__name__)
+CHANGES_INTERVAL = 'changes_interval'
 
 
 def create_send_to_queue_callback(queue):
@@ -53,29 +47,15 @@ class Launcher(object):
             launcher.launch_service(service, 1)
 
     def _register_snapshot_plugins(self):
-        version = 2.0
-        user = 'admin'
-        password = 'password'
-        project = 'admin'
-        auth_url = "http://localhost:5000/v2.0/"
-        registered_plugins = \
-            [ZoneSynchronizer(version, user, password, project, auth_url),
-             HostSynchronizer(version, user, password, project, auth_url),
-             InstanceSynchronizer(version, user, password, project, auth_url),
-             NagiosSynchronizer(self.conf),
-             StaticPhysicalSynchronizer(self.conf)]
-        return registered_plugins
+        return {plugin: importutils.import_object
+                (self.conf[plugin].synchronizer, self.conf)
+                for plugin
+                in self.conf.synchronizer_plugins.plugin_type}
 
     def _register_services(self):
-        nagios_changes_interval = self.conf.synchronizer.\
-            nagios_changes_interval
-        static_physical_changes_interval = self.conf.synchronizer.\
-            static_physical_changes_interval
-
-        return [SnapshotsService(self.conf, self.snapshot_plugins),
-                ChangesService(self.conf,
-                               [NagiosSynchronizer(self.conf)],
-                               nagios_changes_interval),
-                ChangesService(self.conf,
-                               [StaticPhysicalSynchronizer(self.conf)],
-                               static_physical_changes_interval)]
+        return [SnapshotsService(self.conf, self.snapshot_plugins)] + \
+               [ChangesService(self.conf,
+                               [self.snapshot_plugins[plugin]],
+                               self.conf[plugin].changes_interval)
+                for plugin in self.conf.synchronizer_plugins.plugin_type
+                if oslo_config_opt_exists(self.conf[plugin], CHANGES_INTERVAL)]

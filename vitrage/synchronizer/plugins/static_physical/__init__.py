@@ -12,4 +12,28 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-__author__ = 'stack'
+from oslo_config import cfg
+
+OPTS = [
+    cfg.StrOpt('transformer',
+               default='vitrage.synchronizer.plugins.static_physical.'
+                       'transformer.StaticPhysicalTransformer',
+               help='Static physical transformer class path',
+               required=True),
+    cfg.StrOpt('synchronizer',
+               default='vitrage.synchronizer.plugins.static_physical'
+                       '.synchronizer.StaticPhysicalSynchronizer',
+               help='Static physical synchronizer class path',
+               required=True),
+    cfg.IntOpt('changes_interval',
+               default=30,
+               min=30,
+               help='interval between checking changes in the configuration'
+                    'files of the physical topology plugin',
+               required=True),
+    cfg.StrOpt('directory', default='/etc/vitrage/static_plugins',
+               help='Static physical plugins directory'),
+    cfg.ListOpt('entities',
+                default=['switch'],
+                help='Static physical entity types list')
+]

@@ -13,12 +13,19 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from oslo_config import cfg
+from oslo_log import log
+from oslo_policy import opts as policy_opts
+from oslo_utils import importutils
+
 import vitrage.api
 import vitrage.entity_graph.consistency
 import vitrage.evaluator
 import vitrage.rpc
 import vitrage.synchronizer
 import vitrage.synchronizer.plugins
+
+PLUGINS_PATH = 'vitrage.synchronizer.plugins.'
 
 
 def list_opts():
@@ -31,3 +38,18 @@ def list_opts():
         ('entity_graph', vitrage.entity_graph.OPTS),
         ('DEFAULT', vitrage.rpc.OPTS)
     ]
+
+
+# This is made for documentation and configuration purposes
+def plugins_opts():
+    conf = cfg.ConfigOpts()
+    log.register_options(conf)
+    policy_opts.set_defaults(conf)
+
+    for group, options in list_opts():
+        conf.register_opts(list(options),
+                           group=None if group == 'DEFAULT' else group)
+
+    return [(plugin_name, importutils.import_module(PLUGINS_PATH + plugin_name)
+             .OPTS)
+            for plugin_name in conf.synchronizer_plugins.plugin_type]

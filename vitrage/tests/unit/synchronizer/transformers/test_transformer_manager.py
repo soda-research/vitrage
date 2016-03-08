@@ -17,6 +17,7 @@ from oslo_log import log as logging
 
 from vitrage.common.constants import EntityType
 from vitrage.entity_graph.transformer_manager import TransformerManager
+from vitrage.service import load_plugin
 from vitrage.synchronizer.plugins.nagios.transformer import \
     NagiosTransformer
 from vitrage.synchronizer.plugins.nova.host.transformer import \
@@ -33,70 +34,20 @@ LOG = logging.getLogger(__name__)
 class TransformerManagerTest(base.BaseTest):
 
     OPTS = [
-
         cfg.ListOpt('plugin_type',
                     default=['nagios',
                              'nova.host',
                              'nova.instance',
                              'nova.zone'],
                     help='Names of supported synchronizer plugins'),
-
-        cfg.DictOpt('nagios',
-                    default={
-                        'synchronizer':
-                            'vitrage.synchronizer.plugins.nagios.synchronizer',
-                        'transformer': 'vitrage.synchronizer.plugins'
-                                       '.nagios.transformer.NagiosTransformer',
-                        'user': '',
-                        'password': '',
-                        'url': '',
-                        'config_file': '/etc/vitrage/nagios_conf.yaml'},),
-
-        cfg.DictOpt('nova.host',
-                    default={
-                        'synchronizer':
-                            'vitrage.synchronizer.plugins.nova.host'
-                            '.synchronizer',
-                        'transformer': 'vitrage.synchronizer.plugins.nova'
-                                       '.host.transformer.HostTransformer',
-                        'user': '',
-                        'password': '',
-                        'url': '',
-                        'version': '2.0',
-                        'project': 'admin'},),
-
-        cfg.DictOpt('nova.instance',
-                    default={
-                        'synchronizer':
-                            'vitrage.synchronizer.plugins.nova.instance'
-                            '.synchronizer',
-                        'transformer':
-                            'vitrage.synchronizer.plugins'
-                            '.nova.instance.transformer.InstanceTransformer',
-                        'user': '',
-                        'password': '',
-                        'url': '',
-                        'version': '2.0',
-                        'project': 'admin'},),
-
-        cfg.DictOpt('nova.zone',
-                    default={
-                        'synchronizer':
-                            'vitrage.synchronizer.plugins.nova.zone'
-                            '.synchronizer',
-                        'transformer': 'vitrage.synchronizer.plugins.nova'
-                                       '.zone.transformer.ZoneTransformer',
-                        'user': '',
-                        'password': '',
-                        'url': '',
-                        'version': '2.0',
-                        'project': 'admin'},),
     ]
 
     @classmethod
     def setUpClass(cls):
         cls.conf = cfg.ConfigOpts()
         cls.conf.register_opts(cls.OPTS, group='synchronizer_plugins')
+        for plugin_name in cls.conf.synchronizer_plugins.plugin_type:
+            load_plugin(cls.conf, plugin_name)
         cls.manager = TransformerManager(cls.conf)
 
     def test_transformer_registration_nagios(self):

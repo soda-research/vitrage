@@ -12,4 +12,29 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-__author__ = 'stack'
+from oslo_config import cfg
+
+OPTS = [
+    cfg.StrOpt('transformer',
+               default='vitrage.synchronizer.plugins.nagios.'
+                       'transformer.NagiosTransformer',
+               help='Nagios plugin transformer class path',
+               required=True),
+    cfg.StrOpt('synchronizer',
+               default='vitrage.synchronizer.plugins.nagios.synchronizer'
+                       '.NagiosSynchronizer',
+               help='Nagios plugin synchronizer class path',
+               required=True),
+    cfg.IntOpt('changes_interval',
+               default=30,
+               min=30,
+               help='interval between checking changes in nagios plugin',
+               required=True),
+    cfg.StrOpt('user', default='nagiosadmin',
+               help='Nagios user name'),
+    cfg.StrOpt('password', default='nagiosadmin',
+               help='Nagios user password'),
+    cfg.StrOpt('url', default='', help='Nagios url'),
+    cfg.StrOpt('config_file', default='/etc/vitrage/nagios_conf.yaml',
+               help='Nagios configuration file'),
+]

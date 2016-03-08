@@ -25,19 +25,31 @@ LOG = logging.getLogger(__name__)
 class TestNagiosConfig(base.BaseTest):
 
     OPTS = [
-        cfg.DictOpt('nagios',
-                    default={
-                        'synchronizer':
-                        'vitrage.synchronizer.plugins.nagios.synchronizer'
-                        '.NagiosSynchronizer',
-                        'transformer': 'vitrage.synchronizer.plugins'
-                                       '.nagios.transformer.NagiosTransformer',
-                        'user': '',
-                        'password': '',
-                        'url': '',
-                        'config_file': utils.get_resources_dir() +
-                                       '/nagios/nagios_conf.yaml'},)
-        ]
+        cfg.StrOpt('transformer',
+                   default='vitrage.synchronizer.plugins.nagios.'
+                           'transformer.NagiosTransformer',
+                   help='Nagios plugin transformer class path',
+                   required=True),
+        cfg.StrOpt('synchronizer',
+                   default='vitrage.synchronizer.plugins.nagios.synchronizer'
+                           '.NagiosSynchronizer',
+                   help='Nagios plugin synchronizer class path',
+                   required=True),
+        cfg.IntOpt('changes_interval',
+                   default=30,
+                   min=30,
+                   help='interval between checking changes in nagios plugin',
+                   required=True),
+        cfg.StrOpt('user', default='nagiosadmin',
+                   help='Nagios user name'),
+        cfg.StrOpt('password', default='nagiosadmin',
+                   help='Nagios user password'),
+        cfg.StrOpt('url', default='', help='Nagios url'),
+        cfg.StrOpt('config_file',
+                   default=utils.get_resources_dir() +
+                   '/nagios/nagios_conf.yaml',
+                   help='Nagios configuration file'),
+    ]
 
     # the mappings match the ones in nagios_conf.yaml
     MAPPING_1 = NagiosHostMapping('compute-1', 'nova.host', 'compute-1')
@@ -60,7 +72,7 @@ class TestNagiosConfig(base.BaseTest):
     @classmethod
     def setUpClass(cls):
         cls.conf = cfg.ConfigOpts()
-        cls.conf.register_opts(cls.OPTS, group='synchronizer_plugins')
+        cls.conf.register_opts(cls.OPTS, group='nagios')
 
     def test_nagios_configuration_loading(self):
         # Action

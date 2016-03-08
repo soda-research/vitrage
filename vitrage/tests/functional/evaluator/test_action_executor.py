@@ -12,6 +12,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 import multiprocessing
+
 from oslo_config import cfg
 from oslo_log import log as logging
 
@@ -23,6 +24,7 @@ from vitrage.evaluator.actions.base import ActionMode
 from vitrage.evaluator.actions.base import ActionType
 from vitrage.evaluator.template import ActionSpecs
 from vitrage.evaluator.template_fields import TemplateFields as TFields
+from vitrage.service import load_plugin
 from vitrage.tests.functional.entity_graph.base import \
     TestEntityGraphFunctionalBase
 
@@ -37,6 +39,8 @@ class TestActionExecutor(TestEntityGraphFunctionalBase):
         cls.conf.register_opts(cls.PROCESSOR_OPTS, group='entity_graph')
         cls.conf.register_opts(cls.PLUGINS_OPTS,
                                group='synchronizer_plugins')
+        for plugin_name in cls.conf.synchronizer_plugins.plugin_type:
+            load_plugin(cls.conf, plugin_name)
 
     def test_execute_update_vertex(self):
 

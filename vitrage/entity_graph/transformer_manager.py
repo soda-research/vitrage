@@ -19,10 +19,12 @@ from oslo_utils import importutils
 from vitrage.common.constants import EntityType
 from vitrage.common.constants import SynchronizerProperties as SyncProps
 from vitrage.common.exception import VitrageTransformerError
+from vitrage.common.utils import oslo_config_opt_exists
 from vitrage.evaluator.actions.evaluator_event_transformer import \
     EvaluatorEventTransformer
 
 LOG = logging.getLogger(__name__)
+ENTITIES = 'entities'
 
 
 class TransformerManager(object):
@@ -35,9 +37,13 @@ class TransformerManager(object):
 
         transformers = {}
         for plugin in conf.synchronizer_plugins.plugin_type:
-                transformers[plugin] = importutils.import_object(
-                    conf.synchronizer_plugins[plugin]['transformer'],
-                    transformers)
+            transformers[plugin] = importutils.import_object(
+                conf[plugin].transformer,
+                transformers)
+            if oslo_config_opt_exists(conf[plugin], ENTITIES):
+                for entity in conf[plugin].entities:
+                    transformers[entity] = importutils.import_object(
+                        conf[plugin].transformer, transformers)
 
         transformers[EntityType.VITRAGE] = importutils.import_object(
             "%s.%s" % (EvaluatorEventTransformer.__module__,

@@ -29,8 +29,7 @@ NAME = 'name'
 class NagiosConfig(object):
     def __init__(self, conf):
         try:
-            nagios_config_file = conf.synchronizer_plugins\
-                .nagios['config_file']
+            nagios_config_file = conf.nagios['config_file']
             nagios_config = file_utils.load_yaml_file(nagios_config_file)
             nagios = nagios_config[NAGIOS]      # nagios root in the yaml file
 

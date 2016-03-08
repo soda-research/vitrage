@@ -40,7 +40,7 @@ class TestStaticPhysicalTransformer(base.BaseTest):
         host_transformer = HostTransformer(self.transformers)
         static_transformer = StaticPhysicalTransformer(self.transformers)
         self.transformers[EntityType.NOVA_HOST] = host_transformer
-        self.transformers[EntityType.SWITCH] = static_transformer
+        self.transformers[EntityType.STATIC_PHYSICAL] = static_transformer
 
     def test_create_placeholder_vertex(self):
 
@@ -48,7 +48,7 @@ class TestStaticPhysicalTransformer(base.BaseTest):
                   'vertex')
 
         # Test setup
-        switch_type = EntityType.SWITCH
+        switch_type = EntityType.STATIC_PHYSICAL
         switch_name = 'switch-1'
         timestamp = datetime.datetime.utcnow()
         static_transformer = StaticPhysicalTransformer(self.transformers)
@@ -88,7 +88,7 @@ class TestStaticPhysicalTransformer(base.BaseTest):
         LOG.debug('Static Physical transformer test: get key values')
 
         # Test setup
-        switch_type = EntityType.SWITCH
+        switch_type = EntityType.STATIC_PHYSICAL
         switch_name = 'switch-1'
         static_transformer = StaticPhysicalTransformer(self.transformers)
 
@@ -99,7 +99,7 @@ class TestStaticPhysicalTransformer(base.BaseTest):
 
         # Test assertions
         self.assertEqual(EntityCategory.RESOURCE, observed_key_fields[0])
-        self.assertEqual(EntityType.SWITCH, observed_key_fields[1])
+        self.assertEqual(EntityType.STATIC_PHYSICAL, observed_key_fields[1])
         self.assertEqual(switch_name, observed_key_fields[2])
 
     def test_snapshot_transform(self):

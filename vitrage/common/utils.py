@@ -17,6 +17,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from oslo_config import cfg
 import six
 
 
@@ -28,3 +29,10 @@ def recursive_keypairs(d, separator='.'):
                 yield ('%s%s%s' % (name, separator, subname), subvalue)
         else:
             yield name, value
+
+
+def oslo_config_opt_exists(conf_parent, opt):
+    try:
+        return conf_parent[opt]
+    except cfg.NoSuchOptError:
+        return False

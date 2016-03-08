@@ -16,9 +16,11 @@ import logging
 from oslo_config import cfg
 from oslo_log import log
 from oslo_policy import opts as policy_opts
+from oslo_utils import importutils
 
 from vitrage import opts
 
+PLUGINS_PATH = 'vitrage.synchronizer.plugins.'
 LOG = log.getLogger(__name__)
 
 
@@ -35,8 +37,16 @@ def prepare_service(args=None, default_opts=None, conf=None):
     for opt, value, group in default_opts or []:
         conf.set_default(opt, value, group)
 
+    for plugin_name in conf.synchronizer_plugins.plugin_type:
+        load_plugin(conf, plugin_name)
+
     conf(args, project='vitrage', validate_default_values=True)
     log.setup(conf, 'vitrage')
     conf.log_opt_values(LOG, logging.DEBUG)
 
     return conf
+
+
+def load_plugin(conf, name):
+    opt = importutils.import_module(PLUGINS_PATH + name).OPTS
+    conf.register_opts(list(opt), group=None if name == 'DEFAULT' else name)

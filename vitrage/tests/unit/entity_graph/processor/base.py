@@ -27,6 +27,7 @@ class TestBaseProcessor(TestEntityGraphUnitBase):
         self.conf = cfg.ConfigOpts()
         self.conf.register_opts(self.PLUGINS_OPTS,
                                 group='synchronizer_plugins')
+        self.load_plugins(self.conf)
         self.transform = transformer_manager.TransformerManager(self.conf)
 
     @staticmethod
