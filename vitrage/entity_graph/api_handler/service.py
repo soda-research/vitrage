@@ -13,12 +13,10 @@
 # under the License.
 
 import json
-import traceback
 
 import eventlet
 from oslo_log import log
 import oslo_messaging
-
 from oslo_service import service as os_service
 
 from vitrage.common.constants import EdgeLabels
@@ -114,8 +112,8 @@ class EntityGraphApis(object):
         if len(lst) == 1:
             return lst[0]
         else:
-            raise ValueError("Incorrect number of items in lst: %s.\n "
-                             "Exception: %s", lst, traceback.print_exc())
+            raise ValueError('Alarm has ' + str(len(lst)) +
+                             ' connected resources (expected 1).')
 
     def _add_resource_details_to_alarms(self, alarms):
         incorrect_alarms = []
@@ -131,7 +129,7 @@ class EntityGraphApis(object):
                 alarm["resource_type"] = resource.get(VProps.TYPE, '')
             except ValueError as ve:
                 incorrect_alarms.append(alarm)
-                LOG.error(ve)
+                LOG.error('Alarm %s\nException %s', alarm, ve)
 
         return [item for item in alarms if item not in incorrect_alarms]
 

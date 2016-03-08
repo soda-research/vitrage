@@ -13,13 +13,12 @@
 # under the License.
 
 import json
-import pecan as pecan
 
 from networkx.readwrite import json_graph
 from oslo_log import log
+import pecan as pecan
 from pecan import abort
 from pecan import rest
-
 
 LOG = log.getLogger(__name__)
 
@@ -27,7 +26,7 @@ LOG = log.getLogger(__name__)
 class RootRestController(rest.RestController):
 
     @staticmethod
-    def as_tree(graph, root='RESOURCE:openstack.node', reverse=False):
+    def as_tree(graph, root='openstack.node', reverse=False):
         linked_graph = json_graph.node_link_graph(graph)
         if reverse:
             linked_graph = linked_graph.reverse()
