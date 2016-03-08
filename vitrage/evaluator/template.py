@@ -126,8 +126,9 @@ class Template(object):
 
     def _extract_properties(self, var_dict):
 
+        ignore_ids = [TFields.TEMPLATE_ID, TFields.SOURCE, TFields.TARGET]
         return dict((key, var_dict[key]) for key in var_dict
-                    if key != TFields.TEMPLATE_ID)
+                    if key not in ignore_ids)
 
     def _build_scenarios(self, scenarios_defs):
 
@@ -178,13 +179,13 @@ class Template(object):
             return self._extract_or_condition(condition_dnf)
 
         if isinstance(condition_dnf, And):
-            return self._extract_and_condition(condition_dnf)
+            return [self._extract_and_condition(condition_dnf)]
 
         if isinstance(condition_dnf, Not):
-            return [(self._extract_condition_var(condition_dnf, False))]
+            return [[(self._extract_condition_var(condition_dnf, False))]]
 
         if isinstance(condition_dnf, Symbol):
-            return [(self._extract_condition_var(condition_dnf, True))]
+            return [[(self._extract_condition_var(condition_dnf, True))]]
 
     def convert_to_dnf_format(self, condition_str):
 

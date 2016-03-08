@@ -13,18 +13,21 @@
 # under the License.
 
 
-def check_filter(data, attr_filter):
+def check_filter(data, attr_filter, *args):
     """Check attr_filter against data
 
     :param data: a dictionary of field_name: value
     :param attr_filter: a dictionary of either
     field_name : value (mandatory)
     field_name : list of values - data[field_name] must match ANY of the values
+    :param ignore_keys: list of filter keys to ignore (if exist)
     :rtype: bool
     """
     if not attr_filter:
         return True
     for key, content in attr_filter.items():
+        if key in args:
+            continue
         if not isinstance(content, list):
             content = [content]
         if not data.get(key) in content:

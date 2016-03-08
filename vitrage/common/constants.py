@@ -32,7 +32,7 @@ class VertexProperties(object):
 
 
 class EdgeProperties(object):
-    RELATIONSHIP_NAME = 'relationship_name'
+    RELATIONSHIP_TYPE = 'relationship_type'
     IS_DELETED = 'is_deleted'
     UPDATE_TIMESTAMP = 'update_timestamp'
 

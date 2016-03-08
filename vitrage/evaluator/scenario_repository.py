@@ -38,24 +38,27 @@ class ScenarioRepository(object):
 
     def get_scenarios_by_vertex(self, vertex):
 
-        entity_key = frozenset(vertex.properties)
+        entity_key = frozenset(vertex.properties.items())
 
-        return [value for scenario_key, value in self.entity_scenarios
-                if scenario_key.issubset(entity_key)]
+        scenarios = []
+        for scenario_key, value in self.entity_scenarios.items():
+            if scenario_key.issubset(entity_key):
+                scenarios += value
+        return scenarios
 
     def get_scenarios_by_edge(self, edge_description):
 
         key = self._create_edge_scenario_key(edge_description)
         scenarios = []
 
-        for scenario_key, value in self.relationship_scenarios:
+        for scenario_key, value in self.relationship_scenarios.items():
 
             check_label = key.label == scenario_key.label
             check_source_issubset = scenario_key.source.issubset(key.source)
             check_target_issubset = scenario_key.target.issubset(key.target)
 
             if check_label and check_source_issubset and check_target_issubset:
-                scenarios.append(value)
+                scenarios += value
 
         return scenarios
 
@@ -82,17 +85,22 @@ class ScenarioRepository(object):
             self.add_template(template_def)
 
     def _add_template_scenarios(self, template):
-
         for scenario in template.scenarios:
-            for condition_var in scenario.condition:
+            self._handle_condition(scenario)
 
-                if condition_var.type == RELATIONSHIP:
-                    edge_desc = condition_var.variable
-                    self._add_relationship(scenario, edge_desc)
-                    self._add_entity(scenario, edge_desc.source)
-                    self._add_entity(scenario, edge_desc.target)
-                else:  # Entity
-                    self._add_entity(scenario, condition_var.variable)
+    def _handle_condition(self, scenario):
+        for clause in scenario.condition:
+            self._handle_clause(clause, scenario)
+
+    def _handle_clause(self, clause, scenario):
+        for condition_var in clause:
+            if condition_var.type == RELATIONSHIP:
+                edge_desc = condition_var.variable
+                self._add_relationship(scenario, edge_desc)
+                self._add_entity(scenario, edge_desc.source)
+                self._add_entity(scenario, edge_desc.target)
+            else:  # Entity
+                self._add_entity(scenario, condition_var.variable)
 
     @staticmethod
     def _create_scenario_key(properties):
@@ -109,8 +117,8 @@ class ScenarioRepository(object):
     def _create_edge_scenario_key(self, edge_desc):
 
         return EdgeKeyScenario(edge_desc.edge.label,
-                               frozenset(edge_desc.source.properties),
-                               frozenset(edge_desc.target.properties))
+                               frozenset(edge_desc.source.properties.items()),
+                               frozenset(edge_desc.target.properties.items()))
 
     def _add_entity(self, scenario, entity):
 

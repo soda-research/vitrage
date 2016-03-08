@@ -28,24 +28,17 @@ LOG = logging.getLogger(__name__)
 class NagiosSynchronizerTest(NagiosBaseTest):
 
     OPTS = [
-        cfg.DictOpt('nagios',
-                    default={
-                        'synchronizer':
-                            'vitrage.synchronizer.plugins.nagios.synchronizer'
-                            '.NagiosSynchronizer',
-                        'transformer': 'vitrage.synchronizer.plugins'
-                                       '.nagios.transformer.NagiosTransformer',
-                        'user': '',
-                        'password': '',
-                        'url': '',
-                        'config_file': utils.get_resources_dir() +
-                                       '/nagios/nagios_conf.yaml'},)
+        cfg.StrOpt(
+            'config_file',
+            default=utils.get_resources_dir() + '/nagios/nagios_conf.yaml',
+            help='Nagios configuation file'
+        ),
     ]
 
     @classmethod
     def setUpClass(cls):
         cls.conf = cfg.ConfigOpts()
-        cls.conf.register_opts(cls.OPTS, group='synchronizer_plugins')
+        cls.conf.register_opts(cls.OPTS, group='nagios')
 
     def test_get_all(self):
         """Check get_all functionality.

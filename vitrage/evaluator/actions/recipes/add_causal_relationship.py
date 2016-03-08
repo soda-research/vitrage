@@ -46,5 +46,5 @@ class AddCausalRelationship(base.Recipe):
         return {
             TFields.SOURCE: params[TFields.SOURCE],
             TFields.TARGET: params[TFields.TARGET],
-            EdgeProperties.RELATIONSHIP_NAME: EdgeLabels.CAUSES
+            EdgeProperties.RELATIONSHIP_TYPE: EdgeLabels.CAUSES
         }

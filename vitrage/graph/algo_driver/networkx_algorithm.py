@@ -15,7 +15,7 @@
 from oslo_log import log as logging
 
 from algorithm import GraphAlgorithm
-from sub_graph_matching import sub_graph_matching
+from sub_graph_matching import subgraph_matching
 from vitrage.graph.driver import NXGraph
 from vitrage.graph.query import create_predicate
 
@@ -66,5 +66,5 @@ class NXAlgorithm(GraphAlgorithm):
         graph._g = self.graph._g.subgraph(n_result)
         return graph
 
-    def sub_graph_matching(self, sub_graph, known_matches):
-        return sub_graph_matching(self.graph, sub_graph, known_matches)
+    def sub_graph_matching(self, subgraph, known_matches, validate=False):
+        return subgraph_matching(self.graph, subgraph, known_matches, validate)

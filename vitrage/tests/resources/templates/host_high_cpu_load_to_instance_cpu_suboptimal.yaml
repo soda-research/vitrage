@@ -39,13 +39,13 @@ scenarios:
     condition: alarm_on_host and host_contains_instance
     actions:
      - action:
-        action_type: RAISE_ALARM
+        action_type: raise_alarm
         properties:
          alarm_type: VM_CPU_SUBOPTIMAL_PERFORMANCE
         action_target:
          target: 4
      - action:
-        action_type: SET_STATE
+        action_type: set_state
         properties:
          state: SUBOPTIMAL
         action_target:
@@ -54,7 +54,7 @@ scenarios:
     condition: alarm_on_host and alarm_on_instance and host_contains_instance
     actions:
      - action:
-        action_type: ADD_CAUSAL_RELATIONSHIP
+        action_type: add_causal_relationship
         action_target:
          source: 1
          target: 2

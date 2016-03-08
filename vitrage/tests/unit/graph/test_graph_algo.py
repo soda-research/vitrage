@@ -138,10 +138,10 @@ class GraphAlgorithmTest(GraphTestBase):
         ga = create_algorithm(self.entity_graph)
 
         # Get ids of some of the elements in the entity graph:
-        vm_alarm_id = self.entity_graph.get_vertex(
-            ALARM_ON_VM + str(self.vm_alarm_id - 1)).vertex_id
-        host_alarm_id = self.entity_graph.get_vertex(
-            ALARM_ON_HOST + str(self.host_alarm_id - 1)).vertex_id
+        vm_alarm = self.entity_graph.get_vertex(
+            ALARM_ON_VM + str(self.vm_alarm_id - 1))
+        host_alarm = self.entity_graph.get_vertex(
+            ALARM_ON_HOST + str(self.host_alarm_id - 1))
 
         # Create a template for template matching
         t = create_graph('template_graph')
@@ -188,7 +188,7 @@ class GraphAlgorithmTest(GraphTestBase):
 
         t.add_vertex(t_v_alarm_fail)
         mappings = ga.sub_graph_matching(t, [
-            Mapping(t_v_host_alarm.vertex_id, host_alarm_id)])
+            Mapping(t_v_host_alarm, host_alarm, True)], validate=True)
         self.assertEqual(
             0,
             len(mappings),
@@ -198,7 +198,7 @@ class GraphAlgorithmTest(GraphTestBase):
 
         t.add_vertex(t_v_host_alarm)
         mappings = ga.sub_graph_matching(t, [
-            Mapping(t_v_host_alarm.vertex_id, host_alarm_id)])
+            Mapping(t_v_host_alarm, host_alarm, is_vertex=True)])
         self.assertEqual(
             1,
             len(mappings),
@@ -207,7 +207,7 @@ class GraphAlgorithmTest(GraphTestBase):
 
         t.add_vertex(t_v_host)
         mappings = ga.sub_graph_matching(t, [
-            Mapping(t_v_host_alarm.vertex_id, host_alarm_id)])
+            Mapping(t_v_host_alarm, host_alarm, is_vertex=True)])
         self.assertEqual(
             0,
             len(mappings),
@@ -216,15 +216,16 @@ class GraphAlgorithmTest(GraphTestBase):
 
         t.add_edge(e_alarm_on_host)
         mappings = ga.sub_graph_matching(t, [
-            Mapping(t_v_host_alarm.vertex_id, host_alarm_id)])
+            Mapping(t_v_host_alarm, host_alarm, is_vertex=True)])
         self.assertEqual(
             1, len(mappings),
             'Template - Two connected vertices (host alarm -ON-> host)'
             ' template_root is a specific host alarm ' + str(mappings))
 
         host_id = mappings[0][t_v_host.vertex_id]
+        host_vertex = self.entity_graph.get_vertex(host_id)
         mappings = ga.sub_graph_matching(t, [
-            Mapping(t_v_host.vertex_id, host_id)])
+            Mapping(t_v_host, host_vertex, is_vertex=True)])
         self.assertEqual(
             ENTITY_GRAPH_ALARMS_PER_HOST,
             len(mappings),
@@ -233,7 +234,7 @@ class GraphAlgorithmTest(GraphTestBase):
 
         t.add_vertex(t_v_vm)
         mappings = ga.sub_graph_matching(t, [
-            Mapping(t_v_host_alarm.vertex_id, host_alarm_id)])
+            Mapping(t_v_host_alarm, host_alarm, is_vertex=True)])
         self.assertEqual(
             0,
             len(mappings),
@@ -243,7 +244,7 @@ class GraphAlgorithmTest(GraphTestBase):
 
         t.add_vertex(t_v_vm_alarm)
         mappings = ga.sub_graph_matching(t, [
-            Mapping(t_v_vm_alarm.vertex_id, vm_alarm_id)])
+            Mapping(t_v_vm_alarm, vm_alarm, is_vertex=True)])
         self.assertEqual(
             0,
             len(mappings),
@@ -253,7 +254,7 @@ class GraphAlgorithmTest(GraphTestBase):
 
         t.add_edge(e_alarm_on_vm)
         mappings = ga.sub_graph_matching(t, [
-            Mapping(t_v_vm_alarm.vertex_id, vm_alarm_id)])
+            Mapping(t_v_vm_alarm, vm_alarm, is_vertex=True)])
         self.assertEqual(
             0,
             len(mappings),
@@ -263,7 +264,7 @@ class GraphAlgorithmTest(GraphTestBase):
 
         t.add_edge(e_host_contains_vm)
         mappings = ga.sub_graph_matching(t, [
-            Mapping(t_v_vm_alarm.vertex_id, vm_alarm_id)])
+            Mapping(t_v_vm_alarm, vm_alarm, is_vertex=True)])
         self.assertEqual(
             ENTITY_GRAPH_ALARMS_PER_HOST,
             len(mappings),
@@ -272,7 +273,7 @@ class GraphAlgorithmTest(GraphTestBase):
             ' template_root is a specific instance alarm ' + str(mappings))
 
         mappings = ga.sub_graph_matching(t, [
-            Mapping(t_v_host_alarm.vertex_id, host_alarm_id)])
+            Mapping(t_v_host_alarm, host_alarm, is_vertex=True)])
         self.assertEqual(
             ENTITY_GRAPH_VMS_PER_HOST * ENTITY_GRAPH_ALARMS_PER_VM,
             len(mappings),
@@ -281,7 +282,7 @@ class GraphAlgorithmTest(GraphTestBase):
             ' template_root is a specific host alarm ' + str(mappings))
 
         mappings = ga.sub_graph_matching(t, [
-            Mapping(t_v_host.vertex_id, host_id)])
+            Mapping(t_v_host, host_vertex, is_vertex=True)])
         self.assertEqual(
             ENTITY_GRAPH_VMS_PER_HOST * ENTITY_GRAPH_ALARMS_PER_VM
             * ENTITY_GRAPH_ALARMS_PER_HOST,
@@ -292,7 +293,7 @@ class GraphAlgorithmTest(GraphTestBase):
 
         t.add_vertex(t_v_switch)
         mappings = ga.sub_graph_matching(t, [
-            Mapping(t_v_vm_alarm.vertex_id, vm_alarm_id)])
+            Mapping(t_v_vm_alarm, vm_alarm, is_vertex=True)])
         self.assertEqual(
             0,
             len(mappings),
@@ -302,7 +303,7 @@ class GraphAlgorithmTest(GraphTestBase):
 
         t.add_edge(e_host_uses_switch)
         mappings = ga.sub_graph_matching(t, [
-            Mapping(t_v_vm_alarm.vertex_id, vm_alarm_id)])
+            Mapping(t_v_vm_alarm, vm_alarm, is_vertex=True)])
         self.assertEqual(
             ENTITY_GRAPH_ALARMS_PER_HOST,
             len(mappings),
@@ -312,7 +313,7 @@ class GraphAlgorithmTest(GraphTestBase):
             + str(mappings))
 
         mappings = ga.sub_graph_matching(t, [
-            Mapping(t_v_host.vertex_id, host_id)])
+            Mapping(t_v_host, host_vertex, is_vertex=True)])
         self.assertEqual(
             ENTITY_GRAPH_VMS_PER_HOST * ENTITY_GRAPH_ALARMS_PER_VM
             * ENTITY_GRAPH_ALARMS_PER_HOST,
@@ -323,8 +324,8 @@ class GraphAlgorithmTest(GraphTestBase):
             + str(mappings))
 
         mappings = ga.sub_graph_matching(t, [
-            Mapping(t_v_switch.vertex_id, v_switch.vertex_id),
-            Mapping(t_v_vm_alarm.vertex_id, vm_alarm_id)])
+            Mapping(t_v_switch, v_switch, is_vertex=True),
+            Mapping(t_v_vm_alarm, vm_alarm, is_vertex=True)])
         self.assertEqual(
             ENTITY_GRAPH_ALARMS_PER_HOST,
             len(mappings),
@@ -336,7 +337,7 @@ class GraphAlgorithmTest(GraphTestBase):
         t.add_vertex(t_v_node_not_in_graph)
         t.add_edge(e_host_to_node_not_in_graph)
         mappings = ga.sub_graph_matching(t, [
-            Mapping(t_v_vm_alarm.vertex_id, vm_alarm_id)])
+            Mapping(t_v_vm_alarm, vm_alarm, is_vertex=True)])
         self.assertEqual(
             0,
             len(mappings),
@@ -351,7 +352,7 @@ class GraphAlgorithmTest(GraphTestBase):
         t.add_edge(e_node_contains_host)
         t.add_edge(e_node_contains_switch)
         mappings = ga.sub_graph_matching(t, [
-            Mapping(t_v_vm_alarm.vertex_id, vm_alarm_id)])
+            Mapping(t_v_vm_alarm, vm_alarm, is_vertex=True)])
         self.assertEqual(
             1,
             len(mappings),
@@ -361,9 +362,8 @@ class GraphAlgorithmTest(GraphTestBase):
             ' template_root is a instance alarm ' + str(mappings))
 
         mappings = ga.sub_graph_matching(t, [
-            Mapping(t_v_node.vertex_id, v_node.vertex_id),
-            Mapping(t_v_switch.vertex_id, v_switch.vertex_id),
-            Mapping(t_v_vm_alarm.vertex_id, vm_alarm_id)])
+            Mapping(e_node_contains_switch, e_node_to_switch, is_vertex=False),
+            Mapping(t_v_vm_alarm, vm_alarm, is_vertex=True)])
         self.assertEqual(
             1,
             len(mappings),
@@ -374,8 +374,21 @@ class GraphAlgorithmTest(GraphTestBase):
 
         t.add_edge(e_node_contains_switch_fail)
         mappings = ga.sub_graph_matching(t, [
-            Mapping(t_v_node.vertex_id, v_node.vertex_id),
-            Mapping(t_v_switch.vertex_id, v_switch.vertex_id)])
+            Mapping(t_v_node, v_node, is_vertex=True),
+            Mapping(t_v_switch, v_switch, is_vertex=True)], validate=True)
+        self.assertEqual(
+            0,
+            len(mappings),
+            'Template - FIVE connected vertices - 2 Known Mapping[node,switch]'
+            ' Check that ALL edges between the 2 known mappings are checked'
+            ' we now have node-CONTAINSfail->switch AND node-CONTAINS->switch'
+            ' ')
+
+        mappings = ga.sub_graph_matching(t, [
+            Mapping(e_node_contains_switch,
+                    e_node_to_switch, is_vertex=False)],
+            validate=True
+            )
         self.assertEqual(
             0,
             len(mappings),
@@ -386,8 +399,8 @@ class GraphAlgorithmTest(GraphTestBase):
 
         t.remove_edge(e_node_contains_switch)
         mappings = ga.sub_graph_matching(t, [
-            Mapping(t_v_node.vertex_id, v_node.vertex_id),
-            Mapping(t_v_switch.vertex_id, v_switch.vertex_id)])
+            Mapping(t_v_node, v_node, is_vertex=True),
+            Mapping(t_v_switch, v_switch, is_vertex=True)])
         self.assertEqual(
             0,
             len(mappings),
@@ -398,7 +411,7 @@ class GraphAlgorithmTest(GraphTestBase):
             ' ')
 
         mappings = ga.sub_graph_matching(t, [
-            Mapping(t_v_vm_alarm.vertex_id, vm_alarm_id)])
+            Mapping(t_v_vm_alarm, vm_alarm, is_vertex=True)])
         self.assertEqual(
             0,
             len(mappings),

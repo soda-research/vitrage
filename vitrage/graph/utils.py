@@ -93,7 +93,7 @@ def create_edge(source_id,
     properties = {
         EConst.UPDATE_TIMESTAMP: update_timestamp,
         EConst.IS_DELETED: is_deleted,
-        EConst.RELATIONSHIP_NAME: relationship_type,
+        EConst.RELATIONSHIP_TYPE: relationship_type,
         }
     if metadata:
         properties.update(metadata)

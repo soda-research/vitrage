@@ -16,7 +16,8 @@ import abc
 from collections import namedtuple
 import six
 
-Mapping = namedtuple('Mapping', ['sub_graph_v_id', 'graph_v_id'])
+Mapping = \
+    namedtuple('Mapping', ['subgraph_element', 'graph_element', 'is_vertex'])
 
 
 @six.add_metaclass(abc.ABCMeta)
@@ -42,7 +43,7 @@ class GraphAlgorithm(object):
         pass
 
     @abc.abstractmethod
-    def sub_graph_matching(self, sub_graph, known_mappings):
+    def sub_graph_matching(self, sub_graph, known_mappings, validate=False):
         """Search for occurrences of of a template graph in the graph
 
         In sub-graph matching algorithms complexity is high in the general case
@@ -51,6 +52,7 @@ class GraphAlgorithm(object):
 
         :type known_mappings: list
         :type sub_graph: driver.Graph
+        :type validate: bool
         :rtype: list of dict
         """
         pass

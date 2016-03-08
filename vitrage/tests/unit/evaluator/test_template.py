@@ -89,6 +89,7 @@ class BasicTemplateTest(base.BaseTest):
 
         self.assertEqual(len(relationships), len(relations_def))
 
+        exclude_keys = [TFields.TEMPLATE_ID, TFields.SOURCE, TFields.TARGET]
         for relation_def in relations_def:
 
             relation_def_dict = relation_def[TFields.RELATIONSHIP]
@@ -98,9 +99,8 @@ class BasicTemplateTest(base.BaseTest):
             relationship = relationships[template_id].edge
 
             for key, value in relation_def_dict.iteritems():
-                if key == TFields.TEMPLATE_ID:
-                    continue
-                self.assertEqual(value, relationship.properties[key])
+                if key not in exclude_keys:
+                    self.assertEqual(value, relationship.properties[key])
 
     def _validate_scenarios(self, scenarios, entities):
         """Validates scenario parsing
@@ -119,7 +119,7 @@ class BasicTemplateTest(base.BaseTest):
         condition = scenario.condition
         self.assertEqual(len(condition), 1)
 
-        condition_var = condition[0]
+        condition_var = condition[0][0]
         self.assertTrue(isinstance(condition_var, ConditionVar))
 
         variable = condition_var.variable

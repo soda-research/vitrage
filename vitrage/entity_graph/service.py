@@ -19,6 +19,8 @@ from oslo_log import log
 from oslo_service import service as os_service
 
 from vitrage.entity_graph.processor import processor as proc
+from vitrage.evaluator.scenario_evaluator import ScenarioEvaluator
+from vitrage.evaluator.scenario_repository import ScenarioRepository
 
 LOG = log.getLogger(__name__)
 
@@ -32,6 +34,11 @@ class VitrageGraphService(os_service.Service):
         self.processor = proc.Processor(self.cfg,
                                         initialization_status,
                                         e_graph=entity_graph)
+
+        self.scenario_repo = ScenarioRepository(cfg)
+        self.evaluator = ScenarioEvaluator(entity_graph,
+                                           self.scenario_repo,
+                                           event_queue)
 
     def start(self):
         LOG.info("Start VitrageGraphService")
@@ -64,7 +71,6 @@ class VitrageGraphService(os_service.Service):
         seconds and goes to sleep for 1 second. if there are more events in
         the queue they are done when timer returns.
         """
-
         start_time = datetime.datetime.now()
         while not self.queue.empty():
             time_delta = datetime.datetime.now() - start_time

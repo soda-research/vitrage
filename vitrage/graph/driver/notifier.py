@@ -13,29 +13,21 @@
 # under the License.
 import functools
 
-from elements import Edge
+from elements import Vertex
 
 
 def _before_func(graph, item):
     if not graph.is_subscribed():
         return
-    if isinstance(item, Edge):
-        return graph.get_edge(item.source_id, item.target_id, item.label)
-    else:
-        return graph.get_vertex(item.vertex_id)
+    return graph.get_item(item)
 
 
 def _after_func(graph, item, data_before=None):
     if not graph.is_subscribed():
         return
-    if isinstance(item, Edge):
-        edge = graph.get_edge(item.source_id, item.target_id, item.label)
-        edge_source_v = graph.get_vertex(item.source_id)
-        edge_target_v = graph.get_vertex(item.target_id)
-        data_after = edge, edge_source_v, edge_target_v
-    else:
-        data_after = graph.get_vertex(item.vertex_id),
-    graph.notifier.notify(data_before, *data_after)
+    element = graph.get_item(item)
+    is_vertex = isinstance(element, Vertex)
+    graph.notifier.notify(data_before, graph.get_item(item), is_vertex)
 
 
 class Notifier(object):

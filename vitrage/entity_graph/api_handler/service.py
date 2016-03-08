@@ -123,7 +123,7 @@ class EntityGraphApis(object):
             try:
                 resources = self.entity_graph.neighbors(
                     v_id=alarm.vertex_id,
-                    edge_attr_filter={EProps.RELATIONSHIP_NAME: EdgeLabels.ON},
+                    edge_attr_filter={EProps.RELATIONSHIP_TYPE: EdgeLabels.ON},
                     direction=Direction.OUT)
 
                 resource = self._get_first(resources)

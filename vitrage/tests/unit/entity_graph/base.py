@@ -34,6 +34,11 @@ class TestEntityGraphUnitBase(base.BaseTest):
                    default=utils.get_resources_dir() + '/states_plugins'),
     ]
 
+    EVALUATOR_OPTS = [
+        cfg.StrOpt('templates_dir',
+                   default=utils.get_resources_dir() + '/evaluator_templates',
+                   )]
+
     PLUGINS_OPTS = [
         cfg.ListOpt('plugin_type',
                     default=['nagios',
@@ -42,14 +47,16 @@ class TestEntityGraphUnitBase(base.BaseTest):
                              'nova.zone'],
                     help='Names of supported synchronizer plugins'),
     ]
+
     NUM_NODES = 1
     NUM_ZONES = 2
     NUM_HOSTS = 4
     NUM_INSTANCES = 16
 
-    def load_plugins(self, conf):
+    @staticmethod
+    def load_plugins(conf):
         for plugin_name in conf.synchronizer_plugins.plugin_type:
-            load_plugin(self.conf, plugin_name)
+            load_plugin(conf, plugin_name)
 
     def _create_processor_with_graph(self, conf, processor=None):
         events = self._create_mock_events()

@@ -61,5 +61,5 @@ class AddCausalRelationshipTest(base.BaseTest):
         target = add_edge_step_params.get(TField.TARGET)
         self.assertEqual(target_vertex_id, target)
 
-        relation_name = add_edge_step_params[EdgeProperties.RELATIONSHIP_NAME]
+        relation_name = add_edge_step_params[EdgeProperties.RELATIONSHIP_TYPE]
         self.assertEqual(EdgeLabels.CAUSES, relation_name)

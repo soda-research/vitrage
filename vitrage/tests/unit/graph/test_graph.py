@@ -126,10 +126,10 @@ class GraphTest(GraphTestBase):
         g.add_vertex(v_host)
         g.add_edge(e_node_to_host)
         self.assertEqual(1, g.num_edges(), 'graph __len__ after add edge')
-        label = e_node_to_host[EProps.RELATIONSHIP_NAME]
+        label = e_node_to_host[EProps.RELATIONSHIP_TYPE]
         e = g.get_edge(v_node.vertex_id, v_host.vertex_id, label)
-        self.assertEqual(e_node_to_host[EProps.RELATIONSHIP_NAME],
-                         e[EProps.RELATIONSHIP_NAME],
+        self.assertEqual(e_node_to_host[EProps.RELATIONSHIP_TYPE],
+                         e[EProps.RELATIONSHIP_TYPE],
                          'edge properties are saved')
         self.assertEqual(e_node_to_host.source_id, e.source_id,
                          'edge vertex_id is saved')
@@ -195,8 +195,8 @@ class GraphTest(GraphTestBase):
         g.add_edge(another_edge)
         self.assertEqual(2, g.num_edges(), 'graph __len__ after add edge')
         e = g.get_edge(v_node.vertex_id, v_host.vertex_id, another_label)
-        self.assertEqual(another_edge[EProps.RELATIONSHIP_NAME],
-                         e[EProps.RELATIONSHIP_NAME],
+        self.assertEqual(another_edge[EProps.RELATIONSHIP_TYPE],
+                         e[EProps.RELATIONSHIP_TYPE],
                          'edge properties are saved')
         self.assertEqual('DATA', e['some_meta'],
                          'edge properties are saved')
@@ -278,7 +278,7 @@ class GraphTest(GraphTestBase):
 
         v1_neighbors = g.neighbors(
             v_id=v1.vertex_id,
-            edge_attr_filter={EProps.RELATIONSHIP_NAME: relationship_a})
+            edge_attr_filter={EProps.RELATIONSHIP_TYPE: relationship_a})
         self._assert_set_equal({v2, v4}, v1_neighbors,
                                'Check V1 neighbors, edge property filter')
 
@@ -300,7 +300,7 @@ class GraphTest(GraphTestBase):
         v1_neighbors = g.neighbors(
             v_id=v1.vertex_id,
             direction=Direction.IN,
-            edge_attr_filter={EProps.RELATIONSHIP_NAME: relationship_c},
+            edge_attr_filter={EProps.RELATIONSHIP_TYPE: relationship_c},
             vertex_attr_filter={VProps.TYPE: HOST})
         self._assert_set_equal(
             {v2}, v1_neighbors,
@@ -327,7 +327,7 @@ class GraphTest(GraphTestBase):
         v2_neighbors = g.neighbors(
             v_id=v2.vertex_id,
             edge_attr_filter={
-                EProps.RELATIONSHIP_NAME: [relationship_a, relationship_b]
+                EProps.RELATIONSHIP_TYPE: [relationship_a, relationship_b]
             },
             vertex_attr_filter={
                 VProps.CATEGORY: [RESOURCE, ALARM],
@@ -382,8 +382,7 @@ class GraphTest(GraphTestBase):
         self.assertEqual(OPENSTACK_NODE, found_vertex[VProps.TYPE],
                          'get_vertices check node vertex')
 
-    def _check_callback_result(self, result, msg, exp_prev, exp_curr,
-                               exp_source_v=None, exp_target_v=None):
+    def _check_callback_result(self, result, msg, exp_prev, exp_curr):
 
         def assert_none_or_equals(exp, act, msg):
             if exp:
@@ -396,10 +395,6 @@ class GraphTest(GraphTestBase):
                               msg + ' prev_item unexpected')
         assert_none_or_equals(exp_curr, result[1],
                               msg + ' curr_item unexpected')
-        assert_none_or_equals(exp_source_v, result[2],
-                              msg + ' edge_source_v unexpected')
-        assert_none_or_equals(exp_target_v, result[3],
-                              msg + ' edge_target_v unexpected')
         self.result = None
 
     def _assert_none_or_equals(self, exp, act, msg):
@@ -415,12 +410,11 @@ class GraphTest(GraphTestBase):
 
         def callback(pre_item,
                      current_item,
-                     edge_source_v=None,
-                     edge_target_v=None):
+                     is_vertex):
             LOG.info('called with: pre_event_item ' + str(pre_item) +
                      ' current_item ' + str(current_item))
             self.assertIsNotNone(current_item)
-            self.result = pre_item, current_item, edge_source_v, edge_target_v
+            self.result = pre_item, current_item, is_vertex
 
         # Check there is no notification without subscribing
         g.add_vertex(v_alarm)
@@ -440,7 +434,7 @@ class GraphTest(GraphTestBase):
 
         g.add_edge(e_node_to_host)
         self._check_callback_result(self.result, 'add edge', None,
-                                    e_node_to_host, v_node, v_host)
+                                    e_node_to_host)
 
         updated_vertex = g.get_vertex(v_host.vertex_id)
         updated_vertex[VProps.CATEGORY] = ALARM
@@ -454,4 +448,4 @@ class GraphTest(GraphTestBase):
         updated_edge['ZIG'] = 'ZAG'
         g.update_edge(updated_edge)
         self._check_callback_result(self.result, 'update edge', e_node_to_host,
-                                    updated_edge, v_node, updated_vertex)
+                                    updated_edge)
