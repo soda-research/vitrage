@@ -30,7 +30,7 @@ class NagiosSynchronizerWithMockData(NagiosSynchronizer):
     def set_service_datas(self, service_datas):
         self.service_datas = service_datas
 
-    def _get_services_from_nagios(self):
+    def _get_alarms(self):
         alarms = []
         for service_data in self.service_datas:
             generators = mock_sync.simple_nagios_alarm_generators(

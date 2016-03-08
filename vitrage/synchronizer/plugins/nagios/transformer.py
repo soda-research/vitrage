@@ -16,29 +16,26 @@ from oslo_log import log as logging
 from vitrage.common.constants import EdgeLabels
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import EntityType
-from vitrage.common.constants import EventAction
 from vitrage.common.constants import SynchronizerProperties as SyncProps
-from vitrage.common.constants import SyncMode
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.common import datetime_utils
-from vitrage.common.exception import VitrageTransformerError
 import vitrage.graph.utils as graph_utils
+from vitrage.synchronizer.plugins.base.alarm.properties \
+    import AlarmProperties as AlarmProps
+from vitrage.synchronizer.plugins.base.alarm.transformer \
+    import BaseAlarmTransformer
 from vitrage.synchronizer.plugins.nagios.properties import NagiosProperties
 from vitrage.synchronizer.plugins import transformer_base as tbase
 
 LOG = logging.getLogger(__name__)
 
 
-class NagiosTransformer(tbase.TransformerBase):
+class NagiosTransformer(BaseAlarmTransformer):
 
     STATUS_OK = 'OK'
-    NAGIOS_ALARM_STATE = 'Active'
 
     def __init__(self, transformers):
-        self.transformers = transformers
-
-    def create_placeholder_vertex(self, properties={}):
-        LOG.info('Nagios alarm cannot be a placeholder')
+        super(NagiosTransformer, self).__init__(transformers)
 
     def _create_entity_vertex(self, entity_event):
 
@@ -57,7 +54,7 @@ class NagiosTransformer(tbase.TransformerBase):
             self.extract_key(entity_event),
             entity_category=EntityCategory.ALARM,
             entity_type=entity_event[SyncProps.SYNC_TYPE],
-            entity_state=self.NAGIOS_ALARM_STATE,
+            entity_state=AlarmProps.ALARM_STATE,
             update_timestamp=timestamp,
             metadata=metadata)
 
@@ -100,16 +97,8 @@ class NagiosTransformer(tbase.TransformerBase):
         LOG.warning('Cannot transform host, host transformer does not exist')
         return None
 
-    def _extract_action_type(self, entity_event):
-        sync_mode = entity_event[SyncProps.SYNC_MODE]
-        if sync_mode in (SyncMode.UPDATE, SyncMode.SNAPSHOT):
-            if entity_event[NagiosProperties.STATUS] == self.STATUS_OK:
-                return EventAction.DELETE_ENTITY
-            else:
-                return EventAction.UPDATE_ENTITY
-        if SyncMode.INIT_SNAPSHOT == sync_mode:
-            return EventAction.CREATE_ENTITY
-        raise VitrageTransformerError('Invalid sync mode: (%s)' % sync_mode)
+    def _ok_status(self, entity_event):
+        return entity_event[NagiosProperties.STATUS] == self.STATUS_OK
 
     def extract_key(self, entity_event):
 
@@ -119,6 +108,3 @@ class NagiosTransformer(tbase.TransformerBase):
         return tbase.build_key(self.key_values([sync_type,
                                                 resource_name,
                                                 alarm_name]))
-
-    def key_values(self, mutable_fields=[]):
-        return [EntityCategory.ALARM] + mutable_fields

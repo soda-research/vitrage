@@ -21,50 +21,33 @@ from vitrage.common.constants import EntityType
 from vitrage.common.constants import SynchronizerProperties as SyncProps
 from vitrage.i18n import _LE
 from vitrage.i18n import _LW
+from vitrage.synchronizer.plugins.base.alarm.synchronizer \
+    import BaseAlarmSynchronizer
 from vitrage.synchronizer.plugins.nagios.config import NagiosConfig
 from vitrage.synchronizer.plugins.nagios.parser import NagiosParser
 from vitrage.synchronizer.plugins.nagios.properties import NagiosProperties \
     as NagiosProps
 from vitrage.synchronizer.plugins.nagios.properties import NagiosStatus
-from vitrage.synchronizer.plugins.synchronizer_base import SynchronizerBase
 
 LOG = log.getLogger(__name__)
 
 
-class NagiosSynchronizer(SynchronizerBase):
+class NagiosSynchronizer(BaseAlarmSynchronizer):
     ServiceKey = namedtuple('ServiceKey', ['host_name', 'service'])
 
     def __init__(self, conf):
         super(NagiosSynchronizer, self).__init__()
         self.conf = conf
-        self.cache = dict()
         self.config = NagiosConfig(conf)
 
-    def get_all(self, sync_mode):
-        return self.make_pickleable(self._get_all_services(),
-                                    EntityType.NAGIOS,
-                                    sync_mode)
+    def _sync_type(self):
+        return EntityType.NAGIOS
 
-    def get_changes(self, sync_mode):
-        return self.make_pickleable(self._get_changed_services(),
-                                    EntityType.NAGIOS,
-                                    sync_mode)
+    def _alarm_key(self, alarm):
+        return self.ServiceKey(host_name=alarm[NagiosProps.RESOURCE_NAME],
+                               service=alarm[NagiosProps.SERVICE])
 
-    def _get_all_services(self):
-        nagios_services = self._get_services_from_nagios()
-        self._enrich_services(nagios_services)
-        return self._filter_and_cache_services(
-            nagios_services,
-            NagiosSynchronizer._filter_get_all)
-
-    def _get_changed_services(self):
-        nagios_services = self._get_services_from_nagios()
-        self._enrich_services(nagios_services)
-        return self._filter_and_cache_services(
-            nagios_services,
-            NagiosSynchronizer._filter_get_changes)
-
-    def _get_services_from_nagios(self):
+    def _get_alarms(self):
         nagios_user = self.conf.nagios.user
         nagios_password = self.conf.nagios.password
         nagios_url = self.conf.nagios.url
@@ -95,59 +78,27 @@ class NagiosSynchronizer(SynchronizerBase):
                       response.status_code)
             return []
 
-    def _enrich_services(self, nagios_services):
-        for service in nagios_services:
+    def _enrich_alarms(self, alarms):
+        for alarm in alarms:
             # based on nagios configuration file, convert nagios host name
             # to vitrage resource type and name
-            service[SyncProps.SYNC_TYPE] = NagiosProps.NAGIOS
+            alarm[SyncProps.SYNC_TYPE] = NagiosProps.NAGIOS
 
-            nagios_host = service[NagiosProps.RESOURCE_NAME]
+            nagios_host = alarm[NagiosProps.RESOURCE_NAME]
             vitrage_resource = self.config.get_vitrage_resource(nagios_host)
 
-            service[NagiosProps.RESOURCE_TYPE] = \
+            alarm[NagiosProps.RESOURCE_TYPE] = \
                 vitrage_resource[0] if vitrage_resource else None
-            service[NagiosProps.RESOURCE_NAME] = \
-                vitrage_resource[1] if vitrage_resource \
-                else service[NagiosProps.RESOURCE_NAME]
+            alarm[NagiosProps.RESOURCE_NAME] = \
+                vitrage_resource[1] if vitrage_resource else None
 
-    def _filter_and_cache_services(self, nagios_services, filter_):
-        services_to_update = []
+    def _is_erroneous(self, alarm):
+        return alarm and alarm[NagiosProps.STATUS] != NagiosStatus.OK
 
-        for service in nagios_services:
-            service_key = self.ServiceKey(
-                host_name=service[NagiosProps.RESOURCE_NAME],
-                service=service[NagiosProps.SERVICE])
+    def _status_changed(self, alarm1, alarm2):
+        return alarm1 and alarm2 and \
+            not alarm1[NagiosProps.STATUS] == alarm2[NagiosProps.STATUS]
 
-            old_service = self.cache.get(service_key, None)
-
-            if filter_(service, old_service):
-                services_to_update.append(service)
-
-            self.cache[service_key] = service
-
-        return services_to_update
-
-    @staticmethod
-    def _filter_get_all(service, old_service):
-        return service \
-            if (NagiosSynchronizer._is_erroneous(service) or
-                NagiosSynchronizer._is_erroneous(old_service)) \
-            else None
-
-    @staticmethod
-    def _filter_get_changes(service, old_service):
-        if NagiosSynchronizer._status_changed(service, old_service):
-            return service
-        elif not old_service and NagiosSynchronizer._is_erroneous(service):
-            return service
-        else:
-            return None
-
-    @staticmethod
-    def _is_erroneous(service):
-        return service and service[NagiosProps.STATUS] != NagiosStatus.OK
-
-    @staticmethod
-    def _status_changed(service1, service2):
-        return service1 and service2 and \
-            not service1[NagiosProps.STATUS] == service2[NagiosProps.STATUS]
+    def _is_valid(self, alarm):
+        return alarm[NagiosProps.RESOURCE_TYPE] is not None and \
+            alarm[NagiosProps.RESOURCE_NAME] is not None

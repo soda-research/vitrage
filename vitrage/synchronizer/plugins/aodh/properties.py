@@ -13,21 +13,26 @@
 # under the License.
 
 
-class NagiosProperties(object):
-    NUM_COLUMNS = 7
-    RESOURCE_TYPE = 'resource_type'
-    RESOURCE_NAME = 'resource_name'
-    SERVICE = 'service'
-    STATUS = 'status'
-    LAST_CHECK = 'last_check'
-    DURATION = 'duration'
-    ATTEMPT = 'attempt'
-    STATUS_INFO = 'status_info'
-    NAGIOS = 'nagios'
+class AodhProperties(object):
+    ALARM_ID = 'alarm_id'
+    DESCRIPTION = 'description'
+    ENABLED = 'enabled'
+    EVENT = 'event'
+    EVENT_TYPE = 'event_type'
+    NAME = 'name'
+    STATE = 'state'
+    PROJECT_ID = 'project_id'
+    QUERY = 'query'
+    REPEAT_ACTIONS = 'repeat_actions'
+    RESOURCE_ID = 'resource_id'
+    SEVERITY = 'severity'
+    STATE_TIMESTAMP = 'state_timestamp'
+    THRESHOLD = 'threshold'
+    TIMESTAMP = 'timestamp'
+    TYPE = 'type'
 
 
-class NagiosStatus(object):
-    OK = 'OK'
-    WARNING = 'WARNING'
-    CRITICAL = 'CRITICAL'
-    UNKNOWN = 'UNKNOWN'
+class AodhState(object):
+    OK = 'ok'
+    ALARM = 'alarm'
+    INSUFFICIENT_DATA = 'insufficient_data'

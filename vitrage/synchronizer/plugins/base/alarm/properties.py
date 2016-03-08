@@ -11,23 +11,8 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+__author__ = 'stack'
 
 
-class NagiosProperties(object):
-    NUM_COLUMNS = 7
-    RESOURCE_TYPE = 'resource_type'
-    RESOURCE_NAME = 'resource_name'
-    SERVICE = 'service'
-    STATUS = 'status'
-    LAST_CHECK = 'last_check'
-    DURATION = 'duration'
-    ATTEMPT = 'attempt'
-    STATUS_INFO = 'status_info'
-    NAGIOS = 'nagios'
-
-
-class NagiosStatus(object):
-    OK = 'OK'
-    WARNING = 'WARNING'
-    CRITICAL = 'CRITICAL'
-    UNKNOWN = 'UNKNOWN'
+class AlarmProperties(object):
+    ALARM_STATE = 'Active'

@@ -22,6 +22,7 @@ OPTS = [
                          'nova.host',
                          'nova.instance',
                          'nova.zone',
-                         'static_physical'],
+                         'static_physical',
+                         'aodh'],
                 help='Names of supported plugins'),
 ]

@@ -69,6 +69,7 @@ class EntityType(object):
     STATIC_PHYSICAL = 'static_physical'
     NAGIOS = 'nagios'
     VITRAGE = 'vitrage'
+    AODH = 'aodh'
 
 
 class EventAction(object):

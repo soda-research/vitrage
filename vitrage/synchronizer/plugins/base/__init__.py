@@ -12,22 +12,4 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-
-class NagiosProperties(object):
-    NUM_COLUMNS = 7
-    RESOURCE_TYPE = 'resource_type'
-    RESOURCE_NAME = 'resource_name'
-    SERVICE = 'service'
-    STATUS = 'status'
-    LAST_CHECK = 'last_check'
-    DURATION = 'duration'
-    ATTEMPT = 'attempt'
-    STATUS_INFO = 'status_info'
-    NAGIOS = 'nagios'
-
-
-class NagiosStatus(object):
-    OK = 'OK'
-    WARNING = 'WARNING'
-    CRITICAL = 'CRITICAL'
-    UNKNOWN = 'UNKNOWN'
+__author__ = 'stack'

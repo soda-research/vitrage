@@ -28,11 +28,11 @@ LOG = logging.getLogger(__name__)
 class NagiosSynchronizerTest(NagiosBaseTest):
 
     OPTS = [
-        cfg.StrOpt(
-            'config_file',
-            default=utils.get_resources_dir() + '/nagios/nagios_conf.yaml',
-            help='Nagios configuation file'
-        ),
+        cfg.StrOpt('config_file',
+                   default=utils.get_resources_dir() +
+                   '/nagios/nagios_conf.yaml',
+                   help='Nagios configuation file'
+                   ),
     ]
 
     @classmethod
@@ -65,7 +65,7 @@ class NagiosSynchronizerTest(NagiosBaseTest):
                                                service_data2,
                                                service_data3])
 
-        services = nagios_synchronizer._get_all_services()
+        services = nagios_synchronizer._get_all_alarms()
 
         # Test assertions
         # Services with status OK should not be returned
@@ -87,7 +87,7 @@ class NagiosSynchronizerTest(NagiosBaseTest):
                                                service_data2,
                                                service_data3])
 
-        services = nagios_synchronizer._get_all_services()
+        services = nagios_synchronizer._get_all_alarms()
 
         # Test assertions
         self.assertIsNotNone(services, 'No services returned')
@@ -109,7 +109,7 @@ class NagiosSynchronizerTest(NagiosBaseTest):
                                                service_data2,
                                                service_data3])
 
-        services = nagios_synchronizer._get_all_services()
+        services = nagios_synchronizer._get_all_alarms()
 
         # Test assertions
         self.assertIsNotNone(services, 'No services returned')
@@ -132,7 +132,7 @@ class NagiosSynchronizerTest(NagiosBaseTest):
                                                service_data2,
                                                service_data3])
 
-        services = nagios_synchronizer._get_all_services()
+        services = nagios_synchronizer._get_all_alarms()
 
         # Test assertions
         # The services of service_data1/2 should be returned although their
@@ -143,7 +143,7 @@ class NagiosSynchronizerTest(NagiosBaseTest):
         self._assert_contains(service_data2, services)
 
         # Action
-        services = nagios_synchronizer._get_all_services()
+        services = nagios_synchronizer._get_all_alarms()
 
         # Test assertions
         # Calling get_services again should not return anything, since all
@@ -176,7 +176,7 @@ class NagiosSynchronizerTest(NagiosBaseTest):
                                                service_data2,
                                                service_data3])
 
-        services = nagios_synchronizer._get_changed_services()
+        services = nagios_synchronizer._get_changed_alarms()
 
         # Test assertions
         # Services with status OK should not be returned
@@ -198,7 +198,7 @@ class NagiosSynchronizerTest(NagiosBaseTest):
                                                service_data2,
                                                service_data3])
 
-        services = nagios_synchronizer._get_changed_services()
+        services = nagios_synchronizer._get_changed_alarms()
 
         # Test assertions
         self.assertIsNotNone(services, 'No services returned')
@@ -220,7 +220,7 @@ class NagiosSynchronizerTest(NagiosBaseTest):
                                                service_data2,
                                                service_data3])
 
-        services = nagios_synchronizer._get_changed_services()
+        services = nagios_synchronizer._get_changed_alarms()
 
         # Test assertions
         self.assertIsNotNone(services, 'No services returned')
@@ -243,7 +243,7 @@ class NagiosSynchronizerTest(NagiosBaseTest):
                                                service_data2,
                                                service_data3])
 
-        services = nagios_synchronizer._get_changed_services()
+        services = nagios_synchronizer._get_changed_alarms()
 
         # Test assertions
         self.assertIsNotNone(services, 'No services returned')
@@ -265,7 +265,7 @@ class NagiosSynchronizerTest(NagiosBaseTest):
                                                service_data2,
                                                service_data3])
 
-        services = nagios_synchronizer._get_changed_services()
+        services = nagios_synchronizer._get_changed_alarms()
 
         # Test assertions
         self.assertIsNotNone(services, 'No services returned')
@@ -274,7 +274,7 @@ class NagiosSynchronizerTest(NagiosBaseTest):
         self._assert_contains(service_data2, services)
 
         # Action
-        services = nagios_synchronizer._get_changed_services()
+        services = nagios_synchronizer._get_changed_alarms()
 
         # Test assertions
         self.assertIsNotNone(services, 'services is None')
@@ -301,7 +301,7 @@ class NagiosSynchronizerTest(NagiosBaseTest):
                                                service_data2,
                                                service_data3])
 
-        services = nagios_synchronizer._get_changed_services()
+        services = nagios_synchronizer._get_changed_alarms()
 
         # Test assertions
         self.assertIsNotNone(services, 'No services returned')
@@ -309,7 +309,7 @@ class NagiosSynchronizerTest(NagiosBaseTest):
         self._assert_contains(service_data1, services)
 
         # Action
-        services = nagios_synchronizer._get_changed_services()
+        services = nagios_synchronizer._get_changed_alarms()
 
         # Test assertions
         # Calling get_changes for the second time should return nothing
@@ -317,7 +317,7 @@ class NagiosSynchronizerTest(NagiosBaseTest):
         self.assertEqual(0, len(services))
 
         # Action
-        services = nagios_synchronizer._get_all_services()
+        services = nagios_synchronizer._get_all_alarms()
 
         # Test assertions
         self.assertIsNotNone(services, 'No services returned')
@@ -325,7 +325,7 @@ class NagiosSynchronizerTest(NagiosBaseTest):
         self._assert_contains(service_data1, services)
 
         # Action
-        services = nagios_synchronizer._get_all_services()
+        services = nagios_synchronizer._get_all_alarms()
 
         # Test assertions
         # Calling get_all for the second time should return the same results
@@ -348,7 +348,7 @@ class NagiosSynchronizerTest(NagiosBaseTest):
                                                service_data2,
                                                service_data3])
 
-        services = nagios_synchronizer._get_all_services()
+        services = nagios_synchronizer._get_all_alarms()
 
         # Test assertions
         self.assertIsNotNone(services, 'No services returned')
@@ -357,7 +357,7 @@ class NagiosSynchronizerTest(NagiosBaseTest):
         self._assert_contains(service_data2, services)
 
         # Action
-        services = nagios_synchronizer._get_changed_services()
+        services = nagios_synchronizer._get_changed_alarms()
 
         # Test assertions
         # Calling get_changes after get_all should return nothing
@@ -365,7 +365,7 @@ class NagiosSynchronizerTest(NagiosBaseTest):
         self.assertEqual(0, len(services))
 
         # Action
-        services = nagios_synchronizer._get_all_services()
+        services = nagios_synchronizer._get_all_alarms()
 
         # Test assertions
         # Calling get_all for the second time should return the same results
@@ -389,7 +389,7 @@ class NagiosSynchronizerTest(NagiosBaseTest):
                                                service_data2,
                                                service_data3])
 
-        services = nagios_synchronizer._get_changed_services()
+        services = nagios_synchronizer._get_changed_alarms()
 
         # Test assertions
         self.assertIsNotNone(services, 'No services returned')
@@ -412,7 +412,7 @@ class NagiosSynchronizerTest(NagiosBaseTest):
                                                service_data2,
                                                service_data3])
 
-        services = nagios_synchronizer._get_changed_services()
+        services = nagios_synchronizer._get_changed_alarms()
 
         # Test assertions
         self.assertIsNotNone(services, 'No services returned')
@@ -420,14 +420,14 @@ class NagiosSynchronizerTest(NagiosBaseTest):
         self._assert_contains(service_data1, services)
 
         # Action
-        services = nagios_synchronizer._get_changed_services()
+        services = nagios_synchronizer._get_changed_alarms()
 
         # Test assertions
         self.assertIsNotNone(services, 'services is None')
         self.assertEqual(0, len(services))
 
         # Action
-        services = nagios_synchronizer._get_all_services()
+        services = nagios_synchronizer._get_all_alarms()
 
         # Test assertions
         # Calling get_all for the second time should return the same results
