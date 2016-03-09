@@ -15,6 +15,7 @@
 from oslo_log import log as logging
 
 from vitrage.common.constants import VertexProperties as VProps
+from vitrage.evaluator.actions.base import ActionType
 from vitrage.evaluator.actions.recipes.action_steps import UPDATE_VERTEX
 from vitrage.evaluator.actions.recipes.set_state import SetState
 from vitrage.evaluator.template import ActionSpecs
@@ -31,17 +32,17 @@ class SetStateRecipeTest(base.BaseTest):
         # Test Setup
         target_vertex_id = 'RESOURCE:nova.host:test1'
 
-        targets = {'target': target_vertex_id}
-        props = {'state': 'SUBOPTIMAL'}
+        targets = {TFields.TARGET: target_vertex_id}
+        props = {TFields.STATE: 'SUBOPTIMAL'}
 
-        action_spec = ActionSpecs('set_state', targets, props)
+        action_spec = ActionSpecs(ActionType.SET_STATE, targets, props)
         set_state_action = SetState()
 
         # Test Action
         action_steps = set_state_action.get_do_recipe(action_spec)
 
         # Test Assertions
-        self.assertEqual(1, len(action_steps))
+        self.assertEqual(2, len(action_steps))
 
         self.assertEqual(UPDATE_VERTEX, action_steps[0].type)
         update_vertex_step_params = action_steps[0].params

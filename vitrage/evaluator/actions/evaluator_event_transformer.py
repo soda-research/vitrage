@@ -13,12 +13,16 @@
 # under the License.
 from oslo_log import log as logging
 
+from vitrage.common.constants import EdgeProperties as EProps
 from vitrage.common.constants import EventAction
-from vitrage.common.constants import SynchronizerProperties as SyncProps
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.common.exception import VitrageTransformerError
+from vitrage.evaluator.actions.recipes.action_steps import ADD_EDGE
+from vitrage.evaluator.actions.recipes.action_steps import REMOVE_EDGE
 from vitrage.evaluator.actions.recipes.action_steps import UPDATE_VERTEX
 from vitrage.evaluator.actions.recipes.base import EVALUATOR_EVENT_TYPE
+from vitrage.evaluator.template_fields import TemplateFields
+import vitrage.graph.utils as graph_utils
 from vitrage.graph import Vertex
 from vitrage.synchronizer.plugins import transformer_base
 
@@ -39,13 +43,26 @@ class EvaluatorEventTransformer(transformer_base.TransformerBase):
 
             properties = {
                 VProps.VITRAGE_STATE: event[VProps.VITRAGE_STATE],
-                VProps.UPDATE_TIMESTAMP: event[SyncProps.SAMPLE_DATE]
+                VProps.UPDATE_TIMESTAMP: event[VProps.UPDATE_TIMESTAMP]
             }
             return Vertex(event[VProps.VITRAGE_ID], properties)
 
         return None
 
     def _create_neighbors(self, event):
+
+        event_type = event[EVALUATOR_EVENT_TYPE]
+
+        if event_type in [ADD_EDGE, REMOVE_EDGE]:
+
+            relation_edge = graph_utils.create_edge(
+                source_id=event[TemplateFields.SOURCE],
+                target_id=event[TemplateFields.TARGET],
+                relationship_type=event[EProps.RELATIONSHIP_NAME],
+                update_timestamp=event[EProps.UPDATE_TIMESTAMP])
+
+            return [transformer_base.Neighbor(None, relation_edge)]
+
         return []
 
     def _extract_action_type(self, event):
@@ -54,6 +71,10 @@ class EvaluatorEventTransformer(transformer_base.TransformerBase):
 
         if event_type == UPDATE_VERTEX:
             return EventAction.UPDATE_ENTITY
+        if event_type == ADD_EDGE:
+            return EventAction.UPDATE_RELATIONSHIP
+        if event_type == REMOVE_EDGE:
+            return EventAction.DELETE_RELATIONSHIP
 
         raise VitrageTransformerError(
             'Invalid Evaluator event type: (%s)' % event_type)

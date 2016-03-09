@@ -12,6 +12,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 from vitrage.common.constants import VertexProperties as VProps
+from vitrage.evaluator.actions.recipes.action_steps import NOTIFY
 from vitrage.evaluator.actions.recipes.action_steps import UPDATE_VERTEX
 from vitrage.evaluator.actions.recipes import base
 from vitrage.evaluator.actions.recipes.base import ActionStepWrapper
@@ -27,9 +28,9 @@ class SetState(base.Recipe):
             action_spec.targets[TFields.TARGET],
             action_spec.properties[TFields.STATE])
 
-        # TODO(lhartal): add notify step
+        notify_step = SetState._get_notify_step()
 
-        return [update_vertex_step]
+        return [update_vertex_step, notify_step]
 
     @staticmethod
     def get_undo_recipe(action_spec):
@@ -38,9 +39,9 @@ class SetState(base.Recipe):
             action_spec.targets[TFields.TARGET],
             None)
 
-        # TODO(lhartal): add notify step
+        notify_step = SetState._get_notify_step()
 
-        return [update_vertex_step]
+        return [update_vertex_step, notify_step]
 
     @staticmethod
     def _get_update_vertex_step(target_id, vitrage_state):
@@ -53,3 +54,9 @@ class SetState(base.Recipe):
                                                update_vertex_params)
 
         return update_vertex_step
+
+    @staticmethod
+    def _get_notify_step():
+
+        # TODO(lhartal): add params
+        return ActionStepWrapper(NOTIFY, {})

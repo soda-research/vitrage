@@ -129,7 +129,7 @@ class Processor(processor.ProcessorBase):
             LOG.info("Delete event arrived on invalid resource: %s",
                      deleted_vertex)
 
-    def update_relationship(self, updated_vertex, neighbors):
+    def update_relationship(self, entity_vertex, neighbors):
         LOG.debug("Update relationship in entity graph: %s", neighbors)
 
         for neighbor in neighbors:
@@ -254,14 +254,18 @@ class Processor(processor.ProcessorBase):
     def _calculate_aggregated_state(self, vertex, action):
         LOG.debug("calculate event state")
 
-        if action in [EventAction.UPDATE_ENTITY, EventAction.DELETE_ENTITY,
+        if action in [EventAction.UPDATE_ENTITY,
+                      EventAction.DELETE_ENTITY,
                       EventAction.CREATE_ENTITY]:
             graph_vertex = self.entity_graph.get_vertex(vertex.vertex_id)
-        elif action == EventAction.END_MESSAGE:
+        elif action in [EventAction.END_MESSAGE,
+                        EventAction.UPDATE_RELATIONSHIP,
+                        EventAction.DELETE_RELATIONSHIP]:
             return None
         else:
             LOG.info('not recognized action: %s for vertex: %s',
                      action, vertex)
+            return None
 
         state = self._get_updated_property(vertex, graph_vertex, VProps.STATE)
         vitrage_state = self._get_updated_property(vertex,

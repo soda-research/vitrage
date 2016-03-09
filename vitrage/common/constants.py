@@ -40,6 +40,7 @@ class EdgeProperties(object):
 class EdgeLabels(object):
     ON = 'on'
     CONTAINS = 'contains'
+    CAUSES = 'causes'
 
 
 class SyncMode(object):

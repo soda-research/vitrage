@@ -38,9 +38,8 @@ Neighbor = namedtuple('Neighbor', ['vertex', 'edge'])
 
 TIMESTAMP_FORMAT = '%Y-%m-%dT%H:%M:%SZ'
 
-AVAILABLE = 'available'
 
-Neighbor = namedtuple('Neighbor', ['vertex', 'edge'])
+AVAILABLE = 'available'
 
 
 def extract_field_value(entity_event, key_names):

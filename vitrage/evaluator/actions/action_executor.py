@@ -16,6 +16,7 @@ import copy
 from oslo_log import log as logging
 from oslo_utils import importutils
 
+from vitrage.common.constants import EdgeProperties as EProps
 from vitrage.common.constants import EntityType
 from vitrage.common.constants import SynchronizerProperties as SyncProps
 from vitrage.common.constants import SyncMode
@@ -42,7 +43,7 @@ class ActionExecutor(object):
 
     def __init__(self, event_queue):
         self.event_queue = event_queue
-        self.action_recipes = self._register_action_recipes()
+        self.action_recipes = ActionExecutor._register_action_recipes()
 
         self.action_step_defs = {
             ADD_VERTEX: self.add_vertex,
@@ -70,9 +71,7 @@ class ActionExecutor(object):
     def update_vertex(self, params):
 
         event = copy.deepcopy(params)
-        event[SyncProps.SYNC_MODE] = SyncMode.UPDATE
-        event[SyncProps.SYNC_TYPE] = EntityType.VITRAGE
-        event[SyncProps.SAMPLE_DATE] = str(datetime_utils.utcnow())
+        ActionExecutor._add_default_properties(event)
         event[EVALUATOR_EVENT_TYPE] = UPDATE_VERTEX
 
         self.event_queue.put(event)
@@ -81,15 +80,33 @@ class ActionExecutor(object):
         pass
 
     def add_edge(self, params):
-        pass
+
+        event = copy.deepcopy(params)
+        ActionExecutor._add_default_properties(event)
+        event[EVALUATOR_EVENT_TYPE] = ADD_EDGE
+
+        self.event_queue.put(event)
 
     def remove_edge(self, params):
-        pass
+
+        event = copy.deepcopy(params)
+        ActionExecutor._add_default_properties(event)
+        event[EVALUATOR_EVENT_TYPE] = REMOVE_EDGE
+
+        self.event_queue.put(event)
 
     def notify(self, params):
         pass
 
-    def _register_action_recipes(self):
+    @staticmethod
+    def _add_default_properties(event):
+
+        event[SyncProps.SYNC_MODE] = SyncMode.UPDATE
+        event[SyncProps.SYNC_TYPE] = EntityType.VITRAGE
+        event[EProps.UPDATE_TIMESTAMP] = str(datetime_utils.utcnow())
+
+    @staticmethod
+    def _register_action_recipes():
 
         recipes = {}
 
