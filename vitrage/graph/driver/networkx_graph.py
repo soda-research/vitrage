@@ -47,9 +47,9 @@ class NXGraph(Graph):
     GRAPH_TYPE = "networkx"
 
     def __init__(self, name='networkx_graph', root_id=None):
+        super(NXGraph, self).__init__(name, NXGraph.GRAPH_TYPE)
         self._g = nx.MultiDiGraph()
         self.root_id = root_id
-        super(NXGraph, self).__init__(name=name, graph_type=NXGraph.GRAPH_TYPE)
 
     def __len__(self):
         return len(self._g)
@@ -69,7 +69,6 @@ class NXGraph(Graph):
         self._add_vertex(v)
 
     def _add_vertex(self, v):
-        super(NXGraph, self).add_vertex(v=v)
         properties_copy = copy.copy(v.properties)
         self._g.add_node(n=v.vertex_id, attr_dict=properties_copy)
 

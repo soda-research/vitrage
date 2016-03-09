@@ -18,16 +18,16 @@ from oslo_log import log
 from vitrage.common.constants import EdgeProperties as EProps
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.common.datetime_utils import utcnow
-from vitrage.graph import networkx_graph
+from vitrage.graph import NXGraph
 
 
 LOG = log.getLogger(__name__)
 
 
-class EntityGraph(networkx_graph.NXGraph):
+class EntityGraph(NXGraph):
 
-    def __init__(self, name):
-        super(EntityGraph, self).__init__(name)
+    def __init__(self, name, root_id=None):
+        super(EntityGraph, self).__init__(name, root_id)
 
     def can_vertex_be_deleted(self, vertex):
         """Check if the vertex can be deleted

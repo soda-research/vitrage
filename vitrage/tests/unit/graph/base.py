@@ -51,7 +51,7 @@ ALARM_ON_HOST = 'ALARM_ON_HOST'
 TEST_ON_HOST = 'TEST_ON_HOST'
 
 v_node = graph_utils.create_vertex(
-    vitrage_id=OPENSTACK_NODE + '111111111111',
+    vitrage_id=EntityCategory.RESOURCE + ':' + EntityType.OPENSTACK_NODE,
     entity_id='111111111111',
     entity_type=OPENSTACK_NODE,
     entity_category=RESOURCE)

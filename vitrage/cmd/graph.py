@@ -18,6 +18,8 @@ import sys
 
 from oslo_service import service as os_service
 
+from vitrage.common.constants import EntityCategory
+from vitrage.common.constants import EntityType
 from vitrage.entity_graph.api_handler import service as api_handler_svc
 from vitrage.entity_graph.consistency import service as consistency_svc
 from vitrage.entity_graph.initialization_status import InitializationStatus
@@ -36,7 +38,9 @@ def main():
     4. Starts the Consistency service
     """
 
-    e_graph = entity_graph.EntityGraph("Entity Graph")
+    e_graph = entity_graph.EntityGraph(
+        'Entity Graph',
+        '%s:%s' % (EntityCategory.RESOURCE, EntityType.OPENSTACK_NODE))
     event_queue = multiprocessing.Queue()
     conf = service.prepare_service()
     initialization_status = InitializationStatus()

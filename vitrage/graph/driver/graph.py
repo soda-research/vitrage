@@ -101,8 +101,7 @@ class Graph(object):
         :param v: the vertex to add
         :type v: Vertex
         """
-        if v and v.vertex_id and not self.root_id:
-            self.root_id = v.vertex_id
+        pass
 
     @abc.abstractmethod
     def add_edge(self, e):
