@@ -58,16 +58,17 @@ class ScenarioEvaluator(object):
         before_scenarios, current_scenarios = \
             self._remove_overlap_scenarios(before_scenarios, current_scenarios)
 
-        actions = self._get_actions(before,
-                                    before_scenarios,
-                                    ActionMode.UNDO)
-        actions.update(self._get_actions(current,
-                                         current_scenarios,
-                                         ActionMode.DO))
+        actions = self._process_and_get_actions(before,
+                                                before_scenarios,
+                                                ActionMode.UNDO)
+        actions.update(self._process_and_get_actions(current,
+                                                     current_scenarios,
+                                                     ActionMode.DO))
 
         for action in actions.values():
-            # todo: named tuple?
-            self._action_executor.execute(action[0], action[1])
+            action_spce = action[0]
+            action_mode = action[1]
+            self._action_executor.execute(action_spce, action_mode)
 
     def _get_element_scenarios(self, element, is_vertex):
         if not element \
@@ -77,10 +78,14 @@ class ScenarioEvaluator(object):
         elif is_vertex:
             return self._scenario_repo.get_scenarios_by_vertex(element)
         else:  # is edge
-            source = self._entity_graph.get_vertex(element.source_id)
-            target = self._entity_graph.get_vertex(element.target_id)
-            edge_desc = EdgeDescription(element, source, target)
+            edge_desc = self._get_edge_description(element)
             return self._scenario_repo.get_scenarios_by_edge(edge_desc)
+
+    def _get_edge_description(self, element):
+        source = self._entity_graph.get_vertex(element.source_id)
+        target = self._entity_graph.get_vertex(element.target_id)
+        edge_desc = EdgeDescription(element, source, target)
+        return edge_desc
 
     @staticmethod
     def _remove_overlap_scenarios(before, current):
@@ -89,26 +94,26 @@ class ScenarioEvaluator(object):
         current = filter(lambda x: x not in intersection, current)
         return before, current
 
-    def _get_actions(self, element, anchored_scenarios, mode):
+    def _process_and_get_actions(self, element, triggered_scenarios, mode):
         actions = {}
-        for anchored_scenario in anchored_scenarios:
-            scenario_anchor = anchored_scenario[0]
-            scenario = anchored_scenario[1]
+        for triggered_scenario in triggered_scenarios:
+            scenario_element = triggered_scenario[0]
+            scenario = triggered_scenario[1]
             actions.update(self._process_scenario(element,
                                                   scenario,
-                                                  scenario_anchor,
+                                                  scenario_element,
                                                   mode))
         return actions
 
-    def _process_scenario(self, element, scenario, template_anchors, mode):
+    def _process_scenario(self, element, scenario, scenario_elements, mode):
+        if not isinstance(scenario_elements, list):
+            scenario_elements = [scenario_elements]
         actions = {}
         for action in scenario.actions:
-            if not isinstance(template_anchors, list):
-                template_anchors = [template_anchors]
-            for template_anchor in template_anchors:
+            for scenario_element in scenario_elements:
                 matches = self._evaluate_full_condition(scenario.condition,
                                                         element,
-                                                        template_anchor)
+                                                        scenario_element)
                 if matches:
                     for match in matches:
                         spec, action_id = self._get_action_spec(action, match)
@@ -116,9 +121,11 @@ class ScenarioEvaluator(object):
         return actions
 
     @staticmethod
-    def _get_action_spec(action_spec, mappings):
+    def _get_action_spec(action_spec, match):
         targets = action_spec.targets
-        real_ids = {key: mappings[value] for key, value in targets.items()}
+        real_ids = {
+            target: match[target_id] for target, target_id in targets.items()
+            }
         revised_spec = ActionSpecs(action_spec.type,
                                    real_ids,
                                    action_spec.properties)
@@ -133,17 +140,17 @@ class ScenarioEvaluator(object):
              tuple(sorted(action_spec.properties.items())))
         )
 
-    def _evaluate_full_condition(self, condition, trigger, template_anchor):
+    def _evaluate_full_condition(self, condition, element, scenario_element):
         condition_matches = []
         for clause in condition:
             # OR condition means aggregation of matches, without duplicates
-            simple_condition_matches = \
-                self._evaluate_and_condition(clause, trigger, template_anchor)
-            condition_matches += simple_condition_matches
+            and_condition_matches = \
+                self._evaluate_and_condition(clause, element, scenario_element)
+            condition_matches += and_condition_matches
 
         return condition_matches
 
-    def _evaluate_and_condition(self, condition, trigger, template_anchor):
+    def _evaluate_and_condition(self, condition, element, scenario_element):
 
         condition_g = create_graph("scenario condition")
         for term in condition:
@@ -160,8 +167,8 @@ class ScenarioEvaluator(object):
                 condition_g.add_vertex(term.variable.target)
                 condition_g.add_edge(term.variable.edge)
 
-        if isinstance(trigger, Vertex):
-            anchor_map = Mapping(template_anchor, trigger, True)
+        if isinstance(element, Vertex):
+            initial_map = Mapping(scenario_element, element, True)
         else:
-            anchor_map = Mapping(template_anchor.edge, trigger, False)
-        return self._graph_algs.sub_graph_matching(condition_g, [anchor_map])
+            initial_map = Mapping(scenario_element.edge, element, False)
+        return self._graph_algs.sub_graph_matching(condition_g, [initial_map])
