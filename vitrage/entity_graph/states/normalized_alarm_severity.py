@@ -13,7 +13,7 @@
 # under the License.
 
 
-class NormalizedAlarmState(object):
+class NormalizedAlarmSeverity(object):
     CRITICAL = 'CRITICAL'
     SEVER = 'SEVER'
     WARNING = 'WARNING'

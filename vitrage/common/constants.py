@@ -27,6 +27,7 @@ class VertexProperties(object):
     NAME = 'name'
     IS_PLACEHOLDER = 'is_placeholder'
     SEVERITY = 'severity'
+    NORMALIZED_SEVERITY = 'normalized_severity'
     VITRAGE_ID = 'vitrage_id'
     INFO = 'info'
 

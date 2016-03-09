@@ -14,9 +14,13 @@
 
 from oslo_config import cfg
 
+from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import EntityType
-from vitrage.entity_graph.states.resource_state import NormalizedResourceState
+from vitrage.common.constants import VertexProperties as VProps
+from vitrage.entity_graph.states.normalized_resource_state import \
+    NormalizedResourceState
 from vitrage.entity_graph.states.state_manager import StateManager
+from vitrage.graph.utils import create_vertex
 from vitrage.service import load_plugin
 from vitrage.tests import base
 from vitrage.tests.mocks import utils
@@ -88,7 +92,9 @@ class TestStateManager(base.BaseTest):
 
         # action
         normalized_state = \
-            state_manager.normalize_state(EntityType.NOVA_INSTANCE, 'BUILDING')
+            state_manager.normalize_state(EntityCategory.RESOURCE,
+                                          EntityType.NOVA_INSTANCE,
+                                          'BUILDING')
 
         # test assertions
         self.assertEqual(NormalizedResourceState.TRANSIENT, normalized_state)
@@ -105,58 +111,63 @@ class TestStateManager(base.BaseTest):
         # test assertions
         self.assertEqual(10, state_priority)
 
-    def test_aggregated_state_normalized(self):
-        # setup
-        state_manager = StateManager(self.conf)
-
-        # action
-        aggregated_state_nova_instance_1 = state_manager.aggregated_state(
-            NormalizedResourceState.SUSPENDED,
-            NormalizedResourceState.SUBOPTIMAL,
-            EntityType.NOVA_INSTANCE, True)
-        aggregated_state_nova_instance_2 = state_manager.aggregated_state(
-            NormalizedResourceState.SUBOPTIMAL,
-            NormalizedResourceState.SUSPENDED,
-            EntityType.NOVA_INSTANCE, True)
-
-        # test assertions
-        self.assertEqual(NormalizedResourceState.SUSPENDED,
-                         aggregated_state_nova_instance_1)
-        self.assertEqual(NormalizedResourceState.SUSPENDED,
-                         aggregated_state_nova_instance_2)
-
     def test_aggregated_state_not_normalized(self):
         # setup
         state_manager = StateManager(self.conf)
+        metadata1 = {VProps.VITRAGE_STATE: 'SUSPENDED'}
+        new_vertex1 = create_vertex('12345',
+                                    entity_state='ACTIVE',
+                                    entity_category=EntityCategory.RESOURCE,
+                                    entity_type=EntityType.NOVA_INSTANCE,
+                                    metadata=metadata1)
+        metadata2 = {VProps.VITRAGE_STATE: 'ACTIVE'}
+        new_vertex2 = create_vertex('23456',
+                                    entity_state='SUSPENDED',
+                                    entity_category=EntityCategory.RESOURCE,
+                                    entity_type=EntityType.NOVA_INSTANCE,
+                                    metadata=metadata2)
 
         # action
-        aggregated_state_nova_instance_1 = state_manager.aggregated_state(
-            'ACTIVE', 'SUSPENDED', EntityType.NOVA_INSTANCE)
-        aggregated_state_nova_instance_2 = state_manager.aggregated_state(
-            'SUSPENDED', 'ACTIVE', EntityType.NOVA_INSTANCE)
+        state_manager.aggregated_state(new_vertex1, None)
+        state_manager.aggregated_state(new_vertex2, None)
 
         # test assertions
         self.assertEqual(NormalizedResourceState.SUSPENDED,
-                         aggregated_state_nova_instance_1)
+                         new_vertex1[VProps.AGGREGATED_STATE])
         self.assertEqual(NormalizedResourceState.SUSPENDED,
-                         aggregated_state_nova_instance_2)
+                         new_vertex2[VProps.AGGREGATED_STATE])
 
     def test_aggregated_state_functionalities(self):
         # setup
         state_manager = StateManager(self.conf)
+        new_vertex1 = create_vertex('12345',
+                                    entity_state='ACTIVE',
+                                    entity_category=EntityCategory.RESOURCE,
+                                    entity_type=EntityType.NOVA_INSTANCE)
+        metadata2 = {VProps.VITRAGE_STATE: 'SUBOPTIMAL'}
+        new_vertex2 = create_vertex('23456',
+                                    entity_category=EntityCategory.RESOURCE,
+                                    entity_type=EntityType.NOVA_INSTANCE,
+                                    metadata=metadata2)
+        new_vertex3 = create_vertex('34567',
+                                    entity_category=EntityCategory.RESOURCE,
+                                    entity_type=EntityType.NOVA_INSTANCE)
+        graph_vertex3 = create_vertex('45678',
+                                      entity_category=EntityCategory.RESOURCE,
+                                      entity_type=EntityType.NOVA_INSTANCE)
 
         # action
-        aggregated_state_nova_instance_1 = state_manager.aggregated_state(
-            'ACTIVE', None, EntityType.NOVA_INSTANCE)
-        aggregated_state_nova_instance_2 = state_manager.aggregated_state(
-            None, 'ACTIVE', EntityType.NOVA_INSTANCE)
-        aggregated_state_nova_instance_3 = state_manager.aggregated_state(
-            None, None, EntityType.NOVA_INSTANCE)
+        state_manager.aggregated_state(new_vertex1,
+                                       None)
+        state_manager.aggregated_state(new_vertex2,
+                                       None)
+        state_manager.aggregated_state(new_vertex3,
+                                       graph_vertex3)
 
         # test assertions
         self.assertEqual(NormalizedResourceState.RUNNING,
-                         aggregated_state_nova_instance_1)
-        self.assertEqual(NormalizedResourceState.RUNNING,
-                         aggregated_state_nova_instance_2)
+                         new_vertex1[VProps.AGGREGATED_STATE])
+        self.assertEqual(NormalizedResourceState.SUBOPTIMAL,
+                         new_vertex2[VProps.AGGREGATED_STATE])
         self.assertEqual(NormalizedResourceState.UNDEFINED,
-                         aggregated_state_nova_instance_3)
+                         new_vertex3[VProps.AGGREGATED_STATE])

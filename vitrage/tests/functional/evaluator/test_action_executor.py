@@ -19,7 +19,8 @@ from oslo_log import log as logging
 from vitrage.common.constants import EdgeLabels
 from vitrage.common.constants import EntityType
 from vitrage.common.constants import VertexProperties as VProps
-from vitrage.entity_graph.states.resource_state import NormalizedResourceState
+from vitrage.entity_graph.states.normalized_resource_state import \
+    NormalizedResourceState
 from vitrage.evaluator.actions.action_executor import ActionExecutor
 from vitrage.evaluator.actions.base import ActionMode
 from vitrage.evaluator.actions.base import ActionType

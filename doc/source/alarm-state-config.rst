@@ -62,7 +62,7 @@ Original state 'WARNING' is mapped to normalized state 'WARNING', etc.
           name: CRITICAL
           priority: 50
           original states:
-            - name: CRITITCAL
+            - name: CRITICAL
             - name: DOWN
       - normalized state:
           name: SEVER

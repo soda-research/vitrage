@@ -23,7 +23,8 @@ from vitrage.common.constants import VertexProperties as VProps
 from vitrage.common.datetime_utils import utcnow
 from vitrage.entity_graph.initialization_status import InitializationStatus
 from vitrage.entity_graph.processor import processor as proc
-from vitrage.entity_graph.states.resource_state import NormalizedResourceState
+from vitrage.entity_graph.states.normalized_resource_state import \
+    NormalizedResourceState
 import vitrage.graph.utils as graph_utils
 from vitrage.synchronizer.plugins import transformer_base
 from vitrage.tests.unit.entity_graph.base import TestEntityGraphUnitBase
