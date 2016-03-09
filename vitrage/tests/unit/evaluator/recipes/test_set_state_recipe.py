@@ -36,10 +36,9 @@ class SetStateRecipeTest(base.BaseTest):
         props = {TFields.STATE: 'SUBOPTIMAL'}
 
         action_spec = ActionSpecs(ActionType.SET_STATE, targets, props)
-        set_state_action = SetState()
 
         # Test Action
-        action_steps = set_state_action.get_do_recipe(action_spec)
+        action_steps = SetState.get_do_recipe(action_spec)
 
         # Test Assertions
         self.assertEqual(2, len(action_steps))

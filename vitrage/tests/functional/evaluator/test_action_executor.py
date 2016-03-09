@@ -16,6 +16,7 @@ import multiprocessing
 from oslo_config import cfg
 from oslo_log import log as logging
 
+from vitrage.common.constants import EdgeLabels
 from vitrage.common.constants import EntityType
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.entity_graph.states.resource_state import NormalizedResourceState
@@ -88,3 +89,87 @@ class TestActionExecutor(TestEntityGraphFunctionalBase):
         self.assertEqual(agg_state_after_undo, agg_state_before)
         self.assertTrue(
             VProps.VITRAGE_STATE not in host_vertex_after_undo.properties)
+
+    def test_execute_add_edge(self):
+
+        # Test Setup
+        processor = self._create_processor_with_graph(self.conf)
+
+        vertex_attrs = {VProps.TYPE: EntityType.NOVA_HOST}
+        host_vertices = processor.entity_graph.get_vertices(
+            vertex_attr_filter=vertex_attrs)
+
+        host_1 = host_vertices[0]
+        nagios_event1 = TestActionExecutor._get_nagios_event(
+            host_1.get(VProps.ID), EntityType.NOVA_HOST)
+        processor.process_event(nagios_event1)
+
+        host_2 = host_vertices[1]
+        nagios_event2 = TestActionExecutor._get_nagios_event(
+            host_2.get(VProps.ID), EntityType.NOVA_HOST)
+        processor.process_event(nagios_event2)
+
+        alarms_attrs = {VProps.TYPE: EntityType.NAGIOS}
+        alarms_vertices = processor.entity_graph.get_vertices(
+            vertex_attr_filter=alarms_attrs)
+
+        alarm1 = alarms_vertices[0]
+        alarm2 = alarms_vertices[1]
+        targets = {
+            TFields.TARGET: alarm1.vertex_id,
+            TFields.SOURCE: alarm2.vertex_id
+        }
+        action_spec = ActionSpecs(ActionType.ADD_CAUSAL_RELATIONSHIP,
+                                  targets,
+                                  {})
+
+        event_queue = multiprocessing.Queue()
+        action_executor = ActionExecutor(event_queue)
+
+        before_edge = processor.entity_graph.get_edge(alarm2.vertex_id,
+                                                      alarm1.vertex_id,
+                                                      EdgeLabels.CAUSES)
+        # Test Action - do
+        action_executor.execute(action_spec, ActionMode.DO)
+        processor.process_event(event_queue.get())
+
+        new_edge = processor.entity_graph.get_edge(alarm2.vertex_id,
+                                                   alarm1.vertex_id,
+                                                   EdgeLabels.CAUSES)
+        # Test Assertions
+        self.assertIsNone(before_edge)
+        self.assertIsNotNone(new_edge)
+
+    def test_execute_add_vertex(self):
+
+        # Test Setup
+        processor = self._create_processor_with_graph(self.conf)
+
+        vertex_attrs = {VProps.TYPE: EntityType.NOVA_HOST}
+        host_vertices = processor.entity_graph.get_vertices(
+            vertex_attr_filter=vertex_attrs)
+
+        host = host_vertices[0]
+
+        targets = {TFields.TARGET: host.vertex_id}
+        props = {TFields.ALARM_NAME: 'VM_CPU_SUBOPTIMAL_PERFORMANCE'}
+        action_spec = ActionSpecs(ActionType.RAISE_ALARM, targets, props)
+
+        event_queue = multiprocessing.Queue()
+        action_executor = ActionExecutor(event_queue)
+
+        # Test Action - do
+        action_executor.execute(action_spec, ActionMode.DO)
+        processor.process_event(event_queue.get())
+
+    @staticmethod
+    def _get_nagios_event(resource_name, resource_type):
+
+        return {'last_check': '2016-02-07 15:26:04',
+                'resource_name': resource_name,
+                'resource_type': resource_type,
+                'service': 'Check_MK',
+                'status': 'CRITICAL',
+                'status_info': 'test test test',
+                'sync_mode': 'snapshot',
+                'sync_type': 'nagios'}

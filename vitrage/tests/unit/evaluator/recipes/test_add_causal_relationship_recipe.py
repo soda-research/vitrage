@@ -43,10 +43,8 @@ class AddCausalRelationshipTest(base.BaseTest):
         action_spec = ActionSpecs(ActionType.ADD_CAUSAL_RELATIONSHIP,
                                   targets,
                                   {})
-        add_causal_relation_action = AddCausalRelationship()
-
         # Test Action
-        action_steps = add_causal_relation_action.get_do_recipe(action_spec)
+        action_steps = AddCausalRelationship.get_do_recipe(action_spec)
 
         # Test Assertions
         self.assertEqual(1, len(action_steps))

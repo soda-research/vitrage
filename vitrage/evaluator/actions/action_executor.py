@@ -66,7 +66,12 @@ class ActionExecutor(object):
             self.action_step_defs[step.type](step.params)
 
     def add_vertex(self, params):
-        pass
+
+        event = copy.deepcopy(params)
+        ActionExecutor._add_default_properties(event)
+        event[EVALUATOR_EVENT_TYPE] = ADD_VERTEX
+
+        self.event_queue.put(event)
 
     def update_vertex(self, params):
 
