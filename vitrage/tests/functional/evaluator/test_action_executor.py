@@ -162,6 +162,10 @@ class TestActionExecutor(TestEntityGraphFunctionalBase):
         action_executor.execute(action_spec, ActionMode.DO)
         processor.process_event(event_queue.get())
 
+        # Test Action - undo
+        action_executor.execute(action_spec, ActionMode.UNDO)
+        processor.process_event(event_queue.get())
+
     @staticmethod
     def _get_nagios_event(resource_name, resource_type):
 

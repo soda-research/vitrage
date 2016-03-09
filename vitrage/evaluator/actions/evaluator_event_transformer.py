@@ -22,6 +22,7 @@ from vitrage.common.exception import VitrageTransformerError
 from vitrage.evaluator.actions.recipes.action_steps import ADD_EDGE
 from vitrage.evaluator.actions.recipes.action_steps import ADD_VERTEX
 from vitrage.evaluator.actions.recipes.action_steps import REMOVE_EDGE
+from vitrage.evaluator.actions.recipes.action_steps import REMOVE_VERTEX
 from vitrage.evaluator.actions.recipes.action_steps import UPDATE_VERTEX
 from vitrage.evaluator.actions.recipes.base import EVALUATOR_EVENT_TYPE
 from vitrage.evaluator.template_fields import TemplateFields as TFields
@@ -52,7 +53,7 @@ class EvaluatorEventTransformer(transformer_base.TransformerBase):
             }
             return Vertex(event[VProps.VITRAGE_ID], properties)
 
-        if event_type == ADD_VERTEX:
+        if event_type in [ADD_VERTEX, REMOVE_VERTEX]:
 
             metadata = {
                 VProps.UPDATE_TIMESTAMP: event[VProps.UPDATE_TIMESTAMP]
@@ -105,6 +106,8 @@ class EvaluatorEventTransformer(transformer_base.TransformerBase):
             return EventAction.UPDATE_ENTITY
         if event_type == ADD_VERTEX:
             return EventAction.CREATE_ENTITY
+        if event_type == REMOVE_VERTEX:
+            return EventAction.DELETE_ENTITY
         if event_type == ADD_EDGE:
             return EventAction.UPDATE_RELATIONSHIP
         if event_type == REMOVE_EDGE:

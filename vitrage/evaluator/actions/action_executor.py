@@ -82,7 +82,11 @@ class ActionExecutor(object):
         self.event_queue.put(event)
 
     def remove_vertex(self, params):
-        pass
+        event = copy.deepcopy(params)
+        ActionExecutor._add_default_properties(event)
+        event[EVALUATOR_EVENT_TYPE] = REMOVE_VERTEX
+
+        self.event_queue.put(event)
 
     def add_edge(self, params):
 
