@@ -108,14 +108,14 @@ class EntityGraphApis(object):
         return found_graph.output_graph()
 
     def get_rca(self, ctx, root):
+        ga = create_algorithm(self.entity_graph)
         rca_query = {'==': {VProps. CATEGORY: EntityCategory.ALARM}}
-        found_graph = self._get_topology(ctx=ctx,
-                                         graph_type='graph',
-                                         query=rca_query,
-                                         root=root)
-        found_graph['inspected_index'] = \
-            self._find_rca_index(found_graph, root)
-        return found_graph.output_graph()
+        found_graph = ga.graph_query_vertices(
+            query_dict=rca_query,
+            root_id=root)
+        found_graph.inspected_index = self._find_rca_index(found_graph, root)
+        json_graph = found_graph.output_graph()
+        return json_graph
 
     def _get_topology(self, ctx, graph_type, query, root, depth=None):
         ga = create_algorithm(self.entity_graph)
@@ -157,7 +157,7 @@ class EntityGraphApis(object):
     def _find_rca_index(found_graph, root):
         root_index = 0
         for vertex in found_graph._g:
-            if vertex.vertex_id == root:
+            if vertex == root:
                 break
             root_index += 1
         return root_index
