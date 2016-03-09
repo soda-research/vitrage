@@ -23,6 +23,7 @@ from oslo_service import service as os_service
 from vitrage.common.constants import EdgeLabels
 from vitrage.common.constants import EdgeProperties as EProps
 from vitrage.common.constants import EntityCategory
+from vitrage.common.constants import EntityType
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.graph import create_algorithm
 from vitrage.graph import Direction
@@ -31,6 +32,21 @@ from vitrage import rpc as vitrage_rpc
 LOG = log.getLogger(__name__)
 
 eventlet.monkey_patch()
+
+
+TOPOLOGY_QUERY = {
+    'and': [
+        {'==': {VProps.CATEGORY: EntityCategory.RESOURCE}},
+        {
+            'or': [
+                {'==': {VProps.TYPE: EntityType.OPENSTACK_NODE}},
+                {'==': {VProps.TYPE: EntityType.NOVA_ZONE}},
+                {'==': {VProps.TYPE: EntityType.NOVA_HOST}},
+                {'==': {VProps.TYPE: EntityType.NOVA_INSTANCE}}
+            ]
+        }
+    ]
+}
 
 
 class VitrageApiHandlerService(os_service.Service):
@@ -103,10 +119,12 @@ class EntityGraphApis(object):
 
     def _get_topology(self, ctx, graph_type, query, root, depth=None):
         ga = create_algorithm(self.entity_graph)
-        query = query if query else \
-            {'!=': {VProps.CATEGORY: EntityCategory.ALARM}}
+        if graph_type == 'tree':
+            final_query = query if query else TOPOLOGY_QUERY
+        else:
+            final_query = {}
         return ga.graph_query_vertices(
-            query_dict=query,
+            query_dict=final_query,
             root_id=root)
 
     @staticmethod

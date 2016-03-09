@@ -58,7 +58,7 @@ class EvaluatorEventTransformer(transformer_base.TransformerBase):
             relation_edge = graph_utils.create_edge(
                 source_id=event[TemplateFields.SOURCE],
                 target_id=event[TemplateFields.TARGET],
-                relationship_type=event[EProps.RELATIONSHIP_NAME],
+                relationship_type=event[EProps.RELATIONSHIP_TYPE],
                 update_timestamp=event[EProps.UPDATE_TIMESTAMP])
 
             return [transformer_base.Neighbor(None, relation_edge)]
