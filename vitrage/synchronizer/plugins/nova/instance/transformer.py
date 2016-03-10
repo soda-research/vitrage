@@ -163,7 +163,7 @@ class InstanceTransformer(transformer_base.TransformerBase):
             entity_event,
             self.INSTANCE_ID[entity_event[SyncProps.SYNC_MODE]])
 
-        key_fields = self.key_values([instance_id])
+        key_fields = self.key_values(instance_id)
         return transformer_base.build_key(key_fields)
 
     @staticmethod
@@ -189,7 +189,7 @@ class InstanceTransformer(transformer_base.TransformerBase):
             LOG.error('Cannot create placeholder vertex. Missing property ID')
             raise ValueError('Missing property ID')
 
-        key_fields = self.key_values([properties[VProps.ID]])
+        key_fields = self.key_values(properties[VProps.ID])
 
         return graph_utils.create_vertex(
             transformer_base.build_key(key_fields),
@@ -199,5 +199,5 @@ class InstanceTransformer(transformer_base.TransformerBase):
             update_timestamp=properties[VProps.UPDATE_TIMESTAMP],
             is_placeholder=True)
 
-    def key_values(self, mutable_fields=[]):
-        return [EntityCategory.RESOURCE, self.INSTANCE_TYPE] + mutable_fields
+    def key_values(self, *args):
+        return (EntityCategory.RESOURCE, self.INSTANCE_TYPE) + args

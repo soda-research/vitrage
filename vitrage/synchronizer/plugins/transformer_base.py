@@ -52,7 +52,7 @@ def extract_field_value(entity_event, key_names):
 
 
 def build_key(key_values):
-    return TransformerBase.KEY_SEPARATOR.join(key_values)
+    return TransformerBase.KEY_SEPARATOR.join(map(str, key_values))
 
 
 def create_node_placeholder_vertex():
@@ -127,13 +127,13 @@ class TransformerBase(object):
          """
 
     @abc.abstractmethod
-    def key_values(self, mutable_fields=[]):
+    def key_values(self, *args):
         """A list of key fields
 
         The fields which consist the entity key
 
-        :param mutable_fields: a list of mutable key fields
-        :return: []
+        :param args: a tuple of mutable key fields
+        :return: ()
         """
         pass
 

@@ -16,7 +16,7 @@ from oslo_log import log as logging
 from vitrage.synchronizer.plugins.nagios.parser import NagiosParser
 from vitrage.synchronizer.plugins.nagios.properties import NagiosProperties
 from vitrage.tests.mocks import utils
-from vitrage.tests.unit.synchronizer.nagios.nagios_base_test \
+from vitrage.tests.unit.synchronizer.plugins.nagios.nagios_base_test \
     import NagiosBaseTest
 
 LOG = logging.getLogger(__name__)

@@ -161,7 +161,7 @@ class ZoneTransformer(transformer_base.TransformerBase):
         host_transformer = self.transformers['nova.host']
 
         vitrage_id = transformer_base.build_key(
-            host_transformer.key_values([host_name]))
+            host_transformer.key_values(host_name))
 
         host_vertex = graph_utils.create_vertex(
             vitrage_id,
@@ -184,11 +184,11 @@ class ZoneTransformer(transformer_base.TransformerBase):
             entity_event,
             self.ZONE_NAME[entity_event[SyncProps.SYNC_MODE]])
 
-        key_fields = self.key_values([zone_name])
+        key_fields = self.key_values(zone_name)
         return transformer_base.build_key(key_fields)
 
-    def key_values(self, mutable_fields=[]):
-        return [EntityCategory.RESOURCE, self.ZONE_TYPE] + mutable_fields
+    def key_values(self, *args):
+        return (EntityCategory.RESOURCE, self.ZONE_TYPE) + args
 
     def create_placeholder_vertex(self, properties={}):
         if VProps.ID not in properties:
@@ -196,7 +196,7 @@ class ZoneTransformer(transformer_base.TransformerBase):
             raise ValueError('Missing property ID')
 
         key = transformer_base.build_key(
-            self.key_values([properties[VProps.ID]]))
+            self.key_values(properties[VProps.ID]))
 
         return graph_utils.create_vertex(
             key,

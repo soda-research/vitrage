@@ -61,8 +61,8 @@ class NovaInstanceTransformerTest(base.BaseTest):
         # Test assertions
         observed_id_values = placeholder.vertex_id.split(
             TransformerBase.KEY_SEPARATOR)
-        expected_id_values = transformer.key_values([instance_id])
-        self.assertEqual(observed_id_values, expected_id_values)
+        expected_id_values = transformer.key_values(instance_id)
+        self.assertEqual(tuple(observed_id_values), expected_id_values)
 
         observed_time = placeholder.get(VertexProperties.UPDATE_TIMESTAMP)
         self.assertEqual(observed_time, timestamp)
@@ -267,7 +267,7 @@ class NovaInstanceTransformerTest(base.BaseTest):
 
             self.assertEqual(instance_id, observed_key_fields[2])
 
-            key_values = instance_transformer.key_values([instance_id])
+            key_values = instance_transformer.key_values(instance_id)
             expected_key = tbase.build_key(key_values)
 
             self.assertEqual(expected_key, observed_key)
@@ -281,7 +281,7 @@ class NovaInstanceTransformerTest(base.BaseTest):
 
         instance_transformer = InstanceTransformer(self.transformers)
         # Test action
-        key_fields = instance_transformer.key_values([instance_id])
+        key_fields = instance_transformer.key_values(instance_id)
 
         # Test assertions
         observed_key = tbase.build_key(key_fields)

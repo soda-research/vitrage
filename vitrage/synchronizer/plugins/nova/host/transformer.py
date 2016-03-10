@@ -123,8 +123,8 @@ class HostTransformer(transformer_base.TransformerBase):
 
         return None
 
-    def key_values(self, mutable_fields=[]):
-        return [EntityCategory.RESOURCE, self.HOST_TYPE] + mutable_fields
+    def key_values(self, *args):
+        return (EntityCategory.RESOURCE, self.HOST_TYPE) + args
 
     def extract_key(self, entity_event):
 
@@ -132,7 +132,7 @@ class HostTransformer(transformer_base.TransformerBase):
             entity_event,
             self.HOST_NAME[entity_event[SyncProps.SYNC_MODE]])
 
-        key_fields = self.key_values([host_name])
+        key_fields = self.key_values(host_name)
         return transformer_base.build_key(key_fields)
 
     def create_placeholder_vertex(self, properties={}):
@@ -140,7 +140,7 @@ class HostTransformer(transformer_base.TransformerBase):
             LOG.error('Cannot create placeholder vertex. Missing property ID')
             raise ValueError('Missing property ID')
 
-        key_fields = self.key_values([properties[VProps.ID]])
+        key_fields = self.key_values(properties[VProps.ID])
 
         return graph_utils.create_vertex(
             transformer_base.build_key(key_fields),

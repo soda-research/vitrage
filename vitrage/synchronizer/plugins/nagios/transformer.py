@@ -105,6 +105,6 @@ class NagiosTransformer(BaseAlarmTransformer):
         sync_type = entity_event[SyncProps.SYNC_TYPE]
         alarm_name = entity_event[NagiosProperties.SERVICE]
         resource_name = entity_event[NagiosProperties.RESOURCE_NAME]
-        return tbase.build_key(self.key_values([sync_type,
-                                                resource_name,
-                                                alarm_name]))
+        return tbase.build_key(self.key_values(sync_type,
+                                               resource_name,
+                                               alarm_name))

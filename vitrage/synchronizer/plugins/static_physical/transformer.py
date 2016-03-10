@@ -121,11 +121,11 @@ class StaticPhysicalTransformer(transformer_base.TransformerBase):
     def extract_key(self, entity_event):
         entity_id = entity_event[VProps.ID]
         sync_type = entity_event[VProps.TYPE]
-        key_fields = self.key_values([sync_type, entity_id])
+        key_fields = self.key_values(sync_type, entity_id)
         return transformer_base.build_key(key_fields)
 
-    def key_values(self, mutable_fields=[]):
-        return [EntityCategory.RESOURCE] + mutable_fields
+    def key_values(self, *args):
+        return (EntityCategory.RESOURCE,) + args
 
     def create_placeholder_vertex(self, properties={}):
         if VProps.TYPE not in properties:
@@ -136,8 +136,8 @@ class StaticPhysicalTransformer(transformer_base.TransformerBase):
             LOG.error("Can't create placeholder vertex. Missing property ID")
             raise ValueError('Missing property ID')
 
-        key_fields = self.key_values([properties[VProps.TYPE],
-                                      properties[VProps.ID]])
+        key_fields = self.key_values(properties[VProps.TYPE],
+                                     properties[VProps.ID])
 
         return graph_utils.create_vertex(
             transformer_base.build_key(key_fields),

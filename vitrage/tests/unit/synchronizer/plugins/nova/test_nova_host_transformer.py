@@ -60,8 +60,8 @@ class NovaHostTransformerTest(base.BaseTest):
         # Test assertions
         observed_id_values = placeholder.vertex_id.split(
             TransformerBase.KEY_SEPARATOR)
-        expected_id_values = host_transformer.key_values([host_name])
-        self.assertEqual(observed_id_values, expected_id_values)
+        expected_id_values = host_transformer.key_values(host_name)
+        self.assertEqual(tuple(observed_id_values), expected_id_values)
 
         observed_time = placeholder.get(VertexProperties.UPDATE_TIMESTAMP)
         self.assertEqual(observed_time, timestamp)
@@ -87,7 +87,7 @@ class NovaHostTransformerTest(base.BaseTest):
         host_transformer = HostTransformer(self.transformers)
 
         # Test action
-        observed_key_fields = host_transformer.key_values([host_name])
+        observed_key_fields = host_transformer.key_values(host_name)
 
         # Test assertions
         self.assertEqual(EntityCategory.RESOURCE, observed_key_fields[0])

@@ -46,5 +46,5 @@ class BaseAlarmTransformer(tbase.TransformerBase):
             return EventAction.CREATE_ENTITY
         raise VitrageTransformerError('Invalid sync mode: (%s)' % sync_mode)
 
-    def key_values(self, mutable_fields=[]):
-        return [EntityCategory.ALARM] + mutable_fields
+    def key_values(self, *args):
+        return (EntityCategory.ALARM,) + args

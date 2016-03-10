@@ -120,13 +120,13 @@ class EvaluatorEventTransformer(transformer_base.TransformerBase):
 
     def extract_key(self, event):
 
-        mutable_fields = [event[TFields.ALARM_NAME], event[TFields.TARGET]]
+        mutable_fields = event[TFields.ALARM_NAME], event[TFields.TARGET]
 
         key_fields = self.key_values(mutable_fields)
         return transformer_base.build_key(key_fields)
 
-    def key_values(self, mutable_fields=[]):
-        return [EntityCategory.ALARM, VITRAGE_TYPE] + mutable_fields
+    def key_values(self, *args):
+        return (EntityCategory.ALARM, VITRAGE_TYPE) + args
 
     def create_placeholder_vertex(self, properties={}):
         LOG.info('Evaluator does not create placeholders')
