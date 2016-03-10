@@ -141,7 +141,7 @@ class TestActionExecutor(TestEntityGraphFunctionalBase):
         self.assertIsNone(before_edge)
         self.assertIsNotNone(new_edge)
 
-    def test_execute_add_vertex(self):
+    def test_execute_add_and_remove_vertex(self):
 
         # Test Setup
         processor = self._create_processor_with_graph(self.conf)
@@ -153,7 +153,10 @@ class TestActionExecutor(TestEntityGraphFunctionalBase):
         host = host_vertices[0]
 
         targets = {TFields.TARGET: host.vertex_id}
-        props = {TFields.ALARM_NAME: 'VM_CPU_SUBOPTIMAL_PERFORMANCE'}
+        props = {
+            TFields.ALARM_NAME: 'VM_CPU_SUBOPTIMAL_PERFORMANCE',
+            TFields.SEVERITY: 'critical'
+        }
         action_spec = ActionSpecs(ActionType.RAISE_ALARM, targets, props)
 
         event_queue = multiprocessing.Queue()

@@ -57,7 +57,8 @@ class EvaluatorEventTransformer(transformer_base.TransformerBase):
 
             metadata = {
                 VProps.UPDATE_TIMESTAMP: event[VProps.UPDATE_TIMESTAMP],
-                VProps.NAME: event[TFields.ALARM_NAME]
+                VProps.NAME: event[TFields.ALARM_NAME],
+                VProps.SEVERITY: event[TFields.SEVERITY]
             }
             return graph_utils.create_vertex(
                 self.extract_key(event),

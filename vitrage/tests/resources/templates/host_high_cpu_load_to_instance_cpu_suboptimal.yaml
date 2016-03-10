@@ -42,6 +42,7 @@ scenarios:
         action_type: raise_alarm
         properties:
          alarm_name: VM_CPU_SUBOPTIMAL_PERFORMANCE
+         severity: critical
         action_target:
          target: 4
      - action:

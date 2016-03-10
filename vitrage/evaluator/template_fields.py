@@ -33,6 +33,7 @@ class TemplateFields(object):
     RELATIONSHIPS = 'relationships'
     RELATIONSHIP = 'relationship'
     RELATIONSHIP_TYPE = 'relationship_type'
+    SEVERITY = 'severity'
     SOURCE = 'source'
     SCENARIO = 'scenario'
     STATE = 'state'
