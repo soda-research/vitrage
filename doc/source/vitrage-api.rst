@@ -16,7 +16,7 @@ Vitrage API
 |
 
 .. contents:: Contents:
-:local:
+   :local:
 
 Overview
 ********
