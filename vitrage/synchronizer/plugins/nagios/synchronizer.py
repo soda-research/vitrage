@@ -56,11 +56,11 @@ class NagiosSynchronizer(BaseAlarmSynchronizer):
             return []
 
         if not nagios_password:
-            LOG.warn(_LW('Nagios password is not defined'))
+            LOG.warning(_LW('Nagios password is not defined'))
             return []
 
         if not nagios_url:
-            LOG.warn(_LW('Nagios url is not defined'))
+            LOG.warning(_LW('Nagios url is not defined'))
             return []
 
         session = requests.Session()
