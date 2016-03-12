@@ -37,6 +37,7 @@ eventlet.monkey_patch()
 TOPOLOGY_QUERY = {
     'and': [
         {'==': {VProps.CATEGORY: EntityCategory.RESOURCE}},
+        {'==': {VProps.IS_DELETED: False}},
         {
             'or': [
                 {'==': {VProps.TYPE: EntityType.OPENSTACK_NODE}},
@@ -45,6 +46,20 @@ TOPOLOGY_QUERY = {
                 {'==': {VProps.TYPE: EntityType.NOVA_INSTANCE}}
             ]
         }
+    ]
+}
+
+RCA_QUERY = {
+    'and': [
+        {'==': {VProps.CATEGORY: EntityCategory.ALARM}},
+        {'==': {VProps.IS_DELETED: False}}
+        ]
+}
+
+ALARMS_ALL_QUERY = {
+    'and': [
+        {'==': {VProps.CATEGORY: EntityCategory.ALARM}},
+        {'==': {VProps.IS_DELETED: False}}
     ]
 }
 
@@ -91,11 +106,12 @@ class EntityGraphApis(object):
         vitrage_id = arg
         if not vitrage_id or vitrage_id == 'all':
             items_list = self.entity_graph.get_vertices(
-                {VProps.CATEGORY: EntityCategory.ALARM})
+                query_dict=ALARMS_ALL_QUERY)
         else:
             items_list = self.entity_graph.neighbors(
                 vitrage_id,
-                vertex_attr_filter={VProps.CATEGORY: EntityCategory.ALARM})
+                vertex_attr_filter={VProps.CATEGORY: EntityCategory.ALARM,
+                                    VProps.IS_DELETED: False})
 
         # TODO(alexey) this should not be here, but in the transformer
         modified_alarms = self._add_resource_details_to_alarms(items_list)
@@ -109,9 +125,8 @@ class EntityGraphApis(object):
 
     def get_rca(self, ctx, root):
         ga = create_algorithm(self.entity_graph)
-        rca_query = {'==': {VProps. CATEGORY: EntityCategory.ALARM}}
         found_graph = ga.graph_query_vertices(
-            query_dict=rca_query,
+            query_dict=RCA_QUERY,
             root_id=root)
         found_graph.inspected_index = self._find_rca_index(found_graph, root)
         json_graph = found_graph.output_graph()

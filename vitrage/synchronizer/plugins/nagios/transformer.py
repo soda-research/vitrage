@@ -67,32 +67,36 @@ class NagiosTransformer(BaseAlarmTransformer):
             tbase.TIMESTAMP_FORMAT)
 
         resource_type = entity_event[NagiosProperties.RESOURCE_TYPE]
-        if resource_type == EntityType.NOVA_HOST:
-            return [self._create_host_neighbor(
+        if resource_type == EntityType.NOVA_HOST or resource_type == 'switch':
+            return [self._create_neighbor(
                 vitrage_id,
                 timestamp,
+                resource_type,
                 entity_event[NagiosProperties.RESOURCE_NAME])]
 
         return []
 
-    def _create_host_neighbor(self, vitrage_id, timestamp, host_name):
-
-        transformer = self.transformers[EntityType.NOVA_HOST]
+    def _create_neighbor(self,
+                         vitrage_id,
+                         timestamp,
+                         resource_type,
+                         resource_name):
+        transformer = self.transformers[resource_type]
 
         if transformer:
-
             properties = {
-                VProps.ID: host_name,
+                VProps.TYPE: resource_type,
+                VProps.ID: resource_name,
                 VProps.UPDATE_TIMESTAMP: timestamp
             }
-            host_vertex = transformer.create_placeholder_vertex(properties)
+            resource_vertex = transformer.create_placeholder_vertex(properties)
 
             relationship_edge = graph_utils.create_edge(
                 source_id=vitrage_id,
-                target_id=host_vertex.vertex_id,
+                target_id=resource_vertex.vertex_id,
                 relationship_type=EdgeLabels.ON)
 
-            return tbase.Neighbor(host_vertex, relationship_edge)
+            return tbase.Neighbor(resource_vertex, relationship_edge)
 
         LOG.warning('Cannot transform host, host transformer does not exist')
         return None
