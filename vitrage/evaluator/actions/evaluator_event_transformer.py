@@ -12,6 +12,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 from oslo_log import log as logging
+from vitrage.common import datetime_utils
 
 from vitrage.common.constants import EdgeLabels
 from vitrage.common.constants import EdgeProperties as EProps
@@ -46,10 +47,15 @@ class EvaluatorEventTransformer(transformer_base.TransformerBase):
 
         event_type = event[EVALUATOR_EVENT_TYPE]
 
+        timestamp = datetime_utils.change_time_str_format(
+            event[VProps.UPDATE_TIMESTAMP],
+            '%Y-%m-%d %H:%M:%S.%f',
+            transformer_base.TIMESTAMP_FORMAT)
+
         if event_type == UPDATE_VERTEX:
             properties = {
                 VProps.VITRAGE_STATE: event[VProps.VITRAGE_STATE],
-                VProps.UPDATE_TIMESTAMP: event[VProps.UPDATE_TIMESTAMP]
+                VProps.UPDATE_TIMESTAMP: timestamp
             }
             return Vertex(event[VProps.VITRAGE_ID], properties)
 
@@ -58,7 +64,8 @@ class EvaluatorEventTransformer(transformer_base.TransformerBase):
             metadata = {
                 VProps.UPDATE_TIMESTAMP: event[VProps.UPDATE_TIMESTAMP],
                 VProps.NAME: event[TFields.ALARM_NAME],
-                VProps.SEVERITY: event[TFields.SEVERITY]
+                VProps.SEVERITY: event[TFields.SEVERITY],
+                VProps.STATE: event[VProps.STATE]
             }
             return graph_utils.create_vertex(
                 self.extract_key(event),
