@@ -324,3 +324,7 @@ class Graph(object):
     @abc.abstractmethod
     def output_graph(self, **kwargs):
         pass
+
+    @abc.abstractmethod
+    def union(self, other_graph):
+        pass

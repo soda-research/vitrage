@@ -11,12 +11,10 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-
-
 import copy
 import json
-
 import networkx as nx
+from networkx.algorithms.operators.binary import compose
 from networkx.readwrite import json_graph
 
 from oslo_log import log as logging
@@ -268,3 +266,10 @@ class NXGraph(Graph):
                 node[VProps.ID] = self._g.node[node[VProps.ID]][VProps.ID]
 
         return json.dumps(node_link_data)
+
+    def union(self, other_graph):
+        """Union two graphs - add all vertices and edges of other graph
+
+        :type other_graph: NXGraph
+        """
+        self._g = compose(self._g, other_graph._g)

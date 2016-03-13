@@ -87,11 +87,18 @@ class EntityGraphApis(object):
         LOG.debug("EntityGraphApis get_rca root:%s", str(root))
 
         ga = create_algorithm(self.entity_graph)
-        found_graph = ga.graph_query_vertices(
+        found_graph_in = ga.graph_query_vertices(
             query_dict=RCA_QUERY,
-            root_id=root)
-        json_graph = found_graph.output_graph(
-            inspected_index=self._find_rca_index(found_graph, root))
+            root_id=root,
+            direction=Direction.IN)
+        found_graph_out = ga.graph_query_vertices(
+            query_dict=RCA_QUERY,
+            root_id=root,
+            direction=Direction.OUT)
+        unified_graph = found_graph_in
+        unified_graph.union(found_graph_out)
+        json_graph = unified_graph.output_graph(
+            inspected_index=self._find_rca_index(unified_graph, root))
         return json_graph
 
     def _get_topology(self, ctx, graph_type, query, root, depth=None):

@@ -449,3 +449,43 @@ class GraphTest(GraphTestBase):
         g.update_edge(updated_edge)
         self._check_callback_result(self.result, 'update edge', e_node_to_host,
                                     updated_edge)
+
+    def test_union(self):
+        v1 = v_node
+        v2 = v_host
+        v3 = v_instance
+        v4 = v_alarm
+
+        e_v1_v2 = utils.create_edge(source_id=v1.vertex_id,
+                                    target_id=v2.vertex_id,
+                                    relationship_type='KUKU_v1_v2')
+        e_v2_v3 = utils.create_edge(source_id=v2.vertex_id,
+                                    target_id=v3.vertex_id,
+                                    relationship_type='KUKU_v2_v3')
+        e_v3_v4 = utils.create_edge(source_id=v3.vertex_id,
+                                    target_id=v4.vertex_id,
+                                    relationship_type='KUKU_v3_v4')
+
+        g1 = create_graph('test_union')
+        g1.add_vertex(v1)
+        g1.add_vertex(v2)
+        g1.add_vertex(v3)
+        g1.add_edge(e_v1_v2)
+        g1.add_edge(e_v2_v3)
+
+        g2 = create_graph('test_union_')
+        g2.add_vertex(v3)
+        g2.add_vertex(v4)
+        g2.add_edge(e_v3_v4)
+
+        g1.union(g2)
+        self.assertEqual(4, len(g1), 'incorrect graph len after union')
+
+        e = g1.get_edge(e_v3_v4.source_id, e_v3_v4.target_id, e_v3_v4.label)
+        self.assertIsNotNone(e, 'Edge missing after graphs union')
+
+        e = g1.get_edge(e_v2_v3.source_id, e_v2_v3.target_id, e_v2_v3.label)
+        self.assertIsNotNone(e, 'Edge missing after graphs union')
+
+        e = g1.get_vertex(v3.vertex_id)
+        self.assertIsNotNone(e, 'Vertex missing after graphs union')

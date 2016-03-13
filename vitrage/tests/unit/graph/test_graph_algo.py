@@ -19,7 +19,7 @@ test_vitrage graph algorithms
 Tests for `vitrage` graph driver algorithms
 """
 from vitrage.common.constants import VertexProperties as VProps
-from vitrage.graph import create_algorithm, Mapping  # noqa
+from vitrage.graph import create_algorithm, Mapping, Direction  # noqa
 from vitrage.tests.unit.graph.base import *  # noqa
 
 
@@ -101,6 +101,13 @@ class GraphAlgorithmTest(GraphTestBase):
             ENTITY_GRAPH_VMS_PER_HOST +
             ENTITY_GRAPH_VMS_PER_HOST * ENTITY_GRAPH_ALARMS_PER_VM,
             subgraph.num_edges(), 'num of BOTH edges Host (depth 2)')
+
+        subgraph = ga.graph_query_vertices(root_id=first_host_id, depth=3,
+                                           direction=Direction.OUT)
+        self.assertEqual(
+            1 +
+            ENTITY_GRAPH_VMS_PER_HOST,
+            subgraph.num_edges(), 'num of BOTH edges Host (depth 3)')
 
         query = {
             'and': [

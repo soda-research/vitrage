@@ -16,6 +16,7 @@ from oslo_log import log as logging
 
 from algorithm import GraphAlgorithm
 from sub_graph_matching import subgraph_matching
+from vitrage.graph.driver import Direction
 from vitrage.graph.driver import NXGraph
 from vitrage.graph.query import create_predicate
 
@@ -32,7 +33,8 @@ class NXAlgorithm(GraphAlgorithm):
         """
         super(NXAlgorithm, self).__init__(graph)
 
-    def graph_query_vertices(self, query_dict=None, root_id=None, depth=None):
+    def graph_query_vertices(self, query_dict=None, root_id=None, depth=None,
+                             direction=Direction.BOTH):
 
         if not root_id:
             root_id = self.graph.root_id
@@ -58,7 +60,9 @@ class NXAlgorithm(GraphAlgorithm):
                 continue
             visited_nodes.add(node_id)
             (n_list, e_list) = self.graph._neighboring_nodes_edges_query(
-                node_id, vertex_predicate=match_func)
+                node_id,
+                direction=direction,
+                vertex_predicate=match_func)
             n_result.extend([v_id for v_id, data in n_list])
             nodes_q.extend([(v_id, curr_depth + 1) for v_id, data in n_list])
 
