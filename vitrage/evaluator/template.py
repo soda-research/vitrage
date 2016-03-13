@@ -124,7 +124,8 @@ class Template(object):
         target = self.entities[target_id]
         return EdgeDescription(edge, source, target)
 
-    def _extract_properties(self, var_dict):
+    @staticmethod
+    def _extract_properties(var_dict):
 
         ignore_ids = [TFields.TEMPLATE_ID, TFields.SOURCE, TFields.TARGET]
         return dict((key, var_dict[key]) for key in var_dict
@@ -143,7 +144,8 @@ class Template(object):
 
         return scenarios
 
-    def _build_actions(self, actions_def):
+    @staticmethod
+    def _build_actions(actions_def):
 
         actions = []
         for action_def in actions_def:
@@ -187,7 +189,8 @@ class Template(object):
         if isinstance(condition_dnf, Symbol):
             return [[(self._extract_condition_var(condition_dnf, True))]]
 
-    def convert_to_dnf_format(self, condition_str):
+    @staticmethod
+    def convert_to_dnf_format(condition_str):
 
         condition_str = condition_str.replace('and', '&')
         condition_str = condition_str.replace('or', '|')

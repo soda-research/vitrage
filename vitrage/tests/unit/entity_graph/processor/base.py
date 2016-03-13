@@ -50,7 +50,8 @@ class TestBaseProcessor(TestEntityGraphUnitBase):
 
         return vertex
 
-    def _update_edge_to_graph(self, entity_graph, src_id, trgt_id, label):
+    @staticmethod
+    def _update_edge_to_graph(entity_graph, src_id, trgt_id, label):
         edge = graph.Edge(src_id, trgt_id, label, {})
         entity_graph.add_edge(edge)
         return edge
