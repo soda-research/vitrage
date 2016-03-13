@@ -114,7 +114,8 @@ class ScenarioRepository(object):
         if not self.contains(scenarios, scenario):
             self.relationship_scenarios[key].append((edge_desc, scenario))
 
-    def _create_edge_scenario_key(self, edge_desc):
+    @staticmethod
+    def _create_edge_scenario_key(edge_desc):
 
         return EdgeKeyScenario(edge_desc.edge.label,
                                frozenset(edge_desc.source.properties.items()),
