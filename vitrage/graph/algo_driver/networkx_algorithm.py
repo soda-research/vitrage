@@ -30,7 +30,7 @@ class NXAlgorithm(GraphAlgorithm):
         :param graph: graph instance
         :type graph: driver.Graph
         """
-        self.graph = graph
+        super(NXAlgorithm, self).__init__(graph)
 
     def graph_query_vertices(self, query_dict=None, root_id=None, depth=None):
 
