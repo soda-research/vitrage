@@ -47,7 +47,7 @@ class SnapshotsService(SynchronizerService):
 
         LOG.info("Finish start VitrageSnapshotsService")
 
-    def stop(self):
+    def stop(self, graceful=False):
         LOG.info("Stop VitrageSnapshotsService")
 
         super(SnapshotsService, self).stop()
@@ -84,7 +84,7 @@ class ChangesService(SynchronizerService):
         LOG.info("Finish start VitrageChangesService - %s",
                  self.registered_plugins[0].__class__.__name__)
 
-    def stop(self):
+    def stop(self, graceful=False):
         LOG.info("Stop VitrageChangesService - %s",
                  self.registered_plugins[0].__class__.__name__)
 
