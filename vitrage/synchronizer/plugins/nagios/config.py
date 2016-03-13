@@ -12,7 +12,6 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 import re
-import traceback
 
 from oslo_log import log
 
@@ -35,8 +34,8 @@ class NagiosConfig(object):
 
             self.mappings = [self._create_mapping(config) for config in nagios]
 
-        except Exception:
-            LOG.error("Exception: %s", traceback.print_exc())
+        except Exception as e:
+            LOG.exception('failed in init %s ', e)
             self.mappings = []
 
     @staticmethod

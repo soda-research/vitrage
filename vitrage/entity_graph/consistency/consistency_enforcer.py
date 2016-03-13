@@ -13,7 +13,6 @@
 # under the License.
 
 from datetime import timedelta
-import traceback
 
 from oslo_log import log
 
@@ -48,9 +47,9 @@ class ConsistencyEnforcer(object):
 
                 self.initialization_status.status = \
                     self.initialization_status.FINISHED
-        except Exception:
-            LOG.error("Error in deleting vertices from entity_graph: %s",
-                      traceback.print_exc())
+        except Exception as e:
+            LOG.exception('Error in deleting vertices from entity_graph: %s',
+                          e)
 
     def periodic_process(self):
         try:
@@ -65,9 +64,9 @@ class ConsistencyEnforcer(object):
                       ': %s', len(stale_entities), vertices_to_delete)
 
             self._delete_vertices(vertices_to_delete)
-        except Exception:
-            LOG.error("Error in deleting vertices from entity_graph: %s",
-                      traceback.print_exc())
+        except Exception as e:
+            LOG.exception('Error in deleting vertices from entity_graph: %s',
+                          e)
 
     def _find_stale_entities(self):
         query = {
