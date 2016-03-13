@@ -15,7 +15,7 @@
 
 class NormalizedAlarmSeverity(object):
     CRITICAL = 'CRITICAL'
-    SEVER = 'SEVER'
+    SEVERE = 'SEVERE'
     WARNING = 'WARNING'
     DISABLED = 'DISABLED'
     UNKNOWN = 'UNKNOWN'

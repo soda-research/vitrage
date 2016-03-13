@@ -60,7 +60,7 @@ class TestStateManager(base.BaseTest):
         state_manager = StateManager(self.conf)
 
         # test assertions
-        self.assertEqual(len(self.conf.synchronizer_plugins.plugin_type),
+        self.assertEqual(len(self.conf.synchronizer_plugins.plugin_type) + 1,
                          len(state_manager.states_plugins))
 
     def test_load_state_plugins_with_errors(self):

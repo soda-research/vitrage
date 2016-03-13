@@ -51,7 +51,7 @@ State configuration yaml file has to be defined for all the plugins which were c
 
 The following file will map alarm states.
 Original states 'CRITICAL' and 'DOWN' will be mapped to normalized state 'CRITICAL'.
-Normalized state 'SEVER' has no original states.
+Normalized state 'SEVERE' has no original states.
 Original state 'WARNING' is mapped to normalized state 'WARNING', etc.
 
 ::
@@ -65,7 +65,7 @@ Original state 'WARNING' is mapped to normalized state 'WARNING', etc.
             - name: CRITICAL
             - name: DOWN
       - normalized state:
-          name: SEVER
+          name: SEVERE
           priority: 40
           original states:
       - normalized state:
