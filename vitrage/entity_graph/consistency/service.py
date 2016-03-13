@@ -47,7 +47,7 @@ class VitrageGraphConsistencyService(os_service.Service):
 
         LOG.info("Finish start VitrageGraphConsistencyService")
 
-    def stop(self):
+    def stop(self, graceful=False):
         LOG.info("Stop VitrageGraphConsistencyService")
 
         super(VitrageGraphConsistencyService, self).stop()

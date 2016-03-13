@@ -40,5 +40,5 @@ class ProcessorBase(object):
         pass
 
     @abc.abstractmethod
-    def handle_end_message(self, event):
+    def handle_end_message(self, vertex, neighbors):
         pass

@@ -49,7 +49,7 @@ class VitrageGraphService(os_service.Service):
 
         LOG.info("Finish start VitrageGraphService")
 
-    def stop(self):
+    def stop(self, graceful=False):
         LOG.info("Stop VitrageGraphService")
 
         # TODO(Alexey): check if we need this command here
