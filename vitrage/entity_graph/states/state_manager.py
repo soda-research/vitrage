@@ -13,7 +13,6 @@
 # under the License.
 
 import os
-import traceback
 
 from oslo_log import log
 
@@ -30,7 +29,6 @@ LOG = log.getLogger(__name__)
 
 
 class StateManager(object):
-
     STATES = 'states'
     PRIORITIES = 'priorities'
 
@@ -124,9 +122,11 @@ class StateManager(object):
                     self.STATES: states,
                     self.PRIORITIES: priorities
                 }
-            except Exception:
-                LOG.error("Exception: %s", traceback.print_exc())
-                erroneous_plugins.append(os.path.splitext(file_name)[0])
+            except Exception as e:
+                LOG.exception("Exception: %s", e)
+                plugin = os.path.splitext(file_name)[0]
+                LOG.error('erroneous plugins is %s',
+                          erroneous_plugins.append(plugin))
 
         self._is_all_plugins_states_exists(
             [key for key in states_plugins.keys()],

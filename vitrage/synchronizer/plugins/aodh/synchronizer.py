@@ -11,7 +11,6 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND,  either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-import traceback
 
 from ceilometerclient import client
 from oslo_log import log
@@ -26,7 +25,6 @@ LOG = log.getLogger(__name__)
 
 
 class AodhSynchronizer(BaseAlarmSynchronizer):
-
     def __init__(self, conf):
         super(AodhSynchronizer, self).__init__()
 
@@ -43,9 +41,8 @@ class AodhSynchronizer(BaseAlarmSynchronizer):
                                         password=password,
                                         tenant_name=project,
                                         auth_url=auth_url)
-        except Exception:
-            LOG.error("Failed to initialize ceilometer client. Exception: %s",
-                      traceback.print_exc())
+        except Exception as e:
+            LOG.exception('Failed to initialize client. Exception: %s', e)
 
     def _sync_type(self):
         return EntityType.AODH

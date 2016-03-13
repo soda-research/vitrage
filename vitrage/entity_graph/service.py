@@ -13,7 +13,6 @@
 # under the License.
 
 import datetime
-import traceback
 
 from oslo_log import log
 from oslo_service import service as os_service
@@ -81,5 +80,5 @@ class VitrageGraphService(os_service.Service):
                 event = self.queue.get()
                 LOG.debug("got event: %s" % event)
                 self.processor.process_event(event)
-            except Exception:
-                LOG.error("Exception: %s", traceback.print_exc())
+            except Exception as e:
+                LOG.exception("Exception: %s", e)
