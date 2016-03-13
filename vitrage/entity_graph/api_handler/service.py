@@ -33,6 +33,8 @@ LOG = log.getLogger(__name__)
 
 eventlet.monkey_patch()
 
+# TODO(Alexey): all these queries shouldn't be here
+# they should be called by the client
 
 TOPOLOGY_QUERY = {
     'and': [
