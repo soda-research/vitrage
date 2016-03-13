@@ -27,8 +27,11 @@ from vitrage.evaluator.actions.base import ActionType
 from vitrage.evaluator.template import ActionSpecs
 from vitrage.evaluator.template_fields import TemplateFields as TFields
 from vitrage.service import load_plugin
+from vitrage.synchronizer.plugins.base.alarm.properties \
+    import AlarmProperties as AlarmProps
 from vitrage.tests.functional.entity_graph.base import \
     TestEntityGraphFunctionalBase
+
 
 LOG = logging.getLogger(__name__)
 
@@ -155,7 +158,8 @@ class TestActionExecutor(TestEntityGraphFunctionalBase):
         targets = {TFields.TARGET: host.vertex_id}
         props = {
             TFields.ALARM_NAME: 'VM_CPU_SUBOPTIMAL_PERFORMANCE',
-            TFields.SEVERITY: 'critical'
+            TFields.SEVERITY: 'critical',
+            VProps.STATE: AlarmProps.ALARM_STATE
         }
         action_spec = ActionSpecs(ActionType.RAISE_ALARM, targets, props)
 

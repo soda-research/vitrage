@@ -12,17 +12,23 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from vitrage.common.constants import VertexProperties as VProps
 from vitrage.evaluator.actions.recipes.action_steps import ADD_VERTEX
 from vitrage.evaluator.actions.recipes.action_steps import NOTIFY
 from vitrage.evaluator.actions.recipes.action_steps import REMOVE_VERTEX
 from vitrage.evaluator.actions.recipes import base
 from vitrage.evaluator.actions.recipes.base import ActionStepWrapper
+from vitrage.synchronizer.plugins.base.alarm.properties \
+    import AlarmProperties as AlarmProps
 
 
 class RaiseAlarm(base.Recipe):
 
     @staticmethod
     def get_do_recipe(action_spec):
+
+        params = RaiseAlarm._get_vertex_params(action_spec)
+        params[VProps.STATE] = AlarmProps.ALARM_STATE
 
         add_vertex_step = ActionStepWrapper(
             ADD_VERTEX, RaiseAlarm._get_vertex_params(action_spec))

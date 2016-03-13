@@ -15,9 +15,9 @@ from datetime import datetime
 from oslo_utils import timeutils
 
 
-def utcnow():
+def utcnow(with_timezone=True):
     """Better version of utcnow() that returns utcnow with a correct TZ."""
-    return timeutils.utcnow(True)
+    return timeutils.utcnow(with_timezone)
 
 
 def change_time_str_format(timestamp_str, old_format, new_format):
