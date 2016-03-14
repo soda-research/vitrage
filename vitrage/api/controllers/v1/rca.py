@@ -44,7 +44,7 @@ class RCAController(RootRestController):
     @staticmethod
     def get_rca(alarm_id):
         try:
-            graph_data = pecan.request.client.call({},
+            graph_data = pecan.request.client.call(pecan.request.context,
                                                    'get_rca',
                                                    root=alarm_id)
             LOG.info(graph_data)

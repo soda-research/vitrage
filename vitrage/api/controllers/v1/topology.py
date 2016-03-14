@@ -55,7 +55,8 @@ class TopologyController(RootRestController):
     def get_graph(graph_type, depth, query, root):
 
         try:
-            graph_data = pecan.request.client.call({}, 'get_topology',
+            graph_data = pecan.request.client.call(pecan.request.context,
+                                                   'get_topology',
                                                    graph_type=graph_type,
                                                    depth=depth,
                                                    query=query, root=root)

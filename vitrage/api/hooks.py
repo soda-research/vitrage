@@ -12,6 +12,7 @@
 
 import oslo_messaging
 
+from oslo_context import context
 from oslo_policy import policy
 from pecan import hooks
 
@@ -26,7 +27,6 @@ class ConfigHook(hooks.PecanHook):
         self.enforcer = policy.Enforcer(conf)
 
     def before(self, state):
-        # TODO(dany) add Context
         state.request.cfg = self.conf
         state.request.enforcer = self.enforcer
 
@@ -38,7 +38,6 @@ class RPCHook(hooks.PecanHook):
         transport = oslo_messaging.get_transport(conf)
         target = oslo_messaging.Target(topic=conf.rpc_topic)
         self.client = vitrage_rpc.get_client(transport, target)
-        self.ctxt = {}
 
     def before(self, state):
         state.request.client = self.client
@@ -54,3 +53,23 @@ class TranslationHook(hooks.PecanHook):
         if hasattr(state.response, 'translatable_error'):
             state.request.environ['translatable_error'] = (
                 state.response.translatable_error)
+
+
+class ContextHook(hooks.PecanHook):
+
+    def before(self, state):
+        user_id = state.request.headers.get('X-User-Id')
+        user_id = state.request.headers.get('X-User', user_id)
+        user_name = state.request.headers.get('X-User-Name', '')
+        tenant_id = state.request.headers.get('X-Project-Id')
+        auth_token = state.request.headers.get('X-Auth-Token')
+        # TODO(DANY) use roles
+        # roles = pecan.request.headers.get('X-Roles', '').split(',')
+        # roles = [r.strip() for r in roles]
+        ctx = context.RequestContext(auth_token=auth_token, user=user_id,
+                                     # roles=roles,
+                                     tenant=tenant_id,
+                                     is_admin=(user_name == 'admin'))
+
+        # Inject the context...
+        state.request.context = ctx.to_dict()
