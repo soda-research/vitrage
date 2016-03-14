@@ -322,5 +322,5 @@ class Graph(object):
         pass
 
     @abc.abstractmethod
-    def output_graph(self):
+    def output_graph(self, **kwargs):
         pass

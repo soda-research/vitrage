@@ -259,9 +259,14 @@ class NXGraph(Graph):
                 nodes.append((node_id_to_test, node_data))
         return nodes, edges_filtered2
 
-    def output_graph(self):
+    def output_graph(self, **kwargs):
         node_link_data = json_graph.node_link_data(self._g)
+
+        for key, value in kwargs.items():
+            node_link_data[key] = value
+
         for node in node_link_data['nodes']:
             if VProps.ID in self._g.node[node[VProps.ID]]:
                 node[VProps.ID] = self._g.node[node[VProps.ID]][VProps.ID]
+
         return json.dumps(node_link_data)

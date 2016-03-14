@@ -103,7 +103,7 @@ class EntityGraphApis(object):
         self.entity_graph = entity_graph
 
     def get_alarms(self, ctx, arg):
-        LOG.info("EntityGraphApis get_alarms arg:%s", str(arg))
+        LOG.debug("EntityGraphApis get_alarms arg:%s", str(arg))
         vitrage_id = arg
         if not vitrage_id or vitrage_id == 'all':
             items_list = self.entity_graph.get_vertices(
@@ -117,20 +117,23 @@ class EntityGraphApis(object):
         # TODO(alexey) this should not be here, but in the transformer
         modified_alarms = self._add_resource_details_to_alarms(items_list)
 
-        LOG.info("EntityGraphApis get_alarms result:%s", str(modified_alarms))
         return json.dumps({'alarms': [v.properties for v in modified_alarms]})
 
     def get_topology(self, ctx, graph_type, depth, query, root):
+        LOG.debug("EntityGraphApis get_topology root:%s", str(root))
+
         found_graph = self._get_topology(ctx, graph_type, query, root, depth)
         return found_graph.output_graph()
 
     def get_rca(self, ctx, root):
+        LOG.debug("EntityGraphApis get_rca root:%s", str(root))
+
         ga = create_algorithm(self.entity_graph)
         found_graph = ga.graph_query_vertices(
             query_dict=RCA_QUERY,
             root_id=root)
-        found_graph.inspected_index = self._find_rca_index(found_graph, root)
-        json_graph = found_graph.output_graph()
+        json_graph = found_graph.output_graph(
+            inspected_index=self._find_rca_index(found_graph, root))
         return json_graph
 
     def _get_topology(self, ctx, graph_type, query, root, depth=None):
