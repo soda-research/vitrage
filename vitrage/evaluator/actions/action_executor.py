@@ -112,7 +112,7 @@ class ActionExecutor(object):
 
         event[SyncProps.SYNC_MODE] = SyncMode.UPDATE
         event[SyncProps.SYNC_TYPE] = EntityType.VITRAGE
-        event[EProps.UPDATE_TIMESTAMP] = str(datetime_utils.utcnow(False))
+        event[EProps.UPDATE_TIMESTAMP] = str(datetime_utils.utcnow())
 
     @staticmethod
     def _register_action_recipes():
