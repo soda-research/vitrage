@@ -70,8 +70,11 @@ class ConsistencyEnforcer(object):
 
     def _find_stale_entities(self):
         query = {
-            '<': {VProps.UPDATE_TIMESTAMP: str(utcnow() - timedelta(
-                seconds=2 * self.cfg.consistency.consistency_interval))},
+            'and': [
+                {'!=': {VProps.TYPE: EntityType.VITRAGE}},
+                {'<': {VProps.UPDATE_TIMESTAMP: str(utcnow() - timedelta(
+                    seconds=2 * self.cfg.consistency.consistency_interval))}}
+            ]
         }
 
         vertices = self.graph.get_vertices(query_dict=query)
