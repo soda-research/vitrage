@@ -105,9 +105,16 @@ class TestConsistencyFunctional(TestEntityGraphFunctionalBase):
             VProps.CATEGORY: EntityCategory.RESOURCE,
             VProps.TYPE: EntityType.NOVA_INSTANCE
         })
-        self.assertEqual(self.NUM_INSTANCES - 6, len(instance_vertices))
-        self.assertEqual(self._num_total_expected_vertices() - 6,
+        is_deleted_instance_vertices = \
+            self.processor.entity_graph.get_vertices({
+                VProps.CATEGORY: EntityCategory.RESOURCE,
+                VProps.TYPE: EntityType.NOVA_INSTANCE,
+                VProps.IS_DELETED: True
+            })
+        self.assertEqual(self.NUM_INSTANCES - 3, len(instance_vertices))
+        self.assertEqual(self._num_total_expected_vertices() - 3,
                          len(self.processor.entity_graph.get_vertices()))
+        self.assertEqual(6, len(is_deleted_instance_vertices))
 
     def _periodic_process_setup_stage(self, consistency_interval):
         self._create_processor_with_graph(self.conf, processor=self.processor)
@@ -128,7 +135,7 @@ class TestConsistencyFunctional(TestEntityGraphFunctionalBase):
         # set current timestamp of part of the instances
         self._update_timestamp(instance_vertices[0:3], current_time)
 
-        # set part of the instances as deleted + update to current timestamp
+        # set part of the instances as deleted
         for i in range(3, 6):
             instance_vertices[i][VProps.IS_DELETED] = True
             self.processor.entity_graph.update_vertex(instance_vertices[i])

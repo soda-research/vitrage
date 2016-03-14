@@ -55,18 +55,21 @@ class ConsistencyEnforcer(object):
         try:
             LOG.debug('Started consistency periodic check')
 
-            # periodic check
-            stale_entities = self._find_stale_entities()
+            # remove is_deleted=True entities
             old_deleted_entities = self._find_old_deleted_entities()
-            vertices_to_delete = stale_entities.union(old_deleted_entities)
-
             LOG.debug('Found %s vertices to be deleted by consistency service'
-                      ': %s', len(stale_entities), vertices_to_delete)
+                      ': %s', len(old_deleted_entities), old_deleted_entities)
+            self._delete_vertices(old_deleted_entities)
 
-            self._delete_vertices(vertices_to_delete)
+            # mark stale entities as is_deleted=True
+            stale_entities = self._find_stale_entities()
+            LOG.debug('Found %s vertices to be marked as deleted by '
+                      'consistency service: %s', len(stale_entities),
+                      stale_entities)
+            self._mark_as_deleted(stale_entities)
         except Exception as e:
-            LOG.exception('Error in deleting vertices from entity_graph: %s',
-                          e)
+            LOG.exception(
+                'Error in deleting vertices from entity_graph: %s', e)
 
     def _find_stale_entities(self):
         query = {
@@ -92,7 +95,7 @@ class ConsistencyEnforcer(object):
 
         vertices = self.graph.get_vertices(query_dict=query)
 
-        return set(self._filter_vertices_to_be_deleted(vertices))
+        return self._filter_vertices_to_be_deleted(vertices)
 
     def _find_old_deduced_alarms(self, timestamp):
         query = {
@@ -113,6 +116,10 @@ class ConsistencyEnforcer(object):
     def _delete_vertices(self, vertices):
         for vertex in vertices:
             self.graph.remove_vertex(vertex)
+
+    def _mark_as_deleted(self, vertices):
+        for vertex in vertices:
+            self.graph.mark_vertex_as_deleted(vertex)
 
     @staticmethod
     def _filter_vertices_to_be_deleted(vertices):
