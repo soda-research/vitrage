@@ -132,9 +132,7 @@ class EntityGraphApis(object):
 
     @staticmethod
     def _find_rca_index(found_graph, root):
-        root_index = 0
-        for vertex in found_graph._g:
+        for root_index, vertex in enumerate(found_graph._g):
             if vertex == root:
-                break
-            root_index += 1
-        return root_index
+                return root_index
+        return 0
