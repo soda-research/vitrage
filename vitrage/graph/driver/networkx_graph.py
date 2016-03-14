@@ -261,9 +261,7 @@ class NXGraph(Graph):
 
     def output_graph(self, **kwargs):
         node_link_data = json_graph.node_link_data(self._g)
-
-        for key, value in kwargs.items():
-            node_link_data[key] = value
+        node_link_data.update(kwargs)
 
         for node in node_link_data['nodes']:
             if VProps.ID in self._g.node[node[VProps.ID]]:
