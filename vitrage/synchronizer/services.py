@@ -79,7 +79,9 @@ class ChangesService(SynchronizerService):
                  self.registered_plugins[0].__class__.__name__)
 
         super(ChangesService, self).start()
-        self.tg.add_timer(self.changes_interval, self._get_changes)
+        self.tg.add_timer(interval=self.changes_interval,
+                          callback=self._get_changes,
+                          initial_delay=self.changes_interval)
 
         LOG.info("Finish start VitrageChangesService - %s",
                  self.registered_plugins[0].__class__.__name__)
