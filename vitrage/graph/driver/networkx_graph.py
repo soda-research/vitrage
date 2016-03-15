@@ -263,8 +263,9 @@ class NXGraph(Graph):
         node_link_data = json_graph.node_link_data(self._g)
         node_link_data.update(kwargs)
 
-        for node in node_link_data['nodes']:
+        for index, node in enumerate(node_link_data['nodes']):
             if VProps.ID in self._g.node[node[VProps.ID]]:
                 node[VProps.ID] = self._g.node[node[VProps.ID]][VProps.ID]
+                node[VProps.GRAPH_INDEX] = index
 
         return json.dumps(node_link_data)

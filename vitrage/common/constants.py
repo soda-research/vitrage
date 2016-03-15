@@ -30,6 +30,7 @@ class VertexProperties(object):
     NORMALIZED_SEVERITY = 'normalized_severity'
     VITRAGE_ID = 'vitrage_id'
     INFO = 'info'
+    GRAPH_INDEX = 'graph_index'
 
 
 class EdgeProperties(object):
