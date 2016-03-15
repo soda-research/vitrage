@@ -22,20 +22,17 @@ LOG = log.getLogger(__name__)
 
 
 class SynchronizerService(os_service.Service):
-
-    def __init__(self, conf, registered_plugins):
+    def __init__(self, conf, registered_plugins, callback_function):
         super(SynchronizerService, self).__init__()
         self.conf = conf
         self.registered_plugins = registered_plugins
-
-    def set_callback(self, callback_function):
         self.callback_function = callback_function
 
 
 class SnapshotsService(SynchronizerService):
-
-    def __init__(self, conf, registered_plugins):
-        super(SnapshotsService, self).__init__(conf, registered_plugins)
+    def __init__(self, conf, registered_plugins, callback_function):
+        super(SnapshotsService, self).__init__(conf, registered_plugins,
+                                               callback_function)
         self.first_time = True
 
     def start(self):
@@ -69,9 +66,10 @@ class SnapshotsService(SynchronizerService):
 
 
 class ChangesService(SynchronizerService):
-
-    def __init__(self, conf, registered_plugins, changes_interval):
-        super(ChangesService, self).__init__(conf, registered_plugins)
+    def __init__(self, conf, registered_plugins, changes_interval,
+                 callback_function):
+        super(ChangesService, self).__init__(conf, registered_plugins,
+                                             callback_function)
         self.changes_interval = changes_interval
 
     def start(self):

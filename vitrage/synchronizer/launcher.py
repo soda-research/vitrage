@@ -15,7 +15,7 @@
 
 from oslo_log import log
 from oslo_service import service as os_service
-from oslo_utils import importutils
+from oslo_utils import importutils as utils
 
 from services import ChangesService
 from services import SnapshotsService
@@ -43,19 +43,21 @@ class Launcher(object):
     def launch(self):
         launcher = os_service.ProcessLauncher(self.conf)
         for service in self.services:
-            service.set_callback(self.callback)
             launcher.launch_service(service, 1)
 
     def _register_snapshot_plugins(self):
-        return {plugin: importutils.import_object
-                (self.conf[plugin].synchronizer, self.conf)
-                for plugin
-                in self.conf.synchronizer_plugins.plugin_type}
+        return {plugin: utils.import_object(self.conf[plugin].synchronizer,
+                                            self.conf)
+                for plugin in self.conf.synchronizer_plugins.plugin_type}
 
     def _register_services(self):
-        return [SnapshotsService(self.conf, self.snapshot_plugins)] + \
+        return [SnapshotsService(self.conf,
+                                 self.snapshot_plugins,
+                                 self.callback)] + \
                [ChangesService(self.conf,
                                [self.snapshot_plugins[plugin]],
-                               self.conf[plugin].changes_interval)
+                               self.conf[plugin].changes_interval,
+                               self.callback)
+
                 for plugin in self.conf.synchronizer_plugins.plugin_type
                 if oslo_config_opt_exists(self.conf[plugin], CHANGES_INTERVAL)]
