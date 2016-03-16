@@ -159,7 +159,7 @@ class TestActionExecutor(TestEntityGraphFunctionalBase):
         props = {
             TFields.ALARM_NAME: 'VM_CPU_SUBOPTIMAL_PERFORMANCE',
             TFields.SEVERITY: 'critical',
-            VProps.STATE: AlarmProps.ALARM_STATE
+            VProps.STATE: AlarmProps.ALARM_ACTIVE_STATE
         }
         action_spec = ActionSpecs(ActionType.RAISE_ALARM, targets, props)
 

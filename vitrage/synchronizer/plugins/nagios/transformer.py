@@ -54,7 +54,7 @@ class NagiosTransformer(BaseAlarmTransformer):
             self.extract_key(entity_event),
             entity_category=EntityCategory.ALARM,
             entity_type=entity_event[SyncProps.SYNC_TYPE],
-            entity_state=AlarmProps.ALARM_STATE,
+            entity_state=AlarmProps.ALARM_ACTIVE_STATE,
             update_timestamp=timestamp,
             metadata=metadata)
 

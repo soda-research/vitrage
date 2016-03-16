@@ -15,4 +15,5 @@ __author__ = 'stack'
 
 
 class AlarmProperties(object):
-    ALARM_STATE = 'Active'
+    ALARM_ACTIVE_STATE = 'Active'
+    ALARM_INACTIVE_STATE = 'Inactive'

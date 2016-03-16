@@ -46,7 +46,7 @@ class RaiseAlarmRecipeTest(base.BaseTest):
 
         self.assertEqual(ADD_VERTEX, action_steps[0].type)
         add_vertex_step_params = action_steps[0].params
-        self.assertEqual(2, len(add_vertex_step_params))
+        self.assertEqual(3, len(add_vertex_step_params))
 
         alarm_name = add_vertex_step_params[TFields.ALARM_NAME]
         self.assertEqual(props[TFields.ALARM_NAME], alarm_name)
@@ -74,7 +74,7 @@ class RaiseAlarmRecipeTest(base.BaseTest):
 
         self.assertEqual(REMOVE_VERTEX, action_steps[0].type)
         remove_vertex_step_params = action_steps[0].params
-        self.assertEqual(2, len(remove_vertex_step_params))
+        self.assertEqual(3, len(remove_vertex_step_params))
 
         alarm_name = remove_vertex_step_params[TFields.ALARM_NAME]
         self.assertEqual(props[TFields.ALARM_NAME], alarm_name)

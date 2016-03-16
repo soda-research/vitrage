@@ -59,7 +59,7 @@ class AodhTransformer(BaseAlarmTransformer):
             entity_id=entity_event[AodhProps.ALARM_ID],
             entity_category=EntityCategory.ALARM,
             entity_type=entity_event[SyncProps.SYNC_TYPE],
-            entity_state=AlarmProps.ALARM_STATE,
+            entity_state=AlarmProps.ALARM_ACTIVE_STATE,
             update_timestamp=AodhTransformer._timestamp(entity_event),
             metadata=metadata)
 

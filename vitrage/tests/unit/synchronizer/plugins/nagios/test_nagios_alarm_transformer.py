@@ -104,7 +104,7 @@ class NagiosTransformerTest(base.BaseTest):
         self.assertEqual(EntityCategory.ALARM, vertex[VProps.CATEGORY])
         self.assertEqual(event[SyncProps.SYNC_TYPE], vertex[VProps.TYPE])
         self.assertEqual(event[NagiosProperties.SERVICE], vertex[VProps.NAME])
-        self.assertEqual(AlarmProps.ALARM_STATE, vertex[VProps.STATE])
+        self.assertEqual(AlarmProps.ALARM_ACTIVE_STATE, vertex[VProps.STATE])
 
         self.assertEqual(event[NagiosProperties.STATUS],
                          vertex[VProps.SEVERITY])
