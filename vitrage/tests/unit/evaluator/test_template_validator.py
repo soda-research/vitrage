@@ -31,7 +31,7 @@ class TemplateValidatorTest(base.BaseTest):
     @classmethod
     def setUpClass(cls):
 
-        template_dir_path = '%s/templates' % utils.get_resources_dir()
+        template_dir_path = '%s/templates/general' % utils.get_resources_dir()
         template_yamls = file_utils.load_yaml_files(template_dir_path)
         cls.first_template = template_yamls[0]
 

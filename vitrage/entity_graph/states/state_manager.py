@@ -32,8 +32,8 @@ class StateManager(object):
     STATES = 'states'
     PRIORITIES = 'priorities'
 
-    def __init__(self, cfg):
-        self.cfg = cfg
+    def __init__(self, conf):
+        self.conf = conf
         self.category_normalizator = self._init_category_normalizator()
         self.states_plugins = self._load_state_configurations()
 
@@ -110,11 +110,11 @@ class StateManager(object):
         erroneous_plugins = []
 
         files = file_utils.load_files(
-            self.cfg.entity_graph.states_plugins_dir, '.yaml')
+            self.conf.entity_graph.states_plugins_dir, '.yaml')
 
         for file_name in files:
             try:
-                full_path = self.cfg.entity_graph.states_plugins_dir + '/' \
+                full_path = self.conf.entity_graph.states_plugins_dir + '/' \
                     + file_name
                 states, priorities = \
                     self._retrieve_states_and_priorities_from_file(full_path)
@@ -208,7 +208,7 @@ class StateManager(object):
                 and not attr.startswith("__")]
 
     def _is_all_plugins_states_exists(self, states_plugins, error_plugins):
-        plugins = self.cfg.synchronizer_plugins.plugin_type
+        plugins = self.conf.synchronizer_plugins.plugin_type
         all_state_loaded_plugins = states_plugins + error_plugins
 
         for plugin in plugins:

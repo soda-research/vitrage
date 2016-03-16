@@ -33,8 +33,8 @@ class BasicTemplateTest(base.BaseTest):
     def test_basic_template(self):
 
         # Test setup
-        template_path = '%s/templates/%s' % (utils.get_resources_dir(),
-                                             self.BASIC_TEMPLATE)
+        template_path = '%s/templates/general/%s' % (utils.get_resources_dir(),
+                                                     self.BASIC_TEMPLATE)
         template_definition = file_utils.load_yaml_file(template_path, True)
 
         template = Template(template_definition)

@@ -36,20 +36,20 @@ class SnapshotsService(SynchronizerService):
         self.first_time = True
 
     def start(self):
-        LOG.info("Start VitrageSnapshotsService")
+        LOG.info("Vitrage Synchronizer Snapshot Service - Starting...")
 
         super(SnapshotsService, self).start()
         interval = self.conf.synchronizer.snapshots_interval
         self.tg.add_timer(interval, self._get_all)
 
-        LOG.info("Finish start VitrageSnapshotsService")
+        LOG.info("Vitrage Synchronizer Snapshot Service - Started!")
 
     def stop(self, graceful=False):
-        LOG.info("Stop VitrageSnapshotsService")
+        LOG.info("Vitrage Synchronizer Snapshot Service - Stopping...")
 
         super(SnapshotsService, self).stop()
 
-        LOG.info("Finish stop VitrageSnapshotsService")
+        LOG.info("Vitrage Synchronizer Snapshot Service - Stopped!")
 
     def _get_all(self):
         sync_mode = SyncMode.INIT_SNAPSHOT \
@@ -73,7 +73,7 @@ class ChangesService(SynchronizerService):
         self.changes_interval = changes_interval
 
     def start(self):
-        LOG.info("Start VitrageChangesService - %s",
+        LOG.info("Vitrage Synchronizer Changes Service For: %s - Starting...",
                  self.registered_plugins[0].__class__.__name__)
 
         super(ChangesService, self).start()
@@ -81,16 +81,16 @@ class ChangesService(SynchronizerService):
                           callback=self._get_changes,
                           initial_delay=self.changes_interval)
 
-        LOG.info("Finish start VitrageChangesService - %s",
+        LOG.info("Vitrage Synchronizer Changes Service For: %s - Strarted!",
                  self.registered_plugins[0].__class__.__name__)
 
     def stop(self, graceful=False):
-        LOG.info("Stop VitrageChangesService - %s",
+        LOG.info("Vitrage Synchronizer Changes Service For: %s - Stopping...",
                  self.registered_plugins[0].__class__.__name__)
 
         super(ChangesService, self).stop()
 
-        LOG.info("Finish stop VitrageChangesService - %s",
+        LOG.info("Vitrage Synchronizer Changes Service For: %s - Stopped!",
                  self.registered_plugins[0].__class__.__name__)
 
     def _get_changes(self):

@@ -18,28 +18,25 @@ from oslo_log import log
 from oslo_service import service as os_service
 
 from vitrage.entity_graph.processor import processor as proc
-from vitrage.evaluator.scenario_evaluator import ScenarioEvaluator
-from vitrage.evaluator.scenario_repository import ScenarioRepository
 
 LOG = log.getLogger(__name__)
 
 
 class VitrageGraphService(os_service.Service):
 
-    def __init__(self, conf, event_queue, entity_graph, initialization_status):
+    def __init__(self,
+                 conf,
+                 event_queue,
+                 evaluator,
+                 entity_graph,
+                 initialization_status):
         super(VitrageGraphService, self).__init__()
         self.queue = event_queue
         self.conf = conf
-        self.scenario_repo = ScenarioRepository(conf)
-        self.processor = proc.Processor(
-            conf,
-            initialization_status,
-            e_graph=entity_graph)
-        self.evaluator = ScenarioEvaluator(
-            conf,
-            entity_graph,
-            self.scenario_repo,
-            event_queue)
+        self.evaluator = evaluator
+        self.processor = proc.Processor(self.conf,
+                                        initialization_status,
+                                        e_graph=entity_graph)
 
     def start(self):
         LOG.info("Vitrage Graph Service - Starting...")

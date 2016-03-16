@@ -33,7 +33,13 @@ LOG = log.getLogger(__name__)
 
 class ScenarioEvaluator(object):
 
-    def __init__(self, conf, entity_graph, scenario_repo, event_queue):
+    def __init__(self,
+                 conf,
+                 entity_graph,
+                 scenario_repo,
+                 event_queue,
+                 enabled=False):
+        self.conf = conf
         self._entity_graph = entity_graph
         self._graph_algs = create_algorithm(entity_graph)
         self._scenario_repo = scenario_repo
@@ -42,7 +48,7 @@ class ScenarioEvaluator(object):
                                          conf.evaluator.notifier_topic)
         self._action_executor = ActionExecutor(event_queue, self._notifier)
         self._entity_graph.subscribe(self.process_event)
-        self.enabled = True
+        self.enabled = enabled
 
     def process_event(self, before, current, is_vertex):
         """Notification of a change in the entity graph.

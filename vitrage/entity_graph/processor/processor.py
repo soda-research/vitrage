@@ -28,10 +28,10 @@ LOG = log.getLogger(__name__)
 
 class Processor(processor.ProcessorBase):
 
-    def __init__(self, cfg, initialization_status, e_graph=None):
-        self.cfg = cfg
-        self.transformer_manager = TransformerManager(self.cfg)
-        self.state_manager = StateManager(self.cfg)
+    def __init__(self, conf, initialization_status, e_graph=None):
+        self.conf = conf
+        self.transformer_manager = TransformerManager(self.conf)
+        self.state_manager = StateManager(self.conf)
         self._initialize_events_actions()
         self.initialization_status = initialization_status
         self.entity_graph = entity_graph.EntityGraph("Entity Graph") if \
@@ -141,13 +141,16 @@ class Processor(processor.ProcessorBase):
         LOG.debug('Delete relationship from entity graph:\n%s', neighbors)
 
         for neighbor in neighbors:
-            # TODO(Alexey): maybe to check if the vertices exists
-            self.entity_graph.remove_edge(neighbor.edge)
+            graph_edge = self.entity_graph.get_edge(neighbor.edge.source_id,
+                                                    neighbor.edge.target_id,
+                                                    neighbor.edge.label)
+            if graph_edge:
+                self.entity_graph.remove_edge(graph_edge)
 
     def handle_end_message(self, vertex, neighbors):
         self.initialization_status.end_messages[vertex[VProps.TYPE]] = True
         if len(self.initialization_status.end_messages) == \
-                len(self.cfg.synchronizer_plugins.plugin_type):
+                len(self.conf.synchronizer_plugins.plugin_type):
             self.initialization_status.status = \
                 self.initialization_status.RECEIVED_ALL_END_MESSAGES
 

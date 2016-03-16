@@ -11,7 +11,8 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-import multiprocessing
+
+import Queue
 
 from oslo_config import cfg
 from oslo_log import log as logging
@@ -61,7 +62,7 @@ class TestActionExecutor(TestEntityGraphFunctionalBase):
         props = {TFields.STATE: NormalizedResourceState.SUBOPTIMAL}
         action_spec = ActionSpecs(ActionType.SET_STATE, targets, props)
 
-        event_queue = multiprocessing.Queue()
+        event_queue = Queue.Queue()
         action_executor = ActionExecutor(event_queue)
 
         # Test Action - do
@@ -127,7 +128,7 @@ class TestActionExecutor(TestEntityGraphFunctionalBase):
                                   targets,
                                   {})
 
-        event_queue = multiprocessing.Queue()
+        event_queue = Queue.Queue()
         action_executor = ActionExecutor(event_queue)
 
         before_edge = processor.entity_graph.get_edge(alarm2.vertex_id,
@@ -163,7 +164,7 @@ class TestActionExecutor(TestEntityGraphFunctionalBase):
         }
         action_spec = ActionSpecs(ActionType.RAISE_ALARM, targets, props)
 
-        event_queue = multiprocessing.Queue()
+        event_queue = Queue.Queue()
         action_executor = ActionExecutor(event_queue)
 
         # Test Action - do

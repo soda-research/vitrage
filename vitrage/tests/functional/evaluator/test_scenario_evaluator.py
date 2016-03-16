@@ -12,7 +12,8 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import multiprocessing
+import Queue
+
 from oslo_config import cfg
 from oslo_log import log as logging
 from vitrage.common.constants import EntityType
@@ -21,12 +22,23 @@ from vitrage.evaluator.scenario_evaluator import ScenarioEvaluator
 from vitrage.evaluator.scenario_repository import ScenarioRepository
 from vitrage.tests.functional.entity_graph.base import \
     TestEntityGraphFunctionalBase
+from vitrage.tests.mocks import utils
 
 
 LOG = logging.getLogger(__name__)
 
 
 class TestScenarioEvaluator(TestEntityGraphFunctionalBase):
+
+    EVALUATOR_OPTS = [
+        cfg.StrOpt('templates_dir',
+                   default=utils.get_resources_dir() +
+                   '/templates/evaluator',
+                   ),
+        cfg.StrOpt('notifier_topic',
+                   default='vitrage.evaluator',
+                   ),
+    ]
 
     @classmethod
     def setUpClass(cls):
@@ -42,11 +54,12 @@ class TestScenarioEvaluator(TestEntityGraphFunctionalBase):
 
         # Test Setup
         processor = self._create_processor_with_graph(self.conf)
-        event_queue = multiprocessing.Queue()
+        event_queue = Queue.Queue()
         ScenarioEvaluator(self.conf,
                           processor.entity_graph,
                           self.scenario_repository,
-                          event_queue)
+                          event_queue,
+                          enabled=True)
 
         target_host = 'host-2'
         host_v = self._get_host_from_graph(target_host, processor.entity_graph)

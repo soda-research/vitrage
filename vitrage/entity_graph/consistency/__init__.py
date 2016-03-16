@@ -16,7 +16,7 @@ from oslo_config import cfg
 
 
 OPTS = [
-    cfg.IntOpt('consistency_interval',
+    cfg.IntOpt('interval',
                default=600,
                min=180,
                help='interval between consistency checks (in seconds)'),
@@ -24,10 +24,16 @@ OPTS = [
                default=60,
                min=60,
                help='minimum time until deleting entity (in seconds)'),
-    cfg.IntOpt('consistency_initialization_interval',
-               default=5,
+    cfg.IntOpt('initialization_interval',
+               default=3,
                min=1,
                help='interval between consistency initialization checks for '
-                    'finding old deduced alarms after initialization '
-                    '(in seconds)'),
+                    'finding if all end messages from plugins were '
+                    'received (in seconds)'),
+    cfg.IntOpt('initialization_max_retries',
+               default=30,
+               min=1,
+               help='maximum retries for consistency initialization '
+                    'for finding if all end messages from plugins were '
+                    'received (in seconds)'),
 ]

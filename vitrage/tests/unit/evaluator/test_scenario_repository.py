@@ -30,7 +30,7 @@ class ScenarioRepositoryTest(base.BaseTest):
     HOST_HIGH_CPU = 'host_high_cpu_load_to_instance_cpu_suboptimal'
     OPTS = [
         cfg.StrOpt('templates_dir',
-                   default=utils.get_resources_dir() + '/templates',
+                   default=utils.get_resources_dir() + '/templates/general',
                    ),
     ]
 

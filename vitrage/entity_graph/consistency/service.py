@@ -14,6 +14,7 @@
 
 from oslo_log import log
 from oslo_service import service as os_service
+import threading
 
 from vitrage.entity_graph.consistency.consistency_enforcer \
     import ConsistencyEnforcer
@@ -23,33 +24,42 @@ LOG = log.getLogger(__name__)
 
 class VitrageGraphConsistencyService(os_service.Service):
 
-    def __init__(self, conf, entity_graph, initialization_status):
+    def __init__(self,
+                 conf,
+                 event_queue,
+                 evaluator,
+                 entity_graph,
+                 initialization_status):
         super(VitrageGraphConsistencyService, self).__init__()
-        self.cfg = conf
+        self.conf = conf
+        self.event_queue = event_queue
+        self.evaluator = evaluator
         self.entity_graph = entity_graph
         self.initialization_status = initialization_status
 
     def start(self):
-        LOG.info("Start VitrageGraphConsistencyService")
+        LOG.info("Vitrage Graph Consistency Service - Starting...")
 
         super(VitrageGraphConsistencyService, self).start()
 
-        consistency_enf = ConsistencyEnforcer(self.cfg,
+        consistency_enf = ConsistencyEnforcer(self.conf,
+                                              self.event_queue,
+                                              self.evaluator,
                                               self.entity_graph,
                                               self.initialization_status)
-        self.tg.add_timer(self.cfg.consistency.consistency_interval,
-                          consistency_enf.periodic_process)
+        self.tg.add_timer(self.conf.consistency.interval,
+                          consistency_enf.periodic_process,
+                          initial_delay=self.conf.consistency.interval)
 
-        # TODO(Alexey): uncomment this when evaluator is ready
-        # self.tg.add_timer(self.cfg.consistency.
-        #                   consistency_initialization_interval,
-        #                   consistency_enf.initializing_process)
+        initializing_process_thread = \
+            threading.Thread(target=consistency_enf.initializing_process)
+        initializing_process_thread.start()
 
-        LOG.info("Finish start VitrageGraphConsistencyService")
+        LOG.info("Vitrage Graph Consistency Service - Started!")
 
     def stop(self, graceful=False):
-        LOG.info("Stop VitrageGraphConsistencyService")
+        LOG.info("Vitrage Graph Consistency Service - Stopping...")
 
         super(VitrageGraphConsistencyService, self).stop()
 
-        LOG.info("Finish stop VitrageGraphConsistencyService")
+        LOG.info("Vitrage Graph Consistency Service - Stopped!")

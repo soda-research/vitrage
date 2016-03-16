@@ -34,16 +34,6 @@ class TestEntityGraphUnitBase(base.BaseTest):
                    default=utils.get_resources_dir() + '/states_plugins'),
     ]
 
-    EVALUATOR_OPTS = [
-        cfg.StrOpt('templates_dir',
-                   default=utils.get_resources_dir() + '/evaluator_templates',
-                   ),
-        cfg.StrOpt('notifier_topic',
-                   default='vitrage.evaluator',
-                   help='The topic that vitrage-evaluator uses for alarm '
-                        'notifications messages.'),
-        ]
-
     PLUGINS_OPTS = [
         cfg.ListOpt('plugin_type',
                     default=['nagios',
@@ -137,7 +127,7 @@ class TestEntityGraphUnitBase(base.BaseTest):
             entity_id=vitrage_id,
             entity_category=EntityCategory.ALARM,
             entity_type=alarm_type,
-            entity_state='Running',
+            entity_state='active',
             is_deleted=False,
             update_timestamp=utcnow(),
             is_placeholder=False,

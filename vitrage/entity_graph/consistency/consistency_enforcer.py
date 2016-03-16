@@ -13,6 +13,7 @@
 # under the License.
 
 from datetime import timedelta
+import time
 
 from oslo_log import log
 
@@ -26,34 +27,50 @@ LOG = log.getLogger(__name__)
 
 class ConsistencyEnforcer(object):
 
-    def __init__(self, cfg, entity_graph, initialization_status):
-        self.cfg = cfg
+    def __init__(self,
+                 conf,
+                 event_queue,
+                 evaluator,
+                 entity_graph,
+                 initialization_status):
+        self.conf = conf
+        self.event_queue = event_queue
+        self.evaluator = evaluator
         self.graph = entity_graph
         self.initialization_status = initialization_status
-        self.notifier = None
 
     def initializing_process(self):
         try:
-            LOG.debug('Started consistency starting check')
-            if self.initialization_status.is_received_all_end_messages():
-                LOG.debug('All end messages were received')
-                timestamp = utcnow()
-                all_vertices = self.graph.get_vertices()
+            LOG.info('Consistency Initializing Process - Started')
 
-                for vertex in all_vertices:
-                    self.run_evaluator(vertex)
+            if not self._wait_for_action(
+                    self.initialization_status.is_received_all_end_messages):
+                LOG.error('Maximum retries for consistency initializator '
+                          'were done')
 
-                self._notify_deletion_of_deduced_alarms(timestamp)
+            LOG.info('All end messages were received')
 
-                self.initialization_status.status = \
-                    self.initialization_status.FINISHED
+            self.evaluator.enabled = True
+            timestamp = str(utcnow())
+            all_vertices = self.graph.get_vertices()
+
+            self._run_evaluator(all_vertices)
+
+            self._wait_for_processing_evaluator_events()
+
+            self._mark_old_deduced_alarms_as_deleted(timestamp)
+
+            self.initialization_status.status = \
+                self.initialization_status.FINISHED
+
+            LOG.info('Consistency Initializing Process - Finished')
         except Exception as e:
             LOG.exception('Error in deleting vertices from entity_graph: %s',
                           e)
 
     def periodic_process(self):
         try:
-            LOG.debug('Started consistency periodic check')
+            LOG.debug('Consistency Periodic Process - Started')
 
             # remove is_deleted=True entities
             old_deleted_entities = self._find_old_deleted_entities()
@@ -76,7 +93,7 @@ class ConsistencyEnforcer(object):
             'and': [
                 {'!=': {VProps.TYPE: EntityType.VITRAGE}},
                 {'<': {VProps.UPDATE_TIMESTAMP: str(utcnow() - timedelta(
-                    seconds=2 * self.cfg.consistency.consistency_interval))}}
+                    seconds=2 * self.conf.consistency.interval))}}
             ]
         }
 
@@ -89,7 +106,7 @@ class ConsistencyEnforcer(object):
             'and': [
                 {'==': {VProps.IS_DELETED: True}},
                 {'<': {VProps.UPDATE_TIMESTAMP: str(utcnow() - timedelta(
-                    seconds=self.cfg.consistency.min_time_to_delete))}}
+                    seconds=self.conf.consistency.min_time_to_delete))}}
             ]
         }
 
@@ -102,16 +119,24 @@ class ConsistencyEnforcer(object):
             'and': [
                 {'==': {VProps.CATEGORY: EntityCategory.ALARM}},
                 {'==': {VProps.TYPE: EntityType.VITRAGE}},
-                {'>=': {VProps.UPDATE_TIMESTAMP: timestamp}}
+                {'<': {VProps.UPDATE_TIMESTAMP: timestamp}}
             ]
         }
         return self.graph.get_vertices(query_dict=query)
 
-    def _notify_deletion_of_deduced_alarms(self, timestamp):
+    def _run_evaluator(self, vertices):
+        for vertex in vertices:
+            self.evaluator.process_event(None, vertex, True)
+
+    def _wait_for_processing_evaluator_events(self):
+        # wait for multiprocessing to put the events in the queue
+        time.sleep(1)
+
+        self._wait_for_action(self.event_queue.empty)
+
+    def _mark_old_deduced_alarms_as_deleted(self, timestamp):
         old_deduced_alarms = self._find_old_deduced_alarms(timestamp)
-        for vertex in old_deduced_alarms:
-            # TODO(Alexey): use notifier to inform aodh
-            self.notifier(vertex)
+        self._mark_as_deleted(old_deduced_alarms)
 
     def _delete_vertices(self, vertices):
         for vertex in vertices:
@@ -127,3 +152,16 @@ class ConsistencyEnforcer(object):
             lambda ver:
             not (ver[VProps.CATEGORY] == EntityCategory.RESOURCE and
                  ver[VProps.TYPE] == EntityType.OPENSTACK_NODE), vertices)
+
+    def _wait_for_action(self, function):
+        count_retries = 0
+        while True:
+            if count_retries >= \
+                    self.conf.consistency.initialization_max_retries:
+                return False
+
+            if function():
+                return True
+
+            count_retries += 1
+            time.sleep(self.conf.consistency.initialization_interval)

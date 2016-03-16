@@ -25,6 +25,8 @@ from vitrage.entity_graph.consistency import service as consistency_svc
 from vitrage.entity_graph.initialization_status import InitializationStatus
 from vitrage.entity_graph.processor import entity_graph
 from vitrage.entity_graph import service as entity_graph_svc
+from vitrage.evaluator.scenario_evaluator import ScenarioEvaluator
+from vitrage.evaluator.scenario_repository import ScenarioRepository
 from vitrage import service
 from vitrage.synchronizer import launcher as synchronizer_launcher
 
@@ -38,18 +40,13 @@ def main():
     4. Starts the Consistency service
     """
 
-    e_graph = entity_graph.EntityGraph(
-        'Entity Graph',
-        '%s:%s' % (EntityCategory.RESOURCE, EntityType.OPENSTACK_NODE))
-    event_queue = multiprocessing.Queue()
-    conf = service.prepare_service()
-    initialization_status = InitializationStatus()
+    conf, event_queue, evaluator, e_graph, initialization_status = init()
     launcher = os_service.ServiceLauncher(conf)
     synchronizer = synchronizer_launcher.Launcher(
         conf, synchronizer_launcher.create_send_to_queue_callback(event_queue))
 
     launcher.launch_service(entity_graph_svc.VitrageGraphService(
-        conf, event_queue, e_graph, initialization_status))
+        conf, event_queue, evaluator, e_graph, initialization_status))
 
     launcher.launch_service(api_handler_svc.VitrageApiHandlerService(
         conf, e_graph))
@@ -57,9 +54,23 @@ def main():
     synchronizer.launch()
 
     launcher.launch_service(consistency_svc.VitrageGraphConsistencyService(
-        conf, e_graph, initialization_status))
+        conf, event_queue, evaluator, e_graph, initialization_status))
 
     launcher.wait()
+
+
+def init():
+    conf = service.prepare_service()
+    event_queue = multiprocessing.Queue()
+    e_graph = entity_graph.EntityGraph(
+        'Entity Graph',
+        '%s:%s' % (EntityCategory.RESOURCE, EntityType.OPENSTACK_NODE))
+    scenario_repo = ScenarioRepository(conf)
+    evaluator = ScenarioEvaluator(conf, e_graph, scenario_repo, event_queue)
+    initialization_status = InitializationStatus()
+
+    return conf, event_queue, evaluator, e_graph, initialization_status
+
 
 if __name__ == "__main__":
     sys.exit(main())

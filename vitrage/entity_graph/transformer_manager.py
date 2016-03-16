@@ -64,7 +64,7 @@ class TransformerManager(object):
     def transform(self, entity_event):
         try:
             sync_type = entity_event[SyncProps.SYNC_TYPE]
-            LOG.info('TRANSFORMER EVENT: %s', sync_type)
+            LOG.debug('TRANSFORMER EVENT: %s', sync_type)
             LOG.debug('Event:\n%s', entity_event)
         except KeyError:
             raise VitrageTransformerError(

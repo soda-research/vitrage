@@ -34,7 +34,7 @@ class VitrageApiHandlerService(os_service.Service):
         self.entity_graph = e_graph
 
     def start(self):
-        LOG.info("Start VitrageApiHandlerService")
+        LOG.info("Vitrage Api Handler Service - Starting...")
 
         super(VitrageApiHandlerService, self).start()
 
@@ -49,11 +49,11 @@ class VitrageApiHandlerService(os_service.Service):
 
         server.start()
 
-        LOG.info("Finish start VitrageApiHandlerService")
+        LOG.info("Vitrage Api Handler Service - Started!")
 
     def stop(self, graceful=False):
-        LOG.info("Stop VitrageApiHandlerService")
+        LOG.info("Vitrage Api Handler Service - Stopping...")
 
         super(VitrageApiHandlerService, self).stop(graceful)
 
-        LOG.info("Finish stop VitrageApiHandlerService")
+        LOG.info("Vitrage Api Handler Service - Stopped!")

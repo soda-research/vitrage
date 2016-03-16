@@ -13,6 +13,8 @@
 # under the License.
 
 from datetime import timedelta
+import Queue
+import threading
 import time
 import unittest
 
@@ -27,20 +29,38 @@ from vitrage.entity_graph.consistency.consistency_enforcer \
     import ConsistencyEnforcer
 from vitrage.entity_graph.initialization_status import InitializationStatus
 from vitrage.entity_graph.processor.processor import Processor
+from vitrage.evaluator.scenario_evaluator import ScenarioEvaluator
+from vitrage.evaluator.scenario_repository import ScenarioRepository
 import vitrage.graph.utils as graph_utils
 from vitrage.tests.functional.entity_graph.base import \
     TestEntityGraphFunctionalBase
+from vitrage.tests.mocks import utils
 
 
 class TestConsistencyFunctional(TestEntityGraphFunctionalBase):
 
     CONSISTENCY_OPTS = [
-        cfg.IntOpt('consistency_interval',
+        cfg.IntOpt('interval',
                    default=1,
                    min=1),
         cfg.IntOpt('min_time_to_delete',
                    default=1,
                    min=1),
+        cfg.IntOpt('initialization_interval',
+                   default=1,
+                   min=1),
+        cfg.IntOpt('initialization_max_retries',
+                   default=10),
+    ]
+
+    EVALUATOR_OPTS = [
+        cfg.StrOpt('templates_dir',
+                   default=utils.get_resources_dir() +
+                   '/templates/consistency',
+                   ),
+        cfg.StrOpt('notifier_topic',
+                   default='vitrage.evaluator',
+                   ),
     ]
 
     def setUp(self):
@@ -49,51 +69,79 @@ class TestConsistencyFunctional(TestEntityGraphFunctionalBase):
         self.conf = cfg.ConfigOpts()
         self.conf.register_opts(self.CONSISTENCY_OPTS, group='consistency')
         self.conf.register_opts(self.PROCESSOR_OPTS, group='entity_graph')
+        self.conf.register_opts(self.EVALUATOR_OPTS, group='evaluator')
         self.conf.register_opts(self.PLUGINS_OPTS,
                                 group='synchronizer_plugins')
         self.load_plugins(self.conf)
-        self.processor = Processor(self.conf, self.initialization_status)
-        self.consistency_enforcer = ConsistencyEnforcer(
-            self.conf, self.processor.entity_graph, self.initialization_status)
 
-    # TODO(Alexey): unskip this test when evaluator is ready
-    @unittest.skip("testing skipping")
+        self.processor = Processor(self.conf, self.initialization_status)
+        self.event_queue = Queue.Queue()
+        scenario_repo = ScenarioRepository(self.conf)
+        self.evaluator = ScenarioEvaluator(self.conf,
+                                           self.processor.entity_graph,
+                                           scenario_repo,
+                                           self.event_queue)
+        self.consistency_enforcer = ConsistencyEnforcer(
+            self.conf,
+            self.event_queue,
+            self.evaluator,
+            self.processor.entity_graph,
+            self.initialization_status)
+
+    @unittest.skip("test_initializing_process skipping")
     def test_initializing_process(self):
         # Setup
-        num_external_alarms = self.NUM_HOSTS - 2
+        num_of_host_alarms = self.NUM_HOSTS - 2
         num_instances_per_host = 4
         self._create_processor_with_graph(self.conf, processor=self.processor)
         self._add_alarms()
         self._set_end_messages()
         self.assertEqual(self._num_total_expected_vertices() +
-                         num_external_alarms + self.NUM_INSTANCES,
+                         num_of_host_alarms + self.NUM_INSTANCES,
                          len(self.processor.entity_graph.get_vertices()))
 
         # Action
+        # eventlet.spawn(self._process_events)
+        processor_thread = threading.Thread(target=self._process_events)
         self.consistency_enforcer.initializing_process()
+        processor_thread.start()
 
         # Test Assertions
-        num_correct_alarms = num_external_alarms + \
-            num_external_alarms * num_instances_per_host
+        num_correct_alarms = num_of_host_alarms + \
+            num_of_host_alarms * num_instances_per_host
+        num_undeleted_vertices_in_graph = \
+            len(self.processor.entity_graph.get_vertices(vertex_attr_filter={
+                VProps.IS_DELETED: False
+            }))
         self.assertEqual(self._num_total_expected_vertices() +
                          num_correct_alarms,
-                         len(self.processor.entity_graph.get_vertices()))
+                         num_undeleted_vertices_in_graph)
 
-        instance_vertices = self.processor.entity_graph.get_vertices({
-            VProps.CATEGORY: EntityCategory.ALARM
+        alarm_vertices_in_graph = self.processor.entity_graph.get_vertices({
+            VProps.CATEGORY: EntityCategory.ALARM,
+            VProps.IS_DELETED: False
         })
-        self.assertEqual(num_correct_alarms, len(instance_vertices))
+        self.assertEqual(num_correct_alarms, len(alarm_vertices_in_graph))
+
+        is_deleted_alarm_vertices_in_graph = \
+            self.processor.entity_graph.get_vertices({
+                VProps.CATEGORY: EntityCategory.ALARM,
+                VProps.IS_DELETED: True
+            })
+        self.assertEqual(num_of_host_alarms * num_instances_per_host,
+                         len(is_deleted_alarm_vertices_in_graph))
 
         instance_vertices = self.processor.entity_graph.get_vertices({
             VProps.CATEGORY: EntityCategory.ALARM,
-            VProps.TYPE: EntityType.VITRAGE
+            VProps.TYPE: EntityType.VITRAGE,
+            VProps.IS_DELETED: False
         })
-        self.assertEqual(num_external_alarms * num_instances_per_host,
+        self.assertEqual(num_of_host_alarms * num_instances_per_host,
                          len(instance_vertices))
 
     def test_periodic_process(self):
         # Setup
-        consistency_interval = self.conf.consistency.consistency_interval
+        consistency_interval = self.conf.consistency.interval
         self._periodic_process_setup_stage(consistency_interval)
 
         # Action
@@ -163,22 +211,52 @@ class TestConsistencyFunctional(TestEntityGraphFunctionalBase):
             VProps.TYPE: EntityType.NOVA_HOST
         })
 
-        # add external alarms + deduced alarms
-        for host_vertex in host_vertices:
-            alarm_vertex = self._create_alarm('external_alarm',
-                                              EntityType.NAGIOS)
-            self.processor.entity_graph.add_vertex(alarm_vertex)
-            edge = graph_utils.create_edge(alarm_vertex.vertex_id,
-                                           host_vertex.vertex_id,
-                                           EdgeLabels.ON)
+        # add host alarms + deduced alarms
+        self.evaluator.enabled = True
+        alarms_on_hosts_list = []
+        for index, host_vertex in enumerate(host_vertices):
+            alarm_name = '%s:%s' % ('nagios_alarm_on_host_',
+                                    host_vertex[VProps.NAME])
+            alarms_on_hosts_list.append(
+                self._create_alarm(alarm_name, EntityType.NAGIOS))
+            self.processor.entity_graph.add_vertex(alarms_on_hosts_list[index])
+            edge = graph_utils.create_edge(
+                alarms_on_hosts_list[index].vertex_id,
+                host_vertex.vertex_id,
+                EdgeLabels.ON)
             self.processor.entity_graph.add_edge(edge)
-            self.run_evaluator(alarm_vertex)
+
+            # reliable action to check that the events in the queue
+            while self.event_queue.empty():
+                time.sleep(0.1)
+
+            while not self.event_queue.empty():
+                self.processor.process_event(self.event_queue.get())
 
         # remove external alarms
-        self.processor.entity_graph.remove_vertex(host_vertices[2])
-        self.processor.entity_graph.remove_vertex(host_vertices[3])
+        self.evaluator.enabled = False
+        self.processor.entity_graph.remove_vertex(alarms_on_hosts_list[2])
+        self.processor.entity_graph.remove_vertex(alarms_on_hosts_list[3])
+        self.evaluator.enabled = True
 
     def _update_timestamp(self, lst, timestamp):
         for vertex in lst:
             vertex[VProps.UPDATE_TIMESTAMP] = str(timestamp)
             self.processor.entity_graph.update_vertex(vertex)
+
+    def _process_events(self):
+        num_retries = 0
+        while True:
+            if self.event_queue.empty():
+                time.sleep(0.3)
+
+            if not self.event_queue.empty():
+                time.sleep(1)
+                while not self.event_queue.empty():
+                    event = self.event_queue.get()
+                    self.processor.process_event(event)
+                return
+
+            num_retries += 1
+            if num_retries == 30:
+                return
