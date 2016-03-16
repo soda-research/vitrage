@@ -11,8 +11,8 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-from oslo_log import log
 
+from oslo_log import log
 
 from vitrage.common.constants import EdgeProperties as EProps
 from vitrage.common.constants import VertexProperties as VProps
@@ -49,14 +49,26 @@ class ScenarioEvaluator(object):
         change that happened. Deleted elements should arrive with the
         is_deleted property set to True
         """
+
         if not self.enabled:
+            LOG.debug("Process event disabled")
             return
+
+        LOG.debug('Process event - starting')
+        LOG.debug("Element before event: %s, Current element: %s",
+                  str(before),
+                  str(current))
 
         # todo (erosensw): support for NOT conditions - reverse logic
         before_scenarios = self._get_element_scenarios(before, is_vertex)
         current_scenarios = self._get_element_scenarios(current, is_vertex)
         before_scenarios, current_scenarios = \
             self._remove_overlap_scenarios(before_scenarios, current_scenarios)
+
+        if len(before_scenarios) + len(current_scenarios):
+            LOG.debug("Number of relevant scenarios found: undo = %s, do = %s",
+                      str(len(before_scenarios)),
+                      str(len(current_scenarios)))
 
         actions = self._process_and_get_actions(before,
                                                 before_scenarios,
@@ -65,10 +77,15 @@ class ScenarioEvaluator(object):
                                                      current_scenarios,
                                                      ActionMode.DO))
 
+        if actions:
+            LOG.info("About to perform %s actions", len(actions.values()))
+            LOG.debug("Actions to perform: %s", actions.values())
         for action in actions.values():
             action_spce = action[0]
             action_mode = action[1]
             self._action_executor.execute(action_spce, action_mode)
+
+        LOG.debug('Process event - completed')
 
     def _get_element_scenarios(self, element, is_vertex):
         if not element \
@@ -97,6 +114,7 @@ class ScenarioEvaluator(object):
     def _process_and_get_actions(self, element, triggered_scenarios, mode):
         actions = {}
         for triggered_scenario in triggered_scenarios:
+            LOG.debug("Processing: %s", str(triggered_scenario))
             scenario_element = triggered_scenario[0]
             scenario = triggered_scenario[1]
             actions.update(self._process_scenario(element,
@@ -160,15 +178,28 @@ class ScenarioEvaluator(object):
                 return []
 
             if term.type == ENTITY:
+                term.variable[VProps.IS_DELETED] = False
                 condition_g.add_vertex(term.variable)
 
             else:  # type = relationship
-                condition_g.add_vertex(term.variable.source)
-                condition_g.add_vertex(term.variable.target)
-                condition_g.add_edge(term.variable.edge)
+                edge_desc = term.variable
+                self._set_relationship_not_deleted(edge_desc)
+                self._add_relationship(condition_g, edge_desc)
 
         if isinstance(element, Vertex):
             initial_map = Mapping(scenario_element, element, True)
         else:
             initial_map = Mapping(scenario_element.edge, element, False)
         return self._graph_algs.sub_graph_matching(condition_g, [initial_map])
+
+    @staticmethod
+    def _set_relationship_not_deleted(edge_description):
+        edge_description.source[VProps.IS_DELETED] = False
+        edge_description.target[VProps.IS_DELETED] = False
+        edge_description.edge[EProps.IS_DELETED] = False
+
+    @staticmethod
+    def _add_relationship(condition_graph, edge_description):
+        condition_graph.add_vertex(edge_description.source)
+        condition_graph.add_vertex(edge_description.target)
+        condition_graph.add_edge(edge_description.edge)
