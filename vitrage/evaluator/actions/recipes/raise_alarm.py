@@ -25,6 +25,17 @@ from vitrage.synchronizer.plugins.base.alarm.properties \
 
 
 class RaiseAlarm(base.Recipe):
+    """Raise a Vitrage (deduced) alarm.
+
+    The 'get_do_recipe' and 'get_undo_recipe' receive action_spec as input.
+    The action_spec contains the following fields: type, targets and
+    properties. example input:
+
+    action_spec = ActionSpecs('type'= {'raise_alarm'},
+                              'targets'= {target: id},
+                              'properties' = {severity : CRITICAL,
+                                              alarm_name: instance_cpu_problem}
+    """
 
     @staticmethod
     def get_do_recipe(action_spec):

@@ -19,6 +19,16 @@ from vitrage.evaluator.template_fields import TemplateFields as TFields
 
 
 class SetState(base.Recipe):
+    """Set (deduced) state.
+
+    The 'get_do_recipe' and 'get_undo_recipe' receive action_spec as input.
+    The action_spec contains the following fields: type, targets and
+    properties. example input:
+
+    action_spec = ActionSpecs('type'= {'set_state'},
+                              'targets'= {target: id},
+                              'properties' = {state : SUBOPTIMAL}
+    """
 
     @staticmethod
     def get_do_recipe(action_spec):

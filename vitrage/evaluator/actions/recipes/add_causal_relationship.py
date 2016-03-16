@@ -21,6 +21,16 @@ from vitrage.evaluator.template_fields import TemplateFields as TFields
 
 
 class AddCausalRelationship(base.Recipe):
+    """Connect two alarms in the graph to indicate one cause other (RCA)
+
+    The 'get_do_recipe' and 'get_undo_recipe' receive action_spec as input.
+    The action_spec contains the following fields: type, targets and
+    properties. example input:
+
+    action_spec = ActionSpecs('type'= 'add_causal_relationship',
+                              'targets'= {target: id, source: id},
+                              'properties' = {}
+    """
 
     @staticmethod
     def get_do_recipe(action_spec):

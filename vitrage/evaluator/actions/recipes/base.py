@@ -28,20 +28,28 @@ class Recipe(object):
 
     @staticmethod
     @abc.abstractmethod
-    def get_do_recipe(params):
+    def get_do_recipe(action_spec):
         """Execute the action.
 
-        :param params: parameters of the action
-        :type params: ActionSpecs
+        :param action_spec: The action specification as described in the
+        template. contains:
+            1. type - action type e.g. raise_alarm. set_state, etc.
+            2. targets - target element(s) in the graph
+            3. properties - the action properties
+        :type action_spec: ActionSpecs
         """
         pass
 
     @staticmethod
     @abc.abstractmethod
-    def get_undo_recipe(params):
-        """Undo the action.
+    def get_undo_recipe(action_spec):
+        """Revert the action.
 
-        :param params: parameters of the action
-        :type params: ActionSpecs
+        :param action_spec: The action specification as described in the
+        template. contains:
+            1. type - action type e.g. raise_alarm. set_state, etc.
+            2. targets - target element(s) in the graph
+            3. properties - the action properties
+        :type action_spec: ActionSpecs
         """
         pass
