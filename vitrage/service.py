@@ -18,6 +18,8 @@ from oslo_log import log
 from oslo_policy import opts as policy_opts
 from oslo_utils import importutils
 
+from vitrage import keystone_client
+from vitrage import messaging
 from vitrage import opts
 
 PLUGINS_PATH = 'vitrage.synchronizer.plugins.'
@@ -40,9 +42,13 @@ def prepare_service(args=None, default_opts=None, conf=None):
     for plugin_name in conf.synchronizer_plugins.plugin_type:
         load_plugin(conf, plugin_name)
 
+    keystone_client.register_keystoneauth_opts(conf)
     conf(args, project='vitrage', validate_default_values=True)
+
+    keystone_client.setup_keystoneauth(conf)
     log.setup(conf, 'vitrage')
     conf.log_opt_values(LOG, logging.DEBUG)
+    messaging.setup()
 
     return conf
 

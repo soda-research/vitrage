@@ -37,7 +37,12 @@ class TestEntityGraphUnitBase(base.BaseTest):
     EVALUATOR_OPTS = [
         cfg.StrOpt('templates_dir',
                    default=utils.get_resources_dir() + '/evaluator_templates',
-                   )]
+                   ),
+        cfg.StrOpt('notifier_topic',
+                   default='vitrage.evaluator',
+                   help='The topic that vitrage-evaluator uses for alarm '
+                        'notifications messages.'),
+        ]
 
     PLUGINS_OPTS = [
         cfg.ListOpt('plugin_type',

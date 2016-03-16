@@ -81,3 +81,8 @@ class EventAction(object):
     DELETE_RELATIONSHIP = 'delete_relationship'
     UPDATE_RELATIONSHIP = 'update_relationship'
     END_MESSAGE = 'end_message'
+
+
+class NotifierEventTypes(object):
+    ACTIVATE_ALARM_EVENT = 'vitrage.deduced_alarm.activate'
+    DEACTIVATE_ALARM_EVENT = 'vitrage.deduced_alarm.deactivate'

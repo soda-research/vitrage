@@ -26,37 +26,31 @@ LOG = log.getLogger(__name__)
 
 class VitrageGraphService(os_service.Service):
 
-    def __init__(self, cfg, event_queue, entity_graph, initialization_status):
+    def __init__(self, conf, event_queue, entity_graph, initialization_status):
         super(VitrageGraphService, self).__init__()
         self.queue = event_queue
-        self.cfg = cfg
-        self.processor = proc.Processor(self.cfg,
-                                        initialization_status,
-                                        e_graph=entity_graph)
-
-        self.scenario_repo = ScenarioRepository(cfg)
-        self.evaluator = ScenarioEvaluator(entity_graph,
-                                           self.scenario_repo,
-                                           event_queue)
+        self.conf = conf
+        self.scenario_repo = ScenarioRepository(conf)
+        self.processor = proc.Processor(
+            conf,
+            initialization_status,
+            e_graph=entity_graph)
+        self.evaluator = ScenarioEvaluator(
+            conf,
+            entity_graph,
+            self.scenario_repo,
+            event_queue)
 
     def start(self):
-        LOG.info("Start VitrageGraphService")
-
+        LOG.info("Vitrage Graph Service - Starting...")
         super(VitrageGraphService, self).start()
-
         self.tg.add_timer(1.0, self._process_event_non_blocking)
-
-        LOG.info("Finish start VitrageGraphService")
+        LOG.info("Vitrage Graph Service - Started!")
 
     def stop(self, graceful=False):
-        LOG.info("Stop VitrageGraphService")
-
-        # TODO(Alexey): check if we need this command here
-        self.tg.stop_timers()
-
-        super(VitrageGraphService, self).stop()
-
-        LOG.info("Finish stop VitrageGraphService")
+        LOG.info("Vitrage Graph Service - Stopping...")
+        super(VitrageGraphService, self).stop(graceful)
+        LOG.info("Vitrage Graph Service - Stopped!")
 
     def _process_events(self):
         while True:

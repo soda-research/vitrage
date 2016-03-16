@@ -41,7 +41,7 @@ class SetStateRecipeTest(base.BaseTest):
         action_steps = SetState.get_do_recipe(action_spec)
 
         # Test Assertions
-        self.assertEqual(2, len(action_steps))
+        self.assertEqual(1, len(action_steps))
 
         self.assertEqual(UPDATE_VERTEX, action_steps[0].type)
         update_vertex_step_params = action_steps[0].params

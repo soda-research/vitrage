@@ -182,6 +182,7 @@ function start_vitrage {
     fi
 
     run_process vitrage-graph "$VITRAGE_BIN_DIR/vitrage-graph --config-file $VITRAGE_CONF"
+    run_process vitrage-notifier "$VITRAGE_BIN_DIR/vitrage-notifier --config-file $VITRAGE_CONF"
 }
 
 # stop_vitrage() - Stop running processes
@@ -191,7 +192,7 @@ function stop_vitrage {
         restart_apache_server
     fi
     # Kill the vitrage screen windows
-    for serv in vitrage-api vitrage-graph; do
+    for serv in vitrage-api vitrage-graph vitrage-notifier; do
         stop_process $serv
     done
 }

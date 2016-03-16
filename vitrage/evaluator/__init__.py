@@ -21,4 +21,9 @@ OPTS = [
                default='/etc/vitrage/templates',
                help='A path for the templates used by the evaluator'
                ),
+
+    cfg.StrOpt('notifier_topic',
+               default='vitrage.evaluator',
+               help='The topic that vitrage-evaluator uses for alarm '
+                    'notifications messages.'),
 ]

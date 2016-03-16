@@ -62,14 +62,12 @@ class EntityGraph(NXGraph):
 
     def mark_vertex_as_deleted(self, vertex):
         """Marks the vertex as is deleted, and updates deletion timestamp"""
-        # TODO(Alexey): change the update_vertex so it will raise a trigger
         vertex[VProps.IS_DELETED] = True
         vertex[VProps.UPDATE_TIMESTAMP] = str(utcnow())
         self.update_vertex(vertex)
 
     def mark_edge_as_deleted(self, edge):
         """Marks the edge as is deleted, and updates delete timestamp"""
-        # TODO(Alexey): change the update_edge so it will raise a trigger
         edge[EProps.IS_DELETED] = True
         edge[EProps.UPDATE_TIMESTAMP] = str(utcnow())
         self.update_edge(edge)

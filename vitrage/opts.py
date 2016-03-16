@@ -21,6 +21,7 @@ from oslo_utils import importutils
 import vitrage.api
 import vitrage.entity_graph.consistency
 import vitrage.evaluator
+import vitrage.keystone_client
 import vitrage.rpc
 import vitrage.synchronizer
 import vitrage.synchronizer.plugins
@@ -36,6 +37,7 @@ def list_opts():
         ('synchronizer_plugins', vitrage.synchronizer.plugins.OPTS),
         ('consistency', vitrage.entity_graph.consistency.OPTS),
         ('entity_graph', vitrage.entity_graph.OPTS),
+        ('service_credentials', vitrage.keystone_client.OPTS),
         ('DEFAULT', vitrage.rpc.OPTS)
     ]
 

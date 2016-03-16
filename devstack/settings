@@ -3,6 +3,8 @@
 enable_service vitrage-api
 # Graph
 enable_service vitrage-graph
+# Notifier
+enable_service vitrage-notifier
 
 
 # Default directories

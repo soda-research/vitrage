@@ -41,9 +41,10 @@ LOG = logging.getLogger(__name__)
 
 class ActionExecutor(object):
 
-    def __init__(self, event_queue):
+    def __init__(self, event_queue, notifier=None):
         self.event_queue = event_queue
         self.action_recipes = ActionExecutor._register_action_recipes()
+        self.notifier = notifier
 
         self.action_step_defs = {
             ADD_VERTEX: self.add_vertex,
@@ -105,7 +106,10 @@ class ActionExecutor(object):
         self.event_queue.put(event)
 
     def notify(self, params):
-        pass
+        if self.notifier:
+            event_type = params['event_type']
+            del params['event_type']
+            self.notifier.notify(event_type, params)
 
     @staticmethod
     def _add_default_properties(event):

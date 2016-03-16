@@ -30,7 +30,6 @@ class TestScenarioEvaluator(TestEntityGraphFunctionalBase):
 
     @classmethod
     def setUpClass(cls):
-
         cls.conf = cfg.ConfigOpts()
         cls.conf.register_opts(cls.PROCESSOR_OPTS, group='entity_graph')
         cls.conf.register_opts(cls.EVALUATOR_OPTS, group='evaluator')
@@ -44,7 +43,8 @@ class TestScenarioEvaluator(TestEntityGraphFunctionalBase):
         # Test Setup
         processor = self._create_processor_with_graph(self.conf)
         event_queue = multiprocessing.Queue()
-        ScenarioEvaluator(processor.entity_graph,
+        ScenarioEvaluator(self.conf,
+                          processor.entity_graph,
                           self.scenario_repository,
                           event_queue)
 
