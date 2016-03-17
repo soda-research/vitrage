@@ -102,9 +102,17 @@ class InstanceTransformer(transformer_base.TransformerBase):
         state = extract_field_value(
             entity_event,
             self.INSTANCE_STATE[sync_mode])
+
+        # TODO(Alexey): need to check here that only the UPDATE sync_mode will
+        #               update the UPDATE_TIMESTAMP property
         update_timestamp = extract_field_value(
             entity_event,
             self.TIMESTAMP[sync_mode])
+
+        sample_timestamp = entity_event[SyncProps.SAMPLE_DATE]
+
+        update_timestamp = self._format_update_timestamp(update_timestamp,
+                                                         sample_timestamp)
 
         return graph_utils.create_vertex(
             entity_key,
@@ -113,6 +121,7 @@ class InstanceTransformer(transformer_base.TransformerBase):
             entity_type=self.INSTANCE_TYPE,
             entity_state=state,
             update_timestamp=update_timestamp,
+            sample_timestamp=sample_timestamp,
             metadata=metadata)
 
     def _create_neighbors(self, entity_event):
@@ -123,15 +132,10 @@ class InstanceTransformer(transformer_base.TransformerBase):
         host_transformer = self.transformers[EntityType.NOVA_HOST]
 
         if host_transformer:
-
-            update_timestamp = extract_field_value(
-                entity_event,
-                self.TIMESTAMP[sync_mode])
-
             host_neighbor = self._create_host_neighbor(
                 self.extract_key(entity_event),
                 extract_field_value(entity_event, self.HOST_NAME[sync_mode]),
-                update_timestamp,
+                entity_event[SyncProps.SAMPLE_DATE],
                 host_transformer)
             neighbors.append(host_neighbor)
         else:
@@ -169,11 +173,11 @@ class InstanceTransformer(transformer_base.TransformerBase):
     @staticmethod
     def _create_host_neighbor(vertex_id,
                               host_name,
-                              timestamp,
+                              sample_timestamp,
                               host_transformer):
         properties = {
             VProps.ID: host_name,
-            VProps.UPDATE_TIMESTAMP: timestamp
+            VProps.SAMPLE_TIMESTAMP: sample_timestamp
         }
         host_vertex = host_transformer.create_placeholder_vertex(properties)
 
@@ -196,7 +200,7 @@ class InstanceTransformer(transformer_base.TransformerBase):
             entity_id=properties[VProps.ID],
             entity_category=EntityCategory.RESOURCE,
             entity_type=self.INSTANCE_TYPE,
-            update_timestamp=properties[VProps.UPDATE_TIMESTAMP],
+            sample_timestamp=properties[VProps.SAMPLE_TIMESTAMP],
             is_placeholder=True)
 
     def key_values(self, *args):

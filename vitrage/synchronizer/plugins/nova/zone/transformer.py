@@ -46,11 +46,6 @@ class ZoneTransformer(transformer_base.TransformerBase):
         SyncMode.INIT_SNAPSHOT: ('zoneState', 'available',)
     }
 
-    TIMESTAMP = {
-        SyncMode.SNAPSHOT: (SyncProps.SAMPLE_DATE,),
-        SyncMode.INIT_SNAPSHOT: (SyncProps.SAMPLE_DATE,)
-    }
-
     HOSTS = {
         SyncMode.SNAPSHOT: ('hosts',),
         SyncMode.INIT_SNAPSHOT: ('hosts',)
@@ -90,9 +85,10 @@ class ZoneTransformer(transformer_base.TransformerBase):
         state = self.STATE_AVAILABLE if is_available \
             else self.STATE_UNAVAILABLE
 
-        timestamp = extract_field_value(
-            entity_event,
-            self.TIMESTAMP[sync_mode])
+        sample_timestamp = entity_event[SyncProps.SAMPLE_DATE]
+
+        update_timestamp = self._format_update_timestamp(None,
+                                                         sample_timestamp)
 
         return graph_utils.create_vertex(
             entity_key,
@@ -100,7 +96,8 @@ class ZoneTransformer(transformer_base.TransformerBase):
             entity_category=EntityCategory.RESOURCE,
             entity_type=self.ZONE_TYPE,
             entity_state=state,
-            update_timestamp=timestamp,
+            update_timestamp=update_timestamp,
+            sample_timestamp=sample_timestamp,
             metadata=metadata)
 
     def _create_neighbors(self, entity_event):
@@ -115,11 +112,6 @@ class ZoneTransformer(transformer_base.TransformerBase):
         host_transformer = self.transformers[EntityType.NOVA_HOST]
 
         if host_transformer:
-
-            timestamp = extract_field_value(
-                entity_event,
-                self.TIMESTAMP[sync_mode])
-
             for key in hosts:
 
                 host_available = extract_field_value(
@@ -138,7 +130,7 @@ class ZoneTransformer(transformer_base.TransformerBase):
                     zone_vertex_id,
                     key,
                     host_state,
-                    timestamp)
+                    entity_event[SyncProps.SAMPLE_DATE])
                 neighbors.append(host_neighbor)
         else:
             LOG.warning('Cannot find host transformer')
@@ -156,7 +148,8 @@ class ZoneTransformer(transformer_base.TransformerBase):
             relationship_type=EdgeLabels.CONTAINS)
         return transformer_base.Neighbor(node_vertex, relation_edge)
 
-    def _create_host_neighbor(self, zone_id, host_name, host_state, timestamp):
+    def _create_host_neighbor(self, zone_id, host_name,
+                              host_state, sample_timestamp):
 
         host_transformer = self.transformers['nova.host']
 
@@ -169,7 +162,7 @@ class ZoneTransformer(transformer_base.TransformerBase):
             entity_category=EntityCategory.RESOURCE,
             entity_type=EntityType.NOVA_HOST,
             entity_state=host_state,
-            update_timestamp=timestamp)
+            sample_timestamp=sample_timestamp)
 
         relation_edge = graph_utils.create_edge(
             source_id=zone_id,
@@ -203,5 +196,5 @@ class ZoneTransformer(transformer_base.TransformerBase):
             entity_id=properties[VProps.ID],
             entity_category=EntityCategory.RESOURCE,
             entity_type=self.ZONE_TYPE,
-            update_timestamp=properties[VProps.UPDATE_TIMESTAMP],
+            sample_timestamp=properties[VProps.SAMPLE_TIMESTAMP],
             is_placeholder=True)

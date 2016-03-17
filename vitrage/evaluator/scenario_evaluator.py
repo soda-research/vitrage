@@ -88,7 +88,6 @@ class ScenarioEvaluator(object):
                                                      ActionMode.DO))
 
         if actions:
-            LOG.info("About to perform %s actions", len(actions.values()))
             LOG.debug("Actions to perform: %s", actions.values())
         for action in actions.values():
             action_spce = action[0]

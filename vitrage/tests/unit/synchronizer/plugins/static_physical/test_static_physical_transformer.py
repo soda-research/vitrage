@@ -57,7 +57,7 @@ class TestStaticPhysicalTransformer(base.BaseTest):
         properties = {
             VProps.TYPE: switch_type,
             VProps.ID: switch_name,
-            VProps.UPDATE_TIMESTAMP: timestamp
+            VProps.SAMPLE_TIMESTAMP: timestamp
         }
         placeholder = static_transformer.create_placeholder_vertex(properties)
 
@@ -69,7 +69,7 @@ class TestStaticPhysicalTransformer(base.BaseTest):
                 switch_type, switch_name)
         self.assertEqual(tuple(observed_id_values), expected_id_values)
 
-        observed_time = placeholder.get(VProps.UPDATE_TIMESTAMP)
+        observed_time = placeholder.get(VProps.SAMPLE_TIMESTAMP)
         self.assertEqual(observed_time, timestamp)
 
         observed_subtype = placeholder.get(VProps.TYPE)
@@ -155,7 +155,7 @@ class TestStaticPhysicalTransformer(base.BaseTest):
     def _validate_switch_vertex_props(self, vertex, event):
         self._validate_common_vertex_props(vertex, event)
         self.assertEqual(event[SyncProps.SAMPLE_DATE],
-                         vertex[VProps.UPDATE_TIMESTAMP])
+                         vertex[VProps.SAMPLE_TIMESTAMP])
         self.assertEqual(event[VProps.NAME], vertex[VProps.NAME])
         self.assertEqual(event[VProps.STATE], vertex[VProps.STATE])
         self.assertFalse(vertex[VProps.IS_PLACEHOLDER])

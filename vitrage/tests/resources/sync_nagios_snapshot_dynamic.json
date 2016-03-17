@@ -6,6 +6,7 @@
   "status": "CRITICAL|WARNING|UNKNOWN",
   "last_check": "2016-02-07 15:26:04",
   "duration": "61d 21h 52m 38s",
+  "sample_date": "2015-12-01T12:46:41Z",
   "attempt": "1/1",
   "status_info": "OK - user: 0\\.6%, system: 0\\.3%, wait: 0\\.4%",
   "sync_mode": "snapshot|init_snapshot|update"

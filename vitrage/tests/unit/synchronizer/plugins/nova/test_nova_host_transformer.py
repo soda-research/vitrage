@@ -53,7 +53,7 @@ class NovaHostTransformerTest(base.BaseTest):
         # Test action
         properties = {
             VertexProperties.ID: host_name,
-            VertexProperties.UPDATE_TIMESTAMP: timestamp
+            VertexProperties.SAMPLE_TIMESTAMP: timestamp
         }
         placeholder = host_transformer.create_placeholder_vertex(properties)
 
@@ -63,7 +63,7 @@ class NovaHostTransformerTest(base.BaseTest):
         expected_id_values = host_transformer.key_values(host_name)
         self.assertEqual(tuple(observed_id_values), expected_id_values)
 
-        observed_time = placeholder.get(VertexProperties.UPDATE_TIMESTAMP)
+        observed_time = placeholder.get(VertexProperties.SAMPLE_TIMESTAMP)
         self.assertEqual(observed_time, timestamp)
 
         observed_subtype = placeholder.get(VertexProperties.TYPE)
@@ -127,15 +127,12 @@ class NovaHostTransformerTest(base.BaseTest):
             event,
             HostTransformer(self.transformers).ZONE_NAME[sync_mode]
         )
-        time = tbase.extract_field_value(
-            event,
-            HostTransformer(self.transformers).TIMESTAMP[sync_mode]
-        )
+        time = event[SyncProps.SAMPLE_DATE]
 
         zt = self.transformers[EntityType.NOVA_ZONE]
         properties = {
             VertexProperties.ID: zone_name,
-            VertexProperties.UPDATE_TIMESTAMP: time
+            VertexProperties.SAMPLE_TIMESTAMP: time
         }
         expected_neighbor = zt.create_placeholder_vertex(properties)
         self.assertEqual(expected_neighbor, zone.vertex)
@@ -170,11 +167,8 @@ class NovaHostTransformerTest(base.BaseTest):
             vertex[VertexProperties.TYPE]
         )
 
-        expected_timestamp = extract_value(
-            event,
-            HostTransformer.TIMESTAMP[sync_mode]
-        )
-        observed_timestamp = vertex[VertexProperties.UPDATE_TIMESTAMP]
+        expected_timestamp = event[SyncProps.SAMPLE_DATE]
+        observed_timestamp = vertex[VertexProperties.SAMPLE_TIMESTAMP]
         self.assertEqual(expected_timestamp, observed_timestamp)
 
         expected_name = extract_value(

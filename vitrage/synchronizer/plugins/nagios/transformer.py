@@ -11,6 +11,7 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+
 from oslo_log import log as logging
 
 from vitrage.common.constants import EdgeLabels
@@ -39,10 +40,15 @@ class NagiosTransformer(BaseAlarmTransformer):
 
     def _create_entity_vertex(self, entity_event):
 
-        timestamp = datetime_utils.change_time_str_format(
+        update_timestamp = datetime_utils.change_time_str_format(
             entity_event[NagiosProperties.LAST_CHECK],
             '%Y-%m-%d %H:%M:%S',
             tbase.TIMESTAMP_FORMAT)
+
+        sample_timestamp = entity_event[SyncProps.SAMPLE_DATE]
+
+        update_timestamp = self._format_update_timestamp(update_timestamp,
+                                                         sample_timestamp)
 
         metadata = {
             VProps.NAME: entity_event[NagiosProperties.SERVICE],
@@ -55,7 +61,8 @@ class NagiosTransformer(BaseAlarmTransformer):
             entity_category=EntityCategory.ALARM,
             entity_type=entity_event[SyncProps.SYNC_TYPE],
             entity_state=AlarmProps.ALARM_ACTIVE_STATE,
-            update_timestamp=timestamp,
+            update_timestamp=update_timestamp,
+            sample_timestamp=sample_timestamp,
             metadata=metadata)
 
     def _create_neighbors(self, entity_event):
@@ -78,7 +85,7 @@ class NagiosTransformer(BaseAlarmTransformer):
 
     def _create_neighbor(self,
                          vitrage_id,
-                         timestamp,
+                         sample_timestamp,
                          resource_type,
                          resource_name):
         transformer = self.transformers[resource_type]
@@ -87,7 +94,7 @@ class NagiosTransformer(BaseAlarmTransformer):
             properties = {
                 VProps.TYPE: resource_type,
                 VProps.ID: resource_name,
-                VProps.UPDATE_TIMESTAMP: timestamp
+                VProps.SAMPLE_TIMESTAMP: sample_timestamp
             }
             resource_vertex = transformer.create_placeholder_vertex(properties)
 
