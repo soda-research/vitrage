@@ -13,13 +13,15 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import itertools
+
 from oslo_log import log
 from oslo_service import service as os_service
 from oslo_utils import importutils as utils
 
 from services import ChangesService
 from services import SnapshotsService
-from vitrage.common.utils import oslo_config_opt_exists
+from vitrage.common.utils import opt_exists
 
 LOG = log.getLogger(__name__)
 CHANGES_INTERVAL = 'changes_interval'
@@ -33,7 +35,6 @@ def create_send_to_queue_callback(queue):
 
 
 class Launcher(object):
-
     def __init__(self, conf, callback):
         self.conf = conf
         self.callback = callback
@@ -51,13 +52,15 @@ class Launcher(object):
                 for plugin in self.conf.synchronizer_plugins.plugin_type}
 
     def _register_services(self):
-        return [SnapshotsService(self.conf,
-                                 self.snapshot_plugins,
-                                 self.callback)] + \
-               [ChangesService(self.conf,
-                               [self.snapshot_plugins[plugin]],
-                               self.conf[plugin].changes_interval,
-                               self.callback)
+        return itertools.chain(
+            (ChangesService(self.conf,
+                            [self.snapshot_plugins[plugin]],
+                            self.conf[plugin].changes_interval,
+                            self.callback)
 
                 for plugin in self.conf.synchronizer_plugins.plugin_type
-                if oslo_config_opt_exists(self.conf[plugin], CHANGES_INTERVAL)]
+                if opt_exists(self.conf[plugin], CHANGES_INTERVAL)),
+
+            (SnapshotsService(self.conf,
+                              self.snapshot_plugins,
+                              self.callback),))

@@ -31,7 +31,7 @@ def recursive_keypairs(d, separator='.'):
             yield name, value
 
 
-def oslo_config_opt_exists(conf_parent, opt):
+def opt_exists(conf_parent, opt):
     try:
         return conf_parent[opt]
     except cfg.NoSuchOptError:
