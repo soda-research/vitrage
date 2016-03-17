@@ -17,18 +17,6 @@ from vitrage.synchronizer.plugins.nova.base import NovaBase
 
 
 class InstanceSynchronizer(NovaBase):
-    def __init__(self, conf):
-        version = conf[EntityType.NOVA_INSTANCE].version
-        user = conf[EntityType.NOVA_INSTANCE].user
-        password = conf[EntityType.NOVA_INSTANCE].password
-        project = conf[EntityType.NOVA_INSTANCE].project
-        auth_url = conf[EntityType.NOVA_INSTANCE].url
-        super(InstanceSynchronizer, self).__init__(version,
-                                                   user,
-                                                   password,
-                                                   project,
-                                                   auth_url)
-        self.conf = conf
 
     @staticmethod
     def filter_instances(instances):

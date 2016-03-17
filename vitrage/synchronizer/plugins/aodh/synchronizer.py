@@ -12,8 +12,9 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from ceilometerclient import client
 from oslo_log import log
+
+from vitrage import clients
 from vitrage.common.constants import EntityType
 from vitrage.synchronizer.plugins.aodh.properties import AodhProperties \
     as AodhProps
@@ -27,22 +28,7 @@ LOG = log.getLogger(__name__)
 class AodhSynchronizer(BaseAlarmSynchronizer):
     def __init__(self, conf):
         super(AodhSynchronizer, self).__init__()
-
-        version = conf[EntityType.AODH].version
-        user = conf[EntityType.AODH].user
-        password = conf[EntityType.AODH].password
-        project = conf[EntityType.AODH].project
-        auth_url = conf[EntityType.AODH].url
-
-        try:
-            self.client = client.Client(version,
-                                        None,
-                                        username=user,
-                                        password=password,
-                                        tenant_name=project,
-                                        auth_url=auth_url)
-        except Exception as e:
-            LOG.exception('Failed to initialize client. Exception: %s', e)
+        self.client = clients.ceilometer_client(conf)
 
     def _sync_type(self):
         return EntityType.AODH

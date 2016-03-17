@@ -17,18 +17,6 @@ from vitrage.synchronizer.plugins.nova.base import NovaBase
 
 
 class ZoneSynchronizer(NovaBase):
-    def __init__(self, conf):
-        version = conf[EntityType.NOVA_ZONE].version
-        user = conf[EntityType.NOVA_ZONE].user
-        password = conf[EntityType.NOVA_ZONE].password
-        project = conf[EntityType.NOVA_ZONE].project
-        auth_url = conf[EntityType.NOVA_ZONE].url
-        super(ZoneSynchronizer, self).__init__(version,
-                                               user,
-                                               password,
-                                               project,
-                                               auth_url)
-        self.conf = conf
 
     @staticmethod
     def filter_internal_zone(zones):

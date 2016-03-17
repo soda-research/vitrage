@@ -18,19 +18,6 @@ from vitrage.synchronizer.plugins.nova.base import NovaBase
 
 class HostSynchronizer(NovaBase):
 
-    def __init__(self, conf):
-        version = conf[EntityType.NOVA_HOST].version
-        user = conf[EntityType.NOVA_HOST].user
-        password = conf[EntityType.NOVA_HOST].password
-        project = conf[EntityType.NOVA_HOST].project
-        auth_url = conf[EntityType.NOVA_HOST].url
-        super(HostSynchronizer, self).__init__(version,
-                                               user,
-                                               password,
-                                               project,
-                                               auth_url)
-        self.conf = conf
-
     @staticmethod
     def filter_none_compute_hosts(entities):
         compute_hosts = []

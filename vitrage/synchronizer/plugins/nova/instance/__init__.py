@@ -25,10 +25,4 @@ OPTS = [
                        '.synchronizer.InstanceSynchronizer',
                help='Nova instance synchronizer class path',
                required=True),
-    cfg.StrOpt('user', default='admin', help='Nova user name'),
-    cfg.StrOpt('password', default='password', help='Nova user password'),
-    cfg.StrOpt('url', default='http://localhost:5000/v2.0/',
-               help='Nova authentication url'),
-    cfg.FloatOpt('version', default='2.0', help='Nova version'),
-    cfg.StrOpt('project', default='admin', help='Nova project'),
 ]

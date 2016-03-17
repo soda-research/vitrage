@@ -13,15 +13,15 @@
 # under the License.
 
 
-from novaclient import client
-
+from vitrage import clients
 from vitrage.synchronizer.plugins.synchronizer_base import SynchronizerBase
 
 
 class NovaBase(SynchronizerBase):
-    def __init__(self, version, user, password, project, auth_url):
+    def __init__(self, conf):
         super(NovaBase, self).__init__()
-        self.client = client.Client(version, user, password, project, auth_url)
+        self.client = clients.nova_client(conf)
+        self.conf = conf
 
     def get_client(self):
         return self.client

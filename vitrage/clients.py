@@ -12,11 +12,20 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from ceilometerclient import client as cm_client
+from oslo_config import cfg
 from oslo_log import log
+
+from ceilometerclient import client as cm_client
+from novaclient import client as n_client
+
 
 from vitrage import keystone_client
 LOG = log.getLogger(__name__)
+
+OPTS = [
+    cfg.StrOpt('aodh_version', default='2', help='Aodh version'),
+    cfg.FloatOpt('nova_version', default='2.0', help='Nova version'),
+    ]
 
 
 def ceilometer_client(conf):
@@ -24,7 +33,7 @@ def ceilometer_client(conf):
     auth_config = conf.service_credentials
     try:
         client = cm_client.get_client(
-            version=2,
+            version=conf.aodh_version,
             session=keystone_client.get_session(conf),
             region_name=auth_config.region_name,
             interface=auth_config.interface,
@@ -33,3 +42,19 @@ def ceilometer_client(conf):
         return client
     except Exception as e:
         LOG.exception('Create Ceilometer client - Got Exception: %s', e)
+
+
+def nova_client(conf):
+    """Get an instance of nova client"""
+    auth_config = conf.service_credentials
+    try:
+        client = n_client.Client(
+            version=conf.nova_version,
+            session=keystone_client.get_session(conf),
+            region_name=auth_config.region_name,
+            interface=auth_config.interface,
+            )
+        LOG.info('Nova client created')
+        return client
+    except Exception as e:
+        LOG.exception('Create Nova client - Got Exception: %s', e)

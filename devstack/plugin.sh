@@ -113,6 +113,16 @@ function configure_vitrage {
 
     cp $VITRAGE_DIR/etc/vitrage/api-paste.ini $VITRAGE_CONF_DIR
 
+    # Service credentials - openstack clients using keystone
+    iniset $VITRAGE_CONF service_credentials auth_type password
+    iniset $VITRAGE_CONF service_credentials username admin
+    iniset $VITRAGE_CONF service_credentials user_domain_id default
+    iniset $VITRAGE_CONF service_credentials project_domain_id default
+    iniset $VITRAGE_CONF service_credentials password $SERVICE_PASSWORD
+    iniset $VITRAGE_CONF service_credentials project_name admin
+    iniset $VITRAGE_CONF service_credentials region_name $REGION_NAME
+    iniset $VITRAGE_CONF service_credentials auth_url $KEYSTONE_SERVICE_URI
+
     # copy the mock sample files
     cp $VITRAGE_DIR/etc/vitrage/*.sample.json $VITRAGE_CONF_DIR
 

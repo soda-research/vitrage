@@ -30,10 +30,4 @@ OPTS = [
                min=30,
                help='interval between checking changes in aodh plugin',
                required=True),
-    cfg.StrOpt('user', default='admin', help='Aodh user name'),
-    cfg.StrOpt('password', default='password', help='Aodh user password'),
-    cfg.StrOpt('url', default='http://localhost:5000/v2.0/',
-               help='Aodh authentication url'),
-    cfg.StrOpt('version', default='2', help='Aodh version'),
-    cfg.StrOpt('project', default='admin', help='Aodh project'),
 ]
