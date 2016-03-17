@@ -48,6 +48,7 @@ class Processor(processor.ProcessorBase):
         :type event: Dictionary
         """
 
+        LOG.debug('Processor event received')
         entity = self.transform_entity(event)
         self._calculate_aggregated_state(entity.vertex, entity.action)
         return self.actions[entity.action](entity.vertex, entity.neighbors)
@@ -64,7 +65,7 @@ class Processor(processor.ProcessorBase):
         :type neighbors: List
         """
 
-        LOG.debug("Add entity to entity graph: %s", new_vertex)
+        LOG.debug('Add entity to entity graph:\n%s', new_vertex)
         self.entity_graph.add_vertex(new_vertex)
         self._connect_neighbors(neighbors, [], EventAction.CREATE_ENTITY)
 
@@ -81,7 +82,7 @@ class Processor(processor.ProcessorBase):
         :type neighbors: List
         """
 
-        LOG.debug("Update entity in entity graph: %s", updated_vertex)
+        LOG.debug('Update entity in entity graph:\n%s', updated_vertex)
 
         graph_vertex = \
             self.entity_graph.get_vertex(updated_vertex.vertex_id)
@@ -106,7 +107,7 @@ class Processor(processor.ProcessorBase):
         :type neighbors: List
         """
 
-        LOG.debug("Delete entity from entity graph: %s", deleted_vertex)
+        LOG.debug('Delete entity from entity graph:\n%s', deleted_vertex)
 
         graph_vertex = \
             self.entity_graph.get_vertex(deleted_vertex.vertex_id)
@@ -130,14 +131,14 @@ class Processor(processor.ProcessorBase):
                      deleted_vertex)
 
     def update_relationship(self, entity_vertex, neighbors):
-        LOG.debug("Update relationship in entity graph: %s", neighbors)
+        LOG.debug('Update relationship in entity graph:\n%s', neighbors)
 
         for neighbor in neighbors:
             # TODO(Alexey): maybe to check if the vertices exists
             self.entity_graph.update_edge(neighbor.edge)
 
     def delete_relationship(self, updated_vertex, neighbors):
-        LOG.debug("Delete relationship from entity graph: %s", neighbors)
+        LOG.debug('Delete relationship from entity graph:\n%s', neighbors)
 
         for neighbor in neighbors:
             # TODO(Alexey): maybe to check if the vertices exists
@@ -152,7 +153,6 @@ class Processor(processor.ProcessorBase):
 
     def transform_entity(self, event):
         entity = self.transformer_manager.transform(event)
-        LOG.debug('Transformed entity: %s', entity)
         return entity
 
     def _update_neighbors(self, vertex, neighbors):
@@ -171,6 +171,10 @@ class Processor(processor.ProcessorBase):
 
     def _connect_neighbors(self, neighbors, valid_edges, action):
         """Updates the neighbor vertex and adds the connection edges """
+        if not neighbors:
+            LOG.debug('connect_neighbors - nothing to do')
+            return
+
         LOG.debug("Connect neighbors. Neighbors: %s, valid_edges: %s",
                   neighbors, valid_edges)
         for (vertex, edge) in neighbors:
@@ -194,11 +198,14 @@ class Processor(processor.ProcessorBase):
         Finds the old connections that are connected to updated_vertex,
         and marks them as deleted
         """
+        if not obsolete_edges:
+            LOG.debug('obsolete_edges - nothing to do')
+            return
 
-        LOG.debug("Delete old connections. Vertex: %s, old edges: %s",
-                  vertex, obsolete_edges)
+        LOG.debug('Delete old connections. Vertex:\n%s', vertex)
         # remove old edges and placeholder vertices if exist
         for edge in obsolete_edges:
+            LOG.debug("Delete obsolete edge:\n%s", edge)
             self.entity_graph.mark_edge_as_deleted(edge)
             graph_ver = self.entity_graph.get_vertex(
                 edge.other_vertex(vertex.vertex_id))
@@ -263,8 +270,8 @@ class Processor(processor.ProcessorBase):
                         EventAction.DELETE_RELATIONSHIP]:
             return None
         else:
-            LOG.info('not recognized action: %s for vertex: %s',
-                     action, vertex)
+            LOG.error('unrecognized action: %s for vertex: %s',
+                      action, vertex)
             return None
 
         self.state_manager.aggregated_state(vertex, graph_vertex)

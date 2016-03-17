@@ -40,9 +40,9 @@ class AodhNotifier(NotifierBase):
         self.client = clients.ceilometer_client(conf)
 
     def process_event(self, data, event_type):
-        if event_type == NotifierEventTypes.DEACTIVATE_ALARM_EVENT:
+        if event_type == NotifierEventTypes.DEACTIVATE_DEDUCED_ALARM_EVENT:
             self._deactivate_aodh_alarm(data)
-        elif event_type == NotifierEventTypes.ACTIVATE_ALARM_EVENT:
+        elif event_type == NotifierEventTypes.ACTIVATE_DEDUCED_ALARM_EVENT:
             self._activate_aodh_alarm(data)
 
     def _activate_aodh_alarm(self, data):

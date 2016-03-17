@@ -46,7 +46,7 @@ class RaiseAlarm(base.Recipe):
 
         notify_step = RaiseAlarm._get_notify_step(
             action_spec,
-            NotifierEventTypes.ACTIVATE_ALARM_EVENT)
+            NotifierEventTypes.ACTIVATE_DEDUCED_ALARM_EVENT)
 
         return [add_vertex_step, notify_step]
 
@@ -59,7 +59,7 @@ class RaiseAlarm(base.Recipe):
 
         notify_step = RaiseAlarm._get_notify_step(
             action_spec,
-            NotifierEventTypes.DEACTIVATE_ALARM_EVENT)
+            NotifierEventTypes.DEACTIVATE_DEDUCED_ALARM_EVENT)
 
         return [remove_vertex_step, notify_step]
 

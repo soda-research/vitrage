@@ -84,5 +84,5 @@ class EventAction(object):
 
 
 class NotifierEventTypes(object):
-    ACTIVATE_ALARM_EVENT = 'vitrage.deduced_alarm.activate'
-    DEACTIVATE_ALARM_EVENT = 'vitrage.deduced_alarm.deactivate'
+    ACTIVATE_DEDUCED_ALARM_EVENT = 'vitrage.deduced_alarm.activate'
+    DEACTIVATE_DEDUCED_ALARM_EVENT = 'vitrage.deduced_alarm.deactivate'
