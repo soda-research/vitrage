@@ -26,7 +26,7 @@ PLUGINS_PATH = 'vitrage.synchronizer.plugins.'
 LOG = log.getLogger(__name__)
 
 
-def prepare_service(args=None, default_opts=None, conf=None):
+def prepare_service(args=None, conf=None, config_files=None):
     if conf is None:
         conf = cfg.ConfigOpts()
     log.register_options(conf)
@@ -36,14 +36,12 @@ def prepare_service(args=None, default_opts=None, conf=None):
         conf.register_opts(list(options),
                            group=None if group == 'DEFAULT' else group)
 
-    for opt, value, group in default_opts or []:
-        conf.set_default(opt, value, group)
-
     for plugin_name in conf.synchronizer_plugins.plugin_type:
         load_plugin(conf, plugin_name)
 
     keystone_client.register_keystoneauth_opts(conf)
-    conf(args, project='vitrage', validate_default_values=True)
+    conf(args, project='vitrage', validate_default_values=True,
+         default_config_files=config_files)
 
     keystone_client.setup_keystoneauth(conf)
     log.setup(conf, 'vitrage')
