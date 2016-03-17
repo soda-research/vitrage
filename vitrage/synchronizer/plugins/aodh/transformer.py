@@ -54,13 +54,19 @@ class AodhTransformer(BaseAlarmTransformer):
             metadata[AodhProps.STATE_TIMESTAMP] = \
                 entity_event[AodhProps.STATE_TIMESTAMP]
 
+        sample_timestamp = entity_event[SyncProps.SAMPLE_DATE]
+
+        update_timestamp = self._format_update_timestamp(
+            AodhTransformer._timestamp(entity_event), sample_timestamp)
+
         return graph_utils.create_vertex(
             self.extract_key(entity_event),
             entity_id=entity_event[AodhProps.ALARM_ID],
             entity_category=EntityCategory.ALARM,
             entity_type=entity_event[SyncProps.SYNC_TYPE],
             entity_state=AlarmProps.ALARM_ACTIVE_STATE,
-            update_timestamp=AodhTransformer._timestamp(entity_event),
+            update_timestamp=update_timestamp,
+            sample_timestamp=sample_timestamp,
             metadata=metadata)
 
     def _create_neighbors(self, entity_event):

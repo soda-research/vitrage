@@ -50,7 +50,8 @@ class EvaluatorEventTransformer(transformer_base.TransformerBase):
         if event_type == UPDATE_VERTEX:
             properties = {
                 VProps.VITRAGE_STATE: event[VProps.VITRAGE_STATE],
-                VProps.UPDATE_TIMESTAMP: event[VProps.UPDATE_TIMESTAMP]
+                VProps.UPDATE_TIMESTAMP: event[VProps.UPDATE_TIMESTAMP],
+                VProps.SAMPLE_TIMESTAMP: event[VProps.SAMPLE_TIMESTAMP]
             }
             return Vertex(event[VProps.VITRAGE_ID], properties)
 
@@ -58,6 +59,7 @@ class EvaluatorEventTransformer(transformer_base.TransformerBase):
 
             metadata = {
                 VProps.UPDATE_TIMESTAMP: event[VProps.UPDATE_TIMESTAMP],
+                VProps.SAMPLE_TIMESTAMP: event[VProps.SAMPLE_TIMESTAMP],
                 VProps.NAME: event[TFields.ALARM_NAME],
                 VProps.SEVERITY: event[TFields.SEVERITY],
                 VProps.STATE: event[VProps.STATE]
@@ -66,7 +68,8 @@ class EvaluatorEventTransformer(transformer_base.TransformerBase):
                 self.extract_key(event),
                 entity_category=EntityCategory.ALARM,
                 entity_type=VITRAGE_TYPE,
-                update_timestamp=event[EProps.UPDATE_TIMESTAMP],
+                update_timestamp=event[VProps.UPDATE_TIMESTAMP],
+                sample_timestamp=event[VProps.SAMPLE_TIMESTAMP],
                 metadata=metadata)
 
         return None
@@ -95,7 +98,8 @@ class EvaluatorEventTransformer(transformer_base.TransformerBase):
 
             neighbor_props = {
                 VProps.IS_PLACEHOLDER: True,
-                EProps.UPDATE_TIMESTAMP: event[EProps.UPDATE_TIMESTAMP]
+                VProps.UPDATE_TIMESTAMP: event[VProps.UPDATE_TIMESTAMP],
+                VProps.SAMPLE_TIMESTAMP: event[VProps.SAMPLE_TIMESTAMP]
             }
             neighbor = Vertex(event[TFields.TARGET], neighbor_props)
             return [transformer_base.Neighbor(neighbor, relation_edge)]

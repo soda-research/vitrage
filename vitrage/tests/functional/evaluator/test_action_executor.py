@@ -12,7 +12,6 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import multiprocessing
 import Queue
 
 from oslo_config import cfg
@@ -235,7 +234,7 @@ class TestActionExecutor(TestEntityGraphFunctionalBase):
         before_alarms = processor.entity_graph.get_vertices(
             vertex_attr_filter=alarm_vertex_attrs)
 
-        event_queue = multiprocessing.Queue()
+        event_queue = Queue.Queue()
         action_executor = ActionExecutor(event_queue)
 
         # Test Action - undo
@@ -258,7 +257,8 @@ class TestActionExecutor(TestEntityGraphFunctionalBase):
                 'status': 'CRITICAL',
                 'status_info': 'test test test',
                 'sync_mode': 'snapshot',
-                'sync_type': 'nagios'}
+                'sync_type': 'nagios',
+                'sample_date': '2016-02-07 15:26:04'}
 
     @staticmethod
     def _get_vitrage_add_vertex_event(target_id, alarm_name, severity):
@@ -270,4 +270,5 @@ class TestActionExecutor(TestEntityGraphFunctionalBase):
                 'state': 'Active',
                 'type': 'add_vertex',
                 'sync_type': 'vitrage',
-                'severity': 'CRITICAL'}
+                'severity': 'CRITICAL',
+                'sample_timestamp': '2016-03-17 11:33:32.443002+00:00'}

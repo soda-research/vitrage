@@ -67,7 +67,7 @@ class VitrageNotifier(object):
             topic=topic)
 
     def notify(self, event_type, data):
-        LOG.info('notify : ' + event_type + ' ' + str(data))
+        LOG.debug('notify : ' + event_type + ' ' + str(data))
         if self.notifier:
             try:
                 self.notifier.info({}, event_type, data)

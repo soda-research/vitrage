@@ -92,7 +92,7 @@ class ConsistencyEnforcer(object):
         query = {
             'and': [
                 {'!=': {VProps.TYPE: EntityType.VITRAGE}},
-                {'<': {VProps.UPDATE_TIMESTAMP: str(utcnow() - timedelta(
+                {'<': {VProps.SAMPLE_TIMESTAMP: str(utcnow() - timedelta(
                     seconds=2 * self.conf.consistency.interval))}}
             ]
         }
@@ -105,7 +105,7 @@ class ConsistencyEnforcer(object):
         query = {
             'and': [
                 {'==': {VProps.IS_DELETED: True}},
-                {'<': {VProps.UPDATE_TIMESTAMP: str(utcnow() - timedelta(
+                {'<': {VProps.SAMPLE_TIMESTAMP: str(utcnow() - timedelta(
                     seconds=self.conf.consistency.min_time_to_delete))}}
             ]
         }
@@ -119,7 +119,7 @@ class ConsistencyEnforcer(object):
             'and': [
                 {'==': {VProps.CATEGORY: EntityCategory.ALARM}},
                 {'==': {VProps.TYPE: EntityType.VITRAGE}},
-                {'<': {VProps.UPDATE_TIMESTAMP: timestamp}}
+                {'<': {VProps.SAMPLE_TIMESTAMP: timestamp}}
             ]
         }
         return self.graph.get_vertices(query_dict=query)

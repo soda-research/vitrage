@@ -51,7 +51,7 @@ class NovaInstanceTransformerTest(base.BaseTest):
         timestamp = datetime.datetime.utcnow()
         properties = {
             VertexProperties.ID: instance_id,
-            VertexProperties.UPDATE_TIMESTAMP: timestamp
+            VertexProperties.SAMPLE_TIMESTAMP: timestamp
         }
         transformer = InstanceTransformer(self.transformers)
 
@@ -64,7 +64,7 @@ class NovaInstanceTransformerTest(base.BaseTest):
         expected_id_values = transformer.key_values(instance_id)
         self.assertEqual(tuple(observed_id_values), expected_id_values)
 
-        observed_time = placeholder.get(VertexProperties.UPDATE_TIMESTAMP)
+        observed_time = placeholder.get(VertexProperties.SAMPLE_TIMESTAMP)
         self.assertEqual(observed_time, timestamp)
 
         observed_type = placeholder.get(VertexProperties.TYPE)
@@ -155,7 +155,7 @@ class NovaInstanceTransformerTest(base.BaseTest):
 
     def _validate_vertex_props(self, vertex, event):
 
-        self.assertEqual(10, len(vertex.properties))
+        self.assertEqual(11, len(vertex.properties))
 
         sync_mode = event[SyncProps.SYNC_MODE]
 
@@ -191,11 +191,8 @@ class NovaInstanceTransformerTest(base.BaseTest):
         observed_state = vertex[VertexProperties.STATE]
         self.assertEqual(expected_state, observed_state)
 
-        expected_timestamp = extract_value(
-            event,
-            InstanceTransformer.TIMESTAMP[sync_mode]
-        )
-        observed_timestamp = vertex[VertexProperties.UPDATE_TIMESTAMP]
+        expected_timestamp = event[SyncProps.SAMPLE_DATE]
+        observed_timestamp = vertex[VertexProperties.SAMPLE_TIMESTAMP]
         self.assertEqual(expected_timestamp, observed_timestamp)
 
         expected_name = extract_value(
@@ -217,12 +214,12 @@ class NovaInstanceTransformerTest(base.BaseTest):
         sync_mode = event[SyncProps.SYNC_MODE]
 
         host_name = tbase.extract_field_value(event, it.HOST_NAME[sync_mode])
-        time = tbase.extract_field_value(event, it.TIMESTAMP[sync_mode])
+        time = event[SyncProps.SAMPLE_DATE]
 
         ht = self.transformers[EntityType.NOVA_HOST]
         properties = {
             VertexProperties.ID: host_name,
-            VertexProperties.UPDATE_TIMESTAMP: time
+            VertexProperties.SAMPLE_TIMESTAMP: time
         }
         expected_neighbor = ht.create_placeholder_vertex(properties)
         self.assertEqual(expected_neighbor, h_neighbor.vertex)
@@ -309,7 +306,7 @@ class NovaInstanceTransformerTest(base.BaseTest):
         self.assertEqual(host_vertex_id, neighbor.vertex.vertex_id)
         self.assertEqual(
             time,
-            neighbor.vertex.get(VertexProperties.UPDATE_TIMESTAMP)
+            neighbor.vertex.get(VertexProperties.SAMPLE_TIMESTAMP)
         )
 
         # test relation edge

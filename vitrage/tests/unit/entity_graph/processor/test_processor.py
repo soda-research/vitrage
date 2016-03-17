@@ -92,7 +92,7 @@ class TestProcessor(TestEntityGraphUnitBase):
 
         # update instance event with state running
         vertex.properties[VProps.STATE] = 'RUNNING'
-        vertex.properties[VProps.UPDATE_TIMESTAMP] = str(utcnow())
+        vertex.properties[VProps.SAMPLE_TIMESTAMP] = str(utcnow())
         processor.update_entity(vertex, neighbors)
 
         # check state

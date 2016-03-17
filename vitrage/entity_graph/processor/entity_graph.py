@@ -63,7 +63,7 @@ class EntityGraph(NXGraph):
     def mark_vertex_as_deleted(self, vertex):
         """Marks the vertex as is deleted, and updates deletion timestamp"""
         vertex[VProps.IS_DELETED] = True
-        vertex[VProps.UPDATE_TIMESTAMP] = str(utcnow())
+        vertex[VProps.SAMPLE_TIMESTAMP] = str(utcnow())
         self.update_vertex(vertex)
 
     def mark_edge_as_deleted(self, edge):
@@ -99,12 +99,12 @@ class EntityGraph(NXGraph):
 
     @staticmethod
     def check_timestamp(graph_vertex, new_vertex):
-        curr_timestamp = graph_vertex.get(VProps.UPDATE_TIMESTAMP)
+        curr_timestamp = graph_vertex.get(VProps.SAMPLE_TIMESTAMP)
         if not curr_timestamp:
             return True
 
         current_time = parser.parse(curr_timestamp)
-        new_time = parser.parse(new_vertex[VProps.UPDATE_TIMESTAMP])
+        new_time = parser.parse(new_vertex[VProps.SAMPLE_TIMESTAMP])
         return current_time <= new_time
 
     @staticmethod

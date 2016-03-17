@@ -52,7 +52,7 @@ class NovaZoneTransformerTest(base.BaseTest):
         # Test action
         properties = {
             VertexProperties.ID: zone_name,
-            VertexProperties.UPDATE_TIMESTAMP: timestamp
+            VertexProperties.SAMPLE_TIMESTAMP: timestamp
         }
         placeholder = zone_transformer.create_placeholder_vertex(properties)
 
@@ -63,7 +63,7 @@ class NovaZoneTransformerTest(base.BaseTest):
             zone_name)
         self.assertEqual(tuple(observed_id_values), expected_id_values)
 
-        observed_time = placeholder.get(VertexProperties.UPDATE_TIMESTAMP)
+        observed_time = placeholder.get(VertexProperties.SAMPLE_TIMESTAMP)
         self.assertEqual(observed_time, timestamp)
 
         observed_subtype = placeholder.get(VertexProperties.TYPE)
@@ -217,11 +217,8 @@ class NovaZoneTransformerTest(base.BaseTest):
             vertex[VertexProperties.TYPE]
         )
 
-        expected_timestamp = extract_value(
-            event,
-            zone_transform.TIMESTAMP[sync_mode]
-        )
-        observed_timestamp = vertex[VertexProperties.UPDATE_TIMESTAMP]
+        expected_timestamp = event[SyncProps.SAMPLE_DATE]
+        observed_timestamp = vertex[VertexProperties.SAMPLE_TIMESTAMP]
         self.assertEqual(expected_timestamp, observed_timestamp)
 
         expected_name = extract_value(

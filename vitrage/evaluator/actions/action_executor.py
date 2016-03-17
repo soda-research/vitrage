@@ -11,15 +11,16 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+
 import copy
 
 from oslo_log import log as logging
 from oslo_utils import importutils
 
-from vitrage.common.constants import EdgeProperties as EProps
 from vitrage.common.constants import EntityType
 from vitrage.common.constants import SynchronizerProperties as SyncProps
 from vitrage.common.constants import SyncMode
+from vitrage.common.constants import VertexProperties as VProps
 from vitrage.common import datetime_utils
 from vitrage.evaluator.actions.base import ActionMode
 from vitrage.evaluator.actions.base import ActionType
@@ -116,7 +117,8 @@ class ActionExecutor(object):
 
         event[SyncProps.SYNC_MODE] = SyncMode.UPDATE
         event[SyncProps.SYNC_TYPE] = EntityType.VITRAGE
-        event[EProps.UPDATE_TIMESTAMP] = str(datetime_utils.utcnow())
+        event[VProps.UPDATE_TIMESTAMP] = str(datetime_utils.utcnow())
+        event[VProps.SAMPLE_TIMESTAMP] = str(datetime_utils.utcnow())
 
     @staticmethod
     def _register_action_recipes():

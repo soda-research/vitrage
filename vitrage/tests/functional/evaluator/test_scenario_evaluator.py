@@ -73,7 +73,8 @@ class TestScenarioEvaluator(TestEntityGraphFunctionalBase):
                         'status': 'CRITICAL',
                         'status_info': 'ok',
                         'sync_mode': 'snapshot',
-                        'sync_type': 'nagios'}
+                        'sync_type': 'nagios',
+                        'sample_date': '2016-02-07 15:26:04'}
         processor.process_event(nagios_event)
         # The set_state action should have added an event to the queue, so
         processor.process_event(event_queue.get())

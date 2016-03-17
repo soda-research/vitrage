@@ -25,6 +25,7 @@ def create_vertex(vitrage_id,
                   entity_state=None,
                   is_deleted=False,
                   update_timestamp=None,
+                  sample_timestamp=None,
                   is_placeholder=False,
                   metadata=None):
     """A builder to create a vertex
@@ -43,6 +44,8 @@ def create_vertex(vitrage_id,
     :type is_deleted: boolean
     :param update_timestamp:
     :type update_timestamp: str
+    :param sample_timestamp:
+    :type sample_timestamp: str
     :param metadata:
     :type metadata: dict
     :param is_placeholder:
@@ -58,6 +61,7 @@ def create_vertex(vitrage_id,
         VConst.CATEGORY: entity_category,
         VConst.IS_DELETED: is_deleted,
         VConst.UPDATE_TIMESTAMP: update_timestamp,
+        VConst.SAMPLE_TIMESTAMP: sample_timestamp,
         VConst.IS_PLACEHOLDER: is_placeholder,
         VConst.VITRAGE_ID: vitrage_id
     }

@@ -43,11 +43,6 @@ class HostTransformer(transformer_base.TransformerBase):
         SyncMode.INIT_SNAPSHOT: ('zone',)
     }
 
-    TIMESTAMP = {
-        SyncMode.SNAPSHOT: (SyncProps.SAMPLE_DATE,),
-        SyncMode.INIT_SNAPSHOT: (SyncProps.SAMPLE_DATE,)
-    }
-
     def __init__(self, transformers):
         self.transformers = transformers
 
@@ -62,16 +57,18 @@ class HostTransformer(transformer_base.TransformerBase):
 
         entity_key = self.extract_key(entity_event)
 
-        timestamp = extract_field_value(
-            entity_event,
-            self.TIMESTAMP[sync_mode])
+        sample_timestamp = entity_event[SyncProps.SAMPLE_DATE]
+
+        update_timestamp = self._format_update_timestamp(None,
+                                                         sample_timestamp)
 
         return graph_utils.create_vertex(
             entity_key,
             entity_id=host_name,
             entity_category=EntityCategory.RESOURCE,
             entity_type=self.HOST_TYPE,
-            update_timestamp=timestamp,
+            update_timestamp=update_timestamp,
+            sample_timestamp=sample_timestamp,
             metadata=metadata)
 
     def _create_neighbors(self, entity_event):
@@ -80,13 +77,9 @@ class HostTransformer(transformer_base.TransformerBase):
 
         neighbors = []
 
-        timestamp = extract_field_value(
-            entity_event,
-            self.TIMESTAMP[sync_mode])
-
         zone_neighbor = self._create_zone_neighbor(
             entity_event,
-            timestamp,
+            entity_event[SyncProps.SAMPLE_DATE],
             self.extract_key(entity_event),
             self.ZONE_NAME[sync_mode])
 
@@ -97,7 +90,7 @@ class HostTransformer(transformer_base.TransformerBase):
 
     def _create_zone_neighbor(self,
                               entity_event,
-                              timestamp,
+                              sample_timestamp,
                               host_vertex_id,
                               zone_name_path):
 
@@ -109,7 +102,7 @@ class HostTransformer(transformer_base.TransformerBase):
 
             properties = {
                 VProps.ID: zone_name,
-                VProps.UPDATE_TIMESTAMP: timestamp
+                VProps.SAMPLE_TIMESTAMP: sample_timestamp
             }
             zone_neighbor = zone_transformer.create_placeholder_vertex(
                 properties)
@@ -147,5 +140,5 @@ class HostTransformer(transformer_base.TransformerBase):
             entity_id=properties[VProps.ID],
             entity_category=EntityCategory.RESOURCE,
             entity_type=self.HOST_TYPE,
-            update_timestamp=properties[VProps.UPDATE_TIMESTAMP],
+            sample_timestamp=properties[VProps.SAMPLE_TIMESTAMP],
             is_placeholder=True)

@@ -103,8 +103,8 @@ class TestConsistencyFunctional(TestEntityGraphFunctionalBase):
         # Action
         # eventlet.spawn(self._process_events)
         processor_thread = threading.Thread(target=self._process_events)
-        self.consistency_enforcer.initializing_process()
         processor_thread.start()
+        self.consistency_enforcer.initializing_process()
 
         # Test Assertions
         num_correct_alarms = num_of_host_alarms + \
@@ -191,7 +191,7 @@ class TestConsistencyFunctional(TestEntityGraphFunctionalBase):
         # set part of the instances as deleted
         for i in range(6, 9):
             instance_vertices[i][VProps.IS_DELETED] = True
-            instance_vertices[i][VProps.UPDATE_TIMESTAMP] = str(
+            instance_vertices[i][VProps.SAMPLE_TIMESTAMP] = str(
                 current_time + timedelta(seconds=2 * consistency_interval + 1))
             self.processor.entity_graph.update_vertex(instance_vertices[i])
 
@@ -241,7 +241,7 @@ class TestConsistencyFunctional(TestEntityGraphFunctionalBase):
 
     def _update_timestamp(self, lst, timestamp):
         for vertex in lst:
-            vertex[VProps.UPDATE_TIMESTAMP] = str(timestamp)
+            vertex[VProps.SAMPLE_TIMESTAMP] = str(timestamp)
             self.processor.entity_graph.update_vertex(vertex)
 
     def _process_events(self):

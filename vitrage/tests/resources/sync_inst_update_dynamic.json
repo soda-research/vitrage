@@ -1,5 +1,6 @@
 {
   "sync_mode": "update",
+  "sample_date": "2015-12-01T12:46:41Z",
   "publisher_id": "compute.emalin-devstack",
   "event_type": "compute.instance.pause.end|compute.instance.delete.end|compute.instance.create.start",
   "payload" :

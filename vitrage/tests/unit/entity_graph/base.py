@@ -129,7 +129,7 @@ class TestEntityGraphUnitBase(base.BaseTest):
             entity_type=alarm_type,
             entity_state='active',
             is_deleted=False,
-            update_timestamp=utcnow(),
+            sample_timestamp=utcnow(),
             is_placeholder=False,
         )
 

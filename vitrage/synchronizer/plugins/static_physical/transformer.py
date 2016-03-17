@@ -40,7 +40,9 @@ class StaticPhysicalTransformer(transformer_base.TransformerBase):
     def _create_entity_vertex(self, entity_event):
         sync_type = entity_event[VProps.TYPE]
         entity_id = entity_event[VProps.ID]
-        timestamp = entity_event[SyncProps.SAMPLE_DATE]
+        sample_timestamp = entity_event[SyncProps.SAMPLE_DATE]
+        update_timestamp = self._format_update_timestamp(None,
+                                                         sample_timestamp)
         state = entity_event[VProps.STATE]
         entity_key = self.extract_key(entity_event)
         metadata = self._extract_metadata(entity_event)
@@ -50,7 +52,8 @@ class StaticPhysicalTransformer(transformer_base.TransformerBase):
             entity_id=entity_id,
             entity_category=EntityCategory.RESOURCE,
             entity_type=sync_type,
-            update_timestamp=timestamp,
+            update_timestamp=update_timestamp,
+            sample_timestamp=sample_timestamp,
             entity_state=state,
             metadata=metadata)
 
@@ -71,7 +74,7 @@ class StaticPhysicalTransformer(transformer_base.TransformerBase):
         return neighbors
 
     def _create_neighbor(self, neighbor_details, entity_type,
-                         entity_key, timestamp):
+                         entity_key, sample_timestamp):
         neighbor_type = neighbor_details[VProps.TYPE]
         entity_transformer = self.transformers[neighbor_type]
 
@@ -84,7 +87,7 @@ class StaticPhysicalTransformer(transformer_base.TransformerBase):
             properties = {
                 VProps.TYPE: neighbor_type,
                 VProps.ID: neighbor_id,
-                VProps.UPDATE_TIMESTAMP: timestamp
+                VProps.SAMPLE_TIMESTAMP: sample_timestamp
             }
             neighbor = entity_transformer.create_placeholder_vertex(properties)
 
@@ -144,7 +147,7 @@ class StaticPhysicalTransformer(transformer_base.TransformerBase):
             entity_id=properties[VProps.ID],
             entity_category=EntityCategory.RESOURCE,
             entity_type=properties[VProps.TYPE],
-            update_timestamp=properties[VProps.UPDATE_TIMESTAMP],
+            sample_timestamp=properties[VProps.SAMPLE_TIMESTAMP],
             is_placeholder=True)
 
     @staticmethod

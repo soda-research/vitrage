@@ -189,3 +189,7 @@ class TransformerBase(object):
         return entity_event[SyncProps.SYNC_MODE] == SyncMode.INIT_SNAPSHOT and\
             SyncProps.EVENT_TYPE in entity_event and \
             entity_event[SyncProps.EVENT_TYPE] == EventAction.END_MESSAGE
+
+    @staticmethod
+    def _format_update_timestamp(update_timestamp, sample_timestamp):
+        return update_timestamp if update_timestamp else sample_timestamp
