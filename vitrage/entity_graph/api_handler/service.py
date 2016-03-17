@@ -18,6 +18,7 @@ import oslo_messaging
 from oslo_service import service as os_service
 
 from vitrage.entity_graph.api_handler.entity_graph_api import EntityGraphApis
+from vitrage import messaging
 from vitrage import rpc as vitrage_rpc
 
 LOG = log.getLogger(__name__)
@@ -37,7 +38,7 @@ class VitrageApiHandlerService(os_service.Service):
 
         super(VitrageApiHandlerService, self).start()
 
-        transport = oslo_messaging.get_transport(self.conf)
+        transport = messaging.get_transport(self.conf)
         rabbit_hosts = self.conf.oslo_messaging_rabbit.rabbit_hosts
         target = oslo_messaging.Target(topic=self.conf.rpc_topic,
                                        server=rabbit_hosts)

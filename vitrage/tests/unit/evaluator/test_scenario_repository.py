@@ -11,6 +11,7 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+import os
 from oslo_config import cfg
 from oslo_log import log as logging
 from vitrage.common import file_utils
@@ -51,7 +52,8 @@ class ScenarioRepositoryTest(base.BaseTest):
 
         # Test assertions
         self.assertIsNotNone(scenario_repository)
-        self.assertEqual(2, len(scenario_repository.templates))
+        path, dirs, files = os.walk(self.conf.evaluator.templates_dir).next()
+        self.assertEqual(len(files), len(scenario_repository.templates))
 
     def test_init_scenario_repository(self):
 

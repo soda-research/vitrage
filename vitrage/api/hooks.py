@@ -16,6 +16,7 @@ from oslo_context import context
 from oslo_policy import policy
 from pecan import hooks
 
+from vitrage import messaging
 from vitrage import rpc as vitrage_rpc
 
 
@@ -35,7 +36,7 @@ class RPCHook(hooks.PecanHook):
     """Create and attach an rpc to the request. """
 
     def __init__(self, conf):
-        transport = oslo_messaging.get_transport(conf)
+        transport = messaging.get_transport(conf)
         target = oslo_messaging.Target(topic=conf.rpc_topic)
         self.client = vitrage_rpc.get_client(transport, target)
 
