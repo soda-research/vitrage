@@ -12,12 +12,14 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import multiprocessing
 import Queue
 
 from oslo_config import cfg
 from oslo_log import log as logging
 
 from vitrage.common.constants import EdgeLabels
+from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import EntityType
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.entity_graph.states.normalized_resource_state import \
@@ -145,6 +147,63 @@ class TestActionExecutor(TestEntityGraphFunctionalBase):
         self.assertIsNone(before_edge)
         self.assertIsNotNone(new_edge)
 
+    def test_execute_add_vertex(self):
+
+        # Test Setup
+        processor = self._create_processor_with_graph(self.conf)
+
+        vertex_attrs = {VProps.TYPE: EntityType.NOVA_HOST}
+        host_vertices = processor.entity_graph.get_vertices(
+            vertex_attr_filter=vertex_attrs)
+
+        host = host_vertices[0]
+
+        targets = {TFields.TARGET: host.vertex_id}
+        props = {
+            TFields.ALARM_NAME: 'VM_CPU_SUBOPTIMAL_PERFORMANCE',
+            TFields.SEVERITY: 'CRITICAL',
+            VProps.STATE: AlarmProps.ALARM_ACTIVE_STATE
+        }
+
+        # Raise alarm action adds new vertex with type vitrage to the graph
+        action_spec = ActionSpecs(ActionType.RAISE_ALARM, targets, props)
+
+        alarm_vertex_attrs = {VProps.TYPE: EntityType.VITRAGE}
+        before_alarms = processor.entity_graph.get_vertices(
+            vertex_attr_filter=alarm_vertex_attrs)
+        event_queue = Queue.Queue()
+        action_executor = ActionExecutor(event_queue)
+
+        expected_alarm_id = 'ALARM:vitrage:%s:%s' % (props[TFields.ALARM_NAME],
+                                                     host.vertex_id)
+        # Test Action
+        action_executor.execute(action_spec, ActionMode.DO)
+        processor.process_event(event_queue.get())
+
+        after_alarms = processor.entity_graph.get_vertices(
+            vertex_attr_filter=alarm_vertex_attrs)
+
+        # Assertions
+        self.assertEqual(len(before_alarms) + 1, len(after_alarms))
+        self.assert_is_not_empty(after_alarms)
+
+        alarms = [alarm for alarm in after_alarms
+                  if alarm.vertex_id == expected_alarm_id]
+
+        # Expected exactly one alarm with expected  id
+        self.assertEqual(1, len(alarms))
+        alarm = alarms[0]
+
+        self.assertEqual(alarm.properties[VProps.CATEGORY],
+                         EntityCategory.ALARM)
+        self.assertEqual(alarm.properties[VProps.TYPE], EntityType.VITRAGE)
+        self.assertEqual(alarm.properties[VProps.SEVERITY],
+                         props[TFields.SEVERITY])
+        self.assertEqual(alarm.properties[VProps.NORMALIZED_SEVERITY],
+                         props[TFields.SEVERITY])
+        self.assertEqual(alarm.properties[VProps.STATE],
+                         AlarmProps.ALARM_ACTIVE_STATE)
+
     def test_execute_add_and_remove_vertex(self):
 
         # Test Setup
@@ -159,21 +218,35 @@ class TestActionExecutor(TestEntityGraphFunctionalBase):
         targets = {TFields.TARGET: host.vertex_id}
         props = {
             TFields.ALARM_NAME: 'VM_CPU_SUBOPTIMAL_PERFORMANCE',
-            TFields.SEVERITY: 'critical',
+            TFields.SEVERITY: 'CRITICAL',
             VProps.STATE: AlarmProps.ALARM_ACTIVE_STATE
         }
         action_spec = ActionSpecs(ActionType.RAISE_ALARM, targets, props)
 
-        event_queue = Queue.Queue()
-        action_executor = ActionExecutor(event_queue)
+        add_vertex_event = TestActionExecutor._get_vitrage_add_vertex_event(
+            host.vertex_id,
+            props[TFields.ALARM_NAME],
+            props[TFields.SEVERITY])
 
-        # Test Action - do
-        action_executor.execute(action_spec, ActionMode.DO)
-        processor.process_event(event_queue.get())
+        processor.process_event(add_vertex_event)
+
+        alarm_vertex_attrs = {VProps.TYPE: EntityType.VITRAGE,
+                              VProps.IS_DELETED: False}
+        before_alarms = processor.entity_graph.get_vertices(
+            vertex_attr_filter=alarm_vertex_attrs)
+
+        event_queue = multiprocessing.Queue()
+        action_executor = ActionExecutor(event_queue)
 
         # Test Action - undo
         action_executor.execute(action_spec, ActionMode.UNDO)
         processor.process_event(event_queue.get())
+
+        after_alarms = processor.entity_graph.get_vertices(
+            vertex_attr_filter=alarm_vertex_attrs)
+
+        # Test Assertions
+        self.assertEqual(len(before_alarms) - 1, len(after_alarms))
 
     @staticmethod
     def _get_nagios_event(resource_name, resource_type):
@@ -186,3 +259,15 @@ class TestActionExecutor(TestEntityGraphFunctionalBase):
                 'status_info': 'test test test',
                 'sync_mode': 'snapshot',
                 'sync_type': 'nagios'}
+
+    @staticmethod
+    def _get_vitrage_add_vertex_event(target_id, alarm_name, severity):
+
+        return {'target': target_id,
+                'update_timestamp': '2016-03-17 11:33:32.443002+00:00',
+                'sync_mode': 'update',
+                'alarm_name': alarm_name,
+                'state': 'Active',
+                'type': 'add_vertex',
+                'sync_type': 'vitrage',
+                'severity': 'CRITICAL'}
