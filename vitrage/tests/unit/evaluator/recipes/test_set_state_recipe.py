@@ -27,20 +27,24 @@ LOG = logging.getLogger(__name__)
 
 class SetStateRecipeTest(base.BaseTest):
 
+    @classmethod
+    def setUpClass(cls):
+
+        cls.target_vertex_id = 'RESOURCE:nova.host:test1'
+
+        targets = {TFields.TARGET: cls.target_vertex_id}
+        cls.props = {TFields.STATE: 'SUBOPTIMAL'}
+
+        cls.action_spec = ActionSpecs(ActionType.SET_STATE, targets, cls.props)
+
     def test_get_do_recipe(self):
 
-        # Test Setup
-        target_vertex_id = 'RESOURCE:nova.host:test1'
-
-        targets = {TFields.TARGET: target_vertex_id}
-        props = {TFields.STATE: 'SUBOPTIMAL'}
-
-        action_spec = ActionSpecs(ActionType.SET_STATE, targets, props)
-
         # Test Action
-        action_steps = SetState.get_do_recipe(action_spec)
+        action_steps = SetState.get_do_recipe(self.action_spec)
 
         # Test Assertions
+
+        # expecting for one step: [update_vertex]
         self.assertEqual(1, len(action_steps))
 
         self.assertEqual(UPDATE_VERTEX, action_steps[0].type)
@@ -48,7 +52,27 @@ class SetStateRecipeTest(base.BaseTest):
         self.assertEqual(2, len(update_vertex_step_params))
 
         vitrage_state = update_vertex_step_params[VProps.VITRAGE_STATE]
-        self.assertEqual(props[TFields.STATE], vitrage_state)
+        self.assertEqual(self.props[TFields.STATE], vitrage_state)
 
         vitrage_id = update_vertex_step_params[VProps.VITRAGE_ID]
-        self.assertEqual(target_vertex_id, vitrage_id)
+        self.assertEqual(self.target_vertex_id, vitrage_id)
+
+    def test_get_undo_recipe(self):
+
+        # Test Action
+        action_steps = SetState.get_undo_recipe(self.action_spec)
+
+        # Test Assertions
+
+        # expecting for one step: [update_vertex]
+        self.assertEqual(1, len(action_steps))
+
+        self.assertEqual(UPDATE_VERTEX, action_steps[0].type)
+        update_vertex_step_params = action_steps[0].params
+        self.assertEqual(2, len(update_vertex_step_params))
+
+        vitrage_state = update_vertex_step_params[VProps.VITRAGE_STATE]
+        self.assertIsNone(vitrage_state)
+
+        vitrage_id = update_vertex_step_params[VProps.VITRAGE_ID]
+        self.assertEqual(self.target_vertex_id, vitrage_id)

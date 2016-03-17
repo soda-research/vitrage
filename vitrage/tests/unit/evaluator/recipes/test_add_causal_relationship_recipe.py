@@ -17,6 +17,7 @@ from vitrage.common.constants import EdgeLabels
 from vitrage.common.constants import EdgeProperties
 from vitrage.evaluator.actions.base import ActionType
 from vitrage.evaluator.actions.recipes.action_steps import ADD_EDGE
+from vitrage.evaluator.actions.recipes.action_steps import REMOVE_EDGE
 from vitrage.evaluator.actions.recipes.add_causal_relationship import \
     AddCausalRelationship
 from vitrage.evaluator.template import ActionSpecs
@@ -29,24 +30,29 @@ LOG = logging.getLogger(__name__)
 
 class AddCausalRelationshipTest(base.BaseTest):
 
-    def test_get_do_recipe(self):
+    @classmethod
+    def setUpClass(cls):
 
-        # Test Setup
-        target_vertex_id = 'RESOURCE:nova.host:test_target'
-        source_vertex_id = 'RESOURCE:nova.host:test_source'
+        cls.target_vertex_id = 'RESOURCE:nova.host:test_target'
+        cls.source_vertex_id = 'RESOURCE:nova.host:test_source'
 
         targets = {
-            TField.TARGET: target_vertex_id,
-            TField.SOURCE: source_vertex_id
+            TField.TARGET: cls.target_vertex_id,
+            TField.SOURCE: cls.source_vertex_id
         }
 
-        action_spec = ActionSpecs(ActionType.ADD_CAUSAL_RELATIONSHIP,
-                                  targets,
-                                  {})
+        cls.action_spec = ActionSpecs(ActionType.ADD_CAUSAL_RELATIONSHIP,
+                                      targets,
+                                      {})
+
+    def test_get_do_recipe(self):
+
         # Test Action
-        action_steps = AddCausalRelationship.get_do_recipe(action_spec)
+        action_steps = AddCausalRelationship.get_do_recipe(self.action_spec)
 
         # Test Assertions
+
+        # expecting for one step: add edge
         self.assertEqual(1, len(action_steps))
 
         self.assertEqual(ADD_EDGE, action_steps[0].type)
@@ -54,10 +60,33 @@ class AddCausalRelationshipTest(base.BaseTest):
         self.assertEqual(3, len(add_edge_step_params))
 
         source = add_edge_step_params.get(TField.SOURCE)
-        self.assertEqual(source_vertex_id, source)
+        self.assertEqual(self.source_vertex_id, source)
 
         target = add_edge_step_params.get(TField.TARGET)
-        self.assertEqual(target_vertex_id, target)
+        self.assertEqual(self.target_vertex_id, target)
+
+        relation_name = add_edge_step_params[EdgeProperties.RELATIONSHIP_TYPE]
+        self.assertEqual(EdgeLabels.CAUSES, relation_name)
+
+    def test_get_undo_recipe(self):
+
+        # Test Action
+        action_steps = AddCausalRelationship.get_undo_recipe(self.action_spec)
+
+        # Test Assertions
+
+        # expecting for one step: remove edge
+        self.assertEqual(1, len(action_steps))
+
+        self.assertEqual(REMOVE_EDGE, action_steps[0].type)
+        add_edge_step_params = action_steps[0].params
+        self.assertEqual(3, len(add_edge_step_params))
+
+        source = add_edge_step_params.get(TField.SOURCE)
+        self.assertEqual(self.source_vertex_id, source)
+
+        target = add_edge_step_params.get(TField.TARGET)
+        self.assertEqual(self.target_vertex_id, target)
 
         relation_name = add_edge_step_params[EdgeProperties.RELATIONSHIP_TYPE]
         self.assertEqual(EdgeLabels.CAUSES, relation_name)
