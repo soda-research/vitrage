@@ -39,7 +39,7 @@ class FunctionalTest(base.BaseTest):
     # noinspection PyAttributeOutsideInit
     def setUp(self):
         super(FunctionalTest, self).setUp()
-        conf = service.prepare_service(args=[])
+        conf = service.prepare_service(args=[], config_files=[])
         self.conf = self.useFixture(fixture_config.Config(conf)).conf
 
         self.conf.set_override('policy_file',
