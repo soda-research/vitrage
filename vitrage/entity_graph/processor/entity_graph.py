@@ -83,8 +83,8 @@ class EntityGraph(NXGraph):
     @staticmethod
     def get_vertex_category(vertex):
         category = vertex[VProps.CATEGORY]
-        type = vertex[VProps.TYPE]
-        return category, type
+        type_ = vertex[VProps.TYPE]
+        return category, type_
 
     def check_update_validation(self, graph_vertex, updated_vertex):
         """Checks current and updated validation

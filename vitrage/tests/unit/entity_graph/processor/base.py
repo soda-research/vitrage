@@ -31,20 +31,20 @@ class TestBaseProcessor(TestEntityGraphUnitBase):
         self.transform = transformer_manager.TransformerManager(self.conf)
 
     @staticmethod
-    def _update_vertex_to_graph(entity_graph, category, type, id,
+    def _update_vertex_to_graph(entity_graph, category, type_, id_,
                                 is_deleted, is_placeholder_data,
                                 additional_prop):
         # create vertex properties
         prop = {key: value for key, value in additional_prop.items()}
         prop[VertexProperties.CATEGORY] = category
-        prop[VertexProperties.TYPE] = type
-        prop[VertexProperties.ID] = id
+        prop[VertexProperties.TYPE] = type_
+        prop[VertexProperties.ID] = id_
         prop[VertexProperties.IS_DELETED] = is_deleted
         prop[VertexProperties.IS_PLACEHOLDER] = is_placeholder_data
 
         # TODO(Alexey): change back to original method
         # vertex_id = self.transform.get_key(prop)
-        vertex_id = category + "_" + type + "_" + id
+        vertex_id = category + "_" + type_ + "_" + id_
         vertex = graph.Vertex(vertex_id, prop)
         entity_graph.add_vertex(vertex)
 

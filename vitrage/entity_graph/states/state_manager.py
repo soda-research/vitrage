@@ -80,11 +80,11 @@ class StateManager(object):
                                                          is_normalized)
             state_properties.pop(0)
 
-            for property in state_properties:
+            for property_ in state_properties:
                 tmp_normalized_state, tmp_state_priority = \
                     self._find_normalized_state_and_priority(new_vertex,
                                                              graph_vertex,
-                                                             property,
+                                                             property_,
                                                              category,
                                                              plugin_name,
                                                              is_normalized)
@@ -185,13 +185,13 @@ class StateManager(object):
     def _find_normalized_state_and_priority(self,
                                             new_vertex,
                                             graph_vertex,
-                                            property,
+                                            property_,
                                             category,
                                             plugin_name,
                                             is_normalized=False):
         state = self._get_updated_property(new_vertex,
                                            graph_vertex,
-                                           property)
+                                           property_)
 
         upper_state1 = state if not state else state.upper()
 
