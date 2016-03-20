@@ -90,7 +90,7 @@ def _create_query_expression(query, parent_operator=None):
 
     # Recursion evaluate leaf (stop condition)
     elif parent_operator in operators:
-        for key, val in query.iteritems():
+        for key, val in query.items():
             expressions.append('item.get(' + _evaluatable_str(key) + ')' +
                                parent_operator + ' ' + _evaluatable_str(val))
         return _join_logical_operator('and', expressions)

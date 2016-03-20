@@ -11,6 +11,7 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+import six
 
 from oslo_log import log
 from voluptuous import Any
@@ -63,7 +64,7 @@ def validate_template_sections(template_conf):
 def validate_metadata_section(metadata):
 
     schema = Schema({
-        Required(TemplateFields.ID): Any(str, basestring)
+        Required(TemplateFields.ID): Any(str, six.text_type)
     })
 
     error_msg = SCHEMA_CONTENT_ERROR % (
@@ -123,9 +124,9 @@ def validate_entities(entities):
 def validate_entity(entity):
 
     schema = Schema({
-        Required(TemplateFields.CATEGORY): Any(str, basestring),
-        TemplateFields.TYPE: Any(str, basestring),
-        Required(TemplateFields.TEMPLATE_ID): Any(str, basestring, int)
+        Required(TemplateFields.CATEGORY): Any(str, six.text_type),
+        TemplateFields.TYPE: Any(str, six.text_type),
+        Required(TemplateFields.TEMPLATE_ID): Any(str, six.text_type, int)
     }, extra=True)
     error_msg = SCHEMA_CONTENT_ERROR % (
         TemplateFields.ENTITY,
@@ -155,10 +156,10 @@ def validate_relationships(relationships):
 def validate_relationship(relationship):
 
     schema = Schema({
-        Required(TemplateFields.SOURCE): Any(str, basestring, int),
-        Required(TemplateFields.TARGET): Any(str, basestring, int),
-        TemplateFields.RELATIONSHIP_TYPE: Any(str, basestring),
-        Required(TemplateFields.TEMPLATE_ID): Any(str, basestring, int)
+        Required(TemplateFields.SOURCE): Any(str, six.text_type, int),
+        Required(TemplateFields.TARGET): Any(str, six.text_type, int),
+        TemplateFields.RELATIONSHIP_TYPE: Any(str, six.text_type),
+        Required(TemplateFields.TEMPLATE_ID): Any(str, six.text_type, int)
     })
 
     error_msg = SCHEMA_CONTENT_ERROR % (
@@ -199,7 +200,7 @@ def validate_scenarios_section(scenarios):
 def validate_scenario(scenario):
 
     schema = Schema({
-        Required(TemplateFields.CONDITION): Any(str, basestring),
+        Required(TemplateFields.CONDITION): Any(str, six.text_type),
         Required(TemplateFields.ACTIONS): list
     })
 
@@ -244,7 +245,7 @@ def validate_actions_schema(actions):
 def validate_action_schema(action):
 
     schema = Schema({
-        Required(TemplateFields.ACTION_TYPE): Any(str, basestring),
+        Required(TemplateFields.ACTION_TYPE): Any(str, six.text_type),
         TemplateFields.PROPERTIES: dict,
         Required(TemplateFields.ACTION_TARGET): dict
     })

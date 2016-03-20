@@ -12,10 +12,10 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import Queue
 
 from oslo_config import cfg
 from oslo_log import log as logging
+from six.moves import queue
 
 from vitrage.common.constants import EdgeLabels
 from vitrage.common.constants import EntityCategory
@@ -62,7 +62,7 @@ class TestActionExecutor(TestEntityGraphFunctionalBase):
         props = {TFields.STATE: NormalizedResourceState.SUBOPTIMAL}
         action_spec = ActionSpecs(ActionType.SET_STATE, targets, props)
 
-        event_queue = Queue.Queue()
+        event_queue = queue.Queue()
         action_executor = ActionExecutor(event_queue)
 
         # Test Action - do
@@ -128,7 +128,7 @@ class TestActionExecutor(TestEntityGraphFunctionalBase):
                                   targets,
                                   {})
 
-        event_queue = Queue.Queue()
+        event_queue = queue.Queue()
         action_executor = ActionExecutor(event_queue)
 
         before_edge = processor.entity_graph.get_edge(alarm2.vertex_id,
@@ -169,7 +169,7 @@ class TestActionExecutor(TestEntityGraphFunctionalBase):
         alarm_vertex_attrs = {VProps.TYPE: VITRAGE}
         before_alarms = processor.entity_graph.get_vertices(
             vertex_attr_filter=alarm_vertex_attrs)
-        event_queue = Queue.Queue()
+        event_queue = queue.Queue()
         action_executor = ActionExecutor(event_queue)
 
         expected_alarm_id = 'ALARM:vitrage:%s:%s' % (props[TFields.ALARM_NAME],
@@ -233,7 +233,7 @@ class TestActionExecutor(TestEntityGraphFunctionalBase):
         before_alarms = processor.entity_graph.get_vertices(
             vertex_attr_filter=alarm_vertex_attrs)
 
-        event_queue = Queue.Queue()
+        event_queue = queue.Queue()
         action_executor = ActionExecutor(event_queue)
 
         # Test Action - undo

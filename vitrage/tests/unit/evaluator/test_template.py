@@ -54,7 +54,7 @@ class BasicTemplateTest(base.BaseTest):
     def _validate_entities(self, entities, entities_def):
 
         self.assertIsNotNone(entities)
-        for entity_id, entity in entities.iteritems():
+        for entity_id, entity in entities.items():
 
             self.assertIsInstance(entity, Vertex)
             self.assertEqual(entity_id, entity.vertex_id)
@@ -68,7 +68,7 @@ class BasicTemplateTest(base.BaseTest):
             self.assertTrue(entity_def_dict[TFields.TEMPLATE_ID] in entities)
             entity = entities[entity_def_dict[TFields.TEMPLATE_ID]]
 
-            for key, value in entity_def_dict.iteritems():
+            for key, value in entity_def_dict.items():
                 if key == TFields.TEMPLATE_ID:
                     continue
                 self.assertEqual(value, entity.properties[key])
@@ -76,7 +76,7 @@ class BasicTemplateTest(base.BaseTest):
     def _validate_relationships(self, relationships, relations_def, entities):
 
         self.assertIsNotNone(relationships)
-        for relationship_id, relationship in relationships.iteritems():
+        for relationship_id, relationship in relationships.items():
 
             self.assertIsInstance(relationship, EdgeDescription)
             self.assertTrue(relationship.source.vertex_id in entities)
@@ -98,7 +98,7 @@ class BasicTemplateTest(base.BaseTest):
             self.assertTrue(template_id in relationships)
             relationship = relationships[template_id].edge
 
-            for key, value in relation_def_dict.iteritems():
+            for key, value in relation_def_dict.items():
                 if key not in exclude_keys:
                     self.assertEqual(value, relationship.properties[key])
 
@@ -106,7 +106,7 @@ class BasicTemplateTest(base.BaseTest):
         """Validates scenario parsing
 
         Expects to single scenario:
-         1. condition consitsts from one variable (type EdgeDescription)
+         1. condition consists from one variable (type EdgeDescription)
          2. Actions - set state action
         :param scenarios: parsed scenarios
         :param scenarios_definition:

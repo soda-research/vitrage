@@ -35,7 +35,7 @@ class TestBaseProcessor(TestEntityGraphUnitBase):
                                 is_deleted, is_placeholder_data,
                                 additional_prop):
         # create vertex properties
-        prop = {key: value for key, value in additional_prop.iteritems()}
+        prop = {key: value for key, value in additional_prop.items()}
         prop[VertexProperties.CATEGORY] = category
         prop[VertexProperties.TYPE] = type
         prop[VertexProperties.ID] = id

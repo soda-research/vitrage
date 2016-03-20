@@ -12,14 +12,13 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from datetime import timedelta
-import Queue
 import threading
 import time
 import unittest
 
+from datetime import timedelta
 from oslo_config import cfg
-
+from six.moves import queue
 from vitrage.common.constants import EdgeLabels
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import VertexProperties as VProps
@@ -74,7 +73,7 @@ class TestConsistencyFunctional(TestEntityGraphFunctionalBase):
         self.load_plugins(self.conf)
 
         self.processor = Processor(self.conf, self.initialization_status)
-        self.event_queue = Queue.Queue()
+        self.event_queue = queue.Queue()
         scenario_repo = ScenarioRepository(self.conf)
         self.evaluator = ScenarioEvaluator(self.conf,
                                            self.processor.entity_graph,

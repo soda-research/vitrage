@@ -12,10 +12,9 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import Queue
-
 from oslo_config import cfg
 from oslo_log import log as logging
+from six.moves import queue
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.evaluator.scenario_evaluator import ScenarioEvaluator
 from vitrage.evaluator.scenario_repository import ScenarioRepository
@@ -54,7 +53,7 @@ class TestScenarioEvaluator(TestEntityGraphFunctionalBase):
 
         # Test Setup
         processor = self._create_processor_with_graph(self.conf)
-        event_queue = Queue.Queue()
+        event_queue = queue.Queue()
         ScenarioEvaluator(self.conf,
                           processor.entity_graph,
                           self.scenario_repository,

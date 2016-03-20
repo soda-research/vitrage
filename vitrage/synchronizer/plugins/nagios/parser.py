@@ -14,7 +14,7 @@
 
 from lxml import etree
 from oslo_log import log
-from StringIO import StringIO
+from six.moves import StringIO
 from vitrage.synchronizer.plugins.nagios.properties import NagiosProperties
 
 LOG = log.getLogger(__name__)

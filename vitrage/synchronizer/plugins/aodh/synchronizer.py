@@ -120,4 +120,4 @@ def _convert_alarm(alarm):
     elif alarm_type == AodhProps.THRESHOLD:
         return AodhSynchronizer._convert_threshold_alarm(alarm)
     else:
-        LOG.info('Unsopported Aodh alarm of type %s' % alarm_type)
+        LOG.info('Unsupported Aodh alarm of type %s' % alarm_type)

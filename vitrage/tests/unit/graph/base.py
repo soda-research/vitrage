@@ -146,7 +146,7 @@ class GraphTestBase(base.BaseTest):
         g.add_edge(e_node_to_switch)
 
         # Add Hosts
-        for host_id in xrange(num_of_hosts_per_node):
+        for host_id in range(num_of_hosts_per_node):
             host_to_add = add_connected_vertex(g, RESOURCE, HOST, host_id,
                                                ELabel.CONTAINS, v_node, True)
 
@@ -154,20 +154,20 @@ class GraphTestBase(base.BaseTest):
                                                v_switch.vertex_id, 'USES'))
 
             # Add Host Alarms
-            for j in xrange(num_of_alarms_per_host):
+            for j in range(num_of_alarms_per_host):
                 add_connected_vertex(g, ALARM, ALARM_ON_HOST,
                                      self.host_alarm_id, ELabel.ON,
                                      host_to_add)
                 self.host_alarm_id += 1
 
             # Add Host Tests
-            for j in xrange(num_of_tests_per_host):
+            for j in range(num_of_tests_per_host):
                 add_connected_vertex(g, TEST, TEST_ON_HOST, self.host_test_id,
                                      ELabel.ON, host_to_add)
                 self.host_test_id += 1
 
             # Add Host Vms
-            for j in xrange(num_of_vms_per_host):
+            for j in range(num_of_vms_per_host):
                 vm_to_add = add_connected_vertex(g, RESOURCE, INSTANCE,
                                                  self.vm_id, ELabel.CONTAINS,
                                                  host_to_add, True)
@@ -175,7 +175,7 @@ class GraphTestBase(base.BaseTest):
                 self.vms.append(vm_to_add)
 
                 # Add Instance Alarms
-                for k in xrange(num_of_alarms_per_vm):
+                for k in range(num_of_alarms_per_vm):
                     add_connected_vertex(g, ALARM, ALARM_ON_VM,
                                          self.vm_alarm_id, ELabel.ON,
                                          vm_to_add)

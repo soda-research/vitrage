@@ -11,6 +11,7 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+import six
 
 
 class PropertiesElement(object):
@@ -33,7 +34,7 @@ class PropertiesElement(object):
             del self.properties[key]
 
     def __iter__(self):
-        return self.properties.itervalues()
+        return six.itervalues(self.properties)
 
     def get(self, k, d=None):
         return self.properties.get(k, d)

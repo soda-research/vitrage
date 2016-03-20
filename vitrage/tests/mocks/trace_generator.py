@@ -133,7 +133,7 @@ def generate_data_stream(models, event_num=100):
 
     instance_num = len(models)
     data_stream = []
-    for _ in xrange(event_num):
+    for _ in range(event_num):
         random_model = models[randint(0, instance_num - 1)]
         data_stream.append(random_model.params)
     return data_stream
@@ -150,7 +150,7 @@ def generate_round_robin_data_stream(models, event_num=100):
 
     instance_num = len(models)
     data_stream = []
-    for i in xrange(event_num):
+    for i in range(event_num):
         next_model = models[i % instance_num]
         data_stream.append(next_model.params)
     return data_stream
