@@ -16,7 +16,6 @@ from oslo_log import log as logging
 
 from vitrage.common.constants import EdgeLabels
 from vitrage.common.constants import EntityCategory
-from vitrage.common.constants import EntityType
 from vitrage.common.constants import SynchronizerProperties as SyncProps
 from vitrage.common.constants import SyncMode
 from vitrage.common.constants import VertexProperties as VProps
@@ -26,11 +25,13 @@ from vitrage.synchronizer.plugins.transformer_base import extract_field_value
 
 
 LOG = logging.getLogger(__name__)
+NOVA_HOST = 'nova.host'
+NOVA_ZONE = 'nova.zone'
 
 
 class ZoneTransformer(transformer_base.TransformerBase):
 
-    ZONE_TYPE = EntityType.NOVA_ZONE
+    ZONE_TYPE = NOVA_ZONE
 
     STATE_AVAILABLE = 'available'
     STATE_UNAVAILABLE = 'unavailable'
@@ -109,7 +110,7 @@ class ZoneTransformer(transformer_base.TransformerBase):
         neighbors = [self._create_node_neighbor(zone_vertex_id)]
 
         hosts = extract_field_value(entity_event, self.HOSTS[sync_mode])
-        host_transformer = self.transformers[EntityType.NOVA_HOST]
+        host_transformer = self.transformers[NOVA_HOST]
 
         if host_transformer:
             for key in hosts:
@@ -160,7 +161,7 @@ class ZoneTransformer(transformer_base.TransformerBase):
             vitrage_id,
             entity_id=host_name,
             entity_category=EntityCategory.RESOURCE,
-            entity_type=EntityType.NOVA_HOST,
+            entity_type=NOVA_HOST,
             entity_state=host_state,
             sample_timestamp=sample_timestamp)
 

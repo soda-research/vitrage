@@ -12,7 +12,6 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from vitrage.common.constants import EntityType
 from vitrage.synchronizer.plugins.nova.base import NovaBase
 
 
@@ -30,7 +29,7 @@ class HostSynchronizer(NovaBase):
     def get_all(self, sync_mode):
         return self.make_pickleable(
             self.filter_none_compute_hosts(self.client.hosts.list()),
-            EntityType.NOVA_HOST,
+            self.NOVA_HOST,
             sync_mode,
             ['manager'])
 

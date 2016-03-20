@@ -16,7 +16,6 @@ from oslo_log import log as logging
 
 from vitrage.common.constants import EdgeLabels
 from vitrage.common.constants import EntityCategory
-from vitrage.common.constants import EntityType
 from vitrage.common.constants import EventAction
 from vitrage.common.constants import SynchronizerProperties as SyncProps
 from vitrage.common.constants import SyncMode
@@ -28,11 +27,13 @@ from vitrage.synchronizer.plugins.transformer_base import extract_field_value
 
 
 LOG = logging.getLogger(__name__)
+NOVA_INSTANCE = 'nova.instance'
+NOVA_HOST = 'nova.host'
 
 
 class InstanceTransformer(transformer_base.TransformerBase):
 
-    INSTANCE_TYPE = EntityType.NOVA_INSTANCE
+    INSTANCE_TYPE = NOVA_INSTANCE
 
     # Fields returned from Nova Instance snapshot
     INSTANCE_ID = {
@@ -129,7 +130,7 @@ class InstanceTransformer(transformer_base.TransformerBase):
         sync_mode = entity_event[SyncProps.SYNC_MODE]
 
         neighbors = []
-        host_transformer = self.transformers[EntityType.NOVA_HOST]
+        host_transformer = self.transformers[NOVA_HOST]
 
         if host_transformer:
             host_neighbor = self._create_host_neighbor(

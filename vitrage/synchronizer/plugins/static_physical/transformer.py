@@ -15,7 +15,6 @@
 from oslo_log import log as logging
 
 from vitrage.common.constants import EntityCategory
-from vitrage.common.constants import EntityType
 from vitrage.common.constants import EventAction
 from vitrage.common.constants import SynchronizerProperties as SyncProps
 from vitrage.common.constants import SyncMode
@@ -25,6 +24,7 @@ import vitrage.graph.utils as graph_utils
 from vitrage.synchronizer.plugins import transformer_base
 
 LOG = logging.getLogger(__name__)
+NOVA_HOST = 'nova.host'
 
 
 class StaticPhysicalTransformer(transformer_base.TransformerBase):
@@ -163,7 +163,7 @@ class StaticPhysicalTransformer(transformer_base.TransformerBase):
     def _register_relations_direction(self):
         self.relation_direction = {}
 
-        relationship = (self.SWITCH, EntityType.NOVA_HOST)
+        relationship = (self.SWITCH, NOVA_HOST)
         self.relation_direction[relationship] = True
 
         relationship = (self.SWITCH, self.SWITCH)

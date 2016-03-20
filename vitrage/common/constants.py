@@ -14,6 +14,10 @@
 # under the License.
 
 
+OPENSTACK_NODE = 'openstack.node'
+VITRAGE = 'vitrage'
+
+
 class VertexProperties(object):
     CATEGORY = 'category'
     TYPE = 'type'
@@ -62,17 +66,6 @@ class SynchronizerProperties(object):
     SYNC_MODE = 'sync_mode'
     SAMPLE_DATE = 'sample_date'
     EVENT_TYPE = 'event_type'
-
-
-class EntityType(object):
-    OPENSTACK_NODE = 'openstack.node'
-    NOVA_INSTANCE = 'nova.instance'
-    NOVA_HOST = 'nova.host'
-    NOVA_ZONE = 'nova.zone'
-    STATIC_PHYSICAL = 'static_physical'
-    NAGIOS = 'nagios'
-    VITRAGE = 'vitrage'
-    AODH = 'aodh'
 
 
 class EventAction(object):

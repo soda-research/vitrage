@@ -17,7 +17,6 @@ import os
 from oslo_config import cfg
 from oslo_log import log as logging
 
-from vitrage.common.constants import EntityType
 from vitrage.common.constants import EventAction
 from vitrage.common.constants import SynchronizerProperties as SyncProps
 from vitrage.common.constants import SyncMode
@@ -29,12 +28,11 @@ from vitrage.tests.mocks import utils
 
 
 LOG = logging.getLogger(__name__)
+SWITCH = 'switch'
+STATIC_PHYSICAL = 'static_physical'
 
 
 class TestStaticPhysicalSynchronizer(base.BaseTest):
-
-    SWITCH = 'switch'
-    STATIC_PHYSICAL = EntityType.STATIC_PHYSICAL
 
     OPTS = [
         cfg.StrOpt('transformer',
@@ -74,7 +72,7 @@ class TestStaticPhysicalSynchronizer(base.BaseTest):
     def setUp(self):
         super(TestStaticPhysicalSynchronizer, self).setUp()
         self.conf = cfg.ConfigOpts()
-        self.conf.register_opts(self.OPTS, group=self.STATIC_PHYSICAL)
+        self.conf.register_opts(self.OPTS, group=STATIC_PHYSICAL)
         self.static_physical_synchronizer = \
             synchronizer.StaticPhysicalSynchronizer(self.conf)
 
@@ -106,7 +104,7 @@ class TestStaticPhysicalSynchronizer(base.BaseTest):
 
         self.conf = cfg.ConfigOpts()
         self.conf.register_opts(self.CHANGES_OPTS,
-                                group=self.STATIC_PHYSICAL)
+                                group=STATIC_PHYSICAL)
         self.static_physical_synchronizer.cfg = self.conf
 
         # Action
@@ -114,24 +112,24 @@ class TestStaticPhysicalSynchronizer(base.BaseTest):
             EventAction.UPDATE_ENTITY)
 
         # Test Assertions
-        status = any(change[VProps.TYPE] == self.SWITCH and
+        status = any(change[VProps.TYPE] == SWITCH and
                      change[VProps.ID] == '12345' for change in changes)
         self.assertEqual(False, status)
 
-        status = any(change[VProps.TYPE] == self.SWITCH and
+        status = any(change[VProps.TYPE] == SWITCH and
                      change[VProps.ID] == '23456' and
                      change[SyncProps.EVENT_TYPE] == EventAction.DELETE_ENTITY
                      for change in changes)
         self.assertEqual(True, status)
 
-        status = any(change[VProps.TYPE] == self.SWITCH and
+        status = any(change[VProps.TYPE] == SWITCH and
                      change[VProps.ID] == '34567' for change in changes)
         self.assertEqual(True, status)
 
-        status = any(change[VProps.TYPE] == self.SWITCH and
+        status = any(change[VProps.TYPE] == SWITCH and
                      change[VProps.ID] == '45678' for change in changes)
         self.assertEqual(True, status)
-        status = any(change[VProps.TYPE] == self.SWITCH and
+        status = any(change[VProps.TYPE] == SWITCH and
                      change[VProps.ID] == '56789' for change in changes)
         self.assertEqual(True, status)
 

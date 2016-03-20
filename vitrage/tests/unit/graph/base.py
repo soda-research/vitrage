@@ -25,7 +25,7 @@ from oslo_log import log as logging
 
 from vitrage.common.constants import EdgeLabels as ELabel
 from vitrage.common.constants import EntityCategory
-from vitrage.common.constants import EntityType
+from vitrage.common.constants import OPENSTACK_NODE
 from vitrage.graph import create_graph
 from vitrage.graph import utils as graph_utils
 from vitrage.tests import base
@@ -41,9 +41,8 @@ ENTITY_GRAPH_ALARMS_PER_VM = 8
 RESOURCE = EntityCategory.RESOURCE
 ALARM = EntityCategory.ALARM
 
-HOST = EntityType.NOVA_HOST
-INSTANCE = EntityType.NOVA_INSTANCE
-OPENSTACK_NODE = EntityType.OPENSTACK_NODE
+HOST = 'nova.host'
+INSTANCE = 'nova.instance'
 TEST = 'TEST'
 SWITCH = 'switch'
 ALARM_ON_VM = 'ALARM_ON_VM'
@@ -51,7 +50,7 @@ ALARM_ON_HOST = 'ALARM_ON_HOST'
 TEST_ON_HOST = 'TEST_ON_HOST'
 
 v_node = graph_utils.create_vertex(
-    vitrage_id=EntityCategory.RESOURCE + ':' + EntityType.OPENSTACK_NODE,
+    vitrage_id=EntityCategory.RESOURCE + ':' + OPENSTACK_NODE,
     entity_id='111111111111',
     entity_type=OPENSTACK_NODE,
     entity_category=RESOURCE)
@@ -141,7 +140,7 @@ class GraphTestBase(base.BaseTest):
 
         start = time.time()
         g = create_graph(name, EntityCategory.RESOURCE + ':' +
-                         EntityType.OPENSTACK_NODE)
+                         OPENSTACK_NODE)
         g.add_vertex(v_node)
         g.add_vertex(v_switch)
         g.add_edge(e_node_to_switch)

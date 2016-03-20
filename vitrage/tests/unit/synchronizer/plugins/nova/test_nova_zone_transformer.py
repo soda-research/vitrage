@@ -18,7 +18,7 @@ from oslo_log import log as logging
 
 from vitrage.common.constants import EdgeLabels
 from vitrage.common.constants import EntityCategory
-from vitrage.common.constants import EntityType
+from vitrage.common.constants import OPENSTACK_NODE
 from vitrage.common.constants import SynchronizerProperties as SyncProps
 from vitrage.common.constants import VertexProperties
 from vitrage.synchronizer.plugins.nova.host.transformer import HostTransformer
@@ -29,6 +29,7 @@ from vitrage.tests import base
 from vitrage.tests.mocks import mock_syncronizer as mock_sync
 
 LOG = logging.getLogger(__name__)
+NOVA_HOST = 'nova.host'
 
 
 class NovaZoneTransformerTest(base.BaseTest):
@@ -38,7 +39,7 @@ class NovaZoneTransformerTest(base.BaseTest):
 
         self.transformers = {}
         host_transformer = HostTransformer(self.transformers)
-        self.transformers[EntityType.NOVA_HOST] = host_transformer
+        self.transformers[NOVA_HOST] = host_transformer
 
     def test_create_placeholder_vertex(self):
 
@@ -128,7 +129,7 @@ class NovaZoneTransformerTest(base.BaseTest):
         for neighbor in neighbors:
             vertex_type = neighbor.vertex.get(VertexProperties.TYPE)
 
-            if EntityType.OPENSTACK_NODE == vertex_type:
+            if OPENSTACK_NODE == vertex_type:
                 node_neighbors_counter += 1
                 self._validate_node_neighbor(neighbor, zone_vertex_id)
             else:

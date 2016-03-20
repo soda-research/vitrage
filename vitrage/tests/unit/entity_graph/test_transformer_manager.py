@@ -15,7 +15,6 @@
 from oslo_config import cfg
 from oslo_log import log as logging
 
-from vitrage.common.constants import EntityType
 from vitrage.entity_graph.transformer_manager import TransformerManager
 from vitrage.service import load_plugin
 from vitrage.synchronizer.plugins.nagios.transformer import \
@@ -29,6 +28,10 @@ from vitrage.synchronizer.plugins.nova.zone.transformer import \
 from vitrage.tests import base
 
 LOG = logging.getLogger(__name__)
+NOVA_INSTANCE = 'nova.instance'
+NOVA_HOST = 'nova.host'
+NOVA_ZONE = 'nova.zone'
+NAGIOS = 'nagios'
 
 
 class TransformerManagerTest(base.BaseTest):
@@ -52,16 +55,16 @@ class TransformerManagerTest(base.BaseTest):
 
     def test_transformer_registration_nagios(self):
             self.assertIsInstance(self.manager.get_transformer
-                                  (EntityType.NAGIOS), NagiosTransformer)
+                                  (NAGIOS), NagiosTransformer)
 
     def test_transformer_registration_nova_host(self):
         self.assertIsInstance(self.manager.get_transformer
-                              (EntityType.NOVA_HOST), HostTransformer)
+                              (NOVA_HOST), HostTransformer)
 
     def test_transformer_registration_nova_instance(self):
         self.assertIsInstance(self.manager.get_transformer
-                              (EntityType.NOVA_INSTANCE), InstanceTransformer)
+                              (NOVA_INSTANCE), InstanceTransformer)
 
     def test_transformer_registration_nova_zone(self):
         self.assertIsInstance(self.manager.get_transformer
-                              (EntityType.NOVA_ZONE), ZoneTransformer)
+                              (NOVA_ZONE), ZoneTransformer)

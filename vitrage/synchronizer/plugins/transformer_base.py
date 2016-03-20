@@ -20,15 +20,14 @@ from oslo_log import log as logging
 import six
 
 import vitrage.common.constants as cons
-from vitrage.common.constants import EntityType
 from vitrage.common.constants import EventAction
+from vitrage.common.constants import OPENSTACK_NODE
 from vitrage.common.constants import SynchronizerProperties as SyncProps
 from vitrage.common.constants import SyncMode
 from vitrage.common.exception import VitrageTransformerError
 import vitrage.graph.utils as graph_utils
 
 LOG = logging.getLogger(__name__)
-
 
 EntityWrapper = \
     namedtuple('EntityWrapper', ['vertex', 'neighbors', 'action'])
@@ -57,17 +56,17 @@ def build_key(key_values):
 
 def create_node_placeholder_vertex():
     key = build_key([cons.EntityCategory.RESOURCE,
-                     EntityType.OPENSTACK_NODE])
+                     OPENSTACK_NODE])
 
     metadata = {
-        cons.VertexProperties.NAME: EntityType.OPENSTACK_NODE
+        cons.VertexProperties.NAME: OPENSTACK_NODE
     }
 
     return graph_utils.create_vertex(
         key,
-        entity_id=EntityType.OPENSTACK_NODE,
+        entity_id=OPENSTACK_NODE,
         entity_category=cons.EntityCategory.RESOURCE,
-        entity_type=EntityType.OPENSTACK_NODE,
+        entity_type=OPENSTACK_NODE,
         entity_state=AVAILABLE,
         metadata=metadata
     )

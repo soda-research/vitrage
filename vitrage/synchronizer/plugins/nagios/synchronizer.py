@@ -17,7 +17,6 @@ from collections import namedtuple
 from oslo_log import log
 import requests
 
-from vitrage.common.constants import EntityType
 from vitrage.common.constants import SynchronizerProperties as SyncProps
 from vitrage.i18n import _LE
 from vitrage.i18n import _LW
@@ -30,6 +29,7 @@ from vitrage.synchronizer.plugins.nagios.properties import NagiosProperties \
 from vitrage.synchronizer.plugins.nagios.properties import NagiosStatus
 
 LOG = log.getLogger(__name__)
+NAGIOS = 'nagios'
 
 
 class NagiosSynchronizer(BaseAlarmSynchronizer):
@@ -41,7 +41,7 @@ class NagiosSynchronizer(BaseAlarmSynchronizer):
         self.config = NagiosConfig(conf)
 
     def _sync_type(self):
-        return EntityType.NAGIOS
+        return NAGIOS
 
     def _alarm_key(self, alarm):
         return self.ServiceKey(host_name=alarm[NagiosProps.RESOURCE_NAME],

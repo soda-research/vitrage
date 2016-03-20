@@ -15,7 +15,6 @@ from oslo_log import log as logging
 
 from vitrage.common.constants import EdgeLabels
 from vitrage.common.constants import EntityCategory
-from vitrage.common.constants import EntityType
 from vitrage.common.constants import EventAction
 from vitrage.common.constants import SynchronizerProperties as SyncProps
 from vitrage.common.constants import SyncMode
@@ -31,6 +30,7 @@ from vitrage.tests.mocks import mock_syncronizer as mock_sync
 
 
 LOG = logging.getLogger(__name__)
+NOVA_HOST = 'nova.host'
 
 
 class NagiosTransformerTest(base.BaseTest):
@@ -40,7 +40,7 @@ class NagiosTransformerTest(base.BaseTest):
 
         self.transformers = {}
         host_transformer = HostTransformer(self.transformers)
-        self.transformers[EntityType.NOVA_HOST] = host_transformer
+        self.transformers[NOVA_HOST] = host_transformer
 
     def test_extract_key(self):
         LOG.debug('Test get key from nova instance transformer')
@@ -84,7 +84,7 @@ class NagiosTransformerTest(base.BaseTest):
             neighbor = neighbors[0]
 
             # Right now we are support only host as a resource
-            if neighbor.vertex[VProps.TYPE] == EntityType.NOVA_HOST:
+            if neighbor.vertex[VProps.TYPE] == NOVA_HOST:
                 self._validate_host_neighbor(neighbors[0], alarm)
 
             self._validate_action(alarm, wrapper)
@@ -122,7 +122,7 @@ class NagiosTransformerTest(base.BaseTest):
         key_fields = host_vertex.vertex_id.split(TransformerBase.KEY_SEPARATOR)
 
         self.assertEqual(EntityCategory.RESOURCE, key_fields[0])
-        self.assertEqual(EntityType.NOVA_HOST, key_fields[1])
+        self.assertEqual(NOVA_HOST, key_fields[1])
         self.assertEqual(event[NagiosProperties.RESOURCE_NAME], key_fields[2])
 
         self.assertFalse(host_vertex[VProps.IS_DELETED])
@@ -131,7 +131,7 @@ class NagiosTransformerTest(base.BaseTest):
         self.assertEqual(EntityCategory.RESOURCE, host_vertex[VProps.CATEGORY])
         self.assertEqual(event[NagiosProperties.RESOURCE_NAME],
                          host_vertex[VProps.ID])
-        self.assertEqual(EntityType.NOVA_HOST, host_vertex[VProps.TYPE])
+        self.assertEqual(NOVA_HOST, host_vertex[VProps.TYPE])
 
         edge = neighbor.edge
         self.assertEqual(EdgeLabels.ON, edge.label)

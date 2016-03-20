@@ -43,6 +43,11 @@ class TestEntityGraphUnitBase(base.BaseTest):
                     help='Names of supported synchronizer plugins'),
     ]
 
+    NOVA_INSTANCE = 'nova.instance'
+    NOVA_HOST = 'nova.host'
+    NOVA_ZONE = 'nova.zone'
+    NAGIOS = 'nagios'
+
     NUM_NODES = 1
     NUM_ZONES = 2
     NUM_HOSTS = 4

@@ -16,7 +16,6 @@ from oslo_log import log as logging
 
 from vitrage.common.constants import EdgeLabels
 from vitrage.common.constants import EntityCategory
-from vitrage.common.constants import EntityType
 from vitrage.common.constants import SynchronizerProperties as SyncProps
 from vitrage.common.constants import SyncMode
 from vitrage.common.constants import VertexProperties as VProps
@@ -26,11 +25,13 @@ from vitrage.synchronizer.plugins.transformer_base import extract_field_value
 
 
 LOG = logging.getLogger(__name__)
+NOVA_HOST = 'nova.host'
+NOVA_ZONE = 'nova.zone'
 
 
 class HostTransformer(transformer_base.TransformerBase):
 
-    HOST_TYPE = EntityType.NOVA_HOST
+    HOST_TYPE = NOVA_HOST
 
     # Fields returned from Nova Availability Zone snapshot
     HOST_NAME = {
@@ -94,7 +95,7 @@ class HostTransformer(transformer_base.TransformerBase):
                               host_vertex_id,
                               zone_name_path):
 
-        zone_transformer = self.transformers[EntityType.NOVA_ZONE]
+        zone_transformer = self.transformers[NOVA_ZONE]
 
         if zone_transformer:
 

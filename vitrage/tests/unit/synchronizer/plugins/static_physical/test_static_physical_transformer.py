@@ -18,7 +18,6 @@ from oslo_log import log as logging
 
 from vitrage.common.constants import EdgeLabels
 from vitrage.common.constants import EntityCategory
-from vitrage.common.constants import EntityType
 from vitrage.common.constants import SynchronizerProperties as SyncProps
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.synchronizer.plugins.nova.host.transformer import HostTransformer
@@ -29,6 +28,8 @@ from vitrage.tests import base
 from vitrage.tests.mocks import mock_syncronizer as mock_sync
 
 LOG = logging.getLogger(__name__)
+NOVA_HOST = 'nova.host'
+STATIC_PHYSICAL = 'static_physical'
 
 
 class TestStaticPhysicalTransformer(base.BaseTest):
@@ -39,8 +40,8 @@ class TestStaticPhysicalTransformer(base.BaseTest):
         self.transformers = {}
         host_transformer = HostTransformer(self.transformers)
         static_transformer = StaticPhysicalTransformer(self.transformers)
-        self.transformers[EntityType.NOVA_HOST] = host_transformer
-        self.transformers[EntityType.STATIC_PHYSICAL] = static_transformer
+        self.transformers[NOVA_HOST] = host_transformer
+        self.transformers[STATIC_PHYSICAL] = static_transformer
 
     def test_create_placeholder_vertex(self):
 
@@ -48,7 +49,7 @@ class TestStaticPhysicalTransformer(base.BaseTest):
                   'vertex')
 
         # Test setup
-        switch_type = EntityType.STATIC_PHYSICAL
+        switch_type = STATIC_PHYSICAL
         switch_name = 'switch-1'
         timestamp = datetime.datetime.utcnow()
         static_transformer = StaticPhysicalTransformer(self.transformers)
@@ -88,7 +89,7 @@ class TestStaticPhysicalTransformer(base.BaseTest):
         LOG.debug('Static Physical transformer test: get key values')
 
         # Test setup
-        switch_type = EntityType.STATIC_PHYSICAL
+        switch_type = STATIC_PHYSICAL
         switch_name = 'switch-1'
         static_transformer = StaticPhysicalTransformer(self.transformers)
 
@@ -98,7 +99,7 @@ class TestStaticPhysicalTransformer(base.BaseTest):
 
         # Test assertions
         self.assertEqual(EntityCategory.RESOURCE, observed_key_fields[0])
-        self.assertEqual(EntityType.STATIC_PHYSICAL, observed_key_fields[1])
+        self.assertEqual(STATIC_PHYSICAL, observed_key_fields[1])
         self.assertEqual(switch_name, observed_key_fields[2])
 
     def test_snapshot_transform(self):

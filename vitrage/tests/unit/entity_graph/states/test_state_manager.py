@@ -15,7 +15,6 @@
 from oslo_config import cfg
 
 from vitrage.common.constants import EntityCategory
-from vitrage.common.constants import EntityType
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.entity_graph.states.normalized_resource_state import \
     NormalizedResourceState
@@ -24,6 +23,11 @@ from vitrage.graph.utils import create_vertex
 from vitrage.service import load_plugin
 from vitrage.tests import base
 from vitrage.tests.mocks import utils
+
+NOVA_INSTANCE = 'nova.instance'
+NOVA_HOST = 'nova.host'
+NOVA_ZONE = 'nova.zone'
+NAGIOS = 'nagios'
 
 
 class TestStateManager(base.BaseTest):
@@ -95,7 +99,7 @@ class TestStateManager(base.BaseTest):
         # action
         normalized_state = \
             state_manager.normalize_state(EntityCategory.RESOURCE,
-                                          EntityType.NOVA_INSTANCE,
+                                          NOVA_INSTANCE,
                                           'BUILDING')
 
         # test assertions
@@ -107,7 +111,7 @@ class TestStateManager(base.BaseTest):
 
         # action
         state_priority = \
-            state_manager.state_priority(EntityType.NOVA_INSTANCE,
+            state_manager.state_priority(NOVA_INSTANCE,
                                          NormalizedResourceState.RUNNING)
 
         # test assertions
@@ -120,13 +124,13 @@ class TestStateManager(base.BaseTest):
         new_vertex1 = create_vertex('12345',
                                     entity_state='ACTIVE',
                                     entity_category=EntityCategory.RESOURCE,
-                                    entity_type=EntityType.NOVA_INSTANCE,
+                                    entity_type=NOVA_INSTANCE,
                                     metadata=metadata1)
         metadata2 = {VProps.VITRAGE_STATE: 'ACTIVE'}
         new_vertex2 = create_vertex('23456',
                                     entity_state='SUSPENDED',
                                     entity_category=EntityCategory.RESOURCE,
-                                    entity_type=EntityType.NOVA_INSTANCE,
+                                    entity_type=NOVA_INSTANCE,
                                     metadata=metadata2)
 
         # action
@@ -145,18 +149,18 @@ class TestStateManager(base.BaseTest):
         new_vertex1 = create_vertex('12345',
                                     entity_state='ACTIVE',
                                     entity_category=EntityCategory.RESOURCE,
-                                    entity_type=EntityType.NOVA_INSTANCE)
+                                    entity_type=NOVA_INSTANCE)
         metadata2 = {VProps.VITRAGE_STATE: 'SUBOPTIMAL'}
         new_vertex2 = create_vertex('23456',
                                     entity_category=EntityCategory.RESOURCE,
-                                    entity_type=EntityType.NOVA_INSTANCE,
+                                    entity_type=NOVA_INSTANCE,
                                     metadata=metadata2)
         new_vertex3 = create_vertex('34567',
                                     entity_category=EntityCategory.RESOURCE,
-                                    entity_type=EntityType.NOVA_INSTANCE)
+                                    entity_type=NOVA_INSTANCE)
         graph_vertex3 = create_vertex('45678',
                                       entity_category=EntityCategory.RESOURCE,
-                                      entity_type=EntityType.NOVA_INSTANCE)
+                                      entity_type=NOVA_INSTANCE)
 
         # action
         state_manager.aggregated_state(new_vertex1,

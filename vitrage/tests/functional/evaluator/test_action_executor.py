@@ -19,8 +19,8 @@ from oslo_log import log as logging
 
 from vitrage.common.constants import EdgeLabels
 from vitrage.common.constants import EntityCategory
-from vitrage.common.constants import EntityType
 from vitrage.common.constants import VertexProperties as VProps
+from vitrage.common.constants import VITRAGE
 from vitrage.entity_graph.states.normalized_resource_state import \
     NormalizedResourceState
 from vitrage.evaluator.actions.action_executor import ActionExecutor
@@ -33,7 +33,6 @@ from vitrage.synchronizer.plugins.base.alarm.properties \
     import AlarmProperties as AlarmProps
 from vitrage.tests.functional.entity_graph.base import \
     TestEntityGraphFunctionalBase
-
 
 LOG = logging.getLogger(__name__)
 
@@ -54,7 +53,7 @@ class TestActionExecutor(TestEntityGraphFunctionalBase):
         # Test Setup
         processor = self._create_processor_with_graph(self.conf)
 
-        vertex_attrs = {VProps.TYPE: EntityType.NOVA_HOST}
+        vertex_attrs = {VProps.TYPE: self.NOVA_HOST}
         host_vertices = processor.entity_graph.get_vertices(
             vertex_attr_filter=vertex_attrs)
         host_vertex_before = host_vertices[0]
@@ -101,21 +100,21 @@ class TestActionExecutor(TestEntityGraphFunctionalBase):
         # Test Setup
         processor = self._create_processor_with_graph(self.conf)
 
-        vertex_attrs = {VProps.TYPE: EntityType.NOVA_HOST}
+        vertex_attrs = {VProps.TYPE: self.NOVA_HOST}
         host_vertices = processor.entity_graph.get_vertices(
             vertex_attr_filter=vertex_attrs)
 
         host_1 = host_vertices[0]
         nagios_event1 = TestActionExecutor._get_nagios_event(
-            host_1.get(VProps.ID), EntityType.NOVA_HOST)
+            host_1.get(VProps.ID), self.NOVA_HOST)
         processor.process_event(nagios_event1)
 
         host_2 = host_vertices[1]
         nagios_event2 = TestActionExecutor._get_nagios_event(
-            host_2.get(VProps.ID), EntityType.NOVA_HOST)
+            host_2.get(VProps.ID), self.NOVA_HOST)
         processor.process_event(nagios_event2)
 
-        alarms_attrs = {VProps.TYPE: EntityType.NAGIOS}
+        alarms_attrs = {VProps.TYPE: self.NAGIOS}
         alarms_vertices = processor.entity_graph.get_vertices(
             vertex_attr_filter=alarms_attrs)
 
@@ -151,7 +150,7 @@ class TestActionExecutor(TestEntityGraphFunctionalBase):
         # Test Setup
         processor = self._create_processor_with_graph(self.conf)
 
-        vertex_attrs = {VProps.TYPE: EntityType.NOVA_HOST}
+        vertex_attrs = {VProps.TYPE: self.NOVA_HOST}
         host_vertices = processor.entity_graph.get_vertices(
             vertex_attr_filter=vertex_attrs)
 
@@ -167,7 +166,7 @@ class TestActionExecutor(TestEntityGraphFunctionalBase):
         # Raise alarm action adds new vertex with type vitrage to the graph
         action_spec = ActionSpecs(ActionType.RAISE_ALARM, targets, props)
 
-        alarm_vertex_attrs = {VProps.TYPE: EntityType.VITRAGE}
+        alarm_vertex_attrs = {VProps.TYPE: VITRAGE}
         before_alarms = processor.entity_graph.get_vertices(
             vertex_attr_filter=alarm_vertex_attrs)
         event_queue = Queue.Queue()
@@ -195,7 +194,7 @@ class TestActionExecutor(TestEntityGraphFunctionalBase):
 
         self.assertEqual(alarm.properties[VProps.CATEGORY],
                          EntityCategory.ALARM)
-        self.assertEqual(alarm.properties[VProps.TYPE], EntityType.VITRAGE)
+        self.assertEqual(alarm.properties[VProps.TYPE], VITRAGE)
         self.assertEqual(alarm.properties[VProps.SEVERITY],
                          props[TFields.SEVERITY])
         self.assertEqual(alarm.properties[VProps.NORMALIZED_SEVERITY],
@@ -208,7 +207,7 @@ class TestActionExecutor(TestEntityGraphFunctionalBase):
         # Test Setup
         processor = self._create_processor_with_graph(self.conf)
 
-        vertex_attrs = {VProps.TYPE: EntityType.NOVA_HOST}
+        vertex_attrs = {VProps.TYPE: self.NOVA_HOST}
         host_vertices = processor.entity_graph.get_vertices(
             vertex_attr_filter=vertex_attrs)
 
@@ -229,7 +228,7 @@ class TestActionExecutor(TestEntityGraphFunctionalBase):
 
         processor.process_event(add_vertex_event)
 
-        alarm_vertex_attrs = {VProps.TYPE: EntityType.VITRAGE,
+        alarm_vertex_attrs = {VProps.TYPE: VITRAGE,
                               VProps.IS_DELETED: False}
         before_alarms = processor.entity_graph.get_vertices(
             vertex_attr_filter=alarm_vertex_attrs)

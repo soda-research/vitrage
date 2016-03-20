@@ -12,7 +12,6 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from vitrage.common.constants import EntityType
 from vitrage.synchronizer.plugins.nova.base import NovaBase
 
 
@@ -28,7 +27,7 @@ class InstanceSynchronizer(NovaBase):
     def get_all(self, sync_mode):
         return self.make_pickleable(
             self.filter_instances(self.client.servers.list()),
-            EntityType.NOVA_INSTANCE,
+            self.NOVA_INSTANCE,
             sync_mode,
             ['manager'])
 

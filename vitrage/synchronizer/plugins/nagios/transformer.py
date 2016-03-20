@@ -16,7 +16,6 @@ from oslo_log import log as logging
 
 from vitrage.common.constants import EdgeLabels
 from vitrage.common.constants import EntityCategory
-from vitrage.common.constants import EntityType
 from vitrage.common.constants import SynchronizerProperties as SyncProps
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.common import datetime_utils
@@ -29,6 +28,7 @@ from vitrage.synchronizer.plugins.nagios.properties import NagiosProperties
 from vitrage.synchronizer.plugins import transformer_base as tbase
 
 LOG = logging.getLogger(__name__)
+NOVA_HOST = 'nova.host'
 
 
 class NagiosTransformer(BaseAlarmTransformer):
@@ -74,7 +74,7 @@ class NagiosTransformer(BaseAlarmTransformer):
             tbase.TIMESTAMP_FORMAT)
 
         resource_type = entity_event[NagiosProperties.RESOURCE_TYPE]
-        if resource_type == EntityType.NOVA_HOST or resource_type == 'switch':
+        if resource_type == NOVA_HOST or resource_type == 'switch':
             return [self._create_neighbor(
                 vitrage_id,
                 timestamp,

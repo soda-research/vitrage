@@ -18,13 +18,11 @@ from oslo_log import log
 from vitrage.common.constants import EdgeLabels
 from vitrage.common.constants import EdgeProperties as EProps
 from vitrage.common.constants import EntityCategory
-from vitrage.common.constants import EntityType
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.graph import create_algorithm
 from vitrage.graph import Direction
 
 LOG = log.getLogger(__name__)
-
 
 TOPOLOGY_QUERY = {
     'and': [
@@ -32,10 +30,10 @@ TOPOLOGY_QUERY = {
         {'==': {VProps.IS_DELETED: False}},
         {
             'or': [
-                {'==': {VProps.TYPE: EntityType.OPENSTACK_NODE}},
-                {'==': {VProps.TYPE: EntityType.NOVA_ZONE}},
-                {'==': {VProps.TYPE: EntityType.NOVA_HOST}},
-                {'==': {VProps.TYPE: EntityType.NOVA_INSTANCE}}
+                {'==': {VProps.TYPE: 'openstack.node'}},
+                {'==': {VProps.TYPE: 'nova.zone'}},
+                {'==': {VProps.TYPE: 'nova.host'}},
+                {'==': {VProps.TYPE: 'nova.instance'}}
             ]
         }
     ]

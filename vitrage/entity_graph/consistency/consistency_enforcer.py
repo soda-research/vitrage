@@ -18,8 +18,9 @@ import time
 from oslo_log import log
 
 from vitrage.common.constants import EntityCategory
-from vitrage.common.constants import EntityType
+from vitrage.common.constants import OPENSTACK_NODE
 from vitrage.common.constants import VertexProperties as VProps
+from vitrage.common.constants import VITRAGE
 from vitrage.common.datetime_utils import utcnow
 
 LOG = log.getLogger(__name__)
@@ -91,7 +92,7 @@ class ConsistencyEnforcer(object):
     def _find_stale_entities(self):
         query = {
             'and': [
-                {'!=': {VProps.TYPE: EntityType.VITRAGE}},
+                {'!=': {VProps.TYPE: VITRAGE}},
                 {'<': {VProps.SAMPLE_TIMESTAMP: str(utcnow() - timedelta(
                     seconds=2 * self.conf.consistency.interval))}}
             ]
@@ -118,7 +119,7 @@ class ConsistencyEnforcer(object):
         query = {
             'and': [
                 {'==': {VProps.CATEGORY: EntityCategory.ALARM}},
-                {'==': {VProps.TYPE: EntityType.VITRAGE}},
+                {'==': {VProps.TYPE: VITRAGE}},
                 {'<': {VProps.SAMPLE_TIMESTAMP: timestamp}}
             ]
         }
@@ -151,7 +152,7 @@ class ConsistencyEnforcer(object):
         return filter(
             lambda ver:
             not (ver[VProps.CATEGORY] == EntityCategory.RESOURCE and
-                 ver[VProps.TYPE] == EntityType.OPENSTACK_NODE), vertices)
+                 ver[VProps.TYPE] == OPENSTACK_NODE), vertices)
 
     def _wait_for_action(self, function):
         count_retries = 0

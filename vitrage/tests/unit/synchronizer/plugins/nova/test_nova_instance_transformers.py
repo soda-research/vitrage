@@ -18,7 +18,6 @@ from oslo_log import log as logging
 
 from vitrage.common.constants import EdgeLabels
 from vitrage.common.constants import EntityCategory
-from vitrage.common.constants import EntityType
 from vitrage.common.constants import EventAction
 from vitrage.common.constants import SynchronizerProperties as SyncProps
 from vitrage.common.constants import SyncMode
@@ -32,6 +31,7 @@ from vitrage.tests import base
 from vitrage.tests.mocks import mock_syncronizer as mock_sync
 
 LOG = logging.getLogger(__name__)
+NOVA_HOST = 'nova.host'
 
 
 class NovaInstanceTransformerTest(base.BaseTest):
@@ -41,7 +41,7 @@ class NovaInstanceTransformerTest(base.BaseTest):
 
         self.transformers = {}
         host_transformer = HostTransformer(self.transformers)
-        self.transformers[EntityType.NOVA_HOST] = host_transformer
+        self.transformers[NOVA_HOST] = host_transformer
 
     def test_create_placeholder_vertex(self):
         LOG.debug('Test create placeholder vertex')
@@ -216,7 +216,7 @@ class NovaInstanceTransformerTest(base.BaseTest):
         host_name = tbase.extract_field_value(event, it.HOST_NAME[sync_mode])
         time = event[SyncProps.SAMPLE_DATE]
 
-        ht = self.transformers[EntityType.NOVA_HOST]
+        ht = self.transformers[NOVA_HOST]
         properties = {
             VertexProperties.ID: host_name,
             VertexProperties.SAMPLE_TIMESTAMP: time
@@ -298,7 +298,7 @@ class NovaInstanceTransformerTest(base.BaseTest):
             vertex_id,
             host_name,
             time,
-            self.transformers[EntityType.NOVA_HOST]
+            self.transformers[NOVA_HOST]
         )
 
         # Test assertions
