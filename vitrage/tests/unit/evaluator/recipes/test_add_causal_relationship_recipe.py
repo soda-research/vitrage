@@ -30,6 +30,7 @@ LOG = logging.getLogger(__name__)
 
 class AddCausalRelationshipTest(base.BaseTest):
 
+    # noinspection PyPep8Naming
     @classmethod
     def setUpClass(cls):
 

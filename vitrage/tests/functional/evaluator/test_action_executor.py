@@ -39,6 +39,7 @@ LOG = logging.getLogger(__name__)
 
 class TestActionExecutor(TestEntityGraphFunctionalBase):
 
+    # noinspection PyPep8Naming
     @classmethod
     def setUpClass(cls):
         cls.conf = cfg.ConfigOpts()

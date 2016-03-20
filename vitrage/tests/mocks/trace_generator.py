@@ -12,7 +12,6 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-__author__ = 'erosensw'
 
 """
 Mock event generator.
@@ -27,6 +26,7 @@ from random import randint
 
 import exrex
 
+# noinspection PyPep8Naming
 from vitrage.tests.mocks.entity_model import BasicEntityModel as bem
 import vitrage.tests.mocks.utils as utils
 

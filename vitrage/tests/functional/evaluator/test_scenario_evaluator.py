@@ -39,6 +39,7 @@ class TestScenarioEvaluator(TestEntityGraphFunctionalBase):
                    ),
     ]
 
+    # noinspection PyPep8Naming
     @classmethod
     def setUpClass(cls):
         cls.conf = cfg.ConfigOpts()
