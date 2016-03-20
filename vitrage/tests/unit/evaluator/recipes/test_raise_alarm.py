@@ -30,6 +30,7 @@ LOG = logging.getLogger(__name__)
 
 class RaiseAlarmRecipeTest(base.BaseTest):
 
+    # noinspection PyPep8Naming
     @classmethod
     def setUpClass(cls):
 

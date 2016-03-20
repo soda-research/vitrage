@@ -28,6 +28,7 @@ LOG = logging.getLogger(__name__)
 # noinspection PyAttributeOutsideInit
 class TemplateValidatorTest(base.BaseTest):
 
+    # noinspection PyPep8Naming
     @classmethod
     def setUpClass(cls):
 

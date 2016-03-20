@@ -45,6 +45,7 @@ class TransformerManagerTest(base.BaseTest):
                     help='Names of supported synchronizer plugins'),
     ]
 
+    # noinspection PyPep8Naming
     @classmethod
     def setUpClass(cls):
         cls.conf = cfg.ConfigOpts()

@@ -34,6 +34,7 @@ class ScenarioRepositoryTest(base.BaseTest):
                    ),
     ]
 
+    # noinspection PyPep8Naming
     @classmethod
     def setUpClass(cls):
 

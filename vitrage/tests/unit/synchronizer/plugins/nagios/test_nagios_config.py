@@ -69,6 +69,7 @@ class TestNagiosConfig(base.BaseTest):
                              NON_EXISTING_MAPPING_2,
                              NON_EXISTING_MAPPING_3]
 
+    # noinspection PyPep8Naming
     @classmethod
     def setUpClass(cls):
         cls.conf = cfg.ConfigOpts()

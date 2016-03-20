@@ -27,6 +27,7 @@ LOG = logging.getLogger(__name__)
 
 class SetStateRecipeTest(base.BaseTest):
 
+    # noinspection PyPep8Naming
     @classmethod
     def setUpClass(cls):
 
