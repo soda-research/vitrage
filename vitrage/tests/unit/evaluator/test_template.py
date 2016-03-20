@@ -106,7 +106,7 @@ class BasicTemplateTest(base.BaseTest):
         """Validates scenario parsing
 
         Expects to single scenario:
-         1. condition consitsts from one variable (type EdgeDescription)
+         1. condition consists from one variable (type EdgeDescription)
          2. Actions - set state action
         :param scenarios: parsed scenarios
         :param scenarios_definition:
