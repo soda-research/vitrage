@@ -384,11 +384,11 @@ class GraphTest(GraphTestBase):
 
     def _check_callback_result(self, result, msg, exp_prev, exp_curr):
 
-        def assert_none_or_equals(exp, act, msg):
+        def assert_none_or_equals(exp, act, message):
             if exp:
-                self.assertEqual(exp, act, msg)
+                self.assertEqual(exp, act, message)
             else:
-                self.assertIsNone(act, msg)
+                self.assertIsNone(act, message)
 
         self.assertIsNotNone(result, msg + ' Callback was not called')
         assert_none_or_equals(exp_prev, result[0],
