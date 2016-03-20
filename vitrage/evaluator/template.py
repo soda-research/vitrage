@@ -200,16 +200,16 @@ class Template(object):
 
     def _extract_or_condition(self, or_condition):
 
-        vars = []
+        vars_ = []
         for var in or_condition.args:
 
             if isinstance(var, And):
-                vars.append(self._extract_and_condition(var))
+                vars_.append(self._extract_and_condition(var))
             else:
                 is_symbol = isinstance(var, Symbol)
-                vars.append([self._extract_condition_var(var, is_symbol)])
+                vars_.append([self._extract_condition_var(var, is_symbol)])
 
-        return vars
+        return vars_
 
     def _extract_and_condition(self, and_condition):
         return [self._extract_condition_var(arg, isinstance(arg, Symbol))

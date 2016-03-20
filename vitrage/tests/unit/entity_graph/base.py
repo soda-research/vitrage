@@ -120,7 +120,7 @@ class TestEntityGraphUnitBase(base.BaseTest):
             events_list[0][SyncProps.EVENT_TYPE] = event_type
 
         if properties is not None:
-            for key, value in properties.iteritems():
+            for key, value in properties.items():
                 events_list[0][key] = value
 
         return events_list[0]
