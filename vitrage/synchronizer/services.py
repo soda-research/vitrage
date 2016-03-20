@@ -81,7 +81,7 @@ class ChangesService(SynchronizerService):
                           callback=self._get_changes,
                           initial_delay=self.changes_interval)
 
-        LOG.info("Vitrage Synchronizer Changes Service For: %s - Strarted!",
+        LOG.info("Vitrage Synchronizer Changes Service For: %s - Started!",
                  self.registered_plugins[0].__class__.__name__)
 
     def stop(self, graceful=False):

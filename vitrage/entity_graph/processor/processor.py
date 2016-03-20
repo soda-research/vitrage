@@ -40,7 +40,7 @@ class Processor(processor.ProcessorBase):
     def process_event(self, event):
         """Decides which action to run on given event
 
-        Transforms the event into a tupple (vertex, neighbors,action).
+        Transforms the event into a tuple (vertex, neighbors,action).
         After transforming, it runs the correct action according to the
         action received from the transformer.
 

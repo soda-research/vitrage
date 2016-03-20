@@ -121,7 +121,7 @@ class TransformerBase(object):
          by synchronizer
 
          :param entity_event: an event provided by synchronizer
-         :return: neigbors - a list of neighbors
+         :return: neighbors - a list of neighbors
          :rtype:[]
          """
 

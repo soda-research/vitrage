@@ -31,7 +31,7 @@ class NagiosSynchronizerTest(NagiosBaseTest):
         cfg.StrOpt('config_file',
                    default=utils.get_resources_dir() +
                    '/nagios/nagios_conf.yaml',
-                   help='Nagios configuation file'
+                   help='Nagios configuration file'
                    ),
     ]
 

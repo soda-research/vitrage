@@ -96,7 +96,7 @@ class GraphTest(GraphTestBase):
         # Get it again
         v = g.get_vertex(v_node.vertex_id)
         self.assertFalse('KUKU' in v.properties,
-                         'Update value to None should entirly remove the key')
+                         'Update value to None should entirely remove the key')
 
         # check metadata
         another_vertex = utils.create_vertex(
