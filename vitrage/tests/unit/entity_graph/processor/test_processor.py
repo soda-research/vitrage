@@ -82,9 +82,8 @@ class TestProcessor(TestEntityGraphUnitBase):
 
     def test_update_entity_state(self):
         # create instance event with host neighbor and check validity
-        prop = {'status': 'STARTING'}
         (vertex, neighbors, processor) =\
-            self._create_and_check_entity(properties=prop)
+            self._create_and_check_entity(status='STARTING')
 
         # check added entity
         vertex = processor.entity_graph.get_vertex(vertex.vertex_id)
@@ -274,12 +273,12 @@ class TestProcessor(TestEntityGraphUnitBase):
         self.assertEqual(NormalizedResourceState.SUBOPTIMAL,
                          instances[5][0][VProps.AGGREGATED_STATE])
 
-    def _create_and_check_entity(self, properties={}, processor=None):
+    def _create_and_check_entity(self, processor=None, **kwargs):
         # create instance event with host neighbor
         (vertex, neighbors, processor) = self._create_entity(
             spec_type=self.INSTANCE_SPEC,
             sync_mode=SyncMode.INIT_SNAPSHOT,
-            properties=properties,
+            properties=kwargs,
             processor=processor)
 
         # check the data in the graph is correct

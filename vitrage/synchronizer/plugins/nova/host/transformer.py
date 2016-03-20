@@ -106,7 +106,7 @@ class HostTransformer(transformer_base.TransformerBase):
                 VProps.SAMPLE_TIMESTAMP: sample_timestamp
             }
             zone_neighbor = zone_transformer.create_placeholder_vertex(
-                properties)
+                **properties)
             relation_edge = graph_utils.create_edge(
                 source_id=zone_neighbor.vertex_id,
                 target_id=host_vertex_id,
@@ -129,17 +129,17 @@ class HostTransformer(transformer_base.TransformerBase):
         key_fields = self.key_values(host_name)
         return transformer_base.build_key(key_fields)
 
-    def create_placeholder_vertex(self, properties={}):
-        if VProps.ID not in properties:
+    def create_placeholder_vertex(self, **kwargs):
+        if VProps.ID not in kwargs:
             LOG.error('Cannot create placeholder vertex. Missing property ID')
             raise ValueError('Missing property ID')
 
-        key_fields = self.key_values(properties[VProps.ID])
+        key_fields = self.key_values(kwargs[VProps.ID])
 
         return graph_utils.create_vertex(
             transformer_base.build_key(key_fields),
-            entity_id=properties[VProps.ID],
+            entity_id=kwargs[VProps.ID],
             entity_category=EntityCategory.RESOURCE,
             entity_type=self.HOST_TYPE,
-            sample_timestamp=properties[VProps.SAMPLE_TIMESTAMP],
+            sample_timestamp=kwargs[VProps.SAMPLE_TIMESTAMP],
             is_placeholder=True)

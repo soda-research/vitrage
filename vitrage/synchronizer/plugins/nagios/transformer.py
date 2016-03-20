@@ -96,7 +96,8 @@ class NagiosTransformer(BaseAlarmTransformer):
                 VProps.ID: resource_name,
                 VProps.SAMPLE_TIMESTAMP: sample_timestamp
             }
-            resource_vertex = transformer.create_placeholder_vertex(properties)
+            resource_vertex = transformer.create_placeholder_vertex(
+                **properties)
 
             relationship_edge = graph_utils.create_edge(
                 source_id=vitrage_id,

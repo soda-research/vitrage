@@ -55,7 +55,7 @@ class NovaHostTransformerTest(base.BaseTest):
             VertexProperties.ID: host_name,
             VertexProperties.SAMPLE_TIMESTAMP: timestamp
         }
-        placeholder = host_transformer.create_placeholder_vertex(properties)
+        placeholder = host_transformer.create_placeholder_vertex(**properties)
 
         # Test assertions
         observed_id_values = placeholder.vertex_id.split(
@@ -134,7 +134,7 @@ class NovaHostTransformerTest(base.BaseTest):
             VertexProperties.ID: zone_name,
             VertexProperties.SAMPLE_TIMESTAMP: time
         }
-        expected_neighbor = zt.create_placeholder_vertex(properties)
+        expected_neighbor = zt.create_placeholder_vertex(**properties)
         self.assertEqual(expected_neighbor, zone.vertex)
 
         # Validate neighbor edge

@@ -56,7 +56,7 @@ class NovaInstanceTransformerTest(base.BaseTest):
         transformer = InstanceTransformer(self.transformers)
 
         # Test action
-        placeholder = transformer.create_placeholder_vertex(properties)
+        placeholder = transformer.create_placeholder_vertex(**properties)
 
         # Test assertions
         observed_id_values = placeholder.vertex_id.split(
@@ -221,7 +221,7 @@ class NovaInstanceTransformerTest(base.BaseTest):
             VertexProperties.ID: host_name,
             VertexProperties.SAMPLE_TIMESTAMP: time
         }
-        expected_neighbor = ht.create_placeholder_vertex(properties)
+        expected_neighbor = ht.create_placeholder_vertex(**properties)
         self.assertEqual(expected_neighbor, h_neighbor.vertex)
 
         # Validate neighbor edge

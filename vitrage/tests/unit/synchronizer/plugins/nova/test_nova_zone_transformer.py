@@ -55,7 +55,7 @@ class NovaZoneTransformerTest(base.BaseTest):
             VertexProperties.ID: zone_name,
             VertexProperties.SAMPLE_TIMESTAMP: timestamp
         }
-        placeholder = zone_transformer.create_placeholder_vertex(properties)
+        placeholder = zone_transformer.create_placeholder_vertex(**properties)
 
         # Test assertions
         observed_id_values = placeholder.vertex_id.split(

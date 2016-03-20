@@ -184,18 +184,18 @@ class ZoneTransformer(transformer_base.TransformerBase):
     def key_values(self, *args):
         return (EntityCategory.RESOURCE, self.ZONE_TYPE) + args
 
-    def create_placeholder_vertex(self, properties={}):
-        if VProps.ID not in properties:
+    def create_placeholder_vertex(self, **kwargs):
+        if VProps.ID not in kwargs:
             LOG.error('Cannot create placeholder vertex. Missing property ID')
             raise ValueError('Missing property ID')
 
         key = transformer_base.build_key(
-            self.key_values(properties[VProps.ID]))
+            self.key_values(kwargs[VProps.ID]))
 
         return graph_utils.create_vertex(
             key,
-            entity_id=properties[VProps.ID],
+            entity_id=kwargs[VProps.ID],
             entity_category=EntityCategory.RESOURCE,
             entity_type=self.ZONE_TYPE,
-            sample_timestamp=properties[VProps.SAMPLE_TIMESTAMP],
+            sample_timestamp=kwargs[VProps.SAMPLE_TIMESTAMP],
             is_placeholder=True)

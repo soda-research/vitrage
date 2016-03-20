@@ -149,12 +149,12 @@ class TransformerBase(object):
         pass
 
     @abc.abstractmethod
-    def create_placeholder_vertex(self, properties={}):
+    def create_placeholder_vertex(self, **kwargs):
         """Creates placeholder vertex.
 
         Placeholder vertex contains only mandatory fields
 
-        :param properties: the properties for the placeholder vertex
+        :param kwargs: the properties for the placeholder vertex
         :return: Placeholder vertex
         :rtype: Vertex
         """

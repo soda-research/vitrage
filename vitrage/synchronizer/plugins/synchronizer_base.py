@@ -44,11 +44,11 @@ class SynchronizerBase(object):
         pass
 
     def make_pickleable(self, entities, sync_type,
-                        sync_mode, fields_to_remove=[]):
+                        sync_mode, *args):
         pickleable_entities = []
 
         for entity in entities:
-            for field in fields_to_remove:
+            for field in args:
                 entity.pop(field)
 
             self._add_sync_type(entity, sync_type)

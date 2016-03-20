@@ -132,5 +132,5 @@ class EvaluatorEventTransformer(transformer_base.TransformerBase):
     def key_values(self, *args):
         return (EntityCategory.ALARM, VITRAGE_TYPE) + args
 
-    def create_placeholder_vertex(self, properties={}):
+    def create_placeholder_vertex(self, **kwargs):
         LOG.info('Evaluator does not create placeholders')

@@ -89,7 +89,8 @@ class StaticPhysicalTransformer(transformer_base.TransformerBase):
                 VProps.ID: neighbor_id,
                 VProps.SAMPLE_TIMESTAMP: sample_timestamp
             }
-            neighbor = entity_transformer.create_placeholder_vertex(properties)
+            neighbor = entity_transformer.create_placeholder_vertex(
+                **properties)
 
             relation_edge = graph_utils.create_edge(
                 source_id=neighbor.vertex_id if is_source else entity_key,
@@ -130,24 +131,24 @@ class StaticPhysicalTransformer(transformer_base.TransformerBase):
     def key_values(self, *args):
         return (EntityCategory.RESOURCE,) + args
 
-    def create_placeholder_vertex(self, properties={}):
-        if VProps.TYPE not in properties:
+    def create_placeholder_vertex(self, **kwargs):
+        if VProps.TYPE not in kwargs:
             LOG.error("Can't create placeholder vertex. Missing property TYPE")
             raise ValueError('Missing property TYPE')
 
-        if VProps.ID not in properties:
+        if VProps.ID not in kwargs:
             LOG.error("Can't create placeholder vertex. Missing property ID")
             raise ValueError('Missing property ID')
 
-        key_fields = self.key_values(properties[VProps.TYPE],
-                                     properties[VProps.ID])
+        key_fields = self.key_values(kwargs[VProps.TYPE],
+                                     kwargs[VProps.ID])
 
         return graph_utils.create_vertex(
             transformer_base.build_key(key_fields),
-            entity_id=properties[VProps.ID],
+            entity_id=kwargs[VProps.ID],
             entity_category=EntityCategory.RESOURCE,
-            entity_type=properties[VProps.TYPE],
-            sample_timestamp=properties[VProps.SAMPLE_TIMESTAMP],
+            entity_type=kwargs[VProps.TYPE],
+            sample_timestamp=kwargs[VProps.SAMPLE_TIMESTAMP],
             is_placeholder=True)
 
     @staticmethod

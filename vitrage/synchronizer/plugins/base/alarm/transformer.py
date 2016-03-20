@@ -31,7 +31,7 @@ class BaseAlarmTransformer(tbase.TransformerBase):
     def _ok_status(self, entity_event):
         pass
 
-    def create_placeholder_vertex(self, properties={}):
+    def create_placeholder_vertex(self, **kwargs):
         LOG.info('An alarm cannot be a placeholder')
         pass
 

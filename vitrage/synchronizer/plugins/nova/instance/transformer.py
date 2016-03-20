@@ -180,7 +180,7 @@ class InstanceTransformer(transformer_base.TransformerBase):
             VProps.ID: host_name,
             VProps.SAMPLE_TIMESTAMP: sample_timestamp
         }
-        host_vertex = host_transformer.create_placeholder_vertex(properties)
+        host_vertex = host_transformer.create_placeholder_vertex(**properties)
 
         relationship_edge = graph_utils.create_edge(
             source_id=host_vertex.vertex_id,
@@ -189,19 +189,19 @@ class InstanceTransformer(transformer_base.TransformerBase):
 
         return transformer_base.Neighbor(host_vertex, relationship_edge)
 
-    def create_placeholder_vertex(self, properties={}):
-        if VProps.ID not in properties:
+    def create_placeholder_vertex(self, **kwargs):
+        if VProps.ID not in kwargs:
             LOG.error('Cannot create placeholder vertex. Missing property ID')
             raise ValueError('Missing property ID')
 
-        key_fields = self.key_values(properties[VProps.ID])
+        key_fields = self.key_values(kwargs[VProps.ID])
 
         return graph_utils.create_vertex(
             transformer_base.build_key(key_fields),
-            entity_id=properties[VProps.ID],
+            entity_id=kwargs[VProps.ID],
             entity_category=EntityCategory.RESOURCE,
             entity_type=self.INSTANCE_TYPE,
-            sample_timestamp=properties[VProps.SAMPLE_TIMESTAMP],
+            sample_timestamp=kwargs[VProps.SAMPLE_TIMESTAMP],
             is_placeholder=True)
 
     def key_values(self, *args):
