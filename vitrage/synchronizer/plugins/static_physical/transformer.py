@@ -52,8 +52,8 @@ class StaticPhysicalTransformer(transformer_base.TransformerBase):
             entity_id=entity_id,
             entity_category=EntityCategory.RESOURCE,
             entity_type=sync_type,
-            update_timestamp=update_timestamp,
             sample_timestamp=sample_timestamp,
+            update_timestamp=update_timestamp,
             entity_state=state,
             metadata=metadata)
 

@@ -121,8 +121,8 @@ class InstanceTransformer(transformer_base.TransformerBase):
             entity_category=EntityCategory.RESOURCE,
             entity_type=self.INSTANCE_TYPE,
             entity_state=state,
-            update_timestamp=update_timestamp,
             sample_timestamp=sample_timestamp,
+            update_timestamp=update_timestamp,
             metadata=metadata)
 
     def _create_neighbors(self, entity_event):

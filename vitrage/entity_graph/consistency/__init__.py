@@ -16,10 +16,6 @@ from oslo_config import cfg
 
 
 OPTS = [
-    cfg.IntOpt('interval',
-               default=720,
-               min=10,
-               help='interval between consistency checks (in seconds)'),
     cfg.IntOpt('min_time_to_delete',
                default=60,
                min=60,

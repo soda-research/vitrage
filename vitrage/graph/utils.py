@@ -24,8 +24,8 @@ def create_vertex(vitrage_id,
                   entity_type=None,
                   entity_state=None,
                   is_deleted=False,
-                  update_timestamp=None,
                   sample_timestamp=None,
+                  update_timestamp=None,
                   is_placeholder=False,
                   metadata=None):
     """A builder to create a vertex

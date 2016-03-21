@@ -68,8 +68,8 @@ class HostTransformer(transformer_base.TransformerBase):
             entity_id=host_name,
             entity_category=EntityCategory.RESOURCE,
             entity_type=self.HOST_TYPE,
-            update_timestamp=update_timestamp,
             sample_timestamp=sample_timestamp,
+            update_timestamp=update_timestamp,
             metadata=metadata)
 
     def _create_neighbors(self, entity_event):

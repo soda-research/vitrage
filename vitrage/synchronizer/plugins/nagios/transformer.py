@@ -61,8 +61,8 @@ class NagiosTransformer(BaseAlarmTransformer):
             entity_category=EntityCategory.ALARM,
             entity_type=entity_event[SyncProps.SYNC_TYPE],
             entity_state=AlarmProps.ALARM_ACTIVE_STATE,
-            update_timestamp=update_timestamp,
             sample_timestamp=sample_timestamp,
+            update_timestamp=update_timestamp,
             metadata=metadata)
 
     def _create_neighbors(self, entity_event):
