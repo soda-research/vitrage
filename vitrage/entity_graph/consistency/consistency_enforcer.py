@@ -94,7 +94,7 @@ class ConsistencyEnforcer(object):
             'and': [
                 {'!=': {VProps.TYPE: VITRAGE}},
                 {'<': {VProps.SAMPLE_TIMESTAMP: str(utcnow() - timedelta(
-                    seconds=2 * self.conf.consistency.interval))}}
+                    seconds=2 * self.conf.synchronizer.snapshots_interval))}}
             ]
         }
 

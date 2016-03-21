@@ -68,8 +68,8 @@ class EvaluatorEventTransformer(transformer_base.TransformerBase):
                 self.extract_key(event),
                 entity_category=EntityCategory.ALARM,
                 entity_type=VITRAGE_TYPE,
-                update_timestamp=event[VProps.UPDATE_TIMESTAMP],
                 sample_timestamp=event[VProps.SAMPLE_TIMESTAMP],
+                update_timestamp=event[VProps.UPDATE_TIMESTAMP],
                 metadata=metadata)
 
         return None

@@ -38,9 +38,6 @@ from vitrage.tests.mocks import utils
 class TestConsistencyFunctional(TestEntityGraphFunctionalBase):
 
     CONSISTENCY_OPTS = [
-        cfg.IntOpt('interval',
-                   default=1,
-                   min=1),
         cfg.IntOpt('min_time_to_delete',
                    default=1,
                    min=1),
@@ -49,6 +46,12 @@ class TestConsistencyFunctional(TestEntityGraphFunctionalBase):
                    min=1),
         cfg.IntOpt('initialization_max_retries',
                    default=10),
+    ]
+
+    SYNCHRONIZER_OPTS = [
+        cfg.IntOpt('snapshots_interval',
+                   default=1,
+                   min=1),
     ]
 
     EVALUATOR_OPTS = [
@@ -68,6 +71,7 @@ class TestConsistencyFunctional(TestEntityGraphFunctionalBase):
         self.conf.register_opts(self.CONSISTENCY_OPTS, group='consistency')
         self.conf.register_opts(self.PROCESSOR_OPTS, group='entity_graph')
         self.conf.register_opts(self.EVALUATOR_OPTS, group='evaluator')
+        self.conf.register_opts(self.SYNCHRONIZER_OPTS, group='synchronizer')
         self.conf.register_opts(self.PLUGINS_OPTS,
                                 group='synchronizer_plugins')
         self.load_plugins(self.conf)
@@ -139,7 +143,7 @@ class TestConsistencyFunctional(TestEntityGraphFunctionalBase):
 
     def test_periodic_process(self):
         # Setup
-        consistency_interval = self.conf.consistency.interval
+        consistency_interval = self.conf.synchronizer.snapshots_interval
         self._periodic_process_setup_stage(consistency_interval)
 
         # Action

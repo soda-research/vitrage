@@ -47,9 +47,10 @@ class VitrageGraphConsistencyService(os_service.Service):
                                               self.evaluator,
                                               self.entity_graph,
                                               self.initialization_status)
-        self.tg.add_timer(self.conf.consistency.interval,
+        self.tg.add_timer(self.conf.synchronizer.snapshots_interval,
                           consistency_enf.periodic_process,
-                          initial_delay=self.conf.consistency.interval)
+                          initial_delay=60 +
+                          self.conf.synchronizer.snapshots_interval)
 
         initializing_process_thread = \
             threading.Thread(target=consistency_enf.initializing_process)
