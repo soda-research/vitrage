@@ -64,6 +64,7 @@ class TestConsistencyFunctional(TestEntityGraphFunctionalBase):
                    ),
     ]
 
+    # noinspection PyAttributeOutsideInit
     def setUp(self):
         super(TestConsistencyFunctional, self).setUp()
         self.initialization_status = InitializationStatus()

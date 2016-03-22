@@ -125,6 +125,7 @@ class EventTraceGenerator(object):
 def generate_data_stream(models, event_num=100):
     """Generates a list of events.
 
+    :param models:
     :param event_num: number of events to generate
     :type event_num: int
     :return: list of generated events
@@ -142,6 +143,7 @@ def generate_data_stream(models, event_num=100):
 def generate_round_robin_data_stream(models, event_num=100):
     """Generates a list of events.
 
+    :param models:
     :param event_num: number of events to generate
     :type event_num: int
     :return: list of generated events
@@ -417,6 +419,7 @@ def combine_data(static_info_re, mapping_info, external_info):
 def get_trace_generators(entity_spec_list, default_events=100):
     """Returns a collection of event generators.
 
+    :param default_events:
     :param entity_spec_list: list of generator specs.
     :type entity_spec_list: list
     :return: list of generators

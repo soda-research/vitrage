@@ -22,7 +22,7 @@ from vitrage.entity_graph.states.normalized_alarm_severity \
 class AlarmNormalizator(NormalizatorBase):
 
     def __init__(self):
-        pass
+        super(AlarmNormalizator, self).__init__()
 
     def important_states(self):
         return ImportantStates(NormalizedAlarmSeverity.UNKNOWN,

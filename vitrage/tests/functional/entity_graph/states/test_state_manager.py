@@ -29,6 +29,7 @@ from vitrage.tests.functional.entity_graph.base import \
 
 class TestStateManagerFunctional(TestEntityGraphFunctionalBase):
 
+    # noinspection PyAttributeOutsideInit
     def setUp(self):
         super(TestStateManagerFunctional, self).setUp()
         self.conf = cfg.ConfigOpts()

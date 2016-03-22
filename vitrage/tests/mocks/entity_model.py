@@ -12,7 +12,6 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-__author__ = 'erosensw'
 
 from vitrage.tests.mocks.utils import generate_vals
 from vitrage.tests.mocks.utils import merge_vals

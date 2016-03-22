@@ -22,6 +22,7 @@ def create_graph(name, root_id=None):
 
     For now only return NXGraph
 
+    :param root_id:
     :type name: str
     :rtype: Graph
     """

@@ -35,6 +35,7 @@ NOVA_ZONE = 'nova.zone'
 
 class NovaHostTransformerTest(base.BaseTest):
 
+    # noinspection PyAttributeOutsideInit
     def setUp(self):
         super(NovaHostTransformerTest, self).setUp()
 

@@ -69,6 +69,7 @@ class TestStaticPhysicalSynchronizer(base.BaseTest):
                    '/static_plugins/changes_plugins'),
     ]
 
+    # noinspection PyAttributeOutsideInit
     def setUp(self):
         super(TestStaticPhysicalSynchronizer, self).setUp()
         self.conf = cfg.ConfigOpts()
@@ -102,10 +103,9 @@ class TestStaticPhysicalSynchronizer(base.BaseTest):
         entities = self.static_physical_synchronizer.get_all(SyncMode.UPDATE)
         self.assertEqual(5, len(entities))
 
-        self.conf = cfg.ConfigOpts()
-        self.conf.register_opts(self.CHANGES_OPTS,
-                                group=STATIC_PHYSICAL)
-        self.static_physical_synchronizer.cfg = self.conf
+        conf = cfg.ConfigOpts()
+        conf.register_opts(self.CHANGES_OPTS, group=STATIC_PHYSICAL)
+        self.static_physical_synchronizer.cfg = conf
 
         # Action
         changes = self.static_physical_synchronizer.get_changes(

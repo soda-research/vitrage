@@ -149,13 +149,13 @@ class Graph(object):
         Fetch an edge from the graph, according to its two vertices and label
 
         :param source_id: vertex id of the source vertex
-        :type source_id: str
+        :type source_id: str or None
 
         :param target_id: vertex id of the target vertex
         :type target_id: str
 
         :param label: the label property of the edge
-        :type label: str
+        :type label: str or None
 
         :return: The edge between the two vertices or None
         :rtype: Edge
@@ -310,6 +310,7 @@ class Graph(object):
                                vertex_attr_filter={'prop_key':['YES', 'CAT']},
                                edge_attr_filter={'LABEL':['ON', 'WITH']})
 
+        :param direction:
         :param v_id: vertex id
         :type v_id: str
         :param vertex_attr_filter: expected keys and values

@@ -81,6 +81,7 @@ def create_edge(source_id,
                 metadata=None):
     """A builder to create an edge
 
+    :param update_timestamp:
     :param source_id:
     :type source_id: str
     :param target_id:

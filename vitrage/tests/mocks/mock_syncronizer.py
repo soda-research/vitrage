@@ -47,9 +47,6 @@ def generate_random_events_list(generator_spec_list):
      :param generator_spec_list: list of generators
      :type generator_spec_list: list
 
-     :param default_num: default number of events to generate
-     :type default_num: list
-
      :return list of synchronizer events
      :rtype list
 
@@ -71,9 +68,6 @@ def generate_sequential_events_list(generator_spec_list):
 
      :param generator_spec_list: list of generators
      :type generator_spec_list: list
-
-     :param default_num: default number of events to generate
-     :type default_num: list
 
      :return list of synchronizer events
      :rtype list
@@ -239,7 +233,7 @@ def simple_nagios_alarm_generators(host_num,
     Returns generators for a given number of Nagios alarms.
 
     :param host_num: number of hosts
-    :param snapshot_events: number of snapshot alarms per hosts
+    :param events_num: number of snapshot alarms per hosts
     :param snap_vals: preset vals for ALL snapshot events
     :return: generators for zone_num zones as specified
     """

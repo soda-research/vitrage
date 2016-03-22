@@ -22,6 +22,7 @@ from vitrage.tests.unit.entity_graph.base import TestEntityGraphUnitBase
 
 class TestBaseProcessor(TestEntityGraphUnitBase):
 
+    # noinspection PyAttributeOutsideInit
     def setUp(self):
         super(TestBaseProcessor, self).setUp()
         self.conf = cfg.ConfigOpts()

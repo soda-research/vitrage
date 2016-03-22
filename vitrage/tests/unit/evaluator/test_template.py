@@ -109,7 +109,7 @@ class BasicTemplateTest(base.BaseTest):
          1. condition consists from one variable (type EdgeDescription)
          2. Actions - set state action
         :param scenarios: parsed scenarios
-        :param scenarios_definition:
+        :param entities
         """
         self.assertIsNotNone(scenarios)
         self.assertEqual(len(scenarios), 1)

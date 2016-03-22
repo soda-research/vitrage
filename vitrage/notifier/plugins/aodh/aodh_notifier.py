@@ -45,6 +45,7 @@ class AodhNotifier(NotifierBase):
         elif event_type == NotifierEventTypes.ACTIVATE_DEDUCED_ALARM_EVENT:
             self._activate_aodh_alarm(data)
 
+    # noinspection PyMethodMayBeStatic
     def _activate_aodh_alarm(self, data):
         LOG.info('### Activate aodh alarm')
         # alarm_name = aodh_alarm_name_generator(
@@ -84,6 +85,7 @@ class AodhNotifier(NotifierBase):
         # user_id
         # time_constraints
 
+    # noinspection PyMethodMayBeStatic
     def _deactivate_aodh_alarm(self, data):
         LOG.info('### Deactivate aodh alarm')
         # try:

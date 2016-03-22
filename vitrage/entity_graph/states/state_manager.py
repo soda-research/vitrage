@@ -204,8 +204,8 @@ class StateManager(object):
 
     @staticmethod
     def _get_all_local_variables_of_class(class_instance):
-        return [attr for attr in dir(class_instance) if not callable(attr)
-                and not attr.startswith("__")]
+        return [attr for attr in dir(class_instance) if not callable(attr) and
+                not attr.startswith("__")]
 
     def _is_all_plugins_states_exists(self, states_plugins, error_plugins):
         plugins = self.conf.synchronizer_plugins.plugin_type

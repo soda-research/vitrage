@@ -51,6 +51,7 @@ class TestStateManager(base.BaseTest):
         for plugin_name in conf.synchronizer_plugins.plugin_type:
             load_plugin(conf, plugin_name)
 
+    # noinspection PyAttributeOutsideInit
     def setUp(self):
         super(TestStateManager, self).setUp()
         self.conf = cfg.ConfigOpts()

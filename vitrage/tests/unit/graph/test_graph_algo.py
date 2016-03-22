@@ -291,8 +291,8 @@ class GraphAlgorithmTest(GraphTestBase):
         mappings = ga.sub_graph_matching(t, [
             Mapping(t_v_host, host_vertex, is_vertex=True)])
         self.assertEqual(
-            ENTITY_GRAPH_VMS_PER_HOST * ENTITY_GRAPH_ALARMS_PER_VM
-            * ENTITY_GRAPH_ALARMS_PER_HOST,
+            ENTITY_GRAPH_VMS_PER_HOST * ENTITY_GRAPH_ALARMS_PER_VM *
+            ENTITY_GRAPH_ALARMS_PER_HOST,
             len(mappings),
             'Template - Four connected vertices'
             '(host alarm -ON-> host -CONTAINS-> instance <-ON- instance alarm)'
@@ -316,19 +316,19 @@ class GraphAlgorithmTest(GraphTestBase):
             len(mappings),
             'Template - Five connected vertices'
             '(host alarm -ON-> host -CONTAINS-> instance <-ON- instance alarm'
-            ',host -USES-> switch) template_root is a specific instance alarm '
-            + str(mappings))
+            ',host -USES-> switch) template_root '
+            'is a specific instance alarm ' + str(mappings))
 
         mappings = ga.sub_graph_matching(t, [
             Mapping(t_v_host, host_vertex, is_vertex=True)])
         self.assertEqual(
-            ENTITY_GRAPH_VMS_PER_HOST * ENTITY_GRAPH_ALARMS_PER_VM
-            * ENTITY_GRAPH_ALARMS_PER_HOST,
+            ENTITY_GRAPH_VMS_PER_HOST * ENTITY_GRAPH_ALARMS_PER_VM *
+            ENTITY_GRAPH_ALARMS_PER_HOST,
             len(mappings),
             'Template - Five connected vertices'
             '(host alarm -ON-> host -CONTAINS-> instance <-ON- instance alarm'
-            ',host -USES-> switch) template_root is a specific host '
-            + str(mappings))
+            ',host -USES-> switch) template_root is a specific host ' +
+            str(mappings))
 
         mappings = ga.sub_graph_matching(t, [
             Mapping(t_v_switch, v_switch, is_vertex=True),
@@ -338,8 +338,8 @@ class GraphAlgorithmTest(GraphTestBase):
             len(mappings),
             'Template - Five connected vertices, two mappings given'
             '(host alarm -ON-> host -CONTAINS-> instance <-ON- instance alarm'
-            ',host -USES-> switch) template_root is a specific host '
-            + str(mappings))
+            ',host -USES-> switch) template_root is a specific host ' +
+            str(mappings))
 
         t.add_vertex(t_v_node_not_in_graph)
         t.add_edge(e_host_to_node_not_in_graph)
@@ -350,8 +350,8 @@ class GraphAlgorithmTest(GraphTestBase):
             len(mappings),
             'Template - Five connected vertices and a invalid edge'
             '(host alarm -ON-> host -CONTAINS-> instance <-ON- instance alarm'
-            ',host -USES-> switch) template_root is a instance alarm '
-            + str(mappings))
+            ',host -USES-> switch) template_root is a instance alarm ' +
+            str(mappings))
         t.remove_vertex(t_v_node_not_in_graph)
 
         t.remove_vertex(t_v_host_alarm)

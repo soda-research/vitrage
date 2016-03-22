@@ -29,6 +29,7 @@ LOG = log.getLogger(__name__)
 class Processor(processor.ProcessorBase):
 
     def __init__(self, conf, initialization_status, e_graph=None):
+        super(Processor, self).__init__()
         self.conf = conf
         self.transformer_manager = TransformerManager(self.conf)
         self.state_manager = StateManager(self.conf)
