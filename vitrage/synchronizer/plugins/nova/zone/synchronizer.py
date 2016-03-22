@@ -31,7 +31,7 @@ class ZoneSynchronizer(NovaBase):
             self.client.availability_zones.list()),
             self.NOVA_ZONE,
             sync_mode,
-            ['manager'])
+            'manager')
 
     def get_changes(self, sync_mode):
         pass

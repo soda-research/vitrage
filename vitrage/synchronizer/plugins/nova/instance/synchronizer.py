@@ -29,7 +29,7 @@ class InstanceSynchronizer(NovaBase):
             self.filter_instances(self.client.servers.list()),
             self.NOVA_INSTANCE,
             sync_mode,
-            ['manager'])
+            'manager')
 
     def get_changes(self, sync_mode):
         pass

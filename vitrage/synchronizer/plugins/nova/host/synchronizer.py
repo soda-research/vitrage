@@ -31,7 +31,7 @@ class HostSynchronizer(NovaBase):
             self.filter_none_compute_hosts(self.client.hosts.list()),
             self.NOVA_HOST,
             sync_mode,
-            ['manager'])
+            'manager')
 
     def get_changes(self, sync_mode):
         pass
