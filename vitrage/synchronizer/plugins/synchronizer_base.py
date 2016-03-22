@@ -11,13 +11,18 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+
 import abc
 import six
+
+from oslo_log import log
 
 from vitrage.common.constants import EventAction
 from vitrage.common.constants import SynchronizerProperties as SyncProps
 from vitrage.common.constants import SyncMode
 from vitrage.common import datetime_utils
+
+LOG = log.getLogger(__name__)
 
 
 @six.add_metaclass(abc.ABCMeta)
@@ -39,7 +44,6 @@ class SynchronizerBase(object):
         }
         return end_message
 
-    @abc.abstractmethod
     def get_changes(self, sync_mode):
         pass
 

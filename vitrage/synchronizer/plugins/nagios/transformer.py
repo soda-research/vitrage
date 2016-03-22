@@ -57,7 +57,7 @@ class NagiosTransformer(BaseAlarmTransformer):
         }
 
         return graph_utils.create_vertex(
-            self.extract_key(entity_event),
+            self._create_entity_key(entity_event),
             entity_category=EntityCategory.ALARM,
             entity_type=entity_event[SyncProps.SYNC_TYPE],
             entity_state=AlarmProps.ALARM_ACTIVE_STATE,
@@ -67,7 +67,7 @@ class NagiosTransformer(BaseAlarmTransformer):
 
     def _create_neighbors(self, entity_event):
 
-        vitrage_id = self.extract_key(entity_event)
+        vitrage_id = self._create_entity_key(entity_event)
         timestamp = datetime_utils.change_time_str_format(
             entity_event[NagiosProperties.LAST_CHECK],
             '%Y-%m-%d %H:%M:%S',
@@ -112,11 +112,11 @@ class NagiosTransformer(BaseAlarmTransformer):
     def _ok_status(self, entity_event):
         return entity_event[NagiosProperties.STATUS] == self.STATUS_OK
 
-    def extract_key(self, entity_event):
+    def _create_entity_key(self, entity_event):
 
         sync_type = entity_event[SyncProps.SYNC_TYPE]
         alarm_name = entity_event[NagiosProperties.SERVICE]
         resource_name = entity_event[NagiosProperties.RESOURCE_NAME]
-        return tbase.build_key(self.key_values(sync_type,
-                                               resource_name,
-                                               alarm_name))
+        return tbase.build_key(self._key_values(sync_type,
+                                                resource_name,
+                                                alarm_name))

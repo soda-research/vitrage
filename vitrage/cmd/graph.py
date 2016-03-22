@@ -28,7 +28,7 @@ from vitrage.entity_graph import service as entity_graph_svc
 from vitrage.evaluator.scenario_evaluator import ScenarioEvaluator
 from vitrage.evaluator.scenario_repository import ScenarioRepository
 from vitrage import service
-from vitrage.synchronizer import launcher as synchronizer_launcher
+from vitrage.synchronizer import launcher as synchronizers_launcher
 
 
 def main():
@@ -42,8 +42,9 @@ def main():
 
     conf, event_queue, evaluator, e_graph, initialization_status = init()
     launcher = os_service.ServiceLauncher(conf)
-    synchronizer = synchronizer_launcher.Launcher(
-        conf, synchronizer_launcher.create_send_to_queue_callback(event_queue))
+    synchronizers = synchronizers_launcher.Launcher(
+        conf,
+        synchronizers_launcher.create_send_to_queue_callback(event_queue))
 
     launcher.launch_service(entity_graph_svc.VitrageGraphService(
         conf, event_queue, evaluator, e_graph, initialization_status))
@@ -51,7 +52,7 @@ def main():
     launcher.launch_service(api_handler_svc.VitrageApiHandlerService(
         conf, e_graph))
 
-    synchronizer.launch()
+    synchronizers.launch()
 
     launcher.launch_service(consistency_svc.VitrageGraphConsistencyService(
         conf, event_queue, evaluator, e_graph, initialization_status))

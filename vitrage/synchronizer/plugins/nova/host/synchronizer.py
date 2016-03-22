@@ -32,6 +32,3 @@ class HostSynchronizer(NovaBase):
             self.NOVA_HOST,
             sync_mode,
             'manager')
-
-    def get_changes(self, sync_mode):
-        pass

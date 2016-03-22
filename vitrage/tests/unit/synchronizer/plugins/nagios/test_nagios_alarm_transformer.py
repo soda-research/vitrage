@@ -53,7 +53,7 @@ class NagiosTransformerTest(base.BaseTest):
 
         event = nagios_alarms[0]
         # Test action
-        observed_key = transformer.extract_key(event)
+        observed_key = transformer._create_entity_key(event)
 
         # Test assertions
         observed_key_fields = observed_key.split(
@@ -136,6 +136,7 @@ class NagiosTransformerTest(base.BaseTest):
         edge = neighbor.edge
         self.assertEqual(EdgeLabels.ON, edge.label)
 
-        alarm_key = NagiosTransformer(self.transformers).extract_key(event)
+        alarm_key = \
+            NagiosTransformer(self.transformers)._create_entity_key(event)
         self.assertEqual(alarm_key, edge.source_id)
         self.assertEqual(host_vertex.vertex_id, edge.target_id)

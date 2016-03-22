@@ -48,7 +48,7 @@ class TestStateManagerFunctional(TestEntityGraphFunctionalBase):
 
         # test assertions
         instance_transformer = InstanceTransformer({})
-        vitrage_id = instance_transformer.extract_key(event)
+        vitrage_id = instance_transformer._create_entity_key(event)
         vertex = processor.entity_graph.get_vertex(vitrage_id)
         self.assertEqual(NormalizedResourceState.RUNNING,
                          vertex[VProps.AGGREGATED_STATE])

@@ -60,7 +60,8 @@ class NovaHostTransformerTest(base.BaseTest):
         # Test assertions
         observed_id_values = placeholder.vertex_id.split(
             TransformerBase.KEY_SEPARATOR)
-        expected_id_values = host_transformer.key_values(host_name)
+        expected_id_values = host_transformer._key_values('nova.host',
+                                                          host_name)
         self.assertEqual(tuple(observed_id_values), expected_id_values)
 
         observed_time = placeholder.get(VertexProperties.SAMPLE_TIMESTAMP)
@@ -87,7 +88,8 @@ class NovaHostTransformerTest(base.BaseTest):
         host_transformer = HostTransformer(self.transformers)
 
         # Test action
-        observed_key_fields = host_transformer.key_values(host_name)
+        observed_key_fields = host_transformer._key_values('nova.host',
+                                                           host_name)
 
         # Test assertions
         self.assertEqual(EntityCategory.RESOURCE, observed_key_fields[0])
@@ -142,7 +144,7 @@ class NovaHostTransformerTest(base.BaseTest):
         self.assertEqual(edge.source_id, zone.vertex.vertex_id)
         self.assertEqual(
             edge.target_id,
-            HostTransformer(self.transformers).extract_key(event)
+            HostTransformer(self.transformers)._create_entity_key(event)
         )
         self.assertEqual(edge.label, EdgeLabels.CONTAINS)
 

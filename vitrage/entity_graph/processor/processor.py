@@ -89,7 +89,8 @@ class Processor(processor.ProcessorBase):
 
         if (not graph_vertex) or self.entity_graph.check_update_validation(
                 graph_vertex, updated_vertex):
-            self.entity_graph.update_vertex(updated_vertex)
+            self.entity_graph.update_entity_graph_vertex(graph_vertex,
+                                                         updated_vertex)
             self._update_neighbors(updated_vertex, neighbors)
         else:
             LOG.info("Update event arrived on invalid resource: %s",
@@ -187,7 +188,8 @@ class Processor(processor.ProcessorBase):
                 if self.entity_graph.can_update_vertex(graph_vertex, vertex):
                     LOG.debug("Updates vertex: %s", vertex)
                     self._calculate_aggregated_state(vertex, action)
-                    self.entity_graph.update_vertex(vertex)
+                    self.entity_graph.update_entity_graph_vertex(graph_vertex,
+                                                                 vertex)
 
                 if edge not in valid_edges:
                     LOG.debug("Updates edge: %s", edge)
@@ -258,6 +260,7 @@ class Processor(processor.ProcessorBase):
             EventAction.DELETE_ENTITY: self.delete_entity,
             EventAction.UPDATE_RELATIONSHIP: self.update_relationship,
             EventAction.DELETE_RELATIONSHIP: self.delete_relationship,
+            # should not be called explicitly
             EventAction.END_MESSAGE: self.handle_end_message
         }
 

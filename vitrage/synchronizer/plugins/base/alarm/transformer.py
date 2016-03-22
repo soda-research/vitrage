@@ -11,6 +11,7 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+
 from oslo_log import log as logging
 
 from vitrage.common.constants import EntityCategory
@@ -46,5 +47,5 @@ class BaseAlarmTransformer(tbase.TransformerBase):
             return EventAction.CREATE_ENTITY
         raise VitrageTransformerError('Invalid sync mode: (%s)' % sync_mode)
 
-    def key_values(self, *args):
+    def _key_values(self, *args):
         return (EntityCategory.ALARM,) + args

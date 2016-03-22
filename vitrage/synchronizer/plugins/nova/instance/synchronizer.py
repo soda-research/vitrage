@@ -30,6 +30,3 @@ class InstanceSynchronizer(NovaBase):
             self.NOVA_INSTANCE,
             sync_mode,
             'manager')
-
-    def get_changes(self, sync_mode):
-        pass

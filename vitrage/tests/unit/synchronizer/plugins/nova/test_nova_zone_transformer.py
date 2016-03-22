@@ -60,8 +60,8 @@ class NovaZoneTransformerTest(base.BaseTest):
         # Test assertions
         observed_id_values = placeholder.vertex_id.split(
             TransformerBase.KEY_SEPARATOR)
-        expected_id_values = ZoneTransformer(self.transformers).key_values(
-            zone_name)
+        expected_id_values = ZoneTransformer(self.transformers)._key_values(
+            'nova.zone', zone_name)
         self.assertEqual(tuple(observed_id_values), expected_id_values)
 
         observed_time = placeholder.get(VertexProperties.SAMPLE_TIMESTAMP)
@@ -87,7 +87,8 @@ class NovaZoneTransformerTest(base.BaseTest):
         zone_transformer = ZoneTransformer(self.transformers)
 
         # Test action
-        observed_key_fields = zone_transformer.key_values(zone_name)
+        observed_key_fields = zone_transformer._key_values('nova.zone',
+                                                           zone_name)
 
         # Test assertions
         self.assertEqual(EntityCategory.RESOURCE, observed_key_fields[0])
@@ -174,7 +175,7 @@ class NovaZoneTransformerTest(base.BaseTest):
         )
 
         is_placeholder = host_vertex[VertexProperties.IS_PLACEHOLDER]
-        self.assertFalse(is_placeholder)
+        self.assertTrue(is_placeholder)
 
         is_deleted = host_vertex[VertexProperties.IS_DELETED]
         self.assertFalse(is_deleted)

@@ -67,7 +67,7 @@ class TestStaticPhysicalTransformer(base.BaseTest):
         observed_id_values = placeholder.vertex_id.split(
             TransformerBase.KEY_SEPARATOR)
         expected_id_values = \
-            StaticPhysicalTransformer(self.transformers).key_values(
+            StaticPhysicalTransformer(self.transformers)._key_values(
                 switch_type, switch_name)
         self.assertEqual(tuple(observed_id_values), expected_id_values)
 
@@ -95,8 +95,8 @@ class TestStaticPhysicalTransformer(base.BaseTest):
         static_transformer = StaticPhysicalTransformer(self.transformers)
 
         # Test action
-        observed_key_fields = static_transformer.key_values(switch_type,
-                                                            switch_name)
+        observed_key_fields = static_transformer._key_values(switch_type,
+                                                             switch_name)
 
         # Test assertions
         self.assertEqual(EntityCategory.RESOURCE, observed_key_fields[0])

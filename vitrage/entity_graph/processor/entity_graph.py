@@ -110,3 +110,11 @@ class EntityGraph(NXGraph):
     @staticmethod
     def can_update_vertex(graph_vertex, new_vertex):
         return (not graph_vertex) or (not new_vertex[VProps.IS_PLACEHOLDER])
+
+    def update_entity_graph_vertex(self, graph_vertex, updated_vertex):
+        if updated_vertex[VProps.IS_PLACEHOLDER] and \
+                graph_vertex and not graph_vertex[VProps.IS_PLACEHOLDER]:
+            updated_vertex[VProps.IS_PLACEHOLDER] = False
+            updated_vertex[VProps.IS_DELETED] = graph_vertex[VProps.IS_DELETED]
+
+        self.update_vertex(updated_vertex)

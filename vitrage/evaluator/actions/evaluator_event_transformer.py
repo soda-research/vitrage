@@ -51,7 +51,8 @@ class EvaluatorEventTransformer(transformer_base.TransformerBase):
             properties = {
                 VProps.VITRAGE_STATE: event[VProps.VITRAGE_STATE],
                 VProps.UPDATE_TIMESTAMP: event[VProps.UPDATE_TIMESTAMP],
-                VProps.SAMPLE_TIMESTAMP: event[VProps.SAMPLE_TIMESTAMP]
+                VProps.SAMPLE_TIMESTAMP: event[VProps.SAMPLE_TIMESTAMP],
+                VProps.IS_PLACEHOLDER: False
             }
             return Vertex(event[VProps.VITRAGE_ID], properties)
 
@@ -65,7 +66,7 @@ class EvaluatorEventTransformer(transformer_base.TransformerBase):
                 VProps.STATE: event[VProps.STATE]
             }
             return graph_utils.create_vertex(
-                self.extract_key(event),
+                self._create_entity_key(event),
                 entity_category=EntityCategory.ALARM,
                 entity_type=VITRAGE_TYPE,
                 sample_timestamp=event[VProps.SAMPLE_TIMESTAMP],
@@ -91,7 +92,7 @@ class EvaluatorEventTransformer(transformer_base.TransformerBase):
         if event_type == ADD_VERTEX:
 
             relation_edge = graph_utils.create_edge(
-                source_id=self.extract_key(event),
+                source_id=self._create_entity_key(event),
                 target_id=event[TFields.TARGET],
                 relationship_type=EdgeLabels.ON,
                 update_timestamp=event[EProps.UPDATE_TIMESTAMP])
@@ -124,12 +125,12 @@ class EvaluatorEventTransformer(transformer_base.TransformerBase):
         raise VitrageTransformerError(
             'Invalid Evaluator event type: (%s)' % event_type)
 
-    def extract_key(self, event):
-        key_fields = self.key_values(event[TFields.ALARM_NAME],
-                                     event[TFields.TARGET])
+    def _create_entity_key(self, event):
+        key_fields = self._key_values(event[TFields.ALARM_NAME],
+                                      event[TFields.TARGET])
         return transformer_base.build_key(key_fields)
 
-    def key_values(self, *args):
+    def _key_values(self, *args):
         return (EntityCategory.ALARM, VITRAGE_TYPE) + args
 
     def create_placeholder_vertex(self, **kwargs):

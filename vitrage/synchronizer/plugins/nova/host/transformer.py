@@ -20,6 +20,8 @@ from vitrage.common.constants import SynchronizerProperties as SyncProps
 from vitrage.common.constants import SyncMode
 from vitrage.common.constants import VertexProperties as VProps
 import vitrage.graph.utils as graph_utils
+from vitrage.synchronizer.plugins.base.resource.transformer import \
+    BaseResourceTransformer
 from vitrage.synchronizer.plugins import transformer_base
 from vitrage.synchronizer.plugins.transformer_base import extract_field_value
 
@@ -29,7 +31,7 @@ NOVA_HOST = 'nova.host'
 NOVA_ZONE = 'nova.zone'
 
 
-class HostTransformer(transformer_base.TransformerBase):
+class HostTransformer(BaseResourceTransformer):
 
     HOST_TYPE = NOVA_HOST
 
@@ -56,7 +58,7 @@ class HostTransformer(transformer_base.TransformerBase):
             self.HOST_NAME[sync_mode])
         metadata = {VProps.NAME: host_name}
 
-        entity_key = self.extract_key(entity_event)
+        entity_key = self._create_entity_key(entity_event)
 
         sample_timestamp = entity_event[SyncProps.SAMPLE_DATE]
 
@@ -81,7 +83,7 @@ class HostTransformer(transformer_base.TransformerBase):
         zone_neighbor = self._create_zone_neighbor(
             entity_event,
             entity_event[SyncProps.SAMPLE_DATE],
-            self.extract_key(entity_event),
+            self._create_entity_key(entity_event),
             self.ZONE_NAME[sync_mode])
 
         if zone_neighbor is not None:
@@ -117,16 +119,13 @@ class HostTransformer(transformer_base.TransformerBase):
 
         return None
 
-    def key_values(self, *args):
-        return (EntityCategory.RESOURCE, self.HOST_TYPE) + args
-
-    def extract_key(self, entity_event):
+    def _create_entity_key(self, entity_event):
 
         host_name = extract_field_value(
             entity_event,
             self.HOST_NAME[entity_event[SyncProps.SYNC_MODE]])
 
-        key_fields = self.key_values(host_name)
+        key_fields = self._key_values(self.HOST_TYPE, host_name)
         return transformer_base.build_key(key_fields)
 
     def create_placeholder_vertex(self, **kwargs):
@@ -134,7 +133,7 @@ class HostTransformer(transformer_base.TransformerBase):
             LOG.error('Cannot create placeholder vertex. Missing property ID')
             raise ValueError('Missing property ID')
 
-        key_fields = self.key_values(kwargs[VProps.ID])
+        key_fields = self._key_values(self.HOST_TYPE, kwargs[VProps.ID])
 
         return graph_utils.create_vertex(
             transformer_base.build_key(key_fields),
@@ -142,4 +141,6 @@ class HostTransformer(transformer_base.TransformerBase):
             entity_category=EntityCategory.RESOURCE,
             entity_type=self.HOST_TYPE,
             sample_timestamp=kwargs[VProps.SAMPLE_TIMESTAMP],
-            is_placeholder=True)
+            is_placeholder=True,
+            entity_state=kwargs[VProps.STATE]
+            if VProps.STATE in kwargs else None)

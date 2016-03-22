@@ -121,24 +121,14 @@ class TransformerBase(object):
          by synchronizer
 
          :param entity_event: an event provided by synchronizer
-         :return: neighbors - a list of neighbors
+         :return: neighbors - a list of neighbors where each item in the list
+                              is a tuple of (vertex, edge)
          :rtype:[]
          """
 
     @abc.abstractmethod
-    def key_values(self, *args):
-        """A list of key fields
-
-        The fields which consist the entity key
-
-        :param args: a tuple of mutable key fields
-        :return: ()
-        """
-        pass
-
-    @abc.abstractmethod
-    def extract_key(self, entity_event):
-        """Extract entity key from given event
+    def _create_entity_key(self, entity_event):
+        """Create entity key from given event
 
         By given an entity event, return a entity key which
         consisting key fields
@@ -152,7 +142,9 @@ class TransformerBase(object):
     def create_placeholder_vertex(self, **kwargs):
         """Creates placeholder vertex.
 
-        Placeholder vertex contains only mandatory fields
+        Placeholder vertex contains only mandatory fields of this entity.
+        This way other plugins can create placeholder vertices of those
+        entities
 
         :param kwargs: the properties for the placeholder vertex
         :return: Placeholder vertex
@@ -161,6 +153,15 @@ class TransformerBase(object):
         pass
 
     def _extract_action_type(self, entity_event):
+        """Extract action type.
+
+        Decides what action (from constants.EventAction) the processor need
+        to perform according to the data received from the event.
+
+        :param entity_event: event that returns from the synchronizer
+        :return: the action that the processor needs to perform
+        :rtype: str
+        """
 
         sync_mode = entity_event[SyncProps.SYNC_MODE]
 
@@ -175,6 +176,16 @@ class TransformerBase(object):
 
         raise VitrageTransformerError(
             'Invalid sync mode: (%s)' % sync_mode)
+
+    def _key_values(self, *args):
+        """A list of key fields
+
+        The fields which consist the entity key
+
+        :param args: a tuple of mutable key fields
+        :return: ()
+        """
+        pass
 
     @staticmethod
     def _create_end_vertex(entity_event):

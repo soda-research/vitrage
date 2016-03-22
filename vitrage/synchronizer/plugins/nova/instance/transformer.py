@@ -22,6 +22,8 @@ from vitrage.common.constants import SyncMode
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.common.exception import VitrageTransformerError
 import vitrage.graph.utils as graph_utils
+from vitrage.synchronizer.plugins.base.resource.transformer import \
+    BaseResourceTransformer
 from vitrage.synchronizer.plugins import transformer_base
 from vitrage.synchronizer.plugins.transformer_base import extract_field_value
 
@@ -31,7 +33,7 @@ NOVA_INSTANCE = 'nova.instance'
 NOVA_HOST = 'nova.host'
 
 
-class InstanceTransformer(transformer_base.TransformerBase):
+class InstanceTransformer(BaseResourceTransformer):
 
     INSTANCE_TYPE = NOVA_INSTANCE
 
@@ -95,7 +97,7 @@ class InstanceTransformer(transformer_base.TransformerBase):
             VProps.PROJECT_ID: project
         }
 
-        entity_key = self.extract_key(entity_event)
+        entity_key = self._create_entity_key(entity_event)
 
         entity_id = extract_field_value(
             entity_event,
@@ -134,7 +136,7 @@ class InstanceTransformer(transformer_base.TransformerBase):
 
         if host_transformer:
             host_neighbor = self._create_host_neighbor(
-                self.extract_key(entity_event),
+                self._create_entity_key(entity_event),
                 extract_field_value(entity_event, self.HOST_NAME[sync_mode]),
                 entity_event[SyncProps.SAMPLE_DATE],
                 host_transformer)
@@ -162,13 +164,13 @@ class InstanceTransformer(transformer_base.TransformerBase):
         raise VitrageTransformerError(
             'Invalid sync mode: (%s)' % sync_mode)
 
-    def extract_key(self, entity_event):
+    def _create_entity_key(self, entity_event):
 
         instance_id = extract_field_value(
             entity_event,
             self.INSTANCE_ID[entity_event[SyncProps.SYNC_MODE]])
 
-        key_fields = self.key_values(instance_id)
+        key_fields = self._key_values(self.INSTANCE_TYPE, instance_id)
         return transformer_base.build_key(key_fields)
 
     @staticmethod
@@ -194,7 +196,7 @@ class InstanceTransformer(transformer_base.TransformerBase):
             LOG.error('Cannot create placeholder vertex. Missing property ID')
             raise ValueError('Missing property ID')
 
-        key_fields = self.key_values(kwargs[VProps.ID])
+        key_fields = self._key_values(self.INSTANCE_TYPE, kwargs[VProps.ID])
 
         return graph_utils.create_vertex(
             transformer_base.build_key(key_fields),
@@ -203,6 +205,3 @@ class InstanceTransformer(transformer_base.TransformerBase):
             entity_type=self.INSTANCE_TYPE,
             sample_timestamp=kwargs[VProps.SAMPLE_TIMESTAMP],
             is_placeholder=True)
-
-    def key_values(self, *args):
-        return (EntityCategory.RESOURCE, self.INSTANCE_TYPE) + args

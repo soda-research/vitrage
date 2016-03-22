@@ -80,4 +80,4 @@ class TransformerManager(object):
             raise VitrageTransformerError(
                 'Entity Event must contains sync_type field.')
 
-        return self.get_transformer(sync_type).extract_key()
+        return self.get_transformer(sync_type)._create_entity_key()

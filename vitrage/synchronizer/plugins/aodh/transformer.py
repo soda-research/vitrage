@@ -60,7 +60,7 @@ class AodhTransformer(BaseAlarmTransformer):
             AodhTransformer._timestamp(entity_event), sample_timestamp)
 
         return graph_utils.create_vertex(
-            self.extract_key(entity_event),
+            self._create_entity_key(entity_event),
             entity_id=entity_event[AodhProps.ALARM_ID],
             entity_category=EntityCategory.ALARM,
             entity_type=entity_event[SyncProps.SYNC_TYPE],
@@ -76,14 +76,14 @@ class AodhTransformer(BaseAlarmTransformer):
     def _ok_status(self, entity_event):
         return entity_event[AodhProps.STATE] == self.STATUS_OK
 
-    def extract_key(self, entity_event):
+    def _create_entity_key(self, entity_event):
         sync_type = entity_event[SyncProps.SYNC_TYPE]
         alarm_name = entity_event[AodhProps.NAME]
         resource_id = entity_event[AodhProps.RESOURCE_ID]
-        return (tbase.build_key(self.key_values(sync_type,
-                                                resource_id,
-                                                alarm_name)) if resource_id
-                else tbase.build_key(self.key_values(sync_type, alarm_name)))
+        return (tbase.build_key(self._key_values(sync_type,
+                                                 resource_id,
+                                                 alarm_name)) if resource_id
+                else tbase.build_key(self._key_values(sync_type, alarm_name)))
 
     @staticmethod
     def _timestamp(entity_event):

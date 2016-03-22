@@ -21,13 +21,15 @@ from vitrage.common.constants import SyncMode
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.common.exception import VitrageTransformerError
 import vitrage.graph.utils as graph_utils
+from vitrage.synchronizer.plugins.base.resource.transformer import \
+    BaseResourceTransformer
 from vitrage.synchronizer.plugins import transformer_base
 
 LOG = logging.getLogger(__name__)
 NOVA_HOST = 'nova.host'
 
 
-class StaticPhysicalTransformer(transformer_base.TransformerBase):
+class StaticPhysicalTransformer(BaseResourceTransformer):
 
     RELATION_TYPE = 'relation_type'
     RELATIONSHIPS_SECTION = 'relationships'
@@ -41,10 +43,11 @@ class StaticPhysicalTransformer(transformer_base.TransformerBase):
         sync_type = entity_event[VProps.TYPE]
         entity_id = entity_event[VProps.ID]
         sample_timestamp = entity_event[SyncProps.SAMPLE_DATE]
-        update_timestamp = self._format_update_timestamp(None,
-                                                         sample_timestamp)
+        update_timestamp = self._format_update_timestamp(
+            update_timestamp=None,
+            sample_timestamp=sample_timestamp)
         state = entity_event[VProps.STATE]
-        entity_key = self.extract_key(entity_event)
+        entity_key = self._create_entity_key(entity_event)
         metadata = self._extract_metadata(entity_event)
 
         return graph_utils.create_vertex(
@@ -60,7 +63,7 @@ class StaticPhysicalTransformer(transformer_base.TransformerBase):
     def _create_neighbors(self, entity_event):
         neighbors = []
         entity_type = entity_event[VProps.TYPE]
-        entity_key = self.extract_key(entity_event)
+        entity_key = self._create_entity_key(entity_event)
         timestamp = entity_event[SyncProps.SAMPLE_DATE]
 
         for neighbor_details in entity_event[self.RELATIONSHIPS_SECTION]:
@@ -114,22 +117,19 @@ class StaticPhysicalTransformer(transformer_base.TransformerBase):
         if SyncMode.UPDATE == sync_mode:
             if SyncProps.EVENT_TYPE in entity_event:
                 event_type = entity_event[SyncProps.EVENT_TYPE]
-                return EventAction.DELETE_ENTITY if event_type == EventAction.DELETE_ENTITY \
-                    else EventAction.UPDATE_ENTITY
+                return EventAction.DELETE_ENTITY if event_type == \
+                    EventAction.DELETE_ENTITY else EventAction.UPDATE_ENTITY
             else:
                 return EventAction.UPDATE_ENTITY
 
         raise VitrageTransformerError(
             'Invalid sync mode: (%s)' % sync_mode)
 
-    def extract_key(self, entity_event):
+    def _create_entity_key(self, entity_event):
         entity_id = entity_event[VProps.ID]
         sync_type = entity_event[VProps.TYPE]
-        key_fields = self.key_values(sync_type, entity_id)
+        key_fields = self._key_values(sync_type, entity_id)
         return transformer_base.build_key(key_fields)
-
-    def key_values(self, *args):
-        return (EntityCategory.RESOURCE,) + args
 
     def create_placeholder_vertex(self, **kwargs):
         if VProps.TYPE not in kwargs:
@@ -140,8 +140,7 @@ class StaticPhysicalTransformer(transformer_base.TransformerBase):
             LOG.error("Can't create placeholder vertex. Missing property ID")
             raise ValueError('Missing property ID')
 
-        key_fields = self.key_values(kwargs[VProps.TYPE],
-                                     kwargs[VProps.ID])
+        key_fields = self._key_values(kwargs[VProps.TYPE], kwargs[VProps.ID])
 
         return graph_utils.create_vertex(
             transformer_base.build_key(key_fields),
