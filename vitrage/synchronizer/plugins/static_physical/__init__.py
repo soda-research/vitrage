@@ -28,7 +28,7 @@ OPTS = [
     cfg.IntOpt('changes_interval',
                default=30,
                min=30,
-               help='interval between checking changes in the configuration'
+               help='interval between checking changes in the configuration '
                     'files of the physical topology plugin',
                required=True),
     cfg.StrOpt('directory', default='/etc/vitrage/static_plugins',
