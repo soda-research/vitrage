@@ -5,14 +5,17 @@ Static Physical Plugin Configuration
 Configure Access to Static Physical
 -----------------------------------
 
-The following should be set in **/etc/vitrage/vitrage.conf**, under synchronizer_plugins section:
+The following should be set in **/etc/vitrage/vitrage.conf**, under [static_physical] section:
 
-+----------------------+------------------------------------+--------------------------------+
-| Name                 | Description                        | Default Value                  |
-+======================+====================================+================================+
-| static_plugins_dir   | Directory path from where to load  | /etc/vitrage/static_plugins/   |
-|                      | the configurations                 |                                |
-+----------------------+------------------------------------+--------------------------------+
++------------------+---------------------------------------------------------+------------------------------+
+| Name             | Description                                             | Default Value                |
++==================+=========================================================+==============================+
+| directory        | Directory path from where to load the configurations    | /etc/vitrage/static_plugins/ |
++------------------+---------------------------------------------------------+------------------------------+
+| changes_interval | Interval of checking changes in the configuration files | 30 seconds                   |
++------------------+---------------------------------------------------------+------------------------------+
+| entities         | Static physical entity types list                       | switch                       |
++------------------+---------------------------------------------------------+------------------------------+
 
 
 Configure Static Physical Mapping

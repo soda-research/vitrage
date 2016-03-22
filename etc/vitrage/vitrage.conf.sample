@@ -17,17 +17,11 @@
 # The name of a logging configuration file. This file is appended to any
 # existing logging configuration files. For details about logging configuration
 # files, see the Python logging module documentation. Note that when logging
-# configuration files are used all logging configuration is defined in the
+# configuration files are used then all logging configuration is set in the
 # configuration file and other logging configuration options are ignored (for
-# example, log_format). (string value)
+# example, logging_context_format_string). (string value)
 # Deprecated group/name - [DEFAULT]/log_config
 #log_config_append = <None>
-
-# DEPRECATED. A logging.Formatter log message format string which may use any
-# of the available logging.LogRecord attributes. This option is deprecated.
-# Please use logging_context_format_string and logging_default_format_string
-# instead. This option is ignored if log_config_append is set. (string value)
-#log_format = <None>
 
 # Defines the format string for %%(asctime)s in log records. Default:
 # %(default)s . This option is ignored if log_config_append is set. (string
@@ -56,15 +50,6 @@
 # changed later to honor RFC5424. This option is ignored if log_config_append
 # is set. (boolean value)
 #use_syslog = false
-
-# Enables or disables syslog rfc5424 format for logging. If enabled, prefixes
-# the MSG part of the syslog message with APP-NAME (RFC5424). This option is
-# ignored if log_config_append is set. (boolean value)
-# This option is deprecated for removal.
-# Its value may be silently ignored in the future.
-# Reason: The format without the APP-NAME is deprecated in Kilo, and will be
-# removed in Mitaka, along with this option.
-#use_syslog_rfc_format = true
 
 # Syslog facility to receive log lines. This option is ignored if
 # log_config_append is set. (string value)
@@ -110,6 +95,36 @@
 # Enables or disables fatal status of deprecations. (boolean value)
 #fatal_deprecations = false
 
+#
+# From vitrage
+#
+
+# Aodh version (string value)
+#aodh_version = 2
+
+# Nova version (floating point value)
+#nova_version = 2.0
+
+# The topic vitrage listens on (string value)
+#rpc_topic = rpcapiv1
+
+
+[aodh]
+
+#
+# From plugins
+#
+
+# Aodh plugin transformer class path (string value)
+#transformer = vitrage.synchronizer.plugins.aodh.transformer.AodhTransformer
+
+# Aodh plugin synchronizer class path (string value)
+#synchronizer = vitrage.synchronizer.plugins.aodh.synchronizer.AodhSynchronizer
+
+# interval between checking changes in aodh plugin (integer value)
+# Minimum value: 30
+#changes_interval = 30
+
 
 [api]
 
@@ -135,6 +150,9 @@
 # Toggle Pecan Debug Middleware. (boolean value)
 #pecan_debug = false
 
+# Toggle mock file for debugging. (boolean value)
+#use_mock_file = false
+
 
 [consistency]
 
@@ -142,13 +160,19 @@
 # From vitrage
 #
 
-# interval between consistency checks (in seconds) (integer value)
-# Minimum value: 180
-#consistency_interval = 600
-
 # minimum time until deleting entity (in seconds) (integer value)
 # Minimum value: 60
 #min_time_to_delete = 60
+
+# interval between consistency initialization checks for finding if all end
+# messages from plugins were received (in seconds) (integer value)
+# Minimum value: 1
+#initialization_interval = 3
+
+# maximum retries for consistency initialization for finding if all end
+# messages from plugins were received (in seconds) (integer value)
+# Minimum value: 1
+#initialization_max_retries = 30
 
 
 [cors]
@@ -207,6 +231,16 @@
 #allow_headers = Content-Type,Cache-Control,Content-Language,Expires,Last-Modified,Pragma
 
 
+[entity_graph]
+
+#
+# From vitrage
+#
+
+# A path for the configuration files of the plugins states (string value)
+#states_plugins_dir = /etc/vitrage/states_plugins
+
+
 [evaluator]
 
 #
@@ -215,6 +249,10 @@
 
 # A path for the templates used by the evaluator (string value)
 #templates_dir = /etc/vitrage/templates
+
+# The topic that vitrage-evaluator uses for alarm notifications messages.
+# (string value)
+#notifier_topic = vitrage.evaluator
 
 
 [keystone_authtoken]
@@ -351,6 +389,74 @@
 #auth_section = <None>
 
 
+[nagios]
+
+#
+# From plugins
+#
+
+# Nagios plugin transformer class path (string value)
+#transformer = vitrage.synchronizer.plugins.nagios.transformer.NagiosTransformer
+
+# Nagios plugin synchronizer class path (string value)
+#synchronizer = vitrage.synchronizer.plugins.nagios.synchronizer.NagiosSynchronizer
+
+# interval between checking changes in nagios plugin (integer value)
+# Minimum value: 30
+#changes_interval = 30
+
+# Nagios user name (string value)
+#user = nagiosadmin
+
+# Nagios user password (string value)
+#password = nagiosadmin
+
+# Nagios url (string value)
+#url =
+
+# Nagios configuration file (string value)
+#config_file = /etc/vitrage/nagios_conf.yaml
+
+
+[nova.host]
+
+#
+# From plugins
+#
+
+# Nova host transformer class path (string value)
+#transformer = vitrage.synchronizer.plugins.nova.host.transformer.HostTransformer
+
+# Nova host synchronizer class path (string value)
+#synchronizer = vitrage.synchronizer.plugins.nova.host.synchronizer.HostSynchronizer
+
+
+[nova.instance]
+
+#
+# From plugins
+#
+
+# Nova instance transformer class path (string value)
+#transformer = vitrage.synchronizer.plugins.nova.instance.transformer.InstanceTransformer
+
+# Nova instance synchronizer class path (string value)
+#synchronizer = vitrage.synchronizer.plugins.nova.instance.synchronizer.InstanceSynchronizer
+
+
+[nova.zone]
+
+#
+# From plugins
+#
+
+# Nova zone transformer class path (string value)
+#transformer = vitrage.synchronizer.plugins.nova.zone.transformer.ZoneTransformer
+
+# Nova zone synchronizer class path (string value)
+#synchronizer = vitrage.synchronizer.plugins.nova.zone.synchronizer.ZoneSynchronizer
+
+
 [oslo_middleware]
 
 #
@@ -393,6 +499,47 @@
 #policy_dirs = policy.d
 
 
+[service_credentials]
+
+#
+# From vitrage
+#
+
+# Region name to use for OpenStack service endpoints. (string value)
+# Deprecated group/name - [DEFAULT]/os_region_name
+#region_name = <None>
+
+# Type of endpoint in Identity service catalog to use for communication with
+# OpenStack services. (string value)
+# Allowed values: public, internal, admin, auth, publicURL, internalURL, adminURL
+# Deprecated group/name - [DEFAULT]/os_endpoint_type
+#interface = public
+
+
+[static_physical]
+
+#
+# From plugins
+#
+
+# Static physical transformer class path (string value)
+#transformer = vitrage.synchronizer.plugins.static_physical.transformer.StaticPhysicalTransformer
+
+# Static physical synchronizer class path (string value)
+#synchronizer = vitrage.synchronizer.plugins.static_physical.synchronizer.StaticPhysicalSynchronizer
+
+# interval between checking changes in the configuration files of the physical
+# topology plugin (integer value)
+# Minimum value: 30
+#changes_interval = 30
+
+# Static physical plugins directory (string value)
+#directory = /etc/vitrage/static_plugins
+
+# Static physical entity types list (list value)
+#entities = switch
+
+
 [synchronizer]
 
 #
@@ -410,15 +557,5 @@
 # From vitrage
 #
 
-# A path for the static plugins for the synchronizer (string value)
-#static_plugins_dir = /etc/vitrage/static_plugins
-
-# Nagios user (string value)
-#nagios_user = <None>
-
-# Nagios password (string value)
-#nagios_password = <None>
-
-# Nagios url for querying the data. Example:  http://<ip>/monitoring/nagios
-# /cgi-bin/status.cgi (string value)
-#nagios_url = <None>
+# Names of supported plugins (list value)
+#plugin_type = nagios,nova.host,nova.instance,nova.zone,static_physical,aodh

@@ -5,29 +5,31 @@ Nagios Plugin Configuration
 Configure Access to Nagios
 --------------------------
 
-The following should be set in **/etc/vitrage/vitrage.conf**, under synchronizer_plugins section:
+The following should be set in **/etc/vitrage/vitrage.conf**, under [nagios] section:
 
-+----------------------+------------------------------------+--------------------------------+
-| Name                 | Description                        | Default Value                  |
-+======================+====================================+================================+
-| nagios_user          | Nagios user                        |                                |
-+----------------------+------------------------------------+--------------------------------+
-| nagios_password      | Nagios password                    |                                |
-+----------------------+------------------------------------+--------------------------------+
-| nagios_url           | Nagios url for querying the data   |                                |
-+----------------------+------------------------------------+--------------------------------+
-| nagios_config_file   | Nagios configuration file          | /etc/vitrage/nagios_conf.yaml  |
-+----------------------+------------------------------------+--------------------------------+
++------------------+---------------------------------------------------------+-------------------------------+
+| Name             | Description                                             | Default Value                 |
++==================+=========================================================+===============================+
+| user             | Nagios user                                             |                               |
++------------------+---------------------------------------------------------+-------------------------------+
+| password         | Nagios password                                         |                               |
++------------------+---------------------------------------------------------+-------------------------------+
+| url              | Nagios url for querying the data                        |                               |
++------------------+---------------------------------------------------------+-------------------------------+
+| config_file      | Nagios configuration file                               | /etc/vitrage/nagios_conf.yaml |
++------------------+---------------------------------------------------------+-------------------------------+
+| changes_interval | Interval of checking changes in the configuration files | 30 seconds                    |
++------------------+---------------------------------------------------------+-------------------------------+
 
 **Example**
 
-nagios_user = nagios
+user = nagios
 
-nagios_password = nagios
+password = nagios
 
-nagios_url = http://10.20.30.40/monitoring/nagios/cgi-bin/status.cgi
+url = http://10.20.30.40/monitoring/nagios/cgi-bin/status.cgi
 
-nagios_config_file = /etc/vitrage/nagios_conf.yaml
+config_file = /etc/vitrage/nagios_conf.yaml
 
 
 Configure Nagios Host Mapping
