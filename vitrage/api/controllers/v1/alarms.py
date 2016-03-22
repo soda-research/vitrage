@@ -19,7 +19,6 @@ from oslo_log import log
 from pecan.core import abort
 
 from vitrage.api.controllers.rest import RootRestController
-from vitrage.api.controllers.v1 import mock_file
 from vitrage.api.policy import enforce
 # noinspection PyProtectedMember
 from vitrage.i18n import _LI
@@ -43,7 +42,7 @@ class AlarmsController(RootRestController):
                  vitrage_id)
 
         try:
-            if mock_file:
+            if pecan.request.cfg.use_mock_file:
                 return self.get_mock_data('alarms.sample.json')
             else:
                 return self.get_alarms(vitrage_id)

@@ -19,7 +19,6 @@ import pecan
 from oslo_log import log
 from pecan.core import abort
 from vitrage.api.controllers.rest import RootRestController
-from vitrage.api.controllers.v1 import mock_file
 from vitrage.api.policy import enforce
 
 # noinspection PyProtectedMember
@@ -36,7 +35,7 @@ class RCAController(RootRestController):
                 pecan.request.enforcer, {})
 
         LOG.info(_LI('received show rca with alarm id %s') % alarm_id)
-        if mock_file:
+        if pecan.request.cfg.use_mock_file:
             return self.get_mock_data('rca.sample.json')
         else:
             return self.get_rca(alarm_id)

@@ -20,7 +20,6 @@ import pecan
 from pecan.core import abort
 
 from vitrage.api.controllers.rest import RootRestController
-from vitrage.api.controllers.v1 import mock_file
 from vitrage.api.policy import enforce
 
 # noinspection PyProtectedMember
@@ -46,7 +45,7 @@ class TopologyController(RootRestController):
 
         LOG.info(_LI("query is %s") % query)
 
-        if mock_file:
+        if pecan.request.cfg.use_mock_file:
             return self.get_mock_data('graph.sample.json', graph_type)
         else:
             return self.get_graph(graph_type, depth, query, root)

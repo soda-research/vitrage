@@ -15,5 +15,4 @@
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import VertexProperties as VProps
 
-mock_file = False
 RCA_QUERY = {'==': {VProps. CATEGORY: EntityCategory.ALARM}}
