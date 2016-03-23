@@ -35,6 +35,7 @@ NOVA_HOST = 'nova.host'
 
 class NagiosTransformerTest(base.BaseTest):
 
+    # noinspection PyAttributeOutsideInit
     def setUp(self):
         super(NagiosTransformerTest, self).setUp()
 

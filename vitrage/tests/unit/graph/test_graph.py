@@ -403,6 +403,7 @@ class GraphTest(GraphTestBase):
             else:
                 self.assertIsNone(act, msg)
 
+    # noinspection PyAttributeOutsideInit
     def test_graph_callbacks(self):
 
         g = create_graph('test_graph_callbacks')

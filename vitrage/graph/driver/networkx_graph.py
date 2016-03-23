@@ -147,6 +147,7 @@ class NXGraph(Graph):
     def update_vertex(self, v, hard_update=False):
         """Update the vertex properties
 
+        :param hard_update:
         :type v: Vertex
         """
         orig_prop = self._g.node.get(v.vertex_id, None)
@@ -160,6 +161,7 @@ class NXGraph(Graph):
     def update_edge(self, e, hard_update=False):
         """Update the edge properties
 
+        :param hard_update:
         :type e: Edge
         """
         orig_prop = self._g.edge.get(

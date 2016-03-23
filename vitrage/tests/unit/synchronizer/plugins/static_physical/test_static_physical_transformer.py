@@ -34,6 +34,7 @@ STATIC_PHYSICAL = 'static_physical'
 
 class TestStaticPhysicalTransformer(base.BaseTest):
 
+    # noinspection PyAttributeOutsideInit
     def setUp(self):
         super(TestStaticPhysicalTransformer, self).setUp()
 

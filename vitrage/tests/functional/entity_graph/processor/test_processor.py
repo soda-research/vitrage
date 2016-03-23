@@ -28,6 +28,7 @@ class TestProcessorFunctional(TestEntityGraphFunctionalBase):
     NUM_VERTICES_AFTER_DELETION = 1
     NUM_EDGES_AFTER_DELETION = 0
 
+    # noinspection PyAttributeOutsideInit
     def setUp(self):
         super(TestProcessorFunctional, self).setUp()
         self.conf = cfg.ConfigOpts()

@@ -123,6 +123,7 @@ class ActionExecutor(object):
     @staticmethod
     def _register_action_recipes():
 
+        # noinspection PyDictCreation
         recipes = {}
 
         recipes[ActionType.SET_STATE] = importutils.import_object(

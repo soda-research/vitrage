@@ -22,7 +22,7 @@ def syntax_validate(template_conf):
     pass
 
 
-def validate_scenario_condition(condition_str):
+def validate_scenario_condition(condition):
     """Validate the condition content.
 
     Check:

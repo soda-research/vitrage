@@ -29,9 +29,6 @@ def generate_random_events_list(generator_spec_list):
      :param generator_spec_list: list of generators
      :type generator_spec_list: list
 
-     :param default_num: default number of events to generate
-     :type default_num: list
-
      :return list of synchronizer events
      :rtype list
 
@@ -55,7 +52,7 @@ def simple_instance_generators(host_num, vm_num, snapshot_events=0,
     :param host_num: number of hosts
     :param vm_num: number of vms
     :param snapshot_events: number of snapshot events per instance
-    :param update_events: number of update events per instance
+    :param snap_vals: number of update events per instance
     :return: generators for vm_num vms as specified
     """
 
@@ -86,7 +83,7 @@ def simple_host_generators(zone_num, host_num, snapshot_events=0,
     :param zone_num: number of hosts
     :param host_num: number of vms
     :param snapshot_events: number of snapshot events per instance
-    :param update_events: number of update events per instance
+    :param snap_vals: number of update events per instance
     :return: generators for vm_num vms as specified
     """
 
@@ -114,9 +111,8 @@ def simple_zone_generators(zone_num, snapshot_events=0, snap_vals=None):
     instances. Instances will be distributed across hosts in round-robin style.
 
     :param zone_num: number of hosts
-    :param host_num: number of vms
     :param snapshot_events: number of snapshot events per instance
-    :param update_events: number of update events per instance
+    :param snap_vals: number of update events per instance
     :return: generators for vm_num vms as specified
     """
 

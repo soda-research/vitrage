@@ -22,7 +22,7 @@ from vitrage.entity_graph.states.normalized_resource_state \
 class ResourceNormalizator(NormalizatorBase):
 
     def __init__(self):
-        pass
+        super(ResourceNormalizator, self).__init__()
 
     def important_states(self):
         return ImportantStates(NormalizedResourceState.UNRECOGNIZED,

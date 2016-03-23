@@ -53,6 +53,7 @@ class ScenarioEvaluator(object):
     def process_event(self, before, current, is_vertex):
         """Notification of a change in the entity graph.
 
+        :param is_vertex:
         :param before: The graph element (vertex or edge) prior to the
         change that happened. None if the element was just created.
         :param current: The graph element (vertex or edge) after the

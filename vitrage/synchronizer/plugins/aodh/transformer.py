@@ -69,6 +69,7 @@ class AodhTransformer(BaseAlarmTransformer):
             update_timestamp=update_timestamp,
             metadata=metadata)
 
+    # noinspection PyMethodMayBeStatic
     def _create_neighbors(self, entity_event):
         # TODO(iafek): get neighbour resource by its id
         return []

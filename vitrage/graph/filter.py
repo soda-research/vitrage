@@ -20,7 +20,7 @@ def check_filter(data, attr_filter, *args):
     :param attr_filter: a dictionary of either
     field_name : value (mandatory)
     field_name : list of values - data[field_name] must match ANY of the values
-    :param ignore_keys: list of filter keys to ignore (if exist)
+    :param args: list of filter keys to ignore (if exist)
     :rtype: bool
     """
     if not attr_filter:
