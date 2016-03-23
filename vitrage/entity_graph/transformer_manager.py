@@ -62,22 +62,24 @@ class TransformerManager(object):
         return transformer
 
     def transform(self, entity_event):
-        try:
-            sync_type = entity_event[SyncProps.SYNC_TYPE]
-            LOG.debug('TRANSFORMER EVENT: %s', sync_type)
-            LOG.debug('Event:\n%s', entity_event)
-        except KeyError:
-            raise VitrageTransformerError(
-                'Entity Event must contains sync_type field.')
-
+        sync_type = self._get_sync_type(entity_event)
+        LOG.debug('TRANSFORMER EVENT: %s', sync_type)
+        LOG.debug('Event:\n%s', entity_event)
         return self.get_transformer(sync_type).transform(entity_event)
 
-    def extract_key(self, entity_event):
+    def enrich_event(self, entity_event, graph):
+        sync_type = self._get_sync_type(entity_event)
+        return self.get_transformer(sync_type).enrich_event(entity_event,
+                                                            graph)
 
+    def extract_key(self, entity_event):
+        sync_type = self._get_sync_type(entity_event)
+        return self.get_transformer(sync_type)._create_entity_key()
+
+    @staticmethod
+    def _get_sync_type(entity_event):
         try:
-            sync_type = entity_event[SyncProps.SYNC_TYPE]
+            return entity_event[SyncProps.SYNC_TYPE]
         except KeyError:
             raise VitrageTransformerError(
                 'Entity Event must contains sync_type field.')
-
-        return self.get_transformer(sync_type)._create_entity_key()

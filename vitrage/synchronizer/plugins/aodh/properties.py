@@ -36,3 +36,9 @@ class AodhState(object):
     OK = 'ok'
     ALARM = 'alarm'
     INSUFFICIENT_DATA = 'insufficient_data'
+
+
+class EventProps(object):
+    AFFECTED_TYPE = 'affected_resource_type'
+    AFFECTED_CATEGORY = 'affected_resource_category'
+    RESOURCE_VERTEX_ID = 'resource_vertex_id'

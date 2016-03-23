@@ -203,3 +203,7 @@ class TransformerBase(object):
     @staticmethod
     def _format_update_timestamp(update_timestamp, sample_timestamp):
         return update_timestamp if update_timestamp else sample_timestamp
+
+    @staticmethod
+    def enrich_event(event, graph):
+        pass

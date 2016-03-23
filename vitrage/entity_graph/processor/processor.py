@@ -50,7 +50,8 @@ class Processor(processor.ProcessorBase):
         """
 
         LOG.debug('Processor event received')
-        entity = self.transform_entity(event)
+        self.transformer_manager.enrich_event(event, self.entity_graph)
+        entity = self.transformer_manager.transform(event)
         self._calculate_aggregated_state(entity.vertex, entity.action)
         return self.actions[entity.action](entity.vertex, entity.neighbors)
 
@@ -155,10 +156,6 @@ class Processor(processor.ProcessorBase):
                 len(self.conf.synchronizer_plugins.plugin_type):
             self.initialization_status.status = \
                 self.initialization_status.RECEIVED_ALL_END_MESSAGES
-
-    def transform_entity(self, event):
-        entity = self.transformer_manager.transform(event)
-        return entity
 
     def _update_neighbors(self, vertex, neighbors):
         """Updates vertices neighbor connections

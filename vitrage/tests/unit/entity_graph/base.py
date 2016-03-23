@@ -98,7 +98,8 @@ class TestEntityGraphUnitBase(base.BaseTest):
         if processor is None:
             processor = proc.Processor(self.conf, InitializationStatus())
 
-        vertex, neighbors, event_type = processor.transform_entity(event)
+        vertex, neighbors, event_type = processor.transformer_manager\
+            .transform(event)
         processor.create_entity(vertex, neighbors)
 
         return vertex, neighbors, processor
