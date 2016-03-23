@@ -70,12 +70,12 @@ class TestStaticPhysicalSynchronizer(base.BaseTest):
     ]
 
     # noinspection PyAttributeOutsideInit
-    def setUp(self):
-        super(TestStaticPhysicalSynchronizer, self).setUp()
-        self.conf = cfg.ConfigOpts()
-        self.conf.register_opts(self.OPTS, group=STATIC_PHYSICAL_PLUGIN)
-        self.static_physical_synchronizer = \
-            synchronizer.StaticPhysicalSynchronizer(self.conf)
+    @classmethod
+    def setUpClass(cls):
+        cls.conf = cfg.ConfigOpts()
+        cls.conf.register_opts(cls.OPTS, group=STATIC_PHYSICAL_PLUGIN)
+        cls.static_physical_synchronizer = \
+            synchronizer.StaticPhysicalSynchronizer(cls.conf)
 
     def test_static_plugins_loader(self):
         # Setup

@@ -67,7 +67,6 @@ class StaticPhysicalSynchronizer(SynchronizerBase):
         return static_entities
 
     def _get_changes_entities(self):
-        entities_updates = []
 
         entities_updates = []
         files = file_utils.load_files(

@@ -36,12 +36,12 @@ LOG = logging.getLogger(__name__)
 class NovaZoneTransformerTest(base.BaseTest):
 
     # noinspection PyAttributeOutsideInit
-    def setUp(self):
-        super(NovaZoneTransformerTest, self).setUp()
+    @classmethod
+    def setUpClass(cls):
 
-        self.transformers = {}
-        host_transformer = HostTransformer(self.transformers)
-        self.transformers[NOVA_HOST_PLUGIN] = host_transformer
+        cls.transformers = {}
+        host_transformer = HostTransformer(cls.transformers)
+        cls.transformers[NOVA_HOST_PLUGIN] = host_transformer
 
     def test_create_placeholder_vertex(self):
 

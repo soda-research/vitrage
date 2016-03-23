@@ -37,12 +37,11 @@ LOG = logging.getLogger(__name__)
 class NagiosTransformerTest(base.BaseTest):
 
     # noinspection PyAttributeOutsideInit
-    def setUp(self):
-        super(NagiosTransformerTest, self).setUp()
-
-        self.transformers = {}
-        host_transformer = HostTransformer(self.transformers)
-        self.transformers[NOVA_HOST_PLUGIN] = host_transformer
+    @classmethod
+    def setUpClass(cls):
+        cls.transformers = {}
+        host_transformer = HostTransformer(cls.transformers)
+        cls.transformers[NOVA_HOST_PLUGIN] = host_transformer
 
     def test_extract_key(self):
         LOG.debug('Test get key from nova instance transformer')

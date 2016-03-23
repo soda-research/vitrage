@@ -35,14 +35,13 @@ LOG = logging.getLogger(__name__)
 class TestStaticPhysicalTransformer(base.BaseTest):
 
     # noinspection PyAttributeOutsideInit
-    def setUp(self):
-        super(TestStaticPhysicalTransformer, self).setUp()
+    @classmethod
+    def setUpClass(cls):
 
-        self.transformers = {}
-        host_transformer = HostTransformer(self.transformers)
-        static_transformer = StaticPhysicalTransformer(self.transformers)
-        self.transformers[NOVA_HOST_PLUGIN] = host_transformer
-        self.transformers[STATIC_PHYSICAL_PLUGIN] = static_transformer
+        cls.transformers = {}
+        cls.transformers[NOVA_HOST_PLUGIN] = HostTransformer(cls.transformers)
+        cls.transformers[STATIC_PHYSICAL_PLUGIN] = StaticPhysicalTransformer(
+            cls.transformers)
 
     def test_create_placeholder_vertex(self):
 
