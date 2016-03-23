@@ -42,7 +42,7 @@ class AlarmsController(RootRestController):
                  vitrage_id)
 
         try:
-            if pecan.request.cfg.use_mock_file:
+            if pecan.request.cfg.api.use_mock_file:
                 return self.get_mock_data('alarms.sample.json')
             else:
                 return self.get_alarms(vitrage_id)
