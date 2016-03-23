@@ -14,6 +14,8 @@
 
 from oslo_config import cfg
 
+NAGIOS_PLUGIN = 'nagios'
+
 OPTS = [
     cfg.StrOpt('transformer',
                default='vitrage.synchronizer.plugins.nagios.'

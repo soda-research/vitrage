@@ -25,10 +25,11 @@ from vitrage.synchronizer.plugins.base.alarm.properties \
 from vitrage.synchronizer.plugins.base.alarm.transformer \
     import BaseAlarmTransformer
 from vitrage.synchronizer.plugins.nagios.properties import NagiosProperties
+from vitrage.synchronizer.plugins.nova.host import NOVA_HOST_PLUGIN
+from vitrage.synchronizer.plugins.static_physical import SWITCH
 from vitrage.synchronizer.plugins import transformer_base as tbase
 
 LOG = logging.getLogger(__name__)
-NOVA_HOST = 'nova.host'
 
 
 class NagiosTransformer(BaseAlarmTransformer):
@@ -74,7 +75,7 @@ class NagiosTransformer(BaseAlarmTransformer):
             tbase.TIMESTAMP_FORMAT)
 
         resource_type = entity_event[NagiosProperties.RESOURCE_TYPE]
-        if resource_type == NOVA_HOST or resource_type == 'switch':
+        if resource_type == NOVA_HOST_PLUGIN or resource_type == SWITCH:
             return [self._create_neighbor(
                 vitrage_id,
                 timestamp,

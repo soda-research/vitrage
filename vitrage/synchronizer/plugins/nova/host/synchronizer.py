@@ -13,6 +13,7 @@
 # under the License.
 
 from vitrage.synchronizer.plugins.nova.base import NovaBase
+from vitrage.synchronizer.plugins.nova.host import NOVA_HOST_PLUGIN
 
 
 class HostSynchronizer(NovaBase):
@@ -29,6 +30,6 @@ class HostSynchronizer(NovaBase):
     def get_all(self, sync_mode):
         return self.make_pickleable(
             self.filter_none_compute_hosts(self.client.hosts.list()),
-            self.NOVA_HOST,
+            NOVA_HOST_PLUGIN,
             sync_mode,
             'manager')

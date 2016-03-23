@@ -13,6 +13,7 @@
 # under the License.
 
 from vitrage.synchronizer.plugins.nova.base import NovaBase
+from vitrage.synchronizer.plugins.nova.zone import NOVA_ZONE_PLUGIN
 
 
 class ZoneSynchronizer(NovaBase):
@@ -29,6 +30,6 @@ class ZoneSynchronizer(NovaBase):
     def get_all(self, sync_mode):
         return self.make_pickleable(self.filter_internal_zone(
             self.client.availability_zones.list()),
-            self.NOVA_ZONE,
+            NOVA_ZONE_PLUGIN,
             sync_mode,
             'manager')

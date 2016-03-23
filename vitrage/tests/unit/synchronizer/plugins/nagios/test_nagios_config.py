@@ -11,11 +11,14 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+
 from oslo_config import cfg
 from oslo_log import log as logging
 
 from vitrage.synchronizer.plugins.nagios.config import NagiosConfig
 from vitrage.synchronizer.plugins.nagios.config import NagiosHostMapping
+from vitrage.synchronizer.plugins.nova.host import NOVA_HOST_PLUGIN
+from vitrage.synchronizer.plugins.nova.instance import NOVA_INSTANCE_PLUGIN
 from vitrage.tests import base
 from vitrage.tests.mocks import utils
 
@@ -52,19 +55,25 @@ class TestNagiosConfig(base.BaseTest):
     ]
 
     # the mappings match the ones in nagios_conf.yaml
-    MAPPING_1 = NagiosHostMapping('compute-1', 'nova.host', 'compute-1')
-    MAPPING_2 = NagiosHostMapping('compute-2', 'nova.host', 'host2')
+    MAPPING_1 = NagiosHostMapping('compute-1', NOVA_HOST_PLUGIN, 'compute-1')
+    MAPPING_2 = NagiosHostMapping('compute-2', NOVA_HOST_PLUGIN, 'host2')
     MAPPING_3 = NagiosHostMapping('compute-(.*)',
-                                  'nova.host',
+                                  NOVA_HOST_PLUGIN,
                                   '${nagios_host}')
     MAPPING_4 = NagiosHostMapping('instance-(.*)',
-                                  'nova.instance',
+                                  NOVA_INSTANCE_PLUGIN,
                                   '${nagios_host}')
     MAPPINGS = [MAPPING_1, MAPPING_2, MAPPING_3, MAPPING_4]
 
-    NON_EXISTING_MAPPING_1 = NagiosHostMapping('X', 'nova.host', 'compute-1')
-    NON_EXISTING_MAPPING_2 = NagiosHostMapping('compute-1', 'X', 'compute-1')
-    NON_EXISTING_MAPPING_3 = NagiosHostMapping('compute-1', 'nova.host', 'X')
+    NON_EXISTING_MAPPING_1 = NagiosHostMapping('X',
+                                               NOVA_HOST_PLUGIN,
+                                               'compute-1')
+    NON_EXISTING_MAPPING_2 = NagiosHostMapping('compute-1',
+                                               'X',
+                                               'compute-1')
+    NON_EXISTING_MAPPING_3 = NagiosHostMapping('compute-1',
+                                               NOVA_HOST_PLUGIN,
+                                               'X')
     NON_EXISTING_MAPPINGS = [NON_EXISTING_MAPPING_1,
                              NON_EXISTING_MAPPING_2,
                              NON_EXISTING_MAPPING_3]
@@ -148,22 +157,22 @@ class TestNagiosConfig(base.BaseTest):
 
         mapped_resource = nagios_conf.get_vitrage_resource('compute-1')
         self.assertIsNotNone(mapped_resource, 'expected Not None')
-        self.assertEqual('nova.host', mapped_resource[0])
+        self.assertEqual(NOVA_HOST_PLUGIN, mapped_resource[0])
         self.assertEqual('compute-1', mapped_resource[1])
 
         mapped_resource = nagios_conf.get_vitrage_resource('compute-2')
         self.assertIsNotNone(mapped_resource, 'expected Not None')
-        self.assertEqual('nova.host', mapped_resource[0])
+        self.assertEqual(NOVA_HOST_PLUGIN, mapped_resource[0])
         self.assertEqual('host2', mapped_resource[1])
 
         mapped_resource = nagios_conf.get_vitrage_resource('compute-88')
         self.assertIsNotNone(mapped_resource, 'expected Not None')
-        self.assertEqual('nova.host', mapped_resource[0])
+        self.assertEqual(NOVA_HOST_PLUGIN, mapped_resource[0])
         self.assertEqual('compute-88', mapped_resource[1])
 
         mapped_resource = nagios_conf.get_vitrage_resource('instance-7')
         self.assertIsNotNone(mapped_resource, 'expected Not None')
-        self.assertEqual('nova.instance', mapped_resource[0])
+        self.assertEqual(NOVA_INSTANCE_PLUGIN, mapped_resource[0])
         self.assertEqual('instance-7', mapped_resource[1])
 
     @staticmethod

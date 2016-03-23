@@ -14,6 +14,8 @@
 
 from oslo_config import cfg
 
+AODH_PLUGIN = 'aodh'
+
 OPTS = [
     cfg.StrOpt('transformer',
                default='vitrage.synchronizer.plugins.aodh.'

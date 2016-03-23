@@ -21,6 +21,10 @@ from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.graph import create_algorithm
 from vitrage.graph import Direction
+from vitrage.synchronizer.plugins.nova.host import NOVA_HOST_PLUGIN
+from vitrage.synchronizer.plugins.nova.instance import NOVA_INSTANCE_PLUGIN
+from vitrage.synchronizer.plugins.nova.zone import NOVA_ZONE_PLUGIN
+from vitrage.synchronizer.plugins import OPENSTACK_NODE
 
 LOG = log.getLogger(__name__)
 
@@ -30,10 +34,10 @@ TOPOLOGY_QUERY = {
         {'==': {VProps.IS_DELETED: False}},
         {
             'or': [
-                {'==': {VProps.TYPE: 'openstack.node'}},
-                {'==': {VProps.TYPE: 'nova.zone'}},
-                {'==': {VProps.TYPE: 'nova.host'}},
-                {'==': {VProps.TYPE: 'nova.instance'}}
+                {'==': {VProps.TYPE: OPENSTACK_NODE}},
+                {'==': {VProps.TYPE: NOVA_INSTANCE_PLUGIN}},
+                {'==': {VProps.TYPE: NOVA_HOST_PLUGIN}},
+                {'==': {VProps.TYPE: NOVA_ZONE_PLUGIN}}
             ]
         }
     ]

@@ -23,13 +23,13 @@ from vitrage.i18n import _LW
 from vitrage.synchronizer.plugins.base.alarm.synchronizer \
     import BaseAlarmSynchronizer
 from vitrage.synchronizer.plugins.nagios.config import NagiosConfig
+from vitrage.synchronizer.plugins.nagios import NAGIOS_PLUGIN
 from vitrage.synchronizer.plugins.nagios.parser import NagiosParser
 from vitrage.synchronizer.plugins.nagios.properties import NagiosProperties \
     as NagiosProps
 from vitrage.synchronizer.plugins.nagios.properties import NagiosStatus
 
 LOG = log.getLogger(__name__)
-NAGIOS = 'nagios'
 
 
 class NagiosSynchronizer(BaseAlarmSynchronizer):
@@ -41,7 +41,7 @@ class NagiosSynchronizer(BaseAlarmSynchronizer):
         self.config = NagiosConfig(conf)
 
     def _sync_type(self):
-        return NAGIOS
+        return NAGIOS_PLUGIN
 
     def _alarm_key(self, alarm):
         return self.ServiceKey(host_name=alarm[NagiosProps.RESOURCE_NAME],

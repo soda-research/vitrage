@@ -11,6 +11,7 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+
 from oslo_log import log as logging
 
 from vitrage.common.constants import EdgeLabels
@@ -23,6 +24,7 @@ from vitrage.synchronizer.plugins.base.alarm.properties \
     import AlarmProperties as AlarmProps
 from vitrage.synchronizer.plugins.nagios.properties import NagiosProperties
 from vitrage.synchronizer.plugins.nagios.transformer import NagiosTransformer
+from vitrage.synchronizer.plugins.nova.host import NOVA_HOST_PLUGIN
 from vitrage.synchronizer.plugins.nova.host.transformer import HostTransformer
 from vitrage.synchronizer.plugins.transformer_base import TransformerBase
 from vitrage.tests import base
@@ -30,7 +32,6 @@ from vitrage.tests.mocks import mock_syncronizer as mock_sync
 
 
 LOG = logging.getLogger(__name__)
-NOVA_HOST = 'nova.host'
 
 
 class NagiosTransformerTest(base.BaseTest):
@@ -41,7 +42,7 @@ class NagiosTransformerTest(base.BaseTest):
 
         self.transformers = {}
         host_transformer = HostTransformer(self.transformers)
-        self.transformers[NOVA_HOST] = host_transformer
+        self.transformers[NOVA_HOST_PLUGIN] = host_transformer
 
     def test_extract_key(self):
         LOG.debug('Test get key from nova instance transformer')
@@ -85,7 +86,7 @@ class NagiosTransformerTest(base.BaseTest):
             neighbor = neighbors[0]
 
             # Right now we are support only host as a resource
-            if neighbor.vertex[VProps.TYPE] == NOVA_HOST:
+            if neighbor.vertex[VProps.TYPE] == NOVA_HOST_PLUGIN:
                 self._validate_host_neighbor(neighbors[0], alarm)
 
             self._validate_action(alarm, wrapper)
@@ -123,7 +124,7 @@ class NagiosTransformerTest(base.BaseTest):
         key_fields = host_vertex.vertex_id.split(TransformerBase.KEY_SEPARATOR)
 
         self.assertEqual(EntityCategory.RESOURCE, key_fields[0])
-        self.assertEqual(NOVA_HOST, key_fields[1])
+        self.assertEqual(NOVA_HOST_PLUGIN, key_fields[1])
         self.assertEqual(event[NagiosProperties.RESOURCE_NAME], key_fields[2])
 
         self.assertFalse(host_vertex[VProps.IS_DELETED])
@@ -132,7 +133,7 @@ class NagiosTransformerTest(base.BaseTest):
         self.assertEqual(EntityCategory.RESOURCE, host_vertex[VProps.CATEGORY])
         self.assertEqual(event[NagiosProperties.RESOURCE_NAME],
                          host_vertex[VProps.ID])
-        self.assertEqual(NOVA_HOST, host_vertex[VProps.TYPE])
+        self.assertEqual(NOVA_HOST_PLUGIN, host_vertex[VProps.TYPE])
 
         edge = neighbor.edge
         self.assertEqual(EdgeLabels.ON, edge.label)

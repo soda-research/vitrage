@@ -18,11 +18,6 @@ from vitrage.synchronizer.plugins.synchronizer_base import SynchronizerBase
 
 
 class NovaBase(SynchronizerBase):
-
-    NOVA_INSTANCE = 'nova.instance'
-    NOVA_HOST = 'nova.host'
-    NOVA_ZONE = 'nova.zone'
-
     def __init__(self, conf):
         super(NovaBase, self).__init__()
         self.client = clients.nova_client(conf)

@@ -22,6 +22,10 @@ from vitrage.entity_graph.initialization_status import InitializationStatus
 from vitrage.entity_graph.processor import processor as proc
 import vitrage.graph.utils as graph_utils
 from vitrage.service import load_plugin
+from vitrage.synchronizer.plugins.nagios import NAGIOS_PLUGIN
+from vitrage.synchronizer.plugins.nova.host import NOVA_HOST_PLUGIN
+from vitrage.synchronizer.plugins.nova.instance import NOVA_INSTANCE_PLUGIN
+from vitrage.synchronizer.plugins.nova.zone import NOVA_ZONE_PLUGIN
 from vitrage.tests import base
 from vitrage.tests.mocks import mock_syncronizer as mock_sync
 from vitrage.tests.mocks import utils
@@ -36,17 +40,12 @@ class TestEntityGraphUnitBase(base.BaseTest):
 
     PLUGINS_OPTS = [
         cfg.ListOpt('plugin_type',
-                    default=['nagios',
-                             'nova.host',
-                             'nova.instance',
-                             'nova.zone'],
+                    default=[NAGIOS_PLUGIN,
+                             NOVA_HOST_PLUGIN,
+                             NOVA_INSTANCE_PLUGIN,
+                             NOVA_ZONE_PLUGIN],
                     help='Names of supported synchronizer plugins'),
     ]
-
-    NOVA_INSTANCE = 'nova.instance'
-    NOVA_HOST = 'nova.host'
-    NOVA_ZONE = 'nova.zone'
-    NAGIOS = 'nagios'
 
     NUM_NODES = 1
     NUM_ZONES = 2

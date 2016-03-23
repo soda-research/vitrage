@@ -24,18 +24,16 @@ from vitrage.common.exception import VitrageTransformerError
 import vitrage.graph.utils as graph_utils
 from vitrage.synchronizer.plugins.base.resource.transformer import \
     BaseResourceTransformer
+from vitrage.synchronizer.plugins.nova.host import NOVA_HOST_PLUGIN
+from vitrage.synchronizer.plugins.nova.instance import NOVA_INSTANCE_PLUGIN
 from vitrage.synchronizer.plugins import transformer_base
 from vitrage.synchronizer.plugins.transformer_base import extract_field_value
 
 
 LOG = logging.getLogger(__name__)
-NOVA_INSTANCE = 'nova.instance'
-NOVA_HOST = 'nova.host'
 
 
 class InstanceTransformer(BaseResourceTransformer):
-
-    INSTANCE_TYPE = NOVA_INSTANCE
 
     # Fields returned from Nova Instance snapshot
     INSTANCE_ID = {
@@ -121,7 +119,7 @@ class InstanceTransformer(BaseResourceTransformer):
             entity_key,
             entity_id=entity_id,
             entity_category=EntityCategory.RESOURCE,
-            entity_type=self.INSTANCE_TYPE,
+            entity_type=NOVA_INSTANCE_PLUGIN,
             entity_state=state,
             sample_timestamp=sample_timestamp,
             update_timestamp=update_timestamp,
@@ -132,7 +130,7 @@ class InstanceTransformer(BaseResourceTransformer):
         sync_mode = entity_event[SyncProps.SYNC_MODE]
 
         neighbors = []
-        host_transformer = self.transformers[NOVA_HOST]
+        host_transformer = self.transformers[NOVA_HOST_PLUGIN]
 
         if host_transformer:
             host_neighbor = self._create_host_neighbor(
@@ -170,7 +168,7 @@ class InstanceTransformer(BaseResourceTransformer):
             entity_event,
             self.INSTANCE_ID[entity_event[SyncProps.SYNC_MODE]])
 
-        key_fields = self._key_values(self.INSTANCE_TYPE, instance_id)
+        key_fields = self._key_values(NOVA_INSTANCE_PLUGIN, instance_id)
         return transformer_base.build_key(key_fields)
 
     @staticmethod
@@ -196,12 +194,12 @@ class InstanceTransformer(BaseResourceTransformer):
             LOG.error('Cannot create placeholder vertex. Missing property ID')
             raise ValueError('Missing property ID')
 
-        key_fields = self._key_values(self.INSTANCE_TYPE, kwargs[VProps.ID])
+        key_fields = self._key_values(NOVA_INSTANCE_PLUGIN, kwargs[VProps.ID])
 
         return graph_utils.create_vertex(
             transformer_base.build_key(key_fields),
             entity_id=kwargs[VProps.ID],
             entity_category=EntityCategory.RESOURCE,
-            entity_type=self.INSTANCE_TYPE,
+            entity_type=NOVA_INSTANCE_PLUGIN,
             sample_timestamp=kwargs[VProps.SAMPLE_TIMESTAMP],
             is_placeholder=True)

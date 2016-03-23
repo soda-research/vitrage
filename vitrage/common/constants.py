@@ -14,10 +14,6 @@
 # under the License.
 
 
-OPENSTACK_NODE = 'openstack.node'
-VITRAGE = 'vitrage'
-
-
 class VertexProperties(object):
     CATEGORY = 'category'
     TYPE = 'type'

@@ -18,18 +18,19 @@ from oslo_log import log as logging
 
 from vitrage.common.constants import EdgeLabels
 from vitrage.common.constants import EntityCategory
-from vitrage.common.constants import OPENSTACK_NODE
 from vitrage.common.constants import SynchronizerProperties as SyncProps
 from vitrage.common.constants import VertexProperties
+from vitrage.synchronizer.plugins.nova.host import NOVA_HOST_PLUGIN
 from vitrage.synchronizer.plugins.nova.host.transformer import HostTransformer
+from vitrage.synchronizer.plugins.nova.zone import NOVA_ZONE_PLUGIN
 from vitrage.synchronizer.plugins.nova.zone.transformer import ZoneTransformer
+from vitrage.synchronizer.plugins import OPENSTACK_NODE
 from vitrage.synchronizer.plugins import transformer_base as tbase
 from vitrage.synchronizer.plugins.transformer_base import TransformerBase
 from vitrage.tests import base
 from vitrage.tests.mocks import mock_syncronizer as mock_sync
 
 LOG = logging.getLogger(__name__)
-NOVA_HOST = 'nova.host'
 
 
 class NovaZoneTransformerTest(base.BaseTest):
@@ -40,7 +41,7 @@ class NovaZoneTransformerTest(base.BaseTest):
 
         self.transformers = {}
         host_transformer = HostTransformer(self.transformers)
-        self.transformers[NOVA_HOST] = host_transformer
+        self.transformers[NOVA_HOST_PLUGIN] = host_transformer
 
     def test_create_placeholder_vertex(self):
 
@@ -62,14 +63,14 @@ class NovaZoneTransformerTest(base.BaseTest):
         observed_id_values = placeholder.vertex_id.split(
             TransformerBase.KEY_SEPARATOR)
         expected_id_values = ZoneTransformer(self.transformers)._key_values(
-            'nova.zone', zone_name)
+            NOVA_ZONE_PLUGIN, zone_name)
         self.assertEqual(tuple(observed_id_values), expected_id_values)
 
         observed_time = placeholder.get(VertexProperties.SAMPLE_TIMESTAMP)
         self.assertEqual(observed_time, timestamp)
 
         observed_subtype = placeholder.get(VertexProperties.TYPE)
-        self.assertEqual(observed_subtype, zone_transformer.ZONE_TYPE)
+        self.assertEqual(observed_subtype, NOVA_ZONE_PLUGIN)
 
         observed_entity_id = placeholder.get(VertexProperties.ID)
         self.assertEqual(observed_entity_id, zone_name)
@@ -88,13 +89,13 @@ class NovaZoneTransformerTest(base.BaseTest):
         zone_transformer = ZoneTransformer(self.transformers)
 
         # Test action
-        observed_key_fields = zone_transformer._key_values('nova.zone',
+        observed_key_fields = zone_transformer._key_values(NOVA_ZONE_PLUGIN,
                                                            zone_name)
 
         # Test assertions
         self.assertEqual(EntityCategory.RESOURCE, observed_key_fields[0])
         self.assertEqual(
-            ZoneTransformer(self.transformers).ZONE_TYPE,
+            NOVA_ZONE_PLUGIN,
             observed_key_fields[1]
         )
         self.assertEqual(zone_name, observed_key_fields[2])
@@ -216,7 +217,7 @@ class NovaZoneTransformerTest(base.BaseTest):
         )
 
         self.assertEqual(
-            zone_transform.ZONE_TYPE,
+            NOVA_ZONE_PLUGIN,
             vertex[VertexProperties.TYPE]
         )
 

@@ -15,16 +15,17 @@
 from oslo_config import cfg
 from oslo_log import log as logging
 from six.moves import queue
+
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.evaluator.scenario_evaluator import ScenarioEvaluator
 from vitrage.evaluator.scenario_repository import ScenarioRepository
+from vitrage.synchronizer.plugins.nova.host import NOVA_HOST_PLUGIN
 from vitrage.tests.functional.entity_graph.base import \
     TestEntityGraphFunctionalBase
 from vitrage.tests.mocks import utils
 
 
 LOG = logging.getLogger(__name__)
-NOVA_HOST = 'nova.host'
 
 
 class TestScenarioEvaluator(TestEntityGraphFunctionalBase):
@@ -68,7 +69,7 @@ class TestScenarioEvaluator(TestEntityGraphFunctionalBase):
 
         nagios_event = {'last_check': '2016-02-07 15:26:04',
                         'resource_name': target_host,
-                        'resource_type': self.NOVA_HOST,
+                        'resource_type': NOVA_HOST_PLUGIN,
                         'service': 'Check_MK',
                         'status': 'CRITICAL',
                         'status_info': 'ok',
@@ -95,7 +96,7 @@ class TestScenarioEvaluator(TestEntityGraphFunctionalBase):
 
     @staticmethod
     def _get_host_from_graph(host_name, entity_graph):
-        vertex_attrs = {VProps.TYPE: NOVA_HOST,
+        vertex_attrs = {VProps.TYPE: NOVA_HOST_PLUGIN,
                         VProps.NAME: host_name}
         host_vertices = entity_graph.get_vertices(
             vertex_attr_filter=vertex_attrs)

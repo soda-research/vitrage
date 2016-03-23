@@ -13,6 +13,7 @@
 # under the License.
 
 from vitrage.synchronizer.plugins.nova.base import NovaBase
+from vitrage.synchronizer.plugins.nova.instance import NOVA_INSTANCE_PLUGIN
 
 
 class InstanceSynchronizer(NovaBase):
@@ -27,6 +28,6 @@ class InstanceSynchronizer(NovaBase):
     def get_all(self, sync_mode):
         return self.make_pickleable(
             self.filter_instances(self.client.servers.list()),
-            self.NOVA_INSTANCE,
+            NOVA_INSTANCE_PLUGIN,
             sync_mode,
             'manager')

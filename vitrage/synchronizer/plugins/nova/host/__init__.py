@@ -14,6 +14,8 @@
 
 from oslo_config import cfg
 
+NOVA_HOST_PLUGIN = 'nova.host'
+
 OPTS = [
     cfg.StrOpt('transformer',
                default='vitrage.synchronizer.plugins.nova.host.'

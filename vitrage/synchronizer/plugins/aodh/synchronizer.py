@@ -15,6 +15,7 @@
 from oslo_log import log
 
 from vitrage import clients
+from vitrage.synchronizer.plugins.aodh import AODH_PLUGIN
 from vitrage.synchronizer.plugins.aodh.properties import AodhProperties \
     as AodhProps
 from vitrage.synchronizer.plugins.aodh.properties import AodhState
@@ -22,7 +23,6 @@ from vitrage.synchronizer.plugins.base.alarm.synchronizer \
     import BaseAlarmSynchronizer
 
 LOG = log.getLogger(__name__)
-AODH = 'aodh'
 
 
 class AodhSynchronizer(BaseAlarmSynchronizer):
@@ -31,7 +31,7 @@ class AodhSynchronizer(BaseAlarmSynchronizer):
         self.client = clients.ceilometer_client(conf)
 
     def _sync_type(self):
-        return AODH
+        return AODH_PLUGIN
 
     def _alarm_key(self, alarm):
         return alarm[AodhProps.NAME]

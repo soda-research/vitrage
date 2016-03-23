@@ -14,15 +14,24 @@
 
 from oslo_config import cfg
 
+from vitrage.synchronizer.plugins.aodh import AODH_PLUGIN
+from vitrage.synchronizer.plugins.nagios import NAGIOS_PLUGIN
+from vitrage.synchronizer.plugins.nova.host import NOVA_HOST_PLUGIN
+from vitrage.synchronizer.plugins.nova.instance import NOVA_INSTANCE_PLUGIN
+from vitrage.synchronizer.plugins.nova.zone import NOVA_ZONE_PLUGIN
+from vitrage.synchronizer.plugins.static_physical import STATIC_PHYSICAL_PLUGIN
+
+OPENSTACK_NODE = 'openstack.node'
+
 # Register options for the service
 OPTS = [
 
     cfg.ListOpt('plugin_type',
-                default=['nagios',
-                         'nova.host',
-                         'nova.instance',
-                         'nova.zone',
-                         'static_physical',
-                         'aodh'],
+                default=[NOVA_HOST_PLUGIN,
+                         NOVA_INSTANCE_PLUGIN,
+                         NOVA_ZONE_PLUGIN,
+                         NAGIOS_PLUGIN,
+                         STATIC_PHYSICAL_PLUGIN,
+                         AODH_PLUGIN],
                 help='Names of supported plugins'),
 ]

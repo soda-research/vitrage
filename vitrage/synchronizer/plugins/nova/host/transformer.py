@@ -22,18 +22,16 @@ from vitrage.common.constants import VertexProperties as VProps
 import vitrage.graph.utils as graph_utils
 from vitrage.synchronizer.plugins.base.resource.transformer import \
     BaseResourceTransformer
+from vitrage.synchronizer.plugins.nova.host import NOVA_HOST_PLUGIN
+from vitrage.synchronizer.plugins.nova.zone import NOVA_ZONE_PLUGIN
 from vitrage.synchronizer.plugins import transformer_base
 from vitrage.synchronizer.plugins.transformer_base import extract_field_value
 
 
 LOG = logging.getLogger(__name__)
-NOVA_HOST = 'nova.host'
-NOVA_ZONE = 'nova.zone'
 
 
 class HostTransformer(BaseResourceTransformer):
-
-    HOST_TYPE = NOVA_HOST
 
     # Fields returned from Nova Availability Zone snapshot
     HOST_NAME = {
@@ -69,7 +67,7 @@ class HostTransformer(BaseResourceTransformer):
             entity_key,
             entity_id=host_name,
             entity_category=EntityCategory.RESOURCE,
-            entity_type=self.HOST_TYPE,
+            entity_type=NOVA_HOST_PLUGIN,
             sample_timestamp=sample_timestamp,
             update_timestamp=update_timestamp,
             metadata=metadata)
@@ -97,7 +95,7 @@ class HostTransformer(BaseResourceTransformer):
                               host_vertex_id,
                               zone_name_path):
 
-        zone_transformer = self.transformers[NOVA_ZONE]
+        zone_transformer = self.transformers[NOVA_ZONE_PLUGIN]
 
         if zone_transformer:
 
@@ -125,7 +123,7 @@ class HostTransformer(BaseResourceTransformer):
             entity_event,
             self.HOST_NAME[entity_event[SyncProps.SYNC_MODE]])
 
-        key_fields = self._key_values(self.HOST_TYPE, host_name)
+        key_fields = self._key_values(NOVA_HOST_PLUGIN, host_name)
         return transformer_base.build_key(key_fields)
 
     def create_placeholder_vertex(self, **kwargs):
@@ -133,13 +131,13 @@ class HostTransformer(BaseResourceTransformer):
             LOG.error('Cannot create placeholder vertex. Missing property ID')
             raise ValueError('Missing property ID')
 
-        key_fields = self._key_values(self.HOST_TYPE, kwargs[VProps.ID])
+        key_fields = self._key_values(NOVA_HOST_PLUGIN, kwargs[VProps.ID])
 
         return graph_utils.create_vertex(
             transformer_base.build_key(key_fields),
             entity_id=kwargs[VProps.ID],
             entity_category=EntityCategory.RESOURCE,
-            entity_type=self.HOST_TYPE,
+            entity_type=NOVA_HOST_PLUGIN,
             sample_timestamp=kwargs[VProps.SAMPLE_TIMESTAMP],
             is_placeholder=True,
             entity_state=kwargs[VProps.STATE]

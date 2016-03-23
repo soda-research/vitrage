@@ -17,31 +17,31 @@ from oslo_log import log as logging
 
 from vitrage.entity_graph.transformer_manager import TransformerManager
 from vitrage.service import load_plugin
+from vitrage.synchronizer.plugins.nagios import NAGIOS_PLUGIN
 from vitrage.synchronizer.plugins.nagios.transformer import \
     NagiosTransformer
+from vitrage.synchronizer.plugins.nova.host import NOVA_HOST_PLUGIN
 from vitrage.synchronizer.plugins.nova.host.transformer import \
     HostTransformer
+from vitrage.synchronizer.plugins.nova.instance import NOVA_INSTANCE_PLUGIN
 from vitrage.synchronizer.plugins.nova.instance.transformer import \
     InstanceTransformer
+from vitrage.synchronizer.plugins.nova.zone import NOVA_ZONE_PLUGIN
 from vitrage.synchronizer.plugins.nova.zone.transformer import \
     ZoneTransformer
 from vitrage.tests import base
 
 LOG = logging.getLogger(__name__)
-NOVA_INSTANCE = 'nova.instance'
-NOVA_HOST = 'nova.host'
-NOVA_ZONE = 'nova.zone'
-NAGIOS = 'nagios'
 
 
 class TransformerManagerTest(base.BaseTest):
 
     OPTS = [
         cfg.ListOpt('plugin_type',
-                    default=['nagios',
-                             'nova.host',
-                             'nova.instance',
-                             'nova.zone'],
+                    default=[NAGIOS_PLUGIN,
+                             NOVA_HOST_PLUGIN,
+                             NOVA_INSTANCE_PLUGIN,
+                             NOVA_ZONE_PLUGIN],
                     help='Names of supported synchronizer plugins'),
     ]
 
@@ -56,16 +56,16 @@ class TransformerManagerTest(base.BaseTest):
 
     def test_transformer_registration_nagios(self):
             self.assertIsInstance(self.manager.get_transformer
-                                  (NAGIOS), NagiosTransformer)
+                                  (NAGIOS_PLUGIN), NagiosTransformer)
 
     def test_transformer_registration_nova_host(self):
         self.assertIsInstance(self.manager.get_transformer
-                              (NOVA_HOST), HostTransformer)
+                              (NOVA_HOST_PLUGIN), HostTransformer)
 
     def test_transformer_registration_nova_instance(self):
         self.assertIsInstance(self.manager.get_transformer
-                              (NOVA_INSTANCE), InstanceTransformer)
+                              (NOVA_INSTANCE_PLUGIN), InstanceTransformer)
 
     def test_transformer_registration_nova_zone(self):
         self.assertIsInstance(self.manager.get_transformer
-                              (NOVA_ZONE), ZoneTransformer)
+                              (NOVA_ZONE_PLUGIN), ZoneTransformer)

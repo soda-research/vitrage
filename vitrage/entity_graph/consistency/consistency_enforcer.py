@@ -18,10 +18,10 @@ import time
 from oslo_log import log
 
 from vitrage.common.constants import EntityCategory
-from vitrage.common.constants import OPENSTACK_NODE
 from vitrage.common.constants import VertexProperties as VProps
-from vitrage.common.constants import VITRAGE
 from vitrage.common.datetime_utils import utcnow
+from vitrage.evaluator.actions.evaluator_event_transformer import VITRAGE_TYPE
+from vitrage.synchronizer.plugins import OPENSTACK_NODE
 
 LOG = log.getLogger(__name__)
 
@@ -92,7 +92,7 @@ class ConsistencyEnforcer(object):
     def _find_stale_entities(self):
         query = {
             'and': [
-                {'!=': {VProps.TYPE: VITRAGE}},
+                {'!=': {VProps.TYPE: VITRAGE_TYPE}},
                 {'<': {VProps.SAMPLE_TIMESTAMP: str(utcnow() - timedelta(
                     seconds=2 * self.conf.synchronizer.snapshots_interval))}}
             ]
@@ -119,7 +119,7 @@ class ConsistencyEnforcer(object):
         query = {
             'and': [
                 {'==': {VProps.CATEGORY: EntityCategory.ALARM}},
-                {'==': {VProps.TYPE: VITRAGE}},
+                {'==': {VProps.TYPE: VITRAGE_TYPE}},
                 {'<': {VProps.SAMPLE_TIMESTAMP: timestamp}}
             ]
         }

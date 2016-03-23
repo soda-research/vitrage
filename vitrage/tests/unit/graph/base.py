@@ -18,6 +18,7 @@ test_vitrage graph
 
 Tests for `vitrage` graph driver
 """
+
 import random
 import time
 
@@ -25,9 +26,12 @@ from oslo_log import log as logging
 
 from vitrage.common.constants import EdgeLabels as ELabel
 from vitrage.common.constants import EntityCategory
-from vitrage.common.constants import OPENSTACK_NODE
 from vitrage.graph import create_graph
 from vitrage.graph import utils as graph_utils
+from vitrage.synchronizer.plugins.nova.host import NOVA_HOST_PLUGIN
+from vitrage.synchronizer.plugins.nova.instance import NOVA_INSTANCE_PLUGIN
+from vitrage.synchronizer.plugins import OPENSTACK_NODE
+from vitrage.synchronizer.plugins.static_physical import SWITCH
 from vitrage.tests import base
 
 LOG = logging.getLogger(__name__)
@@ -41,10 +45,7 @@ ENTITY_GRAPH_ALARMS_PER_VM = 8
 RESOURCE = EntityCategory.RESOURCE
 ALARM = EntityCategory.ALARM
 
-HOST = 'nova.host'
-INSTANCE = 'nova.instance'
 TEST = 'TEST'
-SWITCH = 'switch'
 ALARM_ON_VM = 'ALARM_ON_VM'
 ALARM_ON_HOST = 'ALARM_ON_HOST'
 TEST_ON_HOST = 'TEST_ON_HOST'
@@ -55,14 +56,14 @@ v_node = graph_utils.create_vertex(
     entity_type=OPENSTACK_NODE,
     entity_category=RESOURCE)
 v_host = graph_utils.create_vertex(
-    vitrage_id=HOST + '222222222222',
+    vitrage_id=NOVA_HOST_PLUGIN + '222222222222',
     entity_id='222222222222',
-    entity_type=HOST,
+    entity_type=NOVA_HOST_PLUGIN,
     entity_category=RESOURCE)
 v_instance = graph_utils.create_vertex(
-    vitrage_id=INSTANCE + '333333333333',
+    vitrage_id=NOVA_INSTANCE_PLUGIN + '333333333333',
     entity_id='333333333333',
-    entity_type=INSTANCE,
+    entity_type=NOVA_INSTANCE_PLUGIN,
     entity_category=RESOURCE)
 v_alarm = graph_utils.create_vertex(
     vitrage_id=ALARM + '444444444444',
@@ -147,8 +148,13 @@ class GraphTestBase(base.BaseTest):
 
         # Add Hosts
         for host_id in range(num_of_hosts_per_node):
-            host_to_add = add_connected_vertex(g, RESOURCE, HOST, host_id,
-                                               ELabel.CONTAINS, v_node, True)
+            host_to_add = add_connected_vertex(g,
+                                               RESOURCE,
+                                               NOVA_HOST_PLUGIN,
+                                               host_id,
+                                               ELabel.CONTAINS,
+                                               v_node,
+                                               True)
 
             g.add_edge(graph_utils.create_edge(host_to_add.vertex_id,
                                                v_switch.vertex_id, 'USES'))
@@ -168,9 +174,13 @@ class GraphTestBase(base.BaseTest):
 
             # Add Host Vms
             for j in range(num_of_vms_per_host):
-                vm_to_add = add_connected_vertex(g, RESOURCE, INSTANCE,
-                                                 self.vm_id, ELabel.CONTAINS,
-                                                 host_to_add, True)
+                vm_to_add = add_connected_vertex(g,
+                                                 RESOURCE,
+                                                 NOVA_INSTANCE_PLUGIN,
+                                                 self.vm_id,
+                                                 ELabel.CONTAINS,
+                                                 host_to_add,
+                                                 True)
                 self.vm_id += 1
                 self.vms.append(vm_to_add)
 

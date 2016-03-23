@@ -19,6 +19,7 @@ import unittest
 from datetime import timedelta
 from oslo_config import cfg
 from six.moves import queue
+
 from vitrage.common.constants import EdgeLabels
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import VertexProperties as VProps
@@ -30,6 +31,10 @@ from vitrage.entity_graph.processor.processor import Processor
 from vitrage.evaluator.scenario_evaluator import ScenarioEvaluator
 from vitrage.evaluator.scenario_repository import ScenarioRepository
 import vitrage.graph.utils as graph_utils
+from vitrage.synchronizer.plugins.nagios import NAGIOS_PLUGIN
+from vitrage.synchronizer.plugins.nova.host import NOVA_HOST_PLUGIN
+from vitrage.synchronizer.plugins.nova.instance import NOVA_INSTANCE_PLUGIN
+from vitrage.synchronizer.plugins.nova.zone import NOVA_ZONE_PLUGIN
 from vitrage.tests.functional.entity_graph.base import \
     TestEntityGraphFunctionalBase
 from vitrage.tests.mocks import utils
@@ -154,12 +159,12 @@ class TestConsistencyFunctional(TestEntityGraphFunctionalBase):
         # Test Assertions
         instance_vertices = self.processor.entity_graph.get_vertices({
             VProps.CATEGORY: EntityCategory.RESOURCE,
-            VProps.TYPE: self.NOVA_INSTANCE
+            VProps.TYPE: NOVA_INSTANCE_PLUGIN
         })
         is_deleted_instance_vertices = \
             self.processor.entity_graph.get_vertices({
                 VProps.CATEGORY: EntityCategory.RESOURCE,
-                VProps.TYPE: self.NOVA_INSTANCE,
+                VProps.TYPE: NOVA_INSTANCE_PLUGIN,
                 VProps.IS_DELETED: True
             })
         self.assertEqual(self.NUM_INSTANCES - 3, len(instance_vertices))
@@ -179,7 +184,7 @@ class TestConsistencyFunctional(TestEntityGraphFunctionalBase):
         # check number of instances in graph
         instance_vertices = self.processor.entity_graph.get_vertices({
             VProps.CATEGORY: EntityCategory.RESOURCE,
-            VProps.TYPE: self.NOVA_INSTANCE
+            VProps.TYPE: NOVA_INSTANCE_PLUGIN
         })
         self.assertEqual(self.NUM_INSTANCES, len(instance_vertices))
 
@@ -199,11 +204,11 @@ class TestConsistencyFunctional(TestEntityGraphFunctionalBase):
             self.processor.entity_graph.update_vertex(instance_vertices[i])
 
     def _set_end_messages(self):
-        self.initialization_status.end_messages[self.NOVA_ZONE] = True
-        self.initialization_status.end_messages[self.NOVA_HOST] = True
-        self.initialization_status.end_messages[self.NOVA_INSTANCE] = \
+        self.initialization_status.end_messages[NOVA_ZONE_PLUGIN] = True
+        self.initialization_status.end_messages[NOVA_HOST_PLUGIN] = True
+        self.initialization_status.end_messages[NOVA_INSTANCE_PLUGIN] = \
             True
-        self.initialization_status.end_messages[self.NAGIOS] = True
+        self.initialization_status.end_messages[NAGIOS_PLUGIN] = True
         self.initialization_status.status = \
             self.initialization_status.RECEIVED_ALL_END_MESSAGES
 
@@ -211,7 +216,7 @@ class TestConsistencyFunctional(TestEntityGraphFunctionalBase):
         # find hosts and instances
         host_vertices = self.processor.entity_graph.get_vertices({
             VProps.CATEGORY: EntityCategory.RESOURCE,
-            VProps.TYPE: self.NOVA_HOST
+            VProps.TYPE: NOVA_HOST_PLUGIN
         })
 
         # add host alarms + deduced alarms
@@ -221,7 +226,7 @@ class TestConsistencyFunctional(TestEntityGraphFunctionalBase):
             alarm_name = '%s:%s' % ('nagios_alarm_on_host_',
                                     host_vertex[VProps.NAME])
             alarms_on_hosts_list.append(
-                self._create_alarm(alarm_name, self.NAGIOS))
+                self._create_alarm(alarm_name, NAGIOS_PLUGIN))
             self.processor.entity_graph.add_vertex(alarms_on_hosts_list[index])
             edge = graph_utils.create_edge(
                 alarms_on_hosts_list[index].vertex_id,

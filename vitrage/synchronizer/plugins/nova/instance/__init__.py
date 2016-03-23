@@ -14,6 +14,8 @@
 
 from oslo_config import cfg
 
+NOVA_INSTANCE_PLUGIN = 'nova.instance'
+
 OPTS = [
     cfg.StrOpt('transformer',
                default='vitrage.synchronizer.plugins.nova.instance.'

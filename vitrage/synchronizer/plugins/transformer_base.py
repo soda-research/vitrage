@@ -21,11 +21,11 @@ import six
 
 import vitrage.common.constants as cons
 from vitrage.common.constants import EventAction
-from vitrage.common.constants import OPENSTACK_NODE
 from vitrage.common.constants import SynchronizerProperties as SyncProps
 from vitrage.common.constants import SyncMode
 from vitrage.common.exception import VitrageTransformerError
 import vitrage.graph.utils as graph_utils
+from vitrage.synchronizer.plugins import OPENSTACK_NODE
 
 LOG = logging.getLogger(__name__)
 

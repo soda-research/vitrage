@@ -22,14 +22,14 @@ from vitrage.common.constants import SynchronizerProperties as SyncProps
 from vitrage.common.constants import SyncMode
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.common import file_utils
+from vitrage.synchronizer.plugins.static_physical import STATIC_PHYSICAL_PLUGIN
+from vitrage.synchronizer.plugins.static_physical import SWITCH
 from vitrage.synchronizer.plugins.static_physical import synchronizer
 from vitrage.tests import base
 from vitrage.tests.mocks import utils
 
 
 LOG = logging.getLogger(__name__)
-SWITCH = 'switch'
-STATIC_PHYSICAL = 'static_physical'
 
 
 class TestStaticPhysicalSynchronizer(base.BaseTest):
@@ -49,7 +49,7 @@ class TestStaticPhysicalSynchronizer(base.BaseTest):
         cfg.StrOpt('directory',
                    default=utils.get_resources_dir() + '/static_plugins'),
         cfg.ListOpt('entities',
-                    default=['switch'])
+                    default=[SWITCH])
     ]
 
     CHANGES_OPTS = [
@@ -73,7 +73,7 @@ class TestStaticPhysicalSynchronizer(base.BaseTest):
     def setUp(self):
         super(TestStaticPhysicalSynchronizer, self).setUp()
         self.conf = cfg.ConfigOpts()
-        self.conf.register_opts(self.OPTS, group=STATIC_PHYSICAL)
+        self.conf.register_opts(self.OPTS, group=STATIC_PHYSICAL_PLUGIN)
         self.static_physical_synchronizer = \
             synchronizer.StaticPhysicalSynchronizer(self.conf)
 
@@ -103,9 +103,10 @@ class TestStaticPhysicalSynchronizer(base.BaseTest):
         entities = self.static_physical_synchronizer.get_all(SyncMode.UPDATE)
         self.assertEqual(5, len(entities))
 
-        conf = cfg.ConfigOpts()
-        conf.register_opts(self.CHANGES_OPTS, group=STATIC_PHYSICAL)
-        self.static_physical_synchronizer.cfg = conf
+        self.conf = cfg.ConfigOpts()
+        self.conf.register_opts(self.CHANGES_OPTS,
+                                group=STATIC_PHYSICAL_PLUGIN)
+        self.static_physical_synchronizer.cfg = self.conf
 
         # Action
         changes = self.static_physical_synchronizer.get_changes(

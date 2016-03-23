@@ -18,9 +18,8 @@ from vitrage.common.constants import EventAction
 from vitrage.common.constants import SynchronizerProperties as SyncProps
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.common import file_utils
+from vitrage.synchronizer.plugins.static_physical import STATIC_PHYSICAL_PLUGIN
 from vitrage.synchronizer.plugins.synchronizer_base import SynchronizerBase
-
-STATIC_PHYSICAL = 'static_physical'
 
 
 class StaticPhysicalSynchronizer(SynchronizerBase):
@@ -33,12 +32,12 @@ class StaticPhysicalSynchronizer(SynchronizerBase):
 
     def get_all(self, sync_mode):
         return self.make_pickleable(self._get_all_entities(),
-                                    STATIC_PHYSICAL,
+                                    STATIC_PHYSICAL_PLUGIN,
                                     sync_mode)
 
     def get_changes(self, sync_mode):
         return self.make_pickleable(self._get_changes_entities(),
-                                    STATIC_PHYSICAL,
+                                    STATIC_PHYSICAL_PLUGIN,
                                     sync_mode)
 
     def _get_all_entities(self):

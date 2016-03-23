@@ -19,7 +19,6 @@ import sys
 from oslo_service import service as os_service
 
 from vitrage.common.constants import EntityCategory
-from vitrage.common.constants import OPENSTACK_NODE
 from vitrage.entity_graph.api_handler import service as api_handler_svc
 from vitrage.entity_graph.consistency import service as consistency_svc
 from vitrage.entity_graph.initialization_status import InitializationStatus
@@ -29,6 +28,7 @@ from vitrage.evaluator.scenario_evaluator import ScenarioEvaluator
 from vitrage.evaluator.scenario_repository import ScenarioRepository
 from vitrage import service
 from vitrage.synchronizer import launcher as synchronizers_launcher
+from vitrage.synchronizer.plugins import OPENSTACK_NODE
 
 
 def main():

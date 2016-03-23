@@ -14,6 +14,9 @@
 
 from oslo_config import cfg
 
+STATIC_PHYSICAL_PLUGIN = 'static_physical'
+SWITCH = 'switch'
+
 OPTS = [
     cfg.StrOpt('transformer',
                default='vitrage.synchronizer.plugins.static_physical.'
@@ -34,6 +37,6 @@ OPTS = [
     cfg.StrOpt('directory', default='/etc/vitrage/static_plugins',
                help='Static physical plugins directory'),
     cfg.ListOpt('entities',
-                default=['switch'],
+                default=[SWITCH],
                 help='Static physical entity types list')
 ]

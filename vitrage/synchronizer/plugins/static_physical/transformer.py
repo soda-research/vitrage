@@ -23,17 +23,17 @@ from vitrage.common.exception import VitrageTransformerError
 import vitrage.graph.utils as graph_utils
 from vitrage.synchronizer.plugins.base.resource.transformer import \
     BaseResourceTransformer
+from vitrage.synchronizer.plugins.nova.host import NOVA_HOST_PLUGIN
+from vitrage.synchronizer.plugins.static_physical import SWITCH
 from vitrage.synchronizer.plugins import transformer_base
 
 LOG = logging.getLogger(__name__)
-NOVA_HOST = 'nova.host'
 
 
 class StaticPhysicalTransformer(BaseResourceTransformer):
 
     RELATION_TYPE = 'relation_type'
     RELATIONSHIPS_SECTION = 'relationships'
-    SWITCH = 'switch'
 
     def __init__(self, transformers):
         self.transformers = transformers
@@ -163,8 +163,8 @@ class StaticPhysicalTransformer(BaseResourceTransformer):
     def _register_relations_direction(self):
         self.relation_direction = {}
 
-        relationship = (self.SWITCH, NOVA_HOST)
+        relationship = (SWITCH, NOVA_HOST_PLUGIN)
         self.relation_direction[relationship] = True
 
-        relationship = (self.SWITCH, self.SWITCH)
+        relationship = (SWITCH, SWITCH)
         self.relation_direction[relationship] = True

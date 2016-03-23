@@ -27,6 +27,7 @@ from random import randint
 import exrex
 
 # noinspection PyPep8Naming
+from vitrage.synchronizer.plugins.nova.host import NOVA_HOST_PLUGIN
 from vitrage.tests.mocks.entity_model import BasicEntityModel as bem
 import vitrage.tests.mocks.utils as utils
 
@@ -325,7 +326,7 @@ def _get_sync_switch_snapshot_values(spec):
     for host_name, switch_name in host_switch_mapping:
         switch_info = switches_info.get(switch_name, [])
 
-        relationship_info = {"type": "nova.host",
+        relationship_info = {"type": NOVA_HOST_PLUGIN,
                              "name": host_name,
                              "id": host_name,
                              "relation_type": "contains"

@@ -14,6 +14,8 @@
 
 from oslo_config import cfg
 
+NOVA_ZONE_PLUGIN = 'nova.zone'
+
 OPTS = [
     cfg.StrOpt('transformer',
                default='vitrage.synchronizer.plugins.nova.zone.'
