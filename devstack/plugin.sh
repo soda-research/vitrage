@@ -14,6 +14,7 @@
 # --------
 GITDIR["python-vitrageclient"]=$DEST/python-vitrageclient
 GITREPO["python-vitrageclient"]=${VITRAGECLIENT_REPO:-${GIT_BASE}/openstack/python-vitrageclient.git}
+GITBRANCH["python-vitrageclient"]=${VITRAGECLIENT_BRANCH:-master}
 
 # Support potential entry-points console scripts in VENV or not
 if [[ ${USE_VENV} = True ]]; then
