@@ -26,6 +26,7 @@ from vitrage.synchronizer.plugins.base.resource.transformer import \
 from vitrage.synchronizer.plugins.nova.host import NOVA_HOST_PLUGIN
 from vitrage.synchronizer.plugins.static_physical import SWITCH
 from vitrage.synchronizer.plugins import transformer_base
+from vitrage.synchronizer.plugins.transformer_base import Neighbor
 
 LOG = logging.getLogger(__name__)
 
@@ -100,7 +101,7 @@ class StaticPhysicalTransformer(BaseResourceTransformer):
                 target_id=entity_key if is_source else neighbor.vertex_id,
                 relationship_type=relation_type)
 
-            return transformer_base.Neighbor(neighbor, relation_edge)
+            return Neighbor(neighbor, relation_edge)
         else:
             LOG.warning('Cannot find zone transformer')
             return None

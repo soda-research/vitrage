@@ -30,6 +30,7 @@ from vitrage.evaluator.template_fields import TemplateFields as TFields
 import vitrage.graph.utils as graph_utils
 from vitrage.graph import Vertex
 from vitrage.synchronizer.plugins import transformer_base
+from vitrage.synchronizer.plugins.transformer_base import Neighbor
 
 
 LOG = logging.getLogger(__name__)
@@ -87,7 +88,7 @@ class EvaluatorEventTransformer(transformer_base.TransformerBase):
                 relationship_type=event[EProps.RELATIONSHIP_TYPE],
                 update_timestamp=event[EProps.UPDATE_TIMESTAMP])
 
-            return [transformer_base.Neighbor(None, relation_edge)]
+            return [Neighbor(None, relation_edge)]
 
         if event_type == ADD_VERTEX:
 
@@ -103,7 +104,7 @@ class EvaluatorEventTransformer(transformer_base.TransformerBase):
                 VProps.SAMPLE_TIMESTAMP: event[VProps.SAMPLE_TIMESTAMP]
             }
             neighbor = Vertex(event[TFields.TARGET], neighbor_props)
-            return [transformer_base.Neighbor(neighbor, relation_edge)]
+            return [Neighbor(neighbor, relation_edge)]
 
         return []
 

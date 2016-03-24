@@ -26,7 +26,7 @@ from vitrage.entity_graph.processor import processor as proc
 from vitrage.entity_graph.states.normalized_resource_state import \
     NormalizedResourceState
 import vitrage.graph.utils as graph_utils
-from vitrage.synchronizer.plugins import transformer_base
+from vitrage.synchronizer.plugins.transformer_base import Neighbor
 from vitrage.tests.unit.entity_graph.base import TestEntityGraphUnitBase
 
 
@@ -146,7 +146,7 @@ class TestProcessor(TestEntityGraphUnitBase):
         new_edge = graph_utils.create_edge(vertex1.vertex_id,
                                            vertex2.vertex_id,
                                            'backup')
-        new_neighbors = [transformer_base.Neighbor(None, new_edge)]
+        new_neighbors = [Neighbor(None, new_edge)]
 
         # action
         processor.update_relationship(None, new_neighbors)
@@ -170,7 +170,7 @@ class TestProcessor(TestEntityGraphUnitBase):
                                            'backup')
         processor.entity_graph.add_edge(new_edge)
         self.assertEqual(3, processor.entity_graph.num_edges())
-        new_neighbors = [transformer_base.Neighbor(None, new_edge)]
+        new_neighbors = [Neighbor(None, new_edge)]
 
         # action
         processor.delete_relationship(None, new_neighbors)

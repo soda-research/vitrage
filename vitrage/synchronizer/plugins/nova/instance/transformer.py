@@ -28,7 +28,7 @@ from vitrage.synchronizer.plugins.nova.host import NOVA_HOST_PLUGIN
 from vitrage.synchronizer.plugins.nova.instance import NOVA_INSTANCE_PLUGIN
 from vitrage.synchronizer.plugins import transformer_base
 from vitrage.synchronizer.plugins.transformer_base import extract_field_value
-
+from vitrage.synchronizer.plugins.transformer_base import Neighbor
 
 LOG = logging.getLogger(__name__)
 
@@ -187,7 +187,7 @@ class InstanceTransformer(BaseResourceTransformer):
             target_id=vertex_id,
             relationship_type=EdgeLabels.CONTAINS)
 
-        return transformer_base.Neighbor(host_vertex, relationship_edge)
+        return Neighbor(host_vertex, relationship_edge)
 
     def create_placeholder_vertex(self, **kwargs):
         if VProps.ID not in kwargs:

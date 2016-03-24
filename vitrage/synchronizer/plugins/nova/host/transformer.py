@@ -26,6 +26,7 @@ from vitrage.synchronizer.plugins.nova.host import NOVA_HOST_PLUGIN
 from vitrage.synchronizer.plugins.nova.zone import NOVA_ZONE_PLUGIN
 from vitrage.synchronizer.plugins import transformer_base
 from vitrage.synchronizer.plugins.transformer_base import extract_field_value
+from vitrage.synchronizer.plugins.transformer_base import Neighbor
 
 
 LOG = logging.getLogger(__name__)
@@ -111,7 +112,7 @@ class HostTransformer(BaseResourceTransformer):
                 source_id=zone_neighbor.vertex_id,
                 target_id=host_vertex_id,
                 relationship_type=EdgeLabels.CONTAINS)
-            return transformer_base.Neighbor(zone_neighbor, relation_edge)
+            return Neighbor(zone_neighbor, relation_edge)
         else:
             LOG.warning('Cannot find zone transformer')
 

@@ -28,6 +28,7 @@ from vitrage.synchronizer.plugins.nagios.properties import NagiosProperties
 from vitrage.synchronizer.plugins.nova.host import NOVA_HOST_PLUGIN
 from vitrage.synchronizer.plugins.static_physical import SWITCH
 from vitrage.synchronizer.plugins import transformer_base as tbase
+from vitrage.synchronizer.plugins.transformer_base import Neighbor
 
 LOG = logging.getLogger(__name__)
 
@@ -105,7 +106,7 @@ class NagiosTransformer(BaseAlarmTransformer):
                 target_id=resource_vertex.vertex_id,
                 relationship_type=EdgeLabels.ON)
 
-            return tbase.Neighbor(resource_vertex, relationship_edge)
+            return Neighbor(resource_vertex, relationship_edge)
 
         LOG.warning('Cannot transform host, host transformer does not exist')
         return None
