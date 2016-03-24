@@ -99,7 +99,7 @@ def create_edge(source_id,
         EConst.UPDATE_TIMESTAMP: update_timestamp,
         EConst.IS_DELETED: is_deleted,
         EConst.RELATIONSHIP_TYPE: relationship_type,
-        }
+    }
     if metadata:
         properties.update(metadata)
     properties = dict(

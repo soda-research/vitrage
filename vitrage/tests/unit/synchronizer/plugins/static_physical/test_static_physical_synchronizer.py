@@ -69,7 +69,7 @@ class TestStaticPhysicalSynchronizer(base.BaseTest):
                    '/static_plugins/changes_plugins'),
     ]
 
-    # noinspection PyAttributeOutsideInit
+    # noinspection PyAttributeOutsideInit,PyPep8Naming
     @classmethod
     def setUpClass(cls):
         cls.conf = cfg.ConfigOpts()
@@ -98,6 +98,7 @@ class TestStaticPhysicalSynchronizer(base.BaseTest):
         # Test assertions
         self.assertEqual(5, len(static_entities))
 
+    # noinspection PyAttributeOutsideInit
     def test_get_changes(self):
         # Setup
         entities = self.static_physical_synchronizer.get_all(SyncMode.UPDATE)

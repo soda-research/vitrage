@@ -28,7 +28,7 @@ import exrex
 
 # noinspection PyPep8Naming
 from vitrage.synchronizer.plugins.nova.host import NOVA_HOST_PLUGIN
-from vitrage.tests.mocks.entity_model import BasicEntityModel as bem
+from vitrage.tests.mocks.entity_model import BasicEntityModel as Bem
 import vitrage.tests.mocks.utils as utils
 
 DYNAMIC_INFO_FKEY = 'filename'
@@ -112,7 +112,7 @@ class EventTraceGenerator(object):
         static_specs = static_info_parsers[dynamic_spec_filename](spec)
         self.name = spec.get(NAME_KEY, 'generator')
 
-        self._models = [bem(dynam_specs, details) for details in static_specs]
+        self._models = [Bem(dynam_specs, details) for details in static_specs]
 
     @property
     def models(self):
@@ -460,5 +460,5 @@ def get_trace_generators(entity_spec_list, default_events=100):
             {GENERATOR: EventTraceGenerator(entity_spec),
              NUM_EVENTS: entity_spec.get(NUM_EVENTS, default_events)}
             for entity_spec in entity_spec_list
-            ]
+        ]
     return generator_spec_list

@@ -70,7 +70,7 @@ class RaiseAlarm(base.Recipe):
             'affected_resource_id': action_spec.targets[TFields.TARGET],
             'name': action_spec.properties[TFields.ALARM_NAME],
             'event_type': event_type,
-            }
+        }
         notify_step = ActionStepWrapper(NOTIFY, notify_params)
         return notify_step
 

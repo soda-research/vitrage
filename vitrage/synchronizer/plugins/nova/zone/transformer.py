@@ -65,7 +65,7 @@ class ZoneTransformer(BaseResourceTransformer):
     }
 
     def __init__(self, transformers):
-        self.transformers = transformers
+        super(ZoneTransformer, self).__init__(transformers)
 
     def _create_entity_vertex(self, entity_event):
 

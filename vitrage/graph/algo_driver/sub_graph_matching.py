@@ -134,7 +134,7 @@ def _get_edges_to_mapped_vertices(graph, vertex_id):
     """Get all edges (to/from) vertex where neighbor has a MAPPED_V_ID
 
     :type graph: driver.Graph
-    :type vertex_id: driver.Vertex
+    :type vertex_id: str
     :rtype: set of driver.Edge
     """
     subgraph_edges_to_mapped_vertices = []

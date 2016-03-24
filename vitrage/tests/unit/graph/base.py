@@ -198,7 +198,7 @@ class GraphTestBase(base.BaseTest):
             2 + num_of_hosts_per_node + num_of_hosts_per_node * \
             num_of_alarms_per_host + num_of_hosts_per_node * \
             num_of_vms_per_host + num_of_hosts_per_node * \
-            num_of_vms_per_host * num_of_alarms_per_vm + num_of_tests_per_host * \
-            num_of_hosts_per_node
+            num_of_vms_per_host * num_of_alarms_per_vm + \
+            num_of_tests_per_host * num_of_hosts_per_node
         assert expected_graph_size == len(g), 'Graph size'
         return g

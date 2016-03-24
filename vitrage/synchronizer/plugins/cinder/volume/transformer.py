@@ -67,7 +67,7 @@ class CinderVolumeTransformer(BaseResourceTransformer):
     }
 
     def __init__(self, transformers):
-        self.transformers = transformers
+        super(CinderVolumeTransformer, self).__init__(transformers)
 
     def _create_entity_vertex(self, entity_event):
         sync_mode = entity_event[SyncProps.SYNC_MODE]

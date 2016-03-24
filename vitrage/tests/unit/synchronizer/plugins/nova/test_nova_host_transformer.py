@@ -34,9 +34,10 @@ from vitrage.tests.mocks import mock_syncronizer as mock_sync
 LOG = logging.getLogger(__name__)
 
 
+# noinspection PyProtectedMember
 class NovaHostTransformerTest(base.BaseTest):
 
-    # noinspection PyAttributeOutsideInit
+    # noinspection PyAttributeOutsideInit,PyPep8Naming
     @classmethod
     def setUpClass(cls):
         cls.transformers = {}
