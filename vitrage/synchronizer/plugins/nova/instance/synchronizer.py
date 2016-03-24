@@ -11,9 +11,14 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND,  either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+from oslo_log import log as logging
 
+from vitrage.common.constants import SyncMode
+from vitrage.common.datetime_utils import utcnow
 from vitrage.synchronizer.plugins.nova.base import NovaBase
 from vitrage.synchronizer.plugins.nova.instance import NOVA_INSTANCE_PLUGIN
+
+LOG = logging.getLogger(__name__)
 
 
 class InstanceSynchronizer(NovaBase):
@@ -31,3 +36,25 @@ class InstanceSynchronizer(NovaBase):
             NOVA_INSTANCE_PLUGIN,
             sync_mode,
             'manager')
+
+    @staticmethod
+    def enrich_event(event, event_type):
+        sync_event = dict()
+        sync_event['payload'] = event
+        sync_event['event_type'] = event_type
+        sync_event['metadata'] = {
+            'timestamp': str(utcnow()),
+        }
+        InstanceSynchronizer.make_pickleable(
+            [sync_event], NOVA_INSTANCE_PLUGIN,
+            SyncMode.UPDATE)
+
+        return sync_event
+
+    @staticmethod
+    def get_event_types(conf):
+        return ['compute.instance']
+
+    @staticmethod
+    def get_topic(conf):
+        return conf[NOVA_INSTANCE_PLUGIN].notification_topic

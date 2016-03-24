@@ -23,8 +23,11 @@ OPTS = [
                help='Nova instance transformer class path',
                required=True),
     cfg.StrOpt('synchronizer',
-               default='vitrage.synchronizer.plugins.nova.instance'
-                       '.synchronizer.InstanceSynchronizer',
+               default='vitrage.synchronizer.plugins.nova.instance.'
+                       'synchronizer.InstanceSynchronizer',
                help='Nova instance synchronizer class path',
                required=True),
-]
+    cfg.StrOpt('notification_topic',
+               default='vitrage_nova_notifications',
+               help='Nova configured notifications topic for Vitrage'),
+    ]
