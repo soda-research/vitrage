@@ -191,6 +191,39 @@ def simple_zone_generators(zone_num, host_num, snapshot_events=0,
     return tg.get_trace_generators(test_entity_spec_list)
 
 
+def simple_volume_generators(volume_num, instance_num, snapshot_events=0,
+                             snap_vals=None):
+    """A function for returning vm event generators.
+
+    Returns generators for a given number of volumes and
+    instances. Instances will be distributed across hosts in round-robin style.
+
+    :param volume_num: number of volumes
+    :param instance_num: number of instances
+    :param snapshot_events: number of snapshot events per host
+    :param snap_vals: preset vals for ALL snapshot events
+    :return: generators for volume_num volumes as specified
+    """
+
+    mapping = [('volume-{0}'.format(index % volume_num),
+                'vm-{0}'.format(index))
+               for index in range(instance_num)
+               ]
+
+    test_entity_spec_list = []
+    if snapshot_events:
+        test_entity_spec_list.append(
+            {tg.DYNAMIC_INFO_FKEY: tg.SYNC_VOLUME_SNAPSHOT_D,
+             tg.STATIC_INFO_FKEY: None,
+             tg.EXTERNAL_INFO_KEY: snap_vals,
+             tg.MAPPING_KEY: mapping,
+             tg.NAME_KEY: 'Volume snapshot generator',
+             tg.NUM_EVENTS: snapshot_events
+             }
+        )
+    return tg.get_trace_generators(test_entity_spec_list)
+
+
 def simple_switch_generators(switch_num, host_num, snapshot_events=0,
                              snap_vals=None):
     """A function for returning switch event generators.
