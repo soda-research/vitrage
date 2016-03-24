@@ -33,7 +33,7 @@ def get_client(transport, target, version_cap=None, serializer=None):
     return messaging.RPCClient(transport,
                                target,
                                version_cap=version_cap,
-                               serializer=None)
+                               serializer=serializer)
 
 
 def get_server(target, endpoints, transport, serializer=None):
@@ -42,4 +42,4 @@ def get_server(target, endpoints, transport, serializer=None):
                                     target,
                                     endpoints,
                                     executor='eventlet',
-                                    serializer=None)
+                                    serializer=serializer)

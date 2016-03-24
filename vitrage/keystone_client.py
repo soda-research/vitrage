@@ -19,6 +19,7 @@ import os
 from keystoneauth1 import exceptions as ka_exception
 from keystoneauth1 import identity as ka_identity
 from keystoneauth1 import loading as ka_loading
+# noinspection PyPackageRequirements
 from keystoneclient.v3 import client as ks_client_v3
 from oslo_config import cfg
 from oslo_log import log
@@ -122,6 +123,7 @@ def setup_keystoneauth(conf):
     ka_loading.load_auth_from_conf_options(conf, CFG_GROUP)
 
 
+# noinspection PyClassHasNoInit
 class LegacyVitrageKeystoneLoader(ka_loading.BaseLoader):
     @property
     def plugin_class(self):

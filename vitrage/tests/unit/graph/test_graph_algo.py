@@ -399,7 +399,7 @@ class GraphAlgorithmTest(GraphTestBase):
             Mapping(e_node_contains_switch,
                     e_node_to_switch, is_vertex=False)],
             validate=True
-            )
+        )
         self.assertEqual(
             0,
             len(mappings),

@@ -16,7 +16,7 @@ from vitrage.synchronizer.plugins.nagios.synchronizer import NagiosSynchronizer
 from vitrage.tests.mocks import mock_syncronizer as mock_sync
 
 
-class NagiosSynchronizerWithMockData(NagiosSynchronizer):
+class MockNagiosSynchronizer(NagiosSynchronizer):
     """A nagios synchronizer for tests.
 
     Instead of calling Nagios URL to get the data, it returns the data it
@@ -24,7 +24,7 @@ class NagiosSynchronizerWithMockData(NagiosSynchronizer):
     """
 
     def __init__(self, conf):
-        super(NagiosSynchronizerWithMockData, self).__init__(conf)
+        super(MockNagiosSynchronizer, self).__init__(conf)
         self.service_datas = None
 
     def set_service_datas(self, service_datas):

@@ -35,7 +35,7 @@ LOG = logging.getLogger(__name__)
 
 class TestCinderVolumeTransformer(base.BaseTest):
 
-    # noinspection PyAttributeOutsideInit
+    # noinspection PyAttributeOutsideInit,PyPep8Naming
     @classmethod
     def setUpClass(cls):
         cls.transformers = {}

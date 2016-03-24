@@ -153,7 +153,7 @@ class ScenarioEvaluator(object):
         targets = action_spec.targets
         real_ids = {
             target: match[target_id] for target, target_id in targets.items()
-            }
+        }
         revised_spec = ActionSpecs(action_spec.type,
                                    real_ids,
                                    action_spec.properties)

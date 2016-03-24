@@ -18,7 +18,9 @@ from oslo_log import log
 import requests
 
 from vitrage.common.constants import SynchronizerProperties as SyncProps
+# noinspection PyProtectedMember
 from vitrage.i18n import _LE
+# noinspection PyProtectedMember
 from vitrage.i18n import _LW
 from vitrage.synchronizer.plugins.base.alarm.synchronizer \
     import BaseAlarmSynchronizer

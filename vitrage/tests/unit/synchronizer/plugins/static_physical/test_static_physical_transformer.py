@@ -34,10 +34,9 @@ LOG = logging.getLogger(__name__)
 
 class TestStaticPhysicalTransformer(base.BaseTest):
 
-    # noinspection PyAttributeOutsideInit
+    # noinspection PyAttributeOutsideInit,PyPep8Naming
     @classmethod
     def setUpClass(cls):
-
         cls.transformers = {}
         cls.transformers[NOVA_HOST_PLUGIN] = HostTransformer(cls.transformers)
         cls.transformers[STATIC_PHYSICAL_PLUGIN] = StaticPhysicalTransformer(

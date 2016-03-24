@@ -37,7 +37,7 @@ class StaticPhysicalTransformer(BaseResourceTransformer):
     RELATIONSHIPS_SECTION = 'relationships'
 
     def __init__(self, transformers):
-        self.transformers = transformers
+        super(StaticPhysicalTransformer, self).__init__(transformers)
         self._register_relations_direction()
 
     def _create_entity_vertex(self, entity_event):

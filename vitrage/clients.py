@@ -27,7 +27,7 @@ OPTS = [
     cfg.StrOpt('aodh_version', default='2', help='Aodh version'),
     cfg.FloatOpt('nova_version', default='2.0', help='Nova version'),
     cfg.StrOpt('cinder_version', default='1', help='Cinder version'),
-    ]
+]
 
 
 def ceilometer_client(conf):
@@ -39,7 +39,7 @@ def ceilometer_client(conf):
             session=keystone_client.get_session(conf),
             region_name=auth_config.region_name,
             interface=auth_config.interface,
-            )
+        )
         LOG.info('Ceilometer client created')
         return client
     except Exception as e:
@@ -55,7 +55,7 @@ def nova_client(conf):
             session=keystone_client.get_session(conf),
             region_name=auth_config.region_name,
             interface=auth_config.interface,
-            )
+        )
         LOG.info('Nova client created')
         return client
     except Exception as e:

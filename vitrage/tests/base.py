@@ -14,6 +14,7 @@
 import os
 
 from oslo_utils import timeutils
+# noinspection PyPackageRequirements
 from oslotest import base
 import sys
 
@@ -44,7 +45,7 @@ class BaseTest(base.BaseTestCase):
         """
         return self.assertAlmostEqual(timeutils.delta_seconds(first, second),
                                       0.0,
-                                      places=5)
+                                      places=5, msg=msg)
 
     def assert_is_empty(self, obj):
         try:

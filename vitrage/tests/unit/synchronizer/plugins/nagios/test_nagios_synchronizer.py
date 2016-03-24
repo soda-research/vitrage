@@ -11,20 +11,22 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+
 from oslo_config import cfg
 from oslo_log import log as logging
 
-from vitrage.synchronizer.plugins.nagios.properties import NagiosProperties \
-    as NagiosProps
+from vitrage.synchronizer.plugins.nagios.properties import (
+    NagiosProperties as NagiosProps)
 from vitrage.tests.mocks import utils
-from vitrage.tests.unit.synchronizer.plugins.nagios.nagios_base_test \
-    import NagiosBaseTest
-from vitrage.tests.unit.synchronizer.plugins.nagios.synchronizer_with_mock_data \
-    import NagiosSynchronizerWithMockData
+from vitrage.tests.unit.synchronizer.plugins.nagios.mock_synchronizer import (
+    MockNagiosSynchronizer)
+from vitrage.tests.unit.synchronizer.plugins.nagios.nagios_base_test import (
+    NagiosBaseTest)
 
 LOG = logging.getLogger(__name__)
 
 
+# noinspection PyProtectedMember
 class NagiosSynchronizerTest(NagiosBaseTest):
 
     OPTS = [
@@ -49,7 +51,7 @@ class NagiosSynchronizerTest(NagiosBaseTest):
         """
 
         # Setup
-        nagios_synchronizer = NagiosSynchronizerWithMockData(self.conf)
+        nagios_synchronizer = MockNagiosSynchronizer(self.conf)
 
         # Action
         service_data1 = {NagiosProps.RESOURCE_NAME: 'compute-0',
@@ -160,7 +162,7 @@ class NagiosSynchronizerTest(NagiosBaseTest):
         """
 
         # Setup
-        nagios_synchronizer = NagiosSynchronizerWithMockData(self.conf)
+        nagios_synchronizer = MockNagiosSynchronizer(self.conf)
 
         # Action
         service_data1 = {NagiosProps.RESOURCE_NAME: 'compute-0',
@@ -285,7 +287,7 @@ class NagiosSynchronizerTest(NagiosBaseTest):
         """Check get_changes and get_all functionalities """
 
         # Setup
-        nagios_synchronizer = NagiosSynchronizerWithMockData(self.conf)
+        nagios_synchronizer = MockNagiosSynchronizer(self.conf)
 
         # Action
         service_data1 = {NagiosProps.RESOURCE_NAME: 'compute-0',
