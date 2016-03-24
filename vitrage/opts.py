@@ -12,11 +12,9 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-import itertools
 
-from oslo_config import cfg
-from oslo_log import log
-from oslo_policy import opts as policy_opts
+import itertools
+import os
 from oslo_utils import importutils
 
 import vitrage.api
@@ -28,7 +26,10 @@ import vitrage.rpc
 import vitrage.synchronizer
 import vitrage.synchronizer.plugins
 
-PLUGINS_PATH = 'vitrage.synchronizer.plugins.'
+PLUGINS_MODULE_PATH = 'vitrage.synchronizer.plugins.'
+PLUGINS_FS_PATH = os.path.join('vitrage', 'synchronizer', 'plugins')
+SYNCHRONIZER_FILE = 'synchronizer.py'
+TRANSFORMER_FILE = 'transformer.py'
 
 
 def list_opts():
@@ -47,16 +48,30 @@ def list_opts():
     ]
 
 
-# This is made for documentation and configuration purposes
 def plugins_opts():
-    conf = cfg.ConfigOpts()
-    log.register_options(conf)
-    policy_opts.set_defaults(conf)
+    top = os.getcwd()
+    plugin_names = _normalize_path_to_plugin_name(
+        _filter_folders_containing_transformer(
+            _get_folders_containing_synchronizer(top)), top)
 
-    for group, options in list_opts():
-        conf.register_opts(list(options),
-                           group=None if group == 'DEFAULT' else group)
+    return [(plugin_name, plugin_module.OPTS) for plugin_name in plugin_names
+            for plugin_module in
+            [importutils.import_module(PLUGINS_MODULE_PATH + plugin_name)]
+            if 'OPTS' in plugin_module.__dict__]
 
-    return [(plugin_name, importutils.import_module(PLUGINS_PATH + plugin_name)
-             .OPTS)
-            for plugin_name in conf.synchronizer_plugins.plugin_type]
+
+def _get_folders_containing_synchronizer(top=os.getcwd()):
+    return [os.path.dirname(os.path.join(root, name))
+            for root, dirs, files in os.walk(top, topdown=False)
+            for name in files if name == SYNCHRONIZER_FILE]
+
+
+def _filter_folders_containing_transformer(folders):
+    return [folder for folder in folders for
+            root, dirs, files in os.walk(folder, topdown=False) for
+            name in files if name == TRANSFORMER_FILE]
+
+
+def _normalize_path_to_plugin_name(path_list, top=os.getcwd()):
+    return [os.path.relpath(path, os.path.join(top, PLUGINS_FS_PATH))
+            .replace(os.sep, '.') for path in path_list]
