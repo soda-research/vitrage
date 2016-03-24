@@ -107,11 +107,11 @@ class EntityGraphApis(object):
         ga = create_algorithm(self.entity_graph)
         if graph_type == 'tree':
             final_query = query if query else TOPOLOGY_QUERY
+            return ga.graph_query_vertices(
+                query_dict=final_query,
+                root_id=root)
         else:
-            final_query = {}
-        return ga.graph_query_vertices(
-            query_dict=final_query,
-            root_id=root)
+            return self.entity_graph
 
     @staticmethod
     def _get_first(lst):

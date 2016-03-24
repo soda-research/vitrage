@@ -15,6 +15,7 @@
 from oslo_config import cfg
 
 from vitrage.synchronizer.plugins.aodh import AODH_PLUGIN
+from vitrage.synchronizer.plugins.cinder.volume import CINDER_VOLUME_PLUGIN
 from vitrage.synchronizer.plugins.nagios import NAGIOS_PLUGIN
 from vitrage.synchronizer.plugins.nova.host import NOVA_HOST_PLUGIN
 from vitrage.synchronizer.plugins.nova.instance import NOVA_INSTANCE_PLUGIN
@@ -32,6 +33,7 @@ OPTS = [
                          NOVA_ZONE_PLUGIN,
                          NAGIOS_PLUGIN,
                          STATIC_PHYSICAL_PLUGIN,
-                         AODH_PLUGIN],
+                         AODH_PLUGIN,
+                         CINDER_VOLUME_PLUGIN],
                 help='Names of supported plugins'),
 ]

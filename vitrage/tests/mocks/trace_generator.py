@@ -48,6 +48,7 @@ SYNC_INST_SNAPSHOT_S = 'sync_inst_snapshot_static.json'
 SYNC_INST_UPDATE_D = 'sync_inst_update_dynamic.json'
 SYNC_HOST_SNAPSHOT_D = 'sync_host_snapshot_dynamic.json'
 SYNC_ZONE_SNAPSHOT_D = 'sync_zone_snapshot_dynamic.json'
+SYNC_VOLUME_SNAPSHOT_D = 'sync_volume_snapshot_dynamic.json'
 SYNC_SWITCH_SNAPSHOT_D = 'sync_switch_snapshot_dynamic.json'
 SYNC_NAGIOS_SNAPSHOT_D = 'sync_nagios_snapshot_dynamic.json'
 SYNC_NAGIOS_SNAPSHOT_S = 'sync_nagios_snapshot_static.json'
@@ -98,6 +99,7 @@ class EventTraceGenerator(object):
              SYNC_INST_UPDATE_D: _get_sync_vm_update_values,
              SYNC_HOST_SNAPSHOT_D: _get_sync_host_snapshot_values,
              SYNC_ZONE_SNAPSHOT_D: _get_sync_zone_snapshot_values,
+             SYNC_VOLUME_SNAPSHOT_D: _get_sync_volume_snapshot_values,
              SYNC_SWITCH_SNAPSHOT_D: _get_sync_switch_snapshot_values,
              SYNC_NAGIOS_SNAPSHOT_D: _get_sync_nagios_alarm_values,
 
@@ -251,6 +253,31 @@ def _get_sync_zone_snapshot_values(spec):
                       'hosts': zones_info.get(zone_name, {})
                       }
         }
+        static_values.append(combine_data(
+            static_info_re, mapping, spec.get(EXTERNAL_INFO_KEY, None)
+        ))
+    return static_values
+
+
+def _get_sync_volume_snapshot_values(spec):
+    """Generates the static synchronizer values for each volume.
+
+    :param spec: specification of event generation.
+    :type spec: dict
+    :return: list of static synchronizer values for each volume.
+    :rtype: list
+    """
+
+    volume_instance_mapping = spec[MAPPING_KEY]
+    static_info_re = None
+    if spec[STATIC_INFO_FKEY] is not None:
+        static_info_re = utils.load_specs(spec[STATIC_INFO_FKEY])
+    static_values = []
+
+    for volume_name, instance_name in volume_instance_mapping:
+        mapping = {'id': volume_name,
+                   'display_name': volume_name,
+                   'attachments': [{'server_id': instance_name}]}
         static_values.append(combine_data(
             static_info_re, mapping, spec.get(EXTERNAL_INFO_KEY, None)
         ))

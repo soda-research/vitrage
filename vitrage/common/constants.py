@@ -44,6 +44,7 @@ class EdgeLabels(object):
     ON = 'on'
     CONTAINS = 'contains'
     CAUSES = 'causes'
+    ATTACHED = 'attached'
 
 
 class SyncMode(object):
