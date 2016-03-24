@@ -21,7 +21,6 @@ from vitrage.common import datetime_utils
 import vitrage.graph.utils as graph_utils
 from vitrage.synchronizer.plugins.aodh.properties import AodhProperties \
     as AodhProps
-from vitrage.synchronizer.plugins.aodh.properties import EventProps
 from vitrage.synchronizer.plugins.base.alarm.properties \
     import AlarmProperties as AlarmProps
 from vitrage.synchronizer.plugins.base.alarm.transformer \
@@ -72,25 +71,16 @@ class AodhTransformer(BaseAlarmTransformer):
             update_timestamp=update_timestamp,
             metadata=metadata)
 
-    # noinspection PyMethodMayBeStatic
     def _create_neighbors(self, entity_event):
-        resource_id = entity_event[AodhProps.RESOURCE_ID]
-        resource_type = entity_event['affected_resource_type']
-        resource_category = entity_event['affected_resource_category']
-        resource_vertex_id = entity_event['resource_vertex_id']
-        vertex = graph_utils.create_vertex(
-            resource_vertex_id,
-            entity_id=resource_id,
-            entity_category=resource_category,
-            entity_type=resource_type,
-            sample_timestamp=entity_event[SyncProps.SAMPLE_DATE],
-            is_placeholder=True)
-
-        edge = graph_utils.create_edge(
-            source_id=self.extract_key(entity_event),
-            target_id=resource_vertex_id,
-            relationship_type=EdgeLabels.ON)
-        return [Neighbor(vertex, edge)]
+        graph_neighbors = entity_event[self.QUERY_RESULT]
+        result = []
+        for vertex in graph_neighbors:
+            edge = graph_utils.create_edge(
+                source_id=self._create_entity_key(entity_event),
+                target_id=vertex.vertex_id,
+                relationship_type=EdgeLabels.ON)
+            result.append(Neighbor(vertex, edge))
+        return result
 
     def _ok_status(self, entity_event):
         return entity_event[AodhProps.STATE] == self.STATUS_OK
@@ -112,17 +102,8 @@ class AodhTransformer(BaseAlarmTransformer):
             tbase.TIMESTAMP_FORMAT)
 
     @staticmethod
-    def enrich_event(event, graph):
+    def get_enrich_query(event):
         affected_resource_id = event.get(AodhProps.RESOURCE_ID, None)
         if not affected_resource_id:
-            return
-
-        vertices = graph.get_vertices({VProps.ID: affected_resource_id})
-        LOG.debug('affected resource id %s found %s items',
-                  affected_resource_id, str(len(vertices)))
-        if len(vertices) != 1:
-            LOG.error('Unknown affected resource id %s', affected_resource_id)
-            return
-        event[EventProps.AFFECTED_TYPE] = vertices[0][VProps.TYPE]
-        event[EventProps.AFFECTED_CATEGORY] = vertices[0][VProps.CATEGORY]
-        event[EventProps.RESOURCE_VERTEX_ID] = vertices[0].vertex_id
+            return {}
+        return {VProps.ID: affected_resource_id}

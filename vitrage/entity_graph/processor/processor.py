@@ -22,6 +22,7 @@ from vitrage.entity_graph.processor import entity_graph
 from vitrage.entity_graph.states.state_manager import StateManager
 from vitrage.entity_graph.transformer_manager import TransformerManager
 from vitrage.graph import Direction
+from vitrage.synchronizer.plugins.transformer_base import TransformerBase
 
 LOG = log.getLogger(__name__)
 
@@ -49,8 +50,11 @@ class Processor(processor.ProcessorBase):
         :type event: Dictionary
         """
 
-        LOG.debug('Processor event received')
-        self.transformer_manager.enrich_event(event, self.entity_graph)
+        sync_type = self.transformer_manager.get_sync_type(event)
+        LOG.info('#### processor event received: %s ####', sync_type)
+        LOG.debug('processor event:\n%s', event)
+
+        self._enrich_event(event)
         entity = self.transformer_manager.transform(event)
         self._calculate_aggregated_state(entity.vertex, entity.action)
         return self.actions[entity.action](entity.vertex, entity.neighbors)
@@ -279,3 +283,10 @@ class Processor(processor.ProcessorBase):
             return None
 
         self.state_manager.aggregated_state(vertex, graph_vertex)
+
+    def _enrich_event(self, event):
+        attr = self.transformer_manager.get_enrich_query(event)
+        if attr is None:
+            return
+        result = self.entity_graph.get_vertices(attr)
+        event[TransformerBase.QUERY_RESULT] = result

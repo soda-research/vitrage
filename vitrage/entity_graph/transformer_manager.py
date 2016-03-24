@@ -52,7 +52,6 @@ class TransformerManager(object):
         return transformers
 
     def get_transformer(self, key):
-
         try:
             transformer = self.transformers[key]
         except KeyError:
@@ -62,22 +61,19 @@ class TransformerManager(object):
         return transformer
 
     def transform(self, entity_event):
-        sync_type = self._get_sync_type(entity_event)
-        LOG.debug('TRANSFORMER EVENT: %s', sync_type)
-        LOG.debug('Event:\n%s', entity_event)
+        sync_type = self.get_sync_type(entity_event)
         return self.get_transformer(sync_type).transform(entity_event)
 
-    def enrich_event(self, entity_event, graph):
-        sync_type = self._get_sync_type(entity_event)
-        return self.get_transformer(sync_type).enrich_event(entity_event,
-                                                            graph)
+    def get_enrich_query(self, entity_event):
+        sync_type = self.get_sync_type(entity_event)
+        return self.get_transformer(sync_type).get_enrich_query(entity_event)
 
     def extract_key(self, entity_event):
-        sync_type = self._get_sync_type(entity_event)
+        sync_type = self.get_sync_type(entity_event)
         return self.get_transformer(sync_type)._create_entity_key()
 
     @staticmethod
-    def _get_sync_type(entity_event):
+    def get_sync_type(entity_event):
         try:
             return entity_event[SyncProps.SYNC_TYPE]
         except KeyError:

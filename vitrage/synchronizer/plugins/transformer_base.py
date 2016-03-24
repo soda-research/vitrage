@@ -86,6 +86,7 @@ def convert_timestamp_format(current_timestamp_format, timestamp):
 class TransformerBase(object):
 
     KEY_SEPARATOR = ':'
+    QUERY_RESULT = 'graph_query_result'
 
     def transform(self, entity_event):
         """Transform an entity event into entity wrapper.
@@ -133,7 +134,7 @@ class TransformerBase(object):
          :param entity_event: an event provided by synchronizer
          :return: neighbors - a list of neighbors where each item in the list
                               is a tuple of (vertex, edge)
-         :rtype:[]
+         :rtype: list
          """
 
     @abc.abstractmethod
@@ -215,5 +216,17 @@ class TransformerBase(object):
         return update_timestamp if update_timestamp else sample_timestamp
 
     @staticmethod
-    def enrich_event(event, graph):
-        pass
+    def get_enrich_query(event):
+        """Allow running a query on the graph vertices
+
+        The result of the query specified here will be added to the event in
+        the 'QUERY_RESULT' field.
+
+         Example:
+         -------
+          query = {'type': 'nova.instance'}
+          Before transform is called the result of running the query against
+          the topology graph will be updated to event[QUERY_RESULT]
+          To contain the list of all the vertices with type=nova.instance
+        """
+        return None
