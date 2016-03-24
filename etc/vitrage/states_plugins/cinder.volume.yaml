@@ -1,0 +1,35 @@
+category: RESOURCE
+states:
+  - normalized state:
+      name: ERROR
+      priority: 50
+      original states:
+        - name: ERROR
+        - name: ERROR_DELETING
+        - name: ERROR_RESTORING
+        - name: ERROR_EXTENDING
+  - normalized state:
+      name: UNRECOGNIZED
+      priority: 40
+      original states:
+        - name: UNRECOGNIZED
+  - normalized state:
+      name: TRANSIENT
+      priority: 30
+      original states:
+        - name: CREATING
+        - name: ATTACHING
+        - name: DELETING
+        - name: RESTORING-BACKUP
+        - name: BACKING-UP
+  - normalized state:
+      name: SUBOPTIMAL
+      priority: 20
+      original states:
+        - name: SUBOPTIMAL
+  - normalized state:
+      name: RUNNING
+      priority: 10
+      original states:
+        - name: IN-USE
+        - name: AVAILABLE
