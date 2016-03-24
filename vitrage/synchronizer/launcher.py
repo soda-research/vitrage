@@ -18,6 +18,7 @@ import itertools
 from oslo_log import log
 from oslo_service import service as os_service
 from oslo_utils import importutils as utils
+from vitrage.synchronizer.plugins.listener_service import ListenerService
 
 from services import ChangesService
 from services import SnapshotsService
@@ -63,4 +64,8 @@ class Launcher(object):
 
             (SnapshotsService(self.conf,
                               self.snapshot_plugins,
-                              self.callback),))
+                              self.callback),),
+
+            (ListenerService(self.conf,
+                             self.snapshot_plugins,
+                             self.callback),),)

@@ -47,7 +47,8 @@ class SynchronizerBase(object):
     def get_changes(self, sync_mode):
         pass
 
-    def make_pickleable(self, entities, sync_type,
+    @classmethod
+    def make_pickleable(cls, entities, sync_type,
                         sync_mode, *args):
         pickleable_entities = []
 
@@ -55,13 +56,13 @@ class SynchronizerBase(object):
             for field in args:
                 entity.pop(field)
 
-            self._add_sync_type(entity, sync_type)
-            self._add_sync_mode(entity, sync_mode)
-            self._add_sampling_time(entity)
+            cls._add_sync_type(entity, sync_type)
+            cls._add_sync_mode(entity, sync_mode)
+            cls._add_sampling_time(entity)
             pickleable_entities.append(entity)
 
         if sync_mode == SyncMode.INIT_SNAPSHOT:
-            pickleable_entities.append(self._get_end_message(sync_type))
+            pickleable_entities.append(cls._get_end_message(sync_type))
 
         return pickleable_entities
 
@@ -77,3 +78,61 @@ class SynchronizerBase(object):
     @staticmethod
     def _add_sync_mode(entity, sync_mode):
         entity[SyncProps.SYNC_MODE] = sync_mode
+
+    @staticmethod
+    @abc.abstractmethod
+    def enrich_event(event, event_type):
+        """Return the given event with extra fields
+
+        We add extra data, which the transformer uses later on.
+        For example, we can add a timestamp and change the message's structure
+        :param event: the event received by oslo
+        :param event_type: the event type of the event
+        :return: the enriched event
+        """
+
+        pass
+
+    @staticmethod
+    @abc.abstractmethod
+    def get_event_types(conf):
+        """Return a list of all event types relevant to this synchronizer
+
+        Example:
+        return ['compute.instance.update',
+                'compute.instance.resume']
+
+        It also supports prefixes- the event types which start
+        with this prefix will be processed by this synchronizer:
+        Example:
+        return ['compute.instance']
+
+
+
+        :return: a list of event types
+        :rtype: list of str
+        """
+
+        return []
+
+    @staticmethod
+    @abc.abstractmethod
+    def get_topic(conf):
+        """Return the topic of events processed by this synchronizer
+
+        Example:
+        to listen to nova topic, add another topic to nova.conf so nova will
+        notify the notifications to another queue.
+
+        example of nova.conf:
+         notification_topics = notifications,new_topic
+
+        example of get_topic():
+         return 'new_topic'
+
+        :param conf: the synchronizer's configuration
+        :return: the topic of the synchronizer
+        :rtype: str
+        """
+
+        return None
