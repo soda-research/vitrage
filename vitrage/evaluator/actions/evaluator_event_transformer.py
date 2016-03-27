@@ -48,10 +48,15 @@ class EvaluatorEventTransformer(transformer_base.TransformerBase):
 
         event_type = event[EVALUATOR_EVENT_TYPE]
 
+        update_timestamp = transformer_base.convert_timestamp_format(
+            '%Y-%m-%d %H:%M:%S.%f',
+            event[VProps.UPDATE_TIMESTAMP]
+        )
+
         if event_type == UPDATE_VERTEX:
             properties = {
                 VProps.VITRAGE_STATE: event[VProps.VITRAGE_STATE],
-                VProps.UPDATE_TIMESTAMP: event[VProps.UPDATE_TIMESTAMP],
+                VProps.UPDATE_TIMESTAMP: update_timestamp,
                 VProps.SAMPLE_TIMESTAMP: event[VProps.SAMPLE_TIMESTAMP],
                 VProps.IS_PLACEHOLDER: False
             }
@@ -60,8 +65,6 @@ class EvaluatorEventTransformer(transformer_base.TransformerBase):
         if event_type in [ADD_VERTEX, REMOVE_VERTEX]:
 
             metadata = {
-                VProps.UPDATE_TIMESTAMP: event[VProps.UPDATE_TIMESTAMP],
-                VProps.SAMPLE_TIMESTAMP: event[VProps.SAMPLE_TIMESTAMP],
                 VProps.NAME: event[TFields.ALARM_NAME],
                 VProps.SEVERITY: event[TFields.SEVERITY],
                 VProps.STATE: event[VProps.STATE]
@@ -71,7 +74,7 @@ class EvaluatorEventTransformer(transformer_base.TransformerBase):
                 entity_category=EntityCategory.ALARM,
                 entity_type=VITRAGE_TYPE,
                 sample_timestamp=event[VProps.SAMPLE_TIMESTAMP],
-                update_timestamp=event[VProps.UPDATE_TIMESTAMP],
+                update_timestamp=update_timestamp,
                 metadata=metadata)
 
         return None
@@ -80,13 +83,18 @@ class EvaluatorEventTransformer(transformer_base.TransformerBase):
 
         event_type = event[EVALUATOR_EVENT_TYPE]
 
+        timestamp = transformer_base.convert_timestamp_format(
+            '%Y-%m-%d %H:%M:%S.%f',
+            event[VProps.UPDATE_TIMESTAMP]
+        )
+
         if event_type in [ADD_EDGE, REMOVE_EDGE]:
 
             relation_edge = graph_utils.create_edge(
                 source_id=event[TFields.SOURCE],
                 target_id=event[TFields.TARGET],
                 relationship_type=event[EProps.RELATIONSHIP_TYPE],
-                update_timestamp=event[EProps.UPDATE_TIMESTAMP])
+                update_timestamp=timestamp)
 
             return [Neighbor(None, relation_edge)]
 
@@ -96,11 +104,11 @@ class EvaluatorEventTransformer(transformer_base.TransformerBase):
                 source_id=self._create_entity_key(event),
                 target_id=event[TFields.TARGET],
                 relationship_type=EdgeLabels.ON,
-                update_timestamp=event[EProps.UPDATE_TIMESTAMP])
+                update_timestamp=timestamp)
 
             neighbor_props = {
                 VProps.IS_PLACEHOLDER: True,
-                VProps.UPDATE_TIMESTAMP: event[VProps.UPDATE_TIMESTAMP],
+                VProps.UPDATE_TIMESTAMP: timestamp,
                 VProps.SAMPLE_TIMESTAMP: event[VProps.SAMPLE_TIMESTAMP]
             }
             neighbor = Vertex(event[TFields.TARGET], neighbor_props)

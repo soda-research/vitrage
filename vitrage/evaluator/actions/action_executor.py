@@ -117,7 +117,7 @@ class ActionExecutor(object):
 
         event[SyncProps.SYNC_MODE] = SyncMode.UPDATE
         event[SyncProps.SYNC_TYPE] = VITRAGE_TYPE
-        event[VProps.UPDATE_TIMESTAMP] = str(datetime_utils.utcnow())
+        event[VProps.UPDATE_TIMESTAMP] = str(datetime_utils.utcnow(False))
         event[VProps.SAMPLE_TIMESTAMP] = str(datetime_utils.utcnow())
 
     @staticmethod

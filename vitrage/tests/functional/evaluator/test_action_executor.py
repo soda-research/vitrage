@@ -241,7 +241,8 @@ class TestActionExecutor(TestEntityGraphFunctionalBase):
 
         # Test Action - undo
         action_executor.execute(action_spec, ActionMode.UNDO)
-        processor.process_event(event_queue.get())
+        event = event_queue.get()
+        processor.process_event(event)
 
         after_alarms = processor.entity_graph.get_vertices(
             vertex_attr_filter=alarm_vertex_attrs)
@@ -266,7 +267,7 @@ class TestActionExecutor(TestEntityGraphFunctionalBase):
     def _get_vitrage_add_vertex_event(target_id, alarm_name, severity):
 
         return {'target': target_id,
-                'update_timestamp': '2016-03-17 11:33:32.443002+00:00',
+                'update_timestamp': '2016-03-17 11:33:32.443002',
                 'sync_mode': 'update',
                 'alarm_name': alarm_name,
                 'state': 'Active',

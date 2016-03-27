@@ -18,6 +18,7 @@ from collections import namedtuple
 
 from oslo_log import log as logging
 import six
+from vitrage.common import datetime_utils
 
 import vitrage.common.constants as cons
 from vitrage.common.constants import EventAction
@@ -69,6 +70,15 @@ def create_node_placeholder_vertex():
         entity_type=OPENSTACK_NODE,
         entity_state=AVAILABLE,
         metadata=metadata
+    )
+
+
+def convert_timestamp_format(current_timestamp_format, timestamp):
+
+    return datetime_utils.change_time_str_format(
+        timestamp,
+        current_timestamp_format,
+        TIMESTAMP_FORMAT
     )
 
 
