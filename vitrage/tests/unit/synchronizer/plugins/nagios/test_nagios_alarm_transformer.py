@@ -23,6 +23,7 @@ from vitrage.common.constants import VertexProperties as VProps
 from vitrage.synchronizer.plugins.base.alarm.properties \
     import AlarmProperties as AlarmProps
 from vitrage.synchronizer.plugins.nagios.properties import NagiosProperties
+from vitrage.synchronizer.plugins.nagios.properties import NagiosStatus
 from vitrage.synchronizer.plugins.nagios.transformer import NagiosTransformer
 from vitrage.synchronizer.plugins.nova.host import NOVA_HOST_PLUGIN
 from vitrage.synchronizer.plugins.nova.host.transformer import HostTransformer
@@ -106,10 +107,17 @@ class NagiosTransformerTest(base.BaseTest):
         self.assertEqual(EntityCategory.ALARM, vertex[VProps.CATEGORY])
         self.assertEqual(event[SyncProps.SYNC_TYPE], vertex[VProps.TYPE])
         self.assertEqual(event[NagiosProperties.SERVICE], vertex[VProps.NAME])
-        self.assertEqual(AlarmProps.ALARM_ACTIVE_STATE, vertex[VProps.STATE])
 
-        self.assertEqual(event[NagiosProperties.STATUS],
-                         vertex[VProps.SEVERITY])
+        event_status = event[NagiosProperties.STATUS]
+
+        if event_status == NagiosStatus.OK:
+            self.assertEqual(AlarmProps.ALARM_INACTIVE_STATE,
+                             vertex[VProps.STATE])
+        else:
+            self.assertEqual(AlarmProps.ALARM_ACTIVE_STATE,
+                             vertex[VProps.STATE])
+
+        self.assertEqual(event_status, vertex[VProps.SEVERITY])
 
         self.assertEqual(event[NagiosProperties.STATUS_INFO],
                          vertex[VProps.INFO])

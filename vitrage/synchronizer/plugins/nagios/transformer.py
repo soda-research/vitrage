@@ -25,6 +25,7 @@ from vitrage.synchronizer.plugins.base.alarm.properties \
 from vitrage.synchronizer.plugins.base.alarm.transformer \
     import BaseAlarmTransformer
 from vitrage.synchronizer.plugins.nagios.properties import NagiosProperties
+from vitrage.synchronizer.plugins.nagios.properties import NagiosStatus
 from vitrage.synchronizer.plugins.nova.host import NOVA_HOST_PLUGIN
 from vitrage.synchronizer.plugins.static_physical import SWITCH
 from vitrage.synchronizer.plugins import transformer_base as tbase
@@ -52,9 +53,13 @@ class NagiosTransformer(BaseAlarmTransformer):
         update_timestamp = self._format_update_timestamp(update_timestamp,
                                                          sample_timestamp)
 
+        severity = entity_event[NagiosProperties.STATUS]
+        entity_state = AlarmProps.ALARM_INACTIVE_STATE if \
+            severity == NagiosStatus.OK else AlarmProps.ALARM_ACTIVE_STATE
+
         metadata = {
             VProps.NAME: entity_event[NagiosProperties.SERVICE],
-            VProps.SEVERITY: entity_event[NagiosProperties.STATUS],
+            VProps.SEVERITY: severity,
             VProps.INFO: entity_event[NagiosProperties.STATUS_INFO]
         }
 
@@ -62,7 +67,7 @@ class NagiosTransformer(BaseAlarmTransformer):
             self._create_entity_key(entity_event),
             entity_category=EntityCategory.ALARM,
             entity_type=entity_event[SyncProps.SYNC_TYPE],
-            entity_state=AlarmProps.ALARM_ACTIVE_STATE,
+            entity_state=entity_state,
             sample_timestamp=sample_timestamp,
             update_timestamp=update_timestamp,
             metadata=metadata)
