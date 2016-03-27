@@ -72,7 +72,7 @@ class AodhTransformer(BaseAlarmTransformer):
             metadata=metadata)
 
     def _create_neighbors(self, entity_event):
-        graph_neighbors = entity_event[self.QUERY_RESULT]
+        graph_neighbors = entity_event.get(self.QUERY_RESULT, [])
         result = []
         for vertex in graph_neighbors:
             edge = graph_utils.create_edge(
@@ -105,5 +105,5 @@ class AodhTransformer(BaseAlarmTransformer):
     def get_enrich_query(event):
         affected_resource_id = event.get(AodhProps.RESOURCE_ID, None)
         if not affected_resource_id:
-            return {}
+            return None
         return {VProps.ID: affected_resource_id}
