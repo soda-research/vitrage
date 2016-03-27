@@ -49,7 +49,7 @@ class ListenerService(os_service.Service):
 
     @staticmethod
     def _get_topics_set(synchronizers, conf):
-        topics = {[sync.get_topic(conf) for sync in synchronizers.values()]}
+        topics = {sync.get_topic(conf) for sync in synchronizers.values()}
         topics.remove(None)
         return topics
 
