@@ -49,7 +49,7 @@ class ListenerService(os_service.Service):
 
     @staticmethod
     def _get_topics_set(synchronizers, conf):
-        topics = set([sync.get_topic(conf) for sync in synchronizers.values()])
+        topics = {[sync.get_topic(conf) for sync in synchronizers.values()]}
         topics.remove(None)
         return topics
 
@@ -64,9 +64,8 @@ class ListenerService(os_service.Service):
     def get_topics_listener(self, conf, topics, callback):
         # Create a listener for each topic
         transport = messaging.get_transport(conf)
-        targets = []
-        for topic in topics:
-            targets.append(oslo_messaging.Target(topic=topic, exchange='nova'))
+        targets = [oslo_messaging.Target(topic=topic, exchange='nova')
+                   for topic in topics]
 
         return messaging.get_notification_listener(
             transport, targets,
@@ -81,7 +80,7 @@ class NotificationsEndpoint(object):
 
     def info(self, ctxt, publisher_id, event_type, payload, metadata):
         LOG.info('EVENT RECEIVED: ' + str(event_type))
-        for event_pattern in self.enrich_callbacks_by_events.keys():
+        for event_pattern in self.enrich_callbacks_by_events:
             if event_type.startswith(event_pattern):
                 callbacks = self.enrich_callbacks_by_events[event_pattern]
                 enriched_events = [callback(payload, event_type)

@@ -392,7 +392,7 @@ class GraphAlgorithmTest(GraphTestBase):
             len(mappings),
             'Template - FIVE connected vertices - 2 Known Mapping[node,switch]'
             ' Check that ALL edges between the 2 known mappings are checked'
-            ' we now have node-CONTAINSfail->switch AND node-CONTAINS->switch'
+            ' we now have node-CONTAINS fail->switch AND node-CONTAINS->switch'
             ' ')
 
         mappings = ga.sub_graph_matching(t, [
@@ -405,7 +405,7 @@ class GraphAlgorithmTest(GraphTestBase):
             len(mappings),
             'Template - FIVE connected vertices - 2 Known Mapping[node,switch]'
             ' Check that ALL edges between the 2 known mappings are checked'
-            ' we now have node-CONTAINSfail->switch AND node-CONTAINS->switch'
+            ' we now have node-CONTAINS fail->switch AND node-CONTAINS->switch'
             ' ')
 
         t.remove_edge(e_node_contains_switch)
@@ -418,7 +418,8 @@ class GraphAlgorithmTest(GraphTestBase):
             'Template - FIVE connected vertices - 2 Known Mapping[node,switch]'
             ' But the edge between these 2 is not same as the graph '
             '(host -CONTAINS-> instance <-ON- instance alarm'
-            ',node -CONTAINS-> host -USES-> switch, node-CONTAINSfail->switch)'
+            ',node -CONTAINS-> host -USES-> switch, node-CONTAINS '
+            'fail->switch)'
             ' ')
 
         mappings = ga.sub_graph_matching(t, [
@@ -428,5 +429,6 @@ class GraphAlgorithmTest(GraphTestBase):
             len(mappings),
             'Template - FIVE connected vertices'
             '(host -CONTAINS-> instance <-ON- instance alarm'
-            ',node -CONTAINS-> host -USES-> switch, node-CONTAINSfail->switch)'
+            ',node -CONTAINS-> host -USES-> switch, node-CONTAINS '
+            'fail->switch)'
             ' template_root is a instance alarm')
