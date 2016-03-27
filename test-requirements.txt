@@ -10,6 +10,7 @@ lxml>=2.3
 networkx>=1.10
 python-ceilometerclient>=2.2.1  # Apache-2.0
 python-cinderclient>=1.3.1 # Apache-2.0
+python-neutronclient!=4.1.0,>=2.6.0 # Apache-2.0
 python-novaclient>=2.26.0
 python-subunit>=0.0.18
 sphinx!=1.2.0,!=1.3b1,<1.3,>=1.1.2

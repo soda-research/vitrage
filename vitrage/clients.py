@@ -17,6 +17,7 @@ from oslo_log import log
 
 from ceilometerclient import client as cm_client
 from cinderclient import client as cin_client
+from neutronclient.v2_0 import client as ne_client
 from novaclient import client as n_client
 
 
@@ -76,3 +77,18 @@ def cinder_client(conf):
         return client
     except Exception as e:
         LOG.exception('Create Cinder client - Got Exception: %s', e)
+
+
+def neutron_client(conf):
+    """Get an instance of neutron client"""
+    auth_config = conf.service_credentials
+    try:
+        client = ne_client.Client(
+            session=keystone_client.get_session(conf),
+            region_name=auth_config.region_name,
+            interface=auth_config.interface,
+        )
+        LOG.info('Neutron client created')
+        return client
+    except Exception as e:
+        LOG.exception('Create Neutron client - Got Exception: %s', e)

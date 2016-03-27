@@ -26,8 +26,9 @@ from vitrage.synchronizer.plugins.base.resource.transformer import \
     BaseResourceTransformer
 from vitrage.synchronizer.plugins.cinder.volume import CINDER_VOLUME_PLUGIN
 from vitrage.synchronizer.plugins.nova.instance import NOVA_INSTANCE_PLUGIN
-from vitrage.synchronizer.plugins import transformer_base
+from vitrage.synchronizer.plugins.transformer_base import build_key
 from vitrage.synchronizer.plugins.transformer_base import extract_field_value
+from vitrage.synchronizer.plugins.transformer_base import Neighbor
 
 
 LOG = logging.getLogger(__name__)
@@ -133,7 +134,7 @@ class CinderVolumeTransformer(BaseResourceTransformer):
             self.VOLUME_ID[entity_event[SyncProps.SYNC_MODE]])
 
         key_fields = self._key_values(CINDER_VOLUME_PLUGIN, volume_id)
-        return transformer_base.build_key(key_fields)
+        return build_key(key_fields)
 
     def create_placeholder_vertex(self, **kwargs):
         if VProps.ID not in kwargs:
@@ -143,7 +144,7 @@ class CinderVolumeTransformer(BaseResourceTransformer):
         key_fields = self._key_values(CINDER_VOLUME_PLUGIN, kwargs[VProps.ID])
 
         return graph_utils.create_vertex(
-            transformer_base.build_key(key_fields),
+            build_key(key_fields),
             entity_id=kwargs[VProps.ID],
             entity_category=EntityCategory.RESOURCE,
             entity_type=CINDER_VOLUME_PLUGIN,
@@ -184,4 +185,4 @@ class CinderVolumeTransformer(BaseResourceTransformer):
             target_id=instance_vertex.vertex_id,
             relationship_type=EdgeLabels.ATTACHED)
 
-        return transformer_base.Neighbor(instance_vertex, relationship_edge)
+        return Neighbor(instance_vertex, relationship_edge)
