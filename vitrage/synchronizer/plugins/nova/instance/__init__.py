@@ -30,4 +30,4 @@ OPTS = [
     cfg.StrOpt('notification_topic',
                default='vitrage_nova_notifications',
                help='Nova configured notifications topic for Vitrage'),
-    ]
+]

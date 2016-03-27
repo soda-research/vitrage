@@ -185,7 +185,7 @@ class GraphTest(GraphTestBase):
         # Get it again
         e = g.get_edge(v_node.vertex_id, v_host.vertex_id, label)
         self.assertFalse(EProps.IS_DELETED in e.properties,
-                         'Update value to None should entirly remove the key')
+                         'Update value to None should entirely remove the key')
 
         # check metadata
         another_label = 'ANOTHER_LABEL'

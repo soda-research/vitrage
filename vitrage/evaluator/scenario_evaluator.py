@@ -91,9 +91,9 @@ class ScenarioEvaluator(object):
         if actions:
             LOG.debug("Actions to perform: %s", actions.values())
         for action in actions.values():
-            action_spce = action[0]
+            action_spec = action[0]
             action_mode = action[1]
-            self._action_executor.execute(action_spce, action_mode)
+            self._action_executor.execute(action_spec, action_mode)
 
         LOG.debug('Process event - completed')
 
