@@ -36,4 +36,7 @@ OPTS = [
                          AODH_PLUGIN,
                          CINDER_VOLUME_PLUGIN],
                 help='Names of supported plugins'),
+    cfg.ListOpt('plugin_path',
+                default=['vitrage.synchronizer.plugins'],
+                help='base path for plugins')
 ]

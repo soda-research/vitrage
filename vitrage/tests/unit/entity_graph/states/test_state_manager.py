@@ -43,12 +43,17 @@ class TestStateManager(base.BaseTest):
                              NOVA_INSTANCE_PLUGIN,
                              NOVA_ZONE_PLUGIN],
                     help='Names of supported synchronizer plugins'),
+
+        cfg.ListOpt('plugin_path',
+                    default=['vitrage.synchronizer.plugins'],
+                    help='base path for plugins')
     ]
 
     @staticmethod
     def _load_plugins(conf):
         for plugin_name in conf.synchronizer_plugins.plugin_type:
-            load_plugin(conf, plugin_name)
+            load_plugin(conf, plugin_name,
+                        conf.synchronizer_plugins.plugin_path)
 
     # noinspection PyAttributeOutsideInit
     def setUp(self):

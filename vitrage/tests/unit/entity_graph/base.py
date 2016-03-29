@@ -45,6 +45,10 @@ class TestEntityGraphUnitBase(base.BaseTest):
                              NOVA_INSTANCE_PLUGIN,
                              NOVA_ZONE_PLUGIN],
                     help='Names of supported synchronizer plugins'),
+
+        cfg.ListOpt('plugin_path',
+                    default=['vitrage.synchronizer.plugins'],
+                    help='base path for plugins')
     ]
 
     NUM_NODES = 1
@@ -55,7 +59,8 @@ class TestEntityGraphUnitBase(base.BaseTest):
     @staticmethod
     def load_plugins(conf):
         for plugin_name in conf.synchronizer_plugins.plugin_type:
-            load_plugin(conf, plugin_name)
+            load_plugin(conf, plugin_name,
+                        conf.synchronizer_plugins.plugin_path)
 
     def _create_processor_with_graph(self, conf, processor=None):
         events = self._create_mock_events()

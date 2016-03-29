@@ -22,7 +22,6 @@ from vitrage import keystone_client
 from vitrage import messaging
 from vitrage import opts
 
-PLUGINS_PATH = 'vitrage.synchronizer.plugins.'
 LOG = log.getLogger(__name__)
 
 
@@ -36,12 +35,13 @@ def prepare_service(args=None, conf=None, config_files=None):
         conf.register_opts(list(options),
                            group=None if group == 'DEFAULT' else group)
 
-    for plugin_name in conf.synchronizer_plugins.plugin_type:
-        load_plugin(conf, plugin_name)
-
-    keystone_client.register_keystoneauth_opts(conf)
     conf(args, project='vitrage', validate_default_values=True,
          default_config_files=config_files)
+
+    for plugin_name in conf.synchronizer_plugins.plugin_type:
+        load_plugin(conf, plugin_name, conf.synchronizer_plugins.plugin_path)
+
+    keystone_client.register_keystoneauth_opts(conf)
 
     keystone_client.setup_keystoneauth(conf)
     log.setup(conf, 'vitrage')
@@ -51,6 +51,14 @@ def prepare_service(args=None, conf=None, config_files=None):
     return conf
 
 
-def load_plugin(conf, name):
-    opt = importutils.import_module(PLUGINS_PATH + name).OPTS
-    conf.register_opts(list(opt), group=None if name == 'DEFAULT' else name)
+def load_plugin(conf, name, paths):
+    for path in paths:
+        try:
+            opt = importutils.import_module("%s.%s" % (path, name)).OPTS
+            conf.register_opts(list(opt),
+                               group=None if name == 'DEFAULT' else name)
+            return
+        except ImportError:
+            pass
+
+    LOG.error("Failed to register config options for plugin %s" % name)

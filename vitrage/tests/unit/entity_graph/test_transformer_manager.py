@@ -43,6 +43,10 @@ class TransformerManagerTest(base.BaseTest):
                              NOVA_INSTANCE_PLUGIN,
                              NOVA_ZONE_PLUGIN],
                     help='Names of supported synchronizer plugins'),
+
+        cfg.ListOpt('plugin_path',
+                    default=['vitrage.synchronizer.plugins'],
+                    help='base path for plugins')
     ]
 
     # noinspection PyPep8Naming
@@ -51,7 +55,8 @@ class TransformerManagerTest(base.BaseTest):
         cls.conf = cfg.ConfigOpts()
         cls.conf.register_opts(cls.OPTS, group='synchronizer_plugins')
         for plugin_name in cls.conf.synchronizer_plugins.plugin_type:
-            load_plugin(cls.conf, plugin_name)
+            load_plugin(cls.conf, plugin_name,
+                        cls.conf.synchronizer_plugins.plugin_path)
         cls.manager = TransformerManager(cls.conf)
 
     def test_transformer_registration_nagios(self):

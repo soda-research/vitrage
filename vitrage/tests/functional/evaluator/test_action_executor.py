@@ -49,7 +49,8 @@ class TestActionExecutor(TestEntityGraphFunctionalBase):
         cls.conf.register_opts(cls.PLUGINS_OPTS,
                                group='synchronizer_plugins')
         for plugin_name in cls.conf.synchronizer_plugins.plugin_type:
-            load_plugin(cls.conf, plugin_name)
+            load_plugin(cls.conf, plugin_name,
+                        cls.conf.synchronizer_plugins.plugin_path)
 
     def test_execute_update_vertex(self):
 
