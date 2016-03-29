@@ -37,15 +37,19 @@ class VitrageNotifierService(os_service.Service):
 
     def start(self):
         LOG.info("Vitrage Notifier Service - Starting...")
+
         super(VitrageNotifierService, self).start()
         self.listener.start()
+
         LOG.info("Vitrage Notifier Service - Started!")
 
     def stop(self, graceful=False):
         LOG.info("Vitrage Notifier Service - Stopping...")
+
         self.listener.stop()
         self.listener.wait()
         super(VitrageNotifierService, self).stop(graceful)
+
         LOG.info("Vitrage Notifier Service - Stopped!")
 
 

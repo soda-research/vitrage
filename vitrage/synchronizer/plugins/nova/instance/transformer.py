@@ -36,7 +36,7 @@ LOG = logging.getLogger(__name__)
 class InstanceTransformer(BaseResourceTransformer):
 
     # Event types which need to refer them differently
-    EVENT_TYPES = {
+    UPDATE_EVENT_TYPES = {
         'compute.instance.delete.end': EventAction.DELETE_ENTITY,
     }
 
@@ -108,13 +108,14 @@ class InstanceTransformer(BaseResourceTransformer):
         return neighbors
 
     def _extract_action_type(self, entity_event):
-
         sync_mode = entity_event[SyncProps.SYNC_MODE]
 
         if SyncMode.UPDATE == sync_mode:
-            return self.EVENT_TYPES.get(
+            return self.UPDATE_EVENT_TYPES.get(
                 entity_event[SyncProps.EVENT_TYPE],
                 EventAction.UPDATE_ENTITY)
+            return self.EVENT_TYPES.get(entity_event[SyncProps.EVENT_TYPE],
+                                        EventAction.UPDATE_ENTITY)
 
         if SyncMode.SNAPSHOT == sync_mode:
             return EventAction.UPDATE_ENTITY
@@ -122,8 +123,7 @@ class InstanceTransformer(BaseResourceTransformer):
         if SyncMode.INIT_SNAPSHOT == sync_mode:
             return EventAction.CREATE_ENTITY
 
-        raise VitrageTransformerError(
-            'Invalid sync mode: (%s)' % sync_mode)
+        raise VitrageTransformerError('Invalid sync mode: (%s)' % sync_mode)
 
     def _create_entity_key(self, event):
 

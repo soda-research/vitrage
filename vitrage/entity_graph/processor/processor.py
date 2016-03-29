@@ -50,8 +50,6 @@ class Processor(processor.ProcessorBase):
         :type event: Dictionary
         """
 
-        sync_type = self.transformer_manager.get_sync_type(event)
-        LOG.info('#### processor event received: %s ####', sync_type)
         LOG.debug('processor event:\n%s', event)
 
         self._enrich_event(event)

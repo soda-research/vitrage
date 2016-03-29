@@ -31,7 +31,8 @@ class SynchronizerService(os_service.Service):
 
 class SnapshotsService(SynchronizerService):
     def __init__(self, conf, registered_plugins, callback_function):
-        super(SnapshotsService, self).__init__(conf, registered_plugins,
+        super(SnapshotsService, self).__init__(conf,
+                                               registered_plugins,
                                                callback_function)
         self.first_time = True
 
@@ -66,9 +67,12 @@ class SnapshotsService(SynchronizerService):
 
 
 class ChangesService(SynchronizerService):
-    def __init__(self, conf, registered_plugins, changes_interval,
+    def __init__(self, conf,
+                 registered_plugins,
+                 changes_interval,
                  callback_function):
-        super(ChangesService, self).__init__(conf, registered_plugins,
+        super(ChangesService, self).__init__(conf,
+                                             registered_plugins,
                                              callback_function)
         self.changes_interval = changes_interval
 

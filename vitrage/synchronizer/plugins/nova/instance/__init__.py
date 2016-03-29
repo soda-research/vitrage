@@ -28,6 +28,6 @@ OPTS = [
                help='Nova instance synchronizer class path',
                required=True),
     cfg.StrOpt('notification_topic',
-               default='vitrage_nova_notifications',
+               default='vitrage_notifications',
                help='Nova configured notifications topic for Vitrage'),
 ]

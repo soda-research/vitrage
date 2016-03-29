@@ -40,13 +40,17 @@ class VitrageGraphService(os_service.Service):
 
     def start(self):
         LOG.info("Vitrage Graph Service - Starting...")
+
         super(VitrageGraphService, self).start()
         self.tg.add_timer(1.0, self._process_event_non_blocking)
+
         LOG.info("Vitrage Graph Service - Started!")
 
     def stop(self, graceful=False):
         LOG.info("Vitrage Graph Service - Stopping...")
+
         super(VitrageGraphService, self).stop(graceful)
+
         LOG.info("Vitrage Graph Service - Stopped!")
 
     def _process_events(self):

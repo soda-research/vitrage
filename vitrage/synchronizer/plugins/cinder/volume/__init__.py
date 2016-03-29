@@ -27,4 +27,7 @@ OPTS = [
                        'synchronizer.CinderVolumeSynchronizer',
                help='Nova host synchronizer class path',
                required=True),
+    cfg.StrOpt('notification_topic',
+               default='vitrage_notifications',
+               help='Cinder configured notifications topic for Vitrage'),
 ]

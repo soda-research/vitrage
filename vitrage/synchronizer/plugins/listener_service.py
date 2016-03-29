@@ -11,6 +11,7 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND,  either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+
 from collections import defaultdict
 
 from oslo_log import log
@@ -26,39 +27,46 @@ LOG = log.getLogger(__name__)
 class ListenerService(os_service.Service):
 
     def __init__(self, conf, synchronizers, callback):
-
         super(ListenerService, self).__init__()
 
         # Get the topics of the synchronizers and callbacks
         topics = self._get_topics_set(synchronizers, conf)
         self.enrich_callbacks_by_events = \
             self.create_callbacks_by_events_dict(synchronizers, conf)
-
         self.listener = self.get_topics_listener(conf, topics, callback)
 
     def start(self):
         LOG.info("Vitrage Synchronizer Listener Service - Starting...")
+
         super(ListenerService, self).start()
         self.listener.start()
+
         LOG.info("Vitrage Synchronizer Listener Service - Started!")
 
     def stop(self, graceful=False):
         LOG.info("Vitrage Synchronizer Listener Service - Stopping...")
+
         super(ListenerService, self).stop(graceful)
+
         LOG.info("Vitrage Synchronizer Listener Service - Stopped!")
 
     @staticmethod
     def _get_topics_set(synchronizers, conf):
         topics = {sync.get_topic(conf) for sync in synchronizers.values()}
-        topics.remove(None)
+
+        if None in topics:
+            topics.remove(None)
+
         return topics
 
     @staticmethod
     def create_callbacks_by_events_dict(synchronizers, conf):
         ret = defaultdict(list)
+
         for sync in synchronizers.values():
             for event in sync.get_event_types(conf):
                 ret[event].append(sync.enrich_event)
+
         return ret
 
     def get_topics_listener(self, conf, topics, callback):
@@ -68,7 +76,8 @@ class ListenerService(os_service.Service):
                    for topic in topics]
 
         return messaging.get_notification_listener(
-            transport, targets,
+            transport,
+            targets,
             [NotificationsEndpoint(self.enrich_callbacks_by_events, callback)])
 
 
