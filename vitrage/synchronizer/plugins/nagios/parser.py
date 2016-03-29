@@ -62,12 +62,12 @@ class NagiosParser(object):
             return self._parse_service_columns(columns)
 
         elif len(columns) > NagiosProperties.NUM_COLUMNS:
-            LOG.warn('Too many columns in nagios service row. '
-                     'Found %d', len(columns))
+            LOG.warning('Too many columns in nagios service row. '
+                        'Found %d', len(columns))
 
         elif len(columns) > 1:
-            LOG.warn('Missing columns in nagios service row. '
-                     'Found only %d', len(columns))
+            LOG.warning('Missing columns in nagios service row. '
+                        'Found only %d', len(columns))
 
         return None
 
@@ -91,8 +91,8 @@ class NagiosParser(object):
         if len(contents) == 1:
             return contents[0].text
         elif len(contents) > 1:
-            LOG.warn('Multiple entries for nagios service column: %s',
-                     contents.toString)
+            LOG.warning('Multiple entries for nagios service column: %s',
+                        contents.toString)
             return contents[0].text
         else:
             # len(contents) might be 0 for a host, since each host name appears
