@@ -39,37 +39,29 @@ class InstanceTransformer(BaseResourceTransformer):
     INSTANCE_ID = {
         SyncMode.SNAPSHOT: ('id',),
         SyncMode.INIT_SNAPSHOT: ('id',),
-        SyncMode.UPDATE: ('payload', 'instance_id')
+        SyncMode.UPDATE: ('instance_id',)
     }
 
     INSTANCE_STATE = {
         SyncMode.SNAPSHOT: ('status',),
         SyncMode.INIT_SNAPSHOT: ('status',),
-        SyncMode.UPDATE: ('payload', 'state')
+        SyncMode.UPDATE: ('state',)
     }
 
-    TIMESTAMP = {
-        SyncMode.SNAPSHOT: (SyncProps.SAMPLE_DATE,),
-        SyncMode.INIT_SNAPSHOT: (SyncProps.SAMPLE_DATE,),
-        SyncMode.UPDATE: ('metadata', 'timestamp')
-    }
+    TIMESTAMP = (SyncProps.SAMPLE_DATE,)
 
     HOST_NAME = {
         SyncMode.SNAPSHOT: ('OS-EXT-SRV-ATTR:host',),
         SyncMode.INIT_SNAPSHOT: ('OS-EXT-SRV-ATTR:host',),
-        SyncMode.UPDATE: ('payload', 'host')
+        SyncMode.UPDATE: ('host',)
     }
 
-    PROJECT_ID = {
-        SyncMode.SNAPSHOT: ('tenant_id',),
-        SyncMode.INIT_SNAPSHOT: ('tenant_id',),
-        SyncMode.UPDATE: ('payload', 'tenant_id')
-    }
+    PROJECT_ID = ('tenant_id',)
 
     INSTANCE_NAME = {
         SyncMode.SNAPSHOT: ('name',),
         SyncMode.INIT_SNAPSHOT: ('name',),
-        SyncMode.UPDATE: ('payload', 'hostname')
+        SyncMode.UPDATE: ('hostname',)
     }
 
     UPDATE_EVENT_TYPE = SyncProps.EVENT_TYPE
@@ -86,7 +78,7 @@ class InstanceTransformer(BaseResourceTransformer):
     def _create_entity_vertex(self, entity_event):
 
         sync_mode = entity_event[SyncProps.SYNC_MODE]
-        project = extract_field_value(entity_event, self.PROJECT_ID[sync_mode])
+        project = extract_field_value(entity_event, self.PROJECT_ID)
 
         metadata = {
             VProps.NAME: extract_field_value(entity_event,
@@ -108,7 +100,7 @@ class InstanceTransformer(BaseResourceTransformer):
         #               update the UPDATE_TIMESTAMP property
         update_timestamp = extract_field_value(
             entity_event,
-            self.TIMESTAMP[sync_mode])
+            self.TIMESTAMP)
 
         sample_timestamp = entity_event[SyncProps.SAMPLE_DATE]
 

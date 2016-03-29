@@ -14,7 +14,6 @@
 from oslo_log import log as logging
 
 from vitrage.common.constants import SyncMode
-from vitrage.common.datetime_utils import utcnow
 from vitrage.synchronizer.plugins.nova.base import NovaBase
 from vitrage.synchronizer.plugins.nova.instance import NOVA_INSTANCE_PLUGIN
 
@@ -39,17 +38,15 @@ class InstanceSynchronizer(NovaBase):
 
     @staticmethod
     def enrich_event(event, event_type):
-        sync_event = dict()
-        sync_event['payload'] = event
-        sync_event['event_type'] = event_type
-        sync_event['metadata'] = {
-            'timestamp': str(utcnow()),
-        }
-        InstanceSynchronizer.make_pickleable(
-            [sync_event], NOVA_INSTANCE_PLUGIN,
+
+        event['event_type'] = event_type
+
+        update_event = InstanceSynchronizer.make_pickleable(
+            [event],
+            NOVA_INSTANCE_PLUGIN,
             SyncMode.UPDATE)
 
-        return sync_event
+        return update_event[0]
 
     @staticmethod
     def get_event_types(conf):
