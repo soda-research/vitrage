@@ -224,8 +224,9 @@ def simple_volume_generators(volume_num, instance_num, snapshot_events=0,
     return tg.get_trace_generators(test_entity_spec_list)
 
 
-def simple_switch_generators(switch_num, host_num, snapshot_events=0,
-                             snap_vals=None):
+def simple_switch_generators(switch_num, host_num,
+                             snapshot_events=0, snap_vals=None,
+                             update_events=0, update_vals=None):
     """A function for returning switch event generators.
 
     Returns generators for a given number of switches and hosts.
@@ -253,6 +254,18 @@ def simple_switch_generators(switch_num, host_num, snapshot_events=0,
              tg.MAPPING_KEY: mapping,
              tg.NAME_KEY: 'Switch snapshot generator',
              tg.NUM_EVENTS: snapshot_events
+             }
+        )
+    if update_events:
+        update_vals = {} if not update_vals else update_vals
+        update_vals['sync_mode'] = 'update'
+        test_entity_spec_list.append(
+            {tg.DYNAMIC_INFO_FKEY: tg.SYNC_SWITCH_SNAPSHOT_D,
+             tg.STATIC_INFO_FKEY: None,
+             tg.EXTERNAL_INFO_KEY: update_vals,
+             tg.MAPPING_KEY: mapping,
+             tg.NAME_KEY: 'Switch update generator',
+             tg.NUM_EVENTS: update_events
              }
         )
     return tg.get_trace_generators(test_entity_spec_list)

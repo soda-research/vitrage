@@ -40,7 +40,14 @@ class StaticPhysicalTransformer(BaseResourceTransformer):
         super(StaticPhysicalTransformer, self).__init__(transformers)
         self._register_relations_direction()
 
-    def _create_entity_vertex(self, entity_event):
+    def _create_snapshot_entity_vertex(self, entity_event):
+        return self._create_vertex(entity_event)
+
+    def _create_update_entity_vertex(self, entity_event):
+        return self._create_vertex(entity_event)
+
+    def _create_vertex(self, entity_event):
+
         sync_type = entity_event[VProps.TYPE]
         entity_id = entity_event[VProps.ID]
         sample_timestamp = entity_event[SyncProps.SAMPLE_DATE]

@@ -136,7 +136,7 @@ class NovaZoneTransformerTest(base.BaseTest):
                 node_neighbors_counter += 1
                 self._validate_node_neighbor(neighbor, zone_vertex_id)
             else:
-                hosts = tbase.extract_field_value(event, ('hosts',))
+                hosts = tbase.extract_field_value(event, 'hosts')
                 self._validate_host_neighbor(neighbor,
                                              zone_vertex_id,
                                              hosts,
@@ -160,11 +160,11 @@ class NovaZoneTransformerTest(base.BaseTest):
 
         host_available = tbase.extract_field_value(
             host_dic,
-            ZoneTransformer.HOST_AVAILABLE[sync_mode]
+            'nova-compute', 'available'
         )
         host_active = tbase.extract_field_value(
             host_dic,
-            ZoneTransformer.HOST_ACTIVE[sync_mode]
+            'nova-compute', 'active'
         )
 
         if host_available and host_active:
@@ -203,11 +203,9 @@ class NovaZoneTransformerTest(base.BaseTest):
 
         zone_transform = ZoneTransformer(self.transformers)
 
-        sync_mode = event[SyncProps.SYNC_MODE]
         extract_value = tbase.extract_field_value
 
-        expected_id = extract_value(event, zone_transform.ZONE_NAME[sync_mode])
-
+        expected_id = extract_value(event, 'zoneName')
         observed_id = vertex[VertexProperties.ID]
         self.assertEqual(expected_id, observed_id)
 
@@ -225,17 +223,11 @@ class NovaZoneTransformerTest(base.BaseTest):
         observed_timestamp = vertex[VertexProperties.SAMPLE_TIMESTAMP]
         self.assertEqual(expected_timestamp, observed_timestamp)
 
-        expected_name = extract_value(
-            event,
-            zone_transform.ZONE_NAME[sync_mode]
-        )
+        expected_name = extract_value(event, 'zoneName')
         observed_name = vertex[VertexProperties.NAME]
         self.assertEqual(expected_name, observed_name)
 
-        is_zone_available = extract_value(
-            event,
-            zone_transform.ZONE_STATE[sync_mode]
-        )
+        is_zone_available = extract_value(event, 'zoneState', 'available')
 
         if is_zone_available:
             expected_state = zone_transform.STATE_AVAILABLE

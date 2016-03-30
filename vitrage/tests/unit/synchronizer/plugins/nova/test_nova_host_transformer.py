@@ -126,11 +126,7 @@ class NovaHostTransformerTest(base.BaseTest):
 
     def _validate_zone_neighbor(self, zone, event):
 
-        sync_mode = event[SyncProps.SYNC_MODE]
-        zone_name = tbase.extract_field_value(
-            event,
-            HostTransformer(self.transformers).ZONE_NAME[sync_mode]
-        )
+        zone_name = tbase.extract_field_value(event, 'zone')
         time = event[SyncProps.SAMPLE_DATE]
 
         zt = self.transformers[NOVA_ZONE_PLUGIN]
@@ -152,13 +148,9 @@ class NovaHostTransformerTest(base.BaseTest):
 
     def _validate_vertex_props(self, vertex, event):
 
-        sync_mode = event[SyncProps.SYNC_MODE]
         extract_value = tbase.extract_field_value
 
-        expected_id = extract_value(
-            event,
-            HostTransformer(self.transformers).HOST_NAME[sync_mode]
-        )
+        expected_id = extract_value(event, '_info', 'host_name')
         observed_id = vertex[VertexProperties.ID]
         self.assertEqual(expected_id, observed_id)
         self.assertEqual(
@@ -175,10 +167,7 @@ class NovaHostTransformerTest(base.BaseTest):
         observed_timestamp = vertex[VertexProperties.SAMPLE_TIMESTAMP]
         self.assertEqual(expected_timestamp, observed_timestamp)
 
-        expected_name = extract_value(
-            event,
-            HostTransformer.HOST_NAME[sync_mode]
-        )
+        expected_name = extract_value(event, '_info', 'host_name')
         observed_name = vertex[VertexProperties.NAME]
         self.assertEqual(expected_name, observed_name)
 

@@ -38,7 +38,13 @@ class AodhTransformer(BaseAlarmTransformer):
     def __init__(self, transformers):
         super(AodhTransformer, self).__init__(transformers)
 
-    def _create_entity_vertex(self, entity_event):
+    def _create_snapshot_entity_vertex(self, entity_event):
+        self._create_vertex(entity_event)
+
+    def _create_update_entity_vertex(self, entity_event):
+        self._create_vertex(entity_event)
+
+    def _create_vertex(self, entity_event):
         metadata = {
             VProps.NAME: entity_event[AodhProps.NAME],
             VProps.SEVERITY: entity_event[AodhProps.SEVERITY],

@@ -103,16 +103,26 @@ class TestStaticPhysicalTransformer(base.BaseTest):
         self.assertEqual(switch_name, observed_key_fields[2])
 
     def test_snapshot_transform(self):
-        LOG.debug('Static Physical transformer test: transform entity event '
-                  'snapshot')
+        LOG.debug('Test transform entity snapshot/snapshot_init event')
 
         # Test setup
         spec_list = mock_sync.simple_switch_generators(2, 10, 10)
         static_events = mock_sync.generate_random_events_list(spec_list)
+        self._events_transform_test(static_events)
 
-        for event in static_events:
+    def test_update_transform(self):
+        LOG.debug('Test transform entity update event')
+
+        # Test setup
+        spec_list = mock_sync.simple_switch_generators(2, 10, 0, None, 10)
+        static_events = mock_sync.generate_random_events_list(spec_list)
+        self._events_transform_test(static_events)
+
+    def _events_transform_test(self, events):
+
+        for event in events:
             # Test action
-            wrapper = StaticPhysicalTransformer(self.transformers).\
+            wrapper = StaticPhysicalTransformer(self.transformers). \
                 transform(event)
 
             # Test assertions

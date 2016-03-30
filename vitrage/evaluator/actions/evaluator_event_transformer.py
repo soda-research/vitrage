@@ -44,7 +44,13 @@ class EvaluatorEventTransformer(transformer_base.TransformerBase):
     def __init__(self, transformers):
         self.transformers = transformers
 
-    def _create_entity_vertex(self, event):
+    def _create_snapshot_entity_vertex(self, entity_event):
+        return self._create_vertex(entity_event)
+
+    def _create_update_entity_vertex(self, entity_event):
+        return self._create_vertex(entity_event)
+
+    def _create_vertex(self, event):
 
         event_type = event[EVALUATOR_EVENT_TYPE]
 

@@ -160,13 +160,12 @@ class NovaInstanceTransformerTest(base.BaseTest):
 
         self.assertEqual(11, len(vertex.properties))
 
-        sync_mode = event[SyncProps.SYNC_MODE]
+        is_update_event = tbase.is_update_event(event)
 
         extract_value = tbase.extract_field_value
-        expected_id = extract_value(
-            event,
-            InstanceTransformer.INSTANCE_ID[sync_mode]
-        )
+
+        instance_id = 'instance_id' if is_update_event else 'id'
+        expected_id = extract_value(event, instance_id)
         observed_id = vertex[VertexProperties.ID]
         self.assertEqual(expected_id, observed_id)
 
@@ -174,23 +173,14 @@ class NovaInstanceTransformerTest(base.BaseTest):
             EntityCategory.RESOURCE,
             vertex[VertexProperties.CATEGORY]
         )
+        self.assertEqual(NOVA_INSTANCE_PLUGIN, vertex[VertexProperties.TYPE])
 
-        self.assertEqual(
-            NOVA_INSTANCE_PLUGIN,
-            vertex[VertexProperties.TYPE]
-        )
-
-        expected_project = extract_value(
-            event,
-            InstanceTransformer.PROJECT_ID
-        )
+        expected_project = extract_value(event, 'tenant_id')
         observed_project = vertex[VertexProperties.PROJECT_ID]
         self.assertEqual(expected_project, observed_project)
 
-        expected_state = extract_value(
-            event,
-            InstanceTransformer.INSTANCE_STATE[sync_mode]
-        )
+        state = 'state' if is_update_event else 'status'
+        expected_state = extract_value(event, state)
         observed_state = vertex[VertexProperties.STATE]
         self.assertEqual(expected_state, observed_state)
 
@@ -198,10 +188,8 @@ class NovaInstanceTransformerTest(base.BaseTest):
         observed_timestamp = vertex[VertexProperties.SAMPLE_TIMESTAMP]
         self.assertEqual(expected_timestamp, observed_timestamp)
 
-        expected_name = extract_value(
-            event,
-            InstanceTransformer.INSTANCE_NAME[sync_mode]
-        )
+        name = 'hostname' if is_update_event else 'name'
+        expected_name = extract_value(event, name)
         observed_name = vertex[VertexProperties.NAME]
         self.assertEqual(expected_name, observed_name)
 
@@ -214,9 +202,10 @@ class NovaInstanceTransformerTest(base.BaseTest):
     def _validate_host_neighbor(self, h_neighbor, event):
 
         it = InstanceTransformer(self.transformers)
-        sync_mode = event[SyncProps.SYNC_MODE]
 
-        host_name = tbase.extract_field_value(event, it.HOST_NAME[sync_mode])
+        name = 'host' if tbase.is_update_event(event) \
+            else 'OS-EXT-SRV-ATTR:host'
+        host_name = tbase.extract_field_value(event, name)
         time = event[SyncProps.SAMPLE_DATE]
 
         ht = self.transformers[NOVA_HOST_PLUGIN]
@@ -260,10 +249,7 @@ class NovaInstanceTransformerTest(base.BaseTest):
                 observed_key_fields[1]
             )
 
-            instance_id = tbase.extract_field_value(
-                event,
-                instance_transformer.INSTANCE_ID[event[SyncProps.SYNC_MODE]]
-            )
+            instance_id = tbase.extract_field_value(event, 'id')
 
             self.assertEqual(instance_id, observed_key_fields[2])
 

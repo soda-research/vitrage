@@ -41,7 +41,13 @@ class NagiosTransformer(BaseAlarmTransformer):
     def __init__(self, transformers):
         super(NagiosTransformer, self).__init__(transformers)
 
-    def _create_entity_vertex(self, entity_event):
+    def _create_snapshot_entity_vertex(self, entity_event):
+        return self._create_vertex(entity_event)
+
+    def _create_update_entity_vertex(self, entity_event):
+        return self._create_vertex(entity_event)
+
+    def _create_vertex(self, entity_event):
 
         update_timestamp = datetime_utils.change_time_str_format(
             entity_event[NagiosProperties.LAST_CHECK],

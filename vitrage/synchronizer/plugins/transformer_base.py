@@ -42,10 +42,10 @@ TIMESTAMP_FORMAT = '%Y-%m-%dT%H:%M:%SZ'
 AVAILABLE = 'available'
 
 
-def extract_field_value(entity_event, key_names):
+def extract_field_value(entity_event, *args):
 
     value = entity_event
-    for key in key_names:
+    for key in args:
         value = value[key]
 
     return value
@@ -82,6 +82,10 @@ def convert_timestamp_format(current_timestamp_format, timestamp):
     )
 
 
+def is_update_event(event):
+    return event[SyncProps.SYNC_MODE] == SyncMode.UPDATE
+
+
 @six.add_metaclass(abc.ABCMeta)
 class TransformerBase(object):
 
@@ -113,16 +117,20 @@ class TransformerBase(object):
                                  None,
                                  EventAction.END_MESSAGE)
 
-    @abc.abstractmethod
     def _create_entity_vertex(self, entity_event):
-        """Creates entity vertex received from given entity event.
 
-         Extracting vertex fields from a given event provided by synchronizer
+        if is_update_event(entity_event):
+            return self._create_update_entity_vertex(entity_event)
+        else:
+            return self._create_snapshot_entity_vertex(entity_event)
 
-         :param entity_event: an event provided by synchronizer
-         :return: vertex - contains the entity data
-         :rtype:Vertex
-         """
+    @abc.abstractmethod
+    def _create_snapshot_entity_vertex(self, entity_event):
+        pass
+
+    @abc.abstractmethod
+    def _create_update_entity_vertex(self, entity_event):
+        pass
 
     @abc.abstractmethod
     def _create_neighbors(self, entity_event):

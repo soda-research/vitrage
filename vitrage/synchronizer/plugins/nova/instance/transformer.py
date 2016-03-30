@@ -26,7 +26,7 @@ from vitrage.synchronizer.plugins.base.resource.transformer import \
     BaseResourceTransformer
 from vitrage.synchronizer.plugins.nova.host import NOVA_HOST_PLUGIN
 from vitrage.synchronizer.plugins.nova.instance import NOVA_INSTANCE_PLUGIN
-from vitrage.synchronizer.plugins import transformer_base
+from vitrage.synchronizer.plugins import transformer_base as tbase
 from vitrage.synchronizer.plugins.transformer_base import extract_field_value
 from vitrage.synchronizer.plugins.transformer_base import Neighbor
 
@@ -35,80 +35,50 @@ LOG = logging.getLogger(__name__)
 
 class InstanceTransformer(BaseResourceTransformer):
 
-    # Fields returned from Nova Instance snapshot
-    INSTANCE_ID = {
-        SyncMode.SNAPSHOT: ('id',),
-        SyncMode.INIT_SNAPSHOT: ('id',),
-        SyncMode.UPDATE: ('instance_id',)
-    }
-
-    INSTANCE_STATE = {
-        SyncMode.SNAPSHOT: ('status',),
-        SyncMode.INIT_SNAPSHOT: ('status',),
-        SyncMode.UPDATE: ('state',)
-    }
-
-    TIMESTAMP = (SyncProps.SAMPLE_DATE,)
-
-    HOST_NAME = {
-        SyncMode.SNAPSHOT: ('OS-EXT-SRV-ATTR:host',),
-        SyncMode.INIT_SNAPSHOT: ('OS-EXT-SRV-ATTR:host',),
-        SyncMode.UPDATE: ('host',)
-    }
-
-    PROJECT_ID = ('tenant_id',)
-
-    INSTANCE_NAME = {
-        SyncMode.SNAPSHOT: ('name',),
-        SyncMode.INIT_SNAPSHOT: ('name',),
-        SyncMode.UPDATE: ('hostname',)
-    }
-
-    UPDATE_EVENT_TYPE = SyncProps.EVENT_TYPE
-
     # Event types which need to refer them differently
     EVENT_TYPES = {
         'compute.instance.delete.end': EventAction.DELETE_ENTITY,
-        'compute.instance.create.start': EventAction.CREATE_ENTITY
     }
 
     def __init__(self, transformers):
         super(InstanceTransformer, self).__init__(transformers)
 
-    def _create_entity_vertex(self, entity_event):
+    def _create_snapshot_entity_vertex(self, entity_event):
 
-        sync_mode = entity_event[SyncProps.SYNC_MODE]
-        project = extract_field_value(entity_event, self.PROJECT_ID)
+        name = extract_field_value(entity_event, 'name')
+        entity_id = extract_field_value(entity_event, 'id')
+        state = extract_field_value(entity_event, 'status')
+
+        return self._create_vertex(entity_event, name, entity_id, state)
+
+    def _create_update_entity_vertex(self, entity_event):
+
+        name = extract_field_value(entity_event, 'hostname')
+        entity_id = extract_field_value(entity_event, 'instance_id')
+        state = extract_field_value(entity_event, 'state')
+
+        return self._create_vertex(entity_event, name, entity_id, state)
+
+    def _create_vertex(self, entity_event, name, entity_id, state):
+
+        project = extract_field_value(entity_event, 'tenant_id')
 
         metadata = {
-            VProps.NAME: extract_field_value(entity_event,
-                                             self.INSTANCE_NAME[sync_mode]),
+            VProps.NAME: name,
             VProps.IS_PLACEHOLDER: False,
             VProps.PROJECT_ID: project
         }
 
-        entity_key = self._create_entity_key(entity_event)
-
-        entity_id = extract_field_value(
-            entity_event,
-            self.INSTANCE_ID[sync_mode])
-        state = extract_field_value(
-            entity_event,
-            self.INSTANCE_STATE[sync_mode])
+        sample_timestamp = entity_event[SyncProps.SAMPLE_DATE]
 
         # TODO(Alexey): need to check here that only the UPDATE sync_mode will
         #               update the UPDATE_TIMESTAMP property
-        update_timestamp = extract_field_value(
-            entity_event,
-            self.TIMESTAMP)
-
-        sample_timestamp = entity_event[SyncProps.SAMPLE_DATE]
-
-        update_timestamp = self._format_update_timestamp(update_timestamp,
-                                                         sample_timestamp)
+        update_timestamp = self._format_update_timestamp(
+            extract_field_value(entity_event, SyncProps.SAMPLE_DATE),
+            sample_timestamp)
 
         return graph_utils.create_vertex(
-            entity_key,
+            self._create_entity_key(entity_event),
             entity_id=entity_id,
             entity_category=EntityCategory.RESOURCE,
             entity_type=NOVA_INSTANCE_PLUGIN,
@@ -119,15 +89,16 @@ class InstanceTransformer(BaseResourceTransformer):
 
     def _create_neighbors(self, entity_event):
 
-        sync_mode = entity_event[SyncProps.SYNC_MODE]
-
         neighbors = []
         host_transformer = self.transformers[NOVA_HOST_PLUGIN]
+
+        host_name = 'host' if tbase.is_update_event(entity_event) \
+            else 'OS-EXT-SRV-ATTR:host'
 
         if host_transformer:
             host_neighbor = self._create_host_neighbor(
                 self._create_entity_key(entity_event),
-                extract_field_value(entity_event, self.HOST_NAME[sync_mode]),
+                extract_field_value(entity_event, host_name),
                 entity_event[SyncProps.SAMPLE_DATE],
                 host_transformer)
             neighbors.append(host_neighbor)
@@ -142,7 +113,7 @@ class InstanceTransformer(BaseResourceTransformer):
 
         if SyncMode.UPDATE == sync_mode:
             return self.EVENT_TYPES.get(
-                entity_event[self.UPDATE_EVENT_TYPE],
+                entity_event[SyncProps.EVENT_TYPE],
                 EventAction.UPDATE_ENTITY)
 
         if SyncMode.SNAPSHOT == sync_mode:
@@ -154,14 +125,13 @@ class InstanceTransformer(BaseResourceTransformer):
         raise VitrageTransformerError(
             'Invalid sync mode: (%s)' % sync_mode)
 
-    def _create_entity_key(self, entity_event):
+    def _create_entity_key(self, event):
 
-        instance_id = extract_field_value(
-            entity_event,
-            self.INSTANCE_ID[entity_event[SyncProps.SYNC_MODE]])
-
-        key_fields = self._key_values(NOVA_INSTANCE_PLUGIN, instance_id)
-        return transformer_base.build_key(key_fields)
+        instance_id = 'instance_id' if tbase.is_update_event(event) else 'id'
+        key_fields = self._key_values(NOVA_INSTANCE_PLUGIN,
+                                      extract_field_value(event,
+                                                          instance_id))
+        return tbase.build_key(key_fields)
 
     @staticmethod
     def _create_host_neighbor(vertex_id,
@@ -189,7 +159,7 @@ class InstanceTransformer(BaseResourceTransformer):
         key_fields = self._key_values(NOVA_INSTANCE_PLUGIN, kwargs[VProps.ID])
 
         return graph_utils.create_vertex(
-            transformer_base.build_key(key_fields),
+            tbase.build_key(key_fields),
             entity_id=kwargs[VProps.ID],
             entity_category=EntityCategory.RESOURCE,
             entity_type=NOVA_INSTANCE_PLUGIN,

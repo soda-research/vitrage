@@ -17,7 +17,6 @@ from oslo_log import log as logging
 from vitrage.common.constants import EdgeLabels
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import SynchronizerProperties as SyncProps
-from vitrage.common.constants import SyncMode
 from vitrage.common.constants import VertexProperties as VProps
 import vitrage.graph.utils as graph_utils
 from vitrage.synchronizer.plugins.base.resource.transformer import \
@@ -34,33 +33,23 @@ LOG = logging.getLogger(__name__)
 
 class HostTransformer(BaseResourceTransformer):
 
-    # Fields returned from Nova Availability Zone snapshot
-    HOST_NAME = {
-        SyncMode.SNAPSHOT: ('_info', 'host_name',),
-        SyncMode.INIT_SNAPSHOT: ('_info', 'host_name',)
-    }
-
-    ZONE_NAME = {
-        SyncMode.SNAPSHOT: ('zone',),
-        SyncMode.INIT_SNAPSHOT: ('zone',)
-    }
-
     def __init__(self, transformers):
         super(HostTransformer, self).__init__(transformers)
 
-    def _create_entity_vertex(self, entity_event):
+    def _create_snapshot_entity_vertex(self, entity_event):
 
-        sync_mode = entity_event[SyncProps.SYNC_MODE]
+        host_name = extract_field_value(entity_event, '_info', 'host_name')
+        return self._create_vertex(entity_event, host_name)
 
-        host_name = extract_field_value(
-            entity_event,
-            self.HOST_NAME[sync_mode])
+    def _create_update_entity_vertex(self, entity_event):
+        LOG.warning('Host Update is not supported yet')
+
+    def _create_vertex(self, entity_event, host_name):
+
         metadata = {VProps.NAME: host_name}
-
         entity_key = self._create_entity_key(entity_event)
 
         sample_timestamp = entity_event[SyncProps.SAMPLE_DATE]
-
         update_timestamp = self._format_update_timestamp(None,
                                                          sample_timestamp)
 
@@ -75,15 +64,14 @@ class HostTransformer(BaseResourceTransformer):
 
     def _create_neighbors(self, entity_event):
 
-        sync_mode = entity_event[SyncProps.SYNC_MODE]
-
         neighbors = []
 
+        # Support snapshot and snapshot_init events only
         zone_neighbor = self._create_zone_neighbor(
             entity_event,
             entity_event[SyncProps.SAMPLE_DATE],
             self._create_entity_key(entity_event),
-            self.ZONE_NAME[sync_mode])
+            'zone')
 
         if zone_neighbor is not None:
             neighbors.append(zone_neighbor)
@@ -120,9 +108,7 @@ class HostTransformer(BaseResourceTransformer):
 
     def _create_entity_key(self, entity_event):
 
-        host_name = extract_field_value(
-            entity_event,
-            self.HOST_NAME[entity_event[SyncProps.SYNC_MODE]])
+        host_name = extract_field_value(entity_event, '_info', 'host_name')
 
         key_fields = self._key_values(NOVA_HOST_PLUGIN, host_name)
         return transformer_base.build_key(key_fields)

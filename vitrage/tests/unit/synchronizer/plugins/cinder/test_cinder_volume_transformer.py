@@ -26,6 +26,7 @@ from vitrage.synchronizer.plugins.cinder.volume.transformer \
 from vitrage.synchronizer.plugins.nova.instance import NOVA_INSTANCE_PLUGIN
 from vitrage.synchronizer.plugins.nova.instance.transformer \
     import InstanceTransformer
+from vitrage.synchronizer.plugins import transformer_base as tbase
 from vitrage.synchronizer.plugins.transformer_base import TransformerBase
 from vitrage.tests import base
 from vitrage.tests.mocks import mock_syncronizer as mock_sync
@@ -119,21 +120,32 @@ class TestCinderVolumeTransformer(base.BaseTest):
             self._validate_neighbors(neighbors, vertex.vertex_id, event)
 
     def _validate_volume_vertex_props(self, vertex, event):
-        sync_mode = event[SyncProps.SYNC_MODE]
+
+        is_update_event = tbase.is_update_event(event)
 
         self.assertEqual(EntityCategory.RESOURCE, vertex[VProps.CATEGORY])
         self.assertEqual(event[SyncProps.SYNC_TYPE], vertex[VProps.TYPE])
+
+        id_field_path = ('payload', 'instance_id') if is_update_event else 'id'
         self.assertEqual(
-            event[CinderVolumeTransformer.VOLUME_ID[sync_mode][0]],
+            tbase.extract_field_value(event, id_field_path),
             vertex[VProps.ID])
+
         self.assertEqual(event[SyncProps.SAMPLE_DATE],
                          vertex[VProps.SAMPLE_TIMESTAMP])
+
+        name_field_path = ('payload', 'hostname') \
+            if is_update_event else 'display_name'
         self.assertEqual(
-            event[CinderVolumeTransformer.VOLUME_NAME[sync_mode][0]],
+            tbase.extract_field_value(event, name_field_path),
             vertex[VProps.NAME])
+
+        state_field_path = ('payload', 'state') \
+            if is_update_event else 'status'
         self.assertEqual(
-            event[CinderVolumeTransformer.VOLUME_STATE[sync_mode][0]],
+            tbase.extract_field_value(event, state_field_path),
             vertex[VProps.STATE])
+
         self.assertFalse(vertex[VProps.IS_PLACEHOLDER])
         self.assertFalse(vertex[VProps.IS_DELETED])
 

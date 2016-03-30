@@ -26,6 +26,7 @@ from vitrage.synchronizer.plugins.base.resource.transformer import \
     BaseResourceTransformer
 from vitrage.synchronizer.plugins.cinder.volume import CINDER_VOLUME_PLUGIN
 from vitrage.synchronizer.plugins.nova.instance import NOVA_INSTANCE_PLUGIN
+from vitrage.synchronizer.plugins import transformer_base as tbase
 from vitrage.synchronizer.plugins.transformer_base import build_key
 from vitrage.synchronizer.plugins.transformer_base import extract_field_value
 from vitrage.synchronizer.plugins.transformer_base import Neighbor
@@ -36,31 +37,6 @@ LOG = logging.getLogger(__name__)
 
 class CinderVolumeTransformer(BaseResourceTransformer):
 
-    # Fields returned from Nova Instance snapshot
-    VOLUME_ID = {
-        SyncMode.SNAPSHOT: ('id',),
-        SyncMode.INIT_SNAPSHOT: ('id',),
-        SyncMode.UPDATE: ('payload', 'instance_id')
-    }
-
-    VOLUME_STATE = {
-        SyncMode.SNAPSHOT: ('status',),
-        SyncMode.INIT_SNAPSHOT: ('status',),
-        SyncMode.UPDATE: ('payload', 'state')
-    }
-
-    VOLUME_UPDATE_TIMESTAMP = {
-        SyncMode.SNAPSHOT: ('created_at',),
-        SyncMode.INIT_SNAPSHOT: ('created_at',),
-        SyncMode.UPDATE: ('metadata', 'timestamp')
-    }
-
-    VOLUME_NAME = {
-        SyncMode.SNAPSHOT: ('display_name',),
-        SyncMode.INIT_SNAPSHOT: ('display_name',),
-        SyncMode.UPDATE: ('payload', 'hostname')
-    }
-
     # Event types which need to refer them differently
     EVENT_TYPES = {
         'compute.instance.delete.end': EventAction.DELETE_ENTITY,
@@ -70,39 +46,50 @@ class CinderVolumeTransformer(BaseResourceTransformer):
     def __init__(self, transformers):
         super(CinderVolumeTransformer, self).__init__(transformers)
 
-    def _create_entity_vertex(self, entity_event):
-        sync_mode = entity_event[SyncProps.SYNC_MODE]
+    def _create_snapshot_entity_vertex(self, entity_event):
 
+        volume_name = extract_field_value(entity_event, 'display_name')
+        volume_id = extract_field_value(entity_event, 'id')
+        volume_state = extract_field_value(entity_event, 'status')
+        timestamp = extract_field_value(entity_event, 'created_at')
+
+        return self._create_vertex(entity_event,
+                                   volume_name,
+                                   volume_id,
+                                   volume_state,
+                                   timestamp)
+
+    def _create_update_entity_vertex(self, entity_event, volume_id):
+
+        volume_name = extract_field_value(entity_event, 'payload', 'hostname')
+        volume_id = extract_field_value(entity_event, 'payload', 'instance_id')
+        volume_state = extract_field_value(entity_event, 'payload', 'state')
+        timestamp = extract_field_value(entity_event, 'metadata', 'timestamp')
+
+        return self._create_vertex(entity_event,
+                                   volume_name,
+                                   volume_id,
+                                   volume_state,
+                                   timestamp)
+
+    def _create_vertex(self, entity_event, volume_name, volume_id,
+                       volume_state, update_timestamp):
         metadata = {
-            VProps.NAME: extract_field_value(entity_event,
-                                             self.VOLUME_NAME[sync_mode])
+            VProps.NAME: volume_name
         }
 
         entity_key = self._create_entity_key(entity_event)
 
-        entity_id = extract_field_value(
-            entity_event,
-            self.VOLUME_ID[sync_mode])
-
-        state = extract_field_value(
-            entity_event,
-            self.VOLUME_STATE[sync_mode])
-
-        update_timestamp = extract_field_value(
-            entity_event,
-            self.VOLUME_UPDATE_TIMESTAMP[sync_mode])
-
         sample_timestamp = entity_event[SyncProps.SAMPLE_DATE]
-
         update_timestamp = self._format_update_timestamp(update_timestamp,
                                                          sample_timestamp)
 
         return graph_utils.create_vertex(
             entity_key,
-            entity_id=entity_id,
+            entity_id=volume_id,
             entity_category=EntityCategory.RESOURCE,
             entity_type=CINDER_VOLUME_PLUGIN,
-            entity_state=state,
+            entity_state=volume_state,
             sample_timestamp=sample_timestamp,
             update_timestamp=update_timestamp,
             metadata=metadata)
@@ -129,9 +116,9 @@ class CinderVolumeTransformer(BaseResourceTransformer):
 
     def _create_entity_key(self, entity_event):
 
-        volume_id = extract_field_value(
-            entity_event,
-            self.VOLUME_ID[entity_event[SyncProps.SYNC_MODE]])
+        is_update_event = tbase.is_update_event(entity_event)
+        id_field_path = ('payload', 'instance_id') if is_update_event else 'id'
+        volume_id = extract_field_value(entity_event, id_field_path)
 
         key_fields = self._key_values(CINDER_VOLUME_PLUGIN, volume_id)
         return build_key(key_fields)

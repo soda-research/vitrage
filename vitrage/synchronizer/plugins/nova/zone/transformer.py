@@ -17,7 +17,6 @@ from oslo_log import log as logging
 from vitrage.common.constants import EdgeLabels
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import SynchronizerProperties as SyncProps
-from vitrage.common.constants import SyncMode
 from vitrage.common.constants import VertexProperties as VProps
 import vitrage.graph.utils as graph_utils
 from vitrage.synchronizer.plugins.base.resource.transformer import \
@@ -36,58 +35,31 @@ class ZoneTransformer(BaseResourceTransformer):
     STATE_AVAILABLE = 'available'
     STATE_UNAVAILABLE = 'unavailable'
 
-    # Fields returned from Nova Availability Zone snapshot
-    ZONE_NAME = {
-        SyncMode.SNAPSHOT: ('zoneName',),
-        SyncMode.INIT_SNAPSHOT: ('zoneName',)
-    }
-
-    ZONE_STATE = {
-        SyncMode.SNAPSHOT: ('zoneState', 'available',),
-        SyncMode.INIT_SNAPSHOT: ('zoneState', 'available',)
-    }
-
-    HOSTS = {
-        SyncMode.SNAPSHOT: ('hosts',),
-        SyncMode.INIT_SNAPSHOT: ('hosts',)
-    }
-
-    HOST_ACTIVE = {
-        # The path is relative to specific host and not the whole event
-        SyncMode.SNAPSHOT: ('nova-compute', 'active',),
-        SyncMode.INIT_SNAPSHOT: ('nova-compute', 'active',)
-    }
-
-    HOST_AVAILABLE = {
-        # The path is relative to specific host and not the whole event
-        SyncMode.SNAPSHOT: ('nova-compute', 'available',),
-        SyncMode.INIT_SNAPSHOT: ('nova-compute', 'available',)
-    }
-
     def __init__(self, transformers):
         super(ZoneTransformer, self).__init__(transformers)
 
-    def _create_entity_vertex(self, entity_event):
+    def _create_snapshot_entity_vertex(self, entity_event):
 
-        sync_mode = entity_event[SyncProps.SYNC_MODE]
+        zone_name = extract_field_value(entity_event, 'zoneName')
+        is_available = extract_field_value(entity_event,
+                                           'zoneState',
+                                           'available')
+        state = self.STATE_AVAILABLE if is_available \
+            else self.STATE_UNAVAILABLE
 
-        zone_name = extract_field_value(
-            entity_event,
-            self.ZONE_NAME[sync_mode])
+        return self._create_vertex(entity_event, state, zone_name)
+
+    def _create_update_entity_vertex(self, entity_event):
+        LOG.warning('Zone Update is not supported yet')
+
+    def _create_vertex(self, entity_event, state, zone_name):
 
         metadata = {
             VProps.NAME: zone_name
         }
-
         entity_key = self._create_entity_key(entity_event)
-        is_available = extract_field_value(
-            entity_event,
-            self.ZONE_STATE[sync_mode])
-        state = self.STATE_AVAILABLE if is_available \
-            else self.STATE_UNAVAILABLE
 
         sample_timestamp = entity_event[SyncProps.SAMPLE_DATE]
-
         update_timestamp = self._format_update_timestamp(None,
                                                          sample_timestamp)
 
@@ -103,29 +75,24 @@ class ZoneTransformer(BaseResourceTransformer):
 
     def _create_neighbors(self, entity_event):
 
-        sync_mode = entity_event[SyncProps.SYNC_MODE]
-
         zone_vertex_id = self._create_entity_key(entity_event)
-
         neighbors = [self._create_node_neighbor(zone_vertex_id)]
-
-        hosts = extract_field_value(entity_event, self.HOSTS[sync_mode])
+        hosts = extract_field_value(entity_event, 'hosts')
         host_transformer = self.transformers[NOVA_HOST_PLUGIN]
 
         if host_transformer:
             for key in hosts:
 
-                host_available = extract_field_value(
-                    hosts[key],
-                    self.HOST_AVAILABLE[sync_mode])
-                host_active = extract_field_value(
-                    hosts[key],
-                    self.HOST_ACTIVE[sync_mode])
+                host_available = extract_field_value(hosts[key],
+                                                     'nova-compute',
+                                                     'available')
+                host_active = extract_field_value(hosts[key],
+                                                  'nova-compute',
+                                                  'active')
 
-                if host_available and host_active:
-                    host_state = self.STATE_AVAILABLE
-                else:
-                    host_state = self.STATE_UNAVAILABLE
+                host_state = self.STATE_AVAILABLE \
+                    if host_available and host_active \
+                    else self.STATE_UNAVAILABLE
 
                 host_neighbor = self._create_host_neighbor(
                     zone_vertex_id,
@@ -171,9 +138,7 @@ class ZoneTransformer(BaseResourceTransformer):
 
     def _create_entity_key(self, entity_event):
 
-        zone_name = extract_field_value(
-            entity_event,
-            self.ZONE_NAME[entity_event[SyncProps.SYNC_MODE]])
+        zone_name = extract_field_value(entity_event, 'zoneName')
 
         key_fields = self._key_values(NOVA_ZONE_PLUGIN, zone_name)
         return transformer_base.build_key(key_fields)
