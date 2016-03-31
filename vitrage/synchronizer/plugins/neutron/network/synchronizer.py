@@ -20,7 +20,7 @@ class NetworkSynchronizer(NeutronBase):
 
     @staticmethod
     def get_skipped_event_types():
-        pass
+        return []
 
     @staticmethod
     def get_topic(conf):
@@ -28,18 +28,14 @@ class NetworkSynchronizer(NeutronBase):
 
     @staticmethod
     def get_event_types(conf):
-        pass
+        return []
 
     @staticmethod
     def enrich_event(event, event_type):
         pass
 
-    @staticmethod
-    def extract(networks):
-        return [network.__dict__ for network in networks]
-
     def get_all(self, sync_mode):
         return self.make_pickleable(
-            self.extract(self.client.list_networks()),
+            self.client.list_networks()['networks'],
             NEUTRON_NETWORK_PLUGIN,
             sync_mode)

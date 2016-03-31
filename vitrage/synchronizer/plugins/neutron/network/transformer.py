@@ -12,12 +12,12 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from synchronizer.plugins.neutron.network import NEUTRON_NETWORK_PLUGIN
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import SynchronizerProperties as SyncProps
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.synchronizer.plugins.base.resource.transformer import \
     BaseResourceTransformer
+from vitrage.synchronizer.plugins.neutron.network import NEUTRON_NETWORK_PLUGIN
 from vitrage.synchronizer.plugins import transformer_base as tbase
 from vitrage.synchronizer.plugins.transformer_base import extract_field_value
 
