@@ -19,6 +19,10 @@ from vitrage.synchronizer.plugins.neutron.network import NEUTRON_NETWORK_PLUGIN
 class NetworkSynchronizer(NeutronBase):
 
     @staticmethod
+    def get_skipped_event_types():
+        pass
+
+    @staticmethod
     def get_topic(conf):
         pass
 

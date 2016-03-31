@@ -19,6 +19,10 @@ from vitrage.synchronizer.plugins.neutron.port import NEUTRON_PORT_PLUGIN
 class PortSynchronizer(NeutronBase):
 
     @staticmethod
+    def get_skipped_event_types():
+        pass
+
+    @staticmethod
     def get_topic(conf):
         pass
 

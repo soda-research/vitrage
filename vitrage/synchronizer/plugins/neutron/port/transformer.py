@@ -17,4 +17,24 @@ from vitrage.synchronizer.plugins.base.resource.transformer import \
 
 
 class PortTransformer(BaseResourceTransformer):
-    pass
+
+    def __init__(self, transformers):
+        super(PortTransformer, self).__init__(transformers)
+
+    def _create_entity_key(self, entity_event):
+        pass
+
+    def create_placeholder_vertex(self, **kwargs):
+        pass
+
+    def _create_snapshot_entity_vertex(self, entity_event):
+        pass
+
+    def _create_update_entity_vertex(self, entity_event):
+        pass
+
+    def _create_neighbors(self, entity_event):
+        pass
+
+    def _extract_action_type(self, entity_event):
+        pass

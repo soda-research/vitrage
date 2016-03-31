@@ -12,9 +12,89 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from common.exception import VitrageTransformerError
+from synchronizer.plugins.neutron.network import NEUTRON_NETWORK_PLUGIN
+from vitrage.common.constants import EntityCategory
+from vitrage.common.constants import EventAction
+from vitrage.common.constants import SynchronizerProperties as SyncProps
+from vitrage.common.constants import SyncMode
+from vitrage.common.constants import VertexProperties as VProps
 from vitrage.synchronizer.plugins.base.resource.transformer import \
     BaseResourceTransformer
+from vitrage.synchronizer.plugins import transformer_base as tbase
+from vitrage.synchronizer.plugins.transformer_base import extract_field_value
+
+import vitrage.graph.utils as graph_utils
 
 
 class NetworkTransformer(BaseResourceTransformer):
-    pass
+
+    UPDATE_EVENT_TYPES = {}
+
+    def __init__(self, transformers):
+        super(NetworkTransformer, self).__init__(transformers)
+
+    def _create_entity_key(self, entity_event):
+        network_id = 'network_id' if tbase.is_update_event(entity_event) \
+            else 'id'
+        key_fields = self._key_values(NEUTRON_NETWORK_PLUGIN,
+                                      extract_field_value(entity_event,
+                                                          network_id))
+        return tbase.build_key(key_fields)
+
+    def create_placeholder_vertex(self, **kwargs):
+        pass
+
+    def _create_snapshot_entity_vertex(self, entity_event):
+        name = extract_field_value(entity_event, 'name')
+        entity_id = extract_field_value(entity_event, 'id')
+        state = extract_field_value(entity_event, 'status')
+
+        return self._create_vertex(entity_event, name, entity_id, state)
+
+    def _create_vertex(self, entity_event, name, entity_id, state):
+
+        metadata = {
+            VProps.NAME: name,
+        }
+
+        sample_timestamp = entity_event[SyncProps.SAMPLE_DATE]
+
+        # TODO(Alexey): need to check here that only the UPDATE sync_mode will
+        #               update the UPDATE_TIMESTAMP property
+        update_timestamp = self._format_update_timestamp(
+            extract_field_value(entity_event, SyncProps.SAMPLE_DATE),
+            sample_timestamp)
+
+        return graph_utils.create_vertex(
+            self._create_entity_key(entity_event),
+            entity_id=entity_id,
+            entity_category=EntityCategory.RESOURCE,
+            entity_type=NEUTRON_NETWORK_PLUGIN,
+            entity_state=state,
+            sample_timestamp=sample_timestamp,
+            update_timestamp=update_timestamp,
+            metadata=metadata)
+
+    def _create_update_entity_vertex(self, entity_event):
+        pass
+
+    @staticmethod
+    def _create_neighbors(entity_event):
+        return []
+
+    def _extract_action_type(self, entity_event):
+        sync_mode = entity_event[SyncProps.SYNC_MODE]
+
+        if SyncMode.UPDATE == sync_mode:
+            return self.UPDATE_EVENT_TYPES.get(
+                entity_event[SyncProps.EVENT_TYPE],
+                EventAction.UPDATE_ENTITY)
+
+        if SyncMode.SNAPSHOT == sync_mode:
+            return EventAction.UPDATE_ENTITY
+
+        if SyncMode.INIT_SNAPSHOT == sync_mode:
+            return EventAction.CREATE_ENTITY
+
+        raise VitrageTransformerError('Invalid sync mode: (%s)' % sync_mode)

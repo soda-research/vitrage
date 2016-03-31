@@ -65,7 +65,6 @@ class InstanceTransformer(BaseResourceTransformer):
 
         metadata = {
             VProps.NAME: name,
-            VProps.IS_PLACEHOLDER: False,
             VProps.PROJECT_ID: project
         }
 
