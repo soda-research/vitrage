@@ -15,6 +15,8 @@
 from oslo_log import log as logging
 
 from vitrage import clients
+from vitrage.common.constants import SynchronizerProperties as SyncProps
+from vitrage.common.constants import SyncMode
 from vitrage.synchronizer.plugins.cinder.volume import CINDER_VOLUME_PLUGIN
 from vitrage.synchronizer.plugins.synchronizer_base import SynchronizerBase
 
@@ -28,11 +30,27 @@ class CinderVolumeSynchronizer(SynchronizerBase):
         self.conf = conf
 
     @staticmethod
-    def filter_instances(volumes):
+    def extract_events(volumes):
         return [volume.__dict__ for volume in volumes]
 
     def get_all(self, sync_mode):
         return self.make_pickleable(
-            self.filter_instances(self.client.volumes.list()),
+            self.extract_events(self.client.volumes.list()),
             CINDER_VOLUME_PLUGIN,
             sync_mode)
+
+    @staticmethod
+    def enrich_event(event, event_type):
+        event[SyncProps.EVENT_TYPE] = event_type
+
+        return CinderVolumeSynchronizer.make_pickleable([event],
+                                                        CINDER_VOLUME_PLUGIN,
+                                                        SyncMode.UPDATE)[0]
+
+    @staticmethod
+    def get_event_types(conf):
+        return ['volume.']
+
+    @staticmethod
+    def get_topic(conf):
+        return conf[CINDER_VOLUME_PLUGIN].notification_topic

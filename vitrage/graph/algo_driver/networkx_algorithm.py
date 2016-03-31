@@ -72,3 +72,12 @@ class NXAlgorithm(GraphAlgorithm):
 
     def sub_graph_matching(self, subgraph, known_matches, validate=False):
         return subgraph_matching(self.graph, subgraph, known_matches, validate)
+
+    def subgraph(self, vertex_attr_filter=None):
+        vertices = self.graph.get_vertices(
+            vertex_attr_filter=vertex_attr_filter)
+        vertices_ids = [vertex.vertex_id for vertex in vertices]
+
+        graph = NXGraph('graph')
+        graph._g = self.graph._g.subgraph(vertices_ids)
+        return graph

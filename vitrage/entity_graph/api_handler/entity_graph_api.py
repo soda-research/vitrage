@@ -28,7 +28,7 @@ from vitrage.synchronizer.plugins import OPENSTACK_NODE
 
 LOG = log.getLogger(__name__)
 
-TOPOLOGY_QUERY = {
+TREE_TOPOLOGY_QUERY = {
     'and': [
         {'==': {VProps.CATEGORY: EntityCategory.RESOURCE}},
         {'==': {VProps.IS_DELETED: False}},
@@ -106,12 +106,12 @@ class EntityGraphApis(object):
     def _get_topology(self, ctx, graph_type, query, root, depth=None):
         ga = create_algorithm(self.entity_graph)
         if graph_type == 'tree':
-            final_query = query if query else TOPOLOGY_QUERY
+            final_query = query if query else TREE_TOPOLOGY_QUERY
             return ga.graph_query_vertices(
                 query_dict=final_query,
                 root_id=root)
         else:
-            return self.entity_graph
+            return ga.subgraph(vertex_attr_filter={VProps.IS_DELETED: False})
 
     @staticmethod
     def _get_first(lst):

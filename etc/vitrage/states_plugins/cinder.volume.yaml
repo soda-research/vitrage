@@ -22,6 +22,7 @@ states:
         - name: DELETING
         - name: RESTORING-BACKUP
         - name: BACKING-UP
+        - name: DETACHING
   - normalized state:
       name: SUBOPTIMAL
       priority: 20

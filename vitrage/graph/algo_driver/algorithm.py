@@ -57,3 +57,7 @@ class GraphAlgorithm(object):
         :rtype: list of dict
         """
         pass
+
+    @abc.abstractmethod
+    def subgraph(self, vertex_attr_filter=None):
+        pass

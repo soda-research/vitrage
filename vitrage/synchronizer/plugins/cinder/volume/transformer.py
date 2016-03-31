@@ -38,9 +38,10 @@ LOG = logging.getLogger(__name__)
 class CinderVolumeTransformer(BaseResourceTransformer):
 
     # Event types which need to refer them differently
-    EVENT_TYPES = {
-        'compute.instance.delete.end': EventAction.DELETE_ENTITY,
-        'compute.instance.create.start': EventAction.CREATE_ENTITY
+    UPDATE_EVENT_TYPES = {
+        'volume.delete.end': EventAction.DELETE_ENTITY,
+        'volume.detach.start': EventAction.DELETE_RELATIONSHIP,
+        'volume.attach.end': EventAction.UPDATE_RELATIONSHIP
     }
 
     def __init__(self, transformers):
@@ -59,12 +60,12 @@ class CinderVolumeTransformer(BaseResourceTransformer):
                                    volume_state,
                                    timestamp)
 
-    def _create_update_entity_vertex(self, entity_event, volume_id):
+    def _create_update_entity_vertex(self, entity_event):
 
-        volume_name = extract_field_value(entity_event, 'payload', 'hostname')
-        volume_id = extract_field_value(entity_event, 'payload', 'instance_id')
-        volume_state = extract_field_value(entity_event, 'payload', 'state')
-        timestamp = extract_field_value(entity_event, 'metadata', 'timestamp')
+        volume_name = extract_field_value(entity_event, 'display_name')
+        volume_id = extract_field_value(entity_event, 'volume_id')
+        volume_state = extract_field_value(entity_event, 'status')
+        timestamp = entity_event.get('updated_at', None)
 
         return self._create_vertex(entity_event,
                                    volume_name,
@@ -81,8 +82,6 @@ class CinderVolumeTransformer(BaseResourceTransformer):
         entity_key = self._create_entity_key(entity_event)
 
         sample_timestamp = entity_event[SyncProps.SAMPLE_DATE]
-        update_timestamp = self._format_update_timestamp(update_timestamp,
-                                                         sample_timestamp)
 
         return graph_utils.create_vertex(
             entity_key,
@@ -95,21 +94,30 @@ class CinderVolumeTransformer(BaseResourceTransformer):
             metadata=metadata)
 
     def _create_neighbors(self, entity_event):
-        return self._create_instance_neighbors(entity_event)
+        if tbase.is_update_event(entity_event):
+            attachments_property = 'volume_attachment'
+            instance_id_property = 'instance_uuid'
+        else:
+            attachments_property = 'attachments'
+            instance_id_property = 'server_id'
+
+        return self._create_instance_neighbors(entity_event,
+                                               attachments_property,
+                                               instance_id_property)
 
     def _extract_action_type(self, entity_event):
         sync_mode = entity_event[SyncProps.SYNC_MODE]
 
-        if SyncMode.INIT_SNAPSHOT == sync_mode:
-            return EventAction.CREATE_ENTITY
+        if SyncMode.UPDATE == sync_mode:
+            return self.UPDATE_EVENT_TYPES.get(
+                entity_event[SyncProps.EVENT_TYPE],
+                EventAction.UPDATE_ENTITY)
 
         if SyncMode.SNAPSHOT == sync_mode:
             return EventAction.UPDATE_ENTITY
 
-        if SyncMode.UPDATE == sync_mode:
-            return self.EVENT_TYPES.get(
-                entity_event[self.UPDATE_EVENT_TYPE],
-                EventAction.UPDATE_ENTITY)
+        if SyncMode.INIT_SNAPSHOT == sync_mode:
+            return EventAction.CREATE_ENTITY
 
         raise VitrageTransformerError(
             'Invalid sync mode: (%s)' % sync_mode)
@@ -117,7 +125,7 @@ class CinderVolumeTransformer(BaseResourceTransformer):
     def _create_entity_key(self, entity_event):
 
         is_update_event = tbase.is_update_event(entity_event)
-        id_field_path = ('payload', 'instance_id') if is_update_event else 'id'
+        id_field_path = 'volume_id' if is_update_event else 'id'
         volume_id = extract_field_value(entity_event, id_field_path)
 
         key_fields = self._key_values(CINDER_VOLUME_PLUGIN, volume_id)
@@ -138,24 +146,29 @@ class CinderVolumeTransformer(BaseResourceTransformer):
             sample_timestamp=kwargs[VProps.SAMPLE_TIMESTAMP],
             is_placeholder=True)
 
-    def _create_instance_neighbors(self, entity_event):
+    def _create_instance_neighbors(self,
+                                   entity_event,
+                                   attachments_property,
+                                   instance_id_property):
         transformer = self.transformers[NOVA_INSTANCE_PLUGIN]
 
         if transformer:
             return [self._create_instance_neighbor(entity_event,
                                                    attachment,
-                                                   transformer)
-                    for attachment in entity_event['attachments']]
+                                                   transformer,
+                                                   instance_id_property)
+                    for attachment in entity_event[attachments_property]]
         else:
             LOG.warning('Cannot find instance transformer')
 
     def _create_instance_neighbor(self,
                                   entity_event,
                                   attachment,
-                                  instance_transformer):
+                                  instance_transformer,
+                                  instance_id_property):
         volume_vitrage_id = self._create_entity_key(entity_event)
 
-        instance_id = attachment['server_id']
+        instance_id = attachment[instance_id_property]
 
         sample_timestamp = entity_event[SyncProps.SAMPLE_DATE]
 

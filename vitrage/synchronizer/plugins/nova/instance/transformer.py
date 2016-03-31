@@ -114,8 +114,6 @@ class InstanceTransformer(BaseResourceTransformer):
             return self.UPDATE_EVENT_TYPES.get(
                 entity_event[SyncProps.EVENT_TYPE],
                 EventAction.UPDATE_ENTITY)
-            return self.EVENT_TYPES.get(entity_event[SyncProps.EVENT_TYPE],
-                                        EventAction.UPDATE_ENTITY)
 
         if SyncMode.SNAPSHOT == sync_mode:
             return EventAction.UPDATE_ENTITY

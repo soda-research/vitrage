@@ -32,8 +32,9 @@ class ListenerService(os_service.Service):
         # Get the topics of the synchronizers and callbacks
         topics = self._get_topics_set(synchronizers, conf)
         self.enrich_callbacks_by_events = \
-            self.create_callbacks_by_events_dict(synchronizers, conf)
-        self.listener = self.get_topics_listener(conf, topics, callback)
+            self._create_callbacks_by_events_dict(synchronizers, conf)
+        self.skipped_event_types = self._get_skipped_event_types(synchronizers)
+        self.listener = self._get_topics_listener(conf, topics, callback)
 
     def start(self):
         LOG.info("Vitrage Synchronizer Listener Service - Starting...")
@@ -60,7 +61,7 @@ class ListenerService(os_service.Service):
         return topics
 
     @staticmethod
-    def create_callbacks_by_events_dict(synchronizers, conf):
+    def _create_callbacks_by_events_dict(synchronizers, conf):
         ret = defaultdict(list)
 
         for sync in synchronizers.values():
@@ -69,7 +70,7 @@ class ListenerService(os_service.Service):
 
         return ret
 
-    def get_topics_listener(self, conf, topics, callback):
+    def _get_topics_listener(self, conf, topics, callback):
         # Create a listener for each topic
         transport = messaging.get_transport(conf)
         targets = [oslo_messaging.Target(topic=topic, exchange='nova')
@@ -78,16 +79,37 @@ class ListenerService(os_service.Service):
         return messaging.get_notification_listener(
             transport,
             targets,
-            [NotificationsEndpoint(self.enrich_callbacks_by_events, callback)])
+            [NotificationsEndpoint(self.enrich_callbacks_by_events,
+                                   callback,
+                                   self.skipped_event_types)])
+
+    @staticmethod
+    def _get_skipped_event_types(synchronizers):
+        skipped_events = []
+        for synchronizer in synchronizers.values():
+            skipped_events += synchronizer.get_skipped_event_types()
+
+        return set(skipped_events)
 
 
 class NotificationsEndpoint(object):
 
-    def __init__(self, enrich_callback_by_events, enqueue_callback):
+    def __init__(self,
+                 enrich_callback_by_events,
+                 enqueue_callback,
+                 skipped_event_types):
         self.enrich_callbacks_by_events = enrich_callback_by_events
         self.enqueue_callback = enqueue_callback
+        self.skipped_event_types = skipped_event_types
 
     def info(self, ctxt, publisher_id, event_type, payload, metadata):
+        # TODO(Alexey): improve skipped implementation because we need to skip
+        #               event depending on the synchronizer and not for all
+        #               synchronizers
+        if event_type in self.skipped_event_types:
+            LOG.info('EVENT SKIPPED: ' + str(event_type))
+            return
+
         LOG.info('EVENT RECEIVED: ' + str(event_type))
         for event_pattern in self.enrich_callbacks_by_events:
             if event_type.startswith(event_pattern):

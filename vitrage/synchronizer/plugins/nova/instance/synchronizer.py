@@ -48,5 +48,9 @@ class InstanceSynchronizer(NovaBase):
         return ['compute.instance']
 
     @staticmethod
+    def get_skipped_event_types():
+        return ['compute.instance.exists', 'compute.instance.update']
+
+    @staticmethod
     def get_topic(conf):
         return conf[NOVA_INSTANCE_PLUGIN].notification_topic
