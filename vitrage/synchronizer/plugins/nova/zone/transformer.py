@@ -23,7 +23,7 @@ from vitrage.synchronizer.plugins.base.resource.transformer import \
     BaseResourceTransformer
 from vitrage.synchronizer.plugins.nova.host import NOVA_HOST_PLUGIN
 from vitrage.synchronizer.plugins.nova.zone import NOVA_ZONE_PLUGIN
-from vitrage.synchronizer.plugins import transformer_base
+from vitrage.synchronizer.plugins import transformer_base as tbase
 from vitrage.synchronizer.plugins.transformer_base import extract_field_value
 
 
@@ -81,12 +81,12 @@ class ZoneTransformer(BaseResourceTransformer):
         host_transformer = self.transformers[NOVA_HOST_PLUGIN]
 
         if host_transformer:
-            for key in hosts:
+            for hostname, host_data in hosts.items():
 
-                host_available = extract_field_value(hosts[key],
+                host_available = extract_field_value(host_data,
                                                      'nova-compute',
                                                      'available')
-                host_active = extract_field_value(hosts[key],
+                host_active = extract_field_value(host_data,
                                                   'nova-compute',
                                                   'active')
 
@@ -96,9 +96,10 @@ class ZoneTransformer(BaseResourceTransformer):
 
                 host_neighbor = self._create_host_neighbor(
                     zone_vertex_id,
-                    key,
+                    hostname,
                     host_state,
                     entity_event[SyncProps.SAMPLE_DATE])
+
                 neighbors.append(host_neighbor)
         else:
             LOG.warning('Cannot find host transformer')
@@ -108,13 +109,13 @@ class ZoneTransformer(BaseResourceTransformer):
     @staticmethod
     def _create_node_neighbor(zone_vertex_id):
 
-        node_vertex = transformer_base.create_node_placeholder_vertex()
+        node_vertex = tbase.create_node_placeholder_vertex()
 
         relation_edge = graph_utils.create_edge(
             source_id=node_vertex.vertex_id,
             target_id=zone_vertex_id,
             relationship_type=EdgeLabels.CONTAINS)
-        return transformer_base.Neighbor(node_vertex, relation_edge)
+        return tbase.Neighbor(node_vertex, relation_edge)
 
     def _create_host_neighbor(self, zone_id, host_name,
                               host_state, sample_timestamp):
@@ -134,22 +135,22 @@ class ZoneTransformer(BaseResourceTransformer):
             target_id=host_neighbor.vertex_id,
             relationship_type=EdgeLabels.CONTAINS)
 
-        return transformer_base.Neighbor(host_neighbor, relation_edge)
+        return tbase.Neighbor(host_neighbor, relation_edge)
 
     def _create_entity_key(self, entity_event):
 
         zone_name = extract_field_value(entity_event, 'zoneName')
 
         key_fields = self._key_values(NOVA_ZONE_PLUGIN, zone_name)
-        return transformer_base.build_key(key_fields)
+        return tbase.build_key(key_fields)
 
     def create_placeholder_vertex(self, **kwargs):
         if VProps.ID not in kwargs:
             LOG.error('Cannot create placeholder vertex. Missing property ID')
             raise ValueError('Missing property ID')
 
-        key = transformer_base.build_key(
-            self._key_values(NOVA_ZONE_PLUGIN, kwargs[VProps.ID]))
+        key = tbase.build_key(self._key_values(NOVA_ZONE_PLUGIN,
+                                               kwargs[VProps.ID]))
 
         return graph_utils.create_vertex(
             key,
