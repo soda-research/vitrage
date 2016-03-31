@@ -15,11 +15,8 @@
 from oslo_log import log as logging
 
 from vitrage.common.constants import EntityCategory
-from vitrage.common.constants import EventAction
 from vitrage.common.constants import SynchronizerProperties as SyncProps
-from vitrage.common.constants import SyncMode
 from vitrage.common.constants import VertexProperties as VProps
-from vitrage.common.exception import VitrageTransformerError
 import vitrage.graph.utils as graph_utils
 from vitrage.synchronizer.plugins.base.resource.transformer import \
     BaseResourceTransformer
@@ -113,50 +110,11 @@ class StaticPhysicalTransformer(BaseResourceTransformer):
             LOG.warning('Cannot find zone transformer')
             return None
 
-    def _extract_action_type(self, entity_event):
-        sync_mode = entity_event[SyncProps.SYNC_MODE]
-
-        if SyncMode.INIT_SNAPSHOT == sync_mode:
-            return EventAction.CREATE_ENTITY
-
-        if SyncMode.SNAPSHOT == sync_mode:
-            return EventAction.UPDATE_ENTITY
-
-        if SyncMode.UPDATE == sync_mode:
-            if SyncProps.EVENT_TYPE in entity_event:
-                event_type = entity_event[SyncProps.EVENT_TYPE]
-                return EventAction.DELETE_ENTITY if event_type == \
-                    EventAction.DELETE_ENTITY else EventAction.UPDATE_ENTITY
-            else:
-                return EventAction.UPDATE_ENTITY
-
-        raise VitrageTransformerError(
-            'Invalid sync mode: (%s)' % sync_mode)
-
     def _create_entity_key(self, entity_event):
         entity_id = entity_event[VProps.ID]
         sync_type = entity_event[VProps.TYPE]
         key_fields = self._key_values(sync_type, entity_id)
         return transformer_base.build_key(key_fields)
-
-    def create_placeholder_vertex(self, **kwargs):
-        if VProps.TYPE not in kwargs:
-            LOG.error("Can't create placeholder vertex. Missing property TYPE")
-            raise ValueError('Missing property TYPE')
-
-        if VProps.ID not in kwargs:
-            LOG.error("Can't create placeholder vertex. Missing property ID")
-            raise ValueError('Missing property ID')
-
-        key_fields = self._key_values(kwargs[VProps.TYPE], kwargs[VProps.ID])
-
-        return graph_utils.create_vertex(
-            transformer_base.build_key(key_fields),
-            entity_id=kwargs[VProps.ID],
-            entity_category=EntityCategory.RESOURCE,
-            entity_type=kwargs[VProps.TYPE],
-            sample_timestamp=kwargs[VProps.SAMPLE_TIMESTAMP],
-            is_placeholder=True)
 
     @staticmethod
     def _extract_metadata(entity_event):

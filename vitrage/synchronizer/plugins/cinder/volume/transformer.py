@@ -18,9 +18,7 @@ from vitrage.common.constants import EdgeLabels
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import EventAction
 from vitrage.common.constants import SynchronizerProperties as SyncProps
-from vitrage.common.constants import SyncMode
 from vitrage.common.constants import VertexProperties as VProps
-from vitrage.common.exception import VitrageTransformerError
 import vitrage.graph.utils as graph_utils
 from vitrage.synchronizer.plugins.base.resource.transformer import \
     BaseResourceTransformer
@@ -105,23 +103,6 @@ class CinderVolumeTransformer(BaseResourceTransformer):
                                                attachments_property,
                                                instance_id_property)
 
-    def _extract_action_type(self, entity_event):
-        sync_mode = entity_event[SyncProps.SYNC_MODE]
-
-        if SyncMode.UPDATE == sync_mode:
-            return self.UPDATE_EVENT_TYPES.get(
-                entity_event[SyncProps.EVENT_TYPE],
-                EventAction.UPDATE_ENTITY)
-
-        if SyncMode.SNAPSHOT == sync_mode:
-            return EventAction.UPDATE_ENTITY
-
-        if SyncMode.INIT_SNAPSHOT == sync_mode:
-            return EventAction.CREATE_ENTITY
-
-        raise VitrageTransformerError(
-            'Invalid sync mode: (%s)' % sync_mode)
-
     def _create_entity_key(self, entity_event):
 
         is_update_event = tbase.is_update_event(entity_event)
@@ -130,21 +111,6 @@ class CinderVolumeTransformer(BaseResourceTransformer):
 
         key_fields = self._key_values(CINDER_VOLUME_PLUGIN, volume_id)
         return build_key(key_fields)
-
-    def create_placeholder_vertex(self, **kwargs):
-        if VProps.ID not in kwargs:
-            LOG.error('Cannot create placeholder vertex. Missing property ID')
-            raise ValueError('Missing property ID')
-
-        key_fields = self._key_values(CINDER_VOLUME_PLUGIN, kwargs[VProps.ID])
-
-        return graph_utils.create_vertex(
-            build_key(key_fields),
-            entity_id=kwargs[VProps.ID],
-            entity_category=EntityCategory.RESOURCE,
-            entity_type=CINDER_VOLUME_PLUGIN,
-            sample_timestamp=kwargs[VProps.SAMPLE_TIMESTAMP],
-            is_placeholder=True)
 
     def _create_instance_neighbors(self,
                                    entity_event,
@@ -174,6 +140,7 @@ class CinderVolumeTransformer(BaseResourceTransformer):
 
         properties = {
             VProps.ID: instance_id,
+            VProps.TYPE: NOVA_INSTANCE_PLUGIN,
             VProps.SAMPLE_TIMESTAMP: sample_timestamp
         }
         instance_vertex = \

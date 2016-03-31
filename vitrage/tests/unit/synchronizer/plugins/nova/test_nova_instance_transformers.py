@@ -53,6 +53,7 @@ class NovaInstanceTransformerTest(base.BaseTest):
         timestamp = datetime.datetime.utcnow()
         properties = {
             VertexProperties.ID: instance_id,
+            VertexProperties.TYPE: NOVA_INSTANCE_PLUGIN,
             VertexProperties.SAMPLE_TIMESTAMP: timestamp
         }
         transformer = InstanceTransformer(self.transformers)
@@ -211,6 +212,7 @@ class NovaInstanceTransformerTest(base.BaseTest):
         ht = self.transformers[NOVA_HOST_PLUGIN]
         properties = {
             VertexProperties.ID: host_name,
+            VertexProperties.TYPE: NOVA_HOST_PLUGIN,
             VertexProperties.SAMPLE_TIMESTAMP: time
         }
         expected_neighbor = ht.create_placeholder_vertex(**properties)

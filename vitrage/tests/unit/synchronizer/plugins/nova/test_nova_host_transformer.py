@@ -55,6 +55,7 @@ class NovaHostTransformerTest(base.BaseTest):
         # Test action
         properties = {
             VertexProperties.ID: host_name,
+            VertexProperties.TYPE: NOVA_HOST_PLUGIN,
             VertexProperties.SAMPLE_TIMESTAMP: timestamp
         }
         placeholder = host_transformer.create_placeholder_vertex(**properties)
@@ -132,6 +133,7 @@ class NovaHostTransformerTest(base.BaseTest):
         zt = self.transformers[NOVA_ZONE_PLUGIN]
         properties = {
             VertexProperties.ID: zone_name,
+            VertexProperties.TYPE: NOVA_ZONE_PLUGIN,
             VertexProperties.SAMPLE_TIMESTAMP: time
         }
         expected_neighbor = zt.create_placeholder_vertex(**properties)

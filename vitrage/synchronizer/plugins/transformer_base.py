@@ -92,6 +92,8 @@ class TransformerBase(object):
     KEY_SEPARATOR = ':'
     QUERY_RESULT = 'graph_query_result'
 
+    UPDATE_EVENT_TYPES = {}
+
     def transform(self, entity_event):
         """Transform an entity event into entity wrapper.
 
@@ -184,14 +186,16 @@ class TransformerBase(object):
 
         sync_mode = entity_event[SyncProps.SYNC_MODE]
 
-        if cons.SyncMode.UPDATE == sync_mode:
-            return cons.EventAction.UPDATE_ENTITY
+        if SyncMode.UPDATE == sync_mode:
+            return self.UPDATE_EVENT_TYPES.get(
+                entity_event.get(SyncProps.EVENT_TYPE, None),
+                EventAction.UPDATE_ENTITY)
 
-        if cons.SyncMode.SNAPSHOT == sync_mode:
-            return cons.EventAction.UPDATE_ENTITY
+        if SyncMode.SNAPSHOT == sync_mode:
+            return EventAction.UPDATE_ENTITY
 
-        if cons.SyncMode.INIT_SNAPSHOT == sync_mode:
-            return cons.EventAction.CREATE_ENTITY
+        if SyncMode.INIT_SNAPSHOT == sync_mode:
+            return EventAction.CREATE_ENTITY
 
         raise VitrageTransformerError(
             'Invalid sync mode: (%s)' % sync_mode)

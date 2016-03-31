@@ -54,6 +54,7 @@ class TestCinderVolumeTransformer(base.BaseTest):
         timestamp = datetime.datetime.utcnow()
         properties = {
             VProps.ID: volume_id,
+            VProps.TYPE: CINDER_VOLUME_PLUGIN,
             VProps.SAMPLE_TIMESTAMP: timestamp
         }
         transformer = CinderVolumeTransformer(self.transformers)

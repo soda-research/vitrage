@@ -39,10 +39,8 @@ class BaseAlarmTransformer(tbase.TransformerBase):
     def _extract_action_type(self, entity_event):
         sync_mode = entity_event[SyncProps.SYNC_MODE]
         if sync_mode in (SyncMode.UPDATE, SyncMode.SNAPSHOT):
-            if self._ok_status(entity_event):
-                return EventAction.DELETE_ENTITY
-            else:
-                return EventAction.UPDATE_ENTITY
+            return EventAction.DELETE_ENTITY if self._ok_status(entity_event) \
+                else EventAction.UPDATE_ENTITY
         if SyncMode.INIT_SNAPSHOT == sync_mode:
             return EventAction.CREATE_ENTITY
         raise VitrageTransformerError('Invalid sync mode: (%s)' % sync_mode)

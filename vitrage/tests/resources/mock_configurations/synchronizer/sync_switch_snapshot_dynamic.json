@@ -11,5 +11,6 @@
   "sample_date": "2015-12-01T12:46:41Z",
   "type": "switch",
   "sync_mode": "snapshot|init_snapshot",
-  "state": "available"
+  "state": "available",
+  "event_type": "entity_update"
 }

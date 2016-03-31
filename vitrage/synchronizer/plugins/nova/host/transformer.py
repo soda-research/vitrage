@@ -92,10 +92,12 @@ class HostTransformer(BaseResourceTransformer):
 
             properties = {
                 VProps.ID: zone_name,
+                VProps.TYPE: NOVA_ZONE_PLUGIN,
                 VProps.SAMPLE_TIMESTAMP: sample_timestamp
             }
             zone_neighbor = zone_transformer.create_placeholder_vertex(
                 **properties)
+
             relation_edge = graph_utils.create_edge(
                 source_id=zone_neighbor.vertex_id,
                 target_id=host_vertex_id,
@@ -112,20 +114,3 @@ class HostTransformer(BaseResourceTransformer):
 
         key_fields = self._key_values(NOVA_HOST_PLUGIN, host_name)
         return transformer_base.build_key(key_fields)
-
-    def create_placeholder_vertex(self, **kwargs):
-        if VProps.ID not in kwargs:
-            LOG.error('Cannot create placeholder vertex. Missing property ID')
-            raise ValueError('Missing property ID')
-
-        key_fields = self._key_values(NOVA_HOST_PLUGIN, kwargs[VProps.ID])
-
-        return graph_utils.create_vertex(
-            transformer_base.build_key(key_fields),
-            entity_id=kwargs[VProps.ID],
-            entity_category=EntityCategory.RESOURCE,
-            entity_type=NOVA_HOST_PLUGIN,
-            sample_timestamp=kwargs[VProps.SAMPLE_TIMESTAMP],
-            is_placeholder=True,
-            entity_state=kwargs[VProps.STATE]
-            if VProps.STATE in kwargs else None)

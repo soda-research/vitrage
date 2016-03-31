@@ -12,6 +12,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import copy
 import os
 
 from vitrage.common.constants import EventAction
@@ -81,6 +82,7 @@ class StaticPhysicalSynchronizer(SynchronizerBase):
                     if str(config) != str(self.cache[file_]):
                         # TODO(alexey_weyl): need also to remove deleted
                         #                   files from cache
+                        old_config = copy.deepcopy(config)
 
                         self._update_on_existing_entities(
                             self.cache[file_][self.ENTITIES_SECTION],
@@ -92,7 +94,7 @@ class StaticPhysicalSynchronizer(SynchronizerBase):
                             self.cache[file_][self.ENTITIES_SECTION],
                             entities_updates)
 
-                        self.cache[file_] = config
+                        self.cache[file_] = old_config
                 else:
                     self.cache[file_] = config
                     entities_updates += \
@@ -106,9 +108,10 @@ class StaticPhysicalSynchronizer(SynchronizerBase):
             if old_entity not in new_entities:
                 new_entity = self._find_entity(old_entity, new_entities)
                 if not new_entity:
-                    self._delete_event(old_entity)
+                    self._set_event_type(old_entity, EventAction.DELETE_ENTITY)
                     updates.append(old_entity.copy())
                 else:
+                    self._set_event_type(new_entity, EventAction.UPDATE_ENTITY)
                     updates.append(new_entity.copy())
 
     @staticmethod
@@ -126,5 +129,5 @@ class StaticPhysicalSynchronizer(SynchronizerBase):
                 updates.append(entity.copy())
 
     @staticmethod
-    def _delete_event(entity):
-        entity[SyncProps.EVENT_TYPE] = EventAction.DELETE_ENTITY
+    def _set_event_type(entity, event_type):
+        entity[SyncProps.EVENT_TYPE] = event_type

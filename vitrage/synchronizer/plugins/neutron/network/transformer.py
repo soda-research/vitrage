@@ -12,12 +12,9 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from common.exception import VitrageTransformerError
 from synchronizer.plugins.neutron.network import NEUTRON_NETWORK_PLUGIN
 from vitrage.common.constants import EntityCategory
-from vitrage.common.constants import EventAction
 from vitrage.common.constants import SynchronizerProperties as SyncProps
-from vitrage.common.constants import SyncMode
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.synchronizer.plugins.base.resource.transformer import \
     BaseResourceTransformer
@@ -41,9 +38,6 @@ class NetworkTransformer(BaseResourceTransformer):
                                       extract_field_value(entity_event,
                                                           network_id))
         return tbase.build_key(key_fields)
-
-    def create_placeholder_vertex(self, **kwargs):
-        pass
 
     def _create_snapshot_entity_vertex(self, entity_event):
         name = extract_field_value(entity_event, 'name')
@@ -82,19 +76,3 @@ class NetworkTransformer(BaseResourceTransformer):
     @staticmethod
     def _create_neighbors(entity_event):
         return []
-
-    def _extract_action_type(self, entity_event):
-        sync_mode = entity_event[SyncProps.SYNC_MODE]
-
-        if SyncMode.UPDATE == sync_mode:
-            return self.UPDATE_EVENT_TYPES.get(
-                entity_event[SyncProps.EVENT_TYPE],
-                EventAction.UPDATE_ENTITY)
-
-        if SyncMode.SNAPSHOT == sync_mode:
-            return EventAction.UPDATE_ENTITY
-
-        if SyncMode.INIT_SNAPSHOT == sync_mode:
-            return EventAction.CREATE_ENTITY
-
-        raise VitrageTransformerError('Invalid sync mode: (%s)' % sync_mode)

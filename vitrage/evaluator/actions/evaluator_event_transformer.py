@@ -43,6 +43,7 @@ class EvaluatorEventTransformer(transformer_base.TransformerBase):
 
     def __init__(self, transformers):
         self.transformers = transformers
+        self.actions = self._init_actions()
 
     def _create_snapshot_entity_vertex(self, entity_event):
         return self._create_vertex(entity_event)
@@ -123,22 +124,23 @@ class EvaluatorEventTransformer(transformer_base.TransformerBase):
         return []
 
     def _extract_action_type(self, event):
-
         event_type = event[EVALUATOR_EVENT_TYPE]
 
-        if event_type == UPDATE_VERTEX:
-            return EventAction.UPDATE_ENTITY
-        if event_type == ADD_VERTEX:
-            return EventAction.CREATE_ENTITY
-        if event_type == REMOVE_VERTEX:
-            return EventAction.DELETE_ENTITY
-        if event_type == ADD_EDGE:
-            return EventAction.UPDATE_RELATIONSHIP
-        if event_type == REMOVE_EDGE:
-            return EventAction.DELETE_RELATIONSHIP
+        try:
+            return self.actions[event_type]
+        except Exception:
+            raise VitrageTransformerError(
+                'Invalid Evaluator event type: (%s)' % event_type)
 
-        raise VitrageTransformerError(
-            'Invalid Evaluator event type: (%s)' % event_type)
+    @staticmethod
+    def _init_actions():
+        return {
+            UPDATE_VERTEX: EventAction.UPDATE_ENTITY,
+            ADD_VERTEX: EventAction.CREATE_ENTITY,
+            REMOVE_VERTEX: EventAction.DELETE_ENTITY,
+            ADD_EDGE: EventAction.UPDATE_RELATIONSHIP,
+            REMOVE_EDGE: EventAction.DELETE_RELATIONSHIP
+        }
 
     def _create_entity_key(self, event):
         key_fields = self._key_values(event[TFields.ALARM_NAME],
