@@ -40,8 +40,8 @@ class NovaZoneTransformerTest(base.BaseTest):
     @classmethod
     def setUpClass(cls):
         cls.transformers = {}
-        host_transformer = HostTransformer(cls.transformers)
-        cls.transformers[NOVA_HOST_PLUGIN] = host_transformer
+        cls.transformers[NOVA_HOST_PLUGIN] = HostTransformer(cls.transformers)
+        cls.transformers[NOVA_ZONE_PLUGIN] = ZoneTransformer(cls.transformers)
 
     def test_create_placeholder_vertex(self):
 
@@ -108,22 +108,21 @@ class NovaZoneTransformerTest(base.BaseTest):
         LOG.debug('Nova zone transformer test: transform entity event')
 
         # Test setup
-        spec_list = mock_sync.simple_zone_generators(
-            zone_num=2,
-            host_num=3,
-            snapshot_events=5
-        )
+        spec_list = mock_sync.simple_zone_generators(zone_num=1,
+                                                     host_num=1,
+                                                     snapshot_events=5)
         zone_events = mock_sync.generate_random_events_list(spec_list)
 
         for event in zone_events:
             # Test action
-            wrapper = ZoneTransformer(self.transformers).transform(event)
+            wrapper = self.transformers[NOVA_ZONE_PLUGIN].transform(event)
 
             # Test assertions
             vertex = wrapper.vertex
             self._validate_vertex_props(vertex, event)
 
             neighbors = wrapper.neighbors
+            self.assertEqual(2, len(neighbors))
             self._validate_neighbors(neighbors, vertex.vertex_id, event)
 
     def _validate_neighbors(self, neighbors, zone_vertex_id, event):

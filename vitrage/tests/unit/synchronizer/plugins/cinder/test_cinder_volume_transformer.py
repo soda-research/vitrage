@@ -106,7 +106,9 @@ class TestCinderVolumeTransformer(base.BaseTest):
                   'snapshot')
 
         # Test setup
-        spec_list = mock_sync.simple_volume_generators(3, 7, 7)
+        spec_list = mock_sync.simple_volume_generators(volume_num=3,
+                                                       instance_num=7,
+                                                       snapshot_events=7)
         static_events = mock_sync.generate_random_events_list(spec_list)
 
         for event in static_events:
@@ -118,6 +120,29 @@ class TestCinderVolumeTransformer(base.BaseTest):
             self._validate_volume_vertex_props(vertex, event)
 
             neighbors = wrapper.neighbors
+            self.assertEqual(1, len(neighbors))
+            self._validate_neighbors(neighbors, vertex.vertex_id, event)
+
+    def test_update_transform(self):
+        LOG.debug('Cinder Volume transformer test: transform entity event '
+                  'update')
+
+        # Test setup
+        spec_list = mock_sync.simple_volume_generators(volume_num=3,
+                                                       instance_num=7,
+                                                       update_events=7)
+        static_events = mock_sync.generate_random_events_list(spec_list)
+
+        for event in static_events:
+            # Test action
+            wrapper = self.transformers[CINDER_VOLUME_PLUGIN].transform(event)
+
+            # Test assertions
+            vertex = wrapper.vertex
+            self._validate_volume_vertex_props(vertex, event)
+
+            neighbors = wrapper.neighbors
+            self.assertEqual(1, len(neighbors))
             self._validate_neighbors(neighbors, vertex.vertex_id, event)
 
     def _validate_volume_vertex_props(self, vertex, event):
@@ -127,7 +152,7 @@ class TestCinderVolumeTransformer(base.BaseTest):
         self.assertEqual(EntityCategory.RESOURCE, vertex[VProps.CATEGORY])
         self.assertEqual(event[SyncProps.SYNC_TYPE], vertex[VProps.TYPE])
 
-        id_field_path = ('payload', 'instance_id') if is_update_event else 'id'
+        id_field_path = 'volume_id' if is_update_event else 'id'
         self.assertEqual(
             tbase.extract_field_value(event, id_field_path),
             vertex[VProps.ID])
@@ -135,14 +160,12 @@ class TestCinderVolumeTransformer(base.BaseTest):
         self.assertEqual(event[SyncProps.SAMPLE_DATE],
                          vertex[VProps.SAMPLE_TIMESTAMP])
 
-        name_field_path = ('payload', 'hostname') \
-            if is_update_event else 'display_name'
+        name_field_path = 'display_name'
         self.assertEqual(
             tbase.extract_field_value(event, name_field_path),
             vertex[VProps.NAME])
 
-        state_field_path = ('payload', 'state') \
-            if is_update_event else 'status'
+        state_field_path = 'status'
         self.assertEqual(
             tbase.extract_field_value(event, state_field_path),
             vertex[VProps.STATE])
@@ -154,15 +177,17 @@ class TestCinderVolumeTransformer(base.BaseTest):
         instance_counter = 0
 
         for neighbor in neighbors:
-            self._validate_instance_neighbor(
-                neighbor,
-                event['attachments'][0]['server_id'],
-                volume_vertex_id)
+            is_update_event = tbase.is_update_event(event)
+            instance_id = event['volume_attachment'][0]['instance_uuid'] if \
+                is_update_event else event['attachments'][0]['server_id']
+            self._validate_instance_neighbor(neighbor,
+                                             instance_id,
+                                             volume_vertex_id)
             instance_counter += 1
 
         self.assertEqual(1,
                          instance_counter,
-                         'Zone can belongs to only one Node')
+                         'Volume can be belonged to only one instance')
 
     def _validate_instance_neighbor(self,
                                     instance_neighbor,

@@ -50,7 +50,7 @@ class Launcher(object):
     def _register_snapshot_plugins(self):
         return {plugin: utils.import_object(self.conf[plugin].synchronizer,
                                             self.conf)
-                for plugin in self.conf.synchronizer_plugins.plugin_type}
+                for plugin in self.conf.plugins.plugin_type}
 
     def _register_services(self):
         return itertools.chain(

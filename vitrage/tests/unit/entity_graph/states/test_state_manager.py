@@ -55,12 +55,13 @@ class TestStateManager(base.BaseTest):
             load_plugin(conf, plugin_name, conf.plugins.plugin_path)
 
     # noinspection PyAttributeOutsideInit
-    def setUp(self):
-        super(TestStateManager, self).setUp()
-        self.conf = cfg.ConfigOpts()
-        self.conf.register_opts(self.ENTITY_GRAPH_OPTS, group='entity_graph')
-        self.conf.register_opts(self.PLUGINS_OPTS, group='plugins')
-        self._load_plugins(self.conf)
+    @classmethod
+    def setUpClass(cls):
+        super(TestStateManager, cls).setUpClass()
+        cls.conf = cfg.ConfigOpts()
+        cls.conf.register_opts(cls.ENTITY_GRAPH_OPTS, group='entity_graph')
+        cls.conf.register_opts(cls.PLUGINS_OPTS, group='plugins')
+        cls._load_plugins(cls.conf)
 
     def test_load_state_plugins_without_errors(self):
         # action

@@ -42,8 +42,9 @@ class NovaInstanceTransformerTest(base.BaseTest):
     @classmethod
     def setUpClass(cls):
         cls.transformers = {}
-        host_transformer = HostTransformer(cls.transformers)
-        cls.transformers[NOVA_HOST_PLUGIN] = host_transformer
+        cls.transformers[NOVA_HOST_PLUGIN] = HostTransformer(cls.transformers)
+        cls.transformers[NOVA_INSTANCE_PLUGIN] = \
+            InstanceTransformer(cls.transformers)
 
     def test_create_placeholder_vertex(self):
         LOG.debug('Test create placeholder vertex')
@@ -88,33 +89,26 @@ class NovaInstanceTransformerTest(base.BaseTest):
                   'snapshot and snapshot init events')
 
         # Test setup
-        spec_list = mock_sync.simple_instance_generators(
-            host_num=1,
-            vm_num=1,
-            snapshot_events=10,
-            update_events=0
-        )
+        spec_list = mock_sync.simple_instance_generators(host_num=1,
+                                                         vm_num=1,
+                                                         snapshot_events=10,
+                                                         update_events=0)
         instance_events = mock_sync.generate_random_events_list(spec_list)
 
         for event in instance_events:
             # Test action
-            instance_transformer = InstanceTransformer(self.transformers)
-            wrapper = instance_transformer.transform(event)
+            wrapper = self.transformers[NOVA_INSTANCE_PLUGIN].transform(event)
 
             # Test assertions
             self._validate_vertex_props(wrapper.vertex, event)
 
-            # Validate the neighbors: only one  valid host neighbor
-            self.assertEqual(
-                1,
-                len(wrapper.neighbors),
-                'Instance has only one host neighbor'
-            )
+            self.assertEqual(1,
+                             len(wrapper.neighbors),
+                             'Instance has only one host neighbor')
             host_neighbor = wrapper.neighbors[0]
             self._validate_host_neighbor(host_neighbor, event)
 
             sync_mode = event[SyncProps.SYNC_MODE]
-
             if sync_mode == SyncMode.INIT_SNAPSHOT:
                 self.assertEqual(EventAction.CREATE_ENTITY, wrapper.action)
             elif sync_mode == SyncMode.SNAPSHOT:
@@ -124,30 +118,23 @@ class NovaInstanceTransformerTest(base.BaseTest):
         LOG.debug('Test tactual transform action for update events')
 
         # Test setup
-        spec_list = mock_sync.simple_instance_generators(
-            host_num=1,
-            vm_num=1,
-            snapshot_events=0,
-            update_events=10
-        )
+        spec_list = mock_sync.simple_instance_generators(host_num=1,
+                                                         vm_num=1,
+                                                         snapshot_events=0,
+                                                         update_events=10)
         instance_events = mock_sync.generate_random_events_list(spec_list)
 
         for event in instance_events:
             # Test action
-            instance_transformer = InstanceTransformer(self.transformers)
-            wrapper = instance_transformer.transform(event)
+            wrapper = self.transformers[NOVA_INSTANCE_PLUGIN].transform(event)
 
             # Test assertions
             self._validate_vertex_props(wrapper.vertex, event)
 
             # Validate the neighbors: only one  valid host neighbor
-            self.assertEqual(
-                1,
-                len(wrapper.neighbors),
-                'Instance has only one host neighbor'
-            )
-            host_neighbor = wrapper.neighbors[0]
-            self._validate_host_neighbor(host_neighbor, event)
+            neighbors = wrapper.neighbors
+            self.assertEqual(1, len(neighbors))
+            self._validate_host_neighbor(neighbors[0], event)
 
             event_type = event[SyncProps.EVENT_TYPE]
             if event_type == 'compute.instance.delete.end':

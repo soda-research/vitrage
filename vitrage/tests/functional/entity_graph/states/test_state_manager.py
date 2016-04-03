@@ -30,12 +30,13 @@ from vitrage.tests.functional.entity_graph.base import \
 class TestStateManagerFunctional(TestEntityGraphFunctionalBase):
 
     # noinspection PyAttributeOutsideInit
-    def setUp(self):
-        super(TestStateManagerFunctional, self).setUp()
-        self.conf = cfg.ConfigOpts()
-        self.conf.register_opts(self.PROCESSOR_OPTS, group='entity_graph')
-        self.conf.register_opts(self.PLUGINS_OPTS, group='plugins')
-        self.load_plugins(self.conf)
+    @classmethod
+    def setUpClass(cls):
+        super(TestStateManagerFunctional, cls).setUpClass()
+        cls.conf = cfg.ConfigOpts()
+        cls.conf.register_opts(cls.PROCESSOR_OPTS, group='entity_graph')
+        cls.conf.register_opts(cls.PLUGINS_OPTS, group='plugins')
+        cls.load_plugins(cls.conf)
 
     def test_state_on_update(self):
         # setup

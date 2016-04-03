@@ -41,8 +41,8 @@ class NovaHostTransformerTest(base.BaseTest):
     @classmethod
     def setUpClass(cls):
         cls.transformers = {}
-        zone_transformer = ZoneTransformer(cls.transformers)
-        cls.transformers[NOVA_ZONE_PLUGIN] = zone_transformer
+        cls.transformers[NOVA_ZONE_PLUGIN] = ZoneTransformer(cls.transformers)
+        cls.transformers[NOVA_HOST_PLUGIN] = HostTransformer(cls.transformers)
 
     def test_create_placeholder_vertex(self):
         LOG.debug('Nova host transformer test: Test create placeholder vertex')
@@ -111,7 +111,7 @@ class NovaHostTransformerTest(base.BaseTest):
 
         for event in host_events:
             # Test action
-            wrapper = HostTransformer(self.transformers).transform(event)
+            wrapper = self.transformers[NOVA_HOST_PLUGIN].transform(event)
 
             # Test assertions
             self._validate_vertex_props(wrapper.vertex, event)

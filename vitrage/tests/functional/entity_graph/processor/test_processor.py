@@ -29,12 +29,13 @@ class TestProcessorFunctional(TestEntityGraphFunctionalBase):
     NUM_EDGES_AFTER_DELETION = 0
 
     # noinspection PyAttributeOutsideInit
-    def setUp(self):
-        super(TestProcessorFunctional, self).setUp()
-        self.conf = cfg.ConfigOpts()
-        self.conf.register_opts(self.PROCESSOR_OPTS, group='entity_graph')
-        self.conf.register_opts(self.PLUGINS_OPTS, group='plugins')
-        self.load_plugins(self.conf)
+    @classmethod
+    def setUpClass(cls):
+        super(TestProcessorFunctional, cls).setUpClass()
+        cls.conf = cfg.ConfigOpts()
+        cls.conf.register_opts(cls.PROCESSOR_OPTS, group='entity_graph')
+        cls.conf.register_opts(cls.PLUGINS_OPTS, group='plugins')
+        cls.load_plugins(cls.conf)
 
     def test_create_entity_graph(self):
         processor = self._create_processor_with_graph(self.conf)

@@ -191,8 +191,9 @@ def simple_zone_generators(zone_num, host_num, snapshot_events=0,
     return tg.get_trace_generators(test_entity_spec_list)
 
 
-def simple_volume_generators(volume_num, instance_num, snapshot_events=0,
-                             snap_vals=None):
+def simple_volume_generators(volume_num, instance_num,
+                             snapshot_events=0, update_events=0,
+                             snap_vals=None, update_vals=None):
     """A function for returning vm event generators.
 
     Returns generators for a given number of volumes and
@@ -219,6 +220,16 @@ def simple_volume_generators(volume_num, instance_num, snapshot_events=0,
              tg.MAPPING_KEY: mapping,
              tg.NAME_KEY: 'Volume snapshot generator',
              tg.NUM_EVENTS: snapshot_events
+             }
+        )
+    if update_events:
+        test_entity_spec_list.append(
+            {tg.DYNAMIC_INFO_FKEY: tg.SYNC_VOLUME_UPDATE_D,
+             tg.STATIC_INFO_FKEY: None,
+             tg.EXTERNAL_INFO_KEY: update_vals,
+             tg.MAPPING_KEY: mapping,
+             tg.NAME_KEY: 'Volume update generator',
+             tg.NUM_EVENTS: update_events
              }
         )
     return tg.get_trace_generators(test_entity_spec_list)

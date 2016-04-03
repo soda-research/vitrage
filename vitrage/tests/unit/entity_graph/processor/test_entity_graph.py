@@ -19,8 +19,9 @@ from vitrage.tests.unit.entity_graph.processor import base
 
 class TestEntityGraphManager(base.TestBaseProcessor):
 
-    def setUp(self):
-        super(TestEntityGraphManager, self).setUp()
+    @classmethod
+    def setUpClass(cls):
+        super(TestEntityGraphManager, cls).setUpClass()
 
     def test_can_vertex_be_deleted(self):
         entity_graph = entity_g.EntityGraph("Entity Graph")

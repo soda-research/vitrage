@@ -23,13 +23,13 @@ from vitrage.tests.unit.entity_graph.base import TestEntityGraphUnitBase
 class TestBaseProcessor(TestEntityGraphUnitBase):
 
     # noinspection PyAttributeOutsideInit
-    def setUp(self):
-        super(TestBaseProcessor, self).setUp()
-        self.conf = cfg.ConfigOpts()
-        self.conf.register_opts(self.PLUGINS_OPTS,
-                                group='plugins')
-        self.load_plugins(self.conf)
-        self.transform = transformer_manager.TransformerManager(self.conf)
+    @classmethod
+    def setUpClass(cls):
+        super(TestBaseProcessor, cls).setUpClass()
+        cls.conf = cfg.ConfigOpts()
+        cls.conf.register_opts(cls.PLUGINS_OPTS, group='plugins')
+        cls.load_plugins(cls.conf)
+        cls.transform = transformer_manager.TransformerManager(cls.conf)
 
     @staticmethod
     def _update_vertex_to_graph(entity_graph, category, type_, id_,

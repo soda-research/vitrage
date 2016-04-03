@@ -28,6 +28,7 @@ from vitrage.entity_graph.consistency.consistency_enforcer \
     import ConsistencyEnforcer
 from vitrage.entity_graph.initialization_status import InitializationStatus
 from vitrage.entity_graph.processor.processor import Processor
+from vitrage.evaluator.actions.evaluator_event_transformer import VITRAGE_TYPE
 from vitrage.evaluator.scenario_evaluator import ScenarioEvaluator
 from vitrage.evaluator.scenario_repository import ScenarioRepository
 import vitrage.graph.utils as graph_utils
@@ -70,30 +71,31 @@ class TestConsistencyFunctional(TestEntityGraphFunctionalBase):
     ]
 
     # noinspection PyAttributeOutsideInit
-    def setUp(self):
-        super(TestConsistencyFunctional, self).setUp()
-        self.initialization_status = InitializationStatus()
-        self.conf = cfg.ConfigOpts()
-        self.conf.register_opts(self.CONSISTENCY_OPTS, group='consistency')
-        self.conf.register_opts(self.PROCESSOR_OPTS, group='entity_graph')
-        self.conf.register_opts(self.EVALUATOR_OPTS, group='evaluator')
-        self.conf.register_opts(self.SYNCHRONIZER_OPTS, group='synchronizer')
-        self.conf.register_opts(self.PLUGINS_OPTS, group='plugins')
-        self.load_plugins(self.conf)
+    @classmethod
+    def setUpClass(cls):
+        super(TestConsistencyFunctional, cls).setUpClass()
+        cls.initialization_status = InitializationStatus()
+        cls.conf = cfg.ConfigOpts()
+        cls.conf.register_opts(cls.CONSISTENCY_OPTS, group='consistency')
+        cls.conf.register_opts(cls.PROCESSOR_OPTS, group='entity_graph')
+        cls.conf.register_opts(cls.EVALUATOR_OPTS, group='evaluator')
+        cls.conf.register_opts(cls.SYNCHRONIZER_OPTS, group='synchronizer')
+        cls.conf.register_opts(cls.PLUGINS_OPTS, group='plugins')
+        cls.load_plugins(cls.conf)
 
-        self.processor = Processor(self.conf, self.initialization_status)
-        self.event_queue = queue.Queue()
-        scenario_repo = ScenarioRepository(self.conf)
-        self.evaluator = ScenarioEvaluator(self.conf,
-                                           self.processor.entity_graph,
-                                           scenario_repo,
-                                           self.event_queue)
-        self.consistency_enforcer = ConsistencyEnforcer(
-            self.conf,
-            self.event_queue,
-            self.evaluator,
-            self.processor.entity_graph,
-            self.initialization_status)
+        cls.processor = Processor(cls.conf, cls.initialization_status)
+        cls.event_queue = queue.Queue()
+        scenario_repo = ScenarioRepository(cls.conf)
+        cls.evaluator = ScenarioEvaluator(cls.conf,
+                                          cls.processor.entity_graph,
+                                          scenario_repo,
+                                          cls.event_queue)
+        cls.consistency_enforcer = ConsistencyEnforcer(
+            cls.conf,
+            cls.event_queue,
+            cls.evaluator,
+            cls.processor.entity_graph,
+            cls.initialization_status)
 
     @unittest.skip("test_initializing_process skipping")
     def test_initializing_process(self):
@@ -140,7 +142,7 @@ class TestConsistencyFunctional(TestEntityGraphFunctionalBase):
 
         instance_vertices = self.processor.entity_graph.get_vertices({
             VProps.CATEGORY: EntityCategory.ALARM,
-            VProps.TYPE: self.VITRAGE,
+            VProps.TYPE: VITRAGE_TYPE,
             VProps.IS_DELETED: False
         })
         self.assertEqual(num_of_host_alarms * num_instances_per_host,

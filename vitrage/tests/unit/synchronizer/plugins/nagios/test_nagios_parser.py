@@ -52,8 +52,9 @@ class NagiosParserTest(NagiosBaseTest):
                              u'OK - 0.00 B/sec read, 1.84 MB/sec write, '
                              u'IOs: 89.00/sec\xa0'}
 
-    def setUp(self):
-        super(NagiosParserTest, self).setUp()
+    @classmethod
+    def setUpClass(cls):
+        super(NagiosParserTest, cls).setUpClass()
 
     def test_template_loader(self):
         # Setup

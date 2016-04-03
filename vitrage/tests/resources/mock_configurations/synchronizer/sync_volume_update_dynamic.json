@@ -1,0 +1,11 @@
+{
+  "volume_attachment": [{"instance_uuid": "54321"}],
+  "display_name": "volume-0",
+  "updated_at": "2015-12-01T12:46:41Z",
+  "status": "In-use",
+  "volume_id": "12345",
+  "sync_type": "cinder\\.volume",
+  "sync_mode": "update",
+  "event_type": "volume.create.start",
+  "sample_date": "2015-12-01T12:46:41Z"
+}
