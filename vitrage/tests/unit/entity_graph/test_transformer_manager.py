@@ -53,10 +53,11 @@ class TransformerManagerTest(base.BaseTest):
     @classmethod
     def setUpClass(cls):
         cls.conf = cfg.ConfigOpts()
-        cls.conf.register_opts(cls.OPTS, group='synchronizer_plugins')
-        for plugin_name in cls.conf.synchronizer_plugins.plugin_type:
-            load_plugin(cls.conf, plugin_name,
-                        cls.conf.synchronizer_plugins.plugin_path)
+        cls.conf.register_opts(cls.OPTS, group='plugins')
+
+        for plugin_name in cls.conf.plugins.plugin_type:
+            load_plugin(cls.conf, plugin_name, cls.conf.plugins.plugin_path)
+
         cls.manager = TransformerManager(cls.conf)
 
     def test_transformer_registration_nagios(self):

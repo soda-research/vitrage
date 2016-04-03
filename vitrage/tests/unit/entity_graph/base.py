@@ -58,9 +58,8 @@ class TestEntityGraphUnitBase(base.BaseTest):
 
     @staticmethod
     def load_plugins(conf):
-        for plugin_name in conf.synchronizer_plugins.plugin_type:
-            load_plugin(conf, plugin_name,
-                        conf.synchronizer_plugins.plugin_path)
+        for plugin_name in conf.plugins.plugin_type:
+            load_plugin(conf, plugin_name, conf.plugins.plugin_path)
 
     def _create_processor_with_graph(self, conf, processor=None):
         events = self._create_mock_events()

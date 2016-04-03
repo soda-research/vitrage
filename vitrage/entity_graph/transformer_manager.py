@@ -36,7 +36,7 @@ class TransformerManager(object):
     def register_transformer_classes(conf):
 
         transformers = {}
-        for plugin in conf.synchronizer_plugins.plugin_type:
+        for plugin in conf.plugins.plugin_type:
             transformers[plugin] = importutils.import_object(
                 conf[plugin].transformer,
                 transformers)

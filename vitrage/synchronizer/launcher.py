@@ -59,7 +59,7 @@ class Launcher(object):
                             self.conf[plugin].changes_interval,
                             self.callback)
 
-                for plugin in self.conf.synchronizer_plugins.plugin_type
+                for plugin in self.conf.plugins.plugin_type
                 if opt_exists(self.conf[plugin], CHANGES_INTERVAL)),
 
             (SnapshotsService(self.conf,

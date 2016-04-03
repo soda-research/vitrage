@@ -37,7 +37,7 @@ def list_opts():
         ('api', vitrage.api.OPTS),
         ('synchronizer', vitrage.synchronizer.OPTS),
         ('evaluator', vitrage.evaluator.OPTS),
-        ('synchronizer_plugins', vitrage.synchronizer.plugins.OPTS),
+        ('plugins', vitrage.synchronizer.plugins.OPTS),
         ('consistency', vitrage.entity_graph.consistency.OPTS),
         ('entity_graph', vitrage.entity_graph.OPTS),
         ('service_credentials', vitrage.keystone_client.OPTS),

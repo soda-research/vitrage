@@ -46,8 +46,7 @@ class TestScenarioEvaluator(TestEntityGraphFunctionalBase):
         cls.conf = cfg.ConfigOpts()
         cls.conf.register_opts(cls.PROCESSOR_OPTS, group='entity_graph')
         cls.conf.register_opts(cls.EVALUATOR_OPTS, group='evaluator')
-        cls.conf.register_opts(cls.PLUGINS_OPTS,
-                               group='synchronizer_plugins')
+        cls.conf.register_opts(cls.PLUGINS_OPTS, group='plugins')
         TestScenarioEvaluator.load_plugins(cls.conf)
         cls.scenario_repository = ScenarioRepository(cls.conf)
 
