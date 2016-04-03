@@ -100,6 +100,16 @@ function cleanup_vitrage {
     fi
 }
 
+function disable_vitrage_plugin {
+
+    local enabled_plugins=",${VITRAGE_DEFAULT_PLUGINS},"
+    local plugin
+    for plugin in $@; do
+            enabled_plugins=${enabled_plugins//,$plugin,/,}
+    done
+    VITRAGE_DEFAULT_PLUGINS=$(_cleanup_service_list "$enabled_plugins")
+
+}
 
 # Configure Vitrage
 function configure_vitrage {
@@ -123,6 +133,19 @@ function configure_vitrage {
     iniset $VITRAGE_CONF service_credentials project_name admin
     iniset $VITRAGE_CONF service_credentials region_name $REGION_NAME
     iniset $VITRAGE_CONF service_credentials auth_url $KEYSTONE_SERVICE_URI
+
+    # add default plugins
+    iniset $VITRAGE_CONF synchronizer_plugins plugin_type $VITRAGE_DEFAULT_PLUGINS
+
+    # remove neutron vitrage plugin if neutron plugin not installed
+    if ! is_service_enabled neutron; then
+        disable_vitrage_plugin neutron.network
+    fi
+
+    # remove aodh vitrage plugin if aodh plugin not installed
+    if ! is_service_enabled aodh; then
+        disable_vitrage_plugin aodh
+    fi
 
     # copy the mock sample files
     cp $VITRAGE_DIR/etc/vitrage/*.sample.json $VITRAGE_CONF_DIR
