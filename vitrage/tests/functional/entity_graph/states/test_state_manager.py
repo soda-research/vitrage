@@ -34,8 +34,7 @@ class TestStateManagerFunctional(TestEntityGraphFunctionalBase):
         super(TestStateManagerFunctional, self).setUp()
         self.conf = cfg.ConfigOpts()
         self.conf.register_opts(self.PROCESSOR_OPTS, group='entity_graph')
-        self.conf.register_opts(self.PLUGINS_OPTS,
-                                group='synchronizer_plugins')
+        self.conf.register_opts(self.PLUGINS_OPTS, group='plugins')
         self.load_plugins(self.conf)
 
     def test_state_on_update(self):

@@ -51,17 +51,15 @@ class TestStateManager(base.BaseTest):
 
     @staticmethod
     def _load_plugins(conf):
-        for plugin_name in conf.synchronizer_plugins.plugin_type:
-            load_plugin(conf, plugin_name,
-                        conf.synchronizer_plugins.plugin_path)
+        for plugin_name in conf.plugins.plugin_type:
+            load_plugin(conf, plugin_name, conf.plugins.plugin_path)
 
     # noinspection PyAttributeOutsideInit
     def setUp(self):
         super(TestStateManager, self).setUp()
         self.conf = cfg.ConfigOpts()
         self.conf.register_opts(self.ENTITY_GRAPH_OPTS, group='entity_graph')
-        self.conf.register_opts(self.PLUGINS_OPTS,
-                                group='synchronizer_plugins')
+        self.conf.register_opts(self.PLUGINS_OPTS, group='plugins')
         self._load_plugins(self.conf)
 
     def test_load_state_plugins_without_errors(self):
@@ -71,7 +69,7 @@ class TestStateManager(base.BaseTest):
         # test assertions
 
         # Total plugins plus the evaluator which is not definable
-        total_plugins = len(self.conf.synchronizer_plugins.plugin_type) + 1
+        total_plugins = len(self.conf.plugins.plugin_type) + 1
         self.assertEqual(total_plugins, len(state_manager.states_plugins))
 
     def test_load_state_plugins_with_errors(self):
@@ -83,7 +81,7 @@ class TestStateManager(base.BaseTest):
         ]
         conf = cfg.ConfigOpts()
         conf.register_opts(entity_graph_opts, group='entity_graph')
-        conf.register_opts(self.PLUGINS_OPTS, group='synchronizer_plugins')
+        conf.register_opts(self.PLUGINS_OPTS, group='plugins')
         self._load_plugins(conf)
 
         # action
@@ -94,8 +92,7 @@ class TestStateManager(base.BaseTest):
         erroneous_states_plugins = 2
         num_valid_plugins = len(state_manager.states_plugins) + \
             missing_states_plugins + erroneous_states_plugins
-        self.assertEqual(len(conf.synchronizer_plugins.plugin_type),
-                         num_valid_plugins)
+        self.assertEqual(len(conf.plugins.plugin_type), num_valid_plugins)
 
     def test_normalize_state(self):
         # setup

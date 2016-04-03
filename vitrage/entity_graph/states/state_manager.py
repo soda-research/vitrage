@@ -208,12 +208,12 @@ class StateManager(object):
                 not attr.startswith("__")]
 
     def _is_all_plugins_states_exists(self, states_plugins, error_plugins):
-        plugins = self.conf.synchronizer_plugins.plugin_type
+        plugin_types = self.conf.plugins.plugin_type
         all_state_loaded_plugins = states_plugins + error_plugins
 
-        for plugin in plugins:
-            if plugin not in all_state_loaded_plugins:
-                LOG.error("No state configuration file for: %s", plugin)
+        for plugin_type in plugin_types:
+            if plugin_type not in all_state_loaded_plugins:
+                LOG.error("No state configuration file for: %s", plugin_type)
 
     @staticmethod
     def _get_updated_property(new_vertex, graph_vertex, prop):

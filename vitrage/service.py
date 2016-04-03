@@ -38,8 +38,8 @@ def prepare_service(args=None, conf=None, config_files=None):
     conf(args, project='vitrage', validate_default_values=True,
          default_config_files=config_files)
 
-    for plugin_name in conf.synchronizer_plugins.plugin_type:
-        load_plugin(conf, plugin_name, conf.synchronizer_plugins.plugin_path)
+    for plugin_name in conf.plugins.plugin_type:
+        load_plugin(conf, plugin_name, conf.plugins.plugin_path)
 
     keystone_client.register_keystoneauth_opts(conf)
 

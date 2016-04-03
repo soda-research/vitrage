@@ -551,7 +551,7 @@
 #snapshots_interval = 600
 
 
-[synchronizer_plugins]
+[plugins]
 
 #
 # From vitrage

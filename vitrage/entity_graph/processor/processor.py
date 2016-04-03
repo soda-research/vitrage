@@ -154,8 +154,9 @@ class Processor(processor.ProcessorBase):
 
     def handle_end_message(self, vertex, neighbors):
         self.initialization_status.end_messages[vertex[VProps.TYPE]] = True
+
         if len(self.initialization_status.end_messages) == \
-                len(self.conf.synchronizer_plugins.plugin_type):
+                len(self.conf.plugins.plugin_type):
             self.initialization_status.status = \
                 self.initialization_status.RECEIVED_ALL_END_MESSAGES
 
