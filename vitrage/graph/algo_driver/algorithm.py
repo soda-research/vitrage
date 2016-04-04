@@ -59,5 +59,7 @@ class GraphAlgorithm(object):
         pass
 
     @abc.abstractmethod
-    def subgraph(self, vertex_attr_filter=None):
+    def create_graph_from_matching_vertices(self,
+                                            vertex_attr_filter=None,
+                                            query_dict=None):
         pass

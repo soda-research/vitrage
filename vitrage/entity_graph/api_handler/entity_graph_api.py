@@ -82,7 +82,20 @@ class EntityGraphApis(object):
     def get_topology(self, ctx, graph_type, depth, query, root):
         LOG.debug("EntityGraphApis get_topology root:%s", str(root))
 
-        found_graph = self._get_topology(ctx, graph_type, query, root, depth)
+        ga = create_algorithm(self.entity_graph)
+        if graph_type == 'tree':
+            final_query = query if query else TREE_TOPOLOGY_QUERY
+            found_graph = ga.graph_query_vertices(
+                query_dict=final_query,
+                root_id=root)
+        else:
+            if query:
+                found_graph = ga.create_graph_from_matching_vertices(
+                    query_dict=query)
+            else:
+                found_graph = ga.create_graph_from_matching_vertices(
+                    vertex_attr_filter={VProps.IS_DELETED: False})
+
         return found_graph.output_graph()
 
     def get_rca(self, ctx, root):
@@ -102,16 +115,6 @@ class EntityGraphApis(object):
         json_graph = unified_graph.output_graph(
             inspected_index=self._find_rca_index(unified_graph, root))
         return json_graph
-
-    def _get_topology(self, ctx, graph_type, query, root, depth=None):
-        ga = create_algorithm(self.entity_graph)
-        if graph_type == 'tree':
-            final_query = query if query else TREE_TOPOLOGY_QUERY
-            return ga.graph_query_vertices(
-                query_dict=final_query,
-                root_id=root)
-        else:
-            return ga.subgraph(vertex_attr_filter={VProps.IS_DELETED: False})
 
     @staticmethod
     def _get_first(lst):

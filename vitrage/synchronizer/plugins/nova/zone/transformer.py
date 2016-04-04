@@ -130,6 +130,7 @@ class ZoneTransformer(BaseResourceTransformer):
         host_neighbor = \
             host_transformer.create_placeholder_vertex(**properties)
         host_neighbor[VProps.STATE] = host_state
+        host_neighbor[VProps.IS_PLACEHOLDER] = False
 
         relation_edge = graph_utils.create_edge(
             source_id=zone_id,

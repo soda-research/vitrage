@@ -177,7 +177,7 @@ class NovaZoneTransformerTest(base.BaseTest):
         )
 
         is_placeholder = host_vertex[VertexProperties.IS_PLACEHOLDER]
-        self.assertTrue(is_placeholder)
+        self.assertFalse(is_placeholder)
 
         is_deleted = host_vertex[VertexProperties.IS_DELETED]
         self.assertFalse(is_deleted)
