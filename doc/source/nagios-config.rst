@@ -21,16 +21,20 @@ The following should be set in **/etc/vitrage/vitrage.conf**, under [nagios] sec
 | changes_interval | Interval of checking changes in the configuration files | 30 seconds                    |
 +------------------+---------------------------------------------------------+-------------------------------+
 
+**Note:** To avoid issues with paging, it is recommended for the URL to be of
+the form *http://<nagios site url>/cgi-bin/status.cgi*, which returns all the
+nagios tests.
+
 **Example**
 
-user = nagios
+ ::
 
-password = nagios
-
-url = http://10.20.30.40/monitoring/nagios/cgi-bin/status.cgi
-
-config_file = /etc/vitrage/nagios_conf.yaml
-
+  [nagios]
+  user = omdadmin
+  password = omd
+  url = http://10.20.30.40/monitoring/nagios/cgi-bin/status.cgi
+  config_file = /etc/vitrage/nagios_conf.yaml
+    
 
 Configure Nagios Host Mapping
 -----------------------------
