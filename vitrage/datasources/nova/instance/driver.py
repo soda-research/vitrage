@@ -45,11 +45,26 @@ class InstanceDriver(NovaDriverBase):
 
     @staticmethod
     def get_event_types(conf):
-        return ['compute.instance']
-
-    @staticmethod
-    def get_skipped_event_types():
-        return ['compute.instance.exists', 'compute.instance.update']
+        # Add event_types to receive notifications about
+        return ['compute.instance.create',
+                'compute.instance.delete',
+                'compute.instance.finish_resize.end',
+                'compute.instance.live_migration.post.dest.end',
+                'compute.instance.live_migration._post.end',
+                'compute.instance.power_off.end',
+                'compute.instance.power_on.end',
+                'compute.instance.reboot.end',
+                'compute.instance.rebuild.end',
+                'compute.instance.resize.end',
+                'compute.instance.resize.revert.end',
+                'compute.instance.resume',
+                'compute.instance.shutdown.end',
+                'compute.instance.suspend',
+                'compute.instance.volume.attach',
+                'compute.instance.volume.detach',
+                'compute.instance.pause.end',
+                'compute.instance.unpause.end'
+                ]
 
     @staticmethod
     def get_topic(conf):

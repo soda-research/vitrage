@@ -34,7 +34,7 @@ class ListenerService(os_service.Service):
         topics = self._get_topics_set(drivers, conf)
         self.enrich_callbacks_by_events = \
             self._create_callbacks_by_events_dict(drivers, conf)
-        self.skipped_event_types = self._get_skipped_event_types(drivers)
+
         self.listener = self._get_topics_listener(conf, topics, callback)
 
     def start(self):
@@ -81,45 +81,23 @@ class ListenerService(os_service.Service):
             transport,
             targets,
             [NotificationsEndpoint(self.enrich_callbacks_by_events,
-                                   callback,
-                                   self.skipped_event_types)])
-
-    @staticmethod
-    def _get_skipped_event_types(drivers):
-
-        skipped_events = []
-        for driver in drivers.values():
-            skipped_events += driver.get_skipped_event_types()
-
-        return set(skipped_events)
+                                   callback)])
 
 
 class NotificationsEndpoint(object):
 
-    def __init__(self,
-                 enrich_callback_by_events,
-                 enqueue_callback,
-                 skipped_event_types):
+    def __init__(self, enrich_callback_by_events, enqueue_callback):
         self.enrich_callbacks_by_events = enrich_callback_by_events
         self.enqueue_callback = enqueue_callback
-        self.skipped_event_types = skipped_event_types
 
     def info(self, ctxt, publisher_id, event_type, payload, metadata):
+        LOG.debug('EVENT RECEIVED: %(event_type)s -> %(payload)s ' %
+                  {'event_type': str(event_type),
+                   'payload': json.dumps(payload)})
+        for event_string in self.enrich_callbacks_by_events:
+            if str(event_type) == event_string:
 
-        LOG.debug('EVENT RECEIVED: %(event_type)s -> %(payload)s ' % {
-            'event_type': str(event_type), 'payload': json.dumps(payload)}
-        )
-
-        # TODO(Alexey): improve skipped implementation because we need to skip
-        #               event depending on the drivers and not for all drivers
-        if event_type in self.skipped_event_types:
-            LOG.info('EVENT SKIPPED: ' + str(event_type))
-            return
-
-        LOG.info('EVENT RECEIVED: ' + str(event_type))
-        for event_pattern in self.enrich_callbacks_by_events:
-            if event_type.startswith(event_pattern):
-                callbacks = self.enrich_callbacks_by_events[event_pattern]
+                callbacks = self.enrich_callbacks_by_events[event_string]
                 enriched_events = [callback(payload, event_type)
                                    for callback in callbacks]
                 self._enqueue_events(enriched_events)
@@ -127,4 +105,4 @@ class NotificationsEndpoint(object):
     def _enqueue_events(self, enriched_events):
         for event in enriched_events:
             self.enqueue_callback(event)
-            LOG.debug('EVENT ENQUEUED: \n' + "enrichment: " + str(event))
+            LOG.debug('EVENT ENQUEUED: \n' + str(event))
