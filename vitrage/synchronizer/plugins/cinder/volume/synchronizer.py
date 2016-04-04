@@ -26,6 +26,7 @@ LOG = logging.getLogger(__name__)
 class CinderVolumeSynchronizer(SynchronizerBase):
 
     def __init__(self, conf):
+        super(CinderVolumeSynchronizer, self).__init__()
         self.client = clients.cinder_client(conf)
         self.conf = conf
 

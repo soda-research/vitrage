@@ -54,7 +54,7 @@ class TestStateManager(base.BaseTest):
         for plugin_name in conf.plugins.plugin_type:
             load_plugin(conf, plugin_name, conf.plugins.plugin_path)
 
-    # noinspection PyAttributeOutsideInit
+    # noinspection PyAttributeOutsideInit,PyPep8Naming
     @classmethod
     def setUpClass(cls):
         super(TestStateManager, cls).setUpClass()

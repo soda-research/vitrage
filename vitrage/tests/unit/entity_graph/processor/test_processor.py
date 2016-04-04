@@ -40,7 +40,7 @@ class TestProcessor(TestEntityGraphUnitBase):
     NUM_VERTICES_AFTER_DELETION = 1
     NUM_EDGES_AFTER_DELETION = 0
 
-    # noinspection PyAttributeOutsideInit
+    # noinspection PyAttributeOutsideInit,PyPep8Naming
     @classmethod
     def setUpClass(cls):
         super(TestProcessor, cls).setUpClass()

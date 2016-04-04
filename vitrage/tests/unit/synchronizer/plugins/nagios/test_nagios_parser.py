@@ -52,6 +52,7 @@ class NagiosParserTest(NagiosBaseTest):
                              u'OK - 0.00 B/sec read, 1.84 MB/sec write, '
                              u'IOs: 89.00/sec\xa0'}
 
+    # noinspection PyPep8Naming
     @classmethod
     def setUpClass(cls):
         super(NagiosParserTest, cls).setUpClass()

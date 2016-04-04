@@ -70,7 +70,7 @@ class TestConsistencyFunctional(TestEntityGraphFunctionalBase):
                    ),
     ]
 
-    # noinspection PyAttributeOutsideInit
+    # noinspection PyAttributeOutsideInit,PyPep8Naming
     @classmethod
     def setUpClass(cls):
         super(TestConsistencyFunctional, cls).setUpClass()

@@ -29,7 +29,7 @@ from vitrage.tests.functional.entity_graph.base import \
 
 class TestStateManagerFunctional(TestEntityGraphFunctionalBase):
 
-    # noinspection PyAttributeOutsideInit
+    # noinspection PyAttributeOutsideInit,PyPep8Naming
     @classmethod
     def setUpClass(cls):
         super(TestStateManagerFunctional, cls).setUpClass()

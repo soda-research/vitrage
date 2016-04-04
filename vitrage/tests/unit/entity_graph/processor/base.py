@@ -22,7 +22,7 @@ from vitrage.tests.unit.entity_graph.base import TestEntityGraphUnitBase
 
 class TestBaseProcessor(TestEntityGraphUnitBase):
 
-    # noinspection PyAttributeOutsideInit
+    # noinspection PyAttributeOutsideInit,PyPep8Naming
     @classmethod
     def setUpClass(cls):
         super(TestBaseProcessor, cls).setUpClass()
