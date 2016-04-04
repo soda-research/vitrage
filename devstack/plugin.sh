@@ -135,7 +135,7 @@ function configure_vitrage {
     iniset $VITRAGE_CONF service_credentials auth_url $KEYSTONE_SERVICE_URI
 
     # add default plugins
-    iniset $VITRAGE_CONF synchronizer_plugins plugin_type $VITRAGE_DEFAULT_PLUGINS
+    iniset $VITRAGE_CONF plugins plugin_type $VITRAGE_DEFAULT_PLUGINS
 
     # remove neutron vitrage plugin if neutron plugin not installed
     if ! is_service_enabled neutron; then
