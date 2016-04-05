@@ -192,9 +192,9 @@ class Template(object):
     @staticmethod
     def convert_to_dnf_format(condition_str):
 
-        condition_str = condition_str.replace('and', '&')
-        condition_str = condition_str.replace('or', '|')
-        condition_str = condition_str.replace('not ', '~')
+        condition_str = condition_str.replace(' and ', '&')
+        condition_str = condition_str.replace(' or ', '|')
+        condition_str = condition_str.replace(' not ', '~')
 
         return sympy_to_dfn(condition_str)
 
