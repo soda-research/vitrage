@@ -14,26 +14,21 @@
 
 from oslo_config import cfg
 
-from vitrage.tests.functional.base import \
-    TestFunctionalBase
+from vitrage.tests.functional.data_sources.base import \
+    TestDataSourcesBase
 
 
-class TestProcessorFunctional(TestFunctionalBase):
+class TestNovaPlugins(TestDataSourcesBase):
 
-    ZONE_SPEC = 'ZONE_SPEC'
-    HOST_SPEC = 'HOST_SPEC'
-    INSTANCE_SPEC = 'INSTANCE_SPEC'
-
-    # noinspection PyAttributeOutsideInit,PyPep8Naming
     @classmethod
     def setUpClass(cls):
-        super(TestProcessorFunctional, cls).setUpClass()
+        super(TestNovaPlugins, cls).setUpClass()
         cls.conf = cfg.ConfigOpts()
         cls.conf.register_opts(cls.PROCESSOR_OPTS, group='entity_graph')
         cls.conf.register_opts(cls.PLUGINS_OPTS, group='plugins')
         cls.load_plugins(cls.conf)
 
-    def test_create_entity_graph(self):
+    def test_nova_plugins(self):
         processor = self._create_processor_with_graph(self.conf)
 
         self.assertEqual(self._num_total_expected_vertices(),
@@ -44,7 +39,7 @@ class TestProcessorFunctional(TestFunctionalBase):
 
         # TODO(Alexey): add this check and to check also the number of edges
         # check all entities create a tree and no free floating vertices exists
-        # it will be done only after we will have zone plugin
+        # it will be done only after we will have zone data source
         # vertex = graph.find_vertex_in_graph()
         # bfs_list = graph.algo.bfs(graph)
         # self.assertEqual(num_vertices, len(bfs_list))

@@ -1,5 +1,5 @@
 {
-  "attachments": [{"server_id": "54321"}],
+  "attachments": [{"server_id": "vm-1"}],
   "display_name": "volume-0",
   "created_at": "2015-12-01T12:46:41Z",
   "status": "In-use",

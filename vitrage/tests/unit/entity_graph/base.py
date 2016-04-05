@@ -145,3 +145,7 @@ class TestEntityGraphUnitBase(base.BaseTest):
     def _num_total_expected_vertices(self):
         return self.NUM_NODES + self.NUM_ZONES + self.NUM_HOSTS + \
             self.NUM_INSTANCES
+
+    def _num_total_expected_edges(self):
+        return self.NUM_NODES + self.NUM_ZONES + self.NUM_HOSTS + \
+            self.NUM_INSTANCES - 1

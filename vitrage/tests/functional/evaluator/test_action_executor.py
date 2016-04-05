@@ -15,8 +15,8 @@
 
 from oslo_config import cfg
 from oslo_log import log as logging
-from six.moves import queue
 
+from six.moves import queue
 from vitrage.common.constants import EdgeLabels
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import VertexProperties as VProps
@@ -33,13 +33,13 @@ from vitrage.synchronizer.plugins.base.alarm.properties \
     import AlarmProperties as AlarmProps
 from vitrage.synchronizer.plugins.nagios import NAGIOS_PLUGIN
 from vitrage.synchronizer.plugins.nova.host import NOVA_HOST_PLUGIN
-from vitrage.tests.functional.entity_graph.base import \
-    TestEntityGraphFunctionalBase
+from vitrage.tests.functional.base import \
+    TestFunctionalBase
 
 LOG = logging.getLogger(__name__)
 
 
-class TestActionExecutor(TestEntityGraphFunctionalBase):
+class TestActionExecutor(TestFunctionalBase):
 
     # noinspection PyPep8Naming
     @classmethod

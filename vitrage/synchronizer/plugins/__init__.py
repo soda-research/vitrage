@@ -22,6 +22,7 @@ from vitrage.synchronizer.plugins.nova.host import NOVA_HOST_PLUGIN
 from vitrage.synchronizer.plugins.nova.instance import NOVA_INSTANCE_PLUGIN
 from vitrage.synchronizer.plugins.nova.zone import NOVA_ZONE_PLUGIN
 from vitrage.synchronizer.plugins.static_physical import STATIC_PHYSICAL_PLUGIN
+
 OPENSTACK_NODE = 'openstack.node'
 
 # Register options for the service

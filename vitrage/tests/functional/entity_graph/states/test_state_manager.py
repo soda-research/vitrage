@@ -23,11 +23,11 @@ from vitrage.entity_graph.states.normalized_resource_state import \
     NormalizedResourceState
 from vitrage.synchronizer.plugins.nova.instance.transformer import \
     InstanceTransformer
-from vitrage.tests.functional.entity_graph.base import \
-    TestEntityGraphFunctionalBase
+from vitrage.tests.functional.base import \
+    TestFunctionalBase
 
 
-class TestStateManagerFunctional(TestEntityGraphFunctionalBase):
+class TestStateManagerFunctional(TestFunctionalBase):
 
     # noinspection PyAttributeOutsideInit,PyPep8Naming
     @classmethod

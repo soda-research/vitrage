@@ -14,21 +14,20 @@
 
 from oslo_config import cfg
 from oslo_log import log as logging
-from six.moves import queue
 
+from six.moves import queue
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.evaluator.scenario_evaluator import ScenarioEvaluator
 from vitrage.evaluator.scenario_repository import ScenarioRepository
 from vitrage.synchronizer.plugins.nova.host import NOVA_HOST_PLUGIN
-from vitrage.tests.functional.entity_graph.base import \
-    TestEntityGraphFunctionalBase
+from vitrage.tests.functional.base import \
+    TestFunctionalBase
 from vitrage.tests.mocks import utils
-
 
 LOG = logging.getLogger(__name__)
 
 
-class TestScenarioEvaluator(TestEntityGraphFunctionalBase):
+class TestScenarioEvaluator(TestFunctionalBase):
 
     EVALUATOR_OPTS = [
         cfg.StrOpt('templates_dir',
