@@ -1,7 +1,7 @@
 {
   "relationships": [
       {"type": "nova\\.host",
-      "name": "host-[1-9]|switch-[1-9]",
+      "name": "host-[1-9]",
       "id": "[1-9]{5}",
       "relation_type": "contains"
       }

@@ -12,14 +12,14 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from datetime import timedelta
 import threading
 import time
 import unittest
 
-from datetime import timedelta
 from oslo_config import cfg
-from six.moves import queue
 
+from six.moves import queue
 from vitrage.common.constants import EdgeLabels
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import VertexProperties as VProps
@@ -36,12 +36,12 @@ from vitrage.synchronizer.plugins.nagios import NAGIOS_PLUGIN
 from vitrage.synchronizer.plugins.nova.host import NOVA_HOST_PLUGIN
 from vitrage.synchronizer.plugins.nova.instance import NOVA_INSTANCE_PLUGIN
 from vitrage.synchronizer.plugins.nova.zone import NOVA_ZONE_PLUGIN
-from vitrage.tests.functional.entity_graph.base import \
-    TestEntityGraphFunctionalBase
+from vitrage.tests.functional.base import \
+    TestFunctionalBase
 from vitrage.tests.mocks import utils
 
 
-class TestConsistencyFunctional(TestEntityGraphFunctionalBase):
+class TestConsistencyFunctional(TestFunctionalBase):
 
     CONSISTENCY_OPTS = [
         cfg.IntOpt('min_time_to_delete',

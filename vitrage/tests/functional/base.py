@@ -20,7 +20,7 @@ from vitrage.tests.mocks import mock_syncronizer as mock_sync
 from vitrage.tests.unit.entity_graph.base import TestEntityGraphUnitBase
 
 
-class TestEntityGraphFunctionalBase(TestEntityGraphUnitBase):
+class TestFunctionalBase(TestEntityGraphUnitBase):
 
     def _create_processor_with_graph(self, conf, processor=None):
         events = self._create_mock_events()
