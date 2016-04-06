@@ -14,14 +14,13 @@
 
 from vitrage.common.constants import NotifierEventTypes
 from vitrage.common.constants import VertexProperties as VProps
+from vitrage.datasources.alarm_properties import AlarmProperties as AlarmProps
 from vitrage.evaluator.actions.recipes.action_steps import ADD_VERTEX
 from vitrage.evaluator.actions.recipes.action_steps import NOTIFY
 from vitrage.evaluator.actions.recipes.action_steps import REMOVE_VERTEX
 from vitrage.evaluator.actions.recipes import base
 from vitrage.evaluator.actions.recipes.base import ActionStepWrapper
 from vitrage.evaluator.template_fields import TemplateFields as TFields
-from vitrage.synchronizer.plugins.base.alarm.properties \
-    import AlarmProperties as AlarmProps
 
 
 class RaiseAlarm(base.Recipe):

@@ -36,7 +36,7 @@ class GraphAlgorithmTest(GraphTestBase):
 
         query = {
             'or': [
-                {'==': {VProps.TYPE: NOVA_HOST_PLUGIN}},
+                {'==': {VProps.TYPE: NOVA_HOST_DATASOURCE}},
                 {'==': {VProps.TYPE: OPENSTACK_NODE}}
             ]
         }
@@ -48,9 +48,9 @@ class GraphAlgorithmTest(GraphTestBase):
 
         query = {
             'or': [
-                {'==': {VProps.TYPE: NOVA_INSTANCE_PLUGIN}},
+                {'==': {VProps.TYPE: NOVA_INSTANCE_DATASOURCE}},
                 {'==': {VProps.CATEGORY: ALARM}},
-                {'==': {VProps.TYPE: NOVA_HOST_PLUGIN}},
+                {'==': {VProps.TYPE: NOVA_HOST_DATASOURCE}},
                 {'==': {VProps.TYPE: OPENSTACK_NODE}}
             ]
         }
@@ -65,7 +65,7 @@ class GraphAlgorithmTest(GraphTestBase):
 
         # Get first host ID
         neighboring_hosts = self.entity_graph.neighbors(
-            v_node.vertex_id, {VProps.TYPE: NOVA_HOST_PLUGIN})
+            v_node.vertex_id, {VProps.TYPE: NOVA_HOST_DATASOURCE})
         first_host_id = neighboring_hosts.pop().vertex_id
 
         query = {'!=': {'NOTHING': 'IS EVERYTHING'}}
@@ -83,7 +83,7 @@ class GraphAlgorithmTest(GraphTestBase):
         query = {
             'or': [
                 {'==': {VProps.TYPE: SWITCH}},
-                {'==': {VProps.TYPE: NOVA_HOST_PLUGIN}},
+                {'==': {VProps.TYPE: NOVA_HOST_DATASOURCE}},
             ]
         }
         subgraph = ga.graph_query_vertices(
@@ -159,11 +159,11 @@ class GraphAlgorithmTest(GraphTestBase):
         t_v_host = graph_utils.create_vertex(
             vitrage_id='2',
             entity_category=RESOURCE,
-            entity_type=NOVA_HOST_PLUGIN)
+            entity_type=NOVA_HOST_DATASOURCE)
         t_v_vm = graph_utils.create_vertex(
             vitrage_id='3',
             entity_category=RESOURCE,
-            entity_type=NOVA_INSTANCE_PLUGIN)
+            entity_type=NOVA_INSTANCE_DATASOURCE)
         t_v_vm_alarm = graph_utils.create_vertex(
             vitrage_id='4', entity_category=ALARM, entity_type=ALARM_ON_VM)
         t_v_switch = graph_utils.create_vertex(

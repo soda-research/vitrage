@@ -20,6 +20,9 @@ from six.moves import queue
 from vitrage.common.constants import EdgeLabels
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import VertexProperties as VProps
+from vitrage.datasources.alarm_properties import AlarmProperties as AlarmProps
+from vitrage.datasources.nagios import NAGIOS_DATASOURCE
+from vitrage.datasources.nova.host import NOVA_HOST_DATASOURCE
 from vitrage.entity_graph.states.normalized_resource_state import \
     NormalizedResourceState
 from vitrage.evaluator.actions.action_executor import ActionExecutor
@@ -28,13 +31,8 @@ from vitrage.evaluator.actions.base import ActionType
 from vitrage.evaluator.actions.evaluator_event_transformer import VITRAGE_TYPE
 from vitrage.evaluator.template import ActionSpecs
 from vitrage.evaluator.template_fields import TemplateFields as TFields
-from vitrage.service import load_plugin
-from vitrage.synchronizer.plugins.base.alarm.properties \
-    import AlarmProperties as AlarmProps
-from vitrage.synchronizer.plugins.nagios import NAGIOS_PLUGIN
-from vitrage.synchronizer.plugins.nova.host import NOVA_HOST_PLUGIN
-from vitrage.tests.functional.base import \
-    TestFunctionalBase
+from vitrage.service import load_datasource
+from vitrage.tests.functional.base import TestFunctionalBase
 
 LOG = logging.getLogger(__name__)
 
@@ -46,16 +44,19 @@ class TestActionExecutor(TestFunctionalBase):
     def setUpClass(cls):
         cls.conf = cfg.ConfigOpts()
         cls.conf.register_opts(cls.PROCESSOR_OPTS, group='entity_graph')
-        cls.conf.register_opts(cls.PLUGINS_OPTS, group='plugins')
-        for plugin_name in cls.conf.plugins.plugin_type:
-            load_plugin(cls.conf, plugin_name, cls.conf.plugins.plugin_path)
+        cls.conf.register_opts(cls.DATASOURCES_OPTS, group='datasources')
+
+        for datasource_name in cls.conf.datasources.types:
+            load_datasource(cls.conf,
+                            datasource_name,
+                            cls.conf.datasources.path)
 
     def test_execute_update_vertex(self):
 
         # Test Setup
         processor = self._create_processor_with_graph(self.conf)
 
-        vertex_attrs = {VProps.TYPE: NOVA_HOST_PLUGIN}
+        vertex_attrs = {VProps.TYPE: NOVA_HOST_DATASOURCE}
         host_vertices = processor.entity_graph.get_vertices(
             vertex_attr_filter=vertex_attrs)
         host_vertex_before = host_vertices[0]
@@ -102,21 +103,21 @@ class TestActionExecutor(TestFunctionalBase):
         # Test Setup
         processor = self._create_processor_with_graph(self.conf)
 
-        vertex_attrs = {VProps.TYPE: NOVA_HOST_PLUGIN}
+        vertex_attrs = {VProps.TYPE: NOVA_HOST_DATASOURCE}
         host_vertices = processor.entity_graph.get_vertices(
             vertex_attr_filter=vertex_attrs)
 
         host_1 = host_vertices[0]
         nagios_event1 = TestActionExecutor._get_nagios_event(
-            host_1.get(VProps.ID), NOVA_HOST_PLUGIN)
+            host_1.get(VProps.ID), NOVA_HOST_DATASOURCE)
         processor.process_event(nagios_event1)
 
         host_2 = host_vertices[1]
         nagios_event2 = TestActionExecutor._get_nagios_event(
-            host_2.get(VProps.ID), NOVA_HOST_PLUGIN)
+            host_2.get(VProps.ID), NOVA_HOST_DATASOURCE)
         processor.process_event(nagios_event2)
 
-        alarms_attrs = {VProps.TYPE: NAGIOS_PLUGIN}
+        alarms_attrs = {VProps.TYPE: NAGIOS_DATASOURCE}
         alarms_vertices = processor.entity_graph.get_vertices(
             vertex_attr_filter=alarms_attrs)
 
@@ -152,7 +153,7 @@ class TestActionExecutor(TestFunctionalBase):
         # Test Setup
         processor = self._create_processor_with_graph(self.conf)
 
-        vertex_attrs = {VProps.TYPE: NOVA_HOST_PLUGIN}
+        vertex_attrs = {VProps.TYPE: NOVA_HOST_DATASOURCE}
         host_vertices = processor.entity_graph.get_vertices(
             vertex_attr_filter=vertex_attrs)
 
@@ -209,7 +210,7 @@ class TestActionExecutor(TestFunctionalBase):
         # Test Setup
         processor = self._create_processor_with_graph(self.conf)
 
-        vertex_attrs = {VProps.TYPE: NOVA_HOST_PLUGIN}
+        vertex_attrs = {VProps.TYPE: NOVA_HOST_DATASOURCE}
         host_vertices = processor.entity_graph.get_vertices(
             vertex_attr_filter=vertex_attrs)
 

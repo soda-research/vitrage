@@ -21,12 +21,12 @@ from vitrage.common.constants import SynchronizerProperties as SyncProps
 from vitrage.common.constants import SyncMode
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.common.datetime_utils import utcnow
+from vitrage.datasources.transformer_base import Neighbor
 from vitrage.entity_graph.initialization_status import InitializationStatus
 from vitrage.entity_graph.processor import processor as proc
 from vitrage.entity_graph.states.normalized_resource_state import \
     NormalizedResourceState
 import vitrage.graph.utils as graph_utils
-from vitrage.synchronizer.plugins.transformer_base import Neighbor
 from vitrage.tests.unit.entity_graph.base import TestEntityGraphUnitBase
 
 
@@ -46,8 +46,8 @@ class TestProcessor(TestEntityGraphUnitBase):
         super(TestProcessor, cls).setUpClass()
         cls.conf = cfg.ConfigOpts()
         cls.conf.register_opts(cls.PROCESSOR_OPTS, group='entity_graph')
-        cls.conf.register_opts(cls.PLUGINS_OPTS, group='plugins')
-        cls.load_plugins(cls.conf)
+        cls.conf.register_opts(cls.DATASOURCES_OPTS, group='datasources')
+        cls.load_datasources(cls.conf)
 
     # TODO(Alexey): un skip this test when instance transformer update is ready
     @unittest.skip('Not ready yet')

@@ -18,37 +18,41 @@ from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import SynchronizerProperties as SyncProps
 from vitrage.common.constants import SyncMode
 from vitrage.common.datetime_utils import utcnow
+from vitrage.datasources.nagios import NAGIOS_DATASOURCE
+from vitrage.datasources.nova.host import NOVA_HOST_DATASOURCE
+from vitrage.datasources.nova.instance import NOVA_INSTANCE_DATASOURCE
+from vitrage.datasources.nova.zone import NOVA_ZONE_DATASOURCE
 from vitrage.entity_graph.initialization_status import InitializationStatus
 from vitrage.entity_graph.processor import processor as proc
 import vitrage.graph.utils as graph_utils
-from vitrage.service import load_plugin
-from vitrage.synchronizer.plugins.nagios import NAGIOS_PLUGIN
-from vitrage.synchronizer.plugins.nova.host import NOVA_HOST_PLUGIN
-from vitrage.synchronizer.plugins.nova.instance import NOVA_INSTANCE_PLUGIN
-from vitrage.synchronizer.plugins.nova.zone import NOVA_ZONE_PLUGIN
+from vitrage.service import load_datasource
 from vitrage.tests import base
-from vitrage.tests.mocks import mock_syncronizer as mock_sync
+from vitrage.tests.mocks import mock_driver as mock_sync
 from vitrage.tests.mocks import utils
 
 
 class TestEntityGraphUnitBase(base.BaseTest):
 
     PROCESSOR_OPTS = [
-        cfg.StrOpt('states_plugins_dir',
-                   default=utils.get_resources_dir() + '/states_plugins'),
+        cfg.StrOpt('datasources_states_dir',
+                   default=utils.get_resources_dir() + '/datasources_states'),
     ]
 
-    PLUGINS_OPTS = [
-        cfg.ListOpt('plugin_type',
-                    default=[NAGIOS_PLUGIN,
-                             NOVA_HOST_PLUGIN,
-                             NOVA_INSTANCE_PLUGIN,
-                             NOVA_ZONE_PLUGIN],
-                    help='Names of supported synchronizer plugins'),
+    DATASOURCES_OPTS = [
+        cfg.ListOpt('types',
+                    default=[NAGIOS_DATASOURCE,
+                             NOVA_HOST_DATASOURCE,
+                             NOVA_INSTANCE_DATASOURCE,
+                             NOVA_ZONE_DATASOURCE],
+                    help='Names of supported data sources'),
 
-        cfg.ListOpt('plugin_path',
-                    default=['vitrage.synchronizer.plugins'],
-                    help='base path for plugins')
+        cfg.ListOpt('path',
+                    default=['vitrage.datasources'],
+                    help='base path for data sources'),
+
+        cfg.IntOpt('snapshots_interval',
+                   default=1,
+                   min=1)
     ]
 
     NUM_NODES = 1
@@ -57,9 +61,9 @@ class TestEntityGraphUnitBase(base.BaseTest):
     NUM_INSTANCES = 16
 
     @staticmethod
-    def load_plugins(conf):
-        for plugin_name in conf.plugins.plugin_type:
-            load_plugin(conf, plugin_name, conf.plugins.plugin_path)
+    def load_datasources(conf):
+        for datasource in conf.datasources.types:
+            load_datasource(conf, datasource, conf.datasources.path)
 
     def _create_processor_with_graph(self, conf, processor=None):
         events = self._create_mock_events()

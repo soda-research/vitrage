@@ -20,6 +20,8 @@ from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import EventAction
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.common.exception import VitrageTransformerError
+from vitrage.datasources import transformer_base
+from vitrage.datasources.transformer_base import Neighbor
 from vitrage.evaluator.actions.recipes.action_steps import ADD_EDGE
 from vitrage.evaluator.actions.recipes.action_steps import ADD_VERTEX
 from vitrage.evaluator.actions.recipes.action_steps import REMOVE_EDGE
@@ -29,8 +31,6 @@ from vitrage.evaluator.actions.recipes.base import EVALUATOR_EVENT_TYPE
 from vitrage.evaluator.template_fields import TemplateFields as TFields
 import vitrage.graph.utils as graph_utils
 from vitrage.graph import Vertex
-from vitrage.synchronizer.plugins import transformer_base
-from vitrage.synchronizer.plugins.transformer_base import Neighbor
 
 
 LOG = logging.getLogger(__name__)

@@ -20,7 +20,7 @@ import pecan as pecan
 from pecan import abort
 from pecan import rest
 
-from vitrage.synchronizer.plugins import OPENSTACK_NODE
+from vitrage.datasources import OPENSTACK_NODE
 
 LOG = log.getLogger(__name__)
 

@@ -27,8 +27,8 @@ class TestBaseProcessor(TestEntityGraphUnitBase):
     def setUpClass(cls):
         super(TestBaseProcessor, cls).setUpClass()
         cls.conf = cfg.ConfigOpts()
-        cls.conf.register_opts(cls.PLUGINS_OPTS, group='plugins')
-        cls.load_plugins(cls.conf)
+        cls.conf.register_opts(cls.DATASOURCES_OPTS, group='datasources')
+        cls.load_datasources(cls.conf)
         cls.transform = transformer_manager.TransformerManager(cls.conf)
 
     @staticmethod

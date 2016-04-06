@@ -16,7 +16,7 @@ from vitrage.common.constants import SynchronizerProperties as SyncProps
 from vitrage.common.constants import SyncMode
 from vitrage.entity_graph.initialization_status import InitializationStatus
 from vitrage.entity_graph.processor import processor as proc
-from vitrage.tests.mocks import mock_syncronizer as mock_sync
+from vitrage.tests.mocks import mock_driver
 from vitrage.tests.unit.entity_graph.base import TestEntityGraphUnitBase
 
 
@@ -34,19 +34,19 @@ class TestFunctionalBase(TestEntityGraphUnitBase):
         return processor
 
     def _create_mock_events(self):
-        gen_list = mock_sync.simple_zone_generators(
+        gen_list = mock_driver.simple_zone_generators(
             self.NUM_ZONES,
             self.NUM_HOSTS,
             snapshot_events=self.NUM_ZONES,
             snap_vals={SyncProps.SYNC_MODE: SyncMode.INIT_SNAPSHOT})
-        gen_list += mock_sync.simple_host_generators(
+        gen_list += mock_driver.simple_host_generators(
             self.NUM_ZONES,
             self.NUM_HOSTS,
             self.NUM_HOSTS,
             snap_vals={SyncProps.SYNC_MODE: SyncMode.INIT_SNAPSHOT})
-        gen_list += mock_sync.simple_instance_generators(
+        gen_list += mock_driver.simple_instance_generators(
             self.NUM_HOSTS,
             self.NUM_INSTANCES,
             self.NUM_INSTANCES,
             snap_vals={SyncProps.SYNC_MODE: SyncMode.INIT_SNAPSHOT})
-        return mock_sync.generate_sequential_events_list(gen_list)
+        return mock_driver.generate_sequential_events_list(gen_list)

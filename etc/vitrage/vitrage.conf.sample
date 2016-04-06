@@ -112,16 +112,16 @@
 [aodh]
 
 #
-# From plugins
+# From datasources
 #
 
 # Aodh plugin transformer class path (string value)
-#transformer = vitrage.synchronizer.plugins.aodh.transformer.AodhTransformer
+#transformer = vitrage.datasources.aodh.transformer.AodhTransformer
 
 # Aodh plugin synchronizer class path (string value)
-#synchronizer = vitrage.synchronizer.plugins.aodh.synchronizer.AodhSynchronizer
+#synchronizer = vitrage.datasources.aodh.driver.AodhDriver
 
-# interval between checking changes in aodh plugin (integer value)
+# interval between checking changes in aodh datasource (integer value)
 # Minimum value: 30
 #changes_interval = 30
 
@@ -165,12 +165,12 @@
 #min_time_to_delete = 60
 
 # interval between consistency initialization checks for finding if all end
-# messages from plugins were received (in seconds) (integer value)
+# messages from data sources were received (in seconds) (integer value)
 # Minimum value: 1
 #initialization_interval = 3
 
 # maximum retries for consistency initialization for finding if all end
-# messages from plugins were received (in seconds) (integer value)
+# messages from data sources were received (in seconds) (integer value)
 # Minimum value: 1
 #initialization_max_retries = 30
 
@@ -237,8 +237,8 @@
 # From vitrage
 #
 
-# A path for the configuration files of the plugins states (string value)
-#states_plugins_dir = /etc/vitrage/states_plugins
+# A path for the configuration files of the data sources states (string value)
+#states_plugins_dir = /etc/vitrage/datasources_states
 
 
 [evaluator]
@@ -392,16 +392,16 @@
 [nagios]
 
 #
-# From plugins
+# From datasources
 #
 
 # Nagios plugin transformer class path (string value)
-#transformer = vitrage.synchronizer.plugins.nagios.transformer.NagiosTransformer
+#transformer = vitrage.datasources.nagios.transformer.NagiosTransformer
 
-# Nagios plugin synchronizer class path (string value)
-#synchronizer = vitrage.synchronizer.plugins.nagios.synchronizer.NagiosSynchronizer
+# Nagios plugin driver class path (string value)
+#synchronizer = vitrage.datasources.nagios.driver.NagiosDriver
 
-# interval between checking changes in nagios plugin (integer value)
+# interval between checking changes in nagios datasource (integer value)
 # Minimum value: 30
 #changes_interval = 30
 
@@ -421,40 +421,40 @@
 [nova.host]
 
 #
-# From plugins
+# From datasources
 #
 
 # Nova host transformer class path (string value)
-#transformer = vitrage.synchronizer.plugins.nova.host.transformer.HostTransformer
+#transformer = vitrage.datasources.nova.host.transformer.HostTransformer
 
-# Nova host synchronizer class path (string value)
-#synchronizer = vitrage.synchronizer.plugins.nova.host.synchronizer.HostSynchronizer
+# Nova host driver class path (string value)
+#synchronizer = vitrage.datasources.nova.host.driver.HostDriver
 
 
 [nova.instance]
 
 #
-# From plugins
+# From datasources
 #
 
 # Nova instance transformer class path (string value)
-#transformer = vitrage.synchronizer.plugins.nova.instance.transformer.InstanceTransformer
+#transformer = vitrage.datasources.nova.instance.transformer.InstanceTransformer
 
-# Nova instance synchronizer class path (string value)
-#synchronizer = vitrage.synchronizer.plugins.nova.instance.synchronizer.InstanceSynchronizer
+# Nova instance driver class path (string value)
+#synchronizer = vitrage.datasources.nova.instance.driver.InstanceDriver
 
 
 [nova.zone]
 
 #
-# From plugins
+# From datasources
 #
 
 # Nova zone transformer class path (string value)
-#transformer = vitrage.synchronizer.plugins.nova.zone.transformer.ZoneTransformer
+#transformer = vitrage.datasources.nova.zone.transformer.ZoneTransformer
 
-# Nova zone synchronizer class path (string value)
-#synchronizer = vitrage.synchronizer.plugins.nova.zone.synchronizer.ZoneSynchronizer
+# Nova zone driver class path (string value)
+#synchronizer = vitrage.datasources.nova.zone.driver.ZoneDriver
 
 
 [oslo_middleware]

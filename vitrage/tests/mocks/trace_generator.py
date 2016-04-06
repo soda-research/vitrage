@@ -27,7 +27,7 @@ from random import randint
 import exrex
 
 # noinspection PyPep8Naming
-from vitrage.synchronizer.plugins.nova.host import NOVA_HOST_PLUGIN
+from vitrage.datasources.nova.host import NOVA_HOST_DATASOURCE
 from vitrage.tests.mocks.entity_model import BasicEntityModel as Bem
 import vitrage.tests.mocks.utils as utils
 
@@ -42,17 +42,18 @@ GENERATOR = 'generator'
 
 
 # specification files for input types
-# Mock synchronizer specs
-SYNC_INST_SNAPSHOT_D = 'sync_inst_snapshot_dynamic.json'
-SYNC_INST_SNAPSHOT_S = 'sync_inst_snapshot_static.json'
-SYNC_INST_UPDATE_D = 'sync_inst_update_dynamic.json'
-SYNC_HOST_SNAPSHOT_D = 'sync_host_snapshot_dynamic.json'
-SYNC_ZONE_SNAPSHOT_D = 'sync_zone_snapshot_dynamic.json'
-SYNC_VOLUME_SNAPSHOT_D = 'sync_volume_snapshot_dynamic.json'
-SYNC_VOLUME_UPDATE_D = 'sync_volume_update_dynamic.json'
-SYNC_SWITCH_SNAPSHOT_D = 'sync_switch_snapshot_dynamic.json'
-SYNC_NAGIOS_SNAPSHOT_D = 'sync_nagios_snapshot_dynamic.json'
-SYNC_NAGIOS_SNAPSHOT_S = 'sync_nagios_snapshot_static.json'
+# Mock driver specs
+DRIVER_HOST_SNAPSHOT_D = 'driver_host_snapshot_dynamic.json'
+DRIVER_INST_SNAPSHOT_D = 'driver_inst_snapshot_dynamic.json'
+DRIVER_INST_SNAPSHOT_S = 'driver_inst_snapshot_static.json'
+DRIVER_INST_UPDATE_D = 'driver_inst_update_dynamic.json'
+DRIVER_NAGIOS_SNAPSHOT_D = 'driver_nagios_snapshot_dynamic.json'
+DRIVER_NAGIOS_SNAPSHOT_S = 'driver_nagios_snapshot_static.json'
+DRIVER_SWITCH_SNAPSHOT_D = 'driver_switch_snapshot_dynamic.json'
+DRIVER_VOLUME_UPDATE_D = 'driver_volume_update_dynamic.json'
+DRIVER_VOLUME_SNAPSHOT_D = 'driver_volume_snapshot_dynamic.json'
+DRIVER_ZONE_SNAPSHOT_D = 'driver_zone_snapshot_dynamic.json'
+
 
 # Mock transformer Specs (i.e., what the transformer outputs)
 TRANS_INST_SNAPSHOT_D = 'transformer_inst_snapshot_dynamic.json'
@@ -96,14 +97,14 @@ class EventTraceGenerator(object):
         """
 
         static_info_parsers = \
-            {SYNC_INST_SNAPSHOT_D: _get_sync_vm_snapshot_values,
-             SYNC_INST_UPDATE_D: _get_sync_vm_update_values,
-             SYNC_HOST_SNAPSHOT_D: _get_sync_host_snapshot_values,
-             SYNC_ZONE_SNAPSHOT_D: _get_sync_zone_snapshot_values,
-             SYNC_VOLUME_SNAPSHOT_D: _get_sync_volume_snapshot_values,
-             SYNC_VOLUME_UPDATE_D: _get_sync_volume_update_values,
-             SYNC_SWITCH_SNAPSHOT_D: _get_sync_switch_snapshot_values,
-             SYNC_NAGIOS_SNAPSHOT_D: _get_sync_nagios_alarm_values,
+            {DRIVER_INST_SNAPSHOT_D: _get_vm_snapshot_driver_values,
+             DRIVER_INST_UPDATE_D: _get_vm_update_driver_values,
+             DRIVER_HOST_SNAPSHOT_D: _get_host_snapshot_driver_values,
+             DRIVER_ZONE_SNAPSHOT_D: _get_zone_snapshot_driver_values,
+             DRIVER_VOLUME_SNAPSHOT_D: _get_volume_snapshot_driver_values,
+             DRIVER_VOLUME_UPDATE_D: _get_volume_update_driver_values,
+             DRIVER_SWITCH_SNAPSHOT_D: _get_switch_snapshot_driver_values,
+             DRIVER_NAGIOS_SNAPSHOT_D: _get_nagios_alarm_driver_values,
 
              TRANS_INST_SNAPSHOT_D: _get_trans_vm_snapshot_values,
              TRANS_HOST_SNAPSHOT_D: _get_trans_host_snapshot_values,
@@ -163,12 +164,12 @@ def generate_round_robin_data_stream(models, event_num=100):
     return data_stream
 
 
-def _get_sync_vm_snapshot_values(spec):
-    """Generates the static synchronizer values for each vm.
+def _get_vm_snapshot_driver_values(spec):
+    """Generates the static driver values for each vm.
 
     :param spec: specification of event generation.
     :type spec: dict
-    :return: list of static synchronizer values for each vm.
+    :return: list of static driver values for each vm.
     :rtype: list
     """
 
@@ -193,12 +194,12 @@ def _get_sync_vm_snapshot_values(spec):
     return static_values
 
 
-def _get_sync_host_snapshot_values(spec):
-    """Generates the static synchronizer values for each host.
+def _get_host_snapshot_driver_values(spec):
+    """Generates the static driver values for each host.
 
     :param spec: specification of event generation.
     :type spec: dict
-    :return: list of static synchronizer values for each host.
+    :return: list of static driver values for each host.
     :rtype: list
     """
 
@@ -219,12 +220,12 @@ def _get_sync_host_snapshot_values(spec):
     return static_values
 
 
-def _get_sync_zone_snapshot_values(spec):
-    """Generates the static synchronizer values for each zone.
+def _get_zone_snapshot_driver_values(spec):
+    """Generates the static driver values for each zone.
 
     :param spec: specification of event generation.
     :type spec: dict
-    :return: list of static synchronizer values for each host.
+    :return: list of static driver values for each host.
     :rtype: list
     """
 
@@ -261,12 +262,12 @@ def _get_sync_zone_snapshot_values(spec):
     return static_values
 
 
-def _get_sync_volume_snapshot_values(spec):
-    """Generates the static synchronizer values for each volume.
+def _get_volume_snapshot_driver_values(spec):
+    """Generates the static driver values for each volume.
 
     :param spec: specification of event generation.
     :type spec: dict
-    :return: list of static synchronizer values for each volume.
+    :return: list of static driver values for each volume.
     :rtype: list
     """
 
@@ -286,12 +287,12 @@ def _get_sync_volume_snapshot_values(spec):
     return static_values
 
 
-def _get_sync_volume_update_values(spec):
-    """Generates the static synchronizer values for each volume.
+def _get_volume_update_driver_values(spec):
+    """Generates the static driver values for each volume.
 
     :param spec: specification of event generation.
     :type spec: dict
-    :return: list of static synchronizer values for each volume.
+    :return: list of static driver values for each volume.
     :rtype: list
     """
 
@@ -336,12 +337,12 @@ def _get_trans_vm_snapshot_values(spec):
     return static_values
 
 
-def _get_sync_vm_update_values(spec):
-    """Generates the static synchronizer values for each vm, for updates.
+def _get_vm_update_driver_values(spec):
+    """Generates the static driver values for each vm, for updates.
 
     :param spec: specification of event generation.
     :type spec: dict
-    :return: list of static synchronizer values for each vm updates.
+    :return: list of static driver values for each vm updates.
     :rtype: list
     """
 
@@ -360,12 +361,12 @@ def _get_sync_vm_update_values(spec):
     return static_values
 
 
-def _get_sync_switch_snapshot_values(spec):
-    """Generates the static synchronizer values for each zone.
+def _get_switch_snapshot_driver_values(spec):
+    """Generates the static driver values for each zone.
 
     :param spec: specification of event generation.
     :type spec: dict
-    :return: list of static synchronizer values for each zone.
+    :return: list of static driver values for each zone.
     :rtype: list
     """
 
@@ -380,7 +381,7 @@ def _get_sync_switch_snapshot_values(spec):
     for host_name, switch_name in host_switch_mapping:
         switch_info = switches_info.get(switch_name, [])
 
-        relationship_info = {"type": NOVA_HOST_PLUGIN,
+        relationship_info = {"type": NOVA_HOST_DATASOURCE,
                              "name": host_name,
                              "id": host_name,
                              "relation_type": "contains"
@@ -400,7 +401,7 @@ def _get_sync_switch_snapshot_values(spec):
     return static_values
 
 
-def _get_sync_nagios_alarm_values(spec):
+def _get_nagios_alarm_driver_values(spec):
     hosts = spec[MAPPING_KEY]
     static_info_re = None
     if spec[STATIC_INFO_FKEY] is not None:
@@ -416,11 +417,11 @@ def _get_sync_nagios_alarm_values(spec):
 
 
 def _get_trans_host_snapshot_values(spec):
-    """Generates the static synchronizer values for each host.
+    """Generates the static driver values for each host.
 
         :param spec: specification of event generation.
         :type spec: dict
-        :return: list of static synchronizer values for each host.
+        :return: list of static driver values for each host.
         :rtype: list
         """
 
@@ -441,11 +442,11 @@ def _get_trans_host_snapshot_values(spec):
 
 
 def _get_trans_zone_snapshot_values(spec):
-    """Generates the static synchronizer values for each zone.
+    """Generates the static driver values for each zone.
 
     :param spec: specification of event generation.
     :type spec: dict
-    :return: list of static synchronizer values for each zone.
+    :return: list of static driver values for each zone.
     :rtype: list
     """
 

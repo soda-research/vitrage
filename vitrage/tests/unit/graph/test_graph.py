@@ -55,7 +55,7 @@ class GraphTest(GraphTestBase):
         v_from_graph_copy = graph_copy.get_vertex(v_host.vertex_id)
         self.assertEqual(ALARM, v_from_g[VProps.CATEGORY],
                          'graph vertex changed after update')
-        self.assertEqual(NOVA_HOST_PLUGIN, v_from_graph_copy[VProps.TYPE],
+        self.assertEqual(NOVA_HOST_DATASOURCE, v_from_graph_copy[VProps.TYPE],
                          'graph copy vertex unchanged after update')
 
     def test_vertex_crud(self):
@@ -102,7 +102,7 @@ class GraphTest(GraphTestBase):
         another_vertex = utils.create_vertex(
             vitrage_id='123',
             entity_id='456',
-            entity_category=NOVA_INSTANCE_PLUGIN,
+            entity_category=NOVA_INSTANCE_DATASOURCE,
             metadata={'some_meta': 'DATA'}
         )
         g.add_vertex(another_vertex)
@@ -230,7 +230,7 @@ class GraphTest(GraphTestBase):
         v4 = v_alarm
         v5 = utils.create_vertex(
             vitrage_id='kuku',
-            entity_category=NOVA_HOST_PLUGIN)
+            entity_category=NOVA_HOST_DATASOURCE)
 
         g = create_graph('test_neighbors')
         g.add_vertex(v1)
@@ -274,7 +274,7 @@ class GraphTest(GraphTestBase):
 
         v1_neighbors = g.neighbors(
             v_id=v1.vertex_id,
-            vertex_attr_filter={VProps.TYPE: NOVA_HOST_PLUGIN})
+            vertex_attr_filter={VProps.TYPE: NOVA_HOST_DATASOURCE})
         self._assert_set_equal({v2}, v1_neighbors,
                                'Check V1 neighbors, vertex property filter')
 
@@ -303,7 +303,7 @@ class GraphTest(GraphTestBase):
             v_id=v1.vertex_id,
             direction=Direction.IN,
             edge_attr_filter={EProps.RELATIONSHIP_TYPE: relationship_c},
-            vertex_attr_filter={VProps.TYPE: NOVA_HOST_PLUGIN})
+            vertex_attr_filter={VProps.TYPE: NOVA_HOST_DATASOURCE})
         self._assert_set_equal(
             {v2}, v1_neighbors,
             'Check V1 neighbors, vertex/edge property filter and direction')
@@ -316,13 +316,14 @@ class GraphTest(GraphTestBase):
 
         v2_neighbors = g.neighbors(
             v_id=v2.vertex_id,
-            vertex_attr_filter={VProps.CATEGORY: NOVA_HOST_PLUGIN})
+            vertex_attr_filter={VProps.CATEGORY: NOVA_HOST_DATASOURCE})
         self._assert_set_equal({}, v2_neighbors,
                                'Check v2 neighbors, vertex property filter')
 
         v2_neighbors = g.neighbors(
             v_id=v2.vertex_id,
-            vertex_attr_filter={VProps.CATEGORY: [NOVA_HOST_PLUGIN, ALARM]})
+            vertex_attr_filter={VProps.CATEGORY: [NOVA_HOST_DATASOURCE,
+                                                  ALARM]})
         self._assert_set_equal({v4}, v2_neighbors,
                                'Check v2 neighbors, vertex property filter')
 
@@ -333,8 +334,8 @@ class GraphTest(GraphTestBase):
             },
             vertex_attr_filter={
                 VProps.CATEGORY: [RESOURCE, ALARM],
-                VProps.TYPE: [NOVA_HOST_PLUGIN,
-                              NOVA_INSTANCE_PLUGIN,
+                VProps.TYPE: [NOVA_HOST_DATASOURCE,
+                              NOVA_INSTANCE_DATASOURCE,
                               ALARM_ON_VM,
                               ALARM_ON_HOST]
             }
@@ -350,13 +351,13 @@ class GraphTest(GraphTestBase):
 
         v3_neighbors = g.neighbors(
             v_id=v3.vertex_id,
-            vertex_attr_filter={VProps.CATEGORY: NOVA_HOST_PLUGIN},
+            vertex_attr_filter={VProps.CATEGORY: NOVA_HOST_DATASOURCE},
             direction=Direction.OUT)
         self._assert_set_equal({}, v3_neighbors,
                                'Check neighbors for vertex without any')
         v5_neighbors = g.neighbors(
             v_id=v5.vertex_id,
-            vertex_attr_filter={VProps.CATEGORY: NOVA_HOST_PLUGIN})
+            vertex_attr_filter={VProps.CATEGORY: NOVA_HOST_DATASOURCE})
         self._assert_set_equal({}, v5_neighbors,
                                'Check neighbors for not connected vertex')
 

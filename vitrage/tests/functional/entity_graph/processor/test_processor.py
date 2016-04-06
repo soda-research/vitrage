@@ -30,8 +30,8 @@ class TestProcessorFunctional(TestFunctionalBase):
         super(TestProcessorFunctional, cls).setUpClass()
         cls.conf = cfg.ConfigOpts()
         cls.conf.register_opts(cls.PROCESSOR_OPTS, group='entity_graph')
-        cls.conf.register_opts(cls.PLUGINS_OPTS, group='plugins')
-        cls.load_plugins(cls.conf)
+        cls.conf.register_opts(cls.DATASOURCES_OPTS, group='datasources')
+        cls.load_datasources(cls.conf)
 
     def test_create_entity_graph(self):
         processor = self._create_processor_with_graph(self.conf)

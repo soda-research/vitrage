@@ -24,12 +24,12 @@ OPTS = [
                default=3,
                min=1,
                help='interval between consistency initialization checks for '
-                    'finding if all end messages from plugins were '
+                    'finding if all end messages from datasources were '
                     'received (in seconds)'),
     cfg.IntOpt('initialization_max_retries',
                default=30,
                min=1,
                help='maximum retries for consistency initialization '
-                    'for finding if all end messages from plugins were '
+                    'for finding if all end messages from datasources were '
                     'received (in seconds)'),
 ]

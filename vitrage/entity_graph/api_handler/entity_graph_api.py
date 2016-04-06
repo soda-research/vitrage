@@ -19,12 +19,12 @@ from vitrage.common.constants import EdgeLabels
 from vitrage.common.constants import EdgeProperties as EProps
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import VertexProperties as VProps
+from vitrage.datasources.nova.host import NOVA_HOST_DATASOURCE
+from vitrage.datasources.nova.instance import NOVA_INSTANCE_DATASOURCE
+from vitrage.datasources.nova.zone import NOVA_ZONE_DATASOURCE
+from vitrage.datasources import OPENSTACK_NODE
 from vitrage.graph import create_algorithm
 from vitrage.graph import Direction
-from vitrage.synchronizer.plugins.nova.host import NOVA_HOST_PLUGIN
-from vitrage.synchronizer.plugins.nova.instance import NOVA_INSTANCE_PLUGIN
-from vitrage.synchronizer.plugins.nova.zone import NOVA_ZONE_PLUGIN
-from vitrage.synchronizer.plugins import OPENSTACK_NODE
 
 LOG = log.getLogger(__name__)
 
@@ -37,9 +37,9 @@ TREE_TOPOLOGY_QUERY = {
         {
             'or': [
                 {'==': {VProps.TYPE: OPENSTACK_NODE}},
-                {'==': {VProps.TYPE: NOVA_INSTANCE_PLUGIN}},
-                {'==': {VProps.TYPE: NOVA_HOST_PLUGIN}},
-                {'==': {VProps.TYPE: NOVA_ZONE_PLUGIN}}
+                {'==': {VProps.TYPE: NOVA_INSTANCE_DATASOURCE}},
+                {'==': {VProps.TYPE: NOVA_HOST_DATASOURCE}},
+                {'==': {VProps.TYPE: NOVA_ZONE_DATASOURCE}}
             ]
         }
     ]

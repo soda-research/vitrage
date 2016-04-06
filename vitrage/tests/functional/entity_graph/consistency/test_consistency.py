@@ -24,6 +24,10 @@ from vitrage.common.constants import EdgeLabels
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.common.datetime_utils import utcnow
+from vitrage.datasources.nagios import NAGIOS_DATASOURCE
+from vitrage.datasources.nova.host import NOVA_HOST_DATASOURCE
+from vitrage.datasources.nova.instance import NOVA_INSTANCE_DATASOURCE
+from vitrage.datasources.nova.zone import NOVA_ZONE_DATASOURCE
 from vitrage.entity_graph.consistency.consistency_enforcer \
     import ConsistencyEnforcer
 from vitrage.entity_graph.initialization_status import InitializationStatus
@@ -32,12 +36,7 @@ from vitrage.evaluator.actions.evaluator_event_transformer import VITRAGE_TYPE
 from vitrage.evaluator.scenario_evaluator import ScenarioEvaluator
 from vitrage.evaluator.scenario_repository import ScenarioRepository
 import vitrage.graph.utils as graph_utils
-from vitrage.synchronizer.plugins.nagios import NAGIOS_PLUGIN
-from vitrage.synchronizer.plugins.nova.host import NOVA_HOST_PLUGIN
-from vitrage.synchronizer.plugins.nova.instance import NOVA_INSTANCE_PLUGIN
-from vitrage.synchronizer.plugins.nova.zone import NOVA_ZONE_PLUGIN
-from vitrage.tests.functional.base import \
-    TestFunctionalBase
+from vitrage.tests.functional.base import TestFunctionalBase
 from vitrage.tests.mocks import utils
 
 
@@ -52,12 +51,6 @@ class TestConsistencyFunctional(TestFunctionalBase):
                    min=1),
         cfg.IntOpt('initialization_max_retries',
                    default=10),
-    ]
-
-    SYNCHRONIZER_OPTS = [
-        cfg.IntOpt('snapshots_interval',
-                   default=1,
-                   min=1),
     ]
 
     EVALUATOR_OPTS = [
@@ -79,9 +72,8 @@ class TestConsistencyFunctional(TestFunctionalBase):
         cls.conf.register_opts(cls.CONSISTENCY_OPTS, group='consistency')
         cls.conf.register_opts(cls.PROCESSOR_OPTS, group='entity_graph')
         cls.conf.register_opts(cls.EVALUATOR_OPTS, group='evaluator')
-        cls.conf.register_opts(cls.SYNCHRONIZER_OPTS, group='synchronizer')
-        cls.conf.register_opts(cls.PLUGINS_OPTS, group='plugins')
-        cls.load_plugins(cls.conf)
+        cls.conf.register_opts(cls.DATASOURCES_OPTS, group='datasources')
+        cls.load_datasources(cls.conf)
 
         cls.processor = Processor(cls.conf, cls.initialization_status)
         cls.event_queue = queue.Queue()
@@ -150,7 +142,7 @@ class TestConsistencyFunctional(TestFunctionalBase):
 
     def test_periodic_process(self):
         # Setup
-        consistency_interval = self.conf.synchronizer.snapshots_interval
+        consistency_interval = self.conf.datasources.snapshots_interval
         self._periodic_process_setup_stage(consistency_interval)
 
         # Action
@@ -160,18 +152,18 @@ class TestConsistencyFunctional(TestFunctionalBase):
         # Test Assertions
         instance_vertices = self.processor.entity_graph.get_vertices({
             VProps.CATEGORY: EntityCategory.RESOURCE,
-            VProps.TYPE: NOVA_INSTANCE_PLUGIN
+            VProps.TYPE: NOVA_INSTANCE_DATASOURCE
         })
-        is_deleted_instance_vertices = \
+        deleted_instance_vertices = \
             self.processor.entity_graph.get_vertices({
                 VProps.CATEGORY: EntityCategory.RESOURCE,
-                VProps.TYPE: NOVA_INSTANCE_PLUGIN,
+                VProps.TYPE: NOVA_INSTANCE_DATASOURCE,
                 VProps.IS_DELETED: True
             })
         self.assertEqual(self.NUM_INSTANCES - 3, len(instance_vertices))
         self.assertEqual(self._num_total_expected_vertices() - 3,
                          len(self.processor.entity_graph.get_vertices()))
-        self.assertEqual(6, len(is_deleted_instance_vertices))
+        self.assertEqual(6, len(deleted_instance_vertices))
 
     def _periodic_process_setup_stage(self, consistency_interval):
         self._create_processor_with_graph(self.conf, processor=self.processor)
@@ -185,7 +177,7 @@ class TestConsistencyFunctional(TestFunctionalBase):
         # check number of instances in graph
         instance_vertices = self.processor.entity_graph.get_vertices({
             VProps.CATEGORY: EntityCategory.RESOURCE,
-            VProps.TYPE: NOVA_INSTANCE_PLUGIN
+            VProps.TYPE: NOVA_INSTANCE_DATASOURCE
         })
         self.assertEqual(self.NUM_INSTANCES, len(instance_vertices))
 
@@ -205,11 +197,11 @@ class TestConsistencyFunctional(TestFunctionalBase):
             self.processor.entity_graph.update_vertex(instance_vertices[i])
 
     def _set_end_messages(self):
-        self.initialization_status.end_messages[NOVA_ZONE_PLUGIN] = True
-        self.initialization_status.end_messages[NOVA_HOST_PLUGIN] = True
-        self.initialization_status.end_messages[NOVA_INSTANCE_PLUGIN] = \
+        self.initialization_status.end_messages[NOVA_ZONE_DATASOURCE] = True
+        self.initialization_status.end_messages[NOVA_HOST_DATASOURCE] = True
+        self.initialization_status.end_messages[NOVA_INSTANCE_DATASOURCE] = \
             True
-        self.initialization_status.end_messages[NAGIOS_PLUGIN] = True
+        self.initialization_status.end_messages[NAGIOS_DATASOURCE] = True
         self.initialization_status.status = \
             self.initialization_status.RECEIVED_ALL_END_MESSAGES
 
@@ -217,7 +209,7 @@ class TestConsistencyFunctional(TestFunctionalBase):
         # find hosts and instances
         host_vertices = self.processor.entity_graph.get_vertices({
             VProps.CATEGORY: EntityCategory.RESOURCE,
-            VProps.TYPE: NOVA_HOST_PLUGIN
+            VProps.TYPE: NOVA_HOST_DATASOURCE
         })
 
         # add host alarms + deduced alarms
@@ -227,7 +219,7 @@ class TestConsistencyFunctional(TestFunctionalBase):
             alarm_name = '%s:%s' % ('nagios_alarm_on_host_',
                                     host_vertex[VProps.NAME])
             alarms_on_hosts_list.append(
-                self._create_alarm(alarm_name, NAGIOS_PLUGIN))
+                self._create_alarm(alarm_name, NAGIOS_DATASOURCE))
             self.processor.entity_graph.add_vertex(alarms_on_hosts_list[index])
             edge = graph_utils.create_edge(
                 alarms_on_hosts_list[index].vertex_id,

@@ -19,6 +19,8 @@ import sys
 from oslo_service import service as os_service
 
 from vitrage.common.constants import EntityCategory
+from vitrage.datasources import launcher as datasource_launcher
+from vitrage.datasources import OPENSTACK_NODE
 from vitrage.entity_graph.api_handler import service as api_handler_svc
 from vitrage.entity_graph.consistency import service as consistency_svc
 from vitrage.entity_graph.initialization_status import InitializationStatus
@@ -27,8 +29,6 @@ from vitrage.entity_graph import service as entity_graph_svc
 from vitrage.evaluator.scenario_evaluator import ScenarioEvaluator
 from vitrage.evaluator.scenario_repository import ScenarioRepository
 from vitrage import service
-from vitrage.synchronizer import launcher as synchronizers_launcher
-from vitrage.synchronizer.plugins import OPENSTACK_NODE
 
 
 def main():
@@ -42,9 +42,9 @@ def main():
 
     conf, event_queue, evaluator, e_graph, initialization_status = init()
     launcher = os_service.ServiceLauncher(conf)
-    synchronizers = synchronizers_launcher.Launcher(
+    synchronizers = datasource_launcher.Launcher(
         conf,
-        synchronizers_launcher.create_send_to_queue_callback(event_queue))
+        datasource_launcher.create_send_to_queue_callback(event_queue))
 
     launcher.launch_service(entity_graph_svc.VitrageGraphService(
         conf, event_queue, evaluator, e_graph, initialization_status))

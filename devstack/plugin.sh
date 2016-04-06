@@ -100,14 +100,14 @@ function cleanup_vitrage {
     fi
 }
 
-function disable_vitrage_plugin {
+function disable_vitrage_datasource {
 
-    local enabled_plugins=",${VITRAGE_DEFAULT_PLUGINS},"
-    local plugin
-    for plugin in $@; do
-            enabled_plugins=${enabled_plugins//,$plugin,/,}
+    local enabled_datasources=",${VITRAGE_DEFAULT_DATASOURCES},"
+    local datasource
+    for datasource in $@; do
+            enabled_datasources=${enabled_datasources//,$datasource,/,}
     done
-    VITRAGE_DEFAULT_PLUGINS=$(_cleanup_service_list "$enabled_plugins")
+    VITRAGE_DEFAULT_DATSOURCES=$(_cleanup_service_list "$enabled_datasources")
 
 }
 
@@ -134,29 +134,29 @@ function configure_vitrage {
     iniset $VITRAGE_CONF service_credentials region_name $REGION_NAME
     iniset $VITRAGE_CONF service_credentials auth_url $KEYSTONE_SERVICE_URI
 
-    # add default plugins
-    iniset $VITRAGE_CONF plugins plugin_type $VITRAGE_DEFAULT_PLUGINS
+    # add default datasources
+    iniset $VITRAGE_CONF datasources types $VITRAGE_DEFAULT_DATASOURCES
 
-    # remove neutron vitrage plugin if neutron plugin not installed
+    # remove neutron vitrage datasource if neutron datasource not installed
     if ! is_service_enabled neutron; then
-        disable_vitrage_plugin neutron.network neutron.port
+        disable_vitrage_datasource neutron.network neutron.port
     fi
 
-    # remove aodh vitrage plugin if aodh plugin not installed
+    # remove aodh vitrage datasource if aodh datasource not installed
     if ! is_service_enabled aodh; then
-        disable_vitrage_plugin aodh
+        disable_vitrage_datasource aodh
     fi
 
     # copy the mock sample files
     cp $VITRAGE_DIR/etc/vitrage/*.sample.json $VITRAGE_CONF_DIR
 
     # create some folders
-    mkdir -p $VITRAGE_CONF_DIR/states_plugins
-    mkdir -p $VITRAGE_CONF_DIR/static_plugins
+    mkdir -p $VITRAGE_CONF_DIR/datasources_states
+    mkdir -p $VITRAGE_CONF_DIR/static_datasources
     mkdir -p $VITRAGE_CONF_DIR/templates
 
-    # copy plugins
-    cp $VITRAGE_DIR/etc/vitrage/states_plugins/*.yaml $VITRAGE_CONF_DIR/states_plugins
+    # copy datasources
+    cp $VITRAGE_DIR/etc/vitrage/datasources_states/*.yaml $VITRAGE_CONF_DIR/datasources_states
 
 
     configure_auth_token_middleware $VITRAGE_CONF vitrage $VITRAGE_AUTH_CACHE_DIR

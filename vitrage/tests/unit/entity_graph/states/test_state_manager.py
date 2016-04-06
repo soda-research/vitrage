@@ -16,15 +16,15 @@ from oslo_config import cfg
 
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import VertexProperties as VProps
+from vitrage.datasources.nagios import NAGIOS_DATASOURCE
+from vitrage.datasources.nova.host import NOVA_HOST_DATASOURCE
+from vitrage.datasources.nova.instance import NOVA_INSTANCE_DATASOURCE
+from vitrage.datasources.nova.zone import NOVA_ZONE_DATASOURCE
 from vitrage.entity_graph.states.normalized_resource_state import \
     NormalizedResourceState
 from vitrage.entity_graph.states.state_manager import StateManager
 from vitrage.graph.utils import create_vertex
-from vitrage.service import load_plugin
-from vitrage.synchronizer.plugins.nagios import NAGIOS_PLUGIN
-from vitrage.synchronizer.plugins.nova.host import NOVA_HOST_PLUGIN
-from vitrage.synchronizer.plugins.nova.instance import NOVA_INSTANCE_PLUGIN
-from vitrage.synchronizer.plugins.nova.zone import NOVA_ZONE_PLUGIN
+from vitrage.service import load_datasource
 from vitrage.tests import base
 from vitrage.tests.mocks import utils
 
@@ -32,27 +32,27 @@ from vitrage.tests.mocks import utils
 class TestStateManager(base.BaseTest):
 
     ENTITY_GRAPH_OPTS = [
-        cfg.StrOpt('states_plugins_dir',
-                   default=utils.get_resources_dir() + '/states_plugins'),
+        cfg.StrOpt('datasources_states_dir',
+                   default=utils.get_resources_dir() + '/datasources_states'),
     ]
 
-    PLUGINS_OPTS = [
-        cfg.ListOpt('plugin_type',
-                    default=[NAGIOS_PLUGIN,
-                             NOVA_HOST_PLUGIN,
-                             NOVA_INSTANCE_PLUGIN,
-                             NOVA_ZONE_PLUGIN],
-                    help='Names of supported synchronizer plugins'),
+    DATASOURCES_OPTS = [
+        cfg.ListOpt('types',
+                    default=[NAGIOS_DATASOURCE,
+                             NOVA_HOST_DATASOURCE,
+                             NOVA_INSTANCE_DATASOURCE,
+                             NOVA_ZONE_DATASOURCE],
+                    help='Names of supported data sources'),
 
-        cfg.ListOpt('plugin_path',
-                    default=['vitrage.synchronizer.plugins'],
-                    help='base path for plugins')
+        cfg.ListOpt('path',
+                    default=['vitrage.datasources'],
+                    help='base path for datasources')
     ]
 
     @staticmethod
-    def _load_plugins(conf):
-        for plugin_name in conf.plugins.plugin_type:
-            load_plugin(conf, plugin_name, conf.plugins.plugin_path)
+    def _load_datasources(conf):
+        for datasource_name in conf.datasources.types:
+            load_datasource(conf, datasource_name, conf.datasources.path)
 
     # noinspection PyAttributeOutsideInit,PyPep8Naming
     @classmethod
@@ -60,40 +60,42 @@ class TestStateManager(base.BaseTest):
         super(TestStateManager, cls).setUpClass()
         cls.conf = cfg.ConfigOpts()
         cls.conf.register_opts(cls.ENTITY_GRAPH_OPTS, group='entity_graph')
-        cls.conf.register_opts(cls.PLUGINS_OPTS, group='plugins')
-        cls._load_plugins(cls.conf)
+        cls.conf.register_opts(cls.DATASOURCES_OPTS, group='datasources')
+        cls._load_datasources(cls.conf)
 
-    def test_load_state_plugins_without_errors(self):
+    def test_load_datasource_state_without_errors(self):
         # action
         state_manager = StateManager(self.conf)
 
         # test assertions
 
-        # Total plugins plus the evaluator which is not definable
-        total_plugins = len(self.conf.plugins.plugin_type) + 1
-        self.assertEqual(total_plugins, len(state_manager.states_plugins))
+        # Total datasources plus the evaluator which is not definable
+        total_datasources = len(self.conf.datasources.types) + 1
+        self.assertEqual(total_datasources,
+                         len(state_manager.datasources_state_confs))
 
-    def test_load_state_plugins_with_errors(self):
+    def test_load_datasources_state_with_errors(self):
         # setup
         entity_graph_opts = [
-            cfg.StrOpt('states_plugins_dir',
+            cfg.StrOpt('datasources_states_dir',
                        default=utils.get_resources_dir() +
-                       '/states_plugins/erroneous_states_plugins'),
+                       '/datasources_states/erroneous_states'),
         ]
         conf = cfg.ConfigOpts()
         conf.register_opts(entity_graph_opts, group='entity_graph')
-        conf.register_opts(self.PLUGINS_OPTS, group='plugins')
-        self._load_plugins(conf)
+        conf.register_opts(self.DATASOURCES_OPTS, group='datasources')
+        self._load_datasources(conf)
 
         # action
         state_manager = StateManager(conf)
 
         # test assertions
-        missing_states_plugins = 1
-        erroneous_states_plugins = 2
-        num_valid_plugins = len(state_manager.states_plugins) + \
-            missing_states_plugins + erroneous_states_plugins
-        self.assertEqual(len(conf.plugins.plugin_type), num_valid_plugins)
+        missing_states = 1
+        erroneous_states = 2
+        num_valid_datasources = len(state_manager.datasources_state_confs) + \
+            missing_states + erroneous_states
+        self.assertEqual(len(conf.datasources.types),
+                         num_valid_datasources)
 
     def test_normalize_state(self):
         # setup
@@ -102,7 +104,7 @@ class TestStateManager(base.BaseTest):
         # action
         normalized_state = \
             state_manager.normalize_state(EntityCategory.RESOURCE,
-                                          NOVA_INSTANCE_PLUGIN,
+                                          NOVA_INSTANCE_DATASOURCE,
                                           'BUILDING')
 
         # test assertions
@@ -114,7 +116,7 @@ class TestStateManager(base.BaseTest):
 
         # action
         state_priority = \
-            state_manager.state_priority(NOVA_INSTANCE_PLUGIN,
+            state_manager.state_priority(NOVA_INSTANCE_DATASOURCE,
                                          NormalizedResourceState.RUNNING)
 
         # test assertions
@@ -127,13 +129,13 @@ class TestStateManager(base.BaseTest):
         new_vertex1 = create_vertex('12345',
                                     entity_state='ACTIVE',
                                     entity_category=EntityCategory.RESOURCE,
-                                    entity_type=NOVA_INSTANCE_PLUGIN,
+                                    entity_type=NOVA_INSTANCE_DATASOURCE,
                                     metadata=metadata1)
         metadata2 = {VProps.VITRAGE_STATE: 'ACTIVE'}
         new_vertex2 = create_vertex('23456',
                                     entity_state='SUSPENDED',
                                     entity_category=EntityCategory.RESOURCE,
-                                    entity_type=NOVA_INSTANCE_PLUGIN,
+                                    entity_type=NOVA_INSTANCE_DATASOURCE,
                                     metadata=metadata2)
 
         # action
@@ -152,18 +154,18 @@ class TestStateManager(base.BaseTest):
         new_vertex1 = create_vertex('12345',
                                     entity_state='ACTIVE',
                                     entity_category=EntityCategory.RESOURCE,
-                                    entity_type=NOVA_INSTANCE_PLUGIN)
+                                    entity_type=NOVA_INSTANCE_DATASOURCE)
         metadata2 = {VProps.VITRAGE_STATE: 'SUBOPTIMAL'}
         new_vertex2 = create_vertex('23456',
                                     entity_category=EntityCategory.RESOURCE,
-                                    entity_type=NOVA_INSTANCE_PLUGIN,
+                                    entity_type=NOVA_INSTANCE_DATASOURCE,
                                     metadata=metadata2)
         new_vertex3 = create_vertex('34567',
                                     entity_category=EntityCategory.RESOURCE,
-                                    entity_type=NOVA_INSTANCE_PLUGIN)
+                                    entity_type=NOVA_INSTANCE_DATASOURCE)
         graph_vertex3 = create_vertex('45678',
                                       entity_category=EntityCategory.RESOURCE,
-                                      entity_type=NOVA_INSTANCE_PLUGIN)
+                                      entity_type=NOVA_INSTANCE_DATASOURCE)
 
         # action
         state_manager.aggregated_state(new_vertex1,

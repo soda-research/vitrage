@@ -38,8 +38,8 @@ def prepare_service(args=None, conf=None, config_files=None):
     conf(args, project='vitrage', validate_default_values=True,
          default_config_files=config_files)
 
-    for plugin_name in conf.plugins.plugin_type:
-        load_plugin(conf, plugin_name, conf.plugins.plugin_path)
+    for datasource in conf.datasources.types:
+        load_datasource(conf, datasource, conf.datasources.path)
 
     keystone_client.register_keystoneauth_opts(conf)
 
@@ -51,7 +51,7 @@ def prepare_service(args=None, conf=None, config_files=None):
     return conf
 
 
-def load_plugin(conf, name, paths):
+def load_datasource(conf, name, paths):
     for path in paths:
         try:
             opt = importutils.import_module("%s.%s" % (path, name)).OPTS

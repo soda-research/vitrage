@@ -17,12 +17,12 @@ from oslo_log import log
 
 from vitrage.common.constants import EventAction
 from vitrage.common.constants import VertexProperties as VProps
+from vitrage.datasources.transformer_base import TransformerBase
 from vitrage.entity_graph.processor import base as processor
 from vitrage.entity_graph.processor import entity_graph
 from vitrage.entity_graph.states.state_manager import StateManager
 from vitrage.entity_graph.transformer_manager import TransformerManager
 from vitrage.graph import Direction
-from vitrage.synchronizer.plugins.transformer_base import TransformerBase
 
 LOG = log.getLogger(__name__)
 
@@ -156,7 +156,7 @@ class Processor(processor.ProcessorBase):
         self.initialization_status.end_messages[vertex[VProps.TYPE]] = True
 
         if len(self.initialization_status.end_messages) == \
-                len(self.conf.plugins.plugin_type):
+                len(self.conf.datasources.types):
             self.initialization_status.status = \
                 self.initialization_status.RECEIVED_ALL_END_MESSAGES
 

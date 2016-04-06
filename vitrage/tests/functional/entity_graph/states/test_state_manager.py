@@ -17,14 +17,12 @@ from oslo_config import cfg
 from vitrage.common.constants import EventAction
 from vitrage.common.constants import SyncMode
 from vitrage.common.constants import VertexProperties as VProps
+from vitrage.datasources.nova.instance.transformer import InstanceTransformer
 from vitrage.entity_graph.initialization_status import InitializationStatus
 from vitrage.entity_graph.processor import processor as proc
 from vitrage.entity_graph.states.normalized_resource_state import \
     NormalizedResourceState
-from vitrage.synchronizer.plugins.nova.instance.transformer import \
-    InstanceTransformer
-from vitrage.tests.functional.base import \
-    TestFunctionalBase
+from vitrage.tests.functional.base import TestFunctionalBase
 
 
 class TestStateManagerFunctional(TestFunctionalBase):
@@ -35,8 +33,8 @@ class TestStateManagerFunctional(TestFunctionalBase):
         super(TestStateManagerFunctional, cls).setUpClass()
         cls.conf = cfg.ConfigOpts()
         cls.conf.register_opts(cls.PROCESSOR_OPTS, group='entity_graph')
-        cls.conf.register_opts(cls.PLUGINS_OPTS, group='plugins')
-        cls.load_plugins(cls.conf)
+        cls.conf.register_opts(cls.DATASOURCES_OPTS, group='datasources')
+        cls.load_datasources(cls.conf)
 
     def test_state_on_update(self):
         # setup

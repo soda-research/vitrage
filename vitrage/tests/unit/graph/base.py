@@ -26,12 +26,12 @@ from oslo_log import log as logging
 
 from vitrage.common.constants import EdgeLabels as ELabel
 from vitrage.common.constants import EntityCategory
+from vitrage.datasources.nova.host import NOVA_HOST_DATASOURCE
+from vitrage.datasources.nova.instance import NOVA_INSTANCE_DATASOURCE
+from vitrage.datasources import OPENSTACK_NODE
+from vitrage.datasources.static_physical import SWITCH
 from vitrage.graph import create_graph
 from vitrage.graph import utils as graph_utils
-from vitrage.synchronizer.plugins.nova.host import NOVA_HOST_PLUGIN
-from vitrage.synchronizer.plugins.nova.instance import NOVA_INSTANCE_PLUGIN
-from vitrage.synchronizer.plugins import OPENSTACK_NODE
-from vitrage.synchronizer.plugins.static_physical import SWITCH
 from vitrage.tests import base
 
 LOG = logging.getLogger(__name__)
@@ -56,14 +56,14 @@ v_node = graph_utils.create_vertex(
     entity_type=OPENSTACK_NODE,
     entity_category=RESOURCE)
 v_host = graph_utils.create_vertex(
-    vitrage_id=NOVA_HOST_PLUGIN + '222222222222',
+    vitrage_id=NOVA_HOST_DATASOURCE + '222222222222',
     entity_id='222222222222',
-    entity_type=NOVA_HOST_PLUGIN,
+    entity_type=NOVA_HOST_DATASOURCE,
     entity_category=RESOURCE)
 v_instance = graph_utils.create_vertex(
-    vitrage_id=NOVA_INSTANCE_PLUGIN + '333333333333',
+    vitrage_id=NOVA_INSTANCE_DATASOURCE + '333333333333',
     entity_id='333333333333',
-    entity_type=NOVA_INSTANCE_PLUGIN,
+    entity_type=NOVA_INSTANCE_DATASOURCE,
     entity_category=RESOURCE)
 v_alarm = graph_utils.create_vertex(
     vitrage_id=ALARM + '444444444444',
@@ -150,7 +150,7 @@ class GraphTestBase(base.BaseTest):
         for host_id in range(num_of_hosts_per_node):
             host_to_add = add_connected_vertex(g,
                                                RESOURCE,
-                                               NOVA_HOST_PLUGIN,
+                                               NOVA_HOST_DATASOURCE,
                                                host_id,
                                                ELabel.CONTAINS,
                                                v_node,
@@ -176,7 +176,7 @@ class GraphTestBase(base.BaseTest):
             for j in range(num_of_vms_per_host):
                 vm_to_add = add_connected_vertex(g,
                                                  RESOURCE,
-                                                 NOVA_INSTANCE_PLUGIN,
+                                                 NOVA_INSTANCE_DATASOURCE,
                                                  self.vm_id,
                                                  ELabel.CONTAINS,
                                                  host_to_add,

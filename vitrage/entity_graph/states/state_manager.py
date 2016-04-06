@@ -35,40 +35,45 @@ class StateManager(object):
     def __init__(self, conf):
         self.conf = conf
         self.category_normalizator = self._init_category_normalizator()
-        self.states_plugins = self._load_state_configurations()
+        self.datasources_state_confs = self._load_state_configurations()
 
-    def normalize_state(self, category, plugin_name, state):
+    def normalize_state(self, category, datasource_name, state):
         upper_state = state if not state else state.upper()
         important_states = \
             self.category_normalizator[category].important_states()
 
-        if plugin_name in self.states_plugins:
-            return self.states_plugins[plugin_name][self.STATES][upper_state] \
-                if upper_state in \
-                self.states_plugins[plugin_name][self.STATES] else \
-                self.states_plugins[plugin_name][important_states.unknown]
+        if datasource_name in self.datasources_state_confs:
+
+            states_conf = self.datasources_state_confs[datasource_name]
+
+            return states_conf[self.STATES][upper_state] \
+                if upper_state in states_conf[self.STATES] \
+                else states_conf[important_states.unknown]
         else:
             return important_states.undefined
 
-    def state_priority(self, plugin_name, normalized_state):
+    def state_priority(self, datasource_name, normalized_state):
         # no need to check if normalized_state exists, cause it exists for sure
         upper_state = normalized_state if not normalized_state else \
             normalized_state.upper()
 
-        if plugin_name in self.states_plugins:
-            return \
-                self.states_plugins[plugin_name][self.PRIORITIES][upper_state]
+        if datasource_name in self.datasources_state_confs:
+            states_conf = self.datasources_state_confs[datasource_name]
+            return states_conf[self.PRIORITIES][upper_state]
         else:
             # default UNDEFINED priority
             return 0
 
     def aggregated_state(self, new_vertex, graph_vertex, is_normalized=False):
-        plugin_name = new_vertex[VProps.TYPE] if VProps.TYPE in \
-            new_vertex.properties else graph_vertex[VProps.TYPE]
-        category = new_vertex[VProps.CATEGORY] if VProps.CATEGORY in \
-            new_vertex.properties else graph_vertex[VProps.CATEGORY]
+        datasource_name = new_vertex[VProps.TYPE] if \
+            VProps.TYPE in new_vertex.properties else \
+            graph_vertex[VProps.TYPE]
 
-        if plugin_name in self.states_plugins:
+        category = new_vertex[VProps.CATEGORY] if \
+            VProps.CATEGORY in new_vertex.properties else \
+            graph_vertex[VProps.CATEGORY]
+
+        if datasource_name in self.datasources_state_confs:
             state_properties = \
                 self.category_normalizator[category].state_properties()
             normalized_state, state_priority = \
@@ -76,7 +81,7 @@ class StateManager(object):
                                                          graph_vertex,
                                                          state_properties[0],
                                                          category,
-                                                         plugin_name,
+                                                         datasource_name,
                                                          is_normalized)
             state_properties.pop(0)
 
@@ -86,7 +91,7 @@ class StateManager(object):
                                                              graph_vertex,
                                                              property_,
                                                              category,
-                                                             plugin_name,
+                                                             datasource_name,
                                                              is_normalized)
                 if tmp_state_priority > state_priority:
                     normalized_state = tmp_normalized_state
@@ -106,33 +111,33 @@ class StateManager(object):
         }
 
     def _load_state_configurations(self):
-        states_plugins = {}
-        erroneous_plugins = []
+        ok_datasources = {}
+        erroneous_datasources = []
 
         files = file_utils.load_files(
-            self.conf.entity_graph.states_plugins_dir, '.yaml')
+            self.conf.entity_graph.datasources_states_dir, '.yaml')
 
         for file_name in files:
             try:
-                full_path = self.conf.entity_graph.states_plugins_dir + '/' \
-                    + file_name
+                full_path = self.conf.entity_graph.datasources_states_dir \
+                    + '/' + file_name
                 states, priorities = \
                     self._retrieve_states_and_priorities_from_file(full_path)
-                states_plugins[os.path.splitext(file_name)[0]] = {
+                ok_datasources[os.path.splitext(file_name)[0]] = {
                     self.STATES: states,
                     self.PRIORITIES: priorities
                 }
             except Exception as e:
                 LOG.exception("Exception: %s", e)
-                plugin = os.path.splitext(file_name)[0]
-                LOG.error('erroneous plugins is %s',
-                          erroneous_plugins.append(plugin))
+                datasource = os.path.splitext(file_name)[0]
+                LOG.error('erroneous data sources is %s',
+                          erroneous_datasources.append(datasource))
 
-        self._is_all_plugins_states_exists(
-            [key for key in states_plugins.keys()],
-            erroneous_plugins)
+        self._check_state_confs_exists(
+            [key for key in ok_datasources.keys()],
+            erroneous_datasources)
 
-        return states_plugins
+        return ok_datasources
 
     def _retrieve_states_and_priorities_from_file(self, full_path):
         states = {}
@@ -154,7 +159,7 @@ class StateManager(object):
             priorities[normalized_state_name] = \
                 int(normalized_state['priority'])
 
-        self.check_validity(category, states, priorities, full_path)
+        self.check_validity(category, priorities, full_path)
 
         return states, priorities
 
@@ -164,7 +169,7 @@ class StateManager(object):
             states[None] = state
             priorities[NormalizedResourceState.UNDEFINED] = priority
 
-    def check_validity(self, category, states, priorities, full_path):
+    def check_validity(self, category, priorities, full_path):
         important_states = \
             self.category_normalizator[category].important_states()
         if important_states.unknown not in priorities:
@@ -187,7 +192,7 @@ class StateManager(object):
                                             graph_vertex,
                                             property_,
                                             category,
-                                            plugin_name,
+                                            datasource_name,
                                             is_normalized=False):
         state = self._get_updated_property(new_vertex,
                                            graph_vertex,
@@ -196,9 +201,10 @@ class StateManager(object):
         upper_state1 = state if not state else state.upper()
 
         normalized_state = upper_state1 if is_normalized else \
-            self.normalize_state(category, plugin_name, upper_state1)
+            self.normalize_state(category, datasource_name, upper_state1)
 
-        state_priority = self.state_priority(plugin_name, normalized_state)
+        state_priority = self.state_priority(datasource_name,
+                                             normalized_state)
 
         return normalized_state, state_priority
 
@@ -207,13 +213,17 @@ class StateManager(object):
         return [attr for attr in dir(class_instance) if not callable(attr) and
                 not attr.startswith("__")]
 
-    def _is_all_plugins_states_exists(self, states_plugins, error_plugins):
-        plugin_types = self.conf.plugins.plugin_type
-        all_state_loaded_plugins = states_plugins + error_plugins
+    def _check_state_confs_exists(self,
+                                  ok_datasources,
+                                  error_datasources):
 
-        for plugin_type in plugin_types:
-            if plugin_type not in all_state_loaded_plugins:
-                LOG.error("No state configuration file for: %s", plugin_type)
+        datasource_types = self.conf.datasources.types
+        datasources_with_state_conf = ok_datasources + error_datasources
+
+        for datasource_type in datasource_types:
+            if datasource_type not in datasources_with_state_conf:
+                LOG.error("No state configuration file for: %s",
+                          datasource_type)
 
     @staticmethod
     def _get_updated_property(new_vertex, graph_vertex, prop):

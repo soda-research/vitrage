@@ -17,8 +17,9 @@ from oslo_config import cfg
 
 
 OPTS = [
-    cfg.StrOpt('states_plugins_dir',
-               default='/etc/vitrage/states_plugins',
-               help='A path for the configuration files of the plugins states'
+    cfg.StrOpt('datasources_states_dir',
+               default='/etc/vitrage/datasources_states',
+               help='A path for the configuration files of the data sources'
+                    ' states'
                ),
 ]

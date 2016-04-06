@@ -17,9 +17,9 @@ from oslo_log import log as logging
 
 from six.moves import queue
 from vitrage.common.constants import VertexProperties as VProps
+from vitrage.datasources.nova.host import NOVA_HOST_DATASOURCE
 from vitrage.evaluator.scenario_evaluator import ScenarioEvaluator
 from vitrage.evaluator.scenario_repository import ScenarioRepository
-from vitrage.synchronizer.plugins.nova.host import NOVA_HOST_PLUGIN
 from vitrage.tests.functional.base import \
     TestFunctionalBase
 from vitrage.tests.mocks import utils
@@ -45,8 +45,8 @@ class TestScenarioEvaluator(TestFunctionalBase):
         cls.conf = cfg.ConfigOpts()
         cls.conf.register_opts(cls.PROCESSOR_OPTS, group='entity_graph')
         cls.conf.register_opts(cls.EVALUATOR_OPTS, group='evaluator')
-        cls.conf.register_opts(cls.PLUGINS_OPTS, group='plugins')
-        TestScenarioEvaluator.load_plugins(cls.conf)
+        cls.conf.register_opts(cls.DATASOURCES_OPTS, group='datasources')
+        TestScenarioEvaluator.load_datasources(cls.conf)
         cls.scenario_repository = ScenarioRepository(cls.conf)
 
     def test_deduced_state(self):
@@ -67,7 +67,7 @@ class TestScenarioEvaluator(TestFunctionalBase):
 
         nagios_event = {'last_check': '2016-02-07 15:26:04',
                         'resource_name': target_host,
-                        'resource_type': NOVA_HOST_PLUGIN,
+                        'resource_type': NOVA_HOST_DATASOURCE,
                         'service': 'Check_MK',
                         'status': 'CRITICAL',
                         'status_info': 'ok',
@@ -94,7 +94,7 @@ class TestScenarioEvaluator(TestFunctionalBase):
 
     @staticmethod
     def _get_host_from_graph(host_name, entity_graph):
-        vertex_attrs = {VProps.TYPE: NOVA_HOST_PLUGIN,
+        vertex_attrs = {VProps.TYPE: NOVA_HOST_DATASOURCE,
                         VProps.NAME: host_name}
         host_vertices = entity_graph.get_vertices(
             vertex_attr_filter=vertex_attrs)

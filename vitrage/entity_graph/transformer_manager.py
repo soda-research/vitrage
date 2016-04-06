@@ -36,14 +36,14 @@ class TransformerManager(object):
     def register_transformer_classes(conf):
 
         transformers = {}
-        for plugin in conf.plugins.plugin_type:
-            transformers[plugin] = importutils.import_object(
-                conf[plugin].transformer,
+        for datasource_type in conf.datasources.types:
+            transformers[datasource_type] = importutils.import_object(
+                conf[datasource_type].transformer,
                 transformers)
-            if opt_exists(conf[plugin], ENTITIES):
-                for entity in conf[plugin].entities:
+            if opt_exists(conf[datasource_type], ENTITIES):
+                for entity in conf[datasource_type].entities:
                     transformers[entity] = importutils.import_object(
-                        conf[plugin].transformer, transformers)
+                        conf[datasource_type].transformer, transformers)
 
         transformers[VITRAGE_TYPE] = importutils.import_object(
             "%s.%s" % (EvaluatorEventTransformer.__module__,

@@ -14,6 +14,7 @@
 from oslo_log import log as logging
 
 from vitrage.common.constants import NotifierEventTypes
+from vitrage.datasources.alarm_properties import AlarmProperties
 from vitrage.evaluator.actions.base import ActionType
 from vitrage.evaluator.actions.recipes.action_steps import ADD_VERTEX
 from vitrage.evaluator.actions.recipes.action_steps import NOTIFY
@@ -21,7 +22,6 @@ from vitrage.evaluator.actions.recipes.action_steps import REMOVE_VERTEX
 from vitrage.evaluator.actions.recipes.raise_alarm import RaiseAlarm
 from vitrage.evaluator.template import ActionSpecs
 from vitrage.evaluator.template_fields import TemplateFields as TFields
-from vitrage.synchronizer.plugins.base.alarm.properties import AlarmProperties
 from vitrage.tests import base
 
 

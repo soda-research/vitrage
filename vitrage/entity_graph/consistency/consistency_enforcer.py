@@ -20,8 +20,8 @@ from oslo_log import log
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.common.datetime_utils import utcnow
+from vitrage.datasources import OPENSTACK_NODE
 from vitrage.evaluator.actions.evaluator_event_transformer import VITRAGE_TYPE
-from vitrage.synchronizer.plugins import OPENSTACK_NODE
 
 LOG = log.getLogger(__name__)
 
@@ -94,7 +94,7 @@ class ConsistencyEnforcer(object):
             'and': [
                 {'!=': {VProps.TYPE: VITRAGE_TYPE}},
                 {'<': {VProps.SAMPLE_TIMESTAMP: str(utcnow() - timedelta(
-                    seconds=2 * self.conf.synchronizer.snapshots_interval))}}
+                    seconds=2 * self.conf.datasources.snapshots_interval))}}
             ]
         }
 

@@ -15,20 +15,16 @@
 from oslo_config import cfg
 from oslo_log import log as logging
 
+from vitrage.datasources.nagios import NAGIOS_DATASOURCE
+from vitrage.datasources.nagios.transformer import NagiosTransformer
+from vitrage.datasources.nova.host import NOVA_HOST_DATASOURCE
+from vitrage.datasources.nova.host.transformer import HostTransformer
+from vitrage.datasources.nova.instance import NOVA_INSTANCE_DATASOURCE
+from vitrage.datasources.nova.instance.transformer import InstanceTransformer
+from vitrage.datasources.nova.zone import NOVA_ZONE_DATASOURCE
+from vitrage.datasources.nova.zone.transformer import ZoneTransformer
 from vitrage.entity_graph.transformer_manager import TransformerManager
-from vitrage.service import load_plugin
-from vitrage.synchronizer.plugins.nagios import NAGIOS_PLUGIN
-from vitrage.synchronizer.plugins.nagios.transformer import \
-    NagiosTransformer
-from vitrage.synchronizer.plugins.nova.host import NOVA_HOST_PLUGIN
-from vitrage.synchronizer.plugins.nova.host.transformer import \
-    HostTransformer
-from vitrage.synchronizer.plugins.nova.instance import NOVA_INSTANCE_PLUGIN
-from vitrage.synchronizer.plugins.nova.instance.transformer import \
-    InstanceTransformer
-from vitrage.synchronizer.plugins.nova.zone import NOVA_ZONE_PLUGIN
-from vitrage.synchronizer.plugins.nova.zone.transformer import \
-    ZoneTransformer
+from vitrage.service import load_datasource
 from vitrage.tests import base
 
 LOG = logging.getLogger(__name__)
@@ -37,41 +33,41 @@ LOG = logging.getLogger(__name__)
 class TransformerManagerTest(base.BaseTest):
 
     OPTS = [
-        cfg.ListOpt('plugin_type',
-                    default=[NAGIOS_PLUGIN,
-                             NOVA_HOST_PLUGIN,
-                             NOVA_INSTANCE_PLUGIN,
-                             NOVA_ZONE_PLUGIN],
-                    help='Names of supported synchronizer plugins'),
+        cfg.ListOpt('types',
+                    default=[NAGIOS_DATASOURCE,
+                             NOVA_HOST_DATASOURCE,
+                             NOVA_INSTANCE_DATASOURCE,
+                             NOVA_ZONE_DATASOURCE],
+                    help='Names of supported data sources'),
 
-        cfg.ListOpt('plugin_path',
-                    default=['vitrage.synchronizer.plugins'],
-                    help='base path for plugins')
+        cfg.ListOpt('path',
+                    default=['vitrage.datasources'],
+                    help='base path for data sources')
     ]
 
     # noinspection PyPep8Naming
     @classmethod
     def setUpClass(cls):
         cls.conf = cfg.ConfigOpts()
-        cls.conf.register_opts(cls.OPTS, group='plugins')
+        cls.conf.register_opts(cls.OPTS, group='datasources')
 
-        for plugin_name in cls.conf.plugins.plugin_type:
-            load_plugin(cls.conf, plugin_name, cls.conf.plugins.plugin_path)
+        for datasource in cls.conf.datasources.types:
+            load_datasource(cls.conf, datasource, cls.conf.datasources.path)
 
         cls.manager = TransformerManager(cls.conf)
 
     def test_transformer_registration_nagios(self):
             self.assertIsInstance(self.manager.get_transformer
-                                  (NAGIOS_PLUGIN), NagiosTransformer)
+                                  (NAGIOS_DATASOURCE), NagiosTransformer)
 
     def test_transformer_registration_nova_host(self):
         self.assertIsInstance(self.manager.get_transformer
-                              (NOVA_HOST_PLUGIN), HostTransformer)
+                              (NOVA_HOST_DATASOURCE), HostTransformer)
 
     def test_transformer_registration_nova_instance(self):
         self.assertIsInstance(self.manager.get_transformer
-                              (NOVA_INSTANCE_PLUGIN), InstanceTransformer)
+                              (NOVA_INSTANCE_DATASOURCE), InstanceTransformer)
 
     def test_transformer_registration_nova_zone(self):
         self.assertIsInstance(self.manager.get_transformer
-                              (NOVA_ZONE_PLUGIN), ZoneTransformer)
+                              (NOVA_ZONE_DATASOURCE), ZoneTransformer)
