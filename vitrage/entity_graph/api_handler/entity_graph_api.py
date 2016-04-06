@@ -28,16 +28,31 @@ from vitrage.synchronizer.plugins import OPENSTACK_NODE
 
 LOG = log.getLogger(__name__)
 
+# Used for Sunburst to show only specific resources
 TREE_TOPOLOGY_QUERY = {
     'and': [
         {'==': {VProps.CATEGORY: EntityCategory.RESOURCE}},
         {'==': {VProps.IS_DELETED: False}},
+        {'==': {VProps.IS_PLACEHOLDER: False}},
         {
             'or': [
                 {'==': {VProps.TYPE: OPENSTACK_NODE}},
                 {'==': {VProps.TYPE: NOVA_INSTANCE_PLUGIN}},
                 {'==': {VProps.TYPE: NOVA_HOST_PLUGIN}},
                 {'==': {VProps.TYPE: NOVA_ZONE_PLUGIN}}
+            ]
+        }
+    ]
+}
+
+TOPOLOGY_AND_ALARMS_QUERY = {
+    'and': [
+        {'==': {VProps.IS_DELETED: False}},
+        {'==': {VProps.IS_PLACEHOLDER: False}},
+        {
+            'or': [
+                {'==': {VProps.CATEGORY: EntityCategory.ALARM}},
+                {'==': {VProps.CATEGORY: EntityCategory.RESOURCE}}
             ]
         }
     ]
@@ -94,7 +109,7 @@ class EntityGraphApis(object):
                     query_dict=query)
             else:
                 found_graph = ga.create_graph_from_matching_vertices(
-                    vertex_attr_filter={VProps.IS_DELETED: False})
+                    query_dict=TOPOLOGY_AND_ALARMS_QUERY)
 
         return found_graph.output_graph()
 
