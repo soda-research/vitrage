@@ -20,7 +20,8 @@ VITRAGE_SERVICE_PROTOCOL=http
 VITRAGE_SERVICE_HOST=$SERVICE_HOST
 VITRAGE_SERVICE_PORT=${VITRAGE_SERVICE_PORT:-8999}
 VITRAGE_USE_MOD_WSGI=${VITRAGE_USE_MOD_WSGI:-${ENABLE_HTTPD_MOD_WSGI_SERVICES}}
-VITRAGE_DEFAULT_PLUGINS=${VITRAGE_DEFAULT_PLUGINS:-nova.host,nova.instance,nova.zone,nagios,static_physical,aodh,cinder.volume,neutron.network}
+VITRAGE_DEFAULT_PLUGINS=${VITRAGE_DEFAULT_PLUGINS:-nova.host,nova.instance,
+nova.zone,nagios,static_physical,aodh,cinder.volume,neutron.network,neutron.port}
 
 
 # Tell Tempest this project is present
