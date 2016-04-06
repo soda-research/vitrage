@@ -139,7 +139,7 @@ function configure_vitrage {
 
     # remove neutron vitrage plugin if neutron plugin not installed
     if ! is_service_enabled neutron; then
-        disable_vitrage_plugin neutron.network
+        disable_vitrage_plugin neutron.network neutron.port
     fi
 
     # remove aodh vitrage plugin if aodh plugin not installed

@@ -18,6 +18,7 @@ from vitrage.synchronizer.plugins.aodh import AODH_PLUGIN
 from vitrage.synchronizer.plugins.cinder.volume import CINDER_VOLUME_PLUGIN
 from vitrage.synchronizer.plugins.nagios import NAGIOS_PLUGIN
 from vitrage.synchronizer.plugins.neutron.network import NEUTRON_NETWORK_PLUGIN
+from vitrage.synchronizer.plugins.neutron.port import NEUTRON_PORT_PLUGIN
 from vitrage.synchronizer.plugins.nova.host import NOVA_HOST_PLUGIN
 from vitrage.synchronizer.plugins.nova.instance import NOVA_INSTANCE_PLUGIN
 from vitrage.synchronizer.plugins.nova.zone import NOVA_ZONE_PLUGIN
@@ -36,7 +37,8 @@ OPTS = [
                          STATIC_PHYSICAL_PLUGIN,
                          AODH_PLUGIN,
                          CINDER_VOLUME_PLUGIN,
-                         NEUTRON_NETWORK_PLUGIN],
+                         NEUTRON_NETWORK_PLUGIN,
+                         NEUTRON_PORT_PLUGIN],
                 help='Names of supported plugins'),
     cfg.ListOpt('plugin_path',
                 default=['vitrage.synchronizer.plugins'],

@@ -20,7 +20,7 @@ class PortSynchronizer(NeutronBase):
 
     @staticmethod
     def get_skipped_event_types():
-        pass
+        return []
 
     @staticmethod
     def get_topic(conf):
@@ -28,18 +28,14 @@ class PortSynchronizer(NeutronBase):
 
     @staticmethod
     def get_event_types(conf):
-        pass
+        return []
 
     @staticmethod
     def enrich_event(event, event_type):
         pass
 
-    @staticmethod
-    def extract(ports):
-        return [port.__dict__ for port in ports]
-
     def get_all(self, sync_mode):
         return self.make_pickleable(
-            self.extract(self.client.list_ports()),
+            self.client.list_ports()['ports'],
             NEUTRON_PORT_PLUGIN,
             sync_mode)
