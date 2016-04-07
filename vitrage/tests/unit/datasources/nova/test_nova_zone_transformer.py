@@ -16,9 +16,9 @@ import datetime
 
 from oslo_log import log as logging
 
+from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import EdgeLabels
 from vitrage.common.constants import EntityCategory
-from vitrage.common.constants import SynchronizerProperties as SyncProps
 from vitrage.common.constants import VertexProperties
 from vitrage.datasources.nova.host import NOVA_HOST_DATASOURCE
 from vitrage.datasources.nova.host.transformer import HostTransformer
@@ -143,7 +143,7 @@ class NovaZoneTransformerTest(base.BaseTest):
                 self._validate_host_neighbor(neighbor,
                                              zone_vertex_id,
                                              hosts,
-                                             event[SyncProps.SYNC_MODE])
+                                             event[DSProps.SYNC_MODE])
 
         self.assertEqual(1,
                          node_neighbors_counter,
@@ -218,7 +218,7 @@ class NovaZoneTransformerTest(base.BaseTest):
         self.assertEqual(NOVA_ZONE_DATASOURCE,
                          vertex[VertexProperties.TYPE])
 
-        expected_timestamp = event[SyncProps.SAMPLE_DATE]
+        expected_timestamp = event[DSProps.SAMPLE_DATE]
         observed_timestamp = vertex[VertexProperties.SAMPLE_TIMESTAMP]
         self.assertEqual(expected_timestamp, observed_timestamp)
 

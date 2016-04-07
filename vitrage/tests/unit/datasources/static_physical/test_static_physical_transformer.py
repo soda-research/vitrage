@@ -16,9 +16,9 @@ import datetime
 
 from oslo_log import log as logging
 
+from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import EdgeLabels
 from vitrage.common.constants import EntityCategory
-from vitrage.common.constants import SynchronizerProperties as SyncProps
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.datasources.nova.host import NOVA_HOST_DATASOURCE
 from vitrage.datasources.nova.host.transformer import HostTransformer
@@ -166,7 +166,7 @@ class TestStaticPhysicalTransformer(base.BaseTest):
 
     def _validate_switch_vertex_props(self, vertex, event):
         self._validate_common_vertex_props(vertex, event)
-        self.assertEqual(event[SyncProps.SAMPLE_DATE],
+        self.assertEqual(event[DSProps.SAMPLE_DATE],
                          vertex[VProps.SAMPLE_TIMESTAMP])
         self.assertEqual(event[VProps.NAME], vertex[VProps.NAME])
         self.assertEqual(event[VProps.STATE], vertex[VProps.STATE])

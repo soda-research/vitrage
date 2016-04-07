@@ -16,7 +16,7 @@
 from oslo_log import log as logging
 from oslo_utils import importutils
 
-from vitrage.common.constants import SynchronizerProperties as SyncProps
+from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.exception import VitrageTransformerError
 from vitrage.common.utils import opt_exists
 from vitrage.evaluator.actions.evaluator_event_transformer import \
@@ -75,7 +75,7 @@ class TransformerManager(object):
     @staticmethod
     def get_sync_type(entity_event):
         try:
-            return entity_event[SyncProps.SYNC_TYPE]
+            return entity_event[DSProps.SYNC_TYPE]
         except KeyError:
             raise VitrageTransformerError(
                 'Entity Event must contains sync_type field.')

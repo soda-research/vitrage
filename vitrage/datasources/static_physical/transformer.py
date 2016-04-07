@@ -14,8 +14,8 @@
 
 from oslo_log import log as logging
 
+from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import EntityCategory
-from vitrage.common.constants import SynchronizerProperties as SyncProps
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.datasources.nova.host import NOVA_HOST_DATASOURCE
 from vitrage.datasources.resource_transformer_base import \
@@ -47,7 +47,7 @@ class StaticPhysicalTransformer(ResourceTransformerBase):
 
         sync_type = entity_event[VProps.TYPE]
         entity_id = entity_event[VProps.ID]
-        sample_timestamp = entity_event[SyncProps.SAMPLE_DATE]
+        sample_timestamp = entity_event[DSProps.SAMPLE_DATE]
         update_timestamp = self._format_update_timestamp(
             update_timestamp=None,
             sample_timestamp=sample_timestamp)
@@ -69,7 +69,7 @@ class StaticPhysicalTransformer(ResourceTransformerBase):
         neighbors = []
         entity_type = entity_event[VProps.TYPE]
         entity_key = self._create_entity_key(entity_event)
-        timestamp = entity_event[SyncProps.SAMPLE_DATE]
+        timestamp = entity_event[DSProps.SAMPLE_DATE]
 
         for neighbor_details in entity_event[self.RELATIONSHIPS_SECTION]:
             # TODO(alexey): need to decide what to do if one of the entities

@@ -13,9 +13,9 @@
 # under the License.
 from oslo_log import log as logging
 
+from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import EdgeLabels
 from vitrage.common.constants import EntityCategory
-from vitrage.common.constants import SynchronizerProperties as SyncProps
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.common import datetime_utils
 from vitrage.datasources.alarm_properties import AlarmProperties as AlarmProps
@@ -59,7 +59,7 @@ class AodhTransformer(AlarmTransformerBase):
             metadata[AodhProps.STATE_TIMESTAMP] = \
                 entity_event[AodhProps.STATE_TIMESTAMP]
 
-        sample_timestamp = entity_event[SyncProps.SAMPLE_DATE]
+        sample_timestamp = entity_event[DSProps.SAMPLE_DATE]
 
         update_timestamp = self._format_update_timestamp(
             AodhTransformer._timestamp(entity_event), sample_timestamp)
@@ -68,7 +68,7 @@ class AodhTransformer(AlarmTransformerBase):
             self._create_entity_key(entity_event),
             entity_id=entity_event[AodhProps.ALARM_ID],
             entity_category=EntityCategory.ALARM,
-            entity_type=entity_event[SyncProps.SYNC_TYPE],
+            entity_type=entity_event[DSProps.SYNC_TYPE],
             entity_state=AlarmProps.ALARM_ACTIVE_STATE,
             sample_timestamp=sample_timestamp,
             update_timestamp=update_timestamp,
@@ -89,7 +89,7 @@ class AodhTransformer(AlarmTransformerBase):
         return entity_event[AodhProps.STATE] == self.STATUS_OK
 
     def _create_entity_key(self, entity_event):
-        sync_type = entity_event[SyncProps.SYNC_TYPE]
+        sync_type = entity_event[DSProps.SYNC_TYPE]
         alarm_name = entity_event[AodhProps.NAME]
         resource_id = entity_event[AodhProps.RESOURCE_ID]
         return (tbase.build_key(self._key_values(sync_type,

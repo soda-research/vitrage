@@ -29,7 +29,7 @@ def generate_random_events_list(generator_spec_list):
      :param generator_spec_list: list of generators
      :type generator_spec_list: list
 
-     :return list of synchronizer events
+     :return list of datasource events
      :rtype list
 
     """

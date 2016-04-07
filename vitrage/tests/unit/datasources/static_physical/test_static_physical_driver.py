@@ -17,8 +17,8 @@ import os
 from oslo_config import cfg
 from oslo_log import log as logging
 
+from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import EventAction
-from vitrage.common.constants import SynchronizerProperties as SyncProps
 from vitrage.common.constants import SyncMode
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.common import file_utils
@@ -119,7 +119,7 @@ class TestStaticPhysicalDriver(base.BaseTest):
 
         status = any(change[VProps.TYPE] == SWITCH and
                      change[VProps.ID] == '23456' and
-                     change[SyncProps.EVENT_TYPE] == EventAction.DELETE_ENTITY
+                     change[DSProps.EVENT_TYPE] == EventAction.DELETE_ENTITY
                      for change in changes)
         self.assertEqual(True, status)
 

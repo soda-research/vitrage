@@ -14,9 +14,9 @@
 
 from oslo_log import log as logging
 
+from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import EdgeLabels
 from vitrage.common.constants import EntityCategory
-from vitrage.common.constants import SynchronizerProperties as SyncProps
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.datasources.nova.host import NOVA_HOST_DATASOURCE
 from vitrage.datasources.nova.zone import NOVA_ZONE_DATASOURCE
@@ -49,7 +49,7 @@ class HostTransformer(ResourceTransformerBase):
         metadata = {VProps.NAME: host_name}
         entity_key = self._create_entity_key(entity_event)
 
-        sample_timestamp = entity_event[SyncProps.SAMPLE_DATE]
+        sample_timestamp = entity_event[DSProps.SAMPLE_DATE]
         update_timestamp = self._format_update_timestamp(None,
                                                          sample_timestamp)
 
@@ -69,7 +69,7 @@ class HostTransformer(ResourceTransformerBase):
         # Support snapshot and snapshot_init events only
         zone_neighbor = self._create_zone_neighbor(
             entity_event,
-            entity_event[SyncProps.SAMPLE_DATE],
+            entity_event[DSProps.SAMPLE_DATE],
             self._create_entity_key(entity_event),
             'zone')
 

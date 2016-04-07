@@ -25,6 +25,6 @@ OPTS = [
     cfg.StrOpt('driver',
                default='vitrage.datasources.nova.zone.driver'
                        '.ZoneDriver',
-               help='Nova zone synchronizer class path',
+               help='Nova zone datasource class path',
                required=True),
 ]

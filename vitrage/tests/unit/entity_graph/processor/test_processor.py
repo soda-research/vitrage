@@ -16,8 +16,8 @@ import unittest
 
 from oslo_config import cfg
 
+from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import EventAction
-from vitrage.common.constants import SynchronizerProperties as SyncProps
 from vitrage.common.constants import SyncMode
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.common.datetime_utils import utcnow
@@ -63,16 +63,16 @@ class TestProcessor(TestEntityGraphUnitBase):
         # check update instance even
         # TODO(Alexey): Create an event in update event structure
         # (update snapshot fields won't work)
-        event[SyncProps.SYNC_MODE] = SyncMode.UPDATE
-        event[SyncProps.EVENT_TYPE] = 'compute.instance.volume.attach'
+        event[DSProps.SYNC_MODE] = SyncMode.UPDATE
+        event[DSProps.EVENT_TYPE] = 'compute.instance.volume.attach'
         event['hostname'] = 'new_host'
         processor.process_event(event)
         self._check_graph(processor, self.NUM_VERTICES_AFTER_CREATION,
                           self.NUM_EDGES_AFTER_CREATION)
 
         # check delete instance event
-        event[SyncProps.SYNC_MODE] = SyncMode.UPDATE
-        event[SyncProps.EVENT_TYPE] = 'compute.instance.delete.end'
+        event[DSProps.SYNC_MODE] = SyncMode.UPDATE
+        event[DSProps.EVENT_TYPE] = 'compute.instance.delete.end'
         processor.process_event(event)
         self._check_graph(processor, self.NUM_VERTICES_AFTER_DELETION,
                           self.NUM_EDGES_AFTER_DELETION)

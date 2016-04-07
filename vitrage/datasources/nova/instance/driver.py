@@ -14,7 +14,7 @@
 
 from oslo_log import log as logging
 
-from vitrage.common.constants import SynchronizerProperties as SyncProps
+from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import SyncMode
 from vitrage.datasources.nova.instance import NOVA_INSTANCE_DATASOURCE
 from vitrage.datasources.nova.nova_driver_base import NovaDriverBase
@@ -37,7 +37,7 @@ class InstanceDriver(NovaDriverBase):
 
     @staticmethod
     def enrich_event(event, event_type):
-        event[SyncProps.EVENT_TYPE] = event_type
+        event[DSProps.EVENT_TYPE] = event_type
 
         return InstanceDriver.make_pickleable([event],
                                               NOVA_INSTANCE_DATASOURCE,

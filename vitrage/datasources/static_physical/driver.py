@@ -15,8 +15,8 @@
 import copy
 import os
 
+from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import EventAction
-from vitrage.common.constants import SynchronizerProperties as SyncProps
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.common import file_utils
 from vitrage.datasources.driver_base import DriverBase
@@ -130,4 +130,4 @@ class StaticPhysicalDriver(DriverBase):
 
     @staticmethod
     def _set_event_type(entity, event_type):
-        entity[SyncProps.EVENT_TYPE] = event_type
+        entity[DSProps.EVENT_TYPE] = event_type

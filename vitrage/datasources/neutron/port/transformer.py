@@ -16,9 +16,9 @@ from vitrage.datasources.resource_transformer_base import \
 
 from oslo_log import log as logging
 
+from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import EdgeLabels
 from vitrage.common.constants import EntityCategory
-from vitrage.common.constants import SynchronizerProperties as SyncProps
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.datasources.neutron.network import NEUTRON_NETWORK_DATASOURCE
 from vitrage.datasources.neutron.port import NEUTRON_PORT_DATASOURCE
@@ -58,12 +58,12 @@ class PortTransformer(ResourceTransformerBase):
             VProps.NAME: name,
         }
 
-        sample_timestamp = entity_event[SyncProps.SAMPLE_DATE]
+        sample_timestamp = entity_event[DSProps.SAMPLE_DATE]
 
         # TODO(Alexey): need to check here that only the UPDATE sync_mode will
         #               update the UPDATE_TIMESTAMP property
         update_timestamp = self._format_update_timestamp(
-            extract_field_value(entity_event, SyncProps.SAMPLE_DATE),
+            extract_field_value(entity_event, DSProps.SAMPLE_DATE),
             sample_timestamp)
 
         return graph_utils.create_vertex(
@@ -118,7 +118,7 @@ class PortTransformer(ResourceTransformerBase):
 
         instance_id = entity_event[instance_id_property]
 
-        sample_timestamp = entity_event[SyncProps.SAMPLE_DATE]
+        sample_timestamp = entity_event[DSProps.SAMPLE_DATE]
 
         properties = {
             VProps.ID: instance_id,
@@ -139,7 +139,7 @@ class PortTransformer(ResourceTransformerBase):
 
         net_id = entity_event[net_id_property]
 
-        sample_timestamp = entity_event[SyncProps.SAMPLE_DATE]
+        sample_timestamp = entity_event[DSProps.SAMPLE_DATE]
 
         properties = {
             VProps.ID: net_id,

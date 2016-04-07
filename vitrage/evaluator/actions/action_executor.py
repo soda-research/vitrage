@@ -17,7 +17,7 @@ import copy
 from oslo_log import log as logging
 from oslo_utils import importutils
 
-from vitrage.common.constants import SynchronizerProperties as SyncProps
+from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import SyncMode
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.common import datetime_utils
@@ -115,8 +115,8 @@ class ActionExecutor(object):
     @staticmethod
     def _add_default_properties(event):
 
-        event[SyncProps.SYNC_MODE] = SyncMode.UPDATE
-        event[SyncProps.SYNC_TYPE] = VITRAGE_TYPE
+        event[DSProps.SYNC_MODE] = SyncMode.UPDATE
+        event[DSProps.SYNC_TYPE] = VITRAGE_TYPE
         event[VProps.UPDATE_TIMESTAMP] = str(datetime_utils.utcnow(False))
         event[VProps.SAMPLE_TIMESTAMP] = str(datetime_utils.utcnow())
 

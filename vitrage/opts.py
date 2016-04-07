@@ -25,7 +25,7 @@ import vitrage.evaluator
 import vitrage.keystone_client
 import vitrage.rpc
 
-DATASOURCES_MODULE_PATH = 'vitrage.datasources.'
+DATASOURCES_PATH = 'vitrage.datasources.'
 DATASOURCE_FS_PATH = os.path.join('vitrage', 'datasources')
 DRIVER_FILE = 'driver.py'
 TRANSFORMER_FILE = 'alarm_transformer_base.py'
@@ -44,18 +44,20 @@ def list_opts():
 
 
 def datasources_opts():
+
     top = os.getcwd()
-    plugin_names = _normalize_path_to_plugin_name(
-        _filter_folders_containing_transformer(
-            _get_folders_containing_synchronizer(top)), top)
 
-    return [(plugin_name, plugin_module.OPTS) for plugin_name in plugin_names
-            for plugin_module in
-            [importutils.import_module(DATASOURCES_MODULE_PATH + plugin_name)]
-            if 'OPTS' in plugin_module.__dict__]
+    datasources = _normalize_path_to_datasource_name(
+        _filter_folders_containing_transformer(_get_datasources_folders(top)),
+        top)
+
+    return [(datasource, module.OPTS) for datasource in datasources
+            for module in
+            [importutils.import_module(DATASOURCES_PATH + datasource)]
+            if 'OPTS' in module.__dict__]
 
 
-def _get_folders_containing_synchronizer(top=os.getcwd()):
+def _get_datasources_folders(top=os.getcwd()):
     return [os.path.dirname(os.path.join(root, name))
             for root, dirs, files in os.walk(top, topdown=False)
             for name in files if name == DRIVER_FILE]
@@ -67,6 +69,6 @@ def _filter_folders_containing_transformer(folders):
             name in files if name == TRANSFORMER_FILE]
 
 
-def _normalize_path_to_plugin_name(path_list, top=os.getcwd()):
+def _normalize_path_to_datasource_name(path_list, top=os.getcwd()):
     return [os.path.relpath(path, os.path.join(top, DATASOURCE_FS_PATH))
             .replace(os.sep, '.') for path in path_list]
