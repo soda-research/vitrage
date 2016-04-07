@@ -17,7 +17,7 @@ from collections import namedtuple
 from oslo_log import log
 import requests
 
-from vitrage.common.constants import SynchronizerProperties as SyncProps
+from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.datasources.alarm_driver_base import AlarmDriverBase
 from vitrage.datasources.nagios.config import NagiosConfig
 from vitrage.datasources.nagios import NAGIOS_DATASOURCE
@@ -83,7 +83,7 @@ class NagiosDriver(AlarmDriverBase):
         for alarm in alarms:
             # based on nagios configuration file, convert nagios host name
             # to vitrage resource type and name
-            alarm[SyncProps.SYNC_TYPE] = NagiosProps.NAGIOS
+            alarm[DSProps.SYNC_TYPE] = NagiosProps.NAGIOS
 
             nagios_host = alarm[NagiosProps.RESOURCE_NAME]
             vitrage_resource = self.config.get_vitrage_resource(nagios_host)

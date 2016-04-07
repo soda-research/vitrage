@@ -14,10 +14,10 @@
 
 from oslo_log import log as logging
 
+from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import EdgeLabels
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import EventAction
-from vitrage.common.constants import SynchronizerProperties as SyncProps
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.datasources.nova.host import NOVA_HOST_DATASOURCE
 from vitrage.datasources.nova.instance import NOVA_INSTANCE_DATASOURCE
@@ -67,12 +67,12 @@ class InstanceTransformer(ResourceTransformerBase):
             VProps.PROJECT_ID: project
         }
 
-        sample_timestamp = entity_event[SyncProps.SAMPLE_DATE]
+        sample_timestamp = entity_event[DSProps.SAMPLE_DATE]
 
         # TODO(Alexey): need to check here that only the UPDATE sync_mode will
         #               update the UPDATE_TIMESTAMP property
         update_timestamp = self._format_update_timestamp(
-            extract_field_value(entity_event, SyncProps.SAMPLE_DATE),
+            extract_field_value(entity_event, DSProps.SAMPLE_DATE),
             sample_timestamp)
 
         return graph_utils.create_vertex(
@@ -97,7 +97,7 @@ class InstanceTransformer(ResourceTransformerBase):
             host_neighbor = self._create_host_neighbor(
                 self._create_entity_key(entity_event),
                 extract_field_value(entity_event, host_name),
-                entity_event[SyncProps.SAMPLE_DATE],
+                entity_event[DSProps.SAMPLE_DATE],
                 host_transformer)
             neighbors.append(host_neighbor)
         else:

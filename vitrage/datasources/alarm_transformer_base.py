@@ -14,9 +14,9 @@
 
 from oslo_log import log as logging
 
+from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import EventAction
-from vitrage.common.constants import SynchronizerProperties as SyncProps
 from vitrage.common.constants import SyncMode
 from vitrage.common.exception import VitrageTransformerError
 from vitrage.datasources import transformer_base as tbase
@@ -37,7 +37,7 @@ class AlarmTransformerBase(tbase.TransformerBase):
         pass
 
     def _extract_action_type(self, entity_event):
-        sync_mode = entity_event[SyncProps.SYNC_MODE]
+        sync_mode = entity_event[DSProps.SYNC_MODE]
         if sync_mode in (SyncMode.UPDATE, SyncMode.SNAPSHOT):
             return EventAction.DELETE_ENTITY if self._ok_status(entity_event) \
                 else EventAction.UPDATE_ENTITY

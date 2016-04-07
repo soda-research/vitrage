@@ -15,7 +15,7 @@
 from oslo_log import log as logging
 
 from vitrage import clients
-from vitrage.common.constants import SynchronizerProperties as SyncProps
+from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import SyncMode
 from vitrage.datasources.cinder.volume import CINDER_VOLUME_DATASOURCE
 from vitrage.datasources.driver_base import DriverBase
@@ -42,7 +42,7 @@ class CinderVolumeDriver(DriverBase):
 
     @staticmethod
     def enrich_event(event, event_type):
-        event[SyncProps.EVENT_TYPE] = event_type
+        event[DSProps.EVENT_TYPE] = event_type
 
         return CinderVolumeDriver.make_pickleable([event],
                                                   CINDER_VOLUME_DATASOURCE,

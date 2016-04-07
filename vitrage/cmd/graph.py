@@ -36,13 +36,13 @@ def main():
 
     1. Starts the Entity graph service
     2. Starts the api_handler service
-    3. Starts the Synchronizer service
+    3. Starts the datasource service
     4. Starts the Consistency service
     """
 
     conf, event_queue, evaluator, e_graph, initialization_status = init()
     launcher = os_service.ServiceLauncher(conf)
-    synchronizers = datasource_launcher.Launcher(
+    datasources = datasource_launcher.Launcher(
         conf,
         datasource_launcher.create_send_to_queue_callback(event_queue))
 
@@ -52,7 +52,7 @@ def main():
     launcher.launch_service(api_handler_svc.VitrageApiHandlerService(
         conf, e_graph))
 
-    synchronizers.launch()
+    datasources.launch()
 
     launcher.launch_service(consistency_svc.VitrageGraphConsistencyService(
         conf, event_queue, evaluator, e_graph, initialization_status))

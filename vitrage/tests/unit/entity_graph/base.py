@@ -14,8 +14,8 @@
 
 from oslo_config import cfg
 
+from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import EntityCategory
-from vitrage.common.constants import SynchronizerProperties as SyncProps
 from vitrage.common.constants import SyncMode
 from vitrage.common.datetime_utils import utcnow
 from vitrage.datasources.nagios import NAGIOS_DATASOURCE
@@ -81,17 +81,17 @@ class TestEntityGraphUnitBase(base.BaseTest):
             self.NUM_ZONES,
             self.NUM_HOSTS,
             snapshot_events=self.NUM_ZONES,
-            snap_vals={SyncProps.SYNC_MODE: SyncMode.INIT_SNAPSHOT})
+            snap_vals={DSProps.SYNC_MODE: SyncMode.INIT_SNAPSHOT})
         gen_list += mock_sync.simple_host_generators(
             self.NUM_ZONES,
             self.NUM_HOSTS,
             self.NUM_HOSTS,
-            snap_vals={SyncProps.SYNC_MODE: SyncMode.INIT_SNAPSHOT})
+            snap_vals={DSProps.SYNC_MODE: SyncMode.INIT_SNAPSHOT})
         gen_list += mock_sync.simple_instance_generators(
             self.NUM_HOSTS,
             self.NUM_INSTANCES,
             self.NUM_INSTANCES,
-            snap_vals={SyncProps.SYNC_MODE: SyncMode.INIT_SNAPSHOT})
+            snap_vals={DSProps.SYNC_MODE: SyncMode.INIT_SNAPSHOT})
         return mock_sync.generate_sequential_events_list(gen_list)
 
     def _create_entity(self, processor=None, spec_type=None, sync_mode=None,
@@ -122,10 +122,10 @@ class TestEntityGraphUnitBase(base.BaseTest):
 
         # update properties
         if sync_mode is not None:
-            events_list[0][SyncProps.SYNC_MODE] = sync_mode
+            events_list[0][DSProps.SYNC_MODE] = sync_mode
 
         if event_type is not None:
-            events_list[0][SyncProps.EVENT_TYPE] = event_type
+            events_list[0][DSProps.EVENT_TYPE] = event_type
 
         if properties is not None:
             for key, value in properties.items():

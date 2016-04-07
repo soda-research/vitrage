@@ -21,15 +21,15 @@ from vitrage.common.constants import SyncMode
 LOG = log.getLogger(__name__)
 
 
-class SynchronizerService(os_service.Service):
+class DatasourceService(os_service.Service):
     def __init__(self, conf, registered_datasources, callback_function):
-        super(SynchronizerService, self).__init__()
+        super(DatasourceService, self).__init__()
         self.conf = conf
         self.registered_datasources = registered_datasources
         self.callback_function = callback_function
 
 
-class SnapshotsService(SynchronizerService):
+class SnapshotsService(DatasourceService):
     def __init__(self, conf, registered_datasources, callback_function):
         super(SnapshotsService, self).__init__(conf,
                                                registered_datasources,
@@ -66,7 +66,7 @@ class SnapshotsService(SynchronizerService):
         self.first_time = False
 
 
-class ChangesService(SynchronizerService):
+class ChangesService(DatasourceService):
     def __init__(self, conf,
                  registered_datasources,
                  changes_interval,
@@ -77,7 +77,7 @@ class ChangesService(SynchronizerService):
         self.changes_interval = changes_interval
 
     def start(self):
-        LOG.info("Vitrage Synchronizer Changes Service For: %s - Starting...",
+        LOG.info("Vitrage Datasource Changes Service For: %s - Starting...",
                  self.registered_datasources[0].__class__.__name__)
 
         super(ChangesService, self).start()
@@ -85,16 +85,16 @@ class ChangesService(SynchronizerService):
                           callback=self._get_changes,
                           initial_delay=self.changes_interval)
 
-        LOG.info("Vitrage Synchronizer Changes Service For: %s - Started!",
+        LOG.info("Vitrage Datasource Changes Service For: %s - Started!",
                  self.registered_datasources[0].__class__.__name__)
 
     def stop(self, graceful=False):
-        LOG.info("Vitrage Synchronizer Changes Service For: %s - Stopping...",
+        LOG.info("Vitrage Datasource Changes Service For: %s - Stopping...",
                  self.registered_datasources[0].__class__.__name__)
 
         super(ChangesService, self).stop()
 
-        LOG.info("Vitrage Synchronizer Changes Service For: %s - Stopped!",
+        LOG.info("Vitrage Datasource Changes Service For: %s - Stopped!",
                  self.registered_datasources[0].__class__.__name__)
 
     def _get_changes(self):

@@ -58,7 +58,7 @@ class EntityCategory(object):
     ALARM = 'ALARM'
 
 
-class SynchronizerProperties(object):
+class DatasourceProperties(object):
     SYNC_TYPE = 'sync_type'
     SYNC_MODE = 'sync_mode'
     SAMPLE_DATE = 'sample_date'

@@ -58,7 +58,7 @@ class VitrageGraphService(os_service.Service):
             self._process_event_non_blocking()
 
     def _process_event_non_blocking(self):
-        """Process events received from the synchronizer
+        """Process events received from datasource
 
         In order that other services (such as graph consistency, api handler)
         could get work time as well, the work processing performed for 2

@@ -14,10 +14,10 @@
 
 from oslo_log import log as logging
 
+from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import EdgeLabels
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import EventAction
-from vitrage.common.constants import SynchronizerProperties as SyncProps
 from vitrage.common.constants import SyncMode
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.datasources.alarm_properties import AlarmProperties as AlarmProps
@@ -62,7 +62,7 @@ class NagiosTransformerTest(base.BaseTest):
             TransformerBase.KEY_SEPARATOR)
 
         self.assertEqual(EntityCategory.ALARM, observed_key_fields[0])
-        self.assertEqual(event[SyncProps.SYNC_TYPE], observed_key_fields[1])
+        self.assertEqual(event[DSProps.SYNC_TYPE], observed_key_fields[1])
         self.assertEqual(event[NagiosProperties.RESOURCE_NAME],
                          observed_key_fields[2])
         self.assertEqual(event[NagiosProperties.SERVICE],
@@ -92,7 +92,7 @@ class NagiosTransformerTest(base.BaseTest):
             self._validate_action(alarm, wrapper)
 
     def _validate_action(self, alarm, wrapper):
-        sync_mode = alarm[SyncProps.SYNC_MODE]
+        sync_mode = alarm[DSProps.SYNC_MODE]
         if sync_mode in (SyncMode.SNAPSHOT, SyncMode.UPDATE):
             if alarm[NagiosProperties.STATUS] == 'OK':
                 self.assertEqual(EventAction.DELETE_ENTITY, wrapper.action)
@@ -104,7 +104,7 @@ class NagiosTransformerTest(base.BaseTest):
     def _validate_vertex(self, vertex, event):
 
         self.assertEqual(EntityCategory.ALARM, vertex[VProps.CATEGORY])
-        self.assertEqual(event[SyncProps.SYNC_TYPE], vertex[VProps.TYPE])
+        self.assertEqual(event[DSProps.SYNC_TYPE], vertex[VProps.TYPE])
         self.assertEqual(event[NagiosProperties.SERVICE], vertex[VProps.NAME])
 
         event_status = event[NagiosProperties.STATUS]

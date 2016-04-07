@@ -14,9 +14,9 @@
 
 from oslo_log import log as logging
 
+from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import EdgeLabels
 from vitrage.common.constants import EntityCategory
-from vitrage.common.constants import SynchronizerProperties as SyncProps
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.common import datetime_utils
 from vitrage.datasources.alarm_properties import AlarmProperties as AlarmProps
@@ -52,7 +52,7 @@ class NagiosTransformer(AlarmTransformerBase):
             '%Y-%m-%d %H:%M:%S',
             tbase.TIMESTAMP_FORMAT)
 
-        sample_timestamp = entity_event[SyncProps.SAMPLE_DATE]
+        sample_timestamp = entity_event[DSProps.SAMPLE_DATE]
 
         update_timestamp = self._format_update_timestamp(update_timestamp,
                                                          sample_timestamp)
@@ -70,7 +70,7 @@ class NagiosTransformer(AlarmTransformerBase):
         return graph_utils.create_vertex(
             self._create_entity_key(entity_event),
             entity_category=EntityCategory.ALARM,
-            entity_type=entity_event[SyncProps.SYNC_TYPE],
+            entity_type=entity_event[DSProps.SYNC_TYPE],
             entity_state=entity_state,
             sample_timestamp=sample_timestamp,
             update_timestamp=update_timestamp,
@@ -125,7 +125,7 @@ class NagiosTransformer(AlarmTransformerBase):
 
     def _create_entity_key(self, entity_event):
 
-        sync_type = entity_event[SyncProps.SYNC_TYPE]
+        sync_type = entity_event[DSProps.SYNC_TYPE]
         alarm_name = entity_event[NagiosProperties.SERVICE]
         resource_name = entity_event[NagiosProperties.RESOURCE_NAME]
         return tbase.build_key(self._key_values(sync_type,

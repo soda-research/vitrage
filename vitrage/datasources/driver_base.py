@@ -17,8 +17,8 @@ import six
 
 from oslo_log import log
 
+from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import EventAction
-from vitrage.common.constants import SynchronizerProperties as SyncProps
 from vitrage.common.constants import SyncMode
 from vitrage.common import datetime_utils
 
@@ -38,9 +38,9 @@ class DriverBase(object):
     @staticmethod
     def _get_end_message(sync_type):
         end_message = {
-            SyncProps.SYNC_TYPE: sync_type,
-            SyncProps.SYNC_MODE: SyncMode.INIT_SNAPSHOT,
-            SyncProps.EVENT_TYPE: EventAction.END_MESSAGE
+            DSProps.SYNC_TYPE: sync_type,
+            DSProps.SYNC_MODE: SyncMode.INIT_SNAPSHOT,
+            DSProps.EVENT_TYPE: EventAction.END_MESSAGE
         }
         return end_message
 
@@ -68,16 +68,16 @@ class DriverBase(object):
 
     @staticmethod
     def _add_sync_type(entity, sync_type):
-        if SyncProps.SYNC_TYPE not in entity:
-            entity[SyncProps.SYNC_TYPE] = sync_type
+        if DSProps.SYNC_TYPE not in entity:
+            entity[DSProps.SYNC_TYPE] = sync_type
 
     @staticmethod
     def _add_sampling_time(entity):
-        entity[SyncProps.SAMPLE_DATE] = str(datetime_utils.utcnow())
+        entity[DSProps.SAMPLE_DATE] = str(datetime_utils.utcnow())
 
     @staticmethod
     def _add_sync_mode(entity, sync_mode):
-        entity[SyncProps.SYNC_MODE] = sync_mode
+        entity[DSProps.SYNC_MODE] = sync_mode
 
     @staticmethod
     @abc.abstractmethod
@@ -96,14 +96,14 @@ class DriverBase(object):
     @staticmethod
     @abc.abstractmethod
     def get_event_types(conf):
-        """Return a list of all event types relevant to this synchronizer
+        """Return a list of all event types relevant to this datasource
 
         Example:
         return ['compute.instance.update',
                 'compute.instance.resume']
 
         It also supports prefixes- the event types which start
-        with this prefix will be processed by this synchronizer:
+        with this prefix will be processed by this driver:
         Example:
         return ['compute.instance']
 
@@ -118,7 +118,7 @@ class DriverBase(object):
     @staticmethod
     @abc.abstractmethod
     def get_topic(conf):
-        """Return the topic of events processed by this synchronizer
+        """Return the topic of events processed by this driver
 
         Example:
         to listen to nova topic, add another topic to nova.conf so nova will
@@ -130,8 +130,8 @@ class DriverBase(object):
         example of get_topic():
          return 'new_topic'
 
-        :param conf: the synchronizer's configuration
-        :return: the topic of the synchronizer
+        :param conf: the datasource's configuration
+        :return: the topic of the datasource
         :rtype: str
         """
 

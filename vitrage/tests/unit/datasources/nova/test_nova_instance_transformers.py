@@ -16,10 +16,10 @@ import datetime
 
 from oslo_log import log as logging
 
+from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import EdgeLabels
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import EventAction
-from vitrage.common.constants import SynchronizerProperties as SyncProps
 from vitrage.common.constants import SyncMode
 from vitrage.common.constants import VertexProperties
 from vitrage.datasources.nova.host import NOVA_HOST_DATASOURCE
@@ -109,7 +109,7 @@ class NovaInstanceTransformerTest(base.BaseTest):
             host_neighbor = wrapper.neighbors[0]
             self._validate_host_neighbor(host_neighbor, event)
 
-            sync_mode = event[SyncProps.SYNC_MODE]
+            sync_mode = event[DSProps.SYNC_MODE]
             if sync_mode == SyncMode.INIT_SNAPSHOT:
                 self.assertEqual(EventAction.CREATE_ENTITY, wrapper.action)
             elif sync_mode == SyncMode.SNAPSHOT:
@@ -138,7 +138,7 @@ class NovaInstanceTransformerTest(base.BaseTest):
             self.assertEqual(1, len(neighbors))
             self._validate_host_neighbor(neighbors[0], event)
 
-            event_type = event[SyncProps.EVENT_TYPE]
+            event_type = event[DSProps.EVENT_TYPE]
             if event_type == 'compute.instance.delete.end':
                 self.assertEqual(EventAction.DELETE_ENTITY, wrapper.action)
             elif event_type == 'compute.instance.create.start':
@@ -175,7 +175,7 @@ class NovaInstanceTransformerTest(base.BaseTest):
         observed_state = vertex[VertexProperties.STATE]
         self.assertEqual(expected_state, observed_state)
 
-        expected_timestamp = event[SyncProps.SAMPLE_DATE]
+        expected_timestamp = event[DSProps.SAMPLE_DATE]
         observed_timestamp = vertex[VertexProperties.SAMPLE_TIMESTAMP]
         self.assertEqual(expected_timestamp, observed_timestamp)
 
@@ -197,7 +197,7 @@ class NovaInstanceTransformerTest(base.BaseTest):
         name = 'host' if tbase.is_update_event(event) \
             else 'OS-EXT-SRV-ATTR:host'
         host_name = tbase.extract_field_value(event, name)
-        time = event[SyncProps.SAMPLE_DATE]
+        time = event[DSProps.SAMPLE_DATE]
 
         ht = self.transformers[NOVA_HOST_DATASOURCE]
         properties = {

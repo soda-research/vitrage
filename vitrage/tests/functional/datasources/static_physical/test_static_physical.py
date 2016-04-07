@@ -14,8 +14,8 @@
 
 from oslo_config import cfg
 
+from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import EntityCategory
-from vitrage.common.constants import SynchronizerProperties as SyncProps
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.datasources import NAGIOS_DATASOURCE
 from vitrage.datasources import NOVA_HOST_DATASOURCE
@@ -66,7 +66,7 @@ class TestStaticPhysical(TestDataSourcesBase):
             snapshot_events=1)
         static_events = mock_driver.generate_random_events_list(spec_list)
         static_physical_event = static_events[0]
-        static_physical_event[SyncProps.SYNC_TYPE] = SWITCH
+        static_physical_event[DSProps.SYNC_TYPE] = SWITCH
         static_physical_event['relationships'][0]['name'] = \
             self._find_entity_id_by_type(processor.entity_graph,
                                          NOVA_HOST_DATASOURCE)

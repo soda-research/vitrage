@@ -35,7 +35,7 @@ class TestNagiosConfig(base.BaseTest):
                    required=True),
         cfg.StrOpt('driver',
                    default='vitrage.datasources.nagios.driver.NagiosDriver',
-                   help='Nagios plugin synchronizer class path',
+                   help='Nagios driver class path',
                    required=True),
         cfg.IntOpt('changes_interval',
                    default=30,

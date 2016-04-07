@@ -12,8 +12,8 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import EntityCategory
-from vitrage.common.constants import SynchronizerProperties as SyncProps
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.datasources.neutron.network import NEUTRON_NETWORK_DATASOURCE
 from vitrage.datasources.resource_transformer_base import \
@@ -51,12 +51,12 @@ class NetworkTransformer(ResourceTransformerBase):
             VProps.NAME: name,
         }
 
-        sample_timestamp = entity_event[SyncProps.SAMPLE_DATE]
+        sample_timestamp = entity_event[DSProps.SAMPLE_DATE]
 
         # TODO(Alexey): need to check here that only the UPDATE sync_mode will
         #               update the UPDATE_TIMESTAMP property
         update_timestamp = self._format_update_timestamp(
-            extract_field_value(entity_event, SyncProps.SAMPLE_DATE),
+            extract_field_value(entity_event, DSProps.SAMPLE_DATE),
             sample_timestamp)
 
         return graph_utils.create_vertex(

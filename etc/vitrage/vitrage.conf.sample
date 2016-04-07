@@ -118,8 +118,8 @@
 # Aodh plugin transformer class path (string value)
 #transformer = vitrage.datasources.aodh.transformer.AodhTransformer
 
-# Aodh plugin synchronizer class path (string value)
-#synchronizer = vitrage.datasources.aodh.driver.AodhDriver
+# Aodh datasource driver class path (string value)
+#driver = vitrage.datasources.aodh.driver.AodhDriver
 
 # interval between checking changes in aodh datasource (integer value)
 # Minimum value: 30
@@ -399,7 +399,7 @@
 #transformer = vitrage.datasources.nagios.transformer.NagiosTransformer
 
 # Nagios plugin driver class path (string value)
-#synchronizer = vitrage.datasources.nagios.driver.NagiosDriver
+#driver = vitrage.datasources.nagios.driver.NagiosDriver
 
 # interval between checking changes in nagios datasource (integer value)
 # Minimum value: 30
@@ -428,7 +428,7 @@
 #transformer = vitrage.datasources.nova.host.transformer.HostTransformer
 
 # Nova host driver class path (string value)
-#synchronizer = vitrage.datasources.nova.host.driver.HostDriver
+#driver = vitrage.datasources.nova.host.driver.HostDriver
 
 
 [nova.instance]
@@ -441,7 +441,7 @@
 #transformer = vitrage.datasources.nova.instance.transformer.InstanceTransformer
 
 # Nova instance driver class path (string value)
-#synchronizer = vitrage.datasources.nova.instance.driver.InstanceDriver
+#driver = vitrage.datasources.nova.instance.driver.InstanceDriver
 
 
 [nova.zone]
@@ -454,7 +454,7 @@
 #transformer = vitrage.datasources.nova.zone.transformer.ZoneTransformer
 
 # Nova zone driver class path (string value)
-#synchronizer = vitrage.datasources.nova.zone.driver.ZoneDriver
+#driver = vitrage.datasources.nova.zone.driver.ZoneDriver
 
 
 [oslo_middleware]
@@ -523,10 +523,10 @@
 #
 
 # Static physical transformer class path (string value)
-#transformer = vitrage.synchronizer.plugins.static_physical.transformer.StaticPhysicalTransformer
+#transformer = vitrage.datasources.static_physical.transformer.StaticPhysicalTransformer
 
-# Static physical synchronizer class path (string value)
-#synchronizer = vitrage.synchronizer.plugins.static_physical.synchronizer.StaticPhysicalSynchronizer
+# Static physical driver class path (string value)
+#driver = vitrage.datasources.static_physical.driver.StaticPhysicalDriver
 
 # interval between checking changes in the configuration files of the physical
 # topology plugin (integer value)
@@ -540,7 +540,7 @@
 #entities = switch
 
 
-[synchronizer]
+[datasources]
 
 #
 # From vitrage
@@ -550,12 +550,5 @@
 # Minimum value: 10
 #snapshots_interval = 600
 
-
-[plugins]
-
-#
-# From vitrage
-#
-
 # Names of supported plugins (list value)
-#plugin_type = nagios,nova.host,nova.instance,nova.zone,static_physical,aodh
+#types = nagios,nova.host,nova.instance,nova.zone,static_physical,aodh

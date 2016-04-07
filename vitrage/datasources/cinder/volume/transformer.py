@@ -14,10 +14,10 @@
 
 from oslo_log import log as logging
 
+from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import EdgeLabels
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import EventAction
-from vitrage.common.constants import SynchronizerProperties as SyncProps
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.datasources.cinder.volume import CINDER_VOLUME_DATASOURCE
 from vitrage.datasources.nova.instance import NOVA_INSTANCE_DATASOURCE
@@ -79,7 +79,7 @@ class CinderVolumeTransformer(ResourceTransformerBase):
 
         entity_key = self._create_entity_key(entity_event)
 
-        sample_timestamp = entity_event[SyncProps.SAMPLE_DATE]
+        sample_timestamp = entity_event[DSProps.SAMPLE_DATE]
 
         return graph_utils.create_vertex(
             entity_key,
@@ -136,7 +136,7 @@ class CinderVolumeTransformer(ResourceTransformerBase):
 
         instance_id = attachment[instance_id_property]
 
-        sample_timestamp = entity_event[SyncProps.SAMPLE_DATE]
+        sample_timestamp = entity_event[DSProps.SAMPLE_DATE]
 
         properties = {
             VProps.ID: instance_id,

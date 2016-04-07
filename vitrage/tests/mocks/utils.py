@@ -57,7 +57,7 @@ def _get_full_path(target_filename, target_folder):
     """
 
     if target_folder is None:
-        target_folder = '%s/mock_configurations/synchronizer' % \
+        target_folder = '%s/mock_configurations/driver' % \
                         get_resources_dir()
     target = '{0}/{1}'.format(target_folder, target_filename)
     return target

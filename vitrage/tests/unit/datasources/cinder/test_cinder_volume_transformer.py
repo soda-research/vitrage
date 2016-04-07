@@ -16,9 +16,9 @@ import datetime
 
 from oslo_log import log as logging
 
+from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import EdgeLabels
 from vitrage.common.constants import EntityCategory
-from vitrage.common.constants import SynchronizerProperties as SyncProps
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.datasources.cinder.volume import CINDER_VOLUME_DATASOURCE
 from vitrage.datasources.cinder.volume.transformer \
@@ -151,14 +151,14 @@ class TestCinderVolumeTransformer(base.BaseTest):
         is_update_event = tbase.is_update_event(event)
 
         self.assertEqual(EntityCategory.RESOURCE, vertex[VProps.CATEGORY])
-        self.assertEqual(event[SyncProps.SYNC_TYPE], vertex[VProps.TYPE])
+        self.assertEqual(event[DSProps.SYNC_TYPE], vertex[VProps.TYPE])
 
         id_field_path = 'volume_id' if is_update_event else 'id'
         self.assertEqual(
             tbase.extract_field_value(event, id_field_path),
             vertex[VProps.ID])
 
-        self.assertEqual(event[SyncProps.SAMPLE_DATE],
+        self.assertEqual(event[DSProps.SAMPLE_DATE],
                          vertex[VProps.SAMPLE_TIMESTAMP])
 
         name_field_path = 'display_name'

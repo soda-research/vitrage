@@ -21,8 +21,8 @@ import six
 from vitrage.common import datetime_utils
 
 import vitrage.common.constants as cons
+from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import EventAction
-from vitrage.common.constants import SynchronizerProperties as SyncProps
 from vitrage.common.constants import SyncMode
 from vitrage.common.exception import VitrageTransformerError
 from vitrage.datasources import OPENSTACK_NODE
@@ -83,7 +83,7 @@ def convert_timestamp_format(current_timestamp_format, timestamp):
 
 
 def is_update_event(event):
-    return event[SyncProps.SYNC_MODE] == SyncMode.UPDATE
+    return event[DSProps.SYNC_MODE] == SyncMode.UPDATE
 
 
 @six.add_metaclass(abc.ABCMeta)
@@ -184,11 +184,11 @@ class TransformerBase(object):
         :rtype: str
         """
 
-        sync_mode = entity_event[SyncProps.SYNC_MODE]
+        sync_mode = entity_event[DSProps.SYNC_MODE]
 
         if SyncMode.UPDATE == sync_mode:
             return self.UPDATE_EVENT_TYPES.get(
-                entity_event.get(SyncProps.EVENT_TYPE, None),
+                entity_event.get(DSProps.EVENT_TYPE, None),
                 EventAction.UPDATE_ENTITY)
 
         if SyncMode.SNAPSHOT == sync_mode:
@@ -212,16 +212,18 @@ class TransformerBase(object):
 
     @staticmethod
     def _create_end_vertex(entity_event):
-        sync_type = entity_event[SyncProps.SYNC_TYPE]
+        sync_type = entity_event[DSProps.SYNC_TYPE]
         return graph_utils.create_vertex(
             'END_MESSAGE:' + sync_type,
             entity_type=sync_type)
 
     @staticmethod
     def _is_end_message(entity_event):
-        return entity_event[SyncProps.SYNC_MODE] == SyncMode.INIT_SNAPSHOT and\
-            SyncProps.EVENT_TYPE in entity_event and \
-            entity_event[SyncProps.EVENT_TYPE] == EventAction.END_MESSAGE
+
+        sync_mode = entity_event[DSProps.SYNC_MODE]
+        is_snapshot_event = sync_mode == SyncMode.INIT_SNAPSHOT
+        event_type = entity_event.get(DSProps.EVENT_TYPE, None)
+        return is_snapshot_event and event_type == EventAction.END_MESSAGE
 
     @staticmethod
     def _format_update_timestamp(update_timestamp, sample_timestamp):
