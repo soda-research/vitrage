@@ -8,6 +8,8 @@ In order to enable Vitrage:
 
 * `Enabling Vitrage in horizon <https://github.com/openstack/vitrage-dashboard/blob/master/README.rst/>`_
 
+* `Nagios devstack installation <https://github.com/openstack/vitrage/blob/master/doc/source/nagios-devstack-installation.rst/>`_
+
 
 -------------
 Configuration
