@@ -1,0 +1,6 @@
+category: RESOURCE
+states:
+  - normalized state:
+      name: UNRECOGNIZED
+      priority: 10
+      original states:

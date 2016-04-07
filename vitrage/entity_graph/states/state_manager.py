@@ -222,8 +222,8 @@ class StateManager(object):
 
         for datasource_type in datasource_types:
             if datasource_type not in datasources_with_state_conf:
-                LOG.error("No state configuration file for: %s",
-                          datasource_type)
+                LOG.info("No state configuration file for: %s",
+                         datasource_type)
 
     @staticmethod
     def _get_updated_property(new_vertex, graph_vertex, prop):
