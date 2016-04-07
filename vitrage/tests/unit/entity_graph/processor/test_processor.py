@@ -12,8 +12,6 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import unittest
-
 from oslo_config import cfg
 
 from vitrage.common.constants import DatasourceProperties as DSProps
@@ -49,8 +47,6 @@ class TestProcessor(TestEntityGraphUnitBase):
         cls.conf.register_opts(cls.DATASOURCES_OPTS, group='datasources')
         cls.load_datasources(cls.conf)
 
-    # TODO(Alexey): un skip this test when instance transformer update is ready
-    @unittest.skip('Not ready yet')
     def test_process_event(self):
         # check create instance event
         processor = proc.Processor(self.conf, InitializationStatus())
@@ -61,11 +57,12 @@ class TestProcessor(TestEntityGraphUnitBase):
                           self.NUM_EDGES_AFTER_CREATION)
 
         # check update instance even
-        # TODO(Alexey): Create an event in update event structure
-        # (update snapshot fields won't work)
         event[DSProps.SYNC_MODE] = SyncMode.UPDATE
         event[DSProps.EVENT_TYPE] = 'compute.instance.volume.attach'
         event['hostname'] = 'new_host'
+        event['instance_id'] = event['id']
+        event['state'] = event['status']
+        event['host'] = event['OS-EXT-SRV-ATTR:host']
         processor.process_event(event)
         self._check_graph(processor, self.NUM_VERTICES_AFTER_CREATION,
                           self.NUM_EDGES_AFTER_CREATION)

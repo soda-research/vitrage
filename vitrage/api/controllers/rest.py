@@ -19,6 +19,7 @@ from oslo_log import log
 import pecan as pecan
 from pecan import abort
 from pecan import rest
+from vitrage.common.constants import EntityCategory
 
 from vitrage.datasources import OPENSTACK_NODE
 
@@ -28,7 +29,9 @@ LOG = log.getLogger(__name__)
 class RootRestController(rest.RestController):
 
     @staticmethod
-    def as_tree(graph, root=OPENSTACK_NODE, reverse=False):
+    def as_tree(graph,
+                root='%s:%s' % (EntityCategory.RESOURCE, OPENSTACK_NODE),
+                reverse=False):
         linked_graph = json_graph.node_link_graph(graph)
         if reverse:
             linked_graph = linked_graph.reverse()
