@@ -106,7 +106,9 @@ class NotificationsEndpoint(object):
 
     def info(self, ctxt, publisher_id, event_type, payload, metadata):
 
-        LOG.debug('EVENT RECEIVED: %s' % json.dumps(payload))
+        LOG.debug('EVENT RECEIVED: %(event_type)s -> %(payload)s ' % {
+            'event_type': str(event_type), 'payload': json.dumps(payload)}
+        )
 
         # TODO(Alexey): improve skipped implementation because we need to skip
         #               event depending on the drivers and not for all drivers
