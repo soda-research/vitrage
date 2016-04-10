@@ -147,6 +147,11 @@ function configure_vitrage {
         disable_vitrage_datasource aodh
     fi
 
+    # remove nagios vitrage datasource if nagios datasource not installed
+    if [ "$VITRAGE_USE_NAGIOS" == "False" ]; then
+        disable_vitrage_datasource nagios
+    fi
+
     # copy the mock sample files
     cp $VITRAGE_DIR/etc/vitrage/*.sample.json $VITRAGE_CONF_DIR
 
