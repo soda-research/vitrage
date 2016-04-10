@@ -45,11 +45,8 @@ class PortTransformer(ResourceTransformerBase):
         super(PortTransformer, self).__init__(transformers)
 
     def _create_entity_key(self, entity_event):
-        port_id = 'port_id' if tbase.is_update_event(entity_event) \
-            else 'id'
         key_fields = self._key_values(NEUTRON_PORT_DATASOURCE,
-                                      extract_field_value(entity_event,
-                                                          port_id))
+                                      extract_field_value(entity_event, 'id'))
         return tbase.build_key(key_fields)
 
     def _create_snapshot_entity_vertex(self, entity_event):
