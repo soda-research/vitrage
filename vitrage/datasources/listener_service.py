@@ -104,6 +104,9 @@ class NotificationsEndpoint(object):
         self.skipped_event_types = skipped_event_types
 
     def info(self, ctxt, publisher_id, event_type, payload, metadata):
+
+        LOG.debug('EVENT RECEIVED: %s' % str(payload))
+
         # TODO(Alexey): improve skipped implementation because we need to skip
         #               event depending on the drivers and not for all drivers
         if event_type in self.skipped_event_types:
