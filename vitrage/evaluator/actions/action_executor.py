@@ -26,7 +26,6 @@ from vitrage.evaluator.actions.base import ActionType
 from vitrage.evaluator.actions.evaluator_event_transformer import VITRAGE_TYPE
 from vitrage.evaluator.actions.recipes.action_steps import ADD_EDGE
 from vitrage.evaluator.actions.recipes.action_steps import ADD_VERTEX
-from vitrage.evaluator.actions.recipes.action_steps import NOTIFY
 from vitrage.evaluator.actions.recipes.action_steps import REMOVE_EDGE
 from vitrage.evaluator.actions.recipes.action_steps import REMOVE_VERTEX
 from vitrage.evaluator.actions.recipes.action_steps import UPDATE_VERTEX
@@ -42,10 +41,9 @@ LOG = logging.getLogger(__name__)
 
 class ActionExecutor(object):
 
-    def __init__(self, event_queue, notifier=None):
+    def __init__(self, event_queue):
         self.event_queue = event_queue
         self.action_recipes = ActionExecutor._register_action_recipes()
-        self.notifier = notifier
 
         self.action_step_defs = {
             ADD_VERTEX: self.add_vertex,
@@ -53,7 +51,6 @@ class ActionExecutor(object):
             UPDATE_VERTEX: self.update_vertex,
             ADD_EDGE: self.add_edge,
             REMOVE_EDGE: self.remove_edge,
-            NOTIFY: self.notify
         }
 
     def execute(self, action_spec, action_mode):
@@ -105,12 +102,6 @@ class ActionExecutor(object):
         event[EVALUATOR_EVENT_TYPE] = REMOVE_EDGE
 
         self.event_queue.put(event)
-
-    def notify(self, params):
-        if self.notifier:
-            event_type = params['event_type']
-            del params['event_type']
-            self.notifier.notify(event_type, params)
 
     @staticmethod
     def _add_default_properties(event):

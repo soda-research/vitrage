@@ -25,7 +25,6 @@ from vitrage.graph.algo_driver.algorithm import Mapping
 from vitrage.graph import create_algorithm
 from vitrage.graph import create_graph
 from vitrage.graph.driver import Vertex
-from vitrage.messaging import VitrageNotifier
 
 
 LOG = log.getLogger(__name__)
@@ -43,10 +42,7 @@ class ScenarioEvaluator(object):
         self._entity_graph = entity_graph
         self._graph_algs = create_algorithm(entity_graph)
         self._scenario_repo = scenario_repo
-        self._notifier = VitrageNotifier(conf,
-                                         'vitrage.evaluator',
-                                         conf.evaluator.notifier_topic)
-        self._action_executor = ActionExecutor(event_queue, self._notifier)
+        self._action_executor = ActionExecutor(event_queue)
         self._entity_graph.subscribe(self.process_event)
         self.enabled = enabled
 
