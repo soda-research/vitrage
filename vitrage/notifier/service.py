@@ -30,7 +30,7 @@ class VitrageNotifierService(os_service.Service):
         self.conf = conf
         self.notifiers = [AodhNotifier(conf)]
         transport = messaging.get_transport(conf)
-        target = oslo_messaging.Target(topic=conf.evaluator.notifier_topic)
+        target = oslo_messaging.Target(topic='stam')
         self.listener = messaging.get_notification_listener(
             transport, [target],
             [VitrageEventEndpoint(self.notifiers)])

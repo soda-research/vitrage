@@ -13,11 +13,9 @@
 # under the License.
 from oslo_log import log as logging
 
-from vitrage.common.constants import NotifierEventTypes
 from vitrage.datasources.alarm_properties import AlarmProperties
 from vitrage.evaluator.actions.base import ActionType
 from vitrage.evaluator.actions.recipes.action_steps import ADD_VERTEX
-from vitrage.evaluator.actions.recipes.action_steps import NOTIFY
 from vitrage.evaluator.actions.recipes.action_steps import REMOVE_VERTEX
 from vitrage.evaluator.actions.recipes.raise_alarm import RaiseAlarm
 from vitrage.evaluator.template import ActionSpecs
@@ -49,8 +47,8 @@ class RaiseAlarmRecipeTest(base.BaseTest):
 
         # Test Assertions
 
-        # expecting for two steps: [add_vertex, notify]
-        self.assertEqual(2, len(action_steps))
+        # expecting for one step: [add_vertex]
+        self.assertEqual(1, len(action_steps))
 
         self.assertEqual(ADD_VERTEX, action_steps[0].type)
         add_vertex_step_params = action_steps[0].params
@@ -65,19 +63,6 @@ class RaiseAlarmRecipeTest(base.BaseTest):
         alarm_state = add_vertex_step_params[TFields.STATE]
         self.assertEqual(alarm_state, AlarmProperties.ALARM_ACTIVE_STATE)
 
-        self.assertEqual(NOTIFY, action_steps[1].type)
-        notify_params = action_steps[1].params
-
-        affected_resource_id = notify_params['affected_resource_id']
-        self.assertEqual(self.target_vertex_id, affected_resource_id)
-
-        event_type = notify_params['event_type']
-        self.assertEqual(NotifierEventTypes.ACTIVATE_DEDUCED_ALARM_EVENT,
-                         event_type)
-
-        name = notify_params['name']
-        self.assertEqual(self.props[TFields.ALARM_NAME], name)
-
     def test_get_undo_recipe(self):
 
         # Test Action
@@ -85,8 +70,8 @@ class RaiseAlarmRecipeTest(base.BaseTest):
 
         # Test Assertions
 
-        # expecting for two steps: [remove_vertex, notify]
-        self.assertEqual(2, len(action_steps))
+        # expecting for one step: [remove_vertex]
+        self.assertEqual(1, len(action_steps))
 
         self.assertEqual(REMOVE_VERTEX, action_steps[0].type)
         remove_vertex_step_params = action_steps[0].params
@@ -102,19 +87,3 @@ class RaiseAlarmRecipeTest(base.BaseTest):
 
         alarm_state = remove_vertex_step_params[TFields.STATE]
         self.assertEqual(alarm_state, AlarmProperties.ALARM_INACTIVE_STATE)
-
-        self.assertEqual(NOTIFY, action_steps[1].type)
-        notify_params = action_steps[1].params
-
-        # notify expects 3 params: name, event_type and affected_resource_id
-        self.assertEqual(3, len(notify_params))
-
-        affected_resource_id = notify_params['affected_resource_id']
-        self.assertEqual(self.target_vertex_id, affected_resource_id)
-
-        event_type = notify_params['event_type']
-        self.assertEqual(NotifierEventTypes.DEACTIVATE_DEDUCED_ALARM_EVENT,
-                         event_type)
-
-        name = notify_params['name']
-        self.assertEqual(self.props[TFields.ALARM_NAME], name)
