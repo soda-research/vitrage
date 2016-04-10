@@ -11,6 +11,7 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+
 from vitrage.datasources.resource_transformer_base import \
     ResourceTransformerBase
 
@@ -19,6 +20,7 @@ from oslo_log import log as logging
 from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import EdgeLabels
 from vitrage.common.constants import EntityCategory
+from vitrage.common.constants import EventAction
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.datasources.neutron.network import NEUTRON_NETWORK_DATASOURCE
 from vitrage.datasources.neutron.port import NEUTRON_PORT_DATASOURCE
@@ -33,6 +35,12 @@ LOG = logging.getLogger(__name__)
 
 
 class PortTransformer(ResourceTransformerBase):
+
+    # Event types which need to refer them differently
+    UPDATE_EVENT_TYPES = {
+        'port.delete.end': EventAction.DELETE_ENTITY,
+    }
+
     def __init__(self, transformers):
         super(PortTransformer, self).__init__(transformers)
 

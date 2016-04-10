@@ -12,27 +12,30 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from vitrage.common.constants import DatasourceProperties as DSProps
+from vitrage.common.constants import SyncMode
 from vitrage.datasources.neutron.base import NeutronBase
 from vitrage.datasources.neutron.network import NEUTRON_NETWORK_DATASOURCE
 
 
+# noinspection PyAbstractClass
 class NetworkDriver(NeutronBase):
 
     @staticmethod
-    def get_skipped_event_types():
-        return []
-
-    @staticmethod
     def get_topic(conf):
-        pass
+        return conf[NEUTRON_NETWORK_DATASOURCE].notification_topic
 
     @staticmethod
     def get_event_types(conf):
-        return []
+        return ['network.']
 
     @staticmethod
     def enrich_event(event, event_type):
-        pass
+        event[DSProps.EVENT_TYPE] = event_type
+
+        return NetworkDriver.make_pickleable([event],
+                                             NEUTRON_NETWORK_DATASOURCE,
+                                             SyncMode.UPDATE)[0]
 
     def get_all(self, sync_mode):
         return self.make_pickleable(

@@ -26,4 +26,7 @@ OPTS = [
                default='vitrage.datasources.neutron.port.driver.PortDriver',
                help='Neutron port driver class path',
                required=True),
+    cfg.StrOpt('notification_topic',
+               default='vitrage_notifications',
+               help='Neutron port configured notifications topic for Vitrage'),
 ]

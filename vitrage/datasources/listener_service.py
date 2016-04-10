@@ -13,6 +13,7 @@
 # under the License.
 
 from collections import defaultdict
+import json
 
 from oslo_log import log
 import oslo_messaging
@@ -105,7 +106,7 @@ class NotificationsEndpoint(object):
 
     def info(self, ctxt, publisher_id, event_type, payload, metadata):
 
-        LOG.debug('EVENT RECEIVED: %s' % str(payload))
+        LOG.debug('EVENT RECEIVED: %s' % json.dumps(payload))
 
         # TODO(Alexey): improve skipped implementation because we need to skip
         #               event depending on the drivers and not for all drivers

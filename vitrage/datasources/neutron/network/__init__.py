@@ -27,4 +27,8 @@ OPTS = [
                        'NetworkDriver',
                help='Neutron network driver class path',
                required=True),
+    cfg.StrOpt('notification_topic',
+               default='vitrage_notifications',
+               help='Neutron network configured notifications topic for '
+                    'Vitrage'),
 ]
