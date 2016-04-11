@@ -1,11 +1,29 @@
-=========================
-Alarm State Configuration
-=========================
+============================
+Alarm Severity Configuration
+============================
 
-Configure Access to Alarm State
--------------------------------
+Overview
+--------
 
-The following should be set in **/etc/vitrage/vitrage.conf**, under entity_graph section:
+Vitrage retrieves information from diverse data-sources regarding alarms in
+the cloud, and stores and combines this information into a unified system
+model. An important property of an alarm is its **severity**. This severity can
+be used both in the Vitrage templates to trigger actions, and in the Horizon UI
+for color-coding purposes. Therefore, it is important that within the Vitrage
+data model, severity names are normalized.
+
+Since each data-source might represent severity differently, for each
+data-source we can supply it's own mapping to the normalized severity supported
+in Vitrage. This page explains how to handle this mapping for a given
+data-source.
+
+
+Configure Access to Alarm Severity
+----------------------------------
+
+The alarm severity configuration is handled via config files. The location of
+these files can be determined in **/etc/vitrage/vitrage.conf**. Under the
+[entity_graph] section, set:
 
 +----------------------+------------------------------------+--------------------------------+
 | Name                 | Description                        | Default Value                  |
@@ -18,40 +36,59 @@ The following should be set in **/etc/vitrage/vitrage.conf**, under entity_graph
 Configure Alarm State Mapping
 -----------------------------
 
-Alarm state configuration is made to configure how states of specific alarm are normalized.
-For each normalized state a priority is set as well, so that when alarm will have the original state and the Vitrage state, Vitrage will know what state is more important.
-UNKNOWN state has to be configured in each alarm state configuration file.
+The alarm severity configuration files configure how the severity of each
+alarm is normalized. There are several guidelines for creating a config file:
 
-The file name has to be in the same name as it's plugin name.
-State configuration yaml file has to be defined for all the plugins which were chosen to be used in Vitrage.
+- Normalized alarm states which can be mapped to can be found in
+  normalized_alarm_severity.py (NormalizedAlarmSeverity class).
+- Each normalized severity also comes with a priority, so
+  that if an alarm is given different severities from different sources (e.g.,
+  a host alarm raised both by nagios and Vitrage), the severity with the
+  highest priority will be used as the **aggregated state**.
+- The *UNKNOWN* severity will be used for severities with no corresponding
+  normalized severity. This severity *must* appear in the config file.
+- The config file is in YAML format.
+- The config filename must be <datasource name>.yaml, for the relevant
+  datasource.
+- Defining a config file for each datasource is recommended, but not mandatory.
+  Datasources with no such configuration will use the states as-is.
 
-**Format**
+
+Default Configuration
++++++++++++++++++++++
+
+Default configurations for alarms severities will be installed with Vitrage for
+all the pre-packaged data-sources.
+
+
+
+
+Format
+++++++
 ::
 
     category: ALARM
     states:
       - normalized state:
-          name: <Normalized alarm state name - must be from NormalizedAlarmState class>
-          priority: <Alarm state priority - an integer>
+          name: <normalized alarm severity>
+          priority: <Alarm severity priority - an integer>
           original states:
-            - name: <Original alarm state name>
-            - name: <Original alarm state name>
+            - name: <Original alarm severity name>
+            - name: ... # can list several severities for one normalized
       - normalized state:
-          name: <Normalized alarm state name - must be from NormalizedAlarmState class>
-          priority: <Alarm state priority - an integer>
-          original states:
-            - name: <Original alarm state name>
-            - name: <Original alarm state name>
+          name: ... # can list several normalized severities
+          ...
 
 
   ...
 
 
-**Example**
+Example
++++++++
 
-The following file will map alarm states.
-Original states 'CRITICAL' and 'DOWN' will be mapped to normalized state 'CRITICAL'.
-Normalized state 'SEVERE' has no original states.
+The following file will map alarm severities.
+Original severities 'CRITICAL' and 'DOWN' will be mapped to normalized state
+'CRITICAL'. Normalized state 'SEVERE' has no original severity.
 Original state 'WARNING' is mapped to normalized state 'WARNING', etc.
 
 ::
@@ -84,12 +121,3 @@ Original state 'WARNING' is mapped to normalized state 'WARNING', etc.
           original states:
             - name: OK
             - name: UP
-
-
-
-**Default Configuration**
-
-Default configurations for alarms states will be installed with Vitrage.
-
-
-
