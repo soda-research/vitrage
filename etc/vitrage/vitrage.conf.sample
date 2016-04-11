@@ -237,8 +237,8 @@
 # From vitrage
 #
 
-# A path for the configuration files of the data sources states (string value)
-#states_plugins_dir = /etc/vitrage/datasources_states
+# A path for the configuration files of the data sources values (string value)
+#datasources_values_dir = /etc/vitrage/datasources_values
 
 
 [evaluator]

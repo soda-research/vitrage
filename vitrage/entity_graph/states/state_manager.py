@@ -29,7 +29,7 @@ LOG = log.getLogger(__name__)
 
 
 class StateManager(object):
-    STATES = 'states'
+    VALUES = 'values'
     PRIORITIES = 'priorities'
 
     def __init__(self, conf):
@@ -46,8 +46,8 @@ class StateManager(object):
 
             states_conf = self.datasources_state_confs[datasource_name]
 
-            return states_conf[self.STATES][upper_state] \
-                if upper_state in states_conf[self.STATES] \
+            return states_conf[self.VALUES][upper_state] \
+                if upper_state in states_conf[self.VALUES] \
                 else states_conf[important_states.unknown]
         else:
             return important_states.undefined
@@ -115,16 +115,16 @@ class StateManager(object):
         erroneous_datasources = []
 
         files = file_utils.load_files(
-            self.conf.entity_graph.datasources_states_dir, '.yaml')
+            self.conf.entity_graph.datasources_values_dir, '.yaml')
 
         for file_name in files:
             try:
-                full_path = self.conf.entity_graph.datasources_states_dir \
+                full_path = self.conf.entity_graph.datasources_values_dir \
                     + '/' + file_name
                 states, priorities = \
                     self._retrieve_states_and_priorities_from_file(full_path)
                 ok_datasources[os.path.splitext(file_name)[0]] = {
-                    self.STATES: states,
+                    self.VALUES: states,
                     self.PRIORITIES: priorities
                 }
             except Exception as e:
@@ -145,17 +145,17 @@ class StateManager(object):
         config = file_utils.load_yaml_file(full_path, with_exception=True)
         category = config['category']
 
-        for item in config['states']:
-            normalized_state = item['normalized state']
+        for item in config[self.VALUES]:
+            normalized_state = item['normalized value']
 
-            # original to normalized state
+            # original to normalized value
             normalized_state_name = normalized_state['name']
-            for original_state in normalized_state['original states']:
+            for original_state in normalized_state['original values']:
                 states[original_state['name'].upper()] = normalized_state_name
 
             self._add_default_states(states, priorities, category)
 
-            # normalized state priority
+            # normalized value priority
             priorities[normalized_state_name] = \
                 int(normalized_state['priority'])
 
@@ -164,8 +164,8 @@ class StateManager(object):
         return states, priorities
 
     def _add_default_states(self, states, priorities, category):
-        default_states = self.category_normalizator[category].default_states()
-        for state, priority in default_states:
+        default_values = self.category_normalizator[category].default_states()
+        for state, priority in default_values:
             states[None] = state
             priorities[NormalizedResourceState.UNDEFINED] = priority
 
@@ -176,14 +176,14 @@ class StateManager(object):
             raise ValueError('%s state is not defined in %s',
                              important_states.unknown, full_path)
 
-        # check that all the normalized states exists
+        # check that all the normalized values exists
         state_class_instance = \
             self.category_normalizator[category].get_state_class_instance()
-        normalized_states = StateManager._get_all_local_variables_of_class(
+        normalized_values = StateManager._get_all_local_variables_of_class(
             state_class_instance)
         for key in priorities.keys():
-            if key not in normalized_states:
-                raise ValueError('Normalized state %s for %s is not in %s',
+            if key not in normalized_values:
+                raise ValueError('normalized value %s for %s is not in %s',
                                  key, full_path,
                                  state_class_instance.__class__.__name__)
 

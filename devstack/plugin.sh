@@ -156,12 +156,12 @@ function configure_vitrage {
     cp $VITRAGE_DIR/etc/vitrage/*.sample.json $VITRAGE_CONF_DIR
 
     # create some folders
-    mkdir -p $VITRAGE_CONF_DIR/datasources_states
+    mkdir -p $VITRAGE_CONF_DIR/datasources_values
     mkdir -p $VITRAGE_CONF_DIR/static_datasources
     mkdir -p $VITRAGE_CONF_DIR/templates
 
     # copy datasources
-    cp $VITRAGE_DIR/etc/vitrage/datasources_states/*.yaml $VITRAGE_CONF_DIR/datasources_states
+    cp $VITRAGE_DIR/etc/vitrage/datasources_values/*.yaml $VITRAGE_CONF_DIR/datasources_values
 
 
     configure_auth_token_middleware $VITRAGE_CONF vitrage $VITRAGE_AUTH_CACHE_DIR

@@ -32,8 +32,8 @@ from vitrage.tests.mocks import utils
 class TestStateManager(base.BaseTest):
 
     ENTITY_GRAPH_OPTS = [
-        cfg.StrOpt('datasources_states_dir',
-                   default=utils.get_resources_dir() + '/datasources_states'),
+        cfg.StrOpt('datasources_values_dir',
+                   default=utils.get_resources_dir() + '/datasources_values'),
     ]
 
     DATASOURCES_OPTS = [
@@ -77,9 +77,9 @@ class TestStateManager(base.BaseTest):
     def test_load_datasources_state_with_errors(self):
         # setup
         entity_graph_opts = [
-            cfg.StrOpt('datasources_states_dir',
+            cfg.StrOpt('datasources_values_dir',
                        default=utils.get_resources_dir() +
-                       '/datasources_states/erroneous_states'),
+                       '/datasources_values/erroneous_values'),
         ]
         conf = cfg.ConfigOpts()
         conf.register_opts(entity_graph_opts, group='entity_graph')
@@ -91,9 +91,9 @@ class TestStateManager(base.BaseTest):
 
         # test assertions
         missing_states = 1
-        erroneous_states = 2
+        erroneous_values = 2
         num_valid_datasources = len(state_manager.datasources_state_confs) + \
-            missing_states + erroneous_states
+            missing_states + erroneous_values
         self.assertEqual(len(conf.datasources.types),
                          num_valid_datasources)
 

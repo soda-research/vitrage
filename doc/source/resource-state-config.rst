@@ -7,12 +7,12 @@ Configure Access to Resource State
 
 The following should be set in **/etc/vitrage/vitrage.conf**, under entity_graph section:
 
-+----------------------+------------------------------------+--------------------------------+
-| Name                 | Description                        | Default Value                  |
-+======================+====================================+================================+
-| states_plugins_dir   | Directory path from where to load  | /etc/vitrage/states_plugins/   |
-|                      | the states configurations          |                                |
-+----------------------+------------------------------------+--------------------------------+
++------------------------+------------------------------------+----------------------------------+
+| Name                   | Description                        | Default Value                    |
++========================+====================================+==================================+
+| datasources_values_dir | Directory path from where to load  | /etc/vitrage/datasources_values/ |
+|                        | the values configurations          |                                  |
++------------------------+------------------------------------+----------------------------------+
 
 
 Configure Resource State Mapping
@@ -29,43 +29,43 @@ State configuration yaml file has to be defined for all the plugins which were c
 ::
 
   category: RESOURCE
-  states:
-    - normalized state:
-        name: <Normalized resource state name - must be from NormalizedResourceState class>
-        priority: <Resource state priority - an integer>
-        original states:
-          - name: <Original resource state name>
-          - name: <Original resource state name>
-    - normalized state:
-          name: <Normalized resource state name - must be from NormalizedResourceState class>
-          priority: <Resource state priority - an integer>
-          original states:
-            - name: <Original resource state name>
-            - name: <Original resource state name>
+  values:
+    - normalized value:
+        name: <Normalized resource value name - must be from NormalizedResourcevalue class>
+        priority: <Resource value priority - an integer>
+        original values:
+          - name: <Original resource value name>
+          - name: <Original resource value name>
+    - normalized value:
+          name: <Normalized resource value name - must be from NormalizedResourcevalue class>
+          priority: <Resource value priority - an integer>
+          original values:
+            - name: <Original resource value name>
+            - name: <Original resource value name>
 
   ...
 
 
 **Example**
 
-The following is mapping resource states.
-Original states 'DELETED' and 'TERMINATED' will be mapped to normalized state 'TERMINATED'.
-Original states 'ACTIVE' and 'RUNNING' to normalized state 'RUNNING'.
+The following is mapping resource values.
+Original values 'DELETED' and 'TERMINATED' will be mapped to normalized value 'TERMINATED'.
+Original values 'ACTIVE' and 'RUNNING' to normalized value 'RUNNING'.
 
 ::
 
   category: RESOURCE
-  states:
-    - normalized state:
+  values:
+    - normalized value:
         name: TERMINATED
         priority: 20
-        original states:
+        original values:
           - name: DELETED
           - name: TERMINATED
-    - normalized state:
+    - normalized value:
           name: RUNNING
           priority: 10
-          original states:
+          original values:
             - name: ACTIVE
             - name: RUNNING
 
@@ -73,7 +73,7 @@ Original states 'ACTIVE' and 'RUNNING' to normalized state 'RUNNING'.
 
 **Default Configuration**
 
-Default configurations for resource states will be installed with Vitrage.
+Default configurations for resource values will be installed with Vitrage.
 
 
 

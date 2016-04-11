@@ -34,8 +34,8 @@ from vitrage.tests.mocks import utils
 class TestEntityGraphUnitBase(base.BaseTest):
 
     PROCESSOR_OPTS = [
-        cfg.StrOpt('datasources_states_dir',
-                   default=utils.get_resources_dir() + '/datasources_states'),
+        cfg.StrOpt('datasources_values_dir',
+                   default=utils.get_resources_dir() + '/datasources_values'),
     ]
 
     DATASOURCES_OPTS = [

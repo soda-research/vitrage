@@ -25,33 +25,33 @@ The alarm severity configuration is handled via config files. The location of
 these files can be determined in **/etc/vitrage/vitrage.conf**. Under the
 [entity_graph] section, set:
 
-+----------------------+------------------------------------+--------------------------------+
-| Name                 | Description                        | Default Value                  |
-+======================+====================================+================================+
-| states_plugins_dir   | Directory path from where to load  | /etc/vitrage/states_plugins/   |
-|                      | the states configurations          |                                |
-+----------------------+------------------------------------+--------------------------------+
++------------------------+------------------------------------+----------------------------------+
+| Name                   | Description                        | Default Value                    |
++========================+====================================+==================================+
+| datasources_values_dir | Directory path from where to load  | /etc/vitrage/datasources_values/ |
+|                        | the values configurations          |                                  |
++------------------------+------------------------------------+----------------------------------+
 
 
-Configure Alarm State Mapping
------------------------------
+Configure Alarm Severity Mapping
+--------------------------------
 
 The alarm severity configuration files configure how the severity of each
 alarm is normalized. There are several guidelines for creating a config file:
 
-- Normalized alarm states which can be mapped to can be found in
+- Normalized alarm values which can be mapped to can be found in
   normalized_alarm_severity.py (NormalizedAlarmSeverity class).
 - Each normalized severity also comes with a priority, so
   that if an alarm is given different severities from different sources (e.g.,
   a host alarm raised both by nagios and Vitrage), the severity with the
-  highest priority will be used as the **aggregated state**.
+  highest priority will be used as the **aggregated severity**.
 - The *UNKNOWN* severity will be used for severities with no corresponding
   normalized severity. This severity *must* appear in the config file.
 - The config file is in YAML format.
 - The config filename must be <datasource name>.yaml, for the relevant
   datasource.
 - Defining a config file for each datasource is recommended, but not mandatory.
-  Datasources with no such configuration will use the states as-is.
+  Datasources with no such configuration will use the values as-is.
 
 
 Default Configuration
@@ -68,14 +68,14 @@ Format
 ::
 
     category: ALARM
-    states:
-      - normalized state:
+    values:
+      - normalized value:
           name: <normalized alarm severity>
           priority: <Alarm severity priority - an integer>
-          original states:
+          original values:
             - name: <Original alarm severity name>
             - name: ... # can list several severities for one normalized
-      - normalized state:
+      - normalized value:
           name: ... # can list several normalized severities
           ...
 
@@ -87,37 +87,37 @@ Example
 +++++++
 
 The following file will map alarm severities.
-Original severities 'CRITICAL' and 'DOWN' will be mapped to normalized state
-'CRITICAL'. Normalized state 'SEVERE' has no original severity.
-Original state 'WARNING' is mapped to normalized state 'WARNING', etc.
+Original severities 'CRITICAL' and 'DOWN' will be mapped to normalized value
+'CRITICAL'. Normalized value 'SEVERE' has no original severity.
+Original value 'WARNING' is mapped to normalized value 'WARNING', etc.
 
 ::
 
     category: ALARM
-    states:
-      - normalized state:
+    values:
+      - normalized value:
           name: CRITICAL
           priority: 50
-          original states:
+          original values:
             - name: CRITICAL
             - name: DOWN
-      - normalized state:
+      - normalized value:
           name: SEVERE
           priority: 40
-          original states:
-      - normalized state:
+          original values:
+      - normalized value:
           name: WARNING
           priority: 30
-          original states:
+          original values:
             - name: WARNING
-      - normalized state:
+      - normalized value:
           name: UNKNOWN
           priority: 20
-          original states:
+          original values:
             - name: UNKNOWN
-      - normalized state:
+      - normalized value:
           name: OK
           priority: 10
-          original states:
+          original values:
             - name: OK
             - name: UP

@@ -1,55 +1,56 @@
+# erroneous yaml file - parsing error in DELETED value
 category: RESOURCE
-states:
-  - normalized state:
+values:
+  - normalized value:
       name: TERMINATED
       priority: 90
-      original states:
-        - name: DELETED
+      original values:
+       - name: DELETED
         - name: HARD_DELETED
         - name: SHELVED_OFFLOADED
         - name: SOFT_DELETED
-  - normalized state:
+  - normalized value:
       name: ERROR
       priority: 80
-      original states:
+      original values:
         - name: ERROR
-  - normalized state:
+  - normalized value:
       name: UNRECOGNIZED
       priority: 70
-      original states:
+      original values:
         - name: UNRECOGNIZED
-  - normalized state:
+  - normalized value:
       name: SUSPENDED
       priority: 60
-      original states:
+      original values:
         - name: SUSPENDED
         - name: PAUSED
         - name: STOPPED
         - name: SHELVED
-  - normalized state:
+  - normalized value:
       name: RESCUED
       priority: 50
-      original states:
+      original values:
         - name: RESCUED
-  - normalized state:
+  - normalized value:
       name: RESIZED
       priority: 40
-      original states:
+      original values:
         - name: RESIZED
-  - normalized state:
+  - normalized value:
       name: TRANSIENT
       priority: 30
-      original states:
+      original values:
         - name: BUILDING
         - name: INITIALIZED
-  - normalized state:
+  - normalized value:
       name: SUBOPTIMAL
       priority: 20
-      original states:
+      original values:
         - name: SUBOPTIMAL
-  - normalized state:
+  - normalized value:
       name: RUNNING
       priority: 10
-      original states:
+      original values:
         - name: ACTIVE
         - name: RESIZED
