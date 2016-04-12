@@ -20,6 +20,7 @@ from vitrage.common.constants import VertexProperties as VProps
 from vitrage.datasources.transformer_base import TransformerBase
 from vitrage.entity_graph.processor import base as processor
 from vitrage.entity_graph.processor import entity_graph
+from vitrage.entity_graph.processor.notifier import DeducedAlarmNotifier
 from vitrage.entity_graph.states.state_manager import StateManager
 from vitrage.entity_graph.transformer_manager import TransformerManager
 from vitrage.graph import Direction
@@ -38,6 +39,7 @@ class Processor(processor.ProcessorBase):
         self.initialization_status = initialization_status
         self.entity_graph = entity_graph.EntityGraph("Entity Graph") if \
             e_graph is None else e_graph
+        self._notifier = DeducedAlarmNotifier(conf)
 
     def process_event(self, event):
         """Decides which action to run on given event
@@ -55,7 +57,7 @@ class Processor(processor.ProcessorBase):
         self._enrich_event(event)
         entity = self.transformer_manager.transform(event)
         self._calculate_aggregated_state(entity.vertex, entity.action)
-        return self.actions[entity.action](entity.vertex, entity.neighbors)
+        self.actions[entity.action](entity.vertex, entity.neighbors)
 
     def create_entity(self, new_vertex, neighbors):
         """Adds new vertex to the entity graph
@@ -97,8 +99,8 @@ class Processor(processor.ProcessorBase):
                                                          updated_vertex)
             self._update_neighbors(updated_vertex, neighbors)
         else:
-            LOG.info("Update event arrived on invalid resource: %s",
-                     updated_vertex)
+            LOG.warning("Update event arrived on invalid resource: %s",
+                        updated_vertex)
 
     def delete_entity(self, deleted_vertex, neighbors):
         """Deletes the vertex from the entity graph
@@ -132,8 +134,8 @@ class Processor(processor.ProcessorBase):
 
             self.entity_graph.mark_vertex_as_deleted(deleted_vertex)
         else:
-            LOG.info("Delete event arrived on invalid resource: %s",
-                     deleted_vertex)
+            LOG.warning("Delete event arrived on invalid resource: %s",
+                        deleted_vertex)
 
     def update_relationship(self, entity_vertex, neighbors):
         LOG.debug('Update relationship in entity graph:\n%s', neighbors)
@@ -159,6 +161,12 @@ class Processor(processor.ProcessorBase):
                 len(self.conf.datasources.types):
             self.initialization_status.status = \
                 self.initialization_status.RECEIVED_ALL_END_MESSAGES
+            self.do_on_initialization_end()
+
+    def do_on_initialization_end(self):
+        if self._notifier.enabled:
+            self.entity_graph.subscribe(self._notifier.notify_when_applicable)
+            LOG.info('Graph notifications subscription added')
 
     def _update_neighbors(self, vertex, neighbors):
         """Updates vertices neighbor connections

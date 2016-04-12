@@ -28,9 +28,9 @@ class VitrageNotifierService(os_service.Service):
     def __init__(self, conf):
         super(VitrageNotifierService, self).__init__()
         self.conf = conf
-        self.notifiers = [AodhNotifier(conf)]
+        self.notifiers = self.get_notifier_plugins(conf)
         transport = messaging.get_transport(conf)
-        target = oslo_messaging.Target(topic='stam')
+        target = oslo_messaging.Target(topic=conf.entity_graph.notifier_topic)
         self.listener = messaging.get_notification_listener(
             transport, [target],
             [VitrageEventEndpoint(self.notifiers)])
@@ -51,6 +51,20 @@ class VitrageNotifierService(os_service.Service):
         super(VitrageNotifierService, self).stop(graceful)
 
         LOG.info("Vitrage Notifier Service - Stopped!")
+
+    @staticmethod
+    def get_notifier_plugins(conf):
+        notifiers = []
+        conf_notifier_names = conf.notifiers
+        if not conf_notifier_names:
+            LOG.info('There are no notifier plugins in configuration')
+            return []
+        for plugin in [AodhNotifier]:
+            plugin_name = plugin.get_notifier_name()
+            if plugin_name in conf_notifier_names:
+                LOG.info('Notifier plugin %s started', plugin_name)
+                notifiers.append(plugin(conf))
+        return notifiers
 
 
 class VitrageEventEndpoint(object):

@@ -58,7 +58,7 @@ class NXGraph(Graph):
         self_copy._g = self._g.copy()
         return self_copy
 
-    @Notifier.add_notify
+    @Notifier.update_notify
     def add_vertex(self, v):
         """Add a vertex to the graph
 
@@ -71,7 +71,7 @@ class NXGraph(Graph):
         properties_copy = copy.copy(v.properties)
         self._g.add_node(n=v.vertex_id, attr_dict=properties_copy)
 
-    @Notifier.add_notify
+    @Notifier.update_notify
     def add_edge(self, e):
         """Add an edge to the graph
 

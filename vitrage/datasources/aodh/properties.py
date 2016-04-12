@@ -30,6 +30,7 @@ class AodhProperties(object):
     THRESHOLD = 'threshold'
     TIMESTAMP = 'timestamp'
     TYPE = 'type'
+    VITRAGE_ID = 'vitrage_id'
 
 
 class AodhState(object):

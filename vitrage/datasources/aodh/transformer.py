@@ -36,10 +36,14 @@ class AodhTransformer(AlarmTransformerBase):
         super(AodhTransformer, self).__init__(transformers)
 
     def _create_snapshot_entity_vertex(self, entity_event):
-        self._create_vertex(entity_event)
+        if _is_vitrage_alarm(entity_event):
+            return self._create_merge_alarm_vertex(entity_event)
+        return self._create_vertex(entity_event)
 
     def _create_update_entity_vertex(self, entity_event):
-        self._create_vertex(entity_event)
+        if _is_vitrage_alarm(entity_event):
+            return self._create_merge_alarm_vertex(entity_event)
+        return self._create_vertex(entity_event)
 
     def _create_vertex(self, entity_event):
         metadata = {
@@ -74,6 +78,30 @@ class AodhTransformer(AlarmTransformerBase):
             update_timestamp=update_timestamp,
             metadata=metadata)
 
+    def _create_merge_alarm_vertex(self, entity_event):
+        """Handle an alarm that already has a vitrage_id
+
+        This is a deduced alarm created in aodh by vitrage, so it already
+        exists in the graph.
+        This function will update the exiting vertex (and not create a new one)
+        """
+        metadata = {
+            AodhProps.DESCRIPTION: entity_event[AodhProps.DESCRIPTION],
+            VProps.PROJECT_ID: entity_event[AodhProps.PROJECT_ID],
+        }
+        sample_timestamp = entity_event[DSProps.SAMPLE_DATE]
+        update_timestamp = self._format_update_timestamp(
+            AodhTransformer._timestamp(entity_event), sample_timestamp)
+
+        return graph_utils.create_vertex(
+            self._create_entity_key(entity_event),
+            entity_id=entity_event.get(AodhProps.ALARM_ID),
+            entity_category=EntityCategory.ALARM,
+            entity_type='vitrage',
+            sample_timestamp=sample_timestamp,
+            update_timestamp=update_timestamp,
+            metadata=metadata)
+
     def _create_neighbors(self, entity_event):
         graph_neighbors = entity_event.get(self.QUERY_RESULT, [])
         result = []
@@ -89,6 +117,9 @@ class AodhTransformer(AlarmTransformerBase):
         return entity_event[AodhProps.STATE] == self.STATUS_OK
 
     def _create_entity_key(self, entity_event):
+        if _is_vitrage_alarm(entity_event):
+            return entity_event.get(AodhProps.VITRAGE_ID)
+
         sync_type = entity_event[DSProps.SYNC_TYPE]
         alarm_name = entity_event[AodhProps.NAME]
         resource_id = entity_event[AodhProps.RESOURCE_ID]
@@ -110,3 +141,7 @@ class AodhTransformer(AlarmTransformerBase):
         if not affected_resource_id:
             return None
         return {VProps.ID: affected_resource_id}
+
+
+def _is_vitrage_alarm(entity_event):
+    return entity_event.get(AodhProps.VITRAGE_ID) is not None

@@ -35,16 +35,12 @@ class AodhDriver(AlarmDriverBase):
         return alarm[AodhProps.NAME]
 
     def _get_alarms(self):
+        try:
+            aodh_alarms = self.client.alarms.list()
+            return [self._convert_alarm(alarm) for alarm in aodh_alarms]
+        except Exception as e:
+                LOG.exception("Exception: %s", e)
         return []
-        # TODO(iafek): enable the code below
-
-        # try:
-        #     aodh_alarms = self.client.alarms.list()
-        #     return [_convert_alarm(alarm)
-        #             for alarm in aodh_alarms]
-        # except Exception:
-        #     LOG.error("Exception: %s", traceback.print_exc())
-        #     return []
 
     def _is_erroneous(self, alarm):
         return alarm and alarm[AodhProps.STATE] != AodhState.OK
@@ -56,22 +52,30 @@ class AodhDriver(AlarmDriverBase):
     def _is_valid(self, alarm):
         return True
 
-    @staticmethod
-    def _convert_event_alarm(alarm):
-        converted_alarm = AodhDriver._convert_base_alarm(alarm)
-        event_type, resource_id = \
-            AodhDriver._parse_event_rule(alarm.event_rule)
-        converted_alarm[AodhProps.EVENT_TYPE] = event_type
-        converted_alarm[AodhProps.RESOURCE_ID] = resource_id
-        return converted_alarm
+    @classmethod
+    def _convert_event_alarm(cls, alarm):
+        res = cls._convert_base_alarm(alarm)
+        res[AodhProps.EVENT_TYPE] = alarm.event_rule[AodhProps.EVENT_TYPE],
+        res[AodhProps.RESOURCE_ID] = _parse_query(alarm.event_rule,
+                                                  AodhProps.RESOURCE_ID)
+        return res
 
-    @staticmethod
-    def _convert_threshold_alarm(alarm):
-        converted_alarm = AodhDriver._convert_base_alarm(alarm)
-        converted_alarm[AodhProps.STATE_TIMESTAMP] = alarm.state_timestamp
-        converted_alarm[AodhProps.RESOURCE_ID] = \
-            AodhDriver._parse_threshold_rule(alarm.threshold_rule)
-        return converted_alarm
+    @classmethod
+    def _convert_threshold_alarm(cls, alarm):
+        res = cls._convert_base_alarm(alarm)
+        res[AodhProps.STATE_TIMESTAMP] = alarm.state_timestamp
+        res[AodhProps.RESOURCE_ID] = _parse_query(alarm.threshold_rule,
+                                                  AodhProps.RESOURCE_ID)
+        return res
+
+    @classmethod
+    def _convert_vitrage_alarm(cls, alarm):
+        res = cls._convert_base_alarm(alarm)
+        res[AodhProps.VITRAGE_ID] = _parse_query(alarm.event_rule,
+                                                 AodhProps.VITRAGE_ID)
+        res[AodhProps.RESOURCE_ID] = _parse_query(alarm.event_rule,
+                                                  AodhProps.RESOURCE_ID)
+        return res
 
     @staticmethod
     def _convert_base_alarm(alarm):
@@ -90,32 +94,27 @@ class AodhDriver(AlarmDriverBase):
             AodhProps.TYPE: alarm.type
         }
 
-    @staticmethod
-    def _parse_event_rule(rule):
-        event_type = rule[AodhProps.EVENT_TYPE]
-        resource_id = \
-            AodhDriver._parse_resource_id(rule[AodhProps.QUERY])
-        return event_type, resource_id
-
-    @staticmethod
-    def _parse_threshold_rule(rule):
-        return AodhDriver._parse_resource_id(rule[AodhProps.QUERY])
-
-    @staticmethod
-    def _parse_resource_id(query_fields):
-        for query in query_fields:
-            field = query['field']
-            if field == AodhProps.RESOURCE_ID:
-                return query['value']
-            else:
-                return None
+    @classmethod
+    def _convert_alarm(cls, alarm):
+        alarm_type = alarm.type
+        if alarm_type == AodhProps.EVENT and _is_vitrage_alarm(alarm):
+            return cls._convert_vitrage_alarm(alarm)
+        elif alarm_type == AodhProps.EVENT:
+            return cls._convert_event_alarm(alarm)
+        elif alarm_type == AodhProps.THRESHOLD:
+            return cls._convert_threshold_alarm(alarm)
+        else:
+            LOG.warning('Unsupported Aodh alarm of type %s' % alarm_type)
 
 
-def _convert_alarm(alarm):
-    alarm_type = alarm.type
-    if alarm_type == AodhProps.EVENT:
-        return AodhDriver._convert_event_alarm(alarm)
-    elif alarm_type == AodhProps.THRESHOLD:
-        return AodhDriver._convert_threshold_alarm(alarm)
-    else:
-        LOG.info('Unsupported Aodh alarm of type %s' % alarm_type)
+def _parse_query(data, key):
+    query_fields = data.get(AodhProps.QUERY, {})
+    for query in query_fields:
+        field = query['field']
+        if field == key:
+            return query['value']
+    return None
+
+
+def _is_vitrage_alarm(alarm):
+    return _parse_query(alarm.event_rule, AodhProps.VITRAGE_ID) is not None

@@ -22,4 +22,8 @@ OPTS = [
                help='A path for the configuration files of the data sources'
                     ' values'
                ),
+    cfg.StrOpt('notifier_topic',
+               default='vitrage.graph',
+               help='The topic that vitrage-graph uses for alarm '
+                    'notification messages.'),
 ]

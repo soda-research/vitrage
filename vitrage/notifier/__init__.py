@@ -12,4 +12,9 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-pass
+from oslo_config import cfg
+
+OPTS = [
+    cfg.ListOpt('notifiers',
+                help='Names of enabled notifiers (example aodh)'),
+    ]

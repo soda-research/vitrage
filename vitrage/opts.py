@@ -23,6 +23,7 @@ import vitrage.datasources
 import vitrage.entity_graph.consistency
 import vitrage.evaluator
 import vitrage.keystone_client
+import vitrage.notifier
 import vitrage.rpc
 
 DATASOURCES_PATH = 'vitrage.datasources.'
@@ -39,7 +40,10 @@ def list_opts():
         ('consistency', vitrage.entity_graph.consistency.OPTS),
         ('entity_graph', vitrage.entity_graph.OPTS),
         ('service_credentials', vitrage.keystone_client.OPTS),
-        ('DEFAULT', itertools.chain(vitrage.clients.OPTS, vitrage.rpc.OPTS))
+        ('DEFAULT', itertools.chain(
+            vitrage.clients.OPTS,
+            vitrage.rpc.OPTS,
+            vitrage.notifier.OPTS))
     ]
 
 
