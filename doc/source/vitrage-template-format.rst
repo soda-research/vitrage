@@ -1,18 +1,24 @@
-========================
-Vitrage Templates Format
-========================
+================================
+Vitrage Templates Format & Usage
+================================
 
 Overview
 ========
-In Vitrage we use configuration files, called "templates", to express rules regarding raising deduced alarms, setting deduced states, and detecting/setting RCA links.
-This page describes the format of the Vitrage templates, with some examples and open questions on extending this format.
+In Vitrage we use configuration files, called "templates", to express rules
+regarding raising deduced alarms, setting deduced states, and detecting/setting
+RCA links.
+This page describes the format of the Vitrage templates, with some examples and
+open questions on extending this format. Additionally, a short guide on adding
+templates is presented.
 
 Template Structure
 ==================
 The template is written in YAML language, with the following structure.
  ::
 
-  metadata: ...
+  metadata:
+    id: <unique template identifier>
+    description: <what this template does>
   definitions:
     entities:
         - entity: ...
@@ -29,25 +35,29 @@ The template is written in YAML language, with the following structure.
 
 The template is divided into three main sections:
 
-- *Metadata:* Contains the template ID, and list of search words/tags to help with future indexing (optional)
-- *Definitions:* This section contains the atomic definitions referenced later on, for entities and relationships
-   - *Entities –* describes the resources and alarms which are relevant to the template scenario (conceptually, corresponds to a vertex in the entity graph)
-   - *Relationships –* the relationships between the entities (conceptually, corresponds to an edge in the entity graph)
-- *Scenarios:* A list of if-then scenarios to consider. Each scenario is comprised of:
-   - *Condition –* the condition to be met. This condition will be phrased using the entities and relationships previously defined.
-   - *Actions –* an action list to execute when the condition is met
+- *metadata:* Contains the template identifier, and brief description of what the template does (optional)
+- *definitions:* This section contains the atomic definitions referenced later on, for entities and relationships
+   - *entities –* describes the resources and alarms which are relevant to the template scenario (conceptually, corresponds to a vertex in the entity graph)
+   - *relationships –* the relationships between the entities (conceptually, corresponds to an edge in the entity graph)
+- *scenarios:* A list of if-then scenarios to consider. Each scenario is comprised of:
+   - *condition –* the condition to be met. This condition will be phrased referencing the entities and relationships previously defined.
+   - *action(s) –* a list of actions to execute when the condition is met.
 
 Condition Format
 ----------------
-The condition which needs to be met will be phrased using the entities and relationships previously defined. An expression is some logical combination of entities and relationships.
+The condition which needs to be met will be phrased using the entities and
+relationships previously defined. An expression is either a *single* entity,
+or some logical combination of relationships.
 Expression can be combined using the following logical operators:
 
-- "and" - indicates both expressions must be satisfied in order for the condition to be met.
-- "or" - indicates at least one expression must be satisfied in order for the condition to be met (non-exclusive or).
-- "not" - indicates the following expression must not be satisfied in order for the condition to be met.
+- "and" - indicates both expressions must be satisfied in order for the
+  condition to be met.
+- "or" - indicates at least one expression must be satisfied in order for the
+  condition to be met (non-exclusive or).
 - parentheses "()"  - clause indicating the scope of an expression.
 
-The following are examples of valid expressions, where X, Y and Z are relationships:
+The following are examples of valid expressions, where X, Y and Z are
+relationships:
 
 - X
 - X and Y
@@ -56,8 +66,6 @@ The following are examples of valid expressions, where X, Y and Z are relationsh
 - X and not (Y or Z)
 - X and not X
 
-**NOTE:** Most templates will require only the "and" operator, which will be the first operator supported for Mitaka.
-
 Examples
 ========
 
@@ -65,81 +73,89 @@ Example 1: Basic RCA and Deduced Alarm/State
 --------------------------------------------
 The following template demonstrates
 
-1. How to raise a deduced alarm. Specifically, if there is high CPU load on a host, raise alarm indicating CPU performance problems on contained instances.
-2. How to link alarms for purposes of root cause analysis (RCA). Specifically, if there is high CPU load on the host and CPU performance problems on the hosted instances, we link them with a "causes" relationship.
+1. How to raise a deduced alarm. Specifically, if there is high CPU load on a
+   host, raise alarm indicating CPU performance problems on all contained
+   instances.
+2. How to link alarms for purposes of root cause analysis (RCA). Specifically,
+   if there is high CPU load on the host and CPU performance problems on the
+   hosted instances, we link them with a "causes" relationship.
 3. How to use a single template for several different scenarios.
 
  ::
 
     metadata:
-        id=host_high_cpu_load_to_instance_cpu_suboptimal
+        id: host_high_mem_load_to_instance_mem_suboptimal
+        description: when there is high memory on the host, show implications on the instances
     definitions:
         entities:
             - entity:
                 category: ALARM
-                type: HOST_HIGH_CPU_LOAD
-                template_id: 1
+                type: host_high_mem_load
+                template_id: host_alarm # some string
             - entity:
                 category: ALARM
-                type: INSTANCE_CPU_SUBOPTIMAL_PERFORMANCE
-                template_id: 2
+                type: instance_mem_performance_problem
+                template_id: instance_alarm
             - entity:
                 category: RESOURCE
-                type: HOST
-                template_id: 3
+                type: nova.host
+                template_id: host
             - entity:
                 category: RESOURCE
-                type: INSTANCE
-                template_id: 4
+                type: nova.instance
+                template_id: instance
         relationships:
             - relationship:
-                source: 1
-                target: 3
+                source: host_alarm  # source and target from entities section
+                target: host
                 relationship_type: on
                 template_id : alarm_on_host
             - relationship:
-                source: 2
-                target: 4
+                source: instance_alarm
+                target: instance
                 relationship_type: on
                 template_id : alarm_on_instance
             - relationship:
-                source: 3
-                target: 4
+                source: host
+                target: instance
                 relationship_type: contains
                 template_id : host_contains_instance
     scenarios:
         scenario:
-            condition: alarm_on_host and host_contains_instance
+            condition: alarm_on_host and host_contains_instance # condition uses relationship ids
             actions:
                 - action:
                    action_type: raise_alarm
                    properties:
-                      alarm_type: INSTANCE_CPU_SUBOPTIMAL_PERFORMANCE
+                      alarm_type: instance_mem_performance_problem
+                      severity: warning
                    action_target:
-                      target: 4
+                      target: instance # entity template_id
                 - action:
                    action_type: set_state
                    properties:
-                      state: SUBOPTIMAL
+                      state: suboptimal
                    action_target:
-                      target: 4
+                      target: instance # entity template_id
          scenario:
             condition: alarm_on_host and alarm_on_instance and host_contains_instance
             actions:
                 - action:
                    type: add_causal_relationship
                    action_target:
-                      source: 1
-                      target: 2
+                      source: host_alarm
+                      target: instance_alarm
 
 Example 2: Deduced state based on alarm
 ---------------------------------------
-The following template will change the state of a resource to "ERROR" if there is any alarm of severity "CRITICAL" on it. Also note that entity ids can be strings as well.
+The following template will change the state of a resource to "ERROR" if there
+is any alarm of severity "CRITICAL" on it.
 
  ::
 
     metadata:
-        id=deduced_state_for_all_with_alarm
+        id: deduced_state_for_all_with_alarm
+        description: deduced state for all resources with alarms
     definitions:
         entities:
             - entity:
@@ -147,7 +163,7 @@ The following template will change the state of a resource to "ERROR" if there i
                 template_id: a_resource # entity ids are any string
             - entity:
                 category: ALARM
-                severity: CRITICAL
+                severity: critical
                 template_id: high_alarm # entity ids are any string
         relationships:
             - relationship:
@@ -162,7 +178,7 @@ The following template will change the state of a resource to "ERROR" if there i
                 - action:
                    action_type : set_state
                    properties:
-                      state: ERROR
+                      state: error
                    action_target:
                       target: a_resource
 
@@ -170,79 +186,85 @@ Example 3: Deduced alarm based on state
 ---------------------------------------
 This template will cause an alarm to be raised on any Host in state "ERROR"
 
-Note that in this template, there are no relationships. The condition is just that the entity exists.
+Note that in this template, there are no relationships. The condition is just
+that the entity exists. Also note that the states and severity are
+case-insensitive.
 
  ::
 
     metadata:
-        id=deduced_alarm_for_all_host_in_error
+        id: deduced_alarm_for_all_host_in_error
+        description: raise deduced alarm for all hosts in error
     definitions:
         entities:
             - entity:
                 category: RESOURCE
-                type: HOST
-                state: ERROR
-                template_id: 1
+                type: nova.host
+                state: error
+                template_id: host_in_error
     scenarios:
         scenario:
-            condition: 1
+            condition: host_in_error
             actions:
                 - action:
                    action_type: raise_alarm
                    properties:
-                      alarm_type: HOST_IN_ERROR_STATE
+                      alarm_type: host_in_error_state
+                      severity: critical
                    action_target:
-                      target: 1
+                      target: host_in_error
 
 Example 4: Deduced Alarm triggered by several options
 -----------------------------------------------------
-This template will raise a deduced alarm on an instance, which can be caused by an alarm on the hosting zone or an alarm on the hosting host.
+This template will raise a deduced alarm on an instance, which can be caused by
+an alarm on the hosting zone or an alarm on the hosting host.
 
  ::
 
     metadata:
-        id=deduced_alarm_two_possibile_triggers
+        id: deduced_alarm_two_possibile_triggers
+        description: deduced alarm using or in condition
     definitions:
         entities:
             - entity:
                 category: ALARM
-                Type: ZONE_CONNECTIVITY_PROBLEM
-                template_id: 1
+                type: zone_connectivity_problem
+                template_id: zone_alarm
             - entity:
                 category: ALARM
-                Type: HOST_CONNECTIVITY_PROBLEM
-                template_id: 2
+                Type: host_connectivity_problem
+                template_id: host_alarm
             - entity:
                 category: RESOURCE
-                type: ZONE
-                template_id: 3
+                type: nova.zone
+                template_id: zone
             - entity:
                 category: RESOURCE
-                type: HOST
-                template_id: 4
+                type: nova.host
+                template_id: host
             - entity:
                 category: RESOURCE
-                type: INSTANCE
-                template_id: 5
+                type: nova.instance
+                template_id: instance
         relationships:
             - relationship:
-                source: 1
-                target: 3
+                source: zone_alarm
+                target: zone
                 relationship_type: on
                 template_id : alarm_on_zone
             - relationship:
-                source: 2
-                target: 4
+                source: zone_alarm
+                target: zone
                 relationship_type: on
                 template_id : alarm_on_host
             - relationship:
-                source: 3
-                target: 4
+                source: zone
+                target: host
                 relationship_type: contains
                 template_id : zone_contains_host
             - relationship:
-                source: 4
-                target: 5
+                source: host
+                target: instance
                 relationship_type: contains
                 template_id : host_contains_instance
     scenarios:
@@ -252,34 +274,83 @@ This template will raise a deduced alarm on an instance, which can be caused by 
                 - action:
                    action_type : raise_alarm
                    properties:
-                      alarm_type: INSTANCE_CONNECTIVITY_PROBLEM
+                      alarm_type: instance_connectivity_problem
+                      severity: critical
                    action_target:
-                      target: 5
+                      target: instance
 
-Open Issues / TBD
-=================
+
+Usage
+=====
+
+Adding/removing a template
+--------------------------
+
+- Ensure all the templates you wish to use are placed here: *<vitrage folder>/templates*.
+- Restart *vitrage-graph*.
+- The template will be validated before loading. Validation errors are written
+  to the log. Templates with validation errors are skipped.
+
+Common parameters and their acceptable values - for writing templates
+---------------------------------------------------------------------
+
++-------------------+---------------+-------------------------+------------------------------------+
+| block             | key           | supported values        | comments                           |
++===================+===============+=========================+====================================+
+| entity            | category      | ALARM                   |                                    |
+|                   |               | RESOURCE                |                                    |
++-------------------+---------------+-------------------------+------------------------------------+
+| entity (ALARM)    | type          | any string              |                                    |
++-------------------+---------------+-------------------------+------------------------------------+
+| entity (RESOURCE) | type          | openstack.cluster,      | These are for the datasources that |
+|                   |               | nova.zone,              | come with vitrage by default.      |
+|                   |               | nova.host,              | Adding datasources will add more   |
+|                   |               | nova.instance,          | supported types, as defined in the |
+|                   |               | cinder.volume,          | datasource transformer             |
+|                   |               | switch                  |                                    |
++-------------------+---------------+-------------------------+------------------------------------+
+| action            | action_type   | raise_alarm,            |                                    |
+|                   |               | set_state,              |                                    |
+|                   |               | add_causal_relationship |                                    |
++-------------------+---------------+-------------------------+------------------------------------+
+
+
+Future support & Open Issues
+============================
+
+Negation
+--------
+We need to support a "not" operator, that indicates the following expression
+must not be satisfied in order for the condition to be met. "not" should apply
+to relationships, not entities. Then we could have a condition like
+
+ ::
+
+    condition: host_contains_instance and not alarm_on_instance
+
 
 Inequality
 ----------
-Consider a template that has two entities of the same category+type, say E1 and E2 both are instances like this:
+Consider a template that has two entities of the same category+type, say E1 and
+E2 both are instances like this:
 
  ::
 
     metadata:
-        id=two_similar_instances
+        id: two_similar_instances
     definitions:
         entities:
             - entity:
                 category: RESOURCE
-                type: HOST
+                type: nova.host
                 template_id: host
             - entity:
                 category: RESOURCE
-                type: INSTANCE
+                type: nova.instance
                 template_id: instance1
             - entity:
                 category: RESOURCE
-                type: INSTANCE
+                type: nova.instance
                 template_id: instance2
             ...
         relationships:
@@ -298,11 +369,14 @@ Consider a template that has two entities of the same category+type, say E1 and 
 
 There are three options of how to interpret this template:
 
-- *instance1 == instance2.* This option is not a reasonable one, as in this case the template can be written with only *instance1*
+- *instance1 == instance2.* This option is not a reasonable one, as in this
+  case the template can be written with only *instance1*
 - *instance1 != instance2.*
-- *instance1 != instance2 or instance1 == instance2.* In other words, either option is fine.
+- *instance1 != instance2 or instance1 == instance2.* In other words, either
+  option is fine.
 
-Thus, we need a way to distinguish between options 2 & 3 (as option 1 can be expressed by using only instance1). This can be done in two ways:
+Thus, we need a way to distinguish between options 2 & 3 (as option 1 can be
+expressed by using only instance1). This can be done in two ways:
 1. Introducing another logical operator "neq", to be used between expressions:
 
  ::
@@ -321,10 +395,14 @@ Thus, we need a way to distinguish between options 2 & 3 (as option 1 can be exp
 
 Cardinality
 -----------
-To support cardinality, for example to express we want a host to have two instances on it, we could take different approaches.
+To support cardinality, for example to express we want a host to have two
+instances on it, we could take different approaches.
 
-1. One approach would rely on the "neq" relationship described above. Similar to the example given in the previous section, stating that the two instances on the host are not equal is equivalent to a cardinality of two.
-2. A different approach would be to expand the definition of the "relationship" clause. By default cardinality=1 (which will support backward compatibility)
+1. One approach would rely on the "neq" relationship described above. Similar
+to the example given in the previous section, stating that the two instances on
+the host are not equal is equivalent to a cardinality of two.
+2. A different approach would be to expand the definition of the "relationship"
+clause. By default cardinality=1 (which will support backward compatibility)
 
 For example, we might use the one of the following formats
 
@@ -333,11 +411,11 @@ For example, we might use the one of the following formats
     - relationship: # option A
         source: host
         target: instance
-        target_cardinality: 2 # means there are two instances, but only one host
+        target_cardinality: 2 # two instances, but only one host
         relationship_type: contains
         template_id: host_contains_two_instances_A
 
-    - relationship: # option B, same meaning as option A but split into two lines
+    - relationship: # option B, same as option A but split into two lines
         source: host
         target: instance
         cardinality_for: instance
