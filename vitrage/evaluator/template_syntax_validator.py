@@ -64,7 +64,8 @@ def validate_template_sections(template_conf):
 def validate_metadata_section(metadata):
 
     schema = Schema({
-        Required(TemplateFields.ID): Any(str, six.text_type)
+        Required(TemplateFields.ID): Any(str, six.text_type),
+        TemplateFields.DESCRIPTION: Any(str, six.text_type)
     })
 
     error_msg = SCHEMA_CONTENT_ERROR % (
