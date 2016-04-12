@@ -114,6 +114,7 @@ class EntityGraph(NXGraph):
     def update_entity_graph_vertex(self, graph_vertex, updated_vertex):
         if updated_vertex[VProps.IS_PLACEHOLDER] and \
                 graph_vertex and not graph_vertex[VProps.IS_PLACEHOLDER]:
+
             updated_vertex[VProps.IS_PLACEHOLDER] = False
             updated_vertex[VProps.IS_DELETED] = graph_vertex[VProps.IS_DELETED]
 

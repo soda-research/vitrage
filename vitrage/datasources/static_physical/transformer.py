@@ -16,6 +16,7 @@ from oslo_log import log as logging
 
 from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import EntityCategory
+from vitrage.common.constants import EventAction
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.datasources.nova.host import NOVA_HOST_DATASOURCE
 from vitrage.datasources.resource_transformer_base import \
@@ -32,6 +33,11 @@ class StaticPhysicalTransformer(ResourceTransformerBase):
 
     RELATION_TYPE = 'relation_type'
     RELATIONSHIPS_SECTION = 'relationships'
+
+    # Event types which need to refer them differently
+    UPDATE_EVENT_TYPES = {
+        EventAction.DELETE_ENTITY: EventAction.DELETE_ENTITY
+    }
 
     def __init__(self, transformers):
         super(StaticPhysicalTransformer, self).__init__(transformers)

@@ -100,12 +100,23 @@ class StaticPhysicalDriver(DriverBase):
                     entities_updates += \
                         self._get_entities_from_file(file_, full_path)
 
+        # iterate over deleted files
+        deleted_files = set(self.cache.keys()) - set(files)
+        for file_ in deleted_files:
+            self._update_on_existing_entities(
+                self.cache[file_][self.ENTITIES_SECTION],
+                {},
+                entities_updates)
+            del self.cache[file_]
+
         return entities_updates
 
-    def _update_on_existing_entities(self, old_entities,
-                                     new_entities, updates):
+    def _update_on_existing_entities(self,
+                                     old_entities,
+                                     new_entities,
+                                     updates):
         for old_entity in old_entities:
-            if old_entity not in new_entities:
+            if not new_entities or old_entity not in new_entities:
                 new_entity = self._find_entity(old_entity, new_entities)
                 if not new_entity:
                     self._set_event_type(old_entity, EventAction.DELETE_ENTITY)
