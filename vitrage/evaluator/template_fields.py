@@ -26,6 +26,7 @@ class TemplateFields(object):
     ACTION_TYPE = 'action_type'
     CATEGORY = 'category'
     CONDITION = 'condition'
+    DESCRIPTION = 'description'
     ENTITIES = 'entities'
     ENTITY = 'entity'
     ID = 'id'
