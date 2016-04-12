@@ -67,12 +67,12 @@ Flow
 Concepts and Guidelines
 -----------------------
 - *Events:* The Scenario Evaluator is notified of each event in the Entity
-  Graph *after* the event takes place. An event in this context is any change
+  Graph after the event takes place. An event in this context is any change
   (create/update/delete) in a graph element (vertex/edge). The notification
   will consist of two copies of the element: the element *before* the change
   and the *current* element after the change took place.
 
-- *Execute and Undo Actions:* If the Entity Graph matches a scenario, the
+- *Actions - Do and Undo:* If the Entity Graph matches a scenario, the
   relevant actions will need to be executed. Conversely, if a previously
   matched scenario no longer holds, the action needs to be undone. Thus, for
   each action there must be a "do" and "undo" procedure defined. For example,
@@ -97,12 +97,12 @@ When Vitrage is started up, all the templates are loaded into a *Scenario*
 ensure the correct format is used, references are valid, and more. Errors in
 each template should be written to the log. Invalid templates are skipped.
 
-The SR supports querying for scenarios based on a vertex or edge in the Entity
-Graph. Given such a graph element, the Scenario Repository will return all
-scenarios where this element appears in the scenario condition. This means that
-a corresponding element appears in the scenario condition, such that for each
-key-value in the template, the same key-value can be found in the element (but
-not always the reverse).
+The Scenario Repository supports querying for scenarios based on a vertex or
+edge in the Entity Graph. Given such a graph element, the Scenario Repository
+will return all scenarios where this element appears in the scenario condition.
+This means that a corresponding element appears in the scenario condition, such
+that for each key-value in the template, the same key-value can be found in the
+element (but not always the reverse).
 
 Ongoing Operation
 -----------------
@@ -110,7 +110,8 @@ Ongoing Operation
 1. The Scenario Evaluator is notified of an event on some element in the Entity
    Graph.
 2. The Scenario Evaluator queries the Scenario Repository for relevant
-   scenarios for both *before* and *current* state of the element.
+   scenarios for both *before* and *current* states of the element, and returns
+   a set of matching scenarios for each.
 3. The two sets of scenarios are analyzed and filtered, resulting in two
    disjoint sets, to avoid "do/undo" conflicts (See above in
    'Concepts and Guidelines'_).
@@ -118,24 +119,24 @@ Ongoing Operation
    in both from both sets.
 4. For each scenario related to the *before* element, the Scenario Evaluator
    queries the Entity Graph for all the matching patterns in the current
-   system. For each match and each associated action, add a reference to the
-   *undo* of the action to an *action collection*.
+   system. For each match and each associated action, a reference to the
+   *undo* of the action is added to an *action collection*.
 5. For each scenario related to the *current* element,the Scenario Evaluator
    queries the Entity Graph for all the matching patterns in the current
-   system. For each match and each associated action, add a reference to the
-   *do* of the action to the same *action collection*.
-6. Given all the actions (do & undo) in the *action collection*, perform them.
-   Using action executor.
+   system. For each match and each associated action, a reference to the
+   *do* of the action is added to the same *action collection*.
+6. Given all the actions (do & undo) in the *action collection*, perform them
+   using action executor.
 
-   - Note that in Mitaka, the only action filtering planned is avoiding
-     performing the same action twice.
+   - Currently, the only action filtering is avoiding performing the same
+     action twice.
 
 
 System Initialization
 ---------------------
 
 During the initialization of Vitrage, the Scenario Evaluator will be
-de-activated until all the synchronizers complete their initial "get_all"
+de-activated until all the datasources complete their initial "get_all"
 process. After it is activated, the consistency flow will begin, which will
 trigger all the relevant scenarios for each element in the Entity Graph.
 
@@ -146,9 +147,10 @@ This approach has several benefits:
   bottlenecks and other performance issues.
 - During the initialization period the Entity Graph is built step-by-step until
   it reflects the current status of the Cloud. Thus, during this interim period
-  scenarios that contain "not" clauses might "fire" because a certain entity is
-  not present in the graph, even though it is present in reality and just has
-  not been processed into the graph (since the "get_all" is not finished).
+  scenarios that contain "not" clauses might be triggered because a certain
+  entity is not present in the graph, even though it is present in reality and
+  just has not been processed into the graph (since the "get_all" is not
+  finished).
 
 It is possible that this late activation of the evaluator will be removed or
 changed once we move to a persistent graph database for the Entity Graph in
