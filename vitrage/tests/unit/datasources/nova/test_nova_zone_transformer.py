@@ -24,7 +24,7 @@ from vitrage.datasources.nova.host import NOVA_HOST_DATASOURCE
 from vitrage.datasources.nova.host.transformer import HostTransformer
 from vitrage.datasources.nova.zone import NOVA_ZONE_DATASOURCE
 from vitrage.datasources.nova.zone.transformer import ZoneTransformer
-from vitrage.datasources import OPENSTACK_NODE
+from vitrage.datasources import OPENSTACK_CLUSTER
 from vitrage.datasources import transformer_base as tbase
 from vitrage.datasources.transformer_base import TransformerBase
 from vitrage.tests import base
@@ -130,14 +130,14 @@ class NovaZoneTransformerTest(base.BaseTest):
 
     def _validate_neighbors(self, neighbors, zone_vertex_id, event):
 
-        node_neighbors_counter = 0
+        cluster_neighbors_counter = 0
 
         for neighbor in neighbors:
             vertex_type = neighbor.vertex.get(VertexProperties.TYPE)
 
-            if OPENSTACK_NODE == vertex_type:
-                node_neighbors_counter += 1
-                self._validate_node_neighbor(neighbor, zone_vertex_id)
+            if OPENSTACK_CLUSTER == vertex_type:
+                cluster_neighbors_counter += 1
+                self._validate_cluster_neighbor(neighbor, zone_vertex_id)
             else:
                 hosts = tbase.extract_field_value(event, 'hosts')
                 self._validate_host_neighbor(neighbor,
@@ -146,8 +146,8 @@ class NovaZoneTransformerTest(base.BaseTest):
                                              event[DSProps.SYNC_MODE])
 
         self.assertEqual(1,
-                         node_neighbors_counter,
-                         'Zone can belongs to only one Node')
+                         cluster_neighbors_counter,
+                         'Zone can belongs to only one Cluster')
 
     def _validate_host_neighbor(self,
                                 host_neighbor,
@@ -191,14 +191,14 @@ class NovaZoneTransformerTest(base.BaseTest):
         self.assertEqual(edge.source_id, zone_vertex_id)
         self.assertEqual(edge.label, EdgeLabels.CONTAINS)
 
-    def _validate_node_neighbor(self, node_neighbor, zone_vertex_id):
+    def _validate_cluster_neighbor(self, cluster_neighbor, zone_vertex_id):
 
-        expected_node_neighbor = tbase.create_node_placeholder_vertex()
-        self.assertEqual(expected_node_neighbor, node_neighbor.vertex)
+        expected_cluster_neighbor = tbase.create_cluster_placeholder_vertex()
+        self.assertEqual(expected_cluster_neighbor, cluster_neighbor.vertex)
 
         # Validate neighbor edge
-        edge = node_neighbor.edge
-        self.assertEqual(edge.source_id, node_neighbor.vertex.vertex_id)
+        edge = cluster_neighbor.edge
+        self.assertEqual(edge.source_id, cluster_neighbor.vertex.vertex_id)
         self.assertEqual(edge.target_id, zone_vertex_id)
         self.assertEqual(edge.label, EdgeLabels.CONTAINS)
 

@@ -25,7 +25,7 @@ from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import EventAction
 from vitrage.common.constants import SyncMode
 from vitrage.common.exception import VitrageTransformerError
-from vitrage.datasources import OPENSTACK_NODE
+from vitrage.datasources import OPENSTACK_CLUSTER
 import vitrage.graph.utils as graph_utils
 
 LOG = logging.getLogger(__name__)
@@ -55,19 +55,19 @@ def build_key(key_values):
     return TransformerBase.KEY_SEPARATOR.join(map(str, key_values))
 
 
-def create_node_placeholder_vertex():
+def create_cluster_placeholder_vertex():
     key = build_key([cons.EntityCategory.RESOURCE,
-                     OPENSTACK_NODE])
+                     OPENSTACK_CLUSTER])
 
     metadata = {
-        cons.VertexProperties.NAME: OPENSTACK_NODE
+        cons.VertexProperties.NAME: OPENSTACK_CLUSTER
     }
 
     return graph_utils.create_vertex(
         key,
-        entity_id=OPENSTACK_NODE,
+        entity_id=OPENSTACK_CLUSTER,
         entity_category=cons.EntityCategory.RESOURCE,
-        entity_type=OPENSTACK_NODE,
+        entity_type=OPENSTACK_CLUSTER,
         entity_state=AVAILABLE,
         metadata=metadata
     )

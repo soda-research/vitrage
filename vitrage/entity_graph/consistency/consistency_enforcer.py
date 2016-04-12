@@ -20,7 +20,7 @@ from oslo_log import log
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.common.datetime_utils import utcnow
-from vitrage.datasources import OPENSTACK_NODE
+from vitrage.datasources import OPENSTACK_CLUSTER
 from vitrage.evaluator.actions.evaluator_event_transformer import VITRAGE_TYPE
 
 LOG = log.getLogger(__name__)
@@ -152,7 +152,7 @@ class ConsistencyEnforcer(object):
         return filter(
             lambda ver:
             not (ver[VProps.CATEGORY] == EntityCategory.RESOURCE and
-                 ver[VProps.TYPE] == OPENSTACK_NODE), vertices)
+                 ver[VProps.TYPE] == OPENSTACK_CLUSTER), vertices)
 
     def _wait_for_action(self, function):
         count_retries = 0

@@ -20,7 +20,7 @@ import pecan as pecan
 from pecan import abort
 from pecan import rest
 
-from vitrage.datasources import OPENSTACK_NODE
+from vitrage.datasources import OPENSTACK_CLUSTER
 
 LOG = log.getLogger(__name__)
 
@@ -28,7 +28,7 @@ LOG = log.getLogger(__name__)
 class RootRestController(rest.RestController):
 
     @staticmethod
-    def as_tree(graph, root=OPENSTACK_NODE, reverse=False):
+    def as_tree(graph, root=OPENSTACK_CLUSTER, reverse=False):
         linked_graph = json_graph.node_link_graph(graph)
         if reverse:
             linked_graph = linked_graph.reverse()

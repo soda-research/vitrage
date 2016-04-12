@@ -102,7 +102,7 @@ Response Examples
 Get  topology
 ^^^^^^^^^^^^^
 
-Get the topology for the node.
+Get the topology for the cluster.
 Its possible to filter the edges vertices and depth of the
 graph
 
@@ -463,10 +463,10 @@ Response Examples
       "category": "RESOURCE",
       "is_placeholder": false,
       "is_deleted": false,
-      "name": "openstack.node",
-      "type": "openstack.node",
-      "id": "openstack.node",
-      "vitrage_id": "RESOURCE:openstack.node"
+      "name": "openstack.cluster",
+      "type": "openstack.cluster",
+      "id": "openstack.cluster",
+      "vitrage_id": "RESOURCE:openstack.cluster"
     }
   ],
   "links": [

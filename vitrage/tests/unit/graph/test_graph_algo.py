@@ -28,22 +28,22 @@ class GraphAlgorithmTest(GraphTestBase):
     def test_graph_query_vertices(self):
         ga = create_algorithm(self.entity_graph)
 
-        query = {'==': {VProps.TYPE: OPENSTACK_NODE}}
+        query = {'==': {VProps.TYPE: OPENSTACK_CLUSTER}}
         subgraph = ga.graph_query_vertices(query)
         self.assertEqual(
-            1,  # For NODE
+            1,  # For Cluster
             subgraph.num_vertices(), 'num of vertex node')
 
         query = {
             'or': [
                 {'==': {VProps.TYPE: NOVA_HOST_DATASOURCE}},
-                {'==': {VProps.TYPE: OPENSTACK_NODE}}
+                {'==': {VProps.TYPE: OPENSTACK_CLUSTER}}
             ]
         }
 
         subgraph = ga.graph_query_vertices(query)
         self.assertEqual(
-            ENTITY_GRAPH_HOSTS_PER_NODE,
+            ENTITY_GRAPH_HOSTS_PER_CLUSTER,
             subgraph.num_edges(), 'num of edges Host <-- NODE')
 
         query = {
@@ -51,15 +51,15 @@ class GraphAlgorithmTest(GraphTestBase):
                 {'==': {VProps.TYPE: NOVA_INSTANCE_DATASOURCE}},
                 {'==': {VProps.CATEGORY: ALARM}},
                 {'==': {VProps.TYPE: NOVA_HOST_DATASOURCE}},
-                {'==': {VProps.TYPE: OPENSTACK_NODE}}
+                {'==': {VProps.TYPE: OPENSTACK_CLUSTER}}
             ]
         }
         subgraph = ga.graph_query_vertices(query)
         self.assertEqual(
-            ENTITY_GRAPH_HOSTS_PER_NODE +
-            ENTITY_GRAPH_HOSTS_PER_NODE * ENTITY_GRAPH_ALARMS_PER_HOST +
-            ENTITY_GRAPH_HOSTS_PER_NODE * ENTITY_GRAPH_VMS_PER_HOST +
-            ENTITY_GRAPH_HOSTS_PER_NODE * ENTITY_GRAPH_VMS_PER_HOST *
+            ENTITY_GRAPH_HOSTS_PER_CLUSTER +
+            ENTITY_GRAPH_HOSTS_PER_CLUSTER * ENTITY_GRAPH_ALARMS_PER_HOST +
+            ENTITY_GRAPH_HOSTS_PER_CLUSTER * ENTITY_GRAPH_VMS_PER_HOST +
+            ENTITY_GRAPH_HOSTS_PER_CLUSTER * ENTITY_GRAPH_VMS_PER_HOST *
             ENTITY_GRAPH_ALARMS_PER_VM,
             subgraph.num_edges(), 'num of BOTH edges Host (depth 1)')
 
@@ -73,7 +73,7 @@ class GraphAlgorithmTest(GraphTestBase):
             query_dict=query, root_id=first_host_id, depth=1)
         self.assertEqual(
             1 +  # For tye host
-            1 +  # For NODE
+            1 +  # For Cluster
             1 +  # For SWITCH
             ENTITY_GRAPH_ALARMS_PER_HOST +
             ENTITY_GRAPH_TESTS_PER_HOST +
@@ -94,8 +94,8 @@ class GraphAlgorithmTest(GraphTestBase):
 
         subgraph = ga.graph_query_vertices(root_id=first_host_id, depth=2)
         self.assertEqual(
-            1 +  # Node to switch
-            ENTITY_GRAPH_HOSTS_PER_NODE * 2 +
+            1 +  # Cluster to switch
+            ENTITY_GRAPH_HOSTS_PER_CLUSTER * 2 +
             ENTITY_GRAPH_ALARMS_PER_HOST +
             ENTITY_GRAPH_TESTS_PER_HOST +
             ENTITY_GRAPH_VMS_PER_HOST +
@@ -118,15 +118,15 @@ class GraphAlgorithmTest(GraphTestBase):
         }
         subgraph = ga.graph_query_vertices(query_dict=query, depth=3)
         self.assertEqual(
-            1 +  # Node to switch
-            ENTITY_GRAPH_HOSTS_PER_NODE * 2 +
-            ENTITY_GRAPH_HOSTS_PER_NODE * ENTITY_GRAPH_TESTS_PER_HOST +
-            ENTITY_GRAPH_HOSTS_PER_NODE * ENTITY_GRAPH_VMS_PER_HOST,
+            1 +  # Cluster to switch
+            ENTITY_GRAPH_HOSTS_PER_CLUSTER * 2 +
+            ENTITY_GRAPH_HOSTS_PER_CLUSTER * ENTITY_GRAPH_TESTS_PER_HOST +
+            ENTITY_GRAPH_HOSTS_PER_CLUSTER * ENTITY_GRAPH_VMS_PER_HOST,
             subgraph.num_edges(), 'num of edges Node (depth 3)')
 
         query = {
             'or': [
-                {'==': {VProps.TYPE: OPENSTACK_NODE}},
+                {'==': {VProps.TYPE: OPENSTACK_CLUSTER}},
                 {'==': {VProps.CATEGORY: ALARM}},
             ]
         }
@@ -171,10 +171,10 @@ class GraphAlgorithmTest(GraphTestBase):
         t_v_node = graph_utils.create_vertex(
             vitrage_id='6',
             entity_category=RESOURCE,
-            entity_type=OPENSTACK_NODE)
+            entity_type=OPENSTACK_CLUSTER)
         t_v_node_not_in_graph = graph_utils.create_vertex(
             vitrage_id='7', entity_category=RESOURCE,
-            entity_type=OPENSTACK_NODE + ' not in graph')
+            entity_type=OPENSTACK_CLUSTER + ' not in graph')
 
         e_alarm_on_host = graph_utils.create_edge(
             t_v_host_alarm.vertex_id, t_v_host.vertex_id, ELabel.ON)

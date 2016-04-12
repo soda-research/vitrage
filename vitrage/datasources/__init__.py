@@ -23,7 +23,7 @@ from vitrage.datasources.nova.instance import NOVA_INSTANCE_DATASOURCE
 from vitrage.datasources.nova.zone import NOVA_ZONE_DATASOURCE
 from vitrage.datasources.static_physical import STATIC_PHYSICAL_DATASOURCE
 
-OPENSTACK_NODE = 'openstack.node'
+OPENSTACK_CLUSTER = 'openstack.cluster'
 
 # Register options for the service
 OPTS = [
