@@ -107,7 +107,7 @@ function disable_vitrage_datasource {
     for datasource in $@; do
             enabled_datasources=${enabled_datasources//,$datasource,/,}
     done
-    VITRAGE_DEFAULT_DATSOURCES=$(_cleanup_service_list "$enabled_datasources")
+    VITRAGE_DEFAULT_DATASOURCES=$(_cleanup_service_list "$enabled_datasources")
 
 }
 
