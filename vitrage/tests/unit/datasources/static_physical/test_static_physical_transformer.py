@@ -144,7 +144,7 @@ class TestStaticPhysicalTransformer(base.BaseTest):
 
         self.assertEqual(5,
                          host_counter,
-                         'Zone can belongs to only one Node')
+                         'Zone can belongs to only one Cluster')
 
     def _validate_host_neighbor(self,
                                 host_neighbor,

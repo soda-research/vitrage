@@ -22,7 +22,7 @@ from vitrage.common.constants import VertexProperties as VProps
 from vitrage.datasources.nova.host import NOVA_HOST_DATASOURCE
 from vitrage.datasources.nova.instance import NOVA_INSTANCE_DATASOURCE
 from vitrage.datasources.nova.zone import NOVA_ZONE_DATASOURCE
-from vitrage.datasources import OPENSTACK_NODE
+from vitrage.datasources import OPENSTACK_CLUSTER
 from vitrage.graph import create_algorithm
 from vitrage.graph import Direction
 
@@ -36,7 +36,7 @@ TREE_TOPOLOGY_QUERY = {
         {'==': {VProps.IS_PLACEHOLDER: False}},
         {
             'or': [
-                {'==': {VProps.TYPE: OPENSTACK_NODE}},
+                {'==': {VProps.TYPE: OPENSTACK_CLUSTER}},
                 {'==': {VProps.TYPE: NOVA_INSTANCE_DATASOURCE}},
                 {'==': {VProps.TYPE: NOVA_HOST_DATASOURCE}},
                 {'==': {VProps.TYPE: NOVA_ZONE_DATASOURCE}}

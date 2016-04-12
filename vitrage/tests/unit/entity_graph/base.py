@@ -55,7 +55,7 @@ class TestEntityGraphUnitBase(base.BaseTest):
                    min=1)
     ]
 
-    NUM_NODES = 1
+    NUM_CLUSTERS = 1
     NUM_ZONES = 2
     NUM_HOSTS = 4
     NUM_INSTANCES = 16
@@ -147,9 +147,9 @@ class TestEntityGraphUnitBase(base.BaseTest):
         )
 
     def _num_total_expected_vertices(self):
-        return self.NUM_NODES + self.NUM_ZONES + self.NUM_HOSTS + \
+        return self.NUM_CLUSTERS + self.NUM_ZONES + self.NUM_HOSTS + \
             self.NUM_INSTANCES
 
     def _num_total_expected_edges(self):
-        return self.NUM_NODES + self.NUM_ZONES + self.NUM_HOSTS + \
+        return self.NUM_CLUSTERS + self.NUM_ZONES + self.NUM_HOSTS + \
             self.NUM_INSTANCES - 1

@@ -116,7 +116,8 @@ def simple_zone_generators(zone_num, snapshot_events=0, snap_vals=None):
     :return: generators for vm_num vms as specified
     """
 
-    mapping = [('zone-{0}'.format(ind), 'node-0') for ind in range(zone_num)]
+    mapping = [('zone-{0}'.format(ind), 'cluster-0')
+               for ind in range(zone_num)]
 
     test_entity_spec_list = [
         {tg.DYNAMIC_INFO_FKEY: tg.TRANS_ZONE_SNAPSHOT_D,

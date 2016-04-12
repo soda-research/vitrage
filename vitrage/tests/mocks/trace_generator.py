@@ -450,12 +450,12 @@ def _get_trans_zone_snapshot_values(spec):
     :rtype: list
     """
 
-    zone_node_mapping = spec[MAPPING_KEY]
+    zone_cluster_mapping = spec[MAPPING_KEY]
     static_info_re = None
     if spec[STATIC_INFO_FKEY] is not None:
         static_info_re = utils.load_specs(spec[STATIC_INFO_FKEY])
     static_values = []
-    for zone_name, node_name in zone_node_mapping:
+    for zone_name, cluster_name in zone_cluster_mapping:
         mapping = {'name': zone_name,
                    'id': zone_name}
         static_values.append(combine_data(

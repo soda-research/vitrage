@@ -20,7 +20,7 @@ from oslo_service import service as os_service
 
 from vitrage.common.constants import EntityCategory
 from vitrage.datasources import launcher as datasource_launcher
-from vitrage.datasources import OPENSTACK_NODE
+from vitrage.datasources import OPENSTACK_CLUSTER
 from vitrage.entity_graph.api_handler import service as api_handler_svc
 from vitrage.entity_graph.consistency import service as consistency_svc
 from vitrage.entity_graph.initialization_status import InitializationStatus
@@ -65,7 +65,7 @@ def init():
     event_queue = multiprocessing.Queue()
     e_graph = entity_graph.EntityGraph(
         'Entity Graph',
-        '%s:%s' % (EntityCategory.RESOURCE, OPENSTACK_NODE))
+        '%s:%s' % (EntityCategory.RESOURCE, OPENSTACK_CLUSTER))
     scenario_repo = ScenarioRepository(conf)
     evaluator = ScenarioEvaluator(conf, e_graph, scenario_repo, event_queue)
     initialization_status = InitializationStatus()

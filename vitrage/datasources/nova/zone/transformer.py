@@ -76,7 +76,7 @@ class ZoneTransformer(ResourceTransformerBase):
     def _create_neighbors(self, entity_event):
 
         zone_vertex_id = self._create_entity_key(entity_event)
-        neighbors = [self._create_node_neighbor(zone_vertex_id)]
+        neighbors = [self._create_cluster_neighbor(zone_vertex_id)]
         hosts = extract_field_value(entity_event, 'hosts')
         host_transformer = self.transformers[NOVA_HOST_DATASOURCE]
 
@@ -107,15 +107,15 @@ class ZoneTransformer(ResourceTransformerBase):
         return neighbors
 
     @staticmethod
-    def _create_node_neighbor(zone_vertex_id):
+    def _create_cluster_neighbor(zone_vertex_id):
 
-        node_vertex = tbase.create_node_placeholder_vertex()
+        cluster_vertex = tbase.create_cluster_placeholder_vertex()
 
         relation_edge = graph_utils.create_edge(
-            source_id=node_vertex.vertex_id,
+            source_id=cluster_vertex.vertex_id,
             target_id=zone_vertex_id,
             relationship_type=EdgeLabels.CONTAINS)
-        return tbase.Neighbor(node_vertex, relation_edge)
+        return tbase.Neighbor(cluster_vertex, relation_edge)
 
     def _create_host_neighbor(self, zone_id, host_name,
                               host_state, sample_timestamp):

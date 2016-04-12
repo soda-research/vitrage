@@ -28,7 +28,7 @@ from vitrage.common.constants import EdgeLabels as ELabel
 from vitrage.common.constants import EntityCategory
 from vitrage.datasources.nova.host import NOVA_HOST_DATASOURCE
 from vitrage.datasources.nova.instance import NOVA_INSTANCE_DATASOURCE
-from vitrage.datasources import OPENSTACK_NODE
+from vitrage.datasources import OPENSTACK_CLUSTER
 from vitrage.datasources.static_physical import SWITCH
 from vitrage.graph import create_graph
 from vitrage.graph import utils as graph_utils
@@ -36,7 +36,7 @@ from vitrage.tests import base
 
 LOG = logging.getLogger(__name__)
 
-ENTITY_GRAPH_HOSTS_PER_NODE = 8
+ENTITY_GRAPH_HOSTS_PER_CLUSTER = 8
 ENTITY_GRAPH_VMS_PER_HOST = 8
 ENTITY_GRAPH_ALARMS_PER_HOST = 8
 ENTITY_GRAPH_TESTS_PER_HOST = 20
@@ -51,9 +51,9 @@ ALARM_ON_HOST = 'ALARM_ON_HOST'
 TEST_ON_HOST = 'TEST_ON_HOST'
 
 v_node = graph_utils.create_vertex(
-    vitrage_id=EntityCategory.RESOURCE + ':' + OPENSTACK_NODE,
+    vitrage_id=EntityCategory.RESOURCE + ':' + OPENSTACK_CLUSTER,
     entity_id='111111111111',
-    entity_type=OPENSTACK_NODE,
+    entity_type=OPENSTACK_CLUSTER,
     entity_category=RESOURCE)
 v_host = graph_utils.create_vertex(
     vitrage_id=NOVA_HOST_DATASOURCE + '222222222222',
@@ -123,7 +123,7 @@ class GraphTestBase(base.BaseTest):
         self.host_test_id = 40000000
         self.entity_graph = self._create_entity_graph(
             'entity_graph',
-            num_of_hosts_per_node=ENTITY_GRAPH_HOSTS_PER_NODE,
+            num_of_hosts_per_node=ENTITY_GRAPH_HOSTS_PER_CLUSTER,
             num_of_vms_per_host=ENTITY_GRAPH_VMS_PER_HOST,
             num_of_alarms_per_host=ENTITY_GRAPH_ALARMS_PER_HOST,
             num_of_alarms_per_vm=ENTITY_GRAPH_ALARMS_PER_VM,
@@ -141,7 +141,7 @@ class GraphTestBase(base.BaseTest):
 
         start = time.time()
         g = create_graph(name, EntityCategory.RESOURCE + ':' +
-                         OPENSTACK_NODE)
+                         OPENSTACK_CLUSTER)
         g.add_vertex(v_node)
         g.add_vertex(v_switch)
         g.add_edge(e_node_to_switch)
