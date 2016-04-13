@@ -17,6 +17,7 @@ Enabling Vitrage in DevStack
    [[post-config|$NOVA_CONF]]
    [DEFAULT]
    notification_topics = notifications,vitrage_notifications
+   notification_driver=messagingv2
 
 4. Add this to add notification from neutron to vitrage
    (make sure neutron is enabled in devstack)
@@ -24,11 +25,13 @@ Enabling Vitrage in DevStack
    [[post-config|$NEUTRON_CONF]]
    [DEFAULT]
    notification_topics = notifications,vitrage_notifications
+   notification_driver=messagingv2
 
 5. Add this to add notification from cinder to vitrage
 
    [[post-config|$CINDER_CONF]]
    [DEFAULT]
    notification_topics = notifications,vitrage_notifications
+   notification_driver=messagingv2
 
 6. Run ``stack.sh``.
