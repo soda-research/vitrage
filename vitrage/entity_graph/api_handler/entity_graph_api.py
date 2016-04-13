@@ -136,8 +136,7 @@ class EntityGraphApis(object):
         if len(lst) == 1:
             return lst[0]
         else:
-            raise ValueError('Alarm has ' + str(len(lst)) +
-                             ' connected resources (expected 1).')
+            return None
 
     def _add_resource_details_to_alarms(self, alarms):
         incorrect_alarms = []
@@ -149,8 +148,13 @@ class EntityGraphApis(object):
                     direction=Direction.OUT)
 
                 resource = self._get_first(resources)
-                alarm["resource_id"] = resource.get(VProps.ID, '')
-                alarm["resource_type"] = resource.get(VProps.TYPE, '')
+                if resource:
+                    alarm["resource_id"] = resource.get(VProps.ID, '')
+                    alarm["resource_type"] = resource.get(VProps.TYPE, '')
+                else:
+                    alarm["resource_id"] = ''
+                    alarm["resource_type"] = ''
+
             except ValueError as ve:
                 incorrect_alarms.append(alarm)
                 LOG.error('Alarm %s\nException %s', alarm, ve)
