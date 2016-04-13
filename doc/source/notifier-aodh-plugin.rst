@@ -14,27 +14,40 @@ Design
 
 ::
 
-  +------------------+          +--------+
-  |      Vitrage     |          | Message|       +------------------+
-  |    Evaluator     ---------->|  Bus   --------> Vitrage Notifier |
-  +------------------+          |        |       +------------------+
-                                |        |          |        |   |
-                                |        |      +---|------+ |   |
-                                |        |      | Aodh     |-|-+ |
-                                |        |      | notifier |   |-|--+
-                                |        |   +--| plugin   |   |    |
-                                |        |   |  +----------+   |    |
-                                +--------+   |     +-----------+    |
-                                             |         +------------+
-  +------------------+                       |
-  |   Aodh           <-----------------------+
-  +------------------+
+ +----------+  +-----------+   +------+         +--------+
+ | Vitrage  |  | DataSource|   |Graph |         | Message|       +------------------+
+ | Evaluator|->| Queue     |-->|      |-------->|  Bus   |------>| Vitrage Notifier |
+ +----------+  +-----------+   +------+         |        |       +------------------+
+                                                |        |          |        |   |
+                                                |        |      +----------+ |   |
+                                                |        |      | Aodh     |---+ |
+                                                |        |      | notifier |   |----+
+                                                |        |   +--| plugin   |   |    |
+                                                |        |   |  +----------+   |    |
+                                                +--------+   |     +-----------+    |
+                                                             |         +------------+
+                  +------------------+                       |
+                  |   Aodh           |<----------------------+
+                  +------------------+
 
 ...
 
-Evaluator bus notifications
----------------------------
-Vitrage Evaluator will use the **vitrage.evaluator** message bus topic, and will post messages as follows:
+DeducedAlarmNotifier class will be subscribed to entity graph notifications. Whenever a vitrage deduced alarm is added to the graph it will post a message to the message bus.
+The processor will hold an instance of the DeducedAlarmNotifier class and will subscribe this instance to entity graph notifications.
+
+The VitrageNotifier is a new service that listens to the bus for internal vitrage notifications, then can call all the relevant notifier plugins.
+
+1. Deduced Alarm created by the Evaluator
+2. Graph vertex added/updated
+3. DeducedAlarmNotifier write to message bus
+4. VitrageNotifierService receives the event and calls all plugins
+5. Aodh plugin - using the ceilometer client, creates an event in aodh (with some metadata params in the query)
+
+Deduced Alarms bus notifications
+--------------------------------
+
+Vitrage Evaluator will create a deduced alarm, sending it to the data source queue
+Vitrage Evaluator will use the **vitrage.graph** message bus topic, and will post messages as follows:
 
  - message of type **vitrage.deduce_alarm.activate** :
 
@@ -62,6 +75,22 @@ Handle vitrage.deduce_alarm.activate:
 -------------------------------------
 Create an event alarm with the specified severity, where the alarm name is vitrage_alarm_name+resource_id so to be unique
 
+ - Message does not contain aodh alarm id:
+
+   * plugin will **create** a new aodh alarm
+   * alarm type - event
+   * alarm status - alarm
+   * query contain resource_id, vitrage_id fields
+
+ - Message contains aodh alarm id
+
+   * plugin will **update** the aodh alarm status to alarm
+
 Handle vitrage.deduce_alarm.deactivate:
 ---------------------------------------
 delete an event alarm with the specified id
+
+   * message will contain the aodh alarm id - plugin will **update** the alarm status to ok
+   * name - is the alarm name in vitrage
+   * severity - is the alarm severity
+   * affected_resource_id - is the openstack id of the resource on which the alarm was raised
