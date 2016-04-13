@@ -20,6 +20,7 @@ from vitrage.tests.functional.datasources.base import \
 
 class TestNovaDatasources(TestDataSourcesBase):
 
+    # noinspection PyPep8Naming
     @classmethod
     def setUpClass(cls):
         super(TestNovaDatasources, cls).setUpClass()

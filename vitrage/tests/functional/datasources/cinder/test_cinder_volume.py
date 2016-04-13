@@ -41,6 +41,7 @@ class TestCinderVolume(TestDataSourcesBase):
                     help='base path for data sources')
     ]
 
+    # noinspection PyPep8Naming
     @classmethod
     def setUpClass(cls):
         super(TestCinderVolume, cls).setUpClass()

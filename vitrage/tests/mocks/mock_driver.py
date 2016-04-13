@@ -199,6 +199,8 @@ def simple_volume_generators(volume_num, instance_num,
     Returns generators for a given number of volumes and
     instances. Instances will be distributed across hosts in round-robin style.
 
+    :param update_vals:  number of values from update event
+    :param update_events: number of events from update event
     :param volume_num: number of volumes
     :param instance_num: number of instances
     :param snapshot_events: number of snapshot events per host
@@ -244,6 +246,8 @@ def simple_switch_generators(switch_num, host_num,
     Hosts will be distributed across switches in round-robin style.
     Switches are interconnected in a line.
 
+    :param update_vals:  number of events from update event
+    :param update_events: number of values from update event
     :param switch_num: number of zones
     :param host_num: number of hosts
     :param snapshot_events: number of snapshot events per zone
