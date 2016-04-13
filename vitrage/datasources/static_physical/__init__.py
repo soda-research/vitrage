@@ -29,8 +29,8 @@ OPTS = [
                help='Static physical driver class path',
                required=True),
     cfg.IntOpt('changes_interval',
-               default=5,
-               min=5,
+               default=20,
+               min=20,
                help='interval between checking changes in the configuration '
                     'files of the physical topology data sources',
                required=True),

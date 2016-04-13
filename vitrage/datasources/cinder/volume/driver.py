@@ -50,7 +50,14 @@ class CinderVolumeDriver(DriverBase):
 
     @staticmethod
     def get_event_types(conf):
-        return ['volume.']
+        return ['volume.create.start',
+                'volume.create.end',
+                'volume.attach.start',
+                'volume.attach.end',
+                'volume.detach.start',
+                'volume.detach.end',
+                'volume.delete.start',
+                'volume.delete.end']
 
     @staticmethod
     def get_topic(conf):

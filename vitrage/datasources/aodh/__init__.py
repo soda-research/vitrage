@@ -27,8 +27,8 @@ OPTS = [
                help='Aodh driver class path',
                required=True),
     cfg.IntOpt('changes_interval',
-               default=30,
-               min=30,
+               default=20,
+               min=20,
                help='interval between checking changes in aodh data source',
                required=True),
 ]

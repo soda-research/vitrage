@@ -276,20 +276,23 @@ class Processor(processor.ProcessorBase):
     def _calculate_aggregated_state(self, vertex, action):
         LOG.debug("calculate event state")
 
-        if action in [EventAction.UPDATE_ENTITY,
-                      EventAction.DELETE_ENTITY,
-                      EventAction.CREATE_ENTITY]:
-            graph_vertex = self.entity_graph.get_vertex(vertex.vertex_id)
-        elif action in [EventAction.END_MESSAGE,
-                        EventAction.UPDATE_RELATIONSHIP,
-                        EventAction.DELETE_RELATIONSHIP]:
-            return None
-        else:
-            LOG.error('unrecognized action: %s for vertex: %s',
-                      action, vertex)
-            return None
+        try:
+            if action in [EventAction.UPDATE_ENTITY,
+                          EventAction.DELETE_ENTITY,
+                          EventAction.CREATE_ENTITY]:
+                graph_vertex = self.entity_graph.get_vertex(vertex.vertex_id)
+            elif action in [EventAction.END_MESSAGE,
+                            EventAction.UPDATE_RELATIONSHIP,
+                            EventAction.DELETE_RELATIONSHIP]:
+                return None
+            else:
+                LOG.error('unrecognized action: %s for vertex: %s',
+                          action, vertex)
+                return None
 
-        self.state_manager.aggregated_state(vertex, graph_vertex)
+            self.state_manager.aggregated_state(vertex, graph_vertex)
+        except Exception as e:
+            LOG.exception("Calculate aggregated state failed - %s", e)
 
     def _enrich_event(self, event):
         attr = self.transformer_manager.get_enrich_query(event)

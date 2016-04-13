@@ -46,8 +46,11 @@ class InstanceDriver(NovaDriverBase):
     @staticmethod
     def get_event_types(conf):
         # Add event_types to receive notifications about
-        return ['compute.instance.create',
-                'compute.instance.delete',
+        return ['compute.instance.create.start',
+                'compute.instance.create.error',
+                'compute.instance.create.end',
+                'compute.instance.delete.start',
+                'compute.instance.delete.end',
                 'compute.instance.finish_resize.end',
                 'compute.instance.live_migration.post.dest.end',
                 'compute.instance.live_migration._post.end',
