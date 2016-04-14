@@ -37,6 +37,11 @@ class AlarmTransformerBase(tbase.TransformerBase):
         pass
 
     def _extract_action_type(self, entity_event):
+        # TODO(ifat_afek): this method should reside together with the cache,
+        # in the transformer code
+        if DSProps.EVENT_TYPE in entity_event:
+            return entity_event[DSProps.EVENT_TYPE]
+
         sync_mode = entity_event[DSProps.SYNC_MODE]
         if sync_mode in (SyncMode.UPDATE, SyncMode.SNAPSHOT):
             return EventAction.DELETE_ENTITY if self._ok_status(entity_event) \

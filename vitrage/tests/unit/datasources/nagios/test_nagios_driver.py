@@ -14,7 +14,8 @@
 
 from oslo_config import cfg
 from oslo_log import log as logging
-
+from vitrage.common.constants import DatasourceProperties as DSProps
+from vitrage.common.constants import EventAction
 from vitrage.datasources.nagios.properties import NagiosProperties as \
     NagiosProps
 from vitrage.tests.mocks import utils
@@ -438,3 +439,105 @@ class NagiosDriverTest(NagiosBaseTest):
         self._assert_contains(service_data1, services)
         self._assert_contains(service_data2, services)
         self._assert_contains(service_data3, services)
+
+    def test_delete_service(self):
+        """Check get_all and get_changes with a deleted service"""
+
+        # Setup
+        nagios_driver = MockNagiosDriver(self.conf)
+
+        # Action
+        service_data1 = {NagiosProps.RESOURCE_NAME: 'compute-0',
+                         NagiosProps.SERVICE: 'CPU utilization',
+                         NagiosProps.STATUS: 'WARNING'}
+        service_data2 = {NagiosProps.RESOURCE_NAME: 'compute-1',
+                         NagiosProps.SERVICE: 'CPU utilization',
+                         NagiosProps.STATUS: 'OK'}
+        service_data3 = {NagiosProps.RESOURCE_NAME: 'compute-1',
+                         NagiosProps.SERVICE: 'Uptime',
+                         NagiosProps.STATUS: 'OK'}
+
+        nagios_driver.set_service_datas([service_data1,
+                                         service_data2,
+                                         service_data3])
+
+        services = nagios_driver._get_all_alarms()
+
+        # Test assertions
+        self.assertIsNotNone(services, 'No services returned')
+        self.assertEqual(1, len(services))
+        self._assert_contains(service_data1, services)
+
+        # Action - delete a service that was OK
+        service_data1 = {NagiosProps.RESOURCE_NAME: 'compute-0',
+                         NagiosProps.SERVICE: 'CPU utilization',
+                         NagiosProps.STATUS: 'WARNING'}
+        service_data2 = {NagiosProps.RESOURCE_NAME: 'compute-1',
+                         NagiosProps.SERVICE: 'CPU utilization',
+                         NagiosProps.STATUS: 'OK'}
+
+        nagios_driver.set_service_datas([service_data1, service_data2])
+
+        services = nagios_driver._get_all_alarms()
+
+        # Test assertions
+        self.assertIsNotNone(services, 'No services returned')
+        self.assertEqual(1, len(services))
+        self._assert_contains(service_data1, services)
+
+        # Action - delete a service that was not OK
+        service_data2 = {NagiosProps.RESOURCE_NAME: 'compute-1',
+                         NagiosProps.SERVICE: 'CPU utilization',
+                         NagiosProps.STATUS: 'OK'}
+
+        nagios_driver.set_service_datas([service_data2])
+
+        services = nagios_driver._get_all_alarms()
+
+        # Test assertions
+        self.assertIsNotNone(services, 'No services returned')
+        self.assertEqual(1, len(services))
+        self._assert_contains(service_data1, services)
+        self.assertEqual(EventAction.DELETE_ENTITY,
+                         services[0][DSProps.EVENT_TYPE])
+
+        # Action - get changes, should not return the deleted alarm again
+        services = nagios_driver._get_changed_alarms()
+
+        # Test assertions
+        self.assertIsNotNone(services, 'services is None')
+        self.assertEqual(0, len(services))
+
+        # Action - "undelete" the service that was OK
+        service_data1 = {NagiosProps.RESOURCE_NAME: 'compute-0',
+                         NagiosProps.SERVICE: 'CPU utilization',
+                         NagiosProps.STATUS: 'WARNING'}
+        service_data2 = {NagiosProps.RESOURCE_NAME: 'compute-1',
+                         NagiosProps.SERVICE: 'CPU utilization',
+                         NagiosProps.STATUS: 'OK'}
+
+        nagios_driver.set_service_datas([service_data1, service_data2])
+
+        services = nagios_driver._get_all_alarms()
+
+        # Test assertions
+        self.assertIsNotNone(services, 'No services returned')
+        self.assertEqual(1, len(services))
+        self._assert_contains(service_data1, services)
+        self.assertFalse(DSProps.EVENT_TYPE in services[0])
+
+        # Action - delete a service that was not OK and call get_changes
+        service_data2 = {NagiosProps.RESOURCE_NAME: 'compute-1',
+                         NagiosProps.SERVICE: 'CPU utilization',
+                         NagiosProps.STATUS: 'OK'}
+
+        nagios_driver.set_service_datas([service_data2])
+
+        services = nagios_driver._get_changed_alarms()
+
+        # Test assertions
+        self.assertIsNotNone(services, 'No services returned')
+        self.assertEqual(1, len(services))
+        self._assert_contains(service_data1, services)
+        self.assertEqual(EventAction.DELETE_ENTITY,
+                         services[0][DSProps.EVENT_TYPE])

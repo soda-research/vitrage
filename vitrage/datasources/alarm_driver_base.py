@@ -13,7 +13,9 @@
 # under the License.
 
 from oslo_log import log
-
+from vitrage.common.constants import DatasourceProperties as DSProps
+from vitrage.common.constants import EventAction
+from vitrage.common import datetime_utils
 from vitrage.datasources.driver_base import DriverBase
 
 LOG = log.getLogger(__name__)
@@ -95,15 +97,24 @@ class AlarmDriverBase(DriverBase):
 
     def _filter_and_cache_alarms(self, alarms, filter_):
         alarms_to_update = []
+        now = datetime_utils.utcnow(False)
 
         for alarm in alarms:
             alarm_key = self._alarm_key(alarm)
-            old_alarm = self.cache.get(alarm_key, None)
+            old_alarm, timestamp = self.cache.get(alarm_key, (None, None))
 
             if filter_(self, alarm, old_alarm):
                 alarms_to_update.append(alarm)
 
-            self.cache[alarm_key] = alarm
+            self.cache[alarm_key] = alarm, now
+
+        # add alarms that were deleted
+        for cached_alarm, timestamp in self.cache.values():
+            if self._is_erroneous(cached_alarm) and timestamp is not now:
+                LOG.debug('deleting cached_alarm %s', cached_alarm)
+                cached_alarm[DSProps.EVENT_TYPE] = EventAction.DELETE_ENTITY
+                alarms_to_update.append(cached_alarm)
+                self.cache.pop(self._alarm_key(cached_alarm))
 
         return alarms_to_update
 
