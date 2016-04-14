@@ -2,10 +2,28 @@
 Resource State Configuration
 ============================
 
+Overview
+--------
+
+Vitrage retrieves information from diverse data-sources regarding resources in
+the cloud, and stores and combines this information into a unified system
+model. An important property of a resource is its **state**. This state can
+be used both in the Vitrage templates to trigger actions, and in the Horizon UI
+for color-coding purposes. Therefore, it is important that within the Vitrage
+data model, state names are normalized.
+
+Since each data-source might represent state differently, for each
+data-source we can supply it's own mapping to the normalized state supported
+in Vitrage. This page explains how to handle this mapping for a given
+data-source.
+
+
 Configure Access to Resource State
 ----------------------------------
 
-The following should be set in **/etc/vitrage/vitrage.conf**, under entity_graph section:
+The resource state configuration is handled via config files. The location of
+these files can be determined in **/etc/vitrage/vitrage.conf**. Under the
+[entity_graph] section, set:
 
 +------------------------+------------------------------------+----------------------------------+
 | Name                   | Description                        | Default Value                    |
@@ -18,35 +36,55 @@ The following should be set in **/etc/vitrage/vitrage.conf**, under entity_graph
 Configure Resource State Mapping
 --------------------------------
 
-Resource state configuration is made to configure how states of specific resource are normalized.
-For each normalized state a priority is set as well, so that when resource will have the original state and the Vitrage state, Vitrage will know what state is more important.
-UNRECOGNIZED state has to be configured in each resource state configuration file.
+The resource state configuration files configure how the state of each
+resource is normalized. Some guidelines for creating a config file:
 
-The file name has to be in the same name as it's plugin name.
-State configuration yaml file has to be defined for all the plugins which were chosen to be used in Vitrage.
+- Normalized state values, to which states should be mapped, can be found in
+  normalized_resource_state.py (NormalizedResourceState class).
+- Each normalized state also comes with a priority, so
+  that if a resource is given different states from different sources (e.g.,
+  a host state set both by nagios and Vitrage), the state with the
+  highest priority will be used as the **aggregated state**.
+- The *UNRECOGNIZED* state will be used for states with no corresponding
+  normalized state. This state *must* appear in the config file.
+- The config file is in YAML format.
+- The config filename must be <datasource name>.yaml, for the relevant
+  datasource.
+- Defining a config file for each datasource is recommended, but not mandatory.
+  Datasources with no such configuration will use the values as-is.
 
-**Format**
+
+Default Configuration
++++++++++++++++++++++
+
+Default configurations for resource states will be installed with Vitrage for
+all the pre-packaged data-sources.
+
+
+
+
+Format
+++++++
 ::
 
-  category: RESOURCE
-  values:
-    - normalized value:
-        name: <Normalized resource value name - must be from NormalizedResourcevalue class>
-        priority: <Resource value priority - an integer>
-        original values:
-          - name: <Original resource value name>
-          - name: <Original resource value name>
-    - normalized value:
-          name: <Normalized resource value name - must be from NormalizedResourcevalue class>
-          priority: <Resource value priority - an integer>
+    category: RESOURCE
+    values:
+      - normalized value:
+          name: <normalized resource state>
+          priority: <resource state priority - an integer>
           original values:
-            - name: <Original resource value name>
-            - name: <Original resource value name>
+            - name: <Original resource state name>
+            - name: ... # can list several states for one normalized
+      - normalized value:
+          name: ... # can list several normalized states
+          ...
+
 
   ...
 
 
-**Example**
+Example
++++++++
 
 The following is mapping resource values.
 Original values 'DELETED' and 'TERMINATED' will be mapped to normalized value 'TERMINATED'.
@@ -58,22 +96,17 @@ Original values 'ACTIVE' and 'RUNNING' to normalized value 'RUNNING'.
   values:
     - normalized value:
         name: TERMINATED
-        priority: 20
+        priority: 30
         original values:
           - name: DELETED
           - name: TERMINATED
     - normalized value:
-          name: RUNNING
-          priority: 10
-          original values:
-            - name: ACTIVE
-            - name: RUNNING
-
-
-
-**Default Configuration**
-
-Default configurations for resource values will be installed with Vitrage.
-
-
-
+        name: RUNNING
+        priority: 20
+        original values:
+          - name: ACTIVE
+          - name: RUNNING
+    - normalized value:
+        name: UNRECOGNIZED
+        priority: 10
+        original values:
