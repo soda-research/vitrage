@@ -74,10 +74,10 @@ def _get_notification_type(before, current, is_vertex):
     if not is_vertex:
         return None
     if not _is_active_deduced_alarm(before) and \
-        _is_active_deduced_alarm(current):
+            _is_active_deduced_alarm(current):
         return NotifierEventTypes.ACTIVATE_DEDUCED_ALARM_EVENT
     if _is_active_deduced_alarm(before) and \
-        not _is_active_deduced_alarm(current):
+            not _is_active_deduced_alarm(current):
         return NotifierEventTypes.DEACTIVATE_DEDUCED_ALARM_EVENT
 
 
