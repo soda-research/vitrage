@@ -19,10 +19,10 @@ from vitrage.tests.functional.base import TestFunctionalBase
 
 class TestDataSourcesBase(TestFunctionalBase):
 
-    def _find_entity_id_by_type(self, graph, type):
+    def _find_entity_id_by_type(self, graph, type_):
         entity_vertices = graph.get_vertices(vertex_attr_filter={
             VProps.CATEGORY: EntityCategory.RESOURCE,
-            VProps.TYPE: type
+            VProps.TYPE: type_
         })
         self.assertTrue(len(entity_vertices) > 0)
 

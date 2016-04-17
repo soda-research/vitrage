@@ -33,7 +33,7 @@ resource = Vertex('123', {
     VProps.TYPE: 'some_resource_type',
     VProps.IS_DELETED: False,
     VProps.IS_PLACEHOLDER: False,
-    }
+}
 )
 
 deduced_alarm = Vertex('123', {
@@ -41,7 +41,7 @@ deduced_alarm = Vertex('123', {
     VProps.TYPE: evaluator.VITRAGE_TYPE,
     VProps.IS_DELETED: False,
     VProps.IS_PLACEHOLDER: False,
-    }
+}
 )
 
 
@@ -50,7 +50,7 @@ non_deduced_alarm = Vertex('123', {
     VProps.TYPE: 'TEST_ALARM',
     VProps.IS_DELETED: False,
     VProps.IS_PLACEHOLDER: True,
-    }
+}
 )
 
 deleted_alarm = Vertex('123', {
@@ -58,7 +58,7 @@ deleted_alarm = Vertex('123', {
     VProps.TYPE: evaluator.VITRAGE_TYPE,
     VProps.IS_DELETED: True,
     VProps.IS_PLACEHOLDER: False,
-    }
+}
 )
 
 placeholder_alarm = Vertex('123', {
@@ -66,7 +66,7 @@ placeholder_alarm = Vertex('123', {
     VProps.TYPE: evaluator.VITRAGE_TYPE,
     VProps.IS_DELETED: False,
     VProps.IS_PLACEHOLDER: True,
-    }
+}
 )
 
 

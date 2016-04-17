@@ -40,8 +40,8 @@ class DeducedAlarmNotifier(object):
                 driver='messagingv2',
                 publisher_id='vitrage.deduced',
                 topic=topic)
-        except Exception:
-            LOG.info('DeducedAlarmNotifier missing configuration')
+        except Exception as e:
+            LOG.info('DeducedAlarmNotifier missing configuration %s' % str(e))
 
     @property
     def enabled(self):

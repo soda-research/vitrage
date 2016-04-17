@@ -17,4 +17,4 @@ from oslo_config import cfg
 OPTS = [
     cfg.ListOpt('notifiers',
                 help='Names of enabled notifiers (example aodh)'),
-    ]
+]
