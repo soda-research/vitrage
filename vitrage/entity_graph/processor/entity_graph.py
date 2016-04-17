@@ -12,7 +12,6 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from dateutil import parser
 from oslo_log import log
 
 from vitrage.common.constants import EdgeProperties as EProps
@@ -85,27 +84,6 @@ class EntityGraph(NXGraph):
         category = vertex[VProps.CATEGORY]
         type_ = vertex[VProps.TYPE]
         return category, type_
-
-    def check_update_validation(self, graph_vertex, updated_vertex):
-        """Checks current and updated validation
-
-        Check 2 conditions:
-        1. is the vertex not deleted
-        2. is updated timestamp bigger then current timestamp
-        """
-
-        return (not self.is_vertex_deleted(graph_vertex)) and \
-            self.check_timestamp(graph_vertex, updated_vertex)
-
-    @staticmethod
-    def check_timestamp(graph_vertex, new_vertex):
-        curr_timestamp = graph_vertex.get(VProps.SAMPLE_TIMESTAMP)
-        if not curr_timestamp:
-            return True
-
-        current_time = parser.parse(curr_timestamp)
-        new_time = parser.parse(new_vertex[VProps.SAMPLE_TIMESTAMP])
-        return current_time <= new_time
 
     @staticmethod
     def can_update_vertex(graph_vertex, new_vertex):

@@ -21,6 +21,7 @@ from vitrage.datasources.transformer_base import TransformerBase
 from vitrage.entity_graph.processor import base as processor
 from vitrage.entity_graph.processor import entity_graph
 from vitrage.entity_graph.processor.notifier import DeducedAlarmNotifier
+from vitrage.entity_graph.processor import processor_utils as PUtils
 from vitrage.entity_graph.states.state_manager import StateManager
 from vitrage.entity_graph.transformer_manager import TransformerManager
 from vitrage.graph import Direction
@@ -90,11 +91,10 @@ class Processor(processor.ProcessorBase):
 
         LOG.debug('Update entity in entity graph:\n%s', updated_vertex)
 
-        graph_vertex = \
-            self.entity_graph.get_vertex(updated_vertex.vertex_id)
+        graph_vertex = self.entity_graph.get_vertex(updated_vertex.vertex_id)
 
-        if (not graph_vertex) or self.entity_graph.check_update_validation(
-                graph_vertex, updated_vertex):
+        if (not graph_vertex) or \
+                PUtils.is_newer_vertex(graph_vertex, updated_vertex):
             self.entity_graph.update_entity_graph_vertex(graph_vertex,
                                                          updated_vertex)
             self._update_neighbors(updated_vertex, neighbors)
@@ -116,11 +116,10 @@ class Processor(processor.ProcessorBase):
 
         LOG.debug('Delete entity from entity graph:\n%s', deleted_vertex)
 
-        graph_vertex = \
-            self.entity_graph.get_vertex(deleted_vertex.vertex_id)
+        graph_vertex = self.entity_graph.get_vertex(deleted_vertex.vertex_id)
 
-        if (not graph_vertex) or self.entity_graph.check_update_validation(
-                graph_vertex, deleted_vertex):
+        if graph_vertex and (not PUtils.is_deleted(graph_vertex)) and \
+                PUtils.is_newer_vertex(graph_vertex, deleted_vertex):
             neighbor_vertices = self.entity_graph.neighbors(
                 deleted_vertex.vertex_id)
             neighbor_edges = self.entity_graph.get_edges(
@@ -192,8 +191,7 @@ class Processor(processor.ProcessorBase):
                   neighbors, valid_edges)
         for (vertex, edge) in neighbors:
             graph_vertex = self.entity_graph.get_vertex(vertex.vertex_id)
-            if not graph_vertex or \
-                    not self.entity_graph.is_vertex_deleted(graph_vertex):
+            if not graph_vertex or not PUtils.is_deleted(graph_vertex):
                 if self.entity_graph.can_update_vertex(graph_vertex, vertex):
                     LOG.debug("Updates vertex: %s", vertex)
                     self._calculate_aggregated_state(vertex, action)
