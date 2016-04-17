@@ -13,7 +13,7 @@
 # under the License.
 from oslo_log import log as logging
 
-from vitrage.common.constants import EdgeLabels
+from vitrage.common.constants import EdgeLabel
 from vitrage.common.constants import EdgeProperties
 from vitrage.evaluator.actions.base import ActionType
 from vitrage.evaluator.actions.recipes.action_steps import ADD_EDGE
@@ -67,7 +67,7 @@ class AddCausalRelationshipTest(base.BaseTest):
         self.assertEqual(self.target_vertex_id, target)
 
         relation_name = add_edge_step_params[EdgeProperties.RELATIONSHIP_TYPE]
-        self.assertEqual(EdgeLabels.CAUSES, relation_name)
+        self.assertEqual(EdgeLabel.CAUSES, relation_name)
 
     def test_get_undo_recipe(self):
 
@@ -90,4 +90,4 @@ class AddCausalRelationshipTest(base.BaseTest):
         self.assertEqual(self.target_vertex_id, target)
 
         relation_name = add_edge_step_params[EdgeProperties.RELATIONSHIP_TYPE]
-        self.assertEqual(EdgeLabels.CAUSES, relation_name)
+        self.assertEqual(EdgeLabel.CAUSES, relation_name)

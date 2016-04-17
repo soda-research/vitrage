@@ -18,7 +18,7 @@ from vitrage.datasources.resource_transformer_base import \
 from oslo_log import log as logging
 
 from vitrage.common.constants import DatasourceProperties as DSProps
-from vitrage.common.constants import EdgeLabels
+from vitrage.common.constants import EdgeLabel
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import EventAction
 from vitrage.common.constants import VertexProperties as VProps
@@ -133,7 +133,7 @@ class PortTransformer(ResourceTransformerBase):
         relationship_edge = graph_utils.create_edge(
             source_id=port_vitrage_id,
             target_id=instance_vertex.vertex_id,
-            relationship_type=EdgeLabels.ATTACHED)
+            relationship_type=EdgeLabel.ATTACHED)
 
         return Neighbor(instance_vertex, relationship_edge)
 
@@ -155,6 +155,6 @@ class PortTransformer(ResourceTransformerBase):
         relationship_edge = graph_utils.create_edge(
             source_id=net_vertex.vertex_id,
             target_id=port_vitrage_id,
-            relationship_type=EdgeLabels.CONTAINS)
+            relationship_type=EdgeLabel.CONTAINS)
 
         return Neighbor(net_vertex, relationship_edge)

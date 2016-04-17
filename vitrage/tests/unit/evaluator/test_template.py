@@ -13,7 +13,7 @@
 # under the License.
 from oslo_log import log as logging
 
-from vitrage.common.constants import EdgeLabels
+from vitrage.common.constants import EdgeLabel
 from vitrage.common import file_utils
 from vitrage.evaluator.template import ConditionVar
 from vitrage.evaluator.template import EdgeDescription
@@ -128,7 +128,7 @@ class BasicTemplateTest(base.BaseTest):
         edge = variable[0]
         self.assertEqual(edge.source_id, '1')
         self.assertEqual(edge.target_id, '2')
-        self.assertEqual(edge.label, EdgeLabels.ON)
+        self.assertEqual(edge.label, EdgeLabel.ON)
 
         source = variable[1]
         self.assertEqual(source, entities[source.vertex_id])
@@ -141,7 +141,7 @@ class BasicTemplateTest(base.BaseTest):
         self.assertEqual(len(actions), 1)
 
         action = actions[0]
-        self.assertEqual(action.type, 'SET_STATE')
+        self.assertEqual(action.type, 'set_state')
 
         targets = action.targets
         self.assertEqual(len(targets), 1)

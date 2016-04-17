@@ -23,7 +23,7 @@ scenarios:
     condition: alarm_on_host
     actions:
      - action:
-        action_type: SET_STATE
+        action_type: set_state
         properties:
          state: SUBOPTIMAL
         action_target:

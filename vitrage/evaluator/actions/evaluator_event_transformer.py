@@ -14,7 +14,7 @@
 
 from oslo_log import log as logging
 
-from vitrage.common.constants import EdgeLabels
+from vitrage.common.constants import EdgeLabel
 from vitrage.common.constants import EdgeProperties as EProps
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import EventAction
@@ -115,7 +115,7 @@ class EvaluatorEventTransformer(transformer_base.TransformerBase):
             relation_edge = graph_utils.create_edge(
                 source_id=self._create_entity_key(event),
                 target_id=event[TFields.TARGET],
-                relationship_type=EdgeLabels.ON,
+                relationship_type=EdgeLabel.ON,
                 update_timestamp=timestamp)
 
             neighbor_props = {

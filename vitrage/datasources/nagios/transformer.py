@@ -15,7 +15,7 @@
 from oslo_log import log as logging
 
 from vitrage.common.constants import DatasourceProperties as DSProps
-from vitrage.common.constants import EdgeLabels
+from vitrage.common.constants import EdgeLabel
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.common import datetime_utils
@@ -118,7 +118,7 @@ class NagiosTransformer(AlarmTransformerBase):
             relationship_edge = graph_utils.create_edge(
                 source_id=vitrage_id,
                 target_id=resource_vertex.vertex_id,
-                relationship_type=EdgeLabels.ON)
+                relationship_type=EdgeLabel.ON)
 
             return Neighbor(resource_vertex, relationship_edge)
 

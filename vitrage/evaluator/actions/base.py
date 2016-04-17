@@ -19,8 +19,11 @@ class ActionType(object):
     RAISE_ALARM = 'raise_alarm'
     ADD_CAUSAL_RELATIONSHIP = 'add_causal_relationship'
 
+actionTypes = [ActionType.SET_STATE,
+               ActionType.RAISE_ALARM,
+               ActionType.ADD_CAUSAL_RELATIONSHIP]
+
 
 class ActionMode(object):
-
     DO = 'do'
     UNDO = 'undo'

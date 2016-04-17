@@ -15,7 +15,7 @@
 from oslo_log import log as logging
 
 from vitrage.common.constants import DatasourceProperties as DSProps
-from vitrage.common.constants import EdgeLabels
+from vitrage.common.constants import EdgeLabel
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.datasources.nova.host import NOVA_HOST_DATASOURCE
@@ -119,7 +119,7 @@ class ZoneTransformer(ResourceTransformerBase):
         relation_edge = graph_utils.create_edge(
             source_id=cluster_vertex.vertex_id,
             target_id=zone_vertex_id,
-            relationship_type=EdgeLabels.CONTAINS)
+            relationship_type=EdgeLabel.CONTAINS)
         return tbase.Neighbor(cluster_vertex, relation_edge)
 
     def _create_host_neighbor(self, zone_id, host_name,
@@ -140,7 +140,7 @@ class ZoneTransformer(ResourceTransformerBase):
         relation_edge = graph_utils.create_edge(
             source_id=zone_id,
             target_id=host_neighbor.vertex_id,
-            relationship_type=EdgeLabels.CONTAINS)
+            relationship_type=EdgeLabel.CONTAINS)
 
         return tbase.Neighbor(host_neighbor, relation_edge)
 

@@ -17,7 +17,7 @@ import datetime
 from oslo_log import log as logging
 
 from vitrage.common.constants import DatasourceProperties as DSProps
-from vitrage.common.constants import EdgeLabels
+from vitrage.common.constants import EdgeLabel
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.datasources.nova.host import NOVA_HOST_DATASOURCE
@@ -157,7 +157,7 @@ class TestStaticPhysicalTransformer(base.BaseTest):
         edge = host_neighbor.edge
         self.assertEqual(edge.target_id, switch_vertex_id)
         self.assertEqual(edge.source_id, host_neighbor.vertex.vertex_id)
-        self.assertEqual(edge.label, EdgeLabels.CONTAINS)
+        self.assertEqual(edge.label, EdgeLabel.CONTAINS)
 
     def _validate_common_vertex_props(self, vertex, event):
         self.assertEqual(EntityCategory.RESOURCE, vertex[VProps.CATEGORY])

@@ -14,7 +14,7 @@
 from oslo_log import log as logging
 
 from vitrage.common.constants import DatasourceProperties as DSProps
-from vitrage.common.constants import EdgeLabels
+from vitrage.common.constants import EdgeLabel
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.common import datetime_utils
@@ -91,7 +91,7 @@ class AodhTransformer(AlarmTransformerBase):
             edge = graph_utils.create_edge(
                 source_id=self._create_entity_key(entity_event),
                 target_id=vertex.vertex_id,
-                relationship_type=EdgeLabels.ON)
+                relationship_type=EdgeLabel.ON)
             result.append(Neighbor(vertex, edge))
         return result
 

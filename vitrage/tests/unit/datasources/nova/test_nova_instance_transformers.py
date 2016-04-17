@@ -17,7 +17,7 @@ import datetime
 from oslo_log import log as logging
 
 from vitrage.common.constants import DatasourceProperties as DSProps
-from vitrage.common.constants import EdgeLabels
+from vitrage.common.constants import EdgeLabel
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import EventAction
 from vitrage.common.constants import SyncMode
@@ -212,7 +212,7 @@ class NovaInstanceTransformerTest(base.BaseTest):
         edge = h_neighbor.edge
         self.assertEqual(edge.source_id, h_neighbor.vertex.vertex_id)
         self.assertEqual(edge.target_id, it._create_entity_key(event))
-        self.assertEqual(edge.label, EdgeLabels.CONTAINS)
+        self.assertEqual(edge.label, EdgeLabel.CONTAINS)
 
     def test_extract_key(self):
         LOG.debug('Test get key from nova instance transformer')
@@ -297,4 +297,4 @@ class NovaInstanceTransformerTest(base.BaseTest):
         # test relation edge
         self.assertEqual(host_vertex_id, neighbor.edge.source_id)
         self.assertEqual(vertex_id, neighbor.edge.target_id)
-        self.assertEqual(EdgeLabels.CONTAINS, neighbor.edge.label)
+        self.assertEqual(EdgeLabel.CONTAINS, neighbor.edge.label)

@@ -20,7 +20,7 @@ import unittest
 from oslo_config import cfg
 
 from six.moves import queue
-from vitrage.common.constants import EdgeLabels
+from vitrage.common.constants import EdgeLabel
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.common.datetime_utils import utcnow
@@ -224,7 +224,7 @@ class TestConsistencyFunctional(TestFunctionalBase):
             edge = graph_utils.create_edge(
                 alarms_on_hosts_list[index].vertex_id,
                 host_vertex.vertex_id,
-                EdgeLabels.ON)
+                EdgeLabel.ON)
             self.processor.entity_graph.add_edge(edge)
 
             # reliable action to check that the events in the queue

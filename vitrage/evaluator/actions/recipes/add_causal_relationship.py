@@ -11,7 +11,7 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-from vitrage.common.constants import EdgeLabels
+from vitrage.common.constants import EdgeLabel
 from vitrage.common.constants import EdgeProperties
 from vitrage.evaluator.actions.recipes.action_steps import ADD_EDGE
 from vitrage.evaluator.actions.recipes.action_steps import REMOVE_EDGE
@@ -56,5 +56,5 @@ class AddCausalRelationship(base.Recipe):
         return {
             TFields.SOURCE: params[TFields.SOURCE],
             TFields.TARGET: params[TFields.TARGET],
-            EdgeProperties.RELATIONSHIP_TYPE: EdgeLabels.CAUSES
+            EdgeProperties.RELATIONSHIP_TYPE: EdgeLabel.CAUSES
         }

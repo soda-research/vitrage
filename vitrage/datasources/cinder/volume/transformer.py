@@ -15,7 +15,7 @@
 from oslo_log import log as logging
 
 from vitrage.common.constants import DatasourceProperties as DSProps
-from vitrage.common.constants import EdgeLabels
+from vitrage.common.constants import EdgeLabel
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import EventAction
 from vitrage.common.constants import VertexProperties as VProps
@@ -148,6 +148,6 @@ class CinderVolumeTransformer(ResourceTransformerBase):
         relationship_edge = graph_utils.create_edge(
             source_id=volume_vitrage_id,
             target_id=instance_vertex.vertex_id,
-            relationship_type=EdgeLabels.ATTACHED)
+            relationship_type=EdgeLabel.ATTACHED)
 
         return Neighbor(instance_vertex, relationship_edge)

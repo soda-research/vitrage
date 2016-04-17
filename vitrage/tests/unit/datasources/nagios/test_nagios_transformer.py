@@ -15,7 +15,7 @@
 from oslo_log import log as logging
 
 from vitrage.common.constants import DatasourceProperties as DSProps
-from vitrage.common.constants import EdgeLabels
+from vitrage.common.constants import EdgeLabel
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import EventAction
 from vitrage.common.constants import SyncMode
@@ -143,7 +143,7 @@ class NagiosTransformerTest(base.BaseTest):
         self.assertEqual(NOVA_HOST_DATASOURCE, host_vertex[VProps.TYPE])
 
         edge = neighbor.edge
-        self.assertEqual(EdgeLabels.ON, edge.label)
+        self.assertEqual(EdgeLabel.ON, edge.label)
 
         alarm_key = \
             NagiosTransformer(self.transformers)._create_entity_key(event)

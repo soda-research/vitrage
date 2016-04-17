@@ -17,7 +17,7 @@ import datetime
 from oslo_log import log as logging
 
 from vitrage.common.constants import DatasourceProperties as DSProps
-from vitrage.common.constants import EdgeLabels
+from vitrage.common.constants import EdgeLabel
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import EventAction
 from vitrage.common.constants import SyncMode
@@ -150,7 +150,7 @@ class NovaHostTransformerTest(base.BaseTest):
             edge.target_id,
             HostTransformer(self.transformers)._create_entity_key(event)
         )
-        self.assertEqual(edge.label, EdgeLabels.CONTAINS)
+        self.assertEqual(edge.label, EdgeLabel.CONTAINS)
 
     def _validate_vertex_props(self, vertex, event):
 

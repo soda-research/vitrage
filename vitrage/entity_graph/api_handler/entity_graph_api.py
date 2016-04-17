@@ -15,7 +15,7 @@
 import json
 from oslo_log import log
 
-from vitrage.common.constants import EdgeLabels
+from vitrage.common.constants import EdgeLabel
 from vitrage.common.constants import EdgeProperties as EProps
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import VertexProperties as VProps
@@ -144,7 +144,7 @@ class EntityGraphApis(object):
             try:
                 resources = self.entity_graph.neighbors(
                     v_id=alarm.vertex_id,
-                    edge_attr_filter={EProps.RELATIONSHIP_TYPE: EdgeLabels.ON},
+                    edge_attr_filter={EProps.RELATIONSHIP_TYPE: EdgeLabel.ON},
                     direction=Direction.OUT)
 
                 resource = self._get_first(resources)

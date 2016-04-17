@@ -15,7 +15,7 @@
 from oslo_log import log as logging
 
 from vitrage.common.constants import DatasourceProperties as DSProps
-from vitrage.common.constants import EdgeLabels
+from vitrage.common.constants import EdgeLabel
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import EventAction
 from vitrage.common.constants import VertexProperties as VProps
@@ -133,6 +133,6 @@ class InstanceTransformer(ResourceTransformerBase):
         relationship_edge = graph_utils.create_edge(
             source_id=host_vertex.vertex_id,
             target_id=vertex_id,
-            relationship_type=EdgeLabels.CONTAINS)
+            relationship_type=EdgeLabel.CONTAINS)
 
         return Neighbor(host_vertex, relationship_edge)

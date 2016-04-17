@@ -24,7 +24,7 @@ import time
 
 from oslo_log import log as logging
 
-from vitrage.common.constants import EdgeLabels as ELabel
+from vitrage.common.constants import EdgeLabel as ELabel
 from vitrage.common.constants import EntityCategory
 from vitrage.datasources.nova.host import NOVA_HOST_DATASOURCE
 from vitrage.datasources.nova.instance import NOVA_INSTANCE_DATASOURCE

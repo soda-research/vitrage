@@ -17,7 +17,7 @@ from oslo_config import cfg
 from oslo_log import log as logging
 
 from six.moves import queue
-from vitrage.common.constants import EdgeLabels
+from vitrage.common.constants import EdgeLabel
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.datasources.alarm_properties import AlarmProperties as AlarmProps
@@ -136,14 +136,14 @@ class TestActionExecutor(TestFunctionalBase):
 
         before_edge = processor.entity_graph.get_edge(alarm2.vertex_id,
                                                       alarm1.vertex_id,
-                                                      EdgeLabels.CAUSES)
+                                                      EdgeLabel.CAUSES)
         # Test Action - do
         action_executor.execute(action_spec, ActionMode.DO)
         processor.process_event(event_queue.get())
 
         new_edge = processor.entity_graph.get_edge(alarm2.vertex_id,
                                                    alarm1.vertex_id,
-                                                   EdgeLabels.CAUSES)
+                                                   EdgeLabel.CAUSES)
         # Test Assertions
         self.assertIsNone(before_edge)
         self.assertIsNotNone(new_edge)

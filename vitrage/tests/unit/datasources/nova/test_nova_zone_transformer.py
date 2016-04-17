@@ -17,7 +17,7 @@ import datetime
 from oslo_log import log as logging
 
 from vitrage.common.constants import DatasourceProperties as DSProps
-from vitrage.common.constants import EdgeLabels
+from vitrage.common.constants import EdgeLabel
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import VertexProperties
 from vitrage.datasources.nova.host import NOVA_HOST_DATASOURCE
@@ -189,7 +189,7 @@ class NovaZoneTransformerTest(base.BaseTest):
         edge = host_neighbor.edge
         self.assertEqual(edge.target_id, host_neighbor.vertex.vertex_id)
         self.assertEqual(edge.source_id, zone_vertex_id)
-        self.assertEqual(edge.label, EdgeLabels.CONTAINS)
+        self.assertEqual(edge.label, EdgeLabel.CONTAINS)
 
     def _validate_cluster_neighbor(self, cluster_neighbor, zone_vertex_id):
 
@@ -200,7 +200,7 @@ class NovaZoneTransformerTest(base.BaseTest):
         edge = cluster_neighbor.edge
         self.assertEqual(edge.source_id, cluster_neighbor.vertex.vertex_id)
         self.assertEqual(edge.target_id, zone_vertex_id)
-        self.assertEqual(edge.label, EdgeLabels.CONTAINS)
+        self.assertEqual(edge.label, EdgeLabel.CONTAINS)
 
     def _validate_vertex_props(self, vertex, event):
 

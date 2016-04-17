@@ -40,11 +40,20 @@ class EdgeProperties(object):
     UPDATE_TIMESTAMP = 'update_timestamp'
 
 
-class EdgeLabels(object):
+class EdgeLabel(object):
     ON = 'on'
     CONTAINS = 'contains'
     CAUSES = 'causes'
     ATTACHED = 'attached'
+    ATTACHED_PUBLIC = 'attached_public'
+    ATTACHED_PRIVATE = 'attached_private'
+
+edge_labels = [EdgeLabel.ON,
+               EdgeLabel.CONTAINS,
+               EdgeLabel.CAUSES,
+               EdgeLabel.ATTACHED,
+               EdgeLabel.ATTACHED_PRIVATE,
+               EdgeLabel.ATTACHED_PUBLIC]
 
 
 class SyncMode(object):
@@ -56,6 +65,10 @@ class SyncMode(object):
 class EntityCategory(object):
     RESOURCE = 'RESOURCE'
     ALARM = 'ALARM'
+
+
+entities_categories = [EntityCategory.RESOURCE,
+                       EntityCategory.ALARM]
 
 
 class DatasourceProperties(object):

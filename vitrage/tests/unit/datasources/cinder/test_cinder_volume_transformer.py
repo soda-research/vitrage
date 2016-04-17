@@ -17,7 +17,7 @@ import datetime
 from oslo_log import log as logging
 
 from vitrage.common.constants import DatasourceProperties as DSProps
-from vitrage.common.constants import EdgeLabels
+from vitrage.common.constants import EdgeLabel
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.datasources.cinder.volume import CINDER_VOLUME_DATASOURCE
@@ -207,4 +207,4 @@ class TestCinderVolumeTransformer(base.BaseTest):
         edge = instance_neighbor.edge
         self.assertEqual(edge.target_id, instance_neighbor.vertex.vertex_id)
         self.assertEqual(edge.source_id, volume_vertex_id)
-        self.assertEqual(edge.label, EdgeLabels.ATTACHED)
+        self.assertEqual(edge.label, EdgeLabel.ATTACHED)
