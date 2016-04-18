@@ -21,7 +21,7 @@ Installation
 
     wget -q "https://labs.consol.de/repo/stable/RPM-GPG-KEY" -O - | sudo apt-key add -
 
-2. Update your repo with the OMD site. For example, for ubuntu wheezy release:
+2. Update your repo with the OMD site. For example, for ubuntu trusty release:
    ::
 
     sudo bash -c "echo 'deb http://labs.consol.de/repo/stable/ubuntu trusty main' >> /etc/apt/sources.list"
