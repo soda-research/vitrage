@@ -1,0 +1,28 @@
+category: ALARM
+values:
+  - normalized value:
+      name: CRITICAL
+      priority: 50
+      original values:
+        - name: critical
+  - normalized value:
+      name: SEVERE
+      priority: 40
+      original values:
+        - name: moderate
+  - normalized value:
+      name: WARNING
+      priority: 30
+      original values:
+        - name: low
+  - normalized value:
+      name: UNKNOWN
+      priority: 20
+      original values:
+        - name: insufficient data
+  - normalized value:
+      name: DISABLED
+      priority: 10
+      original values:
+        - name: OK
+        - name: UP
