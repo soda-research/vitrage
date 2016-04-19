@@ -11,7 +11,9 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+
 from oslo_log import log as logging
+import six
 
 from vitrage.common.exception import VitrageError
 
@@ -101,7 +103,7 @@ def _create_query_expression(query, parent_operator=None):
 
 def _evaluatable_str(value):
     """wrap string/unicode with back tick"""
-    if isinstance(value, unicode) or isinstance(value, str):
+    if isinstance(value, six.string_types):
         return '\'' + value + '\''
     else:
         return str(value)

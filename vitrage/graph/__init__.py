@@ -16,6 +16,6 @@
 Graph abstraction
 """
 
-from algo_driver import *  # noqa
-from driver import *  # noqa
-from utils import *  # noqa
+from vitrage.graph.algo_driver import *  # noqa
+from vitrage.graph.driver import *  # noqa
+from vitrage.graph.utils import *  # noqa

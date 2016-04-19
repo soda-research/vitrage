@@ -149,10 +149,10 @@ class ConsistencyEnforcer(object):
 
     @staticmethod
     def _filter_vertices_to_be_deleted(vertices):
-        return filter(
+        return list(filter(
             lambda ver:
             not (ver[VProps.CATEGORY] == EntityCategory.RESOURCE and
-                 ver[VProps.TYPE] == OPENSTACK_CLUSTER), vertices)
+                 ver[VProps.TYPE] == OPENSTACK_CLUSTER), vertices))
 
     def _wait_for_action(self, function):
         count_retries = 0

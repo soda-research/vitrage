@@ -109,7 +109,8 @@ class AlarmDriverBase(DriverBase):
             self.cache[alarm_key] = alarm, now
 
         # add alarms that were deleted
-        for cached_alarm, timestamp in self.cache.values():
+        values = list(self.cache.values())
+        for cached_alarm, timestamp in values:
             if self._is_erroneous(cached_alarm) and timestamp is not now:
                 LOG.debug('deleting cached_alarm %s', cached_alarm)
                 cached_alarm[DSProps.EVENT_TYPE] = EventAction.DELETE_ENTITY

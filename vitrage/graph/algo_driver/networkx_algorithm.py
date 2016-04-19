@@ -14,8 +14,8 @@
 
 from oslo_log import log as logging
 
-from algorithm import GraphAlgorithm
-from sub_graph_matching import subgraph_matching
+from vitrage.graph.algo_driver.algorithm import GraphAlgorithm
+from vitrage.graph.algo_driver.sub_graph_matching import subgraph_matching
 from vitrage.graph.driver import Direction
 from vitrage.graph.driver import NXGraph
 from vitrage.graph.query import create_predicate

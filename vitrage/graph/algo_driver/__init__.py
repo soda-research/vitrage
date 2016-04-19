@@ -12,8 +12,8 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from algorithm import *  # noqa
-from networkx_algorithm import NXAlgorithm
+from vitrage.graph.algo_driver.algorithm import *  # noqa
+from vitrage.graph.algo_driver.networkx_algorithm import NXAlgorithm
 
 
 def create_algorithm(graph):

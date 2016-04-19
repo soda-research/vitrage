@@ -77,25 +77,25 @@ def subgraph_matching(base_graph, subgraph, matches, validate=False):
         curr_subgraph = queue.pop(0)
 
         # STEP 1: STOPPING CONDITION
-        mapped_vertices = filter(
+        mapped_vertices = list(filter(
             lambda v: v.get(MAPPED_V_ID),
-            curr_subgraph.get_vertices())
+            curr_subgraph.get_vertices()))
         if len(mapped_vertices) == subgraph.num_vertices():
             final_subgraphs.append(curr_subgraph)
             continue
 
         # STEP 2: CAN WE THROW THIS SUB-GRAPH?
-        vertices_with_unmapped_neighbors = filter(
+        vertices_with_unmapped_neighbors = list(filter(
             lambda v: not v.get(NEIGHBORS_MAPPED),
-            mapped_vertices)
+            mapped_vertices))
         if not vertices_with_unmapped_neighbors:
             continue
 
         # STEP 3: FIND A SUB-GRAPH VERTEX TO MAP
         v_with_unmapped_neighbors = vertices_with_unmapped_neighbors.pop(0)
-        unmapped_neighbors = filter(
+        unmapped_neighbors = list(filter(
             lambda v: not v.get(MAPPED_V_ID),
-            curr_subgraph.neighbors(v_with_unmapped_neighbors.vertex_id))
+            curr_subgraph.neighbors(v_with_unmapped_neighbors.vertex_id)))
         if not unmapped_neighbors:
             # Mark vertex as NEIGHBORS_MAPPED=True
             v_with_unmapped_neighbors[NEIGHBORS_MAPPED] = True

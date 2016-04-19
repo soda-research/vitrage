@@ -12,9 +12,9 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from elements import *  # noqa
-from graph import *  # noqa
-from networkx_graph import NXGraph
+from vitrage.graph.driver.elements import *  # noqa
+from vitrage.graph.driver.graph import *  # noqa
+from vitrage.graph.driver.networkx_graph import NXGraph
 
 
 def create_graph(name, root_id=None):
