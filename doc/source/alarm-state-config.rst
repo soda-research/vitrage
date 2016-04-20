@@ -53,6 +53,8 @@ alarm is normalized. There are several guidelines for creating a config file:
 - Defining a config file for each datasource is recommended, but not mandatory.
   Datasources with no such configuration will use the values as-is.
 
+Once the file is modified, you must restart **vitrage-graph** service to load
+the changes.
 
 Default Configuration
 +++++++++++++++++++++

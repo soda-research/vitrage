@@ -39,7 +39,7 @@ Some physical entities, such as switches, can not be retrieved from OpenStack,
 and so are defined here.
 
 There may be more than one configuration file. All files will be read from 
-*/etc/vitrage/static_plugins/*. See previous section on how to configure this 
+*/etc/vitrage/static_datasources/*. See previous section on how to configure this
 location.
 
 Format
@@ -79,15 +79,15 @@ of switch-2
  entities:
   - type: switch
     name: switch-1
-    id: 11111
+    id: switch-1 # should be same as name
     state: available
     relationships:
       - type: nova.host
         name: host-1
-        id: 22222
+        id: host-1 # should be same as name
         relation_type: attached
       - type: switch
         name: switch-2
-        id: 33333
+        id: switch-2 # should be same as name
         relation_type: backup
 
