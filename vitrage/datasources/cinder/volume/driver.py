@@ -27,8 +27,14 @@ class CinderVolumeDriver(DriverBase):
 
     def __init__(self, conf):
         super(CinderVolumeDriver, self).__init__()
-        self.client = clients.cinder_client(conf)
+        self._client = None
         self.conf = conf
+
+    @property
+    def client(self):
+        if not self._client:
+            self._client = clients.cinder_client(self.conf)
+        return self._client
 
     @staticmethod
     def extract_events(volumes):

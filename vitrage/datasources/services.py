@@ -57,10 +57,13 @@ class SnapshotsService(DatasourceService):
             if self.first_time else SyncMode.SNAPSHOT
         LOG.debug("start get all with sync mode %s" % sync_mode)
 
-        for plugin in self.registered_datasources.values():
-            entities_dictionaries = plugin.get_all(sync_mode)
-            for entity in entities_dictionaries:
-                self.callback_function(entity)
+        for plugin_type, plugin in self.registered_datasources.items():
+            try:
+                entities_dictionaries = plugin.get_all(sync_mode)
+                for entity in entities_dictionaries:
+                    self.callback_function(entity)
+            except Exception as e:
+                LOG.error("Get all Failed - %s - %s", plugin_type, e.message)
 
         LOG.debug("end get all with sync mode %s" % sync_mode)
         self.first_time = False
@@ -99,9 +102,10 @@ class ChangesService(DatasourceService):
 
     def _get_changes(self):
         LOG.debug("start get changes")
-
         for datasource in self.registered_datasources:
-            for entity in datasource.get_changes(SyncMode.UPDATE):
-                self.callback_function(entity)
-
+            try:
+                for entity in datasource.get_changes(SyncMode.UPDATE):
+                    self.callback_function(entity)
+            except Exception as e:
+                LOG.error("Get changes Failed - %s", e.message)
         LOG.debug("end get changes")

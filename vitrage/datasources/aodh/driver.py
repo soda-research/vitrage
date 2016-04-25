@@ -26,7 +26,14 @@ LOG = log.getLogger(__name__)
 class AodhDriver(AlarmDriverBase):
     def __init__(self, conf):
         super(AodhDriver, self).__init__()
-        self.client = clients.ceilometer_client(conf)
+        self._client = None
+        self.conf = conf
+
+    @property
+    def client(self):
+        if not self._client:
+            self._client = clients.ceilometer_client(self.conf)
+        return self._client
 
     def _sync_type(self):
         return AODH_DATASOURCE

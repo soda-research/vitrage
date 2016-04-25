@@ -20,8 +20,11 @@ from vitrage.datasources.driver_base import DriverBase
 class NeutronBase(DriverBase):
     def __init__(self, conf):
         super(NeutronBase, self).__init__()
-        self.client = clients.neutron_client(conf)
+        self._client = None
         self.conf = conf
 
-    def get_client(self):
-        return self.client
+    @property
+    def client(self):
+        if not self._client:
+            self._client = clients.neutron_client(self.conf)
+        return self._client

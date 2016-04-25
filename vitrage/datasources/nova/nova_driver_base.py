@@ -20,8 +20,11 @@ from vitrage.datasources.driver_base import DriverBase
 class NovaDriverBase(DriverBase):
     def __init__(self, conf):
         super(NovaDriverBase, self).__init__()
-        self.client = clients.nova_client(conf)
+        self._client = None
         self.conf = conf
 
-    def get_client(self):
-        return self.client
+    @property
+    def client(self):
+        if not self._client:
+            self._client = clients.nova_client(self.conf)
+        return self._client
