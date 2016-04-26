@@ -34,9 +34,10 @@ as the trigger for deduced alarms, states and RCA templates in Vitrage.
 Vitrage in action
 =================
 
-In order to see Vitrage in action, it comes prepackaged with a sample template
-that demonstrate its functionality. This can be found (with default config) at
-*/etc/vitrage/templates*.
+In order to see Vitrage in action, you should place your templates under
+*/etc/vitrage/templates*. You can find a template example here2_.
+
+.. _here2: https://github.com/openstack/vitrage/blob/master/doc/source/host_high_memory_consumption.yaml
 
 In the example shown here, we will cause Nagios to report high memory usage on
 the devstack host. As a result and as defined in our sample template, Vitrage
