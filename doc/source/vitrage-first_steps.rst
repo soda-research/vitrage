@@ -35,9 +35,9 @@ Vitrage in action
 =================
 
 In order to see Vitrage in action, you should place your templates under
-*/etc/vitrage/templates*. You can find a template example here2_.
+*/etc/vitrage/templates*. See template_ example.
 
-.. _here2: https://github.com/openstack/vitrage/blob/master/doc/source/host_high_memory_consumption.yaml
+.. _template: https://github.com/openstack/vitrage/blob/master/doc/source/host_high_memory_consumption.yaml
 
 In the example shown here, we will cause Nagios to report high memory usage on
 the devstack host. As a result and as defined in our sample template, Vitrage
