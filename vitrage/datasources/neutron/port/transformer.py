@@ -58,9 +58,10 @@ class PortTransformer(ResourceTransformerBase):
                                    entity_id, state)
 
     def _create_vertex(self, entity_event, name, entity_id, state):
-
+        ip_addresses = [ip['ip_address'] for ip in entity_event['fixed_ips']]
         metadata = {
             VProps.NAME: name,
+            'ip_addresses': tuple(ip_addresses)
         }
 
         sample_timestamp = entity_event[DSProps.SAMPLE_DATE]
