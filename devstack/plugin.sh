@@ -134,9 +134,6 @@ function configure_vitrage {
     iniset $VITRAGE_CONF service_credentials region_name $REGION_NAME
     iniset $VITRAGE_CONF service_credentials auth_url $KEYSTONE_SERVICE_URI
 
-    # add default datasources
-    iniset $VITRAGE_CONF datasources types $VITRAGE_DEFAULT_DATASOURCES
-
     # remove neutron vitrage datasource if neutron datasource not installed
     if ! is_service_enabled neutron; then
         disable_vitrage_datasource neutron.network neutron.port
@@ -151,6 +148,9 @@ function configure_vitrage {
     if [ "$VITRAGE_USE_NAGIOS" == "False" ]; then
         disable_vitrage_datasource nagios
     fi
+
+    # add default datasources
+    iniset $VITRAGE_CONF datasources types $VITRAGE_DEFAULT_DATASOURCES
 
     # copy the mock sample files
     cp $VITRAGE_DIR/etc/vitrage/*.sample.json $VITRAGE_CONF_DIR
