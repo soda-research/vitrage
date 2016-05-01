@@ -20,12 +20,12 @@ from networkx.readwrite import json_graph
 
 from oslo_log import log as logging
 
-from elements import Edge
-from elements import Vertex
-from graph import Direction
-from graph import Graph
-from notifier import Notifier
 from vitrage.common.constants import VertexProperties as VProps
+from vitrage.graph.driver.elements import Edge
+from vitrage.graph.driver.elements import Vertex
+from vitrage.graph.driver.graph import Direction
+from vitrage.graph.driver.graph import Graph
+from vitrage.graph.driver.notifier import Notifier
 from vitrage.graph.filter import check_filter
 from vitrage.graph.query import create_predicate
 
@@ -198,8 +198,8 @@ class NXGraph(Graph):
         self._g.remove_edge(u=e.source_id, v=e.target_id, key=e.label)
 
     def get_vertices(self, vertex_attr_filter=None, query_dict=None):
-        def check_vertex((v_id, vertex_data)):
-            return check_filter(vertex_data, vertex_attr_filter)
+        def check_vertex(vertex_data):
+            return check_filter(vertex_data[1], vertex_attr_filter)
 
         if not query_dict:
             items = filter(check_vertex, self._g.nodes_iter(data=True))

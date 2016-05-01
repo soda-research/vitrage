@@ -12,10 +12,10 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from driver.elements import Edge
-from driver.elements import Vertex
 from vitrage.common.constants import EdgeProperties as EConst
 from vitrage.common.constants import VertexProperties as VConst
+from vitrage.graph.driver.elements import Edge
+from vitrage.graph.driver.elements import Vertex
 
 
 def create_vertex(vitrage_id,

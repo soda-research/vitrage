@@ -23,6 +23,22 @@ class MockNagiosDriver(NagiosDriver):
     is asked to
     """
 
+    @staticmethod
+    def get_event_types(conf):
+        return []
+
+    @staticmethod
+    def enrich_event(event, event_type):
+        pass
+
+    @staticmethod
+    def get_topic(conf):
+        return None
+
+    @staticmethod
+    def get_skipped_event_types():
+        return []
+
     def __init__(self, conf):
         super(MockNagiosDriver, self).__init__(conf)
         self.service_datas = None

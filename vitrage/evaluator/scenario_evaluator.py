@@ -112,9 +112,9 @@ class ScenarioEvaluator(object):
 
     @staticmethod
     def _remove_overlap_scenarios(before, current):
-        intersection = filter(lambda x: x in before, current)
-        before = filter(lambda x: x not in intersection, before)
-        current = filter(lambda x: x not in intersection, current)
+        intersection = list(filter(lambda x: x in before, current))
+        before = list(filter(lambda x: x not in intersection, before))
+        current = list(filter(lambda x: x not in intersection, current))
         return before, current
 
     def _process_and_get_actions(self, element, triggered_scenarios, mode):

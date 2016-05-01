@@ -12,7 +12,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-
+import codecs
 import json
 from os.path import dirname
 from os import walk
@@ -44,8 +44,9 @@ def load_specs(target_filename, target_folder=None):
     """
 
     target = _get_full_path(target_filename, target_folder)
+    reader = codecs.getreader("utf-8")
     with open(target, "rb") as infile:
-        return json.load(infile)
+        return json.load(reader(infile))
 
 
 def _get_full_path(target_filename, target_folder):

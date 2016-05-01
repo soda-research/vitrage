@@ -53,7 +53,7 @@ class ScenarioRepositoryTest(base.BaseTest):
 
         # Test assertions
         self.assertIsNotNone(scenario_repository)
-        path, dirs, files = os.walk(self.conf.evaluator.templates_dir).next()
+        path, dirs, files = next(os.walk(self.conf.evaluator.templates_dir))
         self.assertEqual(len(files), len(scenario_repository.templates))
 
     def test_init_scenario_repository(self):

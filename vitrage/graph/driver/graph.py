@@ -22,9 +22,9 @@ vitrage.graph.driver namespace.
 import abc
 import six
 
-from elements import Edge
-from elements import Vertex
-from notifier import Notifier
+from vitrage.graph.driver.elements import Edge
+from vitrage.graph.driver.elements import Vertex
+from vitrage.graph.driver.notifier import Notifier
 
 
 class Direction(object):

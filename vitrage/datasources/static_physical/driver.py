@@ -24,6 +24,22 @@ from vitrage.datasources.static_physical import STATIC_PHYSICAL_DATASOURCE
 
 
 class StaticPhysicalDriver(DriverBase):
+    @staticmethod
+    def get_event_types(conf):
+        return []
+
+    @staticmethod
+    def enrich_event(event, event_type):
+        pass
+
+    @staticmethod
+    def get_topic(conf):
+        return None
+
+    @staticmethod
+    def get_skipped_event_types():
+        return []
+
     ENTITIES_SECTION = 'entities'
 
     def __init__(self, conf):
