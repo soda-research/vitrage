@@ -18,25 +18,40 @@ export DEVSTACK_GATE_TEMPEST=1
 export DEVSTACK_GATE_TEMPEST_ALL=1
 export DEVSTACK_GATE_TEMPEST_FULL=0
 export DEVSTACK_GATE_TEMPEST_ALL_PLUGINS=0
-export DEVSTACK_GATE_TEMPEST_REGEX="vitrage_tempest_tests"
+export DEVSTACK_GATE_TEMPEST_REGEX=""
 
 if [ -z ${DEVSTACK_LOCAL_CONFIG+x} ]; then
-    DEVSTACK_LOCAL_CONFIG="enable_plugin vitrage git://git.openstack.org/openstack/vitrage"
+    DEVSTACK_LOCAL_CONFIG="enable_plugin vitrage https://git.openstack.org/openstack/vitrage"
 fi
-
+DEVSTACK_LOCAL_CONFIG+=$'\n'"enable_plugin vitrage-dashboard https://git.openstack.org/openstack/vitrage-dashboard"
 DEVSTACK_LOCAL_CONFIG+=$'\n'"enable_plugin ceilometer https://git.openstack.org/openstack/ceilometer"
-DEVSTACK_LOCAL_CONFIG+=$'\n'"enable_plugin aodh git://git.openstack.org/openstack/aodh"
+DEVSTACK_LOCAL_CONFIG+=$'\n'"enable_plugin aodh https://git.openstack.org/openstack/aodh"
+DEVSTACK_LOCAL_CONFIG+=$'\n'"disable_service ceilometer-alarm-evaluator,ceilometer-alarm-notifier"
+DEVSTACK_LOCAL_CONFIG+=$'\n'"disable_service n-net"
+DEVSTACK_LOCAL_CONFIG+=$'\n'"[[post-config|$NOVA_CONF]]"
+DEVSTACK_LOCAL_CONFIG+=$'\n'"[DEFAULT]"
+DEVSTACK_LOCAL_CONFIG+=$'\n'"notification_topics = notifications,vitrage_notifications"
+DEVSTACK_LOCAL_CONFIG+=$'\n'"notification_driver=messagingv2"
+DEVSTACK_LOCAL_CONFIG+=$'\n'"[[post-config|$NEUTRON_CONF]]"
+DEVSTACK_LOCAL_CONFIG+=$'\n'"[DEFAULT]"
+DEVSTACK_LOCAL_CONFIG+=$'\n'"notification_topics = notifications,vitrage_notifications"
+DEVSTACK_LOCAL_CONFIG+=$'\n'"notification_driver=messagingv2"
+DEVSTACK_LOCAL_CONFIG+=$'\n'"[[post-config|$CINDER_CONF]]"
+DEVSTACK_LOCAL_CONFIG+=$'\n'"[DEFAULT]"
+DEVSTACK_LOCAL_CONFIG+=$'\n'"notification_topics = notifications,vitrage_notifications"
+DEVSTACK_LOCAL_CONFIG+=$'\n'"notification_driver=messagingv2"
 export DEVSTACK_LOCAL_CONFIG
 
 if [ -z ${ENABLED_SERVICES+x} ]; then
     ENABLED_SERVICES=tempest
 fi
-
-ENABLED_SERVICES+=key,aodi-api,aodh-notifier,aodh-evaluator
-ENABLED_SERVICES+=ceilometer-acompute,ceilometer-acentral,ceilometer-anotification,ceilometer-collector
-ENABLED_SERVICES+=ceilometer-alarm-evaluator,ceilometer-alarm-notifier
-ENABLED_SERVICES+=ceilometer-api
+ENABLED_SERVICES+=,vitrage-api,vitrage-graph
+ENABLED_SERVICES+=,q-svc,q-dhcp,q-meta,q-agt,q-l3
+ENABLED_SERVICES+=,key,aodi-api,aodh-notifier,aodh-evaluator
+ENABLED_SERVICES+=,ceilometer-alarm-evaluator,ceilometer-alarm-notifier
+ENABLED_SERVICES+=,ceilometer-api
 export ENABLED_SERVICES
+
 export KEEP_LOCALRC=1
 
 $BASE/new/devstack-gate/devstack-vm-gate.sh
