@@ -20,12 +20,14 @@ export DEVSTACK_GATE_TEMPEST_FULL=0
 export DEVSTACK_GATE_TEMPEST_ALL_PLUGINS=0
 export DEVSTACK_GATE_TEMPEST_REGEX=""
 
+export PROJECTS="openstack/aodh $PROJECTS"
+
 if [ -z ${DEVSTACK_LOCAL_CONFIG+x} ]; then
-    DEVSTACK_LOCAL_CONFIG="enable_plugin vitrage https://git.openstack.org/openstack/vitrage"
+    DEVSTACK_LOCAL_CONFIG="enable_plugin vitrage git://git.openstack.org/openstack/vitrage"
 fi
-DEVSTACK_LOCAL_CONFIG+=$'\n'"enable_plugin vitrage-dashboard https://git.openstack.org/openstack/vitrage-dashboard"
-DEVSTACK_LOCAL_CONFIG+=$'\n'"enable_plugin ceilometer https://git.openstack.org/openstack/ceilometer"
-DEVSTACK_LOCAL_CONFIG+=$'\n'"enable_plugin aodh https://git.openstack.org/openstack/aodh"
+DEVSTACK_LOCAL_CONFIG+=$'\n'"enable_plugin vitrage-dashboard git://git.openstack.org/openstack/vitrage-dashboard"
+DEVSTACK_LOCAL_CONFIG+=$'\n'"enable_plugin ceilometer git://git.openstack.org/openstack/ceilometer"
+DEVSTACK_LOCAL_CONFIG+=$'\n'"enable_plugin aodh git://git.openstack.org/openstack/aodh"
 DEVSTACK_LOCAL_CONFIG+=$'\n'"disable_service ceilometer-alarm-evaluator,ceilometer-alarm-notifier"
 DEVSTACK_LOCAL_CONFIG+=$'\n'"disable_service n-net"
 DEVSTACK_LOCAL_CONFIG+=$'\n'"[[post-config|$NOVA_CONF]]"
