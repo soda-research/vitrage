@@ -39,15 +39,18 @@ class AlarmTransformerBase(tbase.TransformerBase):
     def _extract_action_type(self, entity_event):
         # TODO(ifat_afek): this method should reside together with the cache,
         # in the transformer code
-        if DSProps.EVENT_TYPE in entity_event:
+        if DSProps.EVENT_TYPE in entity_event and \
+           entity_event[DSProps.EVENT_TYPE] == EventAction.DELETE_ENTITY:
             return entity_event[DSProps.EVENT_TYPE]
 
         sync_mode = entity_event[DSProps.SYNC_MODE]
         if sync_mode in (SyncMode.UPDATE, SyncMode.SNAPSHOT):
             return EventAction.DELETE_ENTITY if self._ok_status(entity_event) \
                 else EventAction.UPDATE_ENTITY
+
         if SyncMode.INIT_SNAPSHOT == sync_mode:
             return EventAction.CREATE_ENTITY
+
         raise VitrageTransformerError('Invalid sync mode: (%s)' % sync_mode)
 
     def _key_values(self, *args):
