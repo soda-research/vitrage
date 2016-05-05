@@ -24,5 +24,5 @@ sudo pip install nose
 (cd $BASE/new/vitrage/; sudo rm -rf .testrepository/)
 (cd $BASE/new/vitrage/; sudo testr init)
 
-(cd $BASE/new/vitrage/; sudo sh -c 'testr list-tests vitrage_tempest_tests | grep -E "datasources|topology" > vitrage_tempest_tests.list')
+(cd $BASE/new/vitrage/; sudo sh -c 'testr list-tests vitrage_tempest_tests | grep -E "topology" > vitrage_tempest_tests.list')
 (cd $BASE/new/vitrage/; sudo sh -c 'testr run --subunit --load-list=vitrage_tempest_tests.list | subunit-trace --fails')

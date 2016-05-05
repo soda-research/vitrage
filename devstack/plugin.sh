@@ -129,7 +129,7 @@ function configure_vitrage {
     iniset $VITRAGE_CONF service_credentials username admin
     iniset $VITRAGE_CONF service_credentials user_domain_id default
     iniset $VITRAGE_CONF service_credentials project_domain_id default
-    iniset $VITRAGE_CONF service_credentials password $SERVICE_PASSWORD
+    iniset $VITRAGE_CONF service_credentials password $ADMIN_PASSWORD
     iniset $VITRAGE_CONF service_credentials project_name admin
     iniset $VITRAGE_CONF service_credentials region_name $REGION_NAME
     iniset $VITRAGE_CONF service_credentials auth_url $KEYSTONE_SERVICE_URI
