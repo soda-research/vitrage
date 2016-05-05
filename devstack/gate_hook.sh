@@ -25,23 +25,12 @@ export PROJECTS="openstack/aodh $PROJECTS"
 if [ -z ${DEVSTACK_LOCAL_CONFIG+x} ]; then
     DEVSTACK_LOCAL_CONFIG="enable_plugin vitrage git://git.openstack.org/openstack/vitrage"
 fi
-DEVSTACK_LOCAL_CONFIG+=$'\n'"enable_plugin vitrage-dashboard git://git.openstack.org/openstack/vitrage-dashboard"
-DEVSTACK_LOCAL_CONFIG+=$'\n'"enable_plugin ceilometer git://git.openstack.org/openstack/ceilometer"
-DEVSTACK_LOCAL_CONFIG+=$'\n'"enable_plugin aodh git://git.openstack.org/openstack/aodh"
-DEVSTACK_LOCAL_CONFIG+=$'\n'"disable_service ceilometer-alarm-evaluator,ceilometer-alarm-notifier"
-DEVSTACK_LOCAL_CONFIG+=$'\n'"disable_service n-net"
-DEVSTACK_LOCAL_CONFIG+=$'\n'"[[post-config|\$NOVA_CONF]]"
-DEVSTACK_LOCAL_CONFIG+=$'\n'"[DEFAULT]"
-DEVSTACK_LOCAL_CONFIG+=$'\n'"notification_topics = notifications,vitrage_notifications"
-DEVSTACK_LOCAL_CONFIG+=$'\n'"notification_driver=messagingv2"
-DEVSTACK_LOCAL_CONFIG+=$'\n'"[[post-config|\$NEUTRON_CONF]]"
-DEVSTACK_LOCAL_CONFIG+=$'\n'"[DEFAULT]"
-DEVSTACK_LOCAL_CONFIG+=$'\n'"notification_topics = notifications,vitrage_notifications"
-DEVSTACK_LOCAL_CONFIG+=$'\n'"notification_driver=messagingv2"
-DEVSTACK_LOCAL_CONFIG+=$'\n'"[[post-config|\$CINDER_CONF]]"
-DEVSTACK_LOCAL_CONFIG+=$'\n'"[DEFAULT]"
-DEVSTACK_LOCAL_CONFIG+=$'\n'"notification_topics = notifications,vitrage_notifications"
-DEVSTACK_LOCAL_CONFIG+=$'\n'"notification_driver=messagingv2"
+DEVSTACK_LOCAL_CONFIG+=$'\nenable_plugin vitrage-dashboard git://git.openstack.org/openstack/vitrage-dashboard'
+DEVSTACK_LOCAL_CONFIG+=$'\nenable_plugin ceilometer git://git.openstack.org/openstack/ceilometer'
+DEVSTACK_LOCAL_CONFIG+=$'\nenable_plugin aodh git://git.openstack.org/openstack/aodh'
+DEVSTACK_LOCAL_CONFIG+=$'\ndisable_service ceilometer-alarm-evaluator,ceilometer-alarm-notifier'
+DEVSTACK_LOCAL_CONFIG+=$'\ndisable_service n-net'
+
 export DEVSTACK_LOCAL_CONFIG
 
 if [ -z ${ENABLED_SERVICES+x} ]; then
@@ -56,4 +45,24 @@ export ENABLED_SERVICES
 
 export KEEP_LOCALRC=1
 
-$BASE/new/devstack-gate/devstack-vm-gate.sh
+GATE_DEST=$BASE/new
+DEVSTACK_PATH=$GATE_DEST/devstack
+
+cat > $DEVSTACK_PATH/local.conf <<EOF
+[[post-config|\$NOVA_CONF]]
+[DEFAULT]
+notification_topics = notifications,vitrage_notifications
+notification_driver = messagingv2
+
+[[post-config|\$NEUTRON_CONF]]
+[DEFAULT]
+notification_topics = notifications,vitrage_notifications
+notification_driver = messagingv2
+
+[[post-config|\$CINDER_CONF]]
+[DEFAULT]
+notification_topics = notifications,vitrage_notifications
+notification_driver = messagingv2
+EOF
+
+$GATE_DEST/devstack-gate/devstack-vm-gate.sh
