@@ -134,7 +134,6 @@ class TransformerBase(object):
     def _create_update_entity_vertex(self, entity_event):
         pass
 
-    @abc.abstractmethod
     def _create_neighbors(self, entity_event):
         """Extracts entity neighbors received from a given entity event.
 
@@ -146,6 +145,17 @@ class TransformerBase(object):
                               is a tuple of (vertex, edge)
          :rtype: list
          """
+
+        if is_update_event(entity_event):
+            return self._create_update_neighbors(entity_event)
+        else:
+            return self._create_snapshot_neighbors(entity_event)
+
+    def _create_snapshot_neighbors(self, entity_event):
+        return []
+
+    def _create_update_neighbors(self, entity_event):
+        return []
 
     @abc.abstractmethod
     def _create_entity_key(self, entity_event):

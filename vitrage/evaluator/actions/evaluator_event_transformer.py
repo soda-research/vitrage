@@ -86,8 +86,13 @@ class EvaluatorEventTransformer(transformer_base.TransformerBase):
 
         return None
 
-    def _create_neighbors(self, event):
+    def _create_snapshot_neighbors(self, event):
+        return self._create_vitrage_neighbors(event)
 
+    def _create_update_neighbors(self, event):
+        return self._create_vitrage_neighbors(event)
+
+    def _create_vitrage_neighbors(self, event):
         event_type = event[EVALUATOR_EVENT_TYPE]
 
         timestamp = transformer_base.convert_timestamp_format(

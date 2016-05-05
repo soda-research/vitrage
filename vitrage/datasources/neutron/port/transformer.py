@@ -85,20 +85,17 @@ class PortTransformer(ResourceTransformerBase):
     def _create_update_entity_vertex(self, entity_event):
         pass
 
-    def _create_neighbors(self, entity_event):
-        if tbase.is_update_event(entity_event):
-            device_owner_property = 'device_owner'
-            device_id_property = 'server_uuid'
-            net_id_property = 'network_id'
-        else:
-            device_owner_property = 'device_owner'
-            device_id_property = 'device_id'
-            net_id_property = 'network_id'
-
+    def _create_snapshot_neighbors(self, entity_event):
         return self._create_port_neighbors(entity_event,
-                                           device_owner_property,
-                                           device_id_property,
-                                           net_id_property)
+                                           'device_owner',
+                                           'device_id',
+                                           'network_id')
+
+    def _create_update_neighbors(self, entity_event):
+        return self._create_port_neighbors(entity_event,
+                                           'device_owner',
+                                           'server_uuid',
+                                           'network_id')
 
     def _create_port_neighbors(self,
                                entity_event,

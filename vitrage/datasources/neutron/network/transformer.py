@@ -75,6 +75,3 @@ class NetworkTransformer(ResourceTransformerBase):
 
     def _create_update_entity_vertex(self, entity_event):
         pass
-
-    def _create_neighbors(self, entity_event):
-        return []

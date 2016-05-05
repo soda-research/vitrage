@@ -78,6 +78,23 @@ class AodhTransformer(AlarmTransformerBase):
             update_timestamp=update_timestamp,
             metadata=metadata)
 
+    def _create_snapshot_neighbors(self, entity_event):
+        return self._create_aodh_neighbors(entity_event)
+
+    def _create_update_neighbors(self, entity_event):
+        return self._create_aodh_neighbors(entity_event)
+
+    def _create_aodh_neighbors(self, entity_event):
+        graph_neighbors = entity_event.get(self.QUERY_RESULT, [])
+        result = []
+        for vertex in graph_neighbors:
+            edge = graph_utils.create_edge(
+                source_id=self._create_entity_key(entity_event),
+                target_id=vertex.vertex_id,
+                relationship_type=EdgeLabels.ON)
+            result.append(Neighbor(vertex, edge))
+        return result
+
     def _create_merge_alarm_vertex(self, entity_event):
         """Handle an alarm that already has a vitrage_id
 
@@ -101,17 +118,6 @@ class AodhTransformer(AlarmTransformerBase):
             sample_timestamp=sample_timestamp,
             update_timestamp=update_timestamp,
             metadata=metadata)
-
-    def _create_neighbors(self, entity_event):
-        graph_neighbors = entity_event.get(self.QUERY_RESULT, [])
-        result = []
-        for vertex in graph_neighbors:
-            edge = graph_utils.create_edge(
-                source_id=self._create_entity_key(entity_event),
-                target_id=vertex.vertex_id,
-                relationship_type=EdgeLabels.ON)
-            result.append(Neighbor(vertex, edge))
-        return result
 
     def _ok_status(self, entity_event):
         return entity_event[AodhProps.STATE] == self.STATUS_OK

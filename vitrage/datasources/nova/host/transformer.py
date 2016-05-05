@@ -62,8 +62,13 @@ class HostTransformer(ResourceTransformerBase):
             update_timestamp=update_timestamp,
             metadata=metadata)
 
-    def _create_neighbors(self, entity_event):
+    def _create_snapshot_neighbors(self, entity_event):
+        return self._create_nova_host_neighbors(entity_event)
 
+    def _create_update_neighbors(self, entity_event):
+        return self._create_nova_host_neighbors(entity_event)
+
+    def _create_nova_host_neighbors(self, entity_event):
         neighbors = []
 
         # Support snapshot and snapshot_init events only

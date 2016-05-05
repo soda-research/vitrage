@@ -76,8 +76,13 @@ class NagiosTransformer(AlarmTransformerBase):
             update_timestamp=update_timestamp,
             metadata=metadata)
 
-    def _create_neighbors(self, entity_event):
+    def _create_snapshot_neighbors(self, entity_event):
+        return self._create_nagios_neighbors(entity_event)
 
+    def _create_update_neighbors(self, entity_event):
+        return self._create_nagios_neighbors(entity_event)
+
+    def _create_nagios_neighbors(self, entity_event):
         vitrage_id = self._create_entity_key(entity_event)
         timestamp = datetime_utils.change_time_str_format(
             entity_event[NagiosProperties.LAST_CHECK],

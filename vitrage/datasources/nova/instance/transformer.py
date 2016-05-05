@@ -85,8 +85,13 @@ class InstanceTransformer(ResourceTransformerBase):
             update_timestamp=update_timestamp,
             metadata=metadata)
 
-    def _create_neighbors(self, entity_event):
+    def _create_snapshot_neighbors(self, entity_event):
+        return self._create_nova_instance_neighbors(entity_event)
 
+    def _create_update_neighbors(self, entity_event):
+        return self._create_nova_instance_neighbors(entity_event)
+
+    def _create_nova_instance_neighbors(self, entity_event):
         neighbors = []
         host_transformer = self.transformers[NOVA_HOST_DATASOURCE]
 

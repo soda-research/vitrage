@@ -91,17 +91,15 @@ class CinderVolumeTransformer(ResourceTransformerBase):
             update_timestamp=update_timestamp,
             metadata=metadata)
 
-    def _create_neighbors(self, entity_event):
-        if tbase.is_update_event(entity_event):
-            attachments_property = 'volume_attachment'
-            instance_id_property = 'instance_uuid'
-        else:
-            attachments_property = 'attachments'
-            instance_id_property = 'server_id'
-
+    def _create_snapshot_neighbors(self, entity_event):
         return self._create_instance_neighbors(entity_event,
-                                               attachments_property,
-                                               instance_id_property)
+                                               'attachments',
+                                               'server_id')
+
+    def _create_update_neighbors(self, entity_event):
+        return self._create_instance_neighbors(entity_event,
+                                               'volume_attachment',
+                                               'instance_uuid')
 
     def _create_entity_key(self, entity_event):
 

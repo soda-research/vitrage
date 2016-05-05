@@ -71,7 +71,13 @@ class StaticPhysicalTransformer(ResourceTransformerBase):
             entity_state=state,
             metadata=metadata)
 
-    def _create_neighbors(self, entity_event):
+    def _create_snapshot_neighbors(self, entity_event):
+        return self._create_static_physical_neighbors(entity_event)
+
+    def _create_update_neighbors(self, entity_event):
+        return self._create_static_physical_neighbors(entity_event)
+
+    def _create_static_physical_neighbors(self, entity_event):
         neighbors = []
         entity_type = entity_event[VProps.TYPE]
         entity_key = self._create_entity_key(entity_event)

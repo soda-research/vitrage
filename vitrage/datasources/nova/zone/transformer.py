@@ -73,8 +73,13 @@ class ZoneTransformer(ResourceTransformerBase):
             update_timestamp=update_timestamp,
             metadata=metadata)
 
-    def _create_neighbors(self, entity_event):
+    def _create_snapshot_neighbors(self, entity_event):
+        return self._create_nova_zone_neighbors(entity_event)
 
+    def _create_update_neighbors(self, entity_event):
+        return self._create_nova_zone_neighbors(entity_event)
+
+    def _create_nova_zone_neighbors(self, entity_event):
         zone_vertex_id = self._create_entity_key(entity_event)
         neighbors = [self._create_cluster_neighbor(zone_vertex_id)]
         hosts = extract_field_value(entity_event, 'hosts')
