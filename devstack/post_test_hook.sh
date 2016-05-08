@@ -13,16 +13,22 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+sudo chmod -R a+rw /opt/stack/
 (cd $BASE/new/vitrage/; sudo virtualenv .venv)
 source $BASE/new/vitrage/.venv/bin/activate
 
+(cd $BASE/new/tempest/; sudo pip install -r requirements.txt -r test-requirements.txt)
 sudo pip install nose
+
+(cd $BASE/new/tempest/; sudo oslo-config-generator --config-file  etc/config-generator.tempest.conf  --output-file etc/tempest.conf)
+(cd $BASE/new/; sudo sh -c 'cat vitrage/devstack/files/tempest/tempest.conf >> tempest/etc/tempest.conf')
+
+sudo cp $BASE/new/tempest/etc/logging.conf.sample $BASE/new/tempest/etc/logging.conf
 
 (cd $BASE/new/vitrage/; sudo pip install -r requirements.txt -r test-requirements.txt)
 (cd $BASE/new/vitrage/; sudo python setup.py install)
 
-(cd $BASE/new/vitrage/; sudo rm -rf .testrepository/)
-(cd $BASE/new/vitrage/; sudo testr init)
+(cd $BASE/new/tempest/; sudo testr init)
 
-(cd $BASE/new/vitrage/; sudo sh -c 'testr list-tests vitrage_tempest_tests | grep -E "topology" > vitrage_tempest_tests.list')
-(cd $BASE/new/vitrage/; sudo sh -c 'testr run --subunit --load-list=vitrage_tempest_tests.list | subunit-trace --fails')
+(cd $BASE/new/tempest/; sudo sh -c 'testr list-tests vitrage_tempest_tests | grep -E "topology" > vitrage_tempest_tests.list')
+(cd $BASE/new/tempest/; sudo sh -c 'testr run --subunit --load-list=vitrage_tempest_tests.list | subunit-trace --fails')
