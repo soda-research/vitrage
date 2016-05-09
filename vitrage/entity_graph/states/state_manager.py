@@ -38,31 +38,40 @@ class StateManager(object):
         self.datasources_state_confs = self._load_state_configurations()
 
     def normalize_state(self, category, datasource_name, state):
-        upper_state = state if not state else state.upper()
-        important_states = \
-            self.category_normalizator[category].important_states()
+        try:
+            upper_state = state if not state else state.upper()
+            important_states = \
+                self.category_normalizator[category].important_states()
 
-        if datasource_name in self.datasources_state_confs:
+            if datasource_name in self.datasources_state_confs:
 
-            states_conf = self.datasources_state_confs[datasource_name]
+                states_conf = self.datasources_state_confs[datasource_name]
 
-            return states_conf[self.VALUES][upper_state] \
-                if upper_state in states_conf[self.VALUES] \
-                else states_conf[important_states.unknown]
-        else:
-            return important_states.undefined
+                return states_conf[self.VALUES][upper_state] \
+                    if upper_state in states_conf[self.VALUES] \
+                    else states_conf[self.VALUES][important_states.unknown]
+            else:
+                return important_states.undefined
+        except Exception:
+            LOG.error('Exception in datasource: %s', datasource_name)
+            raise
 
     def state_priority(self, datasource_name, normalized_state):
-        # no need to check if normalized_state exists, cause it exists for sure
-        upper_state = normalized_state if not normalized_state else \
-            normalized_state.upper()
+        try:
+            # no need to check if normalized_state exists, cause it exists for
+            # sure
+            upper_state = normalized_state if not normalized_state else \
+                normalized_state.upper()
 
-        if datasource_name in self.datasources_state_confs:
-            states_conf = self.datasources_state_confs[datasource_name]
-            return states_conf[self.PRIORITIES][upper_state]
-        else:
-            # default UNDEFINED priority
-            return 0
+            if datasource_name in self.datasources_state_confs:
+                states_conf = self.datasources_state_confs[datasource_name]
+                return states_conf[self.PRIORITIES][upper_state]
+            else:
+                # default UNDEFINED priority
+                return 0
+        except Exception:
+            LOG.error('Exception in datasource: %s', datasource_name)
+            raise
 
     def aggregated_state(self, new_vertex, graph_vertex, is_normalized=False):
         datasource_name = new_vertex[VProps.TYPE] if \
