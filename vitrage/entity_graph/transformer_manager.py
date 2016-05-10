@@ -19,6 +19,8 @@ from oslo_utils import importutils
 from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.exception import VitrageTransformerError
 from vitrage.common.utils import opt_exists
+from vitrage.datasources.consistency import CONSISTENCY_DATASOURCE
+from vitrage.datasources.consistency.transformer import ConsistencyTransformer
 from vitrage.evaluator.actions.evaluator_event_transformer import \
     EvaluatorEventTransformer
 from vitrage.evaluator.actions.evaluator_event_transformer import VITRAGE_TYPE
@@ -48,6 +50,10 @@ class TransformerManager(object):
         transformers[VITRAGE_TYPE] = importutils.import_object(
             "%s.%s" % (EvaluatorEventTransformer.__module__,
                        EvaluatorEventTransformer.__name__), transformers)
+
+        transformers[CONSISTENCY_DATASOURCE] = importutils.import_object(
+            "%s.%s" % (ConsistencyTransformer.__module__,
+                       ConsistencyTransformer.__name__), transformers)
 
         return transformers
 

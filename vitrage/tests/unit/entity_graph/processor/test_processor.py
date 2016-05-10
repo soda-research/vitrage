@@ -175,6 +175,21 @@ class TestProcessor(TestEntityGraphUnitBase):
         # test assertions
         self.assertEqual(2, processor.entity_graph.num_edges())
 
+    def test_remove_deleted_entity(self):
+        # setup
+        vertex, neighbors, processor = self._create_entity(
+            spec_type=self.INSTANCE_SPEC,
+            sync_mode=SyncMode.INIT_SNAPSHOT)
+        self.assertEqual(1, processor.entity_graph.num_edges())
+        vertex[VProps.IS_DELETED] = True
+        processor.entity_graph.update_vertex(vertex)
+
+        # action
+        processor.remove_deleted_entity(vertex, None)
+
+        # test assertions
+        self.assertEqual(0, processor.entity_graph.num_edges())
+
     def test_update_neighbors(self):
         # create instance event with host neighbor and check validity
         (vertex, neighbors, processor) = self._create_and_check_entity()

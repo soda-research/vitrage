@@ -153,6 +153,28 @@ class Processor(processor.ProcessorBase):
             if graph_edge:
                 self.entity_graph.remove_edge(graph_edge)
 
+    def remove_deleted_entity(self, vertex, neighbors):
+        """Removes the deleted vertex from the entity graph
+
+        Removes vertex that it's is_deleted value is True
+
+        :param vertex: The vertex to be removed from the graph
+        :type vertex: Vertex
+
+        :param neighbors: The neighbors of the deleted vertex
+        :type neighbors: List
+        """
+
+        LOG.debug('Remove deleted entity from entity graph:\n%s', vertex)
+
+        graph_vertex = self.entity_graph.get_vertex(vertex.vertex_id)
+
+        if graph_vertex and PUtils.is_deleted(graph_vertex) and \
+                PUtils.is_newer_vertex(graph_vertex, vertex):
+            self.entity_graph.remove_vertex(vertex)
+        else:
+            LOG.warning("Delete event arrived on invalid resource: %s", vertex)
+
     def handle_end_message(self, vertex, neighbors):
         self.initialization_status.end_messages[vertex[VProps.TYPE]] = True
 
@@ -267,6 +289,7 @@ class Processor(processor.ProcessorBase):
             EventAction.DELETE_ENTITY: self.delete_entity,
             EventAction.UPDATE_RELATIONSHIP: self.update_relationship,
             EventAction.DELETE_RELATIONSHIP: self.delete_relationship,
+            EventAction.REMOVE_DELETED_ENTITY: self.remove_deleted_entity,
             # should not be called explicitly
             EventAction.END_MESSAGE: self.handle_end_message
         }
@@ -280,6 +303,7 @@ class Processor(processor.ProcessorBase):
                           EventAction.CREATE_ENTITY]:
                 graph_vertex = self.entity_graph.get_vertex(vertex.vertex_id)
             elif action in [EventAction.END_MESSAGE,
+                            EventAction.REMOVE_DELETED_ENTITY,
                             EventAction.UPDATE_RELATIONSHIP,
                             EventAction.DELETE_RELATIONSHIP]:
                 return None

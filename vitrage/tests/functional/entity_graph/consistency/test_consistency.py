@@ -13,7 +13,6 @@
 # under the License.
 
 from datetime import timedelta
-import threading
 import time
 import unittest
 
@@ -103,9 +102,10 @@ class TestConsistencyFunctional(TestFunctionalBase):
 
         # Action
         # eventlet.spawn(self._process_events)
-        processor_thread = threading.Thread(target=self._process_events)
-        processor_thread.start()
+        # processor_thread = threading.Thread(target=self._process_events)
+        # processor_thread.start()
         self.consistency_enforcer.initializing_process()
+        self._process_events()
 
         # Test Assertions
         num_correct_alarms = num_of_host_alarms + \
@@ -148,6 +148,7 @@ class TestConsistencyFunctional(TestFunctionalBase):
         # Action
         time.sleep(2 * consistency_interval + 1)
         self.consistency_enforcer.periodic_process()
+        self._process_events()
 
         # Test Assertions
         instance_vertices = self.processor.entity_graph.get_vertices({
@@ -253,7 +254,9 @@ class TestConsistencyFunctional(TestFunctionalBase):
 
             if not self.event_queue.empty():
                 time.sleep(1)
+                count = 0
                 while not self.event_queue.empty():
+                    count += 1
                     event = self.event_queue.get()
                     self.processor.process_event(event)
                 return

@@ -17,9 +17,13 @@ import time
 
 from oslo_log import log
 
+from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import EntityCategory
+from vitrage.common.constants import EventAction
+from vitrage.common.constants import SyncMode
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.common.datetime_utils import utcnow
+from vitrage.datasources.consistency import CONSISTENCY_DATASOURCE
 from vitrage.datasources import OPENSTACK_CLUSTER
 from vitrage.evaluator.actions.evaluator_event_transformer import VITRAGE_TYPE
 
@@ -77,7 +81,7 @@ class ConsistencyEnforcer(object):
             old_deleted_entities = self._find_old_deleted_entities()
             LOG.debug('Found %s vertices to be deleted by consistency service'
                       ': %s', len(old_deleted_entities), old_deleted_entities)
-            self._delete_vertices(old_deleted_entities)
+            self._remove_deleted_vertices(old_deleted_entities)
 
             # mark stale entities as is_deleted=True
             stale_entities = self._find_stale_entities()
@@ -139,13 +143,27 @@ class ConsistencyEnforcer(object):
         old_deduced_alarms = self._find_old_deduced_alarms(timestamp)
         self._mark_as_deleted(old_deduced_alarms)
 
-    def _delete_vertices(self, vertices):
+    def _remove_deleted_vertices(self, vertices):
         for vertex in vertices:
-            self.graph.remove_vertex(vertex)
+            event = {
+                DSProps.SYNC_TYPE: CONSISTENCY_DATASOURCE,
+                DSProps.SYNC_MODE: SyncMode.UPDATE,
+                DSProps.SAMPLE_DATE: str(utcnow()),
+                DSProps.EVENT_TYPE: EventAction.REMOVE_DELETED_ENTITY,
+                VProps.VITRAGE_ID: vertex[VProps.VITRAGE_ID]
+            }
+            self.event_queue.put(event)
 
     def _mark_as_deleted(self, vertices):
         for vertex in vertices:
-            self.graph.mark_vertex_as_deleted(vertex)
+            event = {
+                DSProps.SYNC_TYPE: CONSISTENCY_DATASOURCE,
+                DSProps.SYNC_MODE: SyncMode.UPDATE,
+                DSProps.SAMPLE_DATE: str(utcnow()),
+                DSProps.EVENT_TYPE: EventAction.DELETE_ENTITY,
+                VProps.VITRAGE_ID: vertex[VProps.VITRAGE_ID]
+            }
+            self.event_queue.put(event)
 
     @staticmethod
     def _filter_vertices_to_be_deleted(vertices):
