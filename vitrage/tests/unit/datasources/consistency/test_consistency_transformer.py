@@ -14,12 +14,13 @@
 
 from oslo_log import log as logging
 
-from vitrage.datasources.cinder.volume import CINDER_VOLUME_DATASOURCE
-from vitrage.datasources.cinder.volume.transformer \
-    import CinderVolumeTransformer
-from vitrage.datasources.nova.instance import NOVA_INSTANCE_DATASOURCE
-from vitrage.datasources.nova.instance.transformer import InstanceTransformer
+from vitrage.common.constants import EventAction
+from vitrage.common.constants import VertexProperties as VProps
+from vitrage.datasources.consistency import CONSISTENCY_DATASOURCE
+from vitrage.datasources.consistency.transformer import ConsistencyTransformer
 from vitrage.tests import base
+
+from vitrage.tests.mocks import mock_driver as mock_sync
 
 LOG = logging.getLogger(__name__)
 
@@ -30,19 +31,65 @@ class TestConsistencyTransformer(base.BaseTest):
     @classmethod
     def setUpClass(cls):
         cls.transformers = {}
-        cls.transformers[CINDER_VOLUME_DATASOURCE] = \
-            CinderVolumeTransformer(cls.transformers)
-        cls.transformers[NOVA_INSTANCE_DATASOURCE] = \
-            InstanceTransformer(cls.transformers)
+        cls.transformers[CONSISTENCY_DATASOURCE] = \
+            ConsistencyTransformer(cls.transformers)
+        cls.actions = [EventAction.DELETE_ENTITY,
+                       EventAction.REMOVE_DELETED_ENTITY]
 
     def test_snapshot_transform(self):
         LOG.debug('Consistency transformer test: transform entity event '
                   'snapshot')
 
-        pass
+        # Test setup
+        spec_list = mock_sync.simple_consistency_generators(consistency_num=7,
+                                                            update_events=7)
+        static_events = mock_sync.generate_random_events_list(spec_list)
+
+        for event in static_events:
+            # Test action
+            wrapper = self.transformers[CONSISTENCY_DATASOURCE].transform(
+                event)
+
+            # Test assertions
+            vertex = wrapper.vertex
+            self._validate_consistency_vertex_props(vertex, event)
+
+            neighbors = wrapper.neighbors
+            self.assertEqual(None, neighbors)
+
+            action = wrapper.action
+            self.assertIn(action, self.actions)
 
     def test_update_transform(self):
         LOG.debug('Consistency transformer test: transform entity event '
                   'update')
 
-        pass
+        # Test setup
+        spec_list = mock_sync.simple_consistency_generators(consistency_num=7,
+                                                            update_events=7)
+        static_events = mock_sync.generate_random_events_list(spec_list)
+
+        for event in static_events:
+            # Test action
+            wrapper = self.transformers[CONSISTENCY_DATASOURCE].transform(
+                event)
+
+            # Test assertions
+            vertex = wrapper.vertex
+            self._validate_consistency_vertex_props(vertex, event)
+
+            neighbors = wrapper.neighbors
+            self.assertEqual(None, neighbors)
+
+            action = wrapper.action
+            self.assertIn(action, self.actions)
+
+    def _validate_consistency_vertex_props(self, vertex, event):
+        vitrage_id = event.get(VProps.VITRAGE_ID, None)
+        self.assertIsNotNone(vitrage_id)
+
+        vertex_id = vertex.vertex_id
+        self.assertIsNotNone(vertex_id)
+
+        sample_timestamp = vertex.get(VProps.SAMPLE_TIMESTAMP, None)
+        self.assertIsNotNone(sample_timestamp)

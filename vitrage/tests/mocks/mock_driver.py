@@ -237,6 +237,34 @@ def simple_volume_generators(volume_num, instance_num,
     return tg.get_trace_generators(test_entity_spec_list)
 
 
+def simple_consistency_generators(consistency_num, update_events=0,
+                                  snap_vals=None, update_vals=None):
+    """A function for returning consistency event generators.
+
+    Returns generators for a given number of consistency events.
+    Instances will be distributed across hosts in round-robin style.
+
+    :param update_vals:  number of values from update event
+    :param update_events: number of events from update event
+    :param consistency_num: number of consisteny events
+    :param snap_vals: preset vals for ALL snapshot events
+    :return: generators for consistency_num consistency events as specified
+    """
+
+    test_entity_spec_list = []
+    if update_events:
+        test_entity_spec_list.append(
+            {tg.DYNAMIC_INFO_FKEY: tg.DRIVER_CONSISTENCY_UPDATE_D,
+             tg.STATIC_INFO_FKEY: None,
+             tg.EXTERNAL_INFO_KEY: update_vals,
+             tg.MAPPING_KEY: consistency_num,
+             tg.NAME_KEY: 'Consistency update generator',
+             tg.NUM_EVENTS: update_events
+             }
+        )
+    return tg.get_trace_generators(test_entity_spec_list)
+
+
 def simple_switch_generators(switch_num, host_num,
                              snapshot_events=0, snap_vals=None,
                              update_events=0, update_vals=None):

@@ -52,6 +52,7 @@ DRIVER_NAGIOS_SNAPSHOT_S = 'driver_nagios_snapshot_static.json'
 DRIVER_SWITCH_SNAPSHOT_D = 'driver_switch_snapshot_dynamic.json'
 DRIVER_VOLUME_UPDATE_D = 'driver_volume_update_dynamic.json'
 DRIVER_VOLUME_SNAPSHOT_D = 'driver_volume_snapshot_dynamic.json'
+DRIVER_CONSISTENCY_UPDATE_D = 'driver_consistency_update_dynamic.json'
 DRIVER_ZONE_SNAPSHOT_D = 'driver_zone_snapshot_dynamic.json'
 
 
@@ -105,6 +106,8 @@ class EventTraceGenerator(object):
              DRIVER_VOLUME_UPDATE_D: _get_volume_update_driver_values,
              DRIVER_SWITCH_SNAPSHOT_D: _get_switch_snapshot_driver_values,
              DRIVER_NAGIOS_SNAPSHOT_D: _get_nagios_alarm_driver_values,
+             DRIVER_CONSISTENCY_UPDATE_D:
+                 _get_consistency_update_driver_values,
 
              TRANS_INST_SNAPSHOT_D: _get_trans_vm_snapshot_values,
              TRANS_HOST_SNAPSHOT_D: _get_trans_host_snapshot_values,
@@ -306,6 +309,29 @@ def _get_volume_update_driver_values(spec):
         mapping = {'volume_id': volume_name,
                    'display_name': volume_name,
                    'volume_attachment': [{'instance_uuid': instance_name}]}
+        static_values.append(combine_data(
+            static_info_re, mapping, spec.get(EXTERNAL_INFO_KEY, None)
+        ))
+    return static_values
+
+
+def _get_consistency_update_driver_values(spec):
+    """Generates the static driver values for each consistency event.
+
+    :param spec: specification of event generation.
+    :type spec: dict
+    :return: list of static driver values for each consistency event.
+    :rtype: list
+    """
+
+    entity_num = spec[MAPPING_KEY]
+    static_info_re = None
+    if spec[STATIC_INFO_FKEY] is not None:
+        static_info_re = utils.load_specs(spec[STATIC_INFO_FKEY])
+    static_values = []
+
+    for i in range(entity_num):
+        mapping = {}
         static_values.append(combine_data(
             static_info_re, mapping, spec.get(EXTERNAL_INFO_KEY, None)
         ))

@@ -81,14 +81,16 @@ class ConsistencyEnforcer(object):
             old_deleted_entities = self._find_old_deleted_entities()
             LOG.debug('Found %s vertices to be deleted by consistency service'
                       ': %s', len(old_deleted_entities), old_deleted_entities)
-            self._remove_deleted_vertices(old_deleted_entities)
+            self._push_events_to_queue(old_deleted_entities,
+                                       EventAction.REMOVE_DELETED_ENTITY)
 
             # mark stale entities as is_deleted=True
             stale_entities = self._find_stale_entities()
             LOG.debug('Found %s vertices to be marked as deleted by '
                       'consistency service: %s', len(stale_entities),
                       stale_entities)
-            self._mark_as_deleted(stale_entities)
+            self._push_events_to_queue(stale_entities,
+                                       EventAction.DELETE_ENTITY)
         except Exception as e:
             LOG.exception(
                 'Error in deleting vertices from entity_graph: %s', e)
@@ -141,26 +143,16 @@ class ConsistencyEnforcer(object):
 
     def _mark_old_deduced_alarms_as_deleted(self, timestamp):
         old_deduced_alarms = self._find_old_deduced_alarms(timestamp)
-        self._mark_as_deleted(old_deduced_alarms)
+        self._push_events_to_queue(old_deduced_alarms,
+                                   EventAction.DELETE_ENTITY)
 
-    def _remove_deleted_vertices(self, vertices):
+    def _push_events_to_queue(self, vertices, action):
         for vertex in vertices:
             event = {
                 DSProps.SYNC_TYPE: CONSISTENCY_DATASOURCE,
                 DSProps.SYNC_MODE: SyncMode.UPDATE,
                 DSProps.SAMPLE_DATE: str(utcnow()),
-                DSProps.EVENT_TYPE: EventAction.REMOVE_DELETED_ENTITY,
-                VProps.VITRAGE_ID: vertex[VProps.VITRAGE_ID]
-            }
-            self.event_queue.put(event)
-
-    def _mark_as_deleted(self, vertices):
-        for vertex in vertices:
-            event = {
-                DSProps.SYNC_TYPE: CONSISTENCY_DATASOURCE,
-                DSProps.SYNC_MODE: SyncMode.UPDATE,
-                DSProps.SAMPLE_DATE: str(utcnow()),
-                DSProps.EVENT_TYPE: EventAction.DELETE_ENTITY,
+                DSProps.EVENT_TYPE: action,
                 VProps.VITRAGE_ID: vertex[VProps.VITRAGE_ID]
             }
             self.event_queue.put(event)

@@ -1,0 +1,7 @@
+{
+  "sample_date": "2015-12-01T12:46:41Z",
+  "sync_type": "consistency",
+  "sync_mode": "update",
+  "event_type": "delete_entity|remove_deleted_entity",
+  "vitrage_id": "[0-9]{5}"
+}

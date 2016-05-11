@@ -94,6 +94,9 @@ class TransformerBase(object):
 
     UPDATE_EVENT_TYPES = {}
 
+    def __init__(self, transformers):
+        self.transformers = transformers
+
     def transform(self, entity_event):
         """Transform an entity event into entity wrapper.
 

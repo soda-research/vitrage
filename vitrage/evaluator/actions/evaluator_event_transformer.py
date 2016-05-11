@@ -42,7 +42,7 @@ VITRAGE_TYPE = 'vitrage'
 class EvaluatorEventTransformer(transformer_base.TransformerBase):
 
     def __init__(self, transformers):
-        self.transformers = transformers
+        super(EvaluatorEventTransformer, self).__init__(transformers)
         self.actions = self._init_actions()
 
     def _create_snapshot_entity_vertex(self, entity_event):
