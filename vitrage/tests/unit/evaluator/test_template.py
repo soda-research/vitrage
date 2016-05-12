@@ -120,10 +120,10 @@ class BasicTemplateTest(base.BaseTest):
         self.assertEqual(len(condition), 1)
 
         condition_var = condition[0][0]
-        self.assertTrue(isinstance(condition_var, ConditionVar))
+        self.assertIsInstance(condition_var, ConditionVar)
 
         variable = condition_var.variable
-        self.assertTrue(isinstance(variable, EdgeDescription))
+        self.assertIsInstance(variable, EdgeDescription)
 
         edge = variable[0]
         self.assertEqual(edge.source_id, '1')
