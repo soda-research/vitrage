@@ -21,6 +21,8 @@ from pecan.core import abort
 
 from vitrage.api.controllers.rest import RootRestController
 from vitrage.api.policy import enforce
+from vitrage.common.constants import VertexProperties as VProps
+from vitrage.datasources import OPENSTACK_CLUSTER
 
 # noinspection PyProtectedMember
 from vitrage.i18n import _LI
@@ -64,7 +66,13 @@ class TopologyController(RootRestController):
             if graph_type == 'graph':
                 return graph
             if graph_type == 'tree':
-                return RootRestController.as_tree(graph)
+                node_id = OPENSTACK_CLUSTER
+                if root:
+                    for node in graph['nodes']:
+                        if node[VProps.VITRAGE_ID] == root:
+                            node_id = node[VProps.ID]
+                            break
+                return RootRestController.as_tree(graph, node_id)
 
         except Exception as e:
             LOG.exception('failed to get topology %s ', e)
