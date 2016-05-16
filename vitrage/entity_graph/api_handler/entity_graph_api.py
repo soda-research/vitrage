@@ -100,16 +100,13 @@ class EntityGraphApis(object):
         ga = create_algorithm(self.entity_graph)
         if graph_type == 'tree':
             final_query = query if query else TREE_TOPOLOGY_QUERY
-            found_graph = ga.graph_query_vertices(
-                query_dict=final_query,
-                root_id=root)
         else:
-            if query:
-                found_graph = ga.create_graph_from_matching_vertices(
-                    query_dict=query)
-            else:
-                found_graph = ga.create_graph_from_matching_vertices(
-                    query_dict=TOPOLOGY_AND_ALARMS_QUERY)
+            final_query = query if query else TOPOLOGY_AND_ALARMS_QUERY
+
+        found_graph = ga.graph_query_vertices(
+            query_dict=final_query,
+            root_id=root,
+            depth=depth)
 
         return found_graph.output_graph()
 
