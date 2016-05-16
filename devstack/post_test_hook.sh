@@ -28,7 +28,9 @@ sudo cp $BASE/new/tempest/etc/logging.conf.sample $BASE/new/tempest/etc/logging.
 (cd $BASE/new/vitrage/; sudo pip install -r requirements.txt -r test-requirements.txt)
 (cd $BASE/new/vitrage/; sudo python setup.py install)
 
+(cd $BASE/new/tempest/; sudo rm -rf .testrepository)
 (cd $BASE/new/tempest/; sudo testr init)
 
+(cd $BASE/new/tempest/; sudo sh -c 'testr list-tests vitrage_tempest_tests')
 (cd $BASE/new/tempest/; sudo sh -c 'testr list-tests vitrage_tempest_tests | grep -E "topology" > vitrage_tempest_tests.list')
 (cd $BASE/new/tempest/; sudo sh -c 'testr run --subunit --load-list=vitrage_tempest_tests.list | subunit-trace --fails')
