@@ -17,7 +17,8 @@ from oslo_log import log as logging
 from vitrage.common import file_utils
 
 from vitrage.evaluator.scenario_repository import ScenarioRepository
-from vitrage.evaluator.template_syntax_validator import syntax_valid
+from vitrage.evaluator.template_syntax_validator import RESULT_STATUS
+from vitrage.evaluator.template_syntax_validator import syntax_validation
 from vitrage.tests import base
 from vitrage.tests.mocks import utils
 
@@ -61,7 +62,8 @@ class ScenarioRepositoryTest(base.BaseTest):
         # Test Setup
         valid_template_counter = 0
         for template_definition in self.template_defs:
-            if syntax_valid(template_definition):
+            syntax_validation_result = syntax_validation(template_definition)
+            if syntax_validation_result[RESULT_STATUS]:
                 valid_template_counter += 1
 
         # Test assertions
