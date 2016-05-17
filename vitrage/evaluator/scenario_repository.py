@@ -13,14 +13,15 @@
 # under the License.
 from collections import defaultdict
 from collections import namedtuple
+
 from oslo_log import log
 
 from vitrage.common import file_utils
 from vitrage.evaluator.template import RELATIONSHIP
 from vitrage.evaluator.template import Template
 from vitrage.evaluator.template_fields import TemplateFields
-from vitrage.evaluator.template_syntax_validator import RESULT_STATUS
-from vitrage.evaluator.template_syntax_validator import syntax_validation
+from vitrage.evaluator.template_validation.template_syntax_validator import \
+    syntax_validation
 
 LOG = log.getLogger(__name__)
 
@@ -65,7 +66,7 @@ class ScenarioRepository(object):
     def add_template(self, template_def):
 
         syntax_validation_result = syntax_validation(template_def)
-        if syntax_validation_result[RESULT_STATUS]:
+        if syntax_validation_result.is_valid:
             template = Template(template_def)
             self.templates[template.name] = template
             self._add_template_scenarios(template)

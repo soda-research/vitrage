@@ -12,12 +12,14 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 import copy
+
 from oslo_log import log
 
 from vitrage.common import file_utils
 from vitrage.evaluator.actions.base import ActionType
-from vitrage.evaluator import template_content_validator as validator
 from vitrage.evaluator.template_fields import TemplateFields
+from vitrage.evaluator.template_validation import \
+    template_content_validator as validator
 from vitrage.tests import base
 from vitrage.tests.mocks import utils
 

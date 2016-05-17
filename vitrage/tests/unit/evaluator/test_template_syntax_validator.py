@@ -17,13 +17,13 @@ from oslo_log import log as logging
 
 from vitrage.common import file_utils
 from vitrage.evaluator.template_fields import TemplateFields
-from vitrage.evaluator import template_syntax_validator
-from vitrage.evaluator.template_syntax_validator import ELEMENTS_MIN_NUM_ERROR
-from vitrage.evaluator.template_syntax_validator import \
+from vitrage.evaluator.template_validation import template_syntax_validator
+from vitrage.evaluator.template_validation.template_syntax_validator import \
+    ELEMENTS_MIN_NUM_ERROR
+from vitrage.evaluator.template_validation.template_syntax_validator import \
     MANDATORY_SECTIONS_ERROR
-from vitrage.evaluator.template_syntax_validator import RESULT_COMMENT
-from vitrage.evaluator.template_syntax_validator import RESULT_STATUS
-from vitrage.evaluator.template_syntax_validator import SCHEMA_CONTENT_ERROR
+from vitrage.evaluator.template_validation.template_syntax_validator import \
+    SCHEMA_CONTENT_ERROR
 from vitrage.tests import base
 from vitrage.tests.mocks import utils
 
@@ -237,5 +237,5 @@ class TemplateSyntaxValidatorTest(base.BaseTest):
         result = template_syntax_validator.syntax_validation(template)
 
         # Test assertions
-        self.assertFalse(result[RESULT_STATUS])
-        self.assertEqual(expected_comment, result[RESULT_COMMENT])
+        self.assertFalse(result.is_valid)
+        self.assertEqual(expected_comment, result.comment)

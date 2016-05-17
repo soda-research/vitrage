@@ -20,7 +20,7 @@ from voluptuous import Required
 from voluptuous import Schema
 
 from vitrage.evaluator.template_fields import TemplateFields
-
+from vitrage.evaluator.template_validation.utils import Result
 
 LOG = log.getLogger(__name__)
 
@@ -32,50 +32,41 @@ DICT_STRUCTURE_SCHEMA_ERROR = '%s must refer to dictionary.'
 SCHEMA_CONTENT_ERROR = '%s must contain %s Fields.'
 
 
-RESULT_DESCRIPTION = 'description'
-RESULT_STATUS = 'status'
-RESULT_COMMENT = 'comment'
+RESULT_DESCRIPTION = 'template syntax validation'
 
 
 def syntax_validation(template_conf):
 
-    result = {
-        RESULT_DESCRIPTION: 'template syntax validation',
-        RESULT_STATUS: True,
-        RESULT_COMMENT: 'Template syntax is OK'
-    }
+    result = validate_template_sections(template_conf)
 
-    validate_template_sections(template_conf, result)
-
-    if result[RESULT_STATUS]:
+    if result.is_valid:
         metadata = template_conf[TemplateFields.METADATA]
-        validate_metadata_section(metadata, result)
+        result = validate_metadata_section(metadata)
 
-    if result[RESULT_STATUS]:
+    if result.is_valid:
         definitions = template_conf[TemplateFields.DEFINITIONS]
-        validate_definitions_section(definitions, result)
+        result = validate_definitions_section(definitions)
 
-    if result[RESULT_STATUS]:
+    if result.is_valid:
         scenarios = template_conf[TemplateFields.SCENARIOS]
-        validate_scenarios_section(scenarios, result)
+        result = validate_scenarios_section(scenarios)
 
     return result
 
 
-def validate_template_sections(template_conf, result):
+def validate_template_sections(template_conf):
 
     schema = Schema({
         Required(TemplateFields.DEFINITIONS): dict,
         Required(TemplateFields.METADATA): dict,
         Required(TemplateFields.SCENARIOS): list
     })
-    _validate_dict_schema(schema,
-                          template_conf,
-                          MANDATORY_SECTIONS_ERROR,
-                          result)
+    return _validate_dict_schema(schema,
+                                 template_conf,
+                                 MANDATORY_SECTIONS_ERROR)
 
 
-def validate_metadata_section(metadata, result):
+def validate_metadata_section(metadata):
 
     schema = Schema({
         Required(TemplateFields.ID): Any(str, six.text_type),
@@ -84,10 +75,10 @@ def validate_metadata_section(metadata, result):
 
     error_msg = SCHEMA_CONTENT_ERROR % (
         TemplateFields.METADATA, TemplateFields.ID)
-    _validate_dict_schema(schema, metadata, error_msg, result)
+    return _validate_dict_schema(schema, metadata, error_msg)
 
 
-def validate_definitions_section(definitions, result):
+def validate_definitions_section(definitions):
 
     schema = Schema({
         Required(TemplateFields.ENTITIES): list,
@@ -98,54 +89,60 @@ def validate_definitions_section(definitions, result):
         TemplateFields.DEFINITIONS,
         '"%s"' % TemplateFields.ENTITIES
     )
-    _validate_dict_schema(schema, definitions, error_msg, result)
+    result = _validate_dict_schema(schema, definitions, error_msg)
 
-    if result[RESULT_STATUS]:
-        validate_entities(definitions[TemplateFields.ENTITIES], result)
+    if result.is_valid:
+        result = validate_entities(definitions[TemplateFields.ENTITIES])
 
         relationships = definitions.get(TemplateFields.RELATIONSHIPS, None)
-        if result[RESULT_STATUS] and relationships:
-            validate_relationships(relationships, result)
+        if result.is_valid and relationships:
+            return validate_relationships(relationships)
+
+    return result
 
 
-def validate_entities(entities, result):
+def validate_entities(entities):
 
     if len(entities) <= 0:
         error_msg = ELEMENTS_MIN_NUM_ERROR % TemplateFields.ENTITY
         LOG.error(error_msg)
-        _update_result(result, error_msg)
+        return _get_fault_result(error_msg)
 
-    if result[RESULT_STATUS]:
+    for entity in entities:
 
-        for entity in entities:
+        schema = Schema({
+            Required(TemplateFields.ENTITY): dict,
+        })
 
-            schema = Schema({
-                Required(TemplateFields.ENTITY): dict,
-            })
+        error_msg = DICT_STRUCTURE_SCHEMA_ERROR % TemplateFields.ENTITY
+        result = _validate_dict_schema(schema, entity, error_msg)
 
-            error_msg = DICT_STRUCTURE_SCHEMA_ERROR % TemplateFields.ENTITY
-            _validate_dict_schema(schema, entity, error_msg, result)
+        if result.is_valid:
+            result = validate_entity_dict(entity[TemplateFields.ENTITY])
 
-            if result[RESULT_STATUS]:
-                validate_entity_dict(entity[TemplateFields.ENTITY], result)
+        if not result.is_valid:
+            return result
+
+    return result
 
 
-def validate_entity_dict(entity_dict, result):
+def validate_entity_dict(entity_dict):
 
     schema = Schema({
         Required(TemplateFields.CATEGORY): Any(str, six.text_type),
         TemplateFields.TYPE: Any(str, six.text_type),
         Required(TemplateFields.TEMPLATE_ID): Any(str, six.text_type, int)
     }, extra=True)
+
     error_msg = SCHEMA_CONTENT_ERROR % (
         TemplateFields.ENTITY,
         '"%s" and "%s"' % (TemplateFields.CATEGORY,
                            TemplateFields.TEMPLATE_ID)
     )
-    _validate_dict_schema(schema, entity_dict, error_msg, result)
+    return _validate_dict_schema(schema, entity_dict, error_msg)
 
 
-def validate_relationships(relationships, result):
+def validate_relationships(relationships):
 
     for relationship in relationships:
 
@@ -153,14 +150,19 @@ def validate_relationships(relationships, result):
             Required(TemplateFields.RELATIONSHIP): dict,
         })
         error_msg = DICT_STRUCTURE_SCHEMA_ERROR % TemplateFields.RELATIONSHIP
-        _validate_dict_schema(schema, relationship, error_msg, result)
+        result = _validate_dict_schema(schema, relationship, error_msg)
 
-        if result[RESULT_STATUS]:
+        if result.is_valid:
             relationship_dict = relationship[TemplateFields.RELATIONSHIP]
-            validate_relationship_dict(relationship_dict, result)
+            result = validate_relationship_dict(relationship_dict)
+
+            if not result.is_valid:
+                return result
+
+    return result
 
 
-def validate_relationship_dict(relationship_dict, result):
+def validate_relationship_dict(relationship_dict):
 
     schema = Schema({
         Required(TemplateFields.SOURCE): Any(str, six.text_type, int),
@@ -176,30 +178,34 @@ def validate_relationship_dict(relationship_dict, result):
             TemplateFields.TEMPLATE_ID
         )
     )
-    _validate_dict_schema(schema, relationship_dict, error_msg, result)
+    return _validate_dict_schema(schema, relationship_dict, error_msg)
 
 
-def validate_scenarios_section(scenarios, result):
+def validate_scenarios_section(scenarios):
 
     if len(scenarios) <= 0:
         error_msg = ELEMENTS_MIN_NUM_ERROR % TemplateFields.SCENARIO
         LOG.error(error_msg)
-        _update_result(result, error_msg)
+        return _get_fault_result(error_msg)
 
-    if result[RESULT_STATUS]:
-        for scenario in scenarios:
+    for scenario in scenarios:
 
-            schema = Schema({
-                Required(TemplateFields.SCENARIO): dict,
-            })
-            error_msg = DICT_STRUCTURE_SCHEMA_ERROR % TemplateFields.SCENARIO
-            _validate_dict_schema(schema, scenario, error_msg, result)
+        schema = Schema({
+            Required(TemplateFields.SCENARIO): dict,
+        })
+        error_msg = DICT_STRUCTURE_SCHEMA_ERROR % TemplateFields.SCENARIO
+        result = _validate_dict_schema(schema, scenario, error_msg)
 
-            if result[RESULT_STATUS]:
-                validate_scenario(scenario[TemplateFields.SCENARIO], result)
+        if result.is_valid:
+            result = validate_scenario(scenario[TemplateFields.SCENARIO])
+
+            if not result.is_valid:
+                return result
+
+    return result
 
 
-def validate_scenario(scenario, result):
+def validate_scenario(scenario):
 
     schema = Schema({
         Required(TemplateFields.CONDITION): Any(str, six.text_type),
@@ -210,18 +216,20 @@ def validate_scenario(scenario, result):
         TemplateFields.SCENARIOS,
         '"%s" and "%s"' % (TemplateFields.CONDITION, TemplateFields.ACTIONS)
     )
-    _validate_dict_schema(schema, scenario, error_msg, result)
+    result = _validate_dict_schema(schema, scenario, error_msg)
 
-    if result[RESULT_STATUS]:
-        validate_actions_schema(scenario[TemplateFields.ACTIONS], result)
+    if result.is_valid:
+        return validate_actions_schema(scenario[TemplateFields.ACTIONS])
+
+    return result
 
 
-def validate_actions_schema(actions, result):
+def validate_actions_schema(actions):
 
     if len(actions) <= 0:
         error_msg = ELEMENTS_MIN_NUM_ERROR % TemplateFields.ACTION
         LOG.error(error_msg)
-        _update_result(result, error_msg)
+        return _get_fault_result(error_msg)
 
     for action in actions:
 
@@ -229,13 +237,18 @@ def validate_actions_schema(actions, result):
             Required(TemplateFields.ACTION): dict,
         })
         error_msg = DICT_STRUCTURE_SCHEMA_ERROR % TemplateFields.ACTION
-        _validate_dict_schema(schema, action, error_msg, result)
+        result = _validate_dict_schema(schema, action, error_msg)
 
-        if result[RESULT_STATUS]:
-            validate_action_schema(action[TemplateFields.ACTION], result)
+        if result.is_valid:
+            result = validate_action_schema(action[TemplateFields.ACTION])
+
+        if not result.is_valid:
+            return result
+
+    return result
 
 
-def validate_action_schema(action, result):
+def validate_action_schema(action):
 
     schema = Schema({
         Required(TemplateFields.ACTION_TYPE): Any(str, six.text_type),
@@ -250,19 +263,23 @@ def validate_action_schema(action, result):
             TemplateFields.ACTION_TARGET
         )
     )
-    _validate_dict_schema(schema, action, error_msg, result)
+    return _validate_dict_schema(schema, action, error_msg)
 
 
-def _validate_dict_schema(schema, value, error_msg, result):
+def _validate_dict_schema(schema, value, error_msg):
 
     try:
         schema(value)
     except Error as e:
         LOG.error('%s %s' % (error_msg, e))
-        _update_result(result, error_msg)
+        return _get_fault_result(error_msg)
+
+    return _get_correct_result()
 
 
-def _update_result(result, comment):
+def _get_fault_result(comment):
+    return Result(RESULT_DESCRIPTION, False, comment)
 
-    result[RESULT_STATUS] = False
-    result[RESULT_COMMENT] = comment
+
+def _get_correct_result():
+    return Result(RESULT_DESCRIPTION, True, 'Template syntax is OK')

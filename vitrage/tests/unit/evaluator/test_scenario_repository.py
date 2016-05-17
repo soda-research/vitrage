@@ -12,16 +12,16 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 import os
+
 from oslo_config import cfg
 from oslo_log import log as logging
-from vitrage.common import file_utils
 
+from vitrage.common import file_utils
 from vitrage.evaluator.scenario_repository import ScenarioRepository
-from vitrage.evaluator.template_syntax_validator import RESULT_STATUS
-from vitrage.evaluator.template_syntax_validator import syntax_validation
+from vitrage.evaluator.template_validation.template_syntax_validator import \
+    syntax_validation
 from vitrage.tests import base
 from vitrage.tests.mocks import utils
-
 
 LOG = logging.getLogger(__name__)
 
@@ -63,7 +63,7 @@ class ScenarioRepositoryTest(base.BaseTest):
         valid_template_counter = 0
         for template_definition in self.template_defs:
             syntax_validation_result = syntax_validation(template_definition)
-            if syntax_validation_result[RESULT_STATUS]:
+            if syntax_validation_result.is_valid:
                 valid_template_counter += 1
 
         # Test assertions
