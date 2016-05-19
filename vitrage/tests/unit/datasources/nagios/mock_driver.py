@@ -35,10 +35,6 @@ class MockNagiosDriver(NagiosDriver):
     def get_topic(conf):
         return None
 
-    @staticmethod
-    def get_skipped_event_types():
-        return []
-
     def __init__(self, conf):
         super(MockNagiosDriver, self).__init__(conf)
         self.service_datas = None

@@ -36,10 +36,6 @@ class StaticPhysicalDriver(DriverBase):
     def get_topic(conf):
         return None
 
-    @staticmethod
-    def get_skipped_event_types():
-        return []
-
     ENTITIES_SECTION = 'entities'
 
     def __init__(self, conf):

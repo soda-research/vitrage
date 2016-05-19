@@ -136,8 +136,3 @@ class DriverBase(object):
         """
 
         return None
-
-    @staticmethod
-    @abc.abstractmethod
-    def get_skipped_event_types():
-        return []
