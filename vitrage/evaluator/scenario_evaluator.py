@@ -12,12 +12,18 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from collections import namedtuple
+
 from oslo_log import log
 
 from vitrage.common.constants import EdgeProperties as EProps
 from vitrage.common.constants import VertexProperties as VProps
+from vitrage.entity_graph.mappings.datasource_info_mapper \
+    import DatasourceInfoMapper
 from vitrage.evaluator.actions.action_executor import ActionExecutor
 from vitrage.evaluator.actions.base import ActionMode
+from vitrage.evaluator.actions.base import ActionType
+import vitrage.evaluator.actions.priority_tools as pt
 from vitrage.evaluator.template import ActionSpecs
 from vitrage.evaluator.template import EdgeDescription
 from vitrage.evaluator.template import ENTITY
@@ -26,8 +32,16 @@ from vitrage.graph import create_algorithm
 from vitrage.graph import create_graph
 from vitrage.graph.driver import Vertex
 
-
 LOG = log.getLogger(__name__)
+
+# Entry containing action info.
+# specs - ActionSpecs
+# mode - DO or UNDO (the action)
+# scenario_id - the scenario id in scenario_repository
+# Trigger_id  - a unique identifier per match in graph (i.e., the subgraph
+# that matched the action in the spec) for the specific action.
+ActionInfo = \
+    namedtuple('ActionInfo', ['specs', 'mode', 'scenario_id', 'trigger_id'])
 
 
 class ScenarioEvaluator(object):
@@ -44,6 +58,7 @@ class ScenarioEvaluator(object):
         self._scenario_repo = scenario_repo
         self._action_executor = ActionExecutor(event_queue)
         self._entity_graph.subscribe(self.process_event)
+        self._action_tracker = ActionTracker(DatasourceInfoMapper(self.conf))
         self.enabled = enabled
 
     def process_event(self, before, current, is_vertex):
@@ -86,10 +101,10 @@ class ScenarioEvaluator(object):
 
         if actions:
             LOG.debug("Actions to perform: %s", actions.values())
-        for action in actions.values():
-            action_spec = action[0]
-            action_mode = action[1]
-            self._action_executor.execute(action_spec, action_mode)
+            filtered_actions = \
+                self._analyze_and_filter_actions(actions.values())
+            for action in filtered_actions:
+                self._action_executor.execute(action.specs, action.mode)
 
         LOG.debug('Process event - completed')
 
@@ -141,7 +156,9 @@ class ScenarioEvaluator(object):
                 if matches:
                     for match in matches:
                         spec, action_id = self._get_action_spec(action, match)
-                        actions[action_id] = (spec, mode)
+                        match_hash = hash(tuple(sorted(match.items())))
+                        actions[action_id] = \
+                            ActionInfo(spec, mode, scenario.id, match_hash)
         return actions
 
     @staticmethod
@@ -153,6 +170,7 @@ class ScenarioEvaluator(object):
         revised_spec = ActionSpecs(action_spec.type,
                                    real_items,
                                    action_spec.properties)
+        # noinspection PyTypeChecker
         action_id = ScenarioEvaluator._generate_action_id(revised_spec)
         return revised_spec, action_id
 
@@ -181,7 +199,7 @@ class ScenarioEvaluator(object):
         for term in condition:
             if not term.positive:
                 # todo(erosensw): add support for NOT clauses
-                LOG.error('Unsupported template with NOT operator')
+                LOG.error('Template with NOT operator current not supported')
                 return []
 
             if term.type == ENTITY:
@@ -210,3 +228,75 @@ class ScenarioEvaluator(object):
         condition_graph.add_vertex(edge_description.source)
         condition_graph.add_vertex(edge_description.target)
         condition_graph.add_edge(edge_description.edge)
+
+    def _analyze_and_filter_actions(self, actions):
+
+        actions_to_perform = {}
+        for action in actions:
+            key = self._action_tracker.get_key(action.specs)
+            prev_dominant = self._action_tracker.get_dominant_action(key)
+            if action.mode == ActionMode.DO:
+                self._action_tracker.insert_action(key, action)
+            else:
+                self._action_tracker.remove_action(key, action)
+            new_dominant = self._action_tracker.get_dominant_action(key)
+
+            # todo: (erosensw) improvement - first analyze DOs, then UNDOs
+            if not new_dominant:  # removed last entry for key
+                undo_action = ActionInfo(prev_dominant.specs,
+                                         ActionMode.UNDO,
+                                         prev_dominant.scenario_id,
+                                         prev_dominant.trigger_id)
+                actions_to_perform[key] = undo_action
+            elif new_dominant != prev_dominant:
+                actions_to_perform[key] = new_dominant
+        return actions_to_perform.values()
+
+
+class ActionTracker(object):
+    """Keeps track of all active actions and relative dominance/priority.
+
+    Actions are organized according to resource-id
+    and action details.
+    Examples:
+    - all set_state actions on a given resource share the same entry,
+    regardless of state
+    - all raise_alarm of type alarm_name on a given resource share the same
+     entry, regardless of severity
+    """
+
+    def __init__(self, datasource_info_mapper):
+        self._tracker = {}
+        alarms_score = \
+            datasource_info_mapper.get_datasource_priorities('vitrage')
+        all_scores = datasource_info_mapper.get_datasource_priorities()
+        self._action_tools = {
+            ActionType.SET_STATE: pt.SetStateTools(all_scores),
+            ActionType.RAISE_ALARM: pt.RaiseAlarmTools(alarms_score),
+            ActionType.ADD_CAUSAL_RELATIONSHIP: pt.CausalTools
+        }
+
+    def get_key(self, action_specs):
+        return self._action_tools[action_specs.type].get_key(action_specs)
+
+    def insert_action(self, key, action):
+        actions = self._tracker.get(key, [])
+        actions.append(action)
+        scorer = self._action_tools[action.specs.type].get_score
+        self._tracker[key] = sorted(actions, key=scorer, reverse=True)
+
+    def remove_action(self, key, action):
+        # actions are unique in their trigger and scenario_ids
+        def _is_equivalent(entry):
+            return entry.trigger_id == action.trigger_id and \
+                entry.scenario_id == action.scenario_id
+        try:
+            to_remove = next(entry for entry in self._tracker[key]
+                             if _is_equivalent(entry))
+            self._tracker[key].remove(to_remove)
+        except StopIteration:
+            LOG.warn("Could not find action entry to remove "
+                     "from tracker: {}".format(action))
+
+    def get_dominant_action(self, key):
+        return self._tracker[key][0] if self._tracker.get(key, None) else None
