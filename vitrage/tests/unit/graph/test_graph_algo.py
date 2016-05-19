@@ -136,6 +136,15 @@ class GraphAlgorithmTest(GraphTestBase):
         self.assertEqual(1, subgraph.num_vertices(),
                          'num of BOTH vertices Node (depth 3)')
 
+    def test_no_match_graph_query_vertices(self):
+        ga = create_algorithm(self.entity_graph)
+
+        query = {'==': {VProps.TYPE: 'test'}}
+        subgraph = ga.graph_query_vertices(query)
+        self.assertEqual(
+            0,
+            subgraph.num_vertices(), 'num of vertex node')
+
     def test_template_matching(self):
         """Test the template matching algorithm
 
