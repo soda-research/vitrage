@@ -27,6 +27,7 @@ class VitrageGraphService(os_service.Service):
     def __init__(self,
                  conf,
                  event_queue,
+                 evaluator_queue,
                  evaluator,
                  entity_graph,
                  initialization_status):
@@ -37,6 +38,7 @@ class VitrageGraphService(os_service.Service):
         self.processor = proc.Processor(self.conf,
                                         initialization_status,
                                         e_graph=entity_graph)
+        self.evaluator_queue = evaluator_queue
 
     def start(self):
         LOG.info("Vitrage Graph Service - Starting...")
@@ -66,13 +68,18 @@ class VitrageGraphService(os_service.Service):
         the queue they are done when timer returns.
         """
         start_time = datetime.datetime.now()
-        while not self.queue.empty():
+        while not self.evaluator_queue.empty() or not self.queue.empty():
             time_delta = datetime.datetime.now() - start_time
             if time_delta.total_seconds() >= 2:
                 break
+            if not self.evaluator_queue.empty():
+                self.do_process(self.evaluator_queue)
+            elif not self.queue.empty():
+                self.do_process(self.queue)
 
-            try:
-                event = self.queue.get()
-                self.processor.process_event(event)
-            except Exception as e:
-                LOG.exception("Exception: %s", e)
+    def do_process(self, queue):
+        try:
+            event = queue.get()
+            self.processor.process_event(event)
+        except Exception as e:
+            LOG.exception("Exception: %s", e)

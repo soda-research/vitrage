@@ -14,6 +14,7 @@
 # under the License.
 
 import multiprocessing
+from Queue import Queue
 import sys
 
 from oslo_service import service as os_service
@@ -40,14 +41,16 @@ def main():
     4. Starts the Consistency service
     """
 
-    conf, event_queue, evaluator, e_graph, initialization_status = init()
+    conf = service.prepare_service()
+    init_status = InitializationStatus()
+    mp_queue, evaluator_queue, evaluator, e_graph = init(conf)
     launcher = os_service.ServiceLauncher(conf)
     datasources = datasource_launcher.Launcher(
         conf,
-        datasource_launcher.create_send_to_queue_callback(event_queue))
+        datasource_launcher.create_send_to_queue_callback(mp_queue))
 
     launcher.launch_service(entity_graph_svc.VitrageGraphService(
-        conf, event_queue, evaluator, e_graph, initialization_status))
+        conf, mp_queue, evaluator_queue, evaluator, e_graph, init_status))
 
     launcher.launch_service(api_handler_svc.VitrageApiHandlerService(
         conf, e_graph))
@@ -55,22 +58,22 @@ def main():
     datasources.launch()
 
     launcher.launch_service(consistency_svc.VitrageGraphConsistencyService(
-        conf, event_queue, evaluator, e_graph, initialization_status))
+        conf, evaluator_queue, evaluator, e_graph, init_status))
 
     launcher.wait()
 
 
-def init():
-    conf = service.prepare_service()
-    event_queue = multiprocessing.Queue()
+def init(conf):
+    mp_queue = multiprocessing.Queue()
+    evaluator_q = Queue()
     e_graph = entity_graph.EntityGraph(
         'Entity Graph',
         '%s:%s' % (EntityCategory.RESOURCE, OPENSTACK_CLUSTER))
     scenario_repo = ScenarioRepository(conf)
-    evaluator = ScenarioEvaluator(conf, e_graph, scenario_repo, event_queue)
-    initialization_status = InitializationStatus()
 
-    return conf, event_queue, evaluator, e_graph, initialization_status
+    evaluator = ScenarioEvaluator(conf, e_graph, scenario_repo, evaluator_q)
+
+    return mp_queue, evaluator_q, evaluator, e_graph
 
 
 if __name__ == "__main__":

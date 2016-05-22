@@ -34,12 +34,12 @@ class ConsistencyEnforcer(object):
 
     def __init__(self,
                  conf,
-                 event_queue,
+                 evaluator_queue,
                  evaluator,
                  entity_graph,
                  initialization_status):
         self.conf = conf
-        self.event_queue = event_queue
+        self.evaluator_queue = evaluator_queue
         self.evaluator = evaluator
         self.graph = entity_graph
         self.initialization_status = initialization_status
@@ -132,14 +132,17 @@ class ConsistencyEnforcer(object):
         return self.graph.get_vertices(query_dict=query)
 
     def _run_evaluator(self, vertices):
+        start_time = time.time()
         for vertex in vertices:
             self.evaluator.process_event(None, vertex, True)
+        LOG.info('Run Evaluator on %s items - took %s', str(len(vertices)),
+                 str(time.time() - start_time))
 
     def _wait_for_processing_evaluator_events(self):
         # wait for multiprocessing to put the events in the queue
         time.sleep(1)
 
-        self._wait_for_action(self.event_queue.empty)
+        self._wait_for_action(self.evaluator_queue.empty)
 
     def _mark_old_deduced_alarms_as_deleted(self, timestamp):
         old_deduced_alarms = self._find_old_deduced_alarms(timestamp)
@@ -155,7 +158,7 @@ class ConsistencyEnforcer(object):
                 DSProps.EVENT_TYPE: action,
                 VProps.VITRAGE_ID: vertex[VProps.VITRAGE_ID]
             }
-            self.event_queue.put(event)
+            self.evaluator_queue.put(event)
 
     @staticmethod
     def _filter_vertices_to_be_deleted(vertices):

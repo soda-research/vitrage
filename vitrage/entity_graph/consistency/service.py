@@ -26,13 +26,13 @@ class VitrageGraphConsistencyService(os_service.Service):
 
     def __init__(self,
                  conf,
-                 event_queue,
+                 evaluator_queue,
                  evaluator,
                  entity_graph,
                  initialization_status):
         super(VitrageGraphConsistencyService, self).__init__()
         self.conf = conf
-        self.event_queue = event_queue
+        self.evaluator_queue = evaluator_queue
         self.evaluator = evaluator
         self.entity_graph = entity_graph
         self.initialization_status = initialization_status
@@ -43,7 +43,7 @@ class VitrageGraphConsistencyService(os_service.Service):
         super(VitrageGraphConsistencyService, self).start()
 
         consistency_enf = ConsistencyEnforcer(self.conf,
-                                              self.event_queue,
+                                              self.evaluator_queue,
                                               self.evaluator,
                                               self.entity_graph,
                                               self.initialization_status)
