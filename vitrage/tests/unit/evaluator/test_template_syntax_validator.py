@@ -17,13 +17,8 @@ from oslo_log import log as logging
 
 from vitrage.common import file_utils
 from vitrage.evaluator.template_fields import TemplateFields
+from vitrage.evaluator.template_validation.error_messages import error_msgs
 from vitrage.evaluator.template_validation import template_syntax_validator
-from vitrage.evaluator.template_validation.template_syntax_validator import \
-    ELEMENTS_MIN_NUM_ERROR
-from vitrage.evaluator.template_validation.template_syntax_validator import \
-    MANDATORY_SECTIONS_ERROR
-from vitrage.evaluator.template_validation.template_syntax_validator import \
-    SCHEMA_CONTENT_ERROR
 from vitrage.tests import base
 from vitrage.tests.mocks import utils
 
@@ -54,181 +49,123 @@ class TemplateSyntaxValidatorTest(base.BaseTest):
 
         template = self.clone_template
         template.pop(TemplateFields.METADATA)
-        self._test_execution(template, MANDATORY_SECTIONS_ERROR)
+        self._test_execution(template, error_msgs[62])
 
     def test_validate_template_without_id_in_metadata_section(self):
 
         template = self.clone_template
         template[TemplateFields.METADATA].pop(TemplateFields.ID)
-
-        expected_comment = SCHEMA_CONTENT_ERROR % (
-            TemplateFields.METADATA, TemplateFields.ID)
-
-        self._test_execution(template, expected_comment)
+        self._test_execution(template, error_msgs[60])
 
     def test_validate_template_without_definitions_section(self):
 
         template = self.clone_template
         template.pop(TemplateFields.DEFINITIONS)
-        self._test_execution(template, MANDATORY_SECTIONS_ERROR)
+        self._test_execution(template, error_msgs[21])
 
     def test_validate_template_without_entities(self):
 
         template = self.clone_template
         template[TemplateFields.DEFINITIONS].pop(TemplateFields.ENTITIES)
-        expected_comment = SCHEMA_CONTENT_ERROR % (
-            TemplateFields.DEFINITIONS,
-            '"%s"' % TemplateFields.ENTITIES
-        )
-
-        self._test_execution(template, expected_comment)
+        self._test_execution(template, error_msgs[20])
 
     def test_validate_template_with_empty_entities(self):
 
-        # Test setup
         template = self.clone_template
         template[TemplateFields.DEFINITIONS][TemplateFields.ENTITIES] = []
-        expected_comment = ELEMENTS_MIN_NUM_ERROR % TemplateFields.ENTITY
-
-        self._test_execution(template, expected_comment)
+        self._test_execution(template, error_msgs[43])
 
     def test_validate_entity_without_required_fields(self):
 
-        self._validate_entity_without_missing_required_field(
-            TemplateFields.CATEGORY)
+        self._validate_entity_without_required_field(
+            TemplateFields.CATEGORY,
+            error_msgs[42])
 
-        self._validate_entity_without_missing_required_field(
-            TemplateFields.TEMPLATE_ID)
+        self._validate_entity_without_required_field(
+            TemplateFields.TEMPLATE_ID,
+            error_msgs[41])
 
-    def _validate_entity_without_missing_required_field(self, field_name):
-
-        # Test setup
+    def _validate_entity_without_required_field(self,
+                                                field_name,
+                                                expected_comment):
         template = self.clone_template
         definitions = template[TemplateFields.DEFINITIONS]
         entity = definitions[TemplateFields.ENTITIES][0]
         entity[TemplateFields.ENTITY].pop(field_name)
-
-        expected_comment = SCHEMA_CONTENT_ERROR % (
-            TemplateFields.ENTITY,
-            '"%s" and "%s"' % (TemplateFields.CATEGORY,
-                               TemplateFields.TEMPLATE_ID)
-        )
 
         self._test_execution(template, expected_comment)
 
     def test_validate_relationships_without_required_fields(self):
 
         self._validate_relationships_with_missing_required_field(
-            TemplateFields.SOURCE)
+            TemplateFields.SOURCE, error_msgs[102])
 
         self._validate_relationships_with_missing_required_field(
-            TemplateFields.TARGET)
+            TemplateFields.TARGET, error_msgs[103])
 
         self._validate_relationships_with_missing_required_field(
-            TemplateFields.TEMPLATE_ID)
+            TemplateFields.TEMPLATE_ID, error_msgs[104])
 
-    def _validate_relationships_with_missing_required_field(self, field_name):
-
-        # Test setup
+    def _validate_relationships_with_missing_required_field(self,
+                                                            field_name,
+                                                            expected_comment):
         template = self.clone_template
         definitions = template[TemplateFields.DEFINITIONS]
         relationship = definitions[TemplateFields.RELATIONSHIPS][0]
         relationship[TemplateFields.RELATIONSHIP].pop(field_name)
 
-        expected_comment = SCHEMA_CONTENT_ERROR % (
-            TemplateFields.RELATIONSHIP, '"%s", "%s" and "%s"' % (
-                TemplateFields.SOURCE,
-                TemplateFields.TARGET,
-                TemplateFields.TEMPLATE_ID
-            )
-        )
-
         self._test_execution(template, expected_comment)
 
     def test_validate_template_without_scenarios_section(self):
 
-        # Test setup
         template = self.clone_template
         template.pop(TemplateFields.SCENARIOS)
-        self._test_execution(template, MANDATORY_SECTIONS_ERROR)
+        self._test_execution(template, error_msgs[80])
 
     def test_validate_template_with_empty_scenarios(self):
 
-        # Test setup
         template = self.clone_template
         template[TemplateFields.SCENARIOS] = []
-        expected_comment = ELEMENTS_MIN_NUM_ERROR % TemplateFields.SCENARIO
-
-        self._test_execution(template, expected_comment)
+        self._test_execution(template, error_msgs[81])
 
     def test_validate_scenario_without_required_condition_field(self):
 
-        # Test setup
         template = self.clone_template
         scenario = template[TemplateFields.SCENARIOS][0]
         scenario[TemplateFields.SCENARIO].pop(TemplateFields.CONDITION)
-
-        expected_comment = SCHEMA_CONTENT_ERROR % (
-            TemplateFields.SCENARIOS,
-            '"%s" and "%s"' % (TemplateFields.CONDITION,
-                               TemplateFields.ACTIONS)
-        )
-
-        self._test_execution(template, expected_comment)
+        self._test_execution(template, error_msgs[83])
 
     def test_validate_scenario_without_required_actions_field(self):
 
-        # Test setup
         template = self.clone_template
         scenario = template[TemplateFields.SCENARIOS][0]
         scenario[TemplateFields.SCENARIO].pop(TemplateFields.ACTIONS)
-
-        expected_comment = SCHEMA_CONTENT_ERROR % (
-            TemplateFields.SCENARIOS,
-            '"%s" and "%s"' % (TemplateFields.CONDITION,
-                               TemplateFields.ACTIONS)
-        )
-
-        self._test_execution(template, expected_comment)
+        self._test_execution(template, error_msgs[84])
 
     def test_validate_template_with_no_actions(self):
 
-        # Test setup
         template = self.clone_template
         scenario = template[TemplateFields.SCENARIOS][0]
         scenario[TemplateFields.SCENARIO][TemplateFields.ACTIONS] = []
-        expected_comment = ELEMENTS_MIN_NUM_ERROR % TemplateFields.ACTION
+        self._test_execution(template, error_msgs[121])
 
-        self._test_execution(template, expected_comment)
+    def _test_validate_action_without_required_fields(self):
 
-    def test_validate_action_without_required_action_target_field(self):
+        self._test_validate_action_without_required_field(
+            TemplateFields.ACTION_TYPE,
+            error_msgs[123])
 
-        # Test setup
+        self._test_validate_action_without_required_field(
+            TemplateFields.ACTION_TARGET,
+            error_msgs[124])
+
+    def _test_validate_action_without_required_field(self,
+                                                     field_name,
+                                                     expected_comment):
         template = self.clone_template
         scenario = template[TemplateFields.SCENARIOS][0]
         action = scenario[TemplateFields.SCENARIO][TemplateFields.ACTIONS][0]
-        action[TemplateFields.ACTION].pop(TemplateFields.ACTION_TARGET)
-
-        expected_comment = SCHEMA_CONTENT_ERROR % (
-            TemplateFields.ACTION, '"%s" and "%s"' % (
-                TemplateFields.ACTION_TYPE, TemplateFields.ACTION_TARGET)
-        )
-
-        self._test_execution(template, expected_comment)
-
-    def test_validate_action_without_required_action_type_field(self):
-
-        # Test setup
-        template = self.clone_template
-        scenario = template[TemplateFields.SCENARIOS][0]
-        action = scenario[TemplateFields.SCENARIO][TemplateFields.ACTIONS][0]
-        action[TemplateFields.ACTION].pop(TemplateFields.ACTION_TYPE)
-
-        expected_comment = SCHEMA_CONTENT_ERROR % (
-            TemplateFields.ACTION, '"%s" and "%s"' % (
-                TemplateFields.ACTION_TYPE, TemplateFields.ACTION_TARGET)
-        )
-
+        action[TemplateFields.ACTION].pop(field_name)
         self._test_execution(template, expected_comment)
 
     def _test_execution(self, template, expected_comment):
@@ -238,4 +175,4 @@ class TemplateSyntaxValidatorTest(base.BaseTest):
 
         # Test assertions
         self.assertFalse(result.is_valid)
-        self.assertEqual(expected_comment, result.comment)
+        self.assertTrue(str(result.comment).startswith(expected_comment))
