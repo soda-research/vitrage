@@ -14,7 +14,7 @@
 # under the License.
 
 import multiprocessing
-from Queue import Queue
+from six.moves import queue
 import sys
 
 from oslo_service import service as os_service
@@ -65,7 +65,7 @@ def main():
 
 def init(conf):
     mp_queue = multiprocessing.Queue()
-    evaluator_q = Queue()
+    evaluator_q = queue.Queue()
     e_graph = entity_graph.EntityGraph(
         'Entity Graph',
         '%s:%s' % (EntityCategory.RESOURCE, OPENSTACK_CLUSTER))
