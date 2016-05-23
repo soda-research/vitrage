@@ -7,15 +7,15 @@ definitions:
      category: ALARM
      type: nagios
      name: HOST_HIGH_CPU_LOAD
-     template_id: 1
+     template_id: alarm
   - entity:
      category: RESOURCE
      type: nova.host
-     template_id: 2
+     template_id: resource
  relationships:
   - relationship:
-     source: 1
-     target: 2
+     source: alarm
+     target: resource
      relationship_type: on
      template_id : alarm_on_host
 scenarios:
@@ -27,4 +27,4 @@ scenarios:
         properties:
          state: SUBOPTIMAL
         action_target:
-         target: 2
+         target: resource

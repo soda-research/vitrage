@@ -5,33 +5,33 @@ definitions:
   - entity:
      category: ALARM
      type: HOST_HIGH_CPU_LOAD
-     template_id: 1
+     template_id: alarm1
   - entity:
      category: ALARM
      type: VM_CPU_SUBOPTIMAL_PERFORMANCE
-     template_id: 2
+     template_id: alarm2
   - entity:
      category: RESOURCE
      type: nova.host
-     template_id: 3
+     template_id: resource3
   - entity:
      category: RESOURCE
      type: nova.instance
-     template_id: 4
+     template_id: resource4
  relationships:
   - relationship:
-     source: 1
-     target: 3
+     source: alarm1
+     target: resource3
      relationship_type: on
      template_id : alarm_on_host
   - relationship:
-     source: 2
-     target: 4
+     source: alarm2
+     target: resource4
      relationship_type: on
      template_id : alarm_on_instance
   - relationship:
-     source: 3
-     target: 4
+     source: resource3
+     target: resource4
      relationship_type: contains
      template_id : host_contains_instance
 scenarios:
@@ -44,18 +44,18 @@ scenarios:
          alarm_name: VM_CPU_SUBOPTIMAL_PERFORMANCE
          severity: critical
         action_target:
-         target: 4
+         target: resource4
      - action:
         action_type: set_state
         properties:
          state: SUBOPTIMAL
         action_target:
-         target: 4
+         target: resource4
  - scenario:
     condition: alarm_on_host and alarm_on_instance and host_contains_instance
     actions:
      - action:
         action_type: add_causal_relationship
         action_target:
-         source: 1
-         target: 2
+         source: alarm1
+         target: alarm2

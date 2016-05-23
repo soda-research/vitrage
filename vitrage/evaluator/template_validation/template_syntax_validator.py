@@ -11,11 +11,14 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+import re
 import six
 
 from oslo_log import log
+from voluptuous import All
 from voluptuous import Any
 from voluptuous import Error
+from voluptuous import Invalid
 from voluptuous import Required
 from voluptuous import Schema
 
@@ -27,6 +30,7 @@ LOG = log.getLogger(__name__)
 
 
 RESULT_DESCRIPTION = 'Template syntax validation'
+CORRECT_RESULT_MESSAGE = 'Template syntax is OK'
 
 
 def syntax_validation(template_conf):
@@ -89,7 +93,7 @@ def validate_definitions_section(definitions):
 
 def validate_entities(entities):
 
-    if len(entities) <= 0:
+    if not entities:
         LOG.error(error_msgs[43])
         return _get_fault_result(error_msgs[43])
 
@@ -115,7 +119,8 @@ def validate_entity_dict(entity_dict):
     schema = Schema({
         Required(TemplateFields.CATEGORY, msg=error_msgs[42]): any_str,
         TemplateFields.TYPE: any_str,
-        Required(TemplateFields.TEMPLATE_ID, msg=error_msgs[41]): any_str
+        Required(TemplateFields.TEMPLATE_ID, msg=error_msgs[41]):
+            All(_validate_template_id_value())
     }, extra=True)
 
     return _validate_dict_schema(schema, entity_dict)
@@ -146,14 +151,15 @@ def validate_relationship_dict(relationship_dict):
         Required(TemplateFields.SOURCE, msg=error_msgs[102]): any_str,
         Required(TemplateFields.TARGET, msg=error_msgs[103]): any_str,
         TemplateFields.RELATIONSHIP_TYPE: Any(str, six.text_type),
-        Required(TemplateFields.TEMPLATE_ID, msg=error_msgs[104]): any_str
+        Required(TemplateFields.TEMPLATE_ID, msg=error_msgs[104]):
+            All(_validate_template_id_value())
     })
     return _validate_dict_schema(schema, relationship_dict)
 
 
 def validate_scenarios_section(scenarios):
 
-    if len(scenarios) <= 0:
+    if not scenarios:
         LOG.error(error_msgs[81])
         return _get_fault_result(error_msgs[81])
 
@@ -190,7 +196,7 @@ def validate_scenario(scenario):
 
 def validate_actions_schema(actions):
 
-    if len(actions) <= 0:
+    if not actions:
         LOG.error(error_msgs[121])
         return _get_fault_result(error_msgs[121])
 
@@ -238,3 +244,12 @@ def _get_fault_result(comment):
 
 def _get_correct_result():
     return Result(RESULT_DESCRIPTION, True, 'Template syntax is OK')
+
+
+def _validate_template_id_value(msg=None):
+    def f(v):
+        if re.match("_*[a-zA-Z]+\\w*", str(v)):
+            return str(v)
+        else:
+            raise Invalid(msg or error_msgs[1])
+    return f

@@ -126,8 +126,8 @@ class BasicTemplateTest(base.BaseTest):
         self.assertIsInstance(variable, EdgeDescription)
 
         edge = variable[0]
-        self.assertEqual(edge.source_id, '1')
-        self.assertEqual(edge.target_id, '2')
+        self.assertEqual(edge.source_id, 'alarm')
+        self.assertEqual(edge.target_id, 'resource')
         self.assertEqual(edge.label, EdgeLabel.ON)
 
         source = variable[1]
@@ -145,7 +145,7 @@ class BasicTemplateTest(base.BaseTest):
 
         targets = action.targets
         self.assertEqual(len(targets), 1)
-        self.assertEqual(targets['target'], '2')
+        self.assertEqual(targets['target'], 'resource')
 
         properties = action.properties
         self.assertEqual(len(properties), 1)
