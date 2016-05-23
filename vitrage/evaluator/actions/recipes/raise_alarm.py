@@ -18,6 +18,7 @@ from vitrage.evaluator.actions.recipes.action_steps import ADD_VERTEX
 from vitrage.evaluator.actions.recipes.action_steps import REMOVE_VERTEX
 from vitrage.evaluator.actions.recipes import base
 from vitrage.evaluator.actions.recipes.base import ActionStepWrapper
+from vitrage.evaluator.template_fields import TemplateFields as TFields
 
 
 class RaiseAlarm(base.Recipe):
@@ -28,7 +29,7 @@ class RaiseAlarm(base.Recipe):
     properties. example input:
 
     action_spec = ActionSpecs('type'= {'raise_alarm'},
-                              'targets'= {target: id},
+                              'targets'= {target: vertex},
                               'properties' = {severity : CRITICAL,
                                               alarm_name: instance_cpu_problem}
     """
@@ -54,7 +55,10 @@ class RaiseAlarm(base.Recipe):
     @staticmethod
     def _get_vertex_params(action_spec):
 
-        add_vertex_params = action_spec.targets.copy()
+        target_resource = action_spec.targets[TFields.TARGET]
+        add_vertex_params = {
+            TFields.TARGET: target_resource.vertex_id
+        }
         add_vertex_params.update(action_spec.properties)
 
         return add_vertex_params

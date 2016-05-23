@@ -20,6 +20,7 @@ from vitrage.evaluator.actions.recipes.action_steps import UPDATE_VERTEX
 from vitrage.evaluator.actions.recipes.set_state import SetState
 from vitrage.evaluator.template import ActionSpecs
 from vitrage.evaluator.template_fields import TemplateFields as TFields
+from vitrage.graph import Vertex
 from vitrage.tests import base
 
 LOG = logging.getLogger(__name__)
@@ -31,9 +32,9 @@ class SetStateRecipeTest(base.BaseTest):
     @classmethod
     def setUpClass(cls):
 
-        cls.target_vertex_id = 'RESOURCE:nova.host:test1'
+        cls.target_vertex = Vertex('RESOURCE:nova.host:test1')
 
-        targets = {TFields.TARGET: cls.target_vertex_id}
+        targets = {TFields.TARGET: cls.target_vertex}
         cls.props = {TFields.STATE: 'SUBOPTIMAL'}
 
         cls.action_spec = ActionSpecs(ActionType.SET_STATE, targets, cls.props)
@@ -56,7 +57,7 @@ class SetStateRecipeTest(base.BaseTest):
         self.assertEqual(self.props[TFields.STATE], vitrage_state)
 
         vitrage_id = update_vertex_step_params[VProps.VITRAGE_ID]
-        self.assertEqual(self.target_vertex_id, vitrage_id)
+        self.assertEqual(self.target_vertex.vertex_id, vitrage_id)
 
     def test_get_undo_recipe(self):
 
@@ -76,4 +77,4 @@ class SetStateRecipeTest(base.BaseTest):
         self.assertIsNone(vitrage_state)
 
         vitrage_id = update_vertex_step_params[VProps.VITRAGE_ID]
-        self.assertEqual(self.target_vertex_id, vitrage_id)
+        self.assertEqual(self.target_vertex.vertex_id, vitrage_id)

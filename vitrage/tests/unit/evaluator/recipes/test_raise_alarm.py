@@ -20,6 +20,7 @@ from vitrage.evaluator.actions.recipes.action_steps import REMOVE_VERTEX
 from vitrage.evaluator.actions.recipes.raise_alarm import RaiseAlarm
 from vitrage.evaluator.template import ActionSpecs
 from vitrage.evaluator.template_fields import TemplateFields as TFields
+from vitrage.graph import Vertex
 from vitrage.tests import base
 
 
@@ -32,8 +33,8 @@ class RaiseAlarmRecipeTest(base.BaseTest):
     @classmethod
     def setUpClass(cls):
 
-        cls.target_vertex_id = 'RESOURCE:nova.host:test1'
-        cls.targets = {TFields.TARGET: cls.target_vertex_id}
+        cls.target_vertex = Vertex('RESOURCE:nova.host:test1')
+        cls.targets = {TFields.TARGET: cls.target_vertex}
         cls.props = {TFields.ALARM_NAME: 'VM_CPU_SUBOPTIMAL_PERFORMANCE'}
 
         cls.action_spec = ActionSpecs(ActionType.SET_STATE,
@@ -58,7 +59,7 @@ class RaiseAlarmRecipeTest(base.BaseTest):
         self.assertEqual(self.props[TFields.ALARM_NAME], alarm_name)
 
         target_vitrage_id = add_vertex_step_params[TFields.TARGET]
-        self.assertEqual(self.target_vertex_id, target_vitrage_id)
+        self.assertEqual(self.target_vertex.vertex_id, target_vitrage_id)
 
         alarm_state = add_vertex_step_params[TFields.STATE]
         self.assertEqual(alarm_state, AlarmProperties.ALARM_ACTIVE_STATE)
@@ -83,7 +84,7 @@ class RaiseAlarmRecipeTest(base.BaseTest):
         self.assertEqual(self.props[TFields.ALARM_NAME], alarm_name)
 
         target_vitrage_id = remove_vertex_step_params[TFields.TARGET]
-        self.assertEqual(self.target_vertex_id, target_vitrage_id)
+        self.assertEqual(self.target_vertex.vertex_id, target_vitrage_id)
 
         alarm_state = remove_vertex_step_params[TFields.STATE]
         self.assertEqual(alarm_state, AlarmProperties.ALARM_INACTIVE_STATE)
