@@ -20,6 +20,7 @@ LOG = logging.getLogger(__name__)
 
 MAPPED_V_ID = 'mapped_v_id'
 NEIGHBORS_MAPPED = 'neighbors_mapped'
+GRAPH_VERTEX = 'graph_vertex'
 
 
 def subgraph_matching(base_graph, subgraph, matches, validate=False):
@@ -114,6 +115,7 @@ def subgraph_matching(base_graph, subgraph, matches, validate=False):
                                               subgraph_vertex_to_map.vertex_id)
         for graph_vertex in graph_candidate_vertices:
             subgraph_vertex_to_map[MAPPED_V_ID] = graph_vertex.vertex_id
+            subgraph_vertex_to_map[GRAPH_VERTEX] = graph_vertex
             curr_subgraph.update_vertex(subgraph_vertex_to_map)
             if _graph_contains_subgraph_edges(base_graph,
                                               curr_subgraph,
@@ -125,7 +127,7 @@ def subgraph_matching(base_graph, subgraph, matches, validate=False):
     for mapping in final_subgraphs:
         # TODO(ihefetz) If needed, Here we can easily extract the edge
         # matches from the mapping graph
-        a = {v.vertex_id: v[MAPPED_V_ID] for v in mapping.get_vertices()}
+        a = {v.vertex_id: v[GRAPH_VERTEX] for v in mapping.get_vertices()}
         result.append(a)
     return result
 
@@ -211,11 +213,12 @@ def _get_related_edges(mapping, match, subgraph, validate):
 
 def _update_mapping(subgraph, graph, subgraph_id, graph_id, validate):
     subgraph_vertex = subgraph.get_vertex(subgraph_id)
+    graph_vertex = graph.get_vertex(graph_id)
     if validate:
-        graph_vertex = graph.get_vertex(graph_id)
         if not check_filter(graph_vertex, subgraph_vertex, MAPPED_V_ID):
             return False
     subgraph_vertex[MAPPED_V_ID] = graph_id
+    subgraph_vertex[GRAPH_VERTEX] = graph_vertex
     subgraph.update_vertex(subgraph_vertex)
     return True
 

@@ -26,7 +26,7 @@ class SetState(base.Recipe):
     properties. example input:
 
     action_spec = ActionSpecs('type'= {'set_state'},
-                              'targets'= {target: id},
+                              'targets'= {target: Vertex},
                               'properties' = {state : SUBOPTIMAL}
     """
 
@@ -34,7 +34,7 @@ class SetState(base.Recipe):
     def get_do_recipe(action_spec):
 
         update_vertex_step = SetState._get_update_vertex_step(
-            action_spec.targets[TFields.TARGET],
+            action_spec.targets[TFields.TARGET].vertex_id,
             action_spec.properties[TFields.STATE])
 
         return [update_vertex_step]
@@ -43,7 +43,7 @@ class SetState(base.Recipe):
     def get_undo_recipe(action_spec):
 
         update_vertex_step = SetState._get_update_vertex_step(
-            action_spec.targets[TFields.TARGET],
+            action_spec.targets[TFields.TARGET].vertex_id,
             None)
 
         return [update_vertex_step]

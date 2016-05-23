@@ -54,7 +54,7 @@ class AddCausalRelationship(base.Recipe):
     def _get_edge_params(params):
 
         return {
-            TFields.SOURCE: params[TFields.SOURCE],
-            TFields.TARGET: params[TFields.TARGET],
+            TFields.SOURCE: params[TFields.SOURCE].vertex_id,
+            TFields.TARGET: params[TFields.TARGET].vertex_id,
             EdgeProperties.RELATIONSHIP_TYPE: EdgeLabel.CAUSES
         }

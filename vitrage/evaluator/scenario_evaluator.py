@@ -147,20 +147,21 @@ class ScenarioEvaluator(object):
     @staticmethod
     def _get_action_spec(action_spec, match):
         targets = action_spec.targets
-        real_ids = {
+        real_items = {
             target: match[target_id] for target, target_id in targets.items()
         }
         revised_spec = ActionSpecs(action_spec.type,
-                                   real_ids,
+                                   real_items,
                                    action_spec.properties)
         action_id = ScenarioEvaluator._generate_action_id(revised_spec)
         return revised_spec, action_id
 
     @staticmethod
     def _generate_action_id(action_spec):
+        targets = [(k, v.vertex_id) for k, v in action_spec.targets.items()]
         return hash(
             (action_spec.type,
-             tuple(sorted(action_spec.targets.items())),
+             tuple(sorted(targets)),
              tuple(sorted(action_spec.properties.items())))
         )
 

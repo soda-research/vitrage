@@ -61,7 +61,7 @@ class TestActionExecutor(TestFunctionalBase):
             vertex_attr_filter=vertex_attrs)
         host_vertex_before = host_vertices[0]
 
-        targets = {TFields.TARGET: host_vertex_before.vertex_id}
+        targets = {TFields.TARGET: host_vertex_before}
         props = {TFields.STATE: NormalizedResourceState.SUBOPTIMAL}
         action_spec = ActionSpecs(ActionType.SET_STATE, targets, props)
 
@@ -124,8 +124,8 @@ class TestActionExecutor(TestFunctionalBase):
         alarm1 = alarms_vertices[0]
         alarm2 = alarms_vertices[1]
         targets = {
-            TFields.TARGET: alarm1.vertex_id,
-            TFields.SOURCE: alarm2.vertex_id
+            TFields.TARGET: alarm1,
+            TFields.SOURCE: alarm2
         }
         action_spec = ActionSpecs(ActionType.ADD_CAUSAL_RELATIONSHIP,
                                   targets,
@@ -159,7 +159,7 @@ class TestActionExecutor(TestFunctionalBase):
 
         host = host_vertices[0]
 
-        targets = {TFields.TARGET: host.vertex_id}
+        targets = {TFields.TARGET: host}
         props = {
             TFields.ALARM_NAME: 'VM_CPU_SUBOPTIMAL_PERFORMANCE',
             TFields.SEVERITY: 'CRITICAL',
@@ -216,7 +216,7 @@ class TestActionExecutor(TestFunctionalBase):
 
         host = host_vertices[0]
 
-        targets = {TFields.TARGET: host.vertex_id}
+        targets = {TFields.TARGET: host}
         props = {
             TFields.ALARM_NAME: 'VM_CPU_SUBOPTIMAL_PERFORMANCE',
             TFields.SEVERITY: 'CRITICAL',
@@ -225,7 +225,7 @@ class TestActionExecutor(TestFunctionalBase):
         action_spec = ActionSpecs(ActionType.RAISE_ALARM, targets, props)
 
         add_vertex_event = TestActionExecutor._get_vitrage_add_vertex_event(
-            host.vertex_id,
+            host,
             props[TFields.ALARM_NAME],
             props[TFields.SEVERITY])
 
@@ -264,9 +264,9 @@ class TestActionExecutor(TestFunctionalBase):
                 'sample_date': '2016-02-07 15:26:04'}
 
     @staticmethod
-    def _get_vitrage_add_vertex_event(target_id, alarm_name, severity):
+    def _get_vitrage_add_vertex_event(target_vertex, alarm_name, severity):
 
-        return {'target': target_id,
+        return {'target': target_vertex.vertex_id,
                 'update_timestamp': '2016-03-17 11:33:32.443002',
                 'sync_mode': 'update',
                 'alarm_name': alarm_name,

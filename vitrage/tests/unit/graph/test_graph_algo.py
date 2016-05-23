@@ -233,8 +233,8 @@ class GraphAlgorithmTest(GraphTestBase):
             'Template - Two connected vertices (host alarm -ON-> host)'
             ' template_root is a specific host alarm ' + str(mappings))
 
-        host_id = mappings[0][t_v_host.vertex_id]
-        host_vertex = self.entity_graph.get_vertex(host_id)
+        host = mappings[0][t_v_host.vertex_id]
+        host_vertex = self.entity_graph.get_vertex(host.vertex_id)
         mappings = ga.sub_graph_matching(t, [
             Mapping(t_v_host, host_vertex, is_vertex=True)])
         self.assertEqual(

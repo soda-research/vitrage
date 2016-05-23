@@ -22,6 +22,7 @@ from vitrage.evaluator.actions.recipes.add_causal_relationship import \
     AddCausalRelationship
 from vitrage.evaluator.template import ActionSpecs
 from vitrage.evaluator.template_fields import TemplateFields as TField
+from vitrage.graph import Vertex
 from vitrage.tests import base
 
 
@@ -34,12 +35,12 @@ class AddCausalRelationshipTest(base.BaseTest):
     @classmethod
     def setUpClass(cls):
 
-        cls.target_vertex_id = 'RESOURCE:nova.host:test_target'
-        cls.source_vertex_id = 'RESOURCE:nova.host:test_source'
+        cls.target_vertex = Vertex('RESOURCE:nova.host:test_target')
+        cls.source_vertex = Vertex('RESOURCE:nova.host:test_source')
 
         targets = {
-            TField.TARGET: cls.target_vertex_id,
-            TField.SOURCE: cls.source_vertex_id
+            TField.TARGET: cls.target_vertex,
+            TField.SOURCE: cls.source_vertex
         }
 
         cls.action_spec = ActionSpecs(ActionType.ADD_CAUSAL_RELATIONSHIP,
@@ -61,10 +62,10 @@ class AddCausalRelationshipTest(base.BaseTest):
         self.assertEqual(3, len(add_edge_step_params))
 
         source = add_edge_step_params.get(TField.SOURCE)
-        self.assertEqual(self.source_vertex_id, source)
+        self.assertEqual(self.source_vertex.vertex_id, source)
 
         target = add_edge_step_params.get(TField.TARGET)
-        self.assertEqual(self.target_vertex_id, target)
+        self.assertEqual(self.target_vertex.vertex_id, target)
 
         relation_name = add_edge_step_params[EdgeProperties.RELATIONSHIP_TYPE]
         self.assertEqual(EdgeLabel.CAUSES, relation_name)
@@ -84,10 +85,10 @@ class AddCausalRelationshipTest(base.BaseTest):
         self.assertEqual(3, len(add_edge_step_params))
 
         source = add_edge_step_params.get(TField.SOURCE)
-        self.assertEqual(self.source_vertex_id, source)
+        self.assertEqual(self.source_vertex.vertex_id, source)
 
         target = add_edge_step_params.get(TField.TARGET)
-        self.assertEqual(self.target_vertex_id, target)
+        self.assertEqual(self.target_vertex.vertex_id, target)
 
         relation_name = add_edge_step_params[EdgeProperties.RELATIONSHIP_TYPE]
         self.assertEqual(EdgeLabel.CAUSES, relation_name)
