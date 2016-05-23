@@ -115,7 +115,6 @@ function disable_vitrage_datasource {
 function configure_vitrage {
     iniset_rpc_backend vitrage $VITRAGE_CONF
 
-    iniset $VITRAGE_CONF DEFAULT verbose True
     iniset $VITRAGE_CONF DEFAULT debug "$ENABLE_DEBUG_LOG_LEVEL"
 
     # Install the policy file for the API server
