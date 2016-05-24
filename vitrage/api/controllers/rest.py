@@ -14,6 +14,7 @@
 
 import json
 
+import networkx as nx
 from networkx.readwrite import json_graph
 from oslo_log import log
 import pecan as pecan
@@ -30,6 +31,8 @@ class RootRestController(rest.RestController):
     @staticmethod
     def as_tree(graph, root=OPENSTACK_CLUSTER, reverse=False):
         linked_graph = json_graph.node_link_graph(graph)
+        if 0 == nx.number_of_nodes(linked_graph):
+            return {}
         if reverse:
             linked_graph = linked_graph.reverse()
         return json_graph.tree_data(linked_graph, root=root)

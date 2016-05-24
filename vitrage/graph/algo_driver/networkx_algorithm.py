@@ -36,6 +36,8 @@ class NXAlgorithm(GraphAlgorithm):
     def graph_query_vertices(self, query_dict=None, root_id=None, depth=None,
                              direction=Direction.BOTH):
 
+        graph = NXGraph('graph')
+
         if not root_id:
             root_id = self.graph.root_id
         root_data = self.graph._g.node[root_id]
@@ -48,7 +50,7 @@ class NXAlgorithm(GraphAlgorithm):
         if not match_func(root_data):
             LOG.info('graph_query_vertices: root %s does not match filter %s',
                      str(root_id), str(query_dict))
-            return None
+            return graph
 
         n_result = []
         visited_nodes = set()
@@ -66,7 +68,6 @@ class NXAlgorithm(GraphAlgorithm):
             n_result.extend([v_id for v_id, data in n_list])
             nodes_q.extend([(v_id, curr_depth + 1) for v_id, data in n_list])
 
-        graph = NXGraph('graph')
         graph._g = self.graph._g.subgraph(n_result)
         return graph
 
