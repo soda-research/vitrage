@@ -15,6 +15,7 @@ import re
 import six
 
 from oslo_log import log
+from vitrage.common.constants import entities_categories
 from voluptuous import All
 from voluptuous import Any
 from voluptuous import Error
@@ -117,7 +118,8 @@ def validate_entity_dict(entity_dict):
 
     any_str = Any(str, six.text_type)
     schema = Schema({
-        Required(TemplateFields.CATEGORY, msg=error_msgs[42]): any_str,
+        Required(TemplateFields.CATEGORY, msg=error_msgs[42]):
+            _validate_category_field(),
         TemplateFields.TYPE: any_str,
         Required(TemplateFields.TEMPLATE_ID, msg=error_msgs[41]):
             All(_validate_template_id_value())
@@ -252,4 +254,13 @@ def _validate_template_id_value(msg=None):
             return str(v)
         else:
             raise Invalid(msg or error_msgs[1])
+    return f
+
+
+def _validate_category_field(msg=None):
+    def f(v):
+        if str(v) in entities_categories:
+            return str(v)
+        else:
+            raise Invalid(msg or error_msgs[45])
     return f

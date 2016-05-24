@@ -132,6 +132,15 @@ class TemplateSyntaxValidatorTest(base.BaseTest):
         entity[TemplateFields.ENTITY][TemplateFields.TEMPLATE_ID] = '_a123'
         self._test_execution_with_correct_result(template)
 
+    def test_validate_entity_with_invalid_category_value(self):
+
+        template = self.clone_template
+        definitions = template[TemplateFields.DEFINITIONS]
+        entity = definitions[TemplateFields.ENTITIES][0]
+        entity[TemplateFields.ENTITY][TemplateFields.CATEGORY] = 'unknown'
+
+        self._test_execution_with_fault_result(template, error_msgs[45])
+
     def test_validate_relationships_without_required_fields(self):
 
         self._validate_relationships_with_missing_required_field(

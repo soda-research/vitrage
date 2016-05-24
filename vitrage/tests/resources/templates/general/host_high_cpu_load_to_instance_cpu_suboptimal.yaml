@@ -13,25 +13,25 @@ definitions:
   - entity:
      category: RESOURCE
      type: nova.host
-     template_id: resource3
+     template_id: host
   - entity:
      category: RESOURCE
      type: nova.instance
-     template_id: resource4
+     template_id: instance
  relationships:
   - relationship:
      source: alarm1
-     target: resource3
+     target: host
      relationship_type: on
      template_id : alarm_on_host
   - relationship:
      source: alarm2
-     target: resource4
+     target: instance
      relationship_type: on
      template_id : alarm_on_instance
   - relationship:
-     source: resource3
-     target: resource4
+     source: host
+     target: instance
      relationship_type: contains
      template_id : host_contains_instance
 scenarios:
@@ -44,13 +44,13 @@ scenarios:
          alarm_name: VM_CPU_SUBOPTIMAL_PERFORMANCE
          severity: critical
         action_target:
-         target: resource4
+         target: instance
      - action:
         action_type: set_state
         properties:
          state: SUBOPTIMAL
         action_target:
-         target: resource4
+         target: instance
  - scenario:
     condition: alarm_on_host and alarm_on_instance and host_contains_instance
     actions:
