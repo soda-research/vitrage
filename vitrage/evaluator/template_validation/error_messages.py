@@ -22,7 +22,7 @@ error_msgs = {
 
     # definitions section 20-39
     20: 'definitions section must contain "entities" field.',
-    21: '"definitions" section is mandatory.',
+    21: '"definitions" section is a mandatory section.',
 
     # Entities syntax error messages 40-59
     40: '"type" field in entity definition must be a string.',
