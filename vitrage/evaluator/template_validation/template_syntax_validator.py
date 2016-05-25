@@ -15,7 +15,6 @@ import re
 import six
 
 from oslo_log import log
-from vitrage.common.constants import entities_categories
 from voluptuous import All
 from voluptuous import Any
 from voluptuous import Error
@@ -23,6 +22,9 @@ from voluptuous import Invalid
 from voluptuous import Required
 from voluptuous import Schema
 
+from vitrage.common.constants import edge_labels
+from vitrage.common.constants import entities_categories
+from vitrage.evaluator.actions.base import action_types
 from vitrage.evaluator.template_fields import TemplateFields
 from vitrage.evaluator.template_validation.error_messages import error_msgs
 from vitrage.evaluator.template_validation.utils import Result
@@ -119,7 +121,7 @@ def validate_entity_dict(entity_dict):
     any_str = Any(str, six.text_type)
     schema = Schema({
         Required(TemplateFields.CATEGORY, msg=error_msgs[42]):
-            _validate_category_field(),
+            All(_validate_category_field()),
         TemplateFields.TYPE: any_str,
         Required(TemplateFields.TEMPLATE_ID, msg=error_msgs[41]):
             All(_validate_template_id_value())
@@ -152,7 +154,7 @@ def validate_relationship_dict(relationship_dict):
     schema = Schema({
         Required(TemplateFields.SOURCE, msg=error_msgs[102]): any_str,
         Required(TemplateFields.TARGET, msg=error_msgs[103]): any_str,
-        TemplateFields.RELATIONSHIP_TYPE: Any(str, six.text_type),
+        TemplateFields.RELATIONSHIP_TYPE: _validate_relationship_type_field(),
         Required(TemplateFields.TEMPLATE_ID, msg=error_msgs[104]):
             All(_validate_template_id_value())
     })
@@ -220,9 +222,9 @@ def validate_actions_schema(actions):
 
 def validate_action_schema(action):
 
-    any_str = Any(str, six.text_type)
     schema = Schema({
-        Required(TemplateFields.ACTION_TYPE, msg=error_msgs[123]): any_str,
+        Required(TemplateFields.ACTION_TYPE, msg=error_msgs[123]):
+            _validate_action_type_field(),
         TemplateFields.PROPERTIES: dict,
         Required(TemplateFields.ACTION_TARGET, msg=error_msgs[124]): dict
     })
@@ -263,4 +265,22 @@ def _validate_category_field(msg=None):
             return str(v)
         else:
             raise Invalid(msg or error_msgs[45])
+    return f
+
+
+def _validate_relationship_type_field(msg=None):
+    def f(v):
+        if str(v) in edge_labels:
+            return str(v)
+        else:
+            raise Invalid(msg or error_msgs[100])
+    return f
+
+
+def _validate_action_type_field(msg=None):
+    def f(v):
+        if str(v) in action_types:
+            return str(v)
+        else:
+            raise Invalid(msg or error_msgs[120])
     return f
