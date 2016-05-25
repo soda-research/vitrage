@@ -27,10 +27,10 @@ The template is written in YAML language, with the following structure.
         - relationship: ...
         - relationship: ...
   scenarios:
-    scenario:
-        condition: <if statement true do the action>
-        actions:
-            - action: ...
+      - scenario:
+          condition: <if statement true do the action>
+          actions:
+              - action: ...
 
 
 The template is divided into three main sections:
@@ -121,7 +121,7 @@ The following template demonstrates
                 relationship_type: contains
                 template_id : host_contains_instance
     scenarios:
-        scenario:
+        - scenario:
             condition: alarm_on_host and host_contains_instance # condition uses relationship ids
             actions:
                 - action:
@@ -137,11 +137,11 @@ The following template demonstrates
                       state: suboptimal
                    action_target:
                       target: instance # entity template_id
-         scenario:
+        - scenario:
             condition: alarm_on_host and alarm_on_instance and host_contains_instance
             actions:
                 - action:
-                   type: add_causal_relationship
+                   action_type: add_causal_relationship
                    action_target:
                       source: host_alarm
                       target: instance_alarm
@@ -172,7 +172,7 @@ is any alarm of severity "CRITICAL" on it.
                 relationship_type: on
                 template_id : high_alarm_on_resource
     scenarios:
-        scenario:
+        - scenario:
             condition: high_alarm_on_resource
             actions:
                 - action:
@@ -203,7 +203,7 @@ case-insensitive.
                 state: error
                 template_id: host_in_error
     scenarios:
-        scenario:
+        - scenario:
             condition: host_in_error
             actions:
                 - action:
@@ -268,7 +268,7 @@ an alarm on the hosting zone or an alarm on the hosting host.
                 relationship_type: contains
                 template_id : host_contains_instance
     scenarios:
-        scenario:
+        - scenario:
             condition: (alarm_on_host and host_contains_instance) or (alarm_on_zone and zone_contains_host and host_contains_instance)
             actions:
                 - action:
