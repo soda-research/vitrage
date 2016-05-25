@@ -14,14 +14,17 @@
 
 from oslo_log import log
 from six.moves import reduce
-from vitrage.common.constants import edge_labels
-from vitrage.common.constants import entities_categories
 from vitrage.evaluator.actions.base import ActionType
-from vitrage.evaluator.actions.base import actionTypes
 from vitrage.evaluator.template import Template
 from vitrage.evaluator.template_fields import TemplateFields
+from vitrage.evaluator.template_validation.error_messages import error_msgs
+from vitrage.evaluator.template_validation.utils import Result
 
 LOG = log.getLogger(__name__)
+
+
+RESULT_DESCRIPTION = 'Template content validation'
+CORRECT_RESULT_MESSAGE = 'Template content is OK'
 
 
 def content_validation(template):
@@ -29,64 +32,80 @@ def content_validation(template):
     template_definitions = template[TemplateFields.DEFINITIONS]
 
     entity_ids = []
-    for entity in template_definitions[TemplateFields.ENTITIES]:
-
-        entity_vals = entity[TemplateFields.ENTITY]
-        if not validate_entity_definition(entity_vals, entity_ids):
-            return False
-        entity_ids.append(entity_vals[TemplateFields.TEMPLATE_ID])
+    entities = template_definitions[TemplateFields.ENTITIES]
+    result = validate_entities_definition(entities, entity_ids)
 
     relationship_ids = []
-    for relationship in template_definitions[TemplateFields.RELATIONSHIPS]:
+    relationships = template_definitions[TemplateFields.RELATIONSHIPS]
 
-        relationship_vals = relationship[TemplateFields.RELATIONSHIP]
+    if result.is_valid and relationships:
+        result = validate_relationships_definitions(relationships,
+                                                    relationship_ids,
+                                                    entity_ids)
+    if result.is_valid:
+        scenarios = template[TemplateFields.SCENARIOS]
+        result = validate_scenarios(scenarios, entity_ids, relationship_ids)
 
-        if not validate_relationship(relationship_vals,
-                                     relationship_ids,
-                                     entity_ids):
-            return False
-        relationship_ids.append(relationship_vals[TemplateFields.TEMPLATE_ID])
+    return result
 
-    scenarios = template[TemplateFields.SCENARIOS]
-    return validate_scenarios(scenarios, entity_ids, relationship_ids)
+
+def validate_entities_definition(entities, entity_ids):
+
+    for entity in entities:
+
+        entity_dict = entity[TemplateFields.ENTITY]
+        result = validate_entity_definition(entity_dict, entity_ids)
+
+        if not result.is_valid:
+            return result
+
+        entity_ids.append(entity_dict[TemplateFields.TEMPLATE_ID])
+
+    return _get_correct_result()
 
 
 def validate_entity_definition(entity, entities_ids):
 
-    category = entity[TemplateFields.CATEGORY]
-    if category not in entities_categories:
-        LOG.error('Invalid entity category: %s. Category must be from types: '
-                  '%s' % (category, entities_categories))
-
     template_id = entity[TemplateFields.TEMPLATE_ID]
     if template_id in entities_ids:
-        LOG.error('Duplicate template_id definition. template id: %s is '
-                  'not unique.' % template_id)
-        return False
+        LOG.error(error_msgs[2])
+        return _get_fault_result(error_msgs[2])
 
-    return True
+    return _get_correct_result()
+
+
+def validate_relationships_definitions(relationships,
+                                       relationship_ids,
+                                       entity_ids):
+
+    for relationship in relationships:
+
+        relationship_dict = relationship[TemplateFields.RELATIONSHIP]
+        result = validate_relationship(relationship_dict,
+                                       relationship_ids,
+                                       entity_ids)
+        if not result.is_valid:
+            return result
+
+        relationship_ids.append(relationship_dict[TemplateFields.TEMPLATE_ID])
+    return _get_correct_result()
 
 
 def validate_relationship(relationship, relationships_ids, entities_ids):
 
     template_id = relationship[TemplateFields.TEMPLATE_ID]
     if template_id in (entities_ids or relationships_ids):
-        LOG.error('Duplicate template_id definition. template id: %s is not '
-                  'unique.' % template_id)
-        return False
-
-    relationship_type = relationship[TemplateFields.RELATIONSHIP_TYPE]
-    if relationship_type not in edge_labels:
-        LOG.error('Invalid relation type: %s. Action type must be from types: '
-                  '%s' % (relationship_type, edge_labels))
-        return False
+        LOG.error(error_msgs[2])
+        return _get_fault_result(error_msgs[2])
 
     target = relationship[TemplateFields.TARGET]
-    source = relationship[TemplateFields.SOURCE]
+    result = _validate_template_id(entities_ids, target)
 
-    return validate_template_id(entities_ids,
-                                target) and validate_template_id(entities_ids,
-                                                                 source)
+    if result.is_valid:
+        source = relationship[TemplateFields.SOURCE]
+        result = _validate_template_id(entities_ids, source)
+
+    return result
 
 
 def validate_scenarios(scenarios, entities_id, relationship_ids):
@@ -96,11 +115,18 @@ def validate_scenarios(scenarios, entities_id, relationship_ids):
         scenario_values = scenario[TemplateFields.SCENARIO]
 
         condition = scenario_values[TemplateFields.CONDITION]
-        if not validate_scenario_condition(condition, relationship_ids):
-            return False
+        result = validate_scenario_condition(condition, relationship_ids)
+
+        if not result.is_valid:
+            return result
 
         actions = scenario_values[TemplateFields.ACTIONS]
-        return validate_scenario_actions(actions, entities_id)
+        result = validate_scenario_actions(actions, entities_id)
+
+        if not result.is_valid:
+            return result
+
+    return _get_correct_result()
 
 
 def validate_scenario_condition(condition, template_ids):
@@ -108,9 +134,8 @@ def validate_scenario_condition(condition, template_ids):
     try:
         Template.convert_to_dnf_format(condition)
     except Exception:
-        LOG.error('Failed to convert condition: "%s" to DNF format'
-                  % condition)
-        return False
+        LOG.error(error_msgs[85])
+        return _get_fault_result(error_msgs[85])
 
     values_to_replace = ' and ', ' or ', ' not ', '(', ')'
     condition = reduce(lambda cond, v: cond.replace(v, ' '),
@@ -118,20 +143,23 @@ def validate_scenario_condition(condition, template_ids):
                        condition)
 
     for condition_var in condition.split(' '):
-        if not validate_template_id(template_ids, condition_var):
-            return False
 
-    return True
+        result = _validate_template_id(template_ids, condition_var)
+        if not result.is_valid:
+            return result
+
+    return _get_correct_result()
 
 
 def validate_scenario_actions(actions, entities_ids):
 
     for action in actions:
-        action_vals = action[TemplateFields.ACTION]
-        if not validate_scenario_action(action_vals, entities_ids):
-            return False
+        result = validate_scenario_action(action[TemplateFields.ACTION],
+                                          entities_ids)
+        if not result.is_valid:
+            return result
 
-    return True
+    return _get_correct_result()
 
 
 def validate_scenario_action(action, entities_ids):
@@ -145,9 +173,8 @@ def validate_scenario_action(action, entities_ids):
     elif action_type == ActionType.ADD_CAUSAL_RELATIONSHIP:
         return validate_add_causal_relationship_action(action, entities_ids)
     else:
-        LOG.error('Invalid action type: %s. Action type must be from types: %s'
-                  % (action_type, actionTypes))
-        return False
+        LOG.error(error_msgs[120])
+        return _get_fault_result(error_msgs[120])
 
 
 def validate_raise_alarm_action(action, entities_ids):
@@ -155,21 +182,20 @@ def validate_raise_alarm_action(action, entities_ids):
     properties = action[TemplateFields.PROPERTIES]
 
     if TemplateFields.ALARM_NAME not in properties:
-        LOG.error('raise_alarm action must contain alarm_name field in '
-                  'properties block.')
-        return False
+        LOG.error(error_msgs[125])
+        return _get_fault_result(error_msgs[125])
 
     if TemplateFields.SEVERITY not in properties:
-        LOG.error('raise_alarm action must contain severity field in '
-                  'properties block.')
-        return False
+        LOG.error(error_msgs[126])
+        return _get_fault_result(error_msgs[126])
 
     action_target = action[TemplateFields.ACTION_TARGET]
     if TemplateFields.TARGET not in action_target:
-        LOG.error('raise_alarm action must have target definition')
-    validate_template_id(entities_ids, action_target[TemplateFields.TARGET])
+        LOG.error(error_msgs[127])
+        return _get_fault_result(error_msgs[127])
 
-    return True
+    target = action_target[TemplateFields.TARGET]
+    return _validate_template_id(entities_ids, target)
 
 
 def validate_set_state_action(action, entities_ids):
@@ -177,17 +203,16 @@ def validate_set_state_action(action, entities_ids):
     properties = action[TemplateFields.PROPERTIES]
 
     if TemplateFields.STATE not in properties:
-        LOG.error('set_state action must contain state field in properties '
-                  'block.')
-        return False
+        LOG.error(error_msgs[128])
+        return _get_fault_result(error_msgs[128])
 
     action_target = action[TemplateFields.ACTION_TARGET]
     if TemplateFields.TARGET not in action_target:
-        LOG.error('set_state action must have target definition')
-        return False
+        LOG.error(error_msgs[129])
+        return _get_fault_result(error_msgs[129])
 
     target = action_target[TemplateFields.TARGET]
-    return validate_template_id(entities_ids, target)
+    return _validate_template_id(entities_ids, target)
 
 
 def validate_add_causal_relationship_action(action, entities_ids):
@@ -195,26 +220,35 @@ def validate_add_causal_relationship_action(action, entities_ids):
     action_target = action[TemplateFields.ACTION_TARGET]
 
     if TemplateFields.TARGET not in action_target:
-        LOG.error('add_causal_relationship action must have target definition')
-        return False
+        LOG.error(error_msgs[130])
+        return _get_fault_result(error_msgs[130])
 
     target = action_target[TemplateFields.TARGET]
-    if not validate_template_id(entities_ids, target):
-        return False
+    result = _validate_template_id(entities_ids, target)
+
+    if not result.is_valid:
+        return result
 
     if TemplateFields.SOURCE not in action_target:
-        LOG.error('add_causal_relationship action must have source definition')
-        return False
+        LOG.error(error_msgs[130])
+        return _get_fault_result(error_msgs[130])
 
     source = action_target[TemplateFields.SOURCE]
-    return validate_template_id(entities_ids, source)
+    return _validate_template_id(entities_ids, source)
 
 
-def validate_template_id(ids, id_to_check):
+def _validate_template_id(ids, id_to_check):
 
     if id_to_check not in ids:
-        LOG.error('Invalid id: %s. The id does not appear in the definition '
-                  'block.' % id_to_check)
-        return False
+        LOG.error(error_msgs[3])
+        return _get_fault_result(error_msgs[3])
 
-    return True
+    return _get_correct_result()
+
+
+def _get_correct_result():
+    return Result(RESULT_DESCRIPTION, True, 'Template content is OK')
+
+
+def _get_fault_result(comment):
+    return Result(RESULT_DESCRIPTION, False, comment)

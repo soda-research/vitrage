@@ -36,16 +36,16 @@ class TemplateSyntaxValidatorTest(base.BaseTest):
     def setUpClass(cls):
 
         template_dir_path = '%s/templates/general' % utils.get_resources_dir()
-        template_yamls = file_utils.load_yaml_files(template_dir_path)
-        cls.first_template = template_yamls[0]
+        cls.template_yamls = file_utils.load_yaml_files(template_dir_path)
+        cls.first_template = cls.template_yamls[0]
 
     @property
     def clone_template(self):
         return copy.deepcopy(self.first_template)
 
     def test_template_validator(self):
-        self.assertTrue(template_syntax_validator.syntax_validation(
-            self.first_template))
+        for template in self.template_yamls:
+            self._test_execution_with_correct_result(template)
 
     def test_validate_template_without_metadata_section(self):
 
@@ -162,6 +162,16 @@ class TemplateSyntaxValidatorTest(base.BaseTest):
 
         self._test_execution_with_fault_result(template, expected_comment)
 
+    def test_validate_relationship_with_invalid_relationship_type_field(self):
+
+        template = self.clone_template
+        definitions = template[TemplateFields.DEFINITIONS]
+        relationship = definitions[TemplateFields.RELATIONSHIPS][0]
+        relationship_dict = relationship[TemplateFields.RELATIONSHIP]
+        relationship_dict[TemplateFields.RELATIONSHIP_TYPE] = 'unknown'
+
+        self._test_execution_with_fault_result(template, error_msgs[100])
+
     def test_validate_template_without_scenarios_section(self):
 
         template = self.clone_template
@@ -213,6 +223,16 @@ class TemplateSyntaxValidatorTest(base.BaseTest):
         action = scenario[TemplateFields.SCENARIO][TemplateFields.ACTIONS][0]
         action[TemplateFields.ACTION].pop(field_name)
         self._test_execution_with_fault_result(template, expected_comment)
+
+    def _test_validate_action_with_invalid_action_type(self):
+
+        template = self.clone_template
+        scenario = template[TemplateFields.SCENARIOS][0]
+        action = scenario[TemplateFields.SCENARIO][TemplateFields.ACTIONS][0]
+        action_dict = action[TemplateFields.ACTION]
+        action_dict[TemplateFields.ACTION_TYPE] = 'unknown'
+
+        self._test_execution_with_fault_result(template, error_msgs[100])
 
     def _test_execution_with_fault_result(self, template, expected_comment):
 

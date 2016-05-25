@@ -18,8 +18,11 @@ from oslo_log import log
 from vitrage.common import file_utils
 from vitrage.evaluator.actions.base import ActionType
 from vitrage.evaluator.template_fields import TemplateFields
-from vitrage.evaluator.template_validation import \
-    template_content_validator as validator
+from vitrage.evaluator.template_validation.error_messages import error_msgs
+from vitrage.evaluator.template_validation import template_content_validator \
+    as validator
+from vitrage.evaluator.template_validation.template_content_validator import \
+    CORRECT_RESULT_MESSAGE
 from vitrage.tests import base
 from vitrage.tests.mocks import utils
 
@@ -40,175 +43,283 @@ class TemplateContentValidatorTest(base.BaseTest):
     def clone_template(self):
         return copy.deepcopy(self.first_template)
 
-    def test_content_validation(self):
-
+    def test_template_validator(self):
         for template in self.templates:
-            self.assertTrue(validator.content_validation(template))
+            self._test_execute_and_assert_with_correct_result(template)
 
-    def test_validate_scenario_actions(self):
+    def test_validate_entity_definition_with_no_unique_template_id(self):
 
-        # Test setup
-        ids = ['1', '2', '3']
-        actions = self._create_scenario_actions('1', '2')
+        template = self.clone_template
+        definitions = template[TemplateFields.DEFINITIONS]
 
-        # Test action
-        is_valid = validator.validate_scenario_actions(actions, ids)
+        for entity in definitions[TemplateFields.ENTITIES]:
+            entity_dict = entity[TemplateFields.ENTITY]
+            entity_dict[TemplateFields.TEMPLATE_ID] = 'aaa'
 
-        # Test assertions
-        self.assertTrue(is_valid)
+        self._test_execute_and_assert_with_fault_result(template,
+                                                        error_msgs[2])
 
-    def test_validate_invalid_scenario_actions(self):
+    def test_validate_relationship_with_no_unique_template_id(self):
 
-        ids = ['1', '2', '3']
-        actions = self._create_scenario_actions('1', '2')
+        template = self.clone_template
+        definitions = template[TemplateFields.DEFINITIONS]
+        entity = definitions[TemplateFields.ENTITIES][0]
+        entity_id = entity[TemplateFields.ENTITY][TemplateFields.TEMPLATE_ID]
+        relationship = definitions[TemplateFields.RELATIONSHIPS][0]
+        relationship_dict = relationship[TemplateFields.RELATIONSHIP]
+        relationship_dict[TemplateFields.TEMPLATE_ID] = entity_id
 
-        # Validate actions with invalid type
-        actions_with_invalid_type = copy.deepcopy(actions)
-        first = actions_with_invalid_type[0]
-        first[TemplateFields.ACTION][TemplateFields.ACTION_TYPE] = 'unknown'
+        self._test_execute_and_assert_with_fault_result(template,
+                                                        error_msgs[2])
 
-        is_valid = validator.validate_scenario_actions(
-            actions_with_invalid_type,
-            ids)
-        self.assertFalse(is_valid)
+    def test_validate_relationship_with_invalid_target(self):
 
-        # Validate actions with invalid target
-        actions_with_invalid_target = self._create_scenario_actions('4', '2')
-        is_valid = validator.validate_scenario_actions(
-            actions_with_invalid_target,
-            ids)
-        self.assertFalse(is_valid)
+        template = self.clone_template
+        definitions = template[TemplateFields.DEFINITIONS]
+        relationship = definitions[TemplateFields.RELATIONSHIPS][0]
+        relationship_dict = relationship[TemplateFields.RELATIONSHIP]
+        relationship_dict[TemplateFields.TARGET] = 'unknown'
 
-        # Validate actions with invalid source
-        actions_with_invalid_source = self._create_scenario_actions('1', '4')
-        is_valid = validator.validate_scenario_actions(
-            actions_with_invalid_source,
-            ids)
-        self.assertFalse(is_valid)
+        self._test_execute_and_assert_with_fault_result(template,
+                                                        error_msgs[3])
 
-    def test_validate_scenario_action(self):
-        ids = ['1', '2', '3']
+    def test_validate_relationship_with_invalid_source(self):
 
-        raise_alarm_action = self._create_raise_alarm_action('1')
-        is_valid = validator.validate_scenario_action(raise_alarm_action, ids)
-        self.assertTrue(is_valid)
+        template = self.clone_template
+        definitions = template[TemplateFields.DEFINITIONS]
+        relationship = definitions[TemplateFields.RELATIONSHIPS][0]
+        relationship_dict = relationship[TemplateFields.RELATIONSHIP]
+        relationship_dict[TemplateFields.SOURCE] = 'unknown'
 
-        set_state_action = self._create_set_state_action('2')
-        is_valid = validator.validate_scenario_action(set_state_action, ids)
-        self.assertTrue(is_valid)
+        self._test_execute_and_assert_with_fault_result(template,
+                                                        error_msgs[3])
 
-        causal_action = self._create_add_causal_relationship_action('1', '3')
-        is_valid = validator.validate_scenario_action(causal_action, ids)
-        self.assertTrue(is_valid)
+    def test_validate_scenario_invalid_condition(self):
 
-        causal_action[TemplateFields.ACTION_TYPE] = 'unknown type'
-        is_valid = validator.validate_scenario_action(causal_action, ids)
-        self.assertFalse(is_valid)
+        template = self.clone_template
+        scenario = template[TemplateFields.SCENARIOS][0]
+        scenario_dict = scenario[TemplateFields.SCENARIO]
+
+        scenario_dict[TemplateFields.CONDITION] = 'and resource'
+        self._test_execute_and_assert_with_fault_result(template,
+                                                        error_msgs[85])
+
+        scenario_dict[TemplateFields.CONDITION] = 'resource or'
+        self._test_execute_and_assert_with_fault_result(template,
+                                                        error_msgs[85])
+
+        scenario_dict[TemplateFields.CONDITION] = 'not or resource'
+        self._test_execute_and_assert_with_fault_result(template,
+                                                        error_msgs[85])
+
+        scenario_dict[TemplateFields.CONDITION] = \
+            'alarm_on_host (alarm or resource'
+        self._test_execute_and_assert_with_fault_result(template,
+                                                        error_msgs[85])
+
+        scenario_dict[TemplateFields.CONDITION] = 'aaa'
+        self._test_execute_and_assert_with_fault_result(template,
+                                                        error_msgs[3])
+
+        scenario_dict[TemplateFields.CONDITION] = 'resource and aaa'
+        self._test_execute_and_assert_with_fault_result(template,
+                                                        error_msgs[3])
 
     def test_validate_raise_alarm_action(self):
         # Test setup
         ids = ['123', '456', '789']
-        action = self._create_set_state_action('123')
+        action = self._create_raise_alarm_action('123')
 
         # Test action and assertions
-        self.assertTrue(validator.validate_set_state_action(action, ids))
+        result = validator.validate_raise_alarm_action(action, ids)
+
+        # Test Assertions
+        self._test_assert_with_correct_result(result)
+
+    def test_raise_alarm_action_validate_invalid_target_id(self):
+
+        # Test setup
+        ids = ['123', '456', '789']
+        action = self._create_raise_alarm_action('unknown')
+
+        # Test action
+        result = validator.validate_raise_alarm_action(action, ids)
+
+        # Test assertions
+        self._test_assert_with_fault_result(result, error_msgs[3])
+
+    def test_validate_raise_alarm_action_without_target_id(self):
+
+        # Test setup
+        ids = ['123', '456', '789']
+        action = self._create_raise_alarm_action('123')
+        action[TemplateFields.ACTION_TARGET].pop(TemplateFields.TARGET)
+
+        # Test action
+        result = validator.validate_raise_alarm_action(action, ids)
+
+        # Test assertions
+        self._test_assert_with_fault_result(result, error_msgs[127])
+
+    def test_validate_raise_alarm_action_without_severity(self):
+
+        # Test setup
+        ids = ['123', '456', '789']
+        action = self._create_raise_alarm_action('abc')
+        action[TemplateFields.PROPERTIES].pop(TemplateFields.SEVERITY)
+
+        # Test action
+        result = validator.validate_raise_alarm_action(action, ids)
+
+        # Test assertions
+        self._test_assert_with_fault_result(result, error_msgs[126])
+
+    def test_validate_raise_alarm_action_without_alarm_name(self):
+
+        # Test setup
+        ids = ['123', '456', '789']
+        action = self._create_raise_alarm_action('abc')
+        action[TemplateFields.PROPERTIES].pop(TemplateFields.ALARM_NAME)
+
+        # Test action
+        result = validator.validate_raise_alarm_action(action, ids)
+
+        # Test assertions
+        self._test_assert_with_fault_result(result, error_msgs[125])
 
     def test_validate_set_state_action(self):
+
         # Test setup
         ids = ['123', '456', '789']
         action = self._create_set_state_action('123')
 
         # Test action and assertions
-        self.assertTrue(validator.validate_set_state_action(action, ids))
+        result = validator.validate_set_state_action(action, ids)
 
-    def test_validate_invalid_raise_alarm_action(self):
+        # Test Assertions
+        self._test_assert_with_correct_result(result)
 
-        # Test setup
-        ids = ['123', '456', '789']
-
-        # Invalid target id
-        action = self._create_set_state_action('000')
-        self.assertFalse(
-            validator.validate_raise_alarm_action(action, ids))
-
-        # Action with no target
-        action[TemplateFields.ACTION_TARGET].pop(TemplateFields.TARGET)
-        self.assertFalse(
-            validator.validate_raise_alarm_action(action, ids))
-
-        # Action with no severity property
-        action = self._create_set_state_action('123')
-        action[TemplateFields.PROPERTIES].pop(TemplateFields.SEVERITY, None)
-        self.assertFalse(
-            validator.validate_raise_alarm_action(action, ids))
-
-        # Action with no alarm name property
-        action = self._create_set_state_action('123')
-        action[TemplateFields.PROPERTIES].pop(TemplateFields.ALARM_NAME, None)
-        self.assertFalse(
-            validator.validate_raise_alarm_action(action, ids))
-
-    def test_validate_invalid_set_state_action(self):
+    def test_validate_set_state_action_with_invalid_target_id(self):
 
         # Test setup
         ids = ['123', '456', '789']
+        action = self._create_set_state_action('unknown')
 
-        # Invalid target id
-        action = self._create_set_state_action('000')
-        self.assertFalse(
-            validator.validate_set_state_action(action, ids))
+        # Test action
+        result = validator.validate_set_state_action(action, ids)
 
-        # Action with no target
+        # Test assertions
+        self._test_assert_with_fault_result(result, error_msgs[3])
+
+    def test_validate_set_state_action_without_target_id(self):
+
+        # Test setup
+        ids = ['123', '456', '789']
+        action = self._create_set_state_action('123')
         action[TemplateFields.ACTION_TARGET].pop(TemplateFields.TARGET)
-        self.assertFalse(
-            validator.validate_set_state_action(action, ids))
 
-        # Action with no state property
+        # Test action
+        result = validator.validate_set_state_action(action, ids)
+
+        # Test assertions
+        self._test_assert_with_fault_result(result, error_msgs[129])
+
+    def test_validate_set_state_action_without_state_property(self):
+
+        # Test setup
+        ids = ['123', '456', '789']
         action = self._create_set_state_action('123')
         action[TemplateFields.PROPERTIES].pop(TemplateFields.STATE, None)
-        self.assertFalse(
-            validator.validate_set_state_action(action, ids))
+
+        # Test action
+        result = validator.validate_set_state_action(action, ids)
+
+        # Test assertions
+        self._test_assert_with_fault_result(result, error_msgs[128])
 
     def test_validate_add_causal_relationship_action(self):
+
         # Test setup
         ids = ['123', '456', '789']
         action = self._create_add_causal_relationship_action('456', '123')
 
         # Test action and assertions
-        self.assertTrue(
-            validator.validate_add_causal_relationship_action(action, ids))
+        result = validator.validate_add_causal_relationship_action(action, ids)
 
-    def test_validate_invalid_add_causal_relationship_action(self):
+        # Test action and assertions
+        self._test_assert_with_correct_result(result)
+
+    def test_validate_add_causal_relationship_action_with_invalid_target(self):
 
         # Test setup
         ids = ['123', '456', '789']
+        action = self._create_add_causal_relationship_action('unknown', '123')
 
-        # Invalid target id
-        action1 = self._create_add_causal_relationship_action('000', '123')
-        self.assertFalse(
-            validator.validate_add_causal_relationship_action(action1, ids))
+        # Test action
+        result = validator.validate_add_causal_relationship_action(action, ids)
 
-        # Action with no target
-        action1[TemplateFields.ACTION_TARGET].pop(TemplateFields.TARGET)
-        self.assertFalse(
-            validator.validate_add_causal_relationship_action(action1, ids))
+        # Test assertion
+        self._test_assert_with_fault_result(result, error_msgs[3])
 
-        # Invalid source id
-        action2 = self._create_add_causal_relationship_action('456', '000')
-        self.assertFalse(
-            validator.validate_add_causal_relationship_action(action2, ids))
+    def test_validate_add_causal_relationship_action_without_target(self):
 
-        # Action with no source
-        action2[TemplateFields.ACTION_TARGET].pop(TemplateFields.SOURCE)
-        self.assertFalse(
-            validator.validate_add_causal_relationship_action(action2, ids))
-
-    def test_validate_template_id(self):
-
+        # Test setup
         ids = ['123', '456', '789']
+        action = self._create_add_causal_relationship_action('456', '123')
+        action[TemplateFields.ACTION_TARGET].pop(TemplateFields.TARGET, None)
 
-        self.assertTrue(validator.validate_template_id(ids, '123'))
-        self.assertFalse(validator.validate_template_id(ids, '000'))
+        # Test action
+        result = validator.validate_add_causal_relationship_action(action, ids)
+
+        # Test assertion
+        self._test_assert_with_fault_result(result, error_msgs[130])
+
+    def test_validate_add_causal_relationship_action_with_invalid_source(self):
+
+        # Test setup
+        ids = ['123', '456', '789']
+        action = self._create_add_causal_relationship_action('456', 'unknown')
+
+        # Test action
+        result = validator.validate_add_causal_relationship_action(action, ids)
+
+        # Test assertion
+        self._test_assert_with_fault_result(result, error_msgs[3])
+
+    def test_validate_add_causal_relationship_action_without_source(self):
+
+        # Test setup
+        ids = ['123', '456', '789']
+        action = self._create_add_causal_relationship_action('456', '123')
+        action[TemplateFields.ACTION_TARGET].pop(TemplateFields.SOURCE, None)
+
+        # Test action
+        result = validator.validate_add_causal_relationship_action(action, ids)
+
+        # Test assertion
+        self._test_assert_with_fault_result(result, error_msgs[130])
+
+    def _test_execute_and_assert_with_fault_result(self,
+                                                   template,
+                                                   expected_comment):
+
+        result = validator.content_validation(template)
+        self._test_assert_with_fault_result(result, expected_comment)
+
+    def _test_assert_with_fault_result(self, result, expected_comment):
+
+        self.assertFalse(result.is_valid)
+        self.assertTrue(str(result.comment).startswith(expected_comment))
+
+    def _test_execute_and_assert_with_correct_result(self, template):
+
+        result = validator.content_validation(template)
+        self._test_assert_with_correct_result(result)
+
+    def _test_assert_with_correct_result(self, result):
+
+        self.assertTrue(result.is_valid)
+        self.assertEqual(result.comment, CORRECT_RESULT_MESSAGE)
 
     def _create_scenario_actions(self, target, source):
 
