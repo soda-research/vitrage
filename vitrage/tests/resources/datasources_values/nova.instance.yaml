@@ -1,55 +1,56 @@
 category: RESOURCE
 values:
-  - normalized value:
-      name: TERMINATED
-      priority: 90
-      original values:
-        - name: DELETED
-        - name: HARD_DELETED
-        - name: SHELVED_OFFLOADED
-        - name: SOFT_DELETED
-  - normalized value:
-      name: ERROR
+  - aggregated values:
       priority: 80
       original values:
-        - name: ERROR
-  - normalized value:
-      name: UNRECOGNIZED
+        - name: DELETED
+          operational_value: DELETED
+        - name: HARD_DELETED
+          operational_value: DELETED
+        - name: SHELVED_OFFLOADED
+          operational_value: DELETED
+        - name: SOFT_DELETED
+          operational_value: DELETED
+  - aggregated values:
       priority: 70
       original values:
-        - name: UNRECOGNIZED
-  - normalized value:
-      name: SUSPENDED
+        - name: ERROR
+          operational_value: ERROR
+  - aggregated values:
       priority: 60
       original values:
         - name: SUSPENDED
+          operational_value: SUBOPTIMAL
         - name: PAUSED
+          operational_value: SUBOPTIMAL
         - name: STOPPED
+          operational_value: SUBOPTIMAL
         - name: SHELVED
-  - normalized value:
-      name: RESCUED
+          operational_value: SUBOPTIMAL
+  - aggregated values:
       priority: 50
       original values:
-        - name: RESCUED
-  - normalized value:
-      name: RESIZED
+        - name: RESIZED
+          operational_value: SUBOPTIMAL
+  - aggregated values:
       priority: 40
       original values:
-        - name: RESIZED
-  - normalized value:
-      name: TRANSIENT
+        - name: BUILDING
+          operational_value: TRANSIENT
+        - name: INITIALIZED
+          operational_value: TRANSIENT
+  - aggregated values:
       priority: 30
       original values:
-        - name: BUILDING
-        - name: INITIALIZED
-  - normalized value:
-      name: SUBOPTIMAL
+        - name: SUBOPTIMAL
+          operational_value: SUBOPTIMAL
+  - aggregated values:
       priority: 20
       original values:
-        - name: SUBOPTIMAL
-  - normalized value:
-      name: RUNNING
+        - name: RESCUED
+          operational_value: OK
+  - aggregated values:
       priority: 10
       original values:
         - name: ACTIVE
-        - name: RESIZED
+          operational_value: OK

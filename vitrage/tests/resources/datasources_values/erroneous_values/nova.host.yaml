@@ -1,23 +1,22 @@
-# erroneous yaml file - missing normalized UNRECOGNIZED value
 category: RESOURCE
 values:
-  - normalized value:
-      name: TERMINATED
-      priority: 50
-      original values:
-        - name: DELETED
-  - normalized value:
-      name: ERROR
+  - aggregated values:
       priority: 40
       original values:
+        - name: DELETED
+          operational_value: DELETED
+  - aggregated values:
+      priority: 30
+      original values:
         - name: ERROR
-  - normalized value:
-      name: SUBOPTIMAL
+          operational_value: ERROR
+  - aggregated values:
       priority: 20
       original values:
         - name: SUBOPTIMAL
-  - normalized value:
-      name: RUNNING
+          operational_value: SUBOPTIMAL
+  - aggregated values:
       priority: 10
       original values:
-        - name: available
+        - name: AVAILABLE
+          operational_value: OK

@@ -1,32 +1,27 @@
 category: RESOURCE
 values:
-  - normalized value:
-      name: ERROR
-      priority: 60
-      original values:
-        - name: ERROR
-  - normalized value:
-      name: UNRECOGNIZED
+  - aggregated values:
       priority: 50
       original values:
-        - name: UNRECOGNIZED
-  - normalized value:
-      name: SUSPENDED
+        - name: ERROR
+          operational_value: ERROR
+  - aggregated values:
       priority: 40
       original values:
         - name: DOWN
-  - normalized value:
-      name: TRANSIENT
+          operational_value: ERROR
+  - aggregated values:
       priority: 30
       original values:
         - name: BUILD
-  - normalized value:
-      name: SUBOPTIMAL
+          operational_value: TRANSIENT
+  - aggregated values:
       priority: 20
       original values:
         - name: SUBOPTIMAL
-  - normalized value:
-      name: RUNNING
+          operational_value: SUBOPTIMAL
+  - aggregated values:
       priority: 10
       original values:
         - name: ACTIVE
+          operational_value: OK

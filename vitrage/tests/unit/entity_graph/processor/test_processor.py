@@ -21,9 +21,9 @@ from vitrage.common.constants import VertexProperties as VProps
 from vitrage.common.datetime_utils import utcnow
 from vitrage.datasources.transformer_base import Neighbor
 from vitrage.entity_graph.initialization_status import InitializationStatus
+from vitrage.entity_graph.mappings.operational_resource_state import \
+    OperationalResourceState
 from vitrage.entity_graph.processor import processor as proc
-from vitrage.entity_graph.states.normalized_resource_state import \
-    NormalizedResourceState
 import vitrage.graph.utils as graph_utils
 from vitrage.tests.unit.entity_graph.base import TestEntityGraphUnitBase
 
@@ -273,18 +273,30 @@ class TestProcessor(TestEntityGraphUnitBase):
                                                     EventAction.UPDATE_ENTITY)
 
         # test assertions
-        self.assertEqual(NormalizedResourceState.SUSPENDED,
+        self.assertEqual('SUSPENDED',
                          instances[0][0][VProps.AGGREGATED_STATE])
-        self.assertEqual(NormalizedResourceState.SUBOPTIMAL,
+        self.assertEqual(OperationalResourceState.SUBOPTIMAL,
+                         instances[0][0][VProps.OPERATIONAL_STATE])
+        self.assertEqual('SUBOPTIMAL',
                          instances[1][0][VProps.AGGREGATED_STATE])
-        self.assertEqual(NormalizedResourceState.SUBOPTIMAL,
+        self.assertEqual(OperationalResourceState.SUBOPTIMAL,
+                         instances[1][0][VProps.OPERATIONAL_STATE])
+        self.assertEqual('SUBOPTIMAL',
                          instances[2][0][VProps.AGGREGATED_STATE])
-        self.assertEqual(NormalizedResourceState.SUSPENDED,
+        self.assertEqual(OperationalResourceState.SUBOPTIMAL,
+                         instances[2][0][VProps.OPERATIONAL_STATE])
+        self.assertEqual('SUSPENDED',
                          instances[3][0][VProps.AGGREGATED_STATE])
-        self.assertEqual(NormalizedResourceState.SUSPENDED,
+        self.assertEqual(OperationalResourceState.SUBOPTIMAL,
+                         instances[3][0][VProps.OPERATIONAL_STATE])
+        self.assertEqual('SUSPENDED',
                          instances[4][0][VProps.AGGREGATED_STATE])
-        self.assertEqual(NormalizedResourceState.SUBOPTIMAL,
+        self.assertEqual(OperationalResourceState.SUBOPTIMAL,
+                         instances[4][0][VProps.OPERATIONAL_STATE])
+        self.assertEqual('SUBOPTIMAL',
                          instances[5][0][VProps.AGGREGATED_STATE])
+        self.assertEqual(OperationalResourceState.SUBOPTIMAL,
+                         instances[5][0][VProps.OPERATIONAL_STATE])
 
     def _create_and_check_entity(self, processor=None, **kwargs):
         # create instance event with host neighbor

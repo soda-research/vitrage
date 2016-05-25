@@ -62,7 +62,7 @@ class TestScenarioEvaluator(TestFunctionalBase):
 
         target_host = 'host-2'
         host_v = self._get_host_from_graph(target_host, processor.entity_graph)
-        self.assertEqual('RUNNING', host_v[VProps.AGGREGATED_STATE],
+        self.assertEqual('AVAILABLE', host_v[VProps.AGGREGATED_STATE],
                          'host should be RUNNING when starting')
 
         nagios_event = {'last_check': '2016-02-07 15:26:04',
@@ -89,7 +89,7 @@ class TestScenarioEvaluator(TestFunctionalBase):
         processor.process_event(event_queue.get())
 
         host_v = self._get_host_from_graph(target_host, processor.entity_graph)
-        self.assertEqual('RUNNING', host_v[VProps.AGGREGATED_STATE],
+        self.assertEqual('AVAILABLE', host_v[VProps.AGGREGATED_STATE],
                          'host should be RUNNING when starting')
 
     @staticmethod

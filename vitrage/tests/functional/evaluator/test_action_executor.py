@@ -23,8 +23,8 @@ from vitrage.common.constants import VertexProperties as VProps
 from vitrage.datasources.alarm_properties import AlarmProperties as AlarmProps
 from vitrage.datasources.nagios import NAGIOS_DATASOURCE
 from vitrage.datasources.nova.host import NOVA_HOST_DATASOURCE
-from vitrage.entity_graph.states.normalized_resource_state import \
-    NormalizedResourceState
+from vitrage.entity_graph.mappings.operational_resource_state import \
+    OperationalResourceState
 from vitrage.evaluator.actions.action_executor import ActionExecutor
 from vitrage.evaluator.actions.base import ActionMode
 from vitrage.evaluator.actions.base import ActionType
@@ -62,7 +62,7 @@ class TestActionExecutor(TestFunctionalBase):
         host_vertex_before = host_vertices[0]
 
         targets = {TFields.TARGET: host_vertex_before}
-        props = {TFields.STATE: NormalizedResourceState.SUBOPTIMAL}
+        props = {TFields.STATE: OperationalResourceState.SUBOPTIMAL}
         action_spec = ActionSpecs(ActionType.SET_STATE, targets, props)
 
         event_queue = queue.Queue()
@@ -77,13 +77,14 @@ class TestActionExecutor(TestFunctionalBase):
 
         # Test Assertions
         agg_state_before = host_vertex_before.get(VProps.AGGREGATED_STATE)
-        self.assertTrue(agg_state_before != NormalizedResourceState.SUBOPTIMAL)
+        self.assertTrue(agg_state_before !=
+                        OperationalResourceState.SUBOPTIMAL)
         self.assertFalse(VProps.VITRAGE_STATE in host_vertex_before.properties)
 
         agg_state_after = host_vertex_after.get(VProps.AGGREGATED_STATE)
-        self.assertEqual(agg_state_after, NormalizedResourceState.SUBOPTIMAL)
+        self.assertEqual(agg_state_after, OperationalResourceState.SUBOPTIMAL)
         v_state_after = host_vertex_after.get(VProps.VITRAGE_STATE)
-        self.assertEqual(v_state_after, NormalizedResourceState.SUBOPTIMAL)
+        self.assertEqual(v_state_after, OperationalResourceState.SUBOPTIMAL)
 
         # Test Action - undo
         action_executor.execute(action_spec, ActionMode.UNDO)
@@ -197,10 +198,11 @@ class TestActionExecutor(TestFunctionalBase):
 
         self.assertEqual(alarm.properties[VProps.CATEGORY],
                          EntityCategory.ALARM)
-        self.assertEqual(alarm.properties[VProps.TYPE], VITRAGE_TYPE)
+        self.assertEqual(alarm.properties[VProps.TYPE],
+                         VITRAGE_TYPE)
         self.assertEqual(alarm.properties[VProps.SEVERITY],
                          props[TFields.SEVERITY])
-        self.assertEqual(alarm.properties[VProps.NORMALIZED_SEVERITY],
+        self.assertEqual(alarm.properties[VProps.OPERATIONAL_SEVERITY],
                          props[TFields.SEVERITY])
         self.assertEqual(alarm.properties[VProps.STATE],
                          AlarmProps.ALARM_ACTIVE_STATE)

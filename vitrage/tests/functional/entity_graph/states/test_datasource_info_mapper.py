@@ -19,18 +19,18 @@ from vitrage.common.constants import SyncMode
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.datasources.nova.instance.transformer import InstanceTransformer
 from vitrage.entity_graph.initialization_status import InitializationStatus
+from vitrage.entity_graph.mappings.operational_resource_state import \
+    OperationalResourceState
 from vitrage.entity_graph.processor import processor as proc
-from vitrage.entity_graph.states.normalized_resource_state import \
-    NormalizedResourceState
 from vitrage.tests.functional.base import TestFunctionalBase
 
 
-class TestStateManagerFunctional(TestFunctionalBase):
+class TestDatasourceInfoMapperFunctional(TestFunctionalBase):
 
     # noinspection PyAttributeOutsideInit,PyPep8Naming
     @classmethod
     def setUpClass(cls):
-        super(TestStateManagerFunctional, cls).setUpClass()
+        super(TestDatasourceInfoMapperFunctional, cls).setUpClass()
         cls.conf = cfg.ConfigOpts()
         cls.conf.register_opts(cls.PROCESSOR_OPTS, group='entity_graph')
         cls.conf.register_opts(cls.DATASOURCES_OPTS, group='datasources')
@@ -49,8 +49,9 @@ class TestStateManagerFunctional(TestFunctionalBase):
         instance_transformer = InstanceTransformer({})
         vitrage_id = instance_transformer._create_entity_key(event)
         vertex = processor.entity_graph.get_vertex(vitrage_id)
-        self.assertEqual(NormalizedResourceState.RUNNING,
-                         vertex[VProps.AGGREGATED_STATE])
+        self.assertEqual('ACTIVE', vertex[VProps.AGGREGATED_STATE])
+        self.assertEqual(OperationalResourceState.OK,
+                         vertex[VProps.OPERATIONAL_STATE])
 
     def test_state_on_neighbor_update(self):
         # setup
@@ -68,5 +69,6 @@ class TestStateManagerFunctional(TestFunctionalBase):
         # test assertions
         neighbor_vertex = processor.entity_graph.get_vertex(
             neighbors[0].vertex.vertex_id)
-        self.assertEqual(NormalizedResourceState.RUNNING,
-                         neighbor_vertex[VProps.AGGREGATED_STATE])
+        self.assertEqual('AVAILABLE', neighbor_vertex[VProps.AGGREGATED_STATE])
+        self.assertEqual(OperationalResourceState.OK,
+                         neighbor_vertex[VProps.OPERATIONAL_STATE])

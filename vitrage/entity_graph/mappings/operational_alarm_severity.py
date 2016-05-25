@@ -13,14 +13,9 @@
 # under the License.
 
 
-class NormalizedResourceState(object):
-    TERMINATED = 'TERMINATED'
-    ERROR = 'ERROR'
-    UNRECOGNIZED = 'UNRECOGNIZED'
-    SUSPENDED = 'SUSPENDED'
-    RESCUED = 'RESCUED'
-    RESIZED = 'RESIZED'
-    TRANSIENT = 'TRANSIENT'
-    SUBOPTIMAL = 'SUBOPTIMAL'
-    RUNNING = 'RUNNING'
-    UNDEFINED = 'UNDEFINED'
+class OperationalAlarmSeverity(object):
+    CRITICAL = 'CRITICAL'
+    SEVERE = 'SEVERE'
+    WARNING = 'WARNING'
+    NA = 'N/A'
+    OK = 'OK'
