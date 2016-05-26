@@ -26,8 +26,8 @@ from vitrage.common.constants import edge_labels
 from vitrage.common.constants import entities_categories
 from vitrage.evaluator.actions.base import action_types
 from vitrage.evaluator.template_fields import TemplateFields
+from vitrage.evaluator.template_validation.base import Result
 from vitrage.evaluator.template_validation.error_messages import error_msgs
-from vitrage.evaluator.template_validation.utils import Result
 
 LOG = log.getLogger(__name__)
 

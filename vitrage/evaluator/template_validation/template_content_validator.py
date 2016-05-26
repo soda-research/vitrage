@@ -17,8 +17,8 @@ from six.moves import reduce
 from vitrage.evaluator.actions.base import ActionType
 from vitrage.evaluator.template import Template
 from vitrage.evaluator.template_fields import TemplateFields
+from vitrage.evaluator.template_validation.base import Result
 from vitrage.evaluator.template_validation.error_messages import error_msgs
-from vitrage.evaluator.template_validation.utils import Result
 
 LOG = log.getLogger(__name__)
 
@@ -36,9 +36,11 @@ def content_validation(template):
     result = validate_entities_definition(entities, entity_ids)
 
     relationship_ids = []
-    relationships = template_definitions[TemplateFields.RELATIONSHIPS]
 
-    if result.is_valid and relationships:
+    if result.is_valid and \
+       TemplateFields.RELATIONSHIPS in template_definitions:
+
+        relationships = template_definitions[TemplateFields.RELATIONSHIPS]
         result = validate_relationships_definitions(relationships,
                                                     relationship_ids,
                                                     entity_ids)
