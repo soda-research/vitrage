@@ -40,7 +40,7 @@ The alarm severity configuration files configure how the severity of each
 alarm is normalized. There are several guidelines for creating a config file:
 
 - Normalized alarm values which can be mapped to can be found in
-  normalized_alarm_severity.py (NormalizedAlarmSeverity class).
+  normalized_alarm_severity.py (OperationalAlarmSeverity class).
 - Each normalized severity also comes with a priority, so
   that if an alarm is given different severities from different sources (e.g.,
   a host alarm raised both by nagios and Vitrage), the severity with the

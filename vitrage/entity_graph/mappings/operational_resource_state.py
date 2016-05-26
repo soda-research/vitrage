@@ -13,10 +13,10 @@
 # under the License.
 
 
-class NormalizedAlarmSeverity(object):
-    CRITICAL = 'CRITICAL'
-    SEVERE = 'SEVERE'
-    WARNING = 'WARNING'
-    DISABLED = 'DISABLED'
-    UNKNOWN = 'UNKNOWN'
-    UNDEFINED = 'UNDEFINED'
+class OperationalResourceState(object):
+    NA = 'N/A'
+    OK = 'OK'
+    TRANSIENT = 'TRANSIENT'
+    SUBOPTIMAL = 'SUBOPTIMAL'
+    ERROR = 'ERROR'
+    DELETED = 'DELETED'

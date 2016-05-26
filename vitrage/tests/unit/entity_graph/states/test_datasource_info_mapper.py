@@ -20,16 +20,17 @@ from vitrage.datasources.nagios import NAGIOS_DATASOURCE
 from vitrage.datasources.nova.host import NOVA_HOST_DATASOURCE
 from vitrage.datasources.nova.instance import NOVA_INSTANCE_DATASOURCE
 from vitrage.datasources.nova.zone import NOVA_ZONE_DATASOURCE
-from vitrage.entity_graph.states.normalized_resource_state import \
-    NormalizedResourceState
-from vitrage.entity_graph.states.state_manager import StateManager
+from vitrage.entity_graph.mappings.datasource_info_mapper import \
+    DatasourceInfoMapper
+from vitrage.entity_graph.mappings.operational_resource_state import \
+    OperationalResourceState
 from vitrage.graph.utils import create_vertex
 from vitrage.service import load_datasource
 from vitrage.tests import base
 from vitrage.tests.mocks import utils
 
 
-class TestStateManager(base.BaseTest):
+class TestDatasourceInfoMapper(base.BaseTest):
 
     ENTITY_GRAPH_OPTS = [
         cfg.StrOpt('datasources_values_dir',
@@ -57,7 +58,7 @@ class TestStateManager(base.BaseTest):
     # noinspection PyAttributeOutsideInit,PyPep8Naming
     @classmethod
     def setUpClass(cls):
-        super(TestStateManager, cls).setUpClass()
+        super(TestDatasourceInfoMapper, cls).setUpClass()
         cls.conf = cfg.ConfigOpts()
         cls.conf.register_opts(cls.ENTITY_GRAPH_OPTS, group='entity_graph')
         cls.conf.register_opts(cls.DATASOURCES_OPTS, group='datasources')
@@ -65,7 +66,7 @@ class TestStateManager(base.BaseTest):
 
     def test_load_datasource_state_without_errors(self):
         # action
-        state_manager = StateManager(self.conf)
+        state_manager = DatasourceInfoMapper(self.conf)
 
         # test assertions
 
@@ -87,44 +88,92 @@ class TestStateManager(base.BaseTest):
         self._load_datasources(conf)
 
         # action
-        state_manager = StateManager(conf)
+        state_manager = DatasourceInfoMapper(conf)
 
         # test assertions
         missing_states = 1
-        erroneous_values = 2
+        erroneous_values = 1
         num_valid_datasources = len(state_manager.datasources_state_confs) + \
             missing_states + erroneous_values
-        self.assertEqual(len(conf.datasources.types),
-                         num_valid_datasources)
+        self.assertEqual(num_valid_datasources, len(conf.datasources.types))
 
-    def test_normalize_state(self):
+    def test_operational_state_exists(self):
         # setup
-        state_manager = StateManager(self.conf)
+        state_manager = DatasourceInfoMapper(self.conf)
 
         # action
-        normalized_state = \
-            state_manager.normalize_state(EntityCategory.RESOURCE,
-                                          NOVA_INSTANCE_DATASOURCE,
-                                          'BUILDING')
+        operational_state = \
+            state_manager.operational_state(NOVA_INSTANCE_DATASOURCE,
+                                            'BUILDING')
 
         # test assertions
-        self.assertEqual(NormalizedResourceState.TRANSIENT, normalized_state)
+        self.assertEqual(OperationalResourceState.TRANSIENT, operational_state)
+
+    def test_operational_state_not_exists(self):
+        # setup
+        state_manager = DatasourceInfoMapper(self.conf)
+
+        # action
+        operational_state = \
+            state_manager.operational_state(NOVA_INSTANCE_DATASOURCE,
+                                            'NON EXISTING STATE')
+
+        # test assertions
+        self.assertEqual(OperationalResourceState.NA, operational_state)
+
+    def test_operational_state_datasource_not_exists(self):
+        # setup
+        state_manager = DatasourceInfoMapper(self.conf)
+
+        # action
+        operational_state = \
+            state_manager.operational_state('NON EXISTING DATASOURCE',
+                                            'BUILDING')
+
+        # test assertions
+        self.assertEqual(DatasourceInfoMapper.UNDEFINED_DATASOURCE,
+                         operational_state)
 
     def test_state_priority(self):
         # setup
-        state_manager = StateManager(self.conf)
+        state_manager = DatasourceInfoMapper(self.conf)
 
         # action
         state_priority = \
             state_manager.state_priority(NOVA_INSTANCE_DATASOURCE,
-                                         NormalizedResourceState.RUNNING)
+                                         'ACTIVE')
 
         # test assertions
         self.assertEqual(10, state_priority)
 
-    def test_aggregated_state_not_normalized(self):
+    def test_state_priority_not_exists(self):
         # setup
-        state_manager = StateManager(self.conf)
+        state_manager = DatasourceInfoMapper(self.conf)
+
+        # action
+        state_priority = \
+            state_manager.state_priority(NOVA_INSTANCE_DATASOURCE,
+                                         'NON EXISTING STATE')
+
+        # test assertions
+        self.assertEqual(0, state_priority)
+
+    def test_state_priority_datasource_not_exists(self):
+        # setup
+        state_manager = DatasourceInfoMapper(self.conf)
+
+        # action
+        state_priority = \
+            state_manager.state_priority('NON EXISTING DATASOURCE',
+                                         'ACTIVE')
+
+        # test assertions
+        self.assertEqual(DatasourceInfoMapper.UNDEFINED_DATASOURCE,
+                         state_priority)
+
+    def test_aggregated_state(self):
+        # setup
+        state_manager = DatasourceInfoMapper(self.conf)
         metadata1 = {VProps.VITRAGE_STATE: 'SUSPENDED'}
         new_vertex1 = create_vertex('12345',
                                     entity_state='ACTIVE',
@@ -143,14 +192,16 @@ class TestStateManager(base.BaseTest):
         state_manager.aggregated_state(new_vertex2, None)
 
         # test assertions
-        self.assertEqual(NormalizedResourceState.SUSPENDED,
-                         new_vertex1[VProps.AGGREGATED_STATE])
-        self.assertEqual(NormalizedResourceState.SUSPENDED,
-                         new_vertex2[VProps.AGGREGATED_STATE])
+        self.assertEqual('SUSPENDED', new_vertex1[VProps.AGGREGATED_STATE])
+        self.assertEqual(OperationalResourceState.SUBOPTIMAL,
+                         new_vertex1[VProps.OPERATIONAL_STATE])
+        self.assertEqual('SUSPENDED', new_vertex2[VProps.AGGREGATED_STATE])
+        self.assertEqual(OperationalResourceState.SUBOPTIMAL,
+                         new_vertex2[VProps.OPERATIONAL_STATE])
 
     def test_aggregated_state_functionalities(self):
         # setup
-        state_manager = StateManager(self.conf)
+        state_manager = DatasourceInfoMapper(self.conf)
         new_vertex1 = create_vertex('12345',
                                     entity_state='ACTIVE',
                                     entity_category=EntityCategory.RESOURCE,
@@ -160,12 +211,16 @@ class TestStateManager(base.BaseTest):
                                     entity_category=EntityCategory.RESOURCE,
                                     entity_type=NOVA_INSTANCE_DATASOURCE,
                                     metadata=metadata2)
+        metadata3 = {VProps.VITRAGE_STATE: 'SUBOPTIMAL'}
         new_vertex3 = create_vertex('34567',
+                                    entity_state='ACTIVE',
                                     entity_category=EntityCategory.RESOURCE,
                                     entity_type=NOVA_INSTANCE_DATASOURCE)
-        graph_vertex3 = create_vertex('45678',
+        graph_vertex3 = create_vertex('34567',
+                                      entity_state='SUSPENDED',
                                       entity_category=EntityCategory.RESOURCE,
-                                      entity_type=NOVA_INSTANCE_DATASOURCE)
+                                      entity_type=NOVA_INSTANCE_DATASOURCE,
+                                      metadata=metadata3)
 
         # action
         state_manager.aggregated_state(new_vertex1,
@@ -176,9 +231,31 @@ class TestStateManager(base.BaseTest):
                                        graph_vertex3)
 
         # test assertions
-        self.assertEqual(NormalizedResourceState.RUNNING,
-                         new_vertex1[VProps.AGGREGATED_STATE])
-        self.assertEqual(NormalizedResourceState.SUBOPTIMAL,
-                         new_vertex2[VProps.AGGREGATED_STATE])
-        self.assertEqual(NormalizedResourceState.UNDEFINED,
-                         new_vertex3[VProps.AGGREGATED_STATE])
+        self.assertEqual('ACTIVE', new_vertex1[VProps.AGGREGATED_STATE])
+        self.assertEqual(OperationalResourceState.OK,
+                         new_vertex1[VProps.OPERATIONAL_STATE])
+        self.assertEqual('SUBOPTIMAL', new_vertex2[VProps.AGGREGATED_STATE])
+        self.assertEqual(OperationalResourceState.SUBOPTIMAL,
+                         new_vertex2[VProps.OPERATIONAL_STATE])
+        self.assertEqual('SUBOPTIMAL', new_vertex3[VProps.AGGREGATED_STATE])
+        self.assertEqual(OperationalResourceState.SUBOPTIMAL,
+                         new_vertex3[VProps.OPERATIONAL_STATE])
+
+    def test_aggregated_state_datasource_not_exists(self):
+        # setup
+        state_manager = DatasourceInfoMapper(self.conf)
+        metadata = {VProps.VITRAGE_STATE: 'SUSPENDED'}
+        new_vertex = create_vertex('12345',
+                                   entity_state='ACTIVE',
+                                   entity_category=EntityCategory.RESOURCE,
+                                   entity_type='NON EXISTING DATASOURCE',
+                                   metadata=metadata)
+
+        # action
+        state_manager.aggregated_state(new_vertex, None)
+
+        # test assertions
+        self.assertEqual(DatasourceInfoMapper.UNDEFINED_DATASOURCE,
+                         new_vertex[VProps.AGGREGATED_STATE])
+        self.assertEqual(DatasourceInfoMapper.UNDEFINED_DATASOURCE,
+                         new_vertex[VProps.OPERATIONAL_STATE])

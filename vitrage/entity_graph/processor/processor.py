@@ -18,11 +18,12 @@ from oslo_log import log
 from vitrage.common.constants import EventAction
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.datasources.transformer_base import TransformerBase
+from vitrage.entity_graph.mappings.datasource_info_mapper import \
+    DatasourceInfoMapper
 from vitrage.entity_graph.processor import base as processor
 from vitrage.entity_graph.processor import entity_graph
 from vitrage.entity_graph.processor.notifier import DeducedAlarmNotifier
 from vitrage.entity_graph.processor import processor_utils as PUtils
-from vitrage.entity_graph.states.state_manager import StateManager
 from vitrage.entity_graph.transformer_manager import TransformerManager
 from vitrage.graph import Direction
 
@@ -35,7 +36,7 @@ class Processor(processor.ProcessorBase):
         super(Processor, self).__init__()
         self.conf = conf
         self.transformer_manager = TransformerManager(self.conf)
-        self.state_manager = StateManager(self.conf)
+        self.state_manager = DatasourceInfoMapper(self.conf)
         self._initialize_events_actions()
         self.initialization_status = initialization_status
         self.entity_graph = entity_graph.EntityGraph("Entity Graph") if \

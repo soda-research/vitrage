@@ -13,40 +13,36 @@
 # under the License.
 
 import abc
-from collections import namedtuple
 
 import six
 
 
-ImportantStates = namedtuple('ImportantStates', ['unknown', 'undefined'])
-
-
 @six.add_metaclass(abc.ABCMeta)
-class NormalizatorBase(object):
+class HandlerBase(object):
 
     def __init__(self):
         pass
 
     @abc.abstractmethod
-    def important_states(self):
+    def undefined_property(self):
         pass
 
     @abc.abstractmethod
-    def state_properties(self):
+    def value_properties(self):
         pass
 
     @abc.abstractmethod
-    def set_aggregated_state(self, new_vertex, normalized_state):
+    def set_aggregated_value(self, new_vertex, aggregated_value):
         pass
 
     @abc.abstractmethod
-    def set_undefined_state(self, new_vertex):
+    def set_operational_value(self, new_vertex, operational_value):
         pass
 
     @abc.abstractmethod
-    def default_states(self):
+    def default_values(self):
         pass
 
     @abc.abstractmethod
-    def get_state_class_instance(self):
+    def get_value_class_instance(self):
         pass

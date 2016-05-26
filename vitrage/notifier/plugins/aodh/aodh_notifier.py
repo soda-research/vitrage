@@ -17,8 +17,8 @@ from vitrage import clients
 from vitrage.common.constants import NotifierEventTypes
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.datasources.aodh.properties import AodhState
-from vitrage.entity_graph.states.normalized_alarm_severity import \
-    NormalizedAlarmSeverity
+from vitrage.entity_graph.mappings.operational_alarm_severity import \
+    OperationalAlarmSeverity
 from vitrage.notifier.plugins.base import NotifierBase
 
 
@@ -26,9 +26,9 @@ LOG = logging.getLogger(__name__)
 
 
 severity_translation = {
-    NormalizedAlarmSeverity.CRITICAL: 'critical',
-    NormalizedAlarmSeverity.SEVERE: 'moderate',
-    NormalizedAlarmSeverity.WARNING: 'low',
+    OperationalAlarmSeverity.CRITICAL: 'critical',
+    OperationalAlarmSeverity.SEVERE: 'moderate',
+    OperationalAlarmSeverity.WARNING: 'low',
 }
 
 

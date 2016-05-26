@@ -40,7 +40,7 @@ The resource state configuration files configure how the state of each
 resource is normalized. Some guidelines for creating a config file:
 
 - Normalized state values, to which states should be mapped, can be found in
-  normalized_resource_state.py (NormalizedResourceState class).
+  normalized_resource_state.py (OperationalResourceState class).
 - Each normalized state also comes with a priority, so
   that if a resource is given different states from different sources (e.g.,
   a host state set both by nagios and Vitrage), the state with the
