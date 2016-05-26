@@ -44,4 +44,3 @@ echo "Listing existing Tempest tests"
 (cd $DEVSTACK_PATH/tempest/; sudo sh -c 'testr list-tests vitrage_tempest_tests | grep -E '$TESTS' > vitrage_tempest_tests.list')
 echo "Testing $1: $TESTS..."
 (cd $DEVSTACK_PATH/tempest/; sudo sh -c 'testr run --subunit --load-list=vitrage_tempest_tests.list | subunit-trace --fails')
-unset DEVSTACK_PATH
