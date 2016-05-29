@@ -99,7 +99,11 @@ class EntityGraphApis(object):
 
         ga = create_algorithm(self.entity_graph)
         if graph_type == 'tree':
-            final_query = query if query else TREE_TOPOLOGY_QUERY
+            if query:
+                final_query = query
+            else:
+                LOG.error("Graph-type 'tree' requires a filter.")
+                return {}
         else:
             final_query = query if query else TOPOLOGY_AND_ALARMS_QUERY
 
