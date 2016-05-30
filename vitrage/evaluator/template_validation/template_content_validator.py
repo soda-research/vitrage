@@ -46,7 +46,8 @@ def content_validation(template):
                                                     entity_ids)
     if result.is_valid:
         scenarios = template[TemplateFields.SCENARIOS]
-        result = validate_scenarios(scenarios, entity_ids, relationship_ids)
+        template_ids = entity_ids + relationship_ids
+        result = validate_scenarios(scenarios, template_ids)
 
     return result
 
@@ -110,20 +111,20 @@ def validate_relationship(relationship, relationships_ids, entities_ids):
     return result
 
 
-def validate_scenarios(scenarios, entities_id, relationship_ids):
+def validate_scenarios(scenarios, template_ids):
 
     for scenario in scenarios:
 
         scenario_values = scenario[TemplateFields.SCENARIO]
 
         condition = scenario_values[TemplateFields.CONDITION]
-        result = validate_scenario_condition(condition, relationship_ids)
+        result = validate_scenario_condition(condition, template_ids)
 
         if not result.is_valid:
             return result
 
         actions = scenario_values[TemplateFields.ACTIONS]
-        result = validate_scenario_actions(actions, entities_id)
+        result = validate_scenario_actions(actions, template_ids)
 
         if not result.is_valid:
             return result
