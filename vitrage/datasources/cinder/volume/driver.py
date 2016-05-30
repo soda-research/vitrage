@@ -42,7 +42,8 @@ class CinderVolumeDriver(DriverBase):
 
     def get_all(self, sync_mode):
         return self.make_pickleable(
-            self.extract_events(self.client.volumes.list()),
+            self.extract_events(self.client.volumes.list(
+                search_opts={'all_tenants': 1})),
             CINDER_VOLUME_DATASOURCE,
             sync_mode)
 
