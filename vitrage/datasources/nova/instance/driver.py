@@ -30,7 +30,8 @@ class InstanceDriver(NovaDriverBase):
 
     def get_all(self, sync_mode):
         return self.make_pickleable(
-            self.extract_events(self.client.servers.list()),
+            self.extract_events(self.client.servers.list(
+                search_opts={'all_tenants': 1})),
             NOVA_INSTANCE_DATASOURCE,
             sync_mode,
             'manager')
