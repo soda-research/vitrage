@@ -127,7 +127,7 @@ The following template demonstrates
                 - action:
                    action_type: raise_alarm
                    properties:
-                      alarm_type: instance_mem_performance_problem
+                      alarm_name: instance_mem_performance_problem
                       severity: warning
                    action_target:
                       target: instance # entity template_id
@@ -209,7 +209,7 @@ case-insensitive.
                 - action:
                    action_type: raise_alarm
                    properties:
-                      alarm_type: host_in_error_state
+                      alarm_name: host_in_error_state
                       severity: critical
                    action_target:
                       target: host_in_error
@@ -274,7 +274,7 @@ an alarm on the hosting zone or an alarm on the hosting host.
                 - action:
                    action_type : raise_alarm
                    properties:
-                      alarm_type: instance_connectivity_problem
+                      alarm_name: instance_connectivity_problem
                       severity: critical
                    action_target:
                       target: instance
