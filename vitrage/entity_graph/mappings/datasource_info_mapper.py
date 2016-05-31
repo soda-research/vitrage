@@ -86,6 +86,16 @@ class DatasourceInfoMapper(object):
             self.category_normalizer[category].set_operational_value(
                 new_vertex, self.UNDEFINED_DATASOURCE)
 
+    def get_datasource_priorities(self, datasource_name=None):
+        if datasource_name:
+            datasource_info = self.datasources_state_confs[datasource_name]
+            return datasource_info[self.PRIORITY_VALUES]
+        else:
+            priorities_dict = \
+                {key: self.datasources_state_confs[key][self.PRIORITY_VALUES]
+                 for key in self.datasources_state_confs.keys()}
+            return priorities_dict
+
     @staticmethod
     def _init_category_normalizer():
         return {

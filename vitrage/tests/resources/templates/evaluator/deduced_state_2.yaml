@@ -1,5 +1,6 @@
 metadata:
- id: deduced_state_for_host_alarms
+ id: deduced_state_for_host_alarms_2
+ description: replicates deduced_state.yaml, with changes to template_ids, to test overlapping templates
 definitions:
  entities:
   - entity:
@@ -7,44 +8,44 @@ definitions:
      type: nagios
      name: cause_suboptimal_state
      severity: WARNING
-     template_id: warning_alarm
+     template_id: warning_alarm_2
   - entity:
      category: ALARM
      type: nagios
      name: cause_error_state
      severity: CRITICAL
-     template_id: critical_alarm
+     template_id: critical_alarm_2
   - entity:
      category: RESOURCE
      type: nova.host
-     template_id: host
+     template_id: host_2
  relationships:
   - relationship:
-     source: warning_alarm
+     source: warning_alarm_2
      relationship_type: on
-     target: host
-     template_id : warning_alarm_on_host
+     target: host_2
+     template_id : warning_alarm_on_host_2
   - relationship:
-     source: critical_alarm
+     source: critical_alarm_2
      relationship_type: on
-     target: host
-     template_id : critical_alarm_on_host
+     target: host_2
+     template_id : critical_alarm_on_host_2
 scenarios:
  - scenario:
-    condition: warning_alarm_on_host
+    condition: warning_alarm_on_host_2
     actions:
      - action:
         action_type: set_state
         properties:
          state: SUBOPTIMAL
         action_target:
-         target: host
+         target: host_2
  - scenario:
-    condition: critical_alarm_on_host
+    condition: critical_alarm_on_host_2
     actions:
      - action:
         action_type: set_state
         properties:
          state: ERROR
         action_target:
-         target: host
+         target: host_2
