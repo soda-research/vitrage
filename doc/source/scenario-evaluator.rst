@@ -125,7 +125,12 @@ Ongoing Operation
    queries the Entity Graph for all the matching patterns in the current
    system. For each match and each associated action, a reference to the
    *do* of the action is added to the same *action collection*.
-6. Given all the actions (do & undo) in the *action collection*, perform them
+6. Given all the actions (do & undo) in the *action collection*, analyze
+   the dependencies between themselves, as well as between them and currently
+   active actions. The result of this analysis will be a new collection of
+   actions comprised of the correct actions to perform. See below in the
+   'Dealing with Overlapping Scenarios'_ Section.
+7. Given all the actions (do & undo) in the *action collection*, perform them
    using action executor.
 
    - Currently, the only action filtering is avoiding performing the same
@@ -156,11 +161,33 @@ It is possible that this late activation of the evaluator will be removed or
 changed once we move to a persistent graph database for the Entity Graph in
 future version.
 
-Limitations / Next Steps
-========================
 
-- Need to check for contradictions between actions, i.e., setting different
-  states for the same element.
-- Currently there is no support for ensuring that if an "undo" is to be
-  activated, there is no "do" that contradicts it and maintains the current
-  state (e.g., deduced alarm active).
+Dealing with Overlapping Scenarios
+----------------------------------
+
+There can be multiple Vitrage scenarios loaded in a specific system, some of
+which might overlap in their targets. For example, two scenarios might have a
+"set_state" action, with identical or different states, for the same resource.
+We need to deal with such overlaps.
+Currently, the goal is to support overlap of the same action type with itself,
+specifically the following use cases, which correspond to the three actions
+Vitrage supports at this point:
+
+- *set_state:* Two scenarios setting the state of the same resource
+- *raise_alarm:* Two scenarios raising the same deduced alarm (with possibly
+  different severity)
+- *add_causal_relationship:* Two scenarios adding the same causal relationship
+
+For all of these, the desired behavior is to choose the *dominant* outcome or
+action. For *set_state* this means the worst state, and for *raise_alarm* this
+means the highest severity of all active actions.
+
+In order to support this feature, Vitrage maintains an in-memory record of all
+active actions, indexed (broadly) according to their affected target. This
+allows for tracking individual actions and their triggers, even when they
+overlap in their effect.
+
+For more details on the implementation of this functionality, see the design
+on this etherpad_.
+
+.. _etherpad: https://etherpad.openstack.org/p/vitrage-overlapping-templates-support-design
