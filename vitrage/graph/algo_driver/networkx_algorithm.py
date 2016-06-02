@@ -69,6 +69,12 @@ class NXAlgorithm(GraphAlgorithm):
             nodes_q.extend([(v_id, curr_depth + 1) for v_id, data in n_list])
 
         graph._g = self.graph._g.subgraph(n_result)
+        LOG.debug('graph_query_vertices: find graph: nodes %s, edges %s',
+                  str(graph._g.nodes(data=True)),
+                  str(graph._g.edges(data=True)))
+        LOG.debug('graph_query_vertices: real graph: nodes %s, edges %s',
+                  str(self.graph._g.nodes(data=True)),
+                  str(self.graph._g.edges(data=True)))
         return graph
 
     def sub_graph_matching(self, subgraph, known_matches, validate=False):
@@ -89,4 +95,10 @@ class NXAlgorithm(GraphAlgorithm):
 
         graph = NXGraph('graph')
         graph._g = self.graph._g.subgraph(vertices_ids)
+        LOG.debug('match query, find graph: nodes %s, edges %s',
+                  str(graph._g.nodes(data=True)),
+                  str(graph._g.edges(data=True)))
+        LOG.debug('match query, real graph: nodes %s, edges %s',
+                  str(self.graph._g.nodes(data=True)),
+                  str(self.graph._g.edges(data=True)))
         return graph
