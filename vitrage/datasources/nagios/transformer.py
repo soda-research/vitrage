@@ -19,10 +19,8 @@ from vitrage.common.constants import EdgeLabel
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.common import datetime_utils
-from vitrage.datasources.alarm_properties import AlarmProperties as AlarmProps
 from vitrage.datasources.alarm_transformer_base import AlarmTransformerBase
 from vitrage.datasources.nagios.properties import NagiosProperties
-from vitrage.datasources.nagios.properties import NagiosStatus
 from vitrage.datasources.nova.host import NOVA_HOST_DATASOURCE
 from vitrage.datasources.static_physical import SWITCH
 from vitrage.datasources import transformer_base as tbase
@@ -57,13 +55,9 @@ class NagiosTransformer(AlarmTransformerBase):
         update_timestamp = self._format_update_timestamp(update_timestamp,
                                                          sample_timestamp)
 
-        severity = entity_event[NagiosProperties.STATUS]
-        entity_state = AlarmProps.ALARM_INACTIVE_STATE if \
-            severity == NagiosStatus.OK else AlarmProps.ALARM_ACTIVE_STATE
-
         metadata = {
             VProps.NAME: entity_event[NagiosProperties.SERVICE],
-            VProps.SEVERITY: severity,
+            VProps.SEVERITY: entity_event[NagiosProperties.STATUS],
             VProps.INFO: entity_event[NagiosProperties.STATUS_INFO]
         }
 
@@ -71,7 +65,7 @@ class NagiosTransformer(AlarmTransformerBase):
             self._create_entity_key(entity_event),
             entity_category=EntityCategory.ALARM,
             entity_type=entity_event[DSProps.SYNC_TYPE],
-            entity_state=entity_state,
+            entity_state=self._get_alarm_state(entity_event),
             sample_timestamp=sample_timestamp,
             update_timestamp=update_timestamp,
             metadata=metadata)

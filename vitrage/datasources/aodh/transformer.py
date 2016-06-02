@@ -18,7 +18,6 @@ from vitrage.common.constants import EdgeLabel
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.common import datetime_utils
-from vitrage.datasources.alarm_properties import AlarmProperties as AlarmProps
 from vitrage.datasources.alarm_transformer_base import AlarmTransformerBase
 from vitrage.datasources.aodh.properties import AodhProperties as AodhProps
 from vitrage.datasources import transformer_base as tbase
@@ -73,7 +72,7 @@ class AodhTransformer(AlarmTransformerBase):
             entity_id=entity_event[AodhProps.ALARM_ID],
             entity_category=EntityCategory.ALARM,
             entity_type=entity_event[DSProps.SYNC_TYPE],
-            entity_state=AlarmProps.ALARM_ACTIVE_STATE,
+            entity_state=self._get_alarm_state(entity_event),
             sample_timestamp=sample_timestamp,
             update_timestamp=update_timestamp,
             metadata=metadata)
