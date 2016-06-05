@@ -13,6 +13,7 @@
 from vitrage.api.controllers.v1 import alarms
 from vitrage.api.controllers.v1 import rca
 from vitrage.api.controllers.v1 import resource
+from vitrage.api.controllers.v1 import template
 from vitrage.api.controllers.v1 import topology
 
 
@@ -21,3 +22,4 @@ class V1Controller(object):
     resources = resource.ResourcesController()
     alarms = alarms.AlarmsController()
     rca = rca.RCAController()
+    template = template.TemplateController()

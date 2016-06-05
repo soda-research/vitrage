@@ -23,6 +23,8 @@ from vitrage.datasources.nova.host import NOVA_HOST_DATASOURCE
 from vitrage.datasources.nova.instance import NOVA_INSTANCE_DATASOURCE
 from vitrage.datasources.nova.zone import NOVA_ZONE_DATASOURCE
 from vitrage.datasources import OPENSTACK_CLUSTER
+from vitrage.evaluator.template_validation.template_syntax_validator import \
+    syntax_validation
 from vitrage.graph import create_algorithm
 from vitrage.graph import Direction
 
@@ -112,7 +114,7 @@ class EntityGraphApis(object):
             root_id=root,
             depth=depth)
 
-        return found_graph.output_graph()
+        return found_graph.json_output_graph()
 
     def get_rca(self, ctx, root):
         LOG.debug("EntityGraphApis get_rca root:%s", str(root))
@@ -128,7 +130,7 @@ class EntityGraphApis(object):
             direction=Direction.OUT)
         unified_graph = found_graph_in
         unified_graph.union(found_graph_out)
-        json_graph = unified_graph.output_graph(
+        json_graph = unified_graph.json_output_graph(
             inspected_index=self._find_rca_index(unified_graph, root))
         return json_graph
 
@@ -168,3 +170,26 @@ class EntityGraphApis(object):
             if vertex == root:
                 return root_index
         return 0
+
+
+class TemplateApis(object):
+
+    def validate_template(self, ctx, template_def):
+        LOG.debug("EntityGraphApis validate_template template definition:"
+                  "%s", str(template_def))
+
+        result = syntax_validation(template_def)
+
+        if not result.is_valid:
+            return self._extract_json_result('validation failed', result)
+
+        return self._extract_json_result('validation OK', result)
+
+    @staticmethod
+    def _extract_json_result(status, result):
+
+        return json.dumps({
+            'status': status,
+            'description': result.description,
+            'message': str(result.comment)
+        })

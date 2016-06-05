@@ -323,7 +323,7 @@ class Graph(object):
         pass
 
     @abc.abstractmethod
-    def output_graph(self, **kwargs):
+    def json_output_graph(self, **kwargs):
         pass
 
     @abc.abstractmethod

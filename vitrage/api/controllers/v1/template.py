@@ -11,7 +11,6 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-
 import json
 import pecan
 
@@ -20,47 +19,40 @@ from pecan.core import abort
 
 from vitrage.api.controllers.rest import RootRestController
 from vitrage.api.policy import enforce
-# noinspection PyProtectedMember
 from vitrage.i18n import _LI
 
 
 LOG = log.getLogger(__name__)
 
 
-class AlarmsController(RootRestController):
+class TemplateController(RootRestController):
 
     @pecan.expose('json')
-    def index(self, vitrage_id=None):
-        return self.post(vitrage_id)
+    def post(self, **kwargs):
 
-    @pecan.expose('json')
-    def post(self, vitrage_id):
-        enforce("list alarms", pecan.request.headers,
-                pecan.request.enforcer, {})
+        LOG.info(_LI('validate template. args: %s') % kwargs)
 
-        LOG.info(_LI('returns list alarms with vitrage id %s') %
-                 vitrage_id)
+        enforce("template validate",
+                pecan.request.headers,
+                pecan.request.enforcer,
+                {})
+
+        template_def = kwargs['template_def']
 
         try:
-            if pecan.request.cfg.api.use_mock_file:
-                return self.get_mock_data('alarms.sample.json')
-            else:
-                return self._get_alarms(vitrage_id)
+            return self._validate(template_def)
         except Exception as e:
-            LOG.exception('failed to get alarms %s', e)
+            LOG.exception('failed to validate template(s) %s', e)
             abort(404, str(e))
 
     @staticmethod
-    def _get_alarms(vitrage_id=None):
-        alarms_json = pecan.request.client.call(pecan.request.context,
-                                                'get_alarms',
-                                                arg=vitrage_id)
-        LOG.info(alarms_json)
+    def _validate(template_def):
 
+        result_json = pecan.request.client.call(pecan.request.context,
+                                                'validate_template',
+                                                template_def=template_def)
         try:
-            alarms_list = json.loads(alarms_json)['alarms']
-            return alarms_list
-
+            return json.loads(result_json)
         except Exception as e:
             LOG.exception('failed to open file %s ', e)
             abort(404, str(e))

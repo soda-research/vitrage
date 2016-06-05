@@ -18,49 +18,49 @@ from vitrage.evaluator.actions.base import action_types
 error_msgs = {
 
     # General 1-19
-    1: '"template_id" field contains incorrect string value.',
+    1: 'template_id field contains incorrect string value.',
     2: 'Duplicate template_id definition.',
-    3: '"template_id" does not appear in the definition block.',
+    3: 'template_id does not appear in the definition block.',
 
     # definitions section 20-39
-    20: 'definitions section must contain "entities" field.',
-    21: '"definitions" section is a mandatory section.',
+    20: 'definitions section must contain entities field.',
+    21: 'definitions section is a mandatory section.',
 
     # Entities syntax error messages 40-59
-    41: 'Entity definition must contain "template_id" field.',
-    42: 'Entity definition must contain "category" field.',
+    41: 'Entity definition must contain template_id field.',
+    42: 'Entity definition must contain category field.',
     43: 'At least one entity must be defined.',
     45: 'Invalid entity category. Category must be from types: '
         '%s' % entities_categories,
     46: 'Entity field is required.',
 
     # metadata section syntax error messages 60-79
-    60: 'metadata section must contain "id" field.',
-    62: '"metadata" is a mandatory section.',
+    60: 'metadata section must contain id field.',
+    62: 'metadata is a mandatory section.',
 
     # scenarios section 80-99
-    80: '"scenarios" is a mandatory section].',
+    80: 'scenarios is a mandatory section].',
     81: 'At least one scenario must be defined.',
     82: 'scenario field is required.',
-    83: 'Entity definition must contain "condition" field.',
-    84: 'Entity definition must contain "actions" field.',
+    83: 'Entity definition must contain condition field.',
+    84: 'Entity definition must contain actions field.',
     85: 'Failed to convert condition.',
 
     # relationships syntax error messages 100-119
     100: 'Invalid relation type. Relation type must be from types: '
          '%s' % edge_labels,
     101: 'Relationship field is required.',
-    102: 'Relationship definition must contain "source" field.',
-    103: 'Relationship definition must contain "target" field.',
-    104: 'Relationship definition must contain "template_id" field.',
+    102: 'Relationship definition must contain source field.',
+    103: 'Relationship definition must contain target field.',
+    104: 'Relationship definition must contain template_id field.',
 
     # actions syntax error messages 120-139
     120: 'Invalid action type. Action type must be from types: '
          '%s' % action_types,
     121: 'At least one action must be defined.',
     122: 'Action field is required.',
-    123: 'Relationship definition must contain "action_type" field.',
-    124: 'Relationship definition must contain "action_target" field.',
+    123: 'Relationship definition must contain action_type field.',
+    124: 'Relationship definition must contain action_target field.',
     125: 'raise_alarm action must contain alarm_name field in properties '
          'block.',
     126: 'raise_alarm action must contain severity field in properties block.',

@@ -19,10 +19,10 @@ import sys
 
 from oslo_service import service as os_service
 
+from vitrage.api_handler import service as api_handler_svc
 from vitrage.common.constants import EntityCategory
 from vitrage.datasources import launcher as datasource_launcher
 from vitrage.datasources import OPENSTACK_CLUSTER
-from vitrage.entity_graph.api_handler import service as api_handler_svc
 from vitrage.entity_graph.consistency import service as consistency_svc
 from vitrage.entity_graph.initialization_status import InitializationStatus
 from vitrage.entity_graph.processor import entity_graph
