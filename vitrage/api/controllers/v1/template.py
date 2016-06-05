@@ -37,22 +37,22 @@ class TemplateController(RootRestController):
                 pecan.request.enforcer,
                 {})
 
-        template_def = kwargs['template_def']
+        templates = kwargs['templates']
 
         try:
-            return self._validate(template_def)
+            return self._validate(templates)
         except Exception as e:
             LOG.exception('failed to validate template(s) %s', e)
             abort(404, str(e))
 
     @staticmethod
-    def _validate(template_def):
+    def _validate(templates):
 
         result_json = pecan.request.client.call(pecan.request.context,
                                                 'validate_template',
-                                                template_def=template_def)
+                                                templates=templates)
         try:
             return json.loads(result_json)
         except Exception as e:
-            LOG.exception('failed to open file %s ', e)
+            LOG.exception('failed to open template file(s) %s ', e)
             abort(404, str(e))

@@ -17,8 +17,8 @@ from oslo_log import log
 import oslo_messaging
 from oslo_service import service as os_service
 
-from vitrage.api_handler.entity_graph_api import EntityGraphApis
-from vitrage.api_handler.entity_graph_api import TemplateApis
+from vitrage.api_handler.apis import EntityGraphApis
+from vitrage.api_handler.apis import TemplateApis
 from vitrage import messaging
 from vitrage import rpc as vitrage_rpc
 

@@ -23,6 +23,8 @@ from vitrage.datasources.nova.host import NOVA_HOST_DATASOURCE
 from vitrage.datasources.nova.instance import NOVA_INSTANCE_DATASOURCE
 from vitrage.datasources.nova.zone import NOVA_ZONE_DATASOURCE
 from vitrage.datasources import OPENSTACK_CLUSTER
+from vitrage.evaluator.template_validation.template_content_validator import \
+    content_validation
 from vitrage.evaluator.template_validation.template_syntax_validator import \
     syntax_validation
 from vitrage.graph import create_algorithm
@@ -174,22 +176,51 @@ class EntityGraphApis(object):
 
 class TemplateApis(object):
 
-    def validate_template(self, ctx, template_def):
-        LOG.debug("EntityGraphApis validate_template template definition:"
-                  "%s", str(template_def))
+    FAILED_MSG = 'validation failed'
+    OK_MSG = 'validation OK'
 
-        result = syntax_validation(template_def)
+    def validate_template(self, ctx, templates):
+        LOG.debug("EntityGraphApis validate_template templates:"
+                  "%s", str(templates))
 
-        if not result.is_valid:
-            return self._extract_json_result('validation failed', result)
+        results = []
+        for template in templates:
 
-        return self._extract_json_result('validation OK', result)
+            template_def = template[1]
+            path = template[0]
+
+            syntax_result = syntax_validation(template_def)
+            if not syntax_result.is_valid:
+                self._add_result(path,
+                                 self.FAILED_MSG,
+                                 syntax_result.description,
+                                 str(syntax_result.comment),
+                                 results)
+                continue
+
+            content_result = content_validation(template_def)
+            if not content_result.is_valid:
+                self._add_result(path,
+                                 self.FAILED_MSG,
+                                 content_result.description,
+                                 str(content_result.comment),
+                                 results)
+                continue
+
+            self._add_result(path,
+                             self.OK_MSG,
+                             'Template validation',
+                             'Template validation is OK',
+                             results)
+
+        return json.dumps({'results': results})
 
     @staticmethod
-    def _extract_json_result(status, result):
+    def _add_result(template_path, status, description, message, results):
 
-        return json.dumps({
+        results.append({
+            'file path': template_path,
             'status': status,
-            'description': result.description,
-            'message': str(result.comment)
+            'description': description,
+            'message': str(message)
         })
