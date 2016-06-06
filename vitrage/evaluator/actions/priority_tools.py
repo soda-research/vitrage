@@ -34,7 +34,7 @@ class RaiseAlarmTools(object):
 
     def get_score(self, action_info):
         severity = action_info.specs.properties[TemplateFields.SEVERITY]
-        return self.scores[severity.upper()]
+        return self.scores.get(severity.upper(), 0)
 
     @staticmethod
     def get_key(action_specs):
@@ -51,7 +51,7 @@ class SetStateTools(object):
     def get_score(self, action_info):
         state = action_info.specs.properties[TemplateFields.STATE].upper()
         target_resource = action_info.specs.targets[TemplateFields.TARGET]
-        return self.scores[target_resource[VProps.TYPE]][state]
+        return self.scores[target_resource[VProps.TYPE]].get(state, 0)
 
     @staticmethod
     def get_key(action_specs):
