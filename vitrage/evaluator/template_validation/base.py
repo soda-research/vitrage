@@ -13,7 +13,17 @@
 # under the License.
 from collections import namedtuple
 from oslo_log import log
+from vitrage.evaluator.template_validation.error_messages import error_msgs
 
 LOG = log.getLogger(__name__)
 
-Result = namedtuple('Result', ['description', 'is_valid', 'comment'])
+Result = namedtuple('Result', ['description', 'is_valid', 'error_code',
+                               'comment'])
+
+
+def get_correct_result(description):
+    return Result(description, True, 4, error_msgs[4])
+
+
+def get_fault_result(description, code):
+    return Result(description, False, code, error_msgs[code])

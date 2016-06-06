@@ -21,8 +21,6 @@ from vitrage.evaluator.template_fields import TemplateFields
 from vitrage.evaluator.template_validation.error_messages import error_msgs
 from vitrage.evaluator.template_validation import template_content_validator \
     as validator
-from vitrage.evaluator.template_validation.template_content_validator import \
-    CORRECT_RESULT_MESSAGE
 from vitrage.tests import base
 from vitrage.tests.mocks import utils
 
@@ -56,8 +54,7 @@ class TemplateContentValidatorTest(base.BaseTest):
             entity_dict = entity[TemplateFields.ENTITY]
             entity_dict[TemplateFields.TEMPLATE_ID] = 'aaa'
 
-        self._test_execute_and_assert_with_fault_result(template,
-                                                        error_msgs[2])
+        self._test_execute_and_assert_with_fault_result(template, 2)
 
     def test_validate_relationship_with_no_unique_template_id(self):
 
@@ -69,8 +66,7 @@ class TemplateContentValidatorTest(base.BaseTest):
         relationship_dict = relationship[TemplateFields.RELATIONSHIP]
         relationship_dict[TemplateFields.TEMPLATE_ID] = entity_id
 
-        self._test_execute_and_assert_with_fault_result(template,
-                                                        error_msgs[2])
+        self._test_execute_and_assert_with_fault_result(template, 2)
 
     def test_validate_relationship_with_invalid_target(self):
 
@@ -80,8 +76,7 @@ class TemplateContentValidatorTest(base.BaseTest):
         relationship_dict = relationship[TemplateFields.RELATIONSHIP]
         relationship_dict[TemplateFields.TARGET] = 'unknown'
 
-        self._test_execute_and_assert_with_fault_result(template,
-                                                        error_msgs[3])
+        self._test_execute_and_assert_with_fault_result(template, 3)
 
     def test_validate_relationship_with_invalid_source(self):
 
@@ -91,8 +86,7 @@ class TemplateContentValidatorTest(base.BaseTest):
         relationship_dict = relationship[TemplateFields.RELATIONSHIP]
         relationship_dict[TemplateFields.SOURCE] = 'unknown'
 
-        self._test_execute_and_assert_with_fault_result(template,
-                                                        error_msgs[3])
+        self._test_execute_and_assert_with_fault_result(template, 3)
 
     def test_validate_scenario_invalid_condition(self):
 
@@ -101,29 +95,23 @@ class TemplateContentValidatorTest(base.BaseTest):
         scenario_dict = scenario[TemplateFields.SCENARIO]
 
         scenario_dict[TemplateFields.CONDITION] = 'and resource'
-        self._test_execute_and_assert_with_fault_result(template,
-                                                        error_msgs[85])
+        self._test_execute_and_assert_with_fault_result(template, 85)
 
         scenario_dict[TemplateFields.CONDITION] = 'resource or'
-        self._test_execute_and_assert_with_fault_result(template,
-                                                        error_msgs[85])
+        self._test_execute_and_assert_with_fault_result(template, 85)
 
         scenario_dict[TemplateFields.CONDITION] = 'not or resource'
-        self._test_execute_and_assert_with_fault_result(template,
-                                                        error_msgs[85])
+        self._test_execute_and_assert_with_fault_result(template, 85)
 
         scenario_dict[TemplateFields.CONDITION] = \
             'alarm_on_host (alarm or resource'
-        self._test_execute_and_assert_with_fault_result(template,
-                                                        error_msgs[85])
+        self._test_execute_and_assert_with_fault_result(template, 85)
 
         scenario_dict[TemplateFields.CONDITION] = 'aaa'
-        self._test_execute_and_assert_with_fault_result(template,
-                                                        error_msgs[3])
+        self._test_execute_and_assert_with_fault_result(template, 3)
 
         scenario_dict[TemplateFields.CONDITION] = 'resource and aaa'
-        self._test_execute_and_assert_with_fault_result(template,
-                                                        error_msgs[3])
+        self._test_execute_and_assert_with_fault_result(template, 3)
 
     def test_validate_raise_alarm_action(self):
         # Test setup
@@ -146,7 +134,7 @@ class TemplateContentValidatorTest(base.BaseTest):
         result = validator.validate_raise_alarm_action(action, ids)
 
         # Test assertions
-        self._test_assert_with_fault_result(result, error_msgs[3])
+        self._test_assert_with_fault_result(result, 3)
 
     def test_validate_raise_alarm_action_without_target_id(self):
 
@@ -159,7 +147,7 @@ class TemplateContentValidatorTest(base.BaseTest):
         result = validator.validate_raise_alarm_action(action, ids)
 
         # Test assertions
-        self._test_assert_with_fault_result(result, error_msgs[127])
+        self._test_assert_with_fault_result(result, 127)
 
     def test_validate_raise_alarm_action_without_severity(self):
 
@@ -172,7 +160,7 @@ class TemplateContentValidatorTest(base.BaseTest):
         result = validator.validate_raise_alarm_action(action, ids)
 
         # Test assertions
-        self._test_assert_with_fault_result(result, error_msgs[126])
+        self._test_assert_with_fault_result(result, 126)
 
     def test_validate_raise_alarm_action_without_alarm_name(self):
 
@@ -185,7 +173,7 @@ class TemplateContentValidatorTest(base.BaseTest):
         result = validator.validate_raise_alarm_action(action, ids)
 
         # Test assertions
-        self._test_assert_with_fault_result(result, error_msgs[125])
+        self._test_assert_with_fault_result(result, 125)
 
     def test_validate_set_state_action(self):
 
@@ -209,7 +197,7 @@ class TemplateContentValidatorTest(base.BaseTest):
         result = validator.validate_set_state_action(action, ids)
 
         # Test assertions
-        self._test_assert_with_fault_result(result, error_msgs[3])
+        self._test_assert_with_fault_result(result, 3)
 
     def test_validate_set_state_action_without_target_id(self):
 
@@ -222,7 +210,7 @@ class TemplateContentValidatorTest(base.BaseTest):
         result = validator.validate_set_state_action(action, ids)
 
         # Test assertions
-        self._test_assert_with_fault_result(result, error_msgs[129])
+        self._test_assert_with_fault_result(result, 129)
 
     def test_validate_set_state_action_without_state_property(self):
 
@@ -235,7 +223,7 @@ class TemplateContentValidatorTest(base.BaseTest):
         result = validator.validate_set_state_action(action, ids)
 
         # Test assertions
-        self._test_assert_with_fault_result(result, error_msgs[128])
+        self._test_assert_with_fault_result(result, 128)
 
     def test_validate_add_causal_relationship_action(self):
 
@@ -259,7 +247,7 @@ class TemplateContentValidatorTest(base.BaseTest):
         result = validator.validate_add_causal_relationship_action(action, ids)
 
         # Test assertion
-        self._test_assert_with_fault_result(result, error_msgs[3])
+        self._test_assert_with_fault_result(result, 3)
 
     def test_validate_add_causal_relationship_action_without_target(self):
 
@@ -272,7 +260,7 @@ class TemplateContentValidatorTest(base.BaseTest):
         result = validator.validate_add_causal_relationship_action(action, ids)
 
         # Test assertion
-        self._test_assert_with_fault_result(result, error_msgs[130])
+        self._test_assert_with_fault_result(result, 130)
 
     def test_validate_add_causal_relationship_action_with_invalid_source(self):
 
@@ -284,7 +272,7 @@ class TemplateContentValidatorTest(base.BaseTest):
         result = validator.validate_add_causal_relationship_action(action, ids)
 
         # Test assertion
-        self._test_assert_with_fault_result(result, error_msgs[3])
+        self._test_assert_with_fault_result(result, 3)
 
     def test_validate_add_causal_relationship_action_without_source(self):
 
@@ -297,19 +285,18 @@ class TemplateContentValidatorTest(base.BaseTest):
         result = validator.validate_add_causal_relationship_action(action, ids)
 
         # Test assertion
-        self._test_assert_with_fault_result(result, error_msgs[130])
+        self._test_assert_with_fault_result(result, 130)
 
-    def _test_execute_and_assert_with_fault_result(self,
-                                                   template,
-                                                   expected_comment):
+    def _test_execute_and_assert_with_fault_result(self, template, error_code):
 
         result = validator.content_validation(template)
-        self._test_assert_with_fault_result(result, expected_comment)
+        self._test_assert_with_fault_result(result, error_code)
 
-    def _test_assert_with_fault_result(self, result, expected_comment):
+    def _test_assert_with_fault_result(self, result, error_code):
 
         self.assertFalse(result.is_valid)
-        self.assertTrue(str(result.comment).startswith(expected_comment))
+        self.assertEqual(result.comment, error_msgs[error_code])
+        self.assertEqual(result.error_code, error_code)
 
     def _test_execute_and_assert_with_correct_result(self, template):
 
@@ -319,7 +306,8 @@ class TemplateContentValidatorTest(base.BaseTest):
     def _test_assert_with_correct_result(self, result):
 
         self.assertTrue(result.is_valid)
-        self.assertEqual(result.comment, CORRECT_RESULT_MESSAGE)
+        self.assertEqual(result.comment, error_msgs[4])
+        self.assertEqual(result.error_code, 4)
 
     def _create_scenario_actions(self, target, source):
 

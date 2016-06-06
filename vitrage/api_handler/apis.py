@@ -23,6 +23,7 @@ from vitrage.datasources.nova.host import NOVA_HOST_DATASOURCE
 from vitrage.datasources.nova.instance import NOVA_INSTANCE_DATASOURCE
 from vitrage.datasources.nova.zone import NOVA_ZONE_DATASOURCE
 from vitrage.datasources import OPENSTACK_CLUSTER
+from vitrage.evaluator.template_validation.error_messages import error_msgs
 from vitrage.evaluator.template_validation.template_content_validator import \
     content_validation
 from vitrage.evaluator.template_validation.template_syntax_validator import \
@@ -194,7 +195,8 @@ class TemplateApis(object):
                 self._add_result(path,
                                  self.FAILED_MSG,
                                  syntax_result.description,
-                                 str(syntax_result.comment),
+                                 syntax_result.comment,
+                                 syntax_result.error_code,
                                  results)
                 continue
 
@@ -203,24 +205,28 @@ class TemplateApis(object):
                 self._add_result(path,
                                  self.FAILED_MSG,
                                  content_result.description,
-                                 str(content_result.comment),
+                                 content_result.comment,
+                                 content_result.error_code,
                                  results)
                 continue
 
             self._add_result(path,
                              self.OK_MSG,
                              'Template validation',
-                             'Template validation is OK',
+                             error_msgs[4],
+                             4,
                              results)
 
         return json.dumps({'results': results})
 
     @staticmethod
-    def _add_result(template_path, status, description, message, results):
+    def _add_result(template_path, status, description, message, error_code,
+                    results):
 
         results.append({
             'file path': template_path,
             'status': status,
             'description': description,
-            'message': str(message)
+            'message': str(message),
+            'error code': error_code
         })

@@ -19,8 +19,6 @@ from vitrage.common import file_utils
 from vitrage.evaluator.template_fields import TemplateFields
 from vitrage.evaluator.template_validation.error_messages import error_msgs
 from vitrage.evaluator.template_validation import template_syntax_validator
-from vitrage.evaluator.template_validation.template_syntax_validator import \
-    CORRECT_RESULT_MESSAGE
 from vitrage.tests import base
 from vitrage.tests.mocks import utils
 
@@ -51,41 +49,39 @@ class TemplateSyntaxValidatorTest(base.BaseTest):
 
         template = self.clone_template
         template.pop(TemplateFields.METADATA)
-        self._test_execution_with_fault_result(template, error_msgs[62])
+        self._test_execution_with_fault_result(template, 62)
 
     def test_validate_template_without_id_in_metadata_section(self):
 
         template = self.clone_template
         template[TemplateFields.METADATA].pop(TemplateFields.ID)
-        self._test_execution_with_fault_result(template, error_msgs[60])
+        self._test_execution_with_fault_result(template, 60)
 
     def test_validate_template_without_definitions_section(self):
 
         template = self.clone_template
         template.pop(TemplateFields.DEFINITIONS)
-        self._test_execution_with_fault_result(template, error_msgs[21])
+        self._test_execution_with_fault_result(template, 21)
 
     def test_validate_template_without_entities(self):
 
         template = self.clone_template
         template[TemplateFields.DEFINITIONS].pop(TemplateFields.ENTITIES)
-        self._test_execution_with_fault_result(template, error_msgs[20])
+        self._test_execution_with_fault_result(template, 20)
 
     def test_validate_template_with_empty_entities(self):
 
         template = self.clone_template
         template[TemplateFields.DEFINITIONS][TemplateFields.ENTITIES] = []
-        self._test_execution_with_fault_result(template, error_msgs[43])
+        self._test_execution_with_fault_result(template, 43)
 
     def test_validate_entity_without_required_fields(self):
 
         self._validate_entity_without_required_field(
-            TemplateFields.CATEGORY,
-            error_msgs[42])
+            TemplateFields.CATEGORY, 42)
 
         self._validate_entity_without_required_field(
-            TemplateFields.TEMPLATE_ID,
-            error_msgs[41])
+            TemplateFields.TEMPLATE_ID, 41)
 
     def _validate_entity_without_required_field(self,
                                                 field_name,
@@ -104,15 +100,15 @@ class TemplateSyntaxValidatorTest(base.BaseTest):
 
         # template_id as integer
         entity[TemplateFields.ENTITY][TemplateFields.TEMPLATE_ID] = 1
-        self._test_execution_with_fault_result(template, error_msgs[1])
+        self._test_execution_with_fault_result(template, 1)
 
         # template_id as string with numbers
         entity[TemplateFields.ENTITY][TemplateFields.TEMPLATE_ID] = '123'
-        self._test_execution_with_fault_result(template, error_msgs[1])
+        self._test_execution_with_fault_result(template, 1)
 
         # template_id as string with numbers
         entity[TemplateFields.ENTITY][TemplateFields.TEMPLATE_ID] = '_'
-        self._test_execution_with_fault_result(template, error_msgs[1])
+        self._test_execution_with_fault_result(template, 1)
 
     def test_validate_correct_template_id_value(self):
 
@@ -139,18 +135,18 @@ class TemplateSyntaxValidatorTest(base.BaseTest):
         entity = definitions[TemplateFields.ENTITIES][0]
         entity[TemplateFields.ENTITY][TemplateFields.CATEGORY] = 'unknown'
 
-        self._test_execution_with_fault_result(template, error_msgs[45])
+        self._test_execution_with_fault_result(template, 45)
 
     def test_validate_relationships_without_required_fields(self):
 
         self._validate_relationships_with_missing_required_field(
-            TemplateFields.SOURCE, error_msgs[102])
+            TemplateFields.SOURCE, 102)
 
         self._validate_relationships_with_missing_required_field(
-            TemplateFields.TARGET, error_msgs[103])
+            TemplateFields.TARGET, 103)
 
         self._validate_relationships_with_missing_required_field(
-            TemplateFields.TEMPLATE_ID, error_msgs[104])
+            TemplateFields.TEMPLATE_ID, 104)
 
     def _validate_relationships_with_missing_required_field(self,
                                                             field_name,
@@ -170,40 +166,40 @@ class TemplateSyntaxValidatorTest(base.BaseTest):
         relationship_dict = relationship[TemplateFields.RELATIONSHIP]
         relationship_dict[TemplateFields.RELATIONSHIP_TYPE] = 'unknown'
 
-        self._test_execution_with_fault_result(template, error_msgs[100])
+        self._test_execution_with_fault_result(template, 100)
 
     def test_validate_template_without_scenarios_section(self):
 
         template = self.clone_template
         template.pop(TemplateFields.SCENARIOS)
-        self._test_execution_with_fault_result(template, error_msgs[80])
+        self._test_execution_with_fault_result(template, 80)
 
     def test_validate_template_with_empty_scenarios(self):
 
         template = self.clone_template
         template[TemplateFields.SCENARIOS] = []
-        self._test_execution_with_fault_result(template, error_msgs[81])
+        self._test_execution_with_fault_result(template, 81)
 
     def test_validate_scenario_without_required_condition_field(self):
 
         template = self.clone_template
         scenario = template[TemplateFields.SCENARIOS][0]
         scenario[TemplateFields.SCENARIO].pop(TemplateFields.CONDITION)
-        self._test_execution_with_fault_result(template, error_msgs[83])
+        self._test_execution_with_fault_result(template, 83)
 
     def test_validate_scenario_without_required_actions_field(self):
 
         template = self.clone_template
         scenario = template[TemplateFields.SCENARIOS][0]
         scenario[TemplateFields.SCENARIO].pop(TemplateFields.ACTIONS)
-        self._test_execution_with_fault_result(template, error_msgs[84])
+        self._test_execution_with_fault_result(template, 84)
 
     def test_validate_template_with_no_actions(self):
 
         template = self.clone_template
         scenario = template[TemplateFields.SCENARIOS][0]
         scenario[TemplateFields.SCENARIO][TemplateFields.ACTIONS] = []
-        self._test_execution_with_fault_result(template, error_msgs[121])
+        self._test_execution_with_fault_result(template, 121)
 
     def _test_validate_action_without_required_fields(self):
 
@@ -234,14 +230,15 @@ class TemplateSyntaxValidatorTest(base.BaseTest):
 
         self._test_execution_with_fault_result(template, error_msgs[100])
 
-    def _test_execution_with_fault_result(self, template, expected_comment):
+    def _test_execution_with_fault_result(self, template, expected_code):
 
         # Test action
         result = template_syntax_validator.syntax_validation(template)
 
         # Test assertions
         self.assertFalse(result.is_valid)
-        self.assertTrue(str(result.comment).startswith(expected_comment))
+        self.assertTrue(result.comment.startswith(error_msgs[expected_code]))
+        self.assertEqual(result.error_code, expected_code)
 
     def _test_execution_with_correct_result(self, template):
 
@@ -250,4 +247,5 @@ class TemplateSyntaxValidatorTest(base.BaseTest):
 
         # Test assertions
         self.assertTrue(result.is_valid)
-        self.assertEqual(result.comment, CORRECT_RESULT_MESSAGE)
+        self.assertEqual(result.comment, error_msgs[4])
+        self.assertEqual(result.error_code, 4)

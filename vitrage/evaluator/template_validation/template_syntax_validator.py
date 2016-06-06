@@ -26,14 +26,14 @@ from vitrage.common.constants import edge_labels
 from vitrage.common.constants import entities_categories
 from vitrage.evaluator.actions.base import action_types
 from vitrage.evaluator.template_fields import TemplateFields
-from vitrage.evaluator.template_validation.base import Result
+from vitrage.evaluator.template_validation.base import get_correct_result
+from vitrage.evaluator.template_validation.base import get_fault_result
 from vitrage.evaluator.template_validation.error_messages import error_msgs
 
 LOG = log.getLogger(__name__)
 
 
 RESULT_DESCRIPTION = 'Template syntax validation'
-CORRECT_RESULT_MESSAGE = 'Template syntax is OK'
 
 
 def syntax_validation(template_conf):
@@ -58,9 +58,9 @@ def syntax_validation(template_conf):
 def validate_template_sections(template_conf):
 
     schema = Schema({
-        Required(TemplateFields.DEFINITIONS, msg=error_msgs[21]): dict,
-        Required(TemplateFields.METADATA, msg=error_msgs[62]): dict,
-        Required(TemplateFields.SCENARIOS, msg=error_msgs[80]): list
+        Required(TemplateFields.DEFINITIONS, msg=21): dict,
+        Required(TemplateFields.METADATA, msg=62): dict,
+        Required(TemplateFields.SCENARIOS, msg=80): list
     })
     return _validate_dict_schema(schema, template_conf)
 
@@ -70,7 +70,7 @@ def validate_metadata_section(metadata):
     any_str = Any(str, six.text_type)
 
     schema = Schema({
-        Required(TemplateFields.ID, msg=error_msgs[60]): any_str,
+        Required(TemplateFields.ID, msg=60): any_str,
         TemplateFields.DESCRIPTION: any_str
     })
     return _validate_dict_schema(schema, metadata)
@@ -79,7 +79,7 @@ def validate_metadata_section(metadata):
 def validate_definitions_section(definitions):
 
     schema = Schema({
-        Required(TemplateFields.ENTITIES, error_msgs[20]): list,
+        Required(TemplateFields.ENTITIES, msg=20): list,
         TemplateFields.RELATIONSHIPS: list
     })
     result = _validate_dict_schema(schema, definitions)
@@ -97,13 +97,13 @@ def validate_definitions_section(definitions):
 def validate_entities(entities):
 
     if not entities:
-        LOG.error(error_msgs[43])
-        return _get_fault_result(error_msgs[43])
+        LOG.error('%s error code: %s' % (error_msgs[43], 43))
+        return get_fault_result(RESULT_DESCRIPTION, 43)
 
     for entity in entities:
 
         schema = Schema({
-            Required(TemplateFields.ENTITY, msg=error_msgs[46]): dict,
+            Required(TemplateFields.ENTITY, msg=46): dict,
         })
         result = _validate_dict_schema(schema, entity)
 
@@ -120,10 +120,10 @@ def validate_entity_dict(entity_dict):
 
     any_str = Any(str, six.text_type)
     schema = Schema({
-        Required(TemplateFields.CATEGORY, msg=error_msgs[42]):
+        Required(TemplateFields.CATEGORY, msg=42):
             All(_validate_category_field()),
         TemplateFields.TYPE: any_str,
-        Required(TemplateFields.TEMPLATE_ID, msg=error_msgs[41]):
+        Required(TemplateFields.TEMPLATE_ID, msg=41):
             All(_validate_template_id_value())
     }, extra=True)
 
@@ -135,7 +135,7 @@ def validate_relationships(relationships):
     for relationship in relationships:
 
         schema = Schema({
-            Required(TemplateFields.RELATIONSHIP, msg=error_msgs[101]): dict,
+            Required(TemplateFields.RELATIONSHIP, msg=101): dict,
         })
         result = _validate_dict_schema(schema, relationship)
 
@@ -152,10 +152,10 @@ def validate_relationship_dict(relationship_dict):
 
     any_str = Any(str, six.text_type)
     schema = Schema({
-        Required(TemplateFields.SOURCE, msg=error_msgs[102]): any_str,
-        Required(TemplateFields.TARGET, msg=error_msgs[103]): any_str,
+        Required(TemplateFields.SOURCE, msg=102): any_str,
+        Required(TemplateFields.TARGET, msg=103): any_str,
         TemplateFields.RELATIONSHIP_TYPE: _validate_relationship_type_field(),
-        Required(TemplateFields.TEMPLATE_ID, msg=error_msgs[104]):
+        Required(TemplateFields.TEMPLATE_ID, msg=104):
             All(_validate_template_id_value())
     })
     return _validate_dict_schema(schema, relationship_dict)
@@ -164,13 +164,13 @@ def validate_relationship_dict(relationship_dict):
 def validate_scenarios_section(scenarios):
 
     if not scenarios:
-        LOG.error(error_msgs[81])
-        return _get_fault_result(error_msgs[81])
+        LOG.error('%s error code: %s' % (error_msgs[81], 81))
+        return get_fault_result(RESULT_DESCRIPTION, 81)
 
     for scenario in scenarios:
 
         schema = Schema({
-            Required(TemplateFields.SCENARIO, msg=error_msgs[82]): dict,
+            Required(TemplateFields.SCENARIO, msg=82): dict,
         })
         result = _validate_dict_schema(schema, scenario)
 
@@ -187,8 +187,8 @@ def validate_scenario(scenario):
 
     any_str = Any(str, six.text_type)
     schema = Schema({
-        Required(TemplateFields.CONDITION, msg=error_msgs[83]): any_str,
-        Required(TemplateFields.ACTIONS, msg=error_msgs[84]): list
+        Required(TemplateFields.CONDITION, msg=83): any_str,
+        Required(TemplateFields.ACTIONS, msg=84): list
     })
     result = _validate_dict_schema(schema, scenario)
 
@@ -201,13 +201,13 @@ def validate_scenario(scenario):
 def validate_actions_schema(actions):
 
     if not actions:
-        LOG.error(error_msgs[121])
-        return _get_fault_result(error_msgs[121])
+        LOG.error('%s error code: %s' % (error_msgs[121], 121))
+        return get_fault_result(RESULT_DESCRIPTION, 121)
 
     for action in actions:
 
         schema = Schema({
-            Required(TemplateFields.ACTION, msg=error_msgs[122]): dict,
+            Required(TemplateFields.ACTION, msg=122): dict,
         })
         result = _validate_dict_schema(schema, action)
 
@@ -223,10 +223,10 @@ def validate_actions_schema(actions):
 def validate_action_schema(action):
 
     schema = Schema({
-        Required(TemplateFields.ACTION_TYPE, msg=error_msgs[123]):
+        Required(TemplateFields.ACTION_TYPE, msg=123):
             _validate_action_type_field(),
         TemplateFields.PROPERTIES: dict,
-        Required(TemplateFields.ACTION_TARGET, msg=error_msgs[124]): dict
+        Required(TemplateFields.ACTION_TARGET, msg=124): dict
     })
     return _validate_dict_schema(schema, action)
 
@@ -236,18 +236,11 @@ def _validate_dict_schema(schema, value):
     try:
         schema(value)
     except Error as e:
-        LOG.error(e)
-        return _get_fault_result(e)
+        error_code = int(str(e).split(' ')[0].strip())
+        LOG.error('%s error code: %s' % (error_msgs[error_code], error_code))
+        return get_fault_result(RESULT_DESCRIPTION, error_code)
 
-    return _get_correct_result()
-
-
-def _get_fault_result(comment):
-    return Result(RESULT_DESCRIPTION, False, comment)
-
-
-def _get_correct_result():
-    return Result(RESULT_DESCRIPTION, True, 'Template syntax is OK')
+    return get_correct_result(RESULT_DESCRIPTION)
 
 
 def _validate_template_id_value(msg=None):
@@ -255,7 +248,7 @@ def _validate_template_id_value(msg=None):
         if re.match("_*[a-zA-Z]+\\w*", str(v)):
             return str(v)
         else:
-            raise Invalid(msg or error_msgs[1])
+            raise Invalid(msg or 1)
     return f
 
 
@@ -264,7 +257,7 @@ def _validate_category_field(msg=None):
         if str(v) in entities_categories:
             return str(v)
         else:
-            raise Invalid(msg or error_msgs[45])
+            raise Invalid(msg or 45)
     return f
 
 
@@ -273,7 +266,7 @@ def _validate_relationship_type_field(msg=None):
         if str(v) in edge_labels:
             return str(v)
         else:
-            raise Invalid(msg or error_msgs[100])
+            raise Invalid(msg or 100)
     return f
 
 
@@ -282,5 +275,5 @@ def _validate_action_type_field(msg=None):
         if str(v) in action_types:
             return str(v)
         else:
-            raise Invalid(msg or error_msgs[120])
+            raise Invalid(msg or 120)
     return f
