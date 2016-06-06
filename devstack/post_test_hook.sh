@@ -29,7 +29,10 @@ fi
 (cd $DEVSTACK_PATH/tempest/; sudo pip install -r requirements.txt -r test-requirements.txt)
 
 (cd $DEVSTACK_PATH/tempest/; sudo oslo-config-generator --config-file  etc/config-generator.tempest.conf  --output-file etc/tempest.conf)
-(cd $DEVSTACK_PATH/; sudo sh -c 'cat vitrage/devstack/files/tempest/tempest.conf >> tempest/etc/tempest.conf')
+(cd $DEVSTACK_PATH/; sudo sh -c 'cp -rf vitrage/devstack/files/tempest/tempest.conf /etc/tempest.conf')
+(cd $DEVSTACK_PATH/; sudo sh -c 'cp -rf vitrage/vitrage_tempest_tests/tests/resources/static_physical/* /etc/vitrage/static_datasources/')
+(cd $DEVSTACK_PATH/; sudo sh -c 'cp -rf vitrage/vitrage_tempest_tests/tests/resources/templates/api/* /etc/vitrage/templates/')
+
 
 sudo cp $DEVSTACK_PATH/tempest/etc/logging.conf.sample $DEVSTACK_PATH/tempest/etc/logging.conf
 
