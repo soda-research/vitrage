@@ -238,7 +238,7 @@ class TemplateSyntaxValidatorTest(base.BaseTest):
         # Test assertions
         self.assertFalse(result.is_valid)
         self.assertTrue(result.comment.startswith(error_msgs[expected_code]))
-        self.assertEqual(result.error_code, expected_code)
+        self.assertEqual(result.status_code, expected_code)
 
     def _test_execution_with_correct_result(self, template):
 
@@ -248,4 +248,4 @@ class TemplateSyntaxValidatorTest(base.BaseTest):
         # Test assertions
         self.assertTrue(result.is_valid)
         self.assertEqual(result.comment, error_msgs[4])
-        self.assertEqual(result.error_code, 4)
+        self.assertEqual(result.status_code, 4)

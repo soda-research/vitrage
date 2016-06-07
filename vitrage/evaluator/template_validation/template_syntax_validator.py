@@ -236,9 +236,9 @@ def _validate_dict_schema(schema, value):
     try:
         schema(value)
     except Error as e:
-        error_code = int(str(e).split(' ')[0].strip())
-        LOG.error('%s error code: %s' % (error_msgs[error_code], error_code))
-        return get_fault_result(RESULT_DESCRIPTION, error_code)
+        status_code = int(str(e).split(' ')[0].strip())
+        LOG.error('%s error code: %s' % (error_msgs[status_code], status_code))
+        return get_fault_result(RESULT_DESCRIPTION, status_code)
 
     return get_correct_result(RESULT_DESCRIPTION)
 

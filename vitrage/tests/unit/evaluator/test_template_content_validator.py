@@ -287,16 +287,18 @@ class TemplateContentValidatorTest(base.BaseTest):
         # Test assertion
         self._test_assert_with_fault_result(result, 130)
 
-    def _test_execute_and_assert_with_fault_result(self, template, error_code):
+    def _test_execute_and_assert_with_fault_result(self,
+                                                   template,
+                                                   status_code):
 
         result = validator.content_validation(template)
-        self._test_assert_with_fault_result(result, error_code)
+        self._test_assert_with_fault_result(result, status_code)
 
-    def _test_assert_with_fault_result(self, result, error_code):
+    def _test_assert_with_fault_result(self, result, status_code):
 
         self.assertFalse(result.is_valid)
-        self.assertEqual(result.comment, error_msgs[error_code])
-        self.assertEqual(result.error_code, error_code)
+        self.assertEqual(result.comment, error_msgs[status_code])
+        self.assertEqual(result.status_code, status_code)
 
     def _test_execute_and_assert_with_correct_result(self, template):
 
@@ -307,7 +309,7 @@ class TemplateContentValidatorTest(base.BaseTest):
 
         self.assertTrue(result.is_valid)
         self.assertEqual(result.comment, error_msgs[4])
-        self.assertEqual(result.error_code, 4)
+        self.assertEqual(result.status_code, 4)
 
     def _create_scenario_actions(self, target, source):
 

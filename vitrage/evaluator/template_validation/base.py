@@ -17,7 +17,7 @@ from vitrage.evaluator.template_validation.error_messages import error_msgs
 
 LOG = log.getLogger(__name__)
 
-Result = namedtuple('Result', ['description', 'is_valid', 'error_code',
+Result = namedtuple('Result', ['description', 'is_valid', 'status_code',
                                'comment'])
 
 

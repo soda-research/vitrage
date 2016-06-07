@@ -196,7 +196,7 @@ class TemplateApis(object):
                                  self.FAILED_MSG,
                                  syntax_result.description,
                                  syntax_result.comment,
-                                 syntax_result.error_code,
+                                 syntax_result.status_code,
                                  results)
                 continue
 
@@ -206,7 +206,7 @@ class TemplateApis(object):
                                  self.FAILED_MSG,
                                  content_result.description,
                                  content_result.comment,
-                                 content_result.error_code,
+                                 content_result.status_code,
                                  results)
                 continue
 
@@ -220,7 +220,7 @@ class TemplateApis(object):
         return json.dumps({'results': results})
 
     @staticmethod
-    def _add_result(template_path, status, description, message, error_code,
+    def _add_result(template_path, status, description, message, status_code,
                     results):
 
         results.append({
@@ -228,5 +228,5 @@ class TemplateApis(object):
             'status': status,
             'description': description,
             'message': str(message),
-            'error code': error_code
+            'error code': status_code
         })
