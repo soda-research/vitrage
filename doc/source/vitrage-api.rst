@@ -856,3 +856,81 @@ Response Examples
        "normalized_severity": "WARNING"
      }
  ]
+
+Template Validate
+^^^^^^^^^^^^^^^^^
+
+An API for validating templates
+
+POST /v1/template/
+~~~~~~~~~~~~~~~~~~
+
+Headers
+=======
+
+-  X-Auth-Token (string, required) - Keystone auth token
+-  Accept (string) - application/json
+-  User-Agent (String)
+-  Content-Type (String): application/json
+
+Path Parameters
+===============
+
+None.
+
+Query Parameters
+================
+
+-  path (string(255), required) - the path to template file or directory
+
+Request Body
+============
+
+None
+
+Request Examples
+================
+
+::
+
+    POST /v1/template/?path=[file/dir path]
+    Host: 135.248.18.122:8999
+    User-Agent: keystoneauth1/2.3.0 python-requests/2.9.1 CPython/2.7.6
+    Content-Type: application/json
+    Accept: application/json
+    X-Auth-Token: 2b8882ba2ec44295bf300aecb2caa4f7
+
+Response Status code
+====================
+
+None
+
+Response Body
+^^^^^^^^^^^^^
+
+Returns a JSON object that is a list of results.
+Each result describes a full validation (syntax and content) of one template file.
+
+Response Examples
+^^^^^^^^^^^^^^^^^
+
+::
+
+{
+  "results": [
+    {
+      "status": "validation failed",
+      "file path": "/tmp/templates/basic_no_meta.yaml",
+      "description": "Template syntax validation",
+      "message": "metadata is a mandatory section.",
+      "status code": 62
+    },
+    {
+      "status": "validation OK",
+      "file path": "/tmp/templates/basic.yaml",
+      "description": "Template validation",
+      "message": "Template validation is OK",
+      "status code": 4
+    }
+  ]
+}
