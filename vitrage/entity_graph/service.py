@@ -44,7 +44,7 @@ class VitrageGraphService(os_service.Service):
         LOG.info("Vitrage Graph Service - Starting...")
 
         super(VitrageGraphService, self).start()
-        self.tg.add_timer(1.0, self._process_event_non_blocking)
+        self.tg.add_timer(0.1, self._process_event_non_blocking)
 
         LOG.info("Vitrage Graph Service - Started!")
 
