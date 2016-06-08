@@ -107,16 +107,20 @@ class NagiosTransformerTest(base.BaseTest):
         self.assertEqual(event[DSProps.SYNC_TYPE], vertex[VProps.TYPE])
         self.assertEqual(event[NagiosProperties.SERVICE], vertex[VProps.NAME])
 
-        event_status = event[NagiosProperties.STATUS]
-
-        if event_status == NagiosStatus.OK:
-            self.assertEqual(AlarmProps.ALARM_INACTIVE_STATE,
-                             vertex[VProps.STATE])
+        event_type = event.get(DSProps.EVENT_TYPE, None)
+        if event_type is not None:
+            self.assertEqual(vertex[VProps.STATE],
+                             AlarmProps.ALARM_INACTIVE_STATE if
+                             EventAction.DELETE_ENTITY == event_type else
+                             AlarmProps.ALARM_ACTIVE_STATE)
         else:
-            self.assertEqual(AlarmProps.ALARM_ACTIVE_STATE,
-                             vertex[VProps.STATE])
+            self.assertEqual(vertex[VProps.STATE],
+                             AlarmProps.ALARM_INACTIVE_STATE if
+                             NagiosStatus.OK == event[NagiosProperties.STATUS]
+                             else AlarmProps.ALARM_ACTIVE_STATE)
 
-        self.assertEqual(event_status, vertex[VProps.SEVERITY])
+        self.assertEqual(event[NagiosProperties.STATUS],
+                         vertex[VProps.SEVERITY])
 
         self.assertEqual(event[NagiosProperties.STATUS_INFO],
                          vertex[VProps.INFO])
