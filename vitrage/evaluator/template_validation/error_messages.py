@@ -40,7 +40,7 @@ error_msgs = {
     62: 'metadata is a mandatory section.',
 
     # scenarios section 80-99
-    80: 'scenarios is a mandatory section].',
+    80: 'scenarios is a mandatory section.',
     81: 'At least one scenario must be defined.',
     82: 'scenario field is required.',
     83: 'Entity definition must contain condition field.',
