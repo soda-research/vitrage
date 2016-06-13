@@ -62,7 +62,7 @@ class RaiseAlarmRecipeTest(base.BaseTest):
         self.assertEqual(self.target_vertex.vertex_id, target_vitrage_id)
 
         alarm_state = add_vertex_step_params[TFields.STATE]
-        self.assertEqual(alarm_state, AlarmProperties.ALARM_ACTIVE_STATE)
+        self.assertEqual(alarm_state, AlarmProperties.ACTIVE_STATE)
 
     def test_get_undo_recipe(self):
 
@@ -87,4 +87,4 @@ class RaiseAlarmRecipeTest(base.BaseTest):
         self.assertEqual(self.target_vertex.vertex_id, target_vitrage_id)
 
         alarm_state = remove_vertex_step_params[TFields.STATE]
-        self.assertEqual(alarm_state, AlarmProperties.ALARM_INACTIVE_STATE)
+        self.assertEqual(alarm_state, AlarmProperties.INACTIVE_STATE)

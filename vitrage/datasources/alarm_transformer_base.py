@@ -60,10 +60,10 @@ class AlarmTransformerBase(tbase.TransformerBase):
     def _get_alarm_state(self, entity_event):
         event_type = entity_event.get(DSProps.EVENT_TYPE, None)
         if event_type is not None:
-            return AlarmProps.ALARM_INACTIVE_STATE if \
+            return AlarmProps.INACTIVE_STATE if \
                 EventAction.DELETE_ENTITY == event_type else \
-                AlarmProps.ALARM_ACTIVE_STATE
+                AlarmProps.ACTIVE_STATE
         else:
-            return AlarmProps.ALARM_INACTIVE_STATE if \
+            return AlarmProps.INACTIVE_STATE if \
                 self._ok_status(entity_event) else \
-                AlarmProps.ALARM_ACTIVE_STATE
+                AlarmProps.ACTIVE_STATE

@@ -84,9 +84,8 @@ class AlarmDriverBase(DriverBase):
     def _get_all_alarms(self):
         alarms = self._get_alarms()
         self._enrich_alarms(alarms)
-        return self._filter_and_cache_alarms(
-            alarms,
-            AlarmDriverBase._filter_get_all)
+        return self._filter_and_cache_alarms(alarms,
+                                             AlarmDriverBase._filter_get_all)
 
     def _get_changed_alarms(self):
         alarms = self._get_alarms()

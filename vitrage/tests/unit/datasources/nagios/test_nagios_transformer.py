@@ -22,7 +22,7 @@ from vitrage.common.constants import SyncMode
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.datasources.alarm_properties import AlarmProperties as AlarmProps
 from vitrage.datasources.nagios.properties import NagiosProperties
-from vitrage.datasources.nagios.properties import NagiosStatus
+from vitrage.datasources.nagios.properties import NagiosTestStatus
 from vitrage.datasources.nagios.transformer import NagiosTransformer
 from vitrage.datasources.nova.host import NOVA_HOST_DATASOURCE
 from vitrage.datasources.nova.host.transformer import HostTransformer
@@ -110,14 +110,14 @@ class NagiosTransformerTest(base.BaseTest):
         event_type = event.get(DSProps.EVENT_TYPE, None)
         if event_type is not None:
             self.assertEqual(vertex[VProps.STATE],
-                             AlarmProps.ALARM_INACTIVE_STATE if
+                             AlarmProps.INACTIVE_STATE if
                              EventAction.DELETE_ENTITY == event_type else
-                             AlarmProps.ALARM_ACTIVE_STATE)
+                             AlarmProps.ACTIVE_STATE)
         else:
-            self.assertEqual(vertex[VProps.STATE],
-                             AlarmProps.ALARM_INACTIVE_STATE if
-                             NagiosStatus.OK == event[NagiosProperties.STATUS]
-                             else AlarmProps.ALARM_ACTIVE_STATE)
+            actual_state = AlarmProps.INACTIVE_STATE if \
+                NagiosTestStatus.OK == event[NagiosProperties.STATUS] \
+                else AlarmProps.ACTIVE_STATE
+            self.assertEqual(vertex[VProps.STATE], actual_state)
 
         self.assertEqual(event[NagiosProperties.STATUS],
                          vertex[VProps.SEVERITY])

@@ -11,9 +11,26 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-__author__ = 'stack'
 
 
-class AlarmProperties(object):
-    ACTIVE_STATE = 'Active'
-    INACTIVE_STATE = 'Inactive'
+class ZabbixProperties(object):
+    RESOURCE_TYPE = 'resource_type'
+    RESOURCE_NAME = 'resource_name'
+    DESCRIPTION = 'description'
+    STATUS = 'status'
+    HOST = 'host'
+    HOST_ID = 'hostid'
+    IS_ALARM_DISABLED = 'status'
+    IS_ALARM_ON = 'value'
+    SEVERITY = 'priority'
+    LAST_CHANGE = 'lastchange'
+
+
+class ZabbixTriggerStatus(object):
+    OK = 'OK'
+    INFORMATION = 'INFORMATION'
+    WARNING = 'WARNING'
+    AVERAGE = 'AVERAGE'
+    HIGH = 'HIGH'
+    DISASTER = 'DISASTER'
+    NOT_CLASSIFIED = 'NOT CLASSIFIED'

@@ -26,7 +26,7 @@ class NagiosProperties(object):
     NAGIOS = 'nagios'
 
 
-class NagiosStatus(object):
+class NagiosTestStatus(object):
     OK = 'OK'
     WARNING = 'WARNING'
     CRITICAL = 'CRITICAL'

@@ -35,7 +35,8 @@ OPTS = [
                help='Nagios user name'),
     cfg.StrOpt('password', default='nagiosadmin',
                help='Nagios user password'),
-    cfg.StrOpt('url', default='', help='Nagios url'),
+    cfg.StrOpt('url', default='',
+               help='Nagios url'),
     cfg.StrOpt('config_file', default='/etc/vitrage/nagios_conf.yaml',
                help='Nagios configuration file'),
 ]

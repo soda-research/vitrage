@@ -18,23 +18,23 @@ from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import EdgeLabel
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import VertexProperties as VProps
-from vitrage.common import datetime_utils
+from vitrage.datasources.alarm_properties import AlarmProperties as AlarmProps
 from vitrage.datasources.alarm_transformer_base import AlarmTransformerBase
-from vitrage.datasources.nagios.properties import NagiosProperties
-from vitrage.datasources.nagios.properties import NagiosTestStatus
 from vitrage.datasources.nova.host import NOVA_HOST_DATASOURCE
 from vitrage.datasources.static_physical import SWITCH
 from vitrage.datasources import transformer_base as tbase
 from vitrage.datasources.transformer_base import Neighbor
+from vitrage.datasources.zabbix.properties import ZabbixProperties
+from vitrage.datasources.zabbix.properties import ZabbixTriggerStatus
 import vitrage.graph.utils as graph_utils
 
 LOG = logging.getLogger(__name__)
 
 
-class NagiosTransformer(AlarmTransformerBase):
+class ZabbixTransformer(AlarmTransformerBase):
 
     def __init__(self, transformers):
-        super(NagiosTransformer, self).__init__(transformers)
+        super(ZabbixTransformer, self).__init__(transformers)
 
     def _create_snapshot_entity_vertex(self, entity_event):
         return self._create_vertex(entity_event)
@@ -43,52 +43,58 @@ class NagiosTransformer(AlarmTransformerBase):
         return self._create_vertex(entity_event)
 
     def _create_vertex(self, entity_event):
-
-        update_timestamp = datetime_utils.change_time_str_format(
-            entity_event[NagiosProperties.LAST_CHECK],
-            '%Y-%m-%d %H:%M:%S',
-            tbase.TIMESTAMP_FORMAT)
+        # TODO(Alexey): need to check the correct format for the date
+        # update_timestamp = datetime_utils.change_time_str_format(
+        #     entity_event[ZabbixProperties.LAST_CHANGE],
+        #     '%Y-%m-%d %H:%M:%S',
+        #     tbase.TIMESTAMP_FORMAT)
+        update_timestamp = entity_event[ZabbixProperties.LAST_CHANGE]
 
         sample_timestamp = entity_event[DSProps.SAMPLE_DATE]
 
         update_timestamp = self._format_update_timestamp(update_timestamp,
                                                          sample_timestamp)
 
+        severity = entity_event[ZabbixProperties.STATUS]
+        entity_state = AlarmProps.INACTIVE_STATE if \
+            severity == ZabbixTriggerStatus.OK else AlarmProps.ACTIVE_STATE
+
         metadata = {
-            VProps.NAME: entity_event[NagiosProperties.SERVICE],
-            VProps.SEVERITY: entity_event[NagiosProperties.STATUS],
-            VProps.INFO: entity_event[NagiosProperties.STATUS_INFO]
+            VProps.NAME: entity_event[ZabbixProperties.DESCRIPTION],
+            VProps.SEVERITY: severity
         }
 
         return graph_utils.create_vertex(
             self._create_entity_key(entity_event),
             entity_category=EntityCategory.ALARM,
             entity_type=entity_event[DSProps.SYNC_TYPE],
-            entity_state=self._get_alarm_state(entity_event),
+            entity_state=entity_state,
             sample_timestamp=sample_timestamp,
             update_timestamp=update_timestamp,
             metadata=metadata)
 
     def _create_snapshot_neighbors(self, entity_event):
-        return self._create_nagios_neighbors(entity_event)
+        return self._create_zabbix_neighbors(entity_event)
 
     def _create_update_neighbors(self, entity_event):
-        return self._create_nagios_neighbors(entity_event)
+        return self._create_zabbix_neighbors(entity_event)
 
-    def _create_nagios_neighbors(self, entity_event):
+    def _create_zabbix_neighbors(self, entity_event):
         vitrage_id = self._create_entity_key(entity_event)
-        timestamp = datetime_utils.change_time_str_format(
-            entity_event[NagiosProperties.LAST_CHECK],
-            '%Y-%m-%d %H:%M:%S',
-            tbase.TIMESTAMP_FORMAT)
+        # TODO(Alexey): need to check the correct format for the date
+        # timestamp = datetime_utils.change_time_str_format(
+        #     entity_event[ZabbixProperties.LAST_CHANGE],
+        #     '%Y-%m-%d %H:%M:%S',
+        #     tbase.TIMESTAMP_FORMAT)
+        timestamp = entity_event[DSProps.SAMPLE_DATE]
 
-        resource_type = entity_event[NagiosProperties.RESOURCE_TYPE]
+        resource_type = entity_event[ZabbixProperties.RESOURCE_TYPE]
         if resource_type == NOVA_HOST_DATASOURCE or resource_type == SWITCH:
             return [self._create_neighbor(
                 vitrage_id,
                 timestamp,
                 resource_type,
-                entity_event[NagiosProperties.RESOURCE_NAME])]
+                entity_event[ZabbixProperties.RESOURCE_NAME])]
 
         return []
 
@@ -119,13 +125,13 @@ class NagiosTransformer(AlarmTransformerBase):
         return None
 
     def _ok_status(self, entity_event):
-        return entity_event[NagiosProperties.STATUS] == NagiosTestStatus.OK
+        return entity_event[ZabbixProperties.STATUS] == ZabbixTriggerStatus.OK
 
     def _create_entity_key(self, entity_event):
 
         sync_type = entity_event[DSProps.SYNC_TYPE]
-        alarm_name = entity_event[NagiosProperties.SERVICE]
-        resource_name = entity_event[NagiosProperties.RESOURCE_NAME]
+        alarm_name = entity_event[ZabbixProperties.DESCRIPTION]
+        resource_name = entity_event[ZabbixProperties.RESOURCE_NAME]
         return tbase.build_key(self._key_values(sync_type,
                                                 resource_name,
                                                 alarm_name))

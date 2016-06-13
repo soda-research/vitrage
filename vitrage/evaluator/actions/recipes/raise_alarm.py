@@ -38,7 +38,7 @@ class RaiseAlarm(base.Recipe):
     def get_do_recipe(action_spec):
 
         params = RaiseAlarm._get_vertex_params(action_spec)
-        params[VProps.STATE] = AlarmProps.ALARM_ACTIVE_STATE
+        params[VProps.STATE] = AlarmProps.ACTIVE_STATE
         add_vertex_step = ActionStepWrapper(ADD_VERTEX, params)
 
         return [add_vertex_step]
@@ -47,7 +47,7 @@ class RaiseAlarm(base.Recipe):
     def get_undo_recipe(action_spec):
 
         params = RaiseAlarm._get_vertex_params(action_spec)
-        params[VProps.STATE] = AlarmProps.ALARM_INACTIVE_STATE
+        params[VProps.STATE] = AlarmProps.INACTIVE_STATE
         remove_vertex_step = ActionStepWrapper(REMOVE_VERTEX, params)
 
         return [remove_vertex_step]

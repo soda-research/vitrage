@@ -24,7 +24,7 @@ from vitrage.datasources.nagios import NAGIOS_DATASOURCE
 from vitrage.datasources.nagios.parser import NagiosParser
 from vitrage.datasources.nagios.properties import NagiosProperties\
     as NagiosProps
-from vitrage.datasources.nagios.properties import NagiosStatus
+from vitrage.datasources.nagios.properties import NagiosTestStatus
 # noinspection PyProtectedMember
 from vitrage.i18n import _LE
 # noinspection PyProtectedMember
@@ -94,7 +94,7 @@ class NagiosDriver(AlarmDriverBase):
                 vitrage_resource[1] if vitrage_resource else None
 
     def _is_erroneous(self, alarm):
-        return alarm and alarm[NagiosProps.STATUS] != NagiosStatus.OK
+        return alarm and alarm[NagiosProps.STATUS] != NagiosTestStatus.OK
 
     def _status_changed(self, alarm1, alarm2):
         return alarm1 and alarm2 and \
