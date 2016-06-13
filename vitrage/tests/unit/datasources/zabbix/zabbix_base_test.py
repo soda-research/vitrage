@@ -12,26 +12,24 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from vitrage.datasources.nagios.properties import NagiosProperties \
-    as NagiosProps
+from vitrage.datasources.zabbix.properties import ZabbixProperties \
+    as ZabbixProps
 from vitrage.tests import base
 
 
-class NagiosBaseTest(base.BaseTest):
-    def _assert_contains(self, expected_service, services):
+class ZabbixBaseTest(base.BaseTest):
+    def _assert_contains(self, expected_serv, services):
         for service in services:
-            if service[NagiosProps.RESOURCE_NAME] == \
-                    expected_service[NagiosProps.RESOURCE_NAME] and \
-                    service[NagiosProps.SERVICE] == \
-                    expected_service[NagiosProps.SERVICE]:
-                self._assert_expected_service(expected_service, service)
+            if service[ZabbixProps.RESOURCE_NAME] == \
+                expected_serv[ZabbixProps.RESOURCE_NAME] and \
+                    service[ZabbixProps.DESCRIPTION] == \
+                    expected_serv[ZabbixProps.DESCRIPTION]:
+                self._assert_expected_service(expected_serv, service)
                 return
 
         self.fail("service not found: %(resource_name)s %(service_name)s" %
-                  {'resource_name':
-                   expected_service[NagiosProps.RESOURCE_NAME],
-                   'service_name':
-                   expected_service[NagiosProps.SERVICE]})
+                  {'resource_name': expected_serv[ZabbixProps.RESOURCE_NAME],
+                   'service_name': expected_serv[ZabbixProps.SERVICE]})
 
     def _assert_expected_service(self, expected_service, service):
         for key, value in expected_service.items():

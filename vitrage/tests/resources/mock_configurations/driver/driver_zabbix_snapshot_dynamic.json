@@ -1,0 +1,12 @@
+{
+  "sync_type": "zabbix",
+  "resource_type": "nova\\.host",
+  "resource_name": "compute-[1-9]",
+  "description": "CPU utilization|Check_MK|Uptime",
+  "status": "0",
+  "lastchange": "2016-02-07 15:26:04",
+  "sample_date": "2015-12-01T12:46:41Z",
+  "value": "1",
+  "priority": "1|2|3|4|5",
+  "sync_mode": "snapshot|init_snapshot|update"
+}
