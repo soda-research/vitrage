@@ -37,18 +37,18 @@ class MockZabbixDriver(ZabbixDriver):
 
     def __init__(self, conf):
         super(MockZabbixDriver, self).__init__(conf)
-        self.service_datas = None
+        self.alarm_datas = None
 
-    def set_service_datas(self, service_datas):
-        self.service_datas = service_datas
+    def set_alarm_datas(self, alarm_datas):
+        self.alarm_datas = alarm_datas
 
     def _get_alarms(self):
         alarms = []
-        for service_data in self.service_datas:
+        for alarm_data in self.alarm_datas:
             generators = mock_driver.simple_zabbix_alarm_generators(
                 host_num=1,
                 events_num=1,
-                snap_vals=service_data)
+                snap_vals=alarm_data)
             alarms.append(
                 mock_driver.generate_sequential_events_list(generators)[0])
 
