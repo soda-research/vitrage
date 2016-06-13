@@ -18,19 +18,19 @@ from vitrage.tests import base
 
 
 class ZabbixBaseTest(base.BaseTest):
-    def _assert_contains(self, expected_serv, services):
-        for service in services:
-            if service[ZabbixProps.RESOURCE_NAME] == \
+    def _assert_contains(self, expected_serv, alarms):
+        for alarm in alarms:
+            if alarm[ZabbixProps.RESOURCE_NAME] == \
                 expected_serv[ZabbixProps.RESOURCE_NAME] and \
-                    service[ZabbixProps.DESCRIPTION] == \
+                    alarm[ZabbixProps.DESCRIPTION] == \
                     expected_serv[ZabbixProps.DESCRIPTION]:
-                self._assert_expected_service(expected_serv, service)
+                self._assert_expected_alarm(expected_serv, alarm)
                 return
 
-        self.fail("service not found: %(resource_name)s %(service_name)s" %
+        self.fail("alarm not found: %(resource_name)s %(alarm_name)s" %
                   {'resource_name': expected_serv[ZabbixProps.RESOURCE_NAME],
-                   'service_name': expected_serv[ZabbixProps.SERVICE]})
+                   'alarm_name': expected_serv[ZabbixProps.DESCRIPTION]})
 
-    def _assert_expected_service(self, expected_service, service):
-        for key, value in expected_service.items():
-            self.assertEqual(value, service[key], 'wrong value for ' + key)
+    def _assert_expected_alarm(self, expected_alarm, alarm):
+        for key, value in expected_alarm.items():
+            self.assertEqual(value, alarm[key], 'wrong value for ' + key)
