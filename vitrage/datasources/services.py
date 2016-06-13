@@ -62,8 +62,9 @@ class SnapshotsService(DatasourceService):
                 entities_dictionaries = plugin.get_all(sync_mode)
                 for entity in entities_dictionaries:
                     self.callback_function(entity)
-            except Exception as e:
-                LOG.error("Get all Failed - %s - %s", plugin_type, e.message)
+            except Exception:
+                LOG.error("'Get all' Failed for datasource: %s", plugin_type)
+                LOG.exception(plugin_type)
 
         LOG.debug("end get all with sync mode %s" % sync_mode)
         self.first_time = False

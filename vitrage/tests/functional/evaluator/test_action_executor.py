@@ -164,7 +164,7 @@ class TestActionExecutor(TestFunctionalBase):
         props = {
             TFields.ALARM_NAME: 'VM_CPU_SUBOPTIMAL_PERFORMANCE',
             TFields.SEVERITY: 'CRITICAL',
-            VProps.STATE: AlarmProps.ALARM_ACTIVE_STATE
+            VProps.STATE: AlarmProps.ACTIVE_STATE
         }
 
         # Raise alarm action adds new vertex with type vitrage to the graph
@@ -205,7 +205,7 @@ class TestActionExecutor(TestFunctionalBase):
         self.assertEqual(alarm.properties[VProps.OPERATIONAL_SEVERITY],
                          props[TFields.SEVERITY])
         self.assertEqual(alarm.properties[VProps.STATE],
-                         AlarmProps.ALARM_ACTIVE_STATE)
+                         AlarmProps.ACTIVE_STATE)
 
     def test_execute_add_and_remove_vertex(self):
 
@@ -222,7 +222,7 @@ class TestActionExecutor(TestFunctionalBase):
         props = {
             TFields.ALARM_NAME: 'VM_CPU_SUBOPTIMAL_PERFORMANCE',
             TFields.SEVERITY: 'CRITICAL',
-            VProps.STATE: AlarmProps.ALARM_ACTIVE_STATE
+            VProps.STATE: AlarmProps.ACTIVE_STATE
         }
         action_spec = ActionSpecs(ActionType.RAISE_ALARM, targets, props)
 

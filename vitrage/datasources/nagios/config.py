@@ -34,7 +34,6 @@ class NagiosConfig(object):
             nagios = nagios_config[NAGIOS]      # nagios root in the yaml file
 
             self.mappings = [self._create_mapping(config) for config in nagios]
-
         except Exception as e:
             LOG.exception('failed in init %s ', e)
             self.mappings = []
