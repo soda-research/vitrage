@@ -349,3 +349,40 @@ def simple_nagios_alarm_generators(host_num,
         })
 
     return tg.get_trace_generators(test_entity_spec_list)
+
+
+def simple_zabbix_alarm_generators(host_num,
+                                   events_num=0,
+                                   snap_vals=None):
+    """A function for returning Zabbix alarm event generators.
+
+    Returns generators for a given number of Zabbix alarms.
+
+    :param host_num: number of hosts
+    :param events_num: number of snapshot alarms per hosts
+    :param snap_vals: preset vals for ALL snapshot events
+    :return: generators for zone_num zones as specified
+    """
+
+    hosts = ['host-{0}'.format(index) for index in range(host_num)]
+
+    test_entity_spec_list = []
+    if events_num:
+        test_entity_spec_list.append({
+            tg.DYNAMIC_INFO_FKEY: tg.DRIVER_ZABBIX_SNAPSHOT_D,
+            tg.STATIC_INFO_FKEY: None,
+            tg.EXTERNAL_INFO_KEY: snap_vals,
+            tg.MAPPING_KEY: hosts,
+            tg.NAME_KEY: 'Zabbix alarm generator (alarm on)',
+            tg.NUM_EVENTS: max(events_num - len(hosts), 0)
+        })
+        test_entity_spec_list.append({
+            tg.DYNAMIC_INFO_FKEY: tg.DRIVER_ZABBIX_SNAPSHOT_D,
+            tg.STATIC_INFO_FKEY: None,
+            tg.EXTERNAL_INFO_KEY: snap_vals,
+            tg.MAPPING_KEY: hosts,
+            tg.NAME_KEY: 'Zabbix alarm generator (alarm off)',
+            tg.NUM_EVENTS: len(hosts)
+        })
+
+    return tg.get_trace_generators(test_entity_spec_list)

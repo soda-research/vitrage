@@ -49,6 +49,7 @@ DRIVER_INST_SNAPSHOT_S = 'driver_inst_snapshot_static.json'
 DRIVER_INST_UPDATE_D = 'driver_inst_update_dynamic.json'
 DRIVER_NAGIOS_SNAPSHOT_D = 'driver_nagios_snapshot_dynamic.json'
 DRIVER_NAGIOS_SNAPSHOT_S = 'driver_nagios_snapshot_static.json'
+DRIVER_ZABBIX_SNAPSHOT_D = 'driver_zabbix_snapshot_dynamic.json'
 DRIVER_SWITCH_SNAPSHOT_D = 'driver_switch_snapshot_dynamic.json'
 DRIVER_VOLUME_UPDATE_D = 'driver_volume_update_dynamic.json'
 DRIVER_VOLUME_SNAPSHOT_D = 'driver_volume_snapshot_dynamic.json'
@@ -106,6 +107,7 @@ class EventTraceGenerator(object):
              DRIVER_VOLUME_UPDATE_D: _get_volume_update_driver_values,
              DRIVER_SWITCH_SNAPSHOT_D: _get_switch_snapshot_driver_values,
              DRIVER_NAGIOS_SNAPSHOT_D: _get_nagios_alarm_driver_values,
+             DRIVER_ZABBIX_SNAPSHOT_D: _get_zabbix_alarm_driver_values,
              DRIVER_CONSISTENCY_UPDATE_D:
                  _get_consistency_update_driver_values,
 
@@ -428,6 +430,21 @@ def _get_switch_snapshot_driver_values(spec):
 
 
 def _get_nagios_alarm_driver_values(spec):
+    hosts = spec[MAPPING_KEY]
+    static_info_re = None
+    if spec[STATIC_INFO_FKEY] is not None:
+        static_info_re = utils.load_specs(spec[STATIC_INFO_FKEY])
+
+    static_values = []
+    for host_name in hosts:
+        host_info = {'resource_name': host_name}
+        static_values.append(combine_data(
+            static_info_re, host_info, spec.get(EXTERNAL_INFO_KEY, None)
+        ))
+    return static_values
+
+
+def _get_zabbix_alarm_driver_values(spec):
     hosts = spec[MAPPING_KEY]
     static_info_re = None
     if spec[STATIC_INFO_FKEY] is not None:
