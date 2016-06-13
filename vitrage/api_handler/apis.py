@@ -23,7 +23,7 @@ from vitrage.datasources.nova.host import NOVA_HOST_DATASOURCE
 from vitrage.datasources.nova.instance import NOVA_INSTANCE_DATASOURCE
 from vitrage.datasources.nova.zone import NOVA_ZONE_DATASOURCE
 from vitrage.datasources import OPENSTACK_CLUSTER
-from vitrage.evaluator.template_validation.error_messages import error_msgs
+from vitrage.evaluator.template_validation.status_messages import status_msgs
 from vitrage.evaluator.template_validation.template_content_validator import \
     content_validation
 from vitrage.evaluator.template_validation.template_syntax_validator import \
@@ -213,7 +213,7 @@ class TemplateApis(object):
             self._add_result(path,
                              self.OK_MSG,
                              'Template validation',
-                             error_msgs[4],
+                             status_msgs[4],
                              4,
                              results)
 
