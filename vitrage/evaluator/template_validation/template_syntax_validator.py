@@ -28,7 +28,7 @@ from vitrage.evaluator.actions.base import action_types
 from vitrage.evaluator.template_fields import TemplateFields
 from vitrage.evaluator.template_validation.base import get_correct_result
 from vitrage.evaluator.template_validation.base import get_fault_result
-from vitrage.evaluator.template_validation.error_messages import error_msgs
+from vitrage.evaluator.template_validation.status_messages import status_msgs
 
 LOG = log.getLogger(__name__)
 
@@ -97,7 +97,7 @@ def validate_definitions_section(definitions):
 def validate_entities(entities):
 
     if not entities:
-        LOG.error('%s error code: %s' % (error_msgs[43], 43))
+        LOG.error('%s error code: %s' % (status_msgs[43], 43))
         return get_fault_result(RESULT_DESCRIPTION, 43)
 
     for entity in entities:
@@ -164,7 +164,7 @@ def validate_relationship_dict(relationship_dict):
 def validate_scenarios_section(scenarios):
 
     if not scenarios:
-        LOG.error('%s error code: %s' % (error_msgs[81], 81))
+        LOG.error('%s error code: %s' % (status_msgs[81], 81))
         return get_fault_result(RESULT_DESCRIPTION, 81)
 
     for scenario in scenarios:
@@ -201,7 +201,7 @@ def validate_scenario(scenario):
 def validate_actions_schema(actions):
 
     if not actions:
-        LOG.error('%s error code: %s' % (error_msgs[121], 121))
+        LOG.error('%s error code: %s' % (status_msgs[121], 121))
         return get_fault_result(RESULT_DESCRIPTION, 121)
 
     for action in actions:
@@ -237,7 +237,8 @@ def _validate_dict_schema(schema, value):
         schema(value)
     except Error as e:
         status_code = int(str(e).split(' ')[0].strip())
-        LOG.error('%s error code: %s' % (error_msgs[status_code], status_code))
+        LOG.error('%s error code: %s' % (status_msgs[status_code],
+                                         status_code))
         return get_fault_result(RESULT_DESCRIPTION, status_code)
 
     return get_correct_result(RESULT_DESCRIPTION)

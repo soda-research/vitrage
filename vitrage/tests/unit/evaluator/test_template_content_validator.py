@@ -18,7 +18,7 @@ from oslo_log import log
 from vitrage.common import file_utils
 from vitrage.evaluator.actions.base import ActionType
 from vitrage.evaluator.template_fields import TemplateFields
-from vitrage.evaluator.template_validation.error_messages import error_msgs
+from vitrage.evaluator.template_validation.status_messages import status_msgs
 from vitrage.evaluator.template_validation import template_content_validator \
     as validator
 from vitrage.tests import base
@@ -297,7 +297,7 @@ class TemplateContentValidatorTest(base.BaseTest):
     def _test_assert_with_fault_result(self, result, status_code):
 
         self.assertFalse(result.is_valid)
-        self.assertEqual(result.comment, error_msgs[status_code])
+        self.assertEqual(result.comment, status_msgs[status_code])
         self.assertEqual(result.status_code, status_code)
 
     def _test_execute_and_assert_with_correct_result(self, template):
@@ -308,7 +308,7 @@ class TemplateContentValidatorTest(base.BaseTest):
     def _test_assert_with_correct_result(self, result):
 
         self.assertTrue(result.is_valid)
-        self.assertEqual(result.comment, error_msgs[4])
+        self.assertEqual(result.comment, status_msgs[4])
         self.assertEqual(result.status_code, 4)
 
     def _create_scenario_actions(self, target, source):

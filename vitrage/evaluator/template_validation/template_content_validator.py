@@ -19,7 +19,7 @@ from vitrage.evaluator.template import Template
 from vitrage.evaluator.template_fields import TemplateFields
 from vitrage.evaluator.template_validation.base import get_correct_result
 from vitrage.evaluator.template_validation.base import get_fault_result
-from vitrage.evaluator.template_validation.error_messages import error_msgs
+from vitrage.evaluator.template_validation.status_messages import status_msgs
 
 LOG = log.getLogger(__name__)
 
@@ -71,7 +71,7 @@ def validate_entity_definition(entity, entities_ids):
 
     template_id = entity[TemplateFields.TEMPLATE_ID]
     if template_id in entities_ids:
-        LOG.error('%s error code: %s' % (error_msgs[2], 2))
+        LOG.error('%s error code: %s' % (status_msgs[2], 2))
         return get_fault_result(RESULT_DESCRIPTION, 2)
 
     return get_correct_result(RESULT_DESCRIPTION)
@@ -98,7 +98,7 @@ def validate_relationship(relationship, relationships_ids, entities_ids):
 
     template_id = relationship[TemplateFields.TEMPLATE_ID]
     if template_id in (entities_ids or relationships_ids):
-        LOG.error('%s error code: %s' % (error_msgs[2], 2))
+        LOG.error('%s error code: %s' % (status_msgs[2], 2))
         return get_fault_result(RESULT_DESCRIPTION, 2)
 
     target = relationship[TemplateFields.TARGET]
@@ -137,7 +137,7 @@ def validate_scenario_condition(condition, template_ids):
     try:
         Template.convert_to_dnf_format(condition)
     except Exception:
-        LOG.error('%s error code: %s' % (error_msgs[85], 85))
+        LOG.error('%s error code: %s' % (status_msgs[85], 85))
         return get_fault_result(RESULT_DESCRIPTION, 85)
 
     values_to_replace = ' and ', ' or ', ' not ', '(', ')'
@@ -176,7 +176,7 @@ def validate_scenario_action(action, entities_ids):
     elif action_type == ActionType.ADD_CAUSAL_RELATIONSHIP:
         return validate_add_causal_relationship_action(action, entities_ids)
     else:
-        LOG.error('%s error code: %s' % (error_msgs[120], 120))
+        LOG.error('%s error code: %s' % (status_msgs[120], 120))
         return get_fault_result(RESULT_DESCRIPTION, 120)
 
 
@@ -185,16 +185,16 @@ def validate_raise_alarm_action(action, entities_ids):
     properties = action[TemplateFields.PROPERTIES]
 
     if TemplateFields.ALARM_NAME not in properties:
-        LOG.error('%s error code: %s' % (error_msgs[125], 125))
+        LOG.error('%s error code: %s' % (status_msgs[125], 125))
         return get_fault_result(RESULT_DESCRIPTION, 125)
 
     if TemplateFields.SEVERITY not in properties:
-        LOG.error('%s error code: %s' % (error_msgs[126], 126))
+        LOG.error('%s error code: %s' % (status_msgs[126], 126))
         return get_fault_result(RESULT_DESCRIPTION, 126)
 
     action_target = action[TemplateFields.ACTION_TARGET]
     if TemplateFields.TARGET not in action_target:
-        LOG.error('%s error code: %s' % (error_msgs[127], 127))
+        LOG.error('%s error code: %s' % (status_msgs[127], 127))
         return get_fault_result(RESULT_DESCRIPTION, 127)
 
     target = action_target[TemplateFields.TARGET]
@@ -206,12 +206,12 @@ def validate_set_state_action(action, entities_ids):
     properties = action[TemplateFields.PROPERTIES]
 
     if TemplateFields.STATE not in properties:
-        LOG.error('%s error code: %s' % (error_msgs[128], 128))
+        LOG.error('%s error code: %s' % (status_msgs[128], 128))
         return get_fault_result(RESULT_DESCRIPTION, 128)
 
     action_target = action[TemplateFields.ACTION_TARGET]
     if TemplateFields.TARGET not in action_target:
-        LOG.error('%s error code: %s' % (error_msgs[129], 129))
+        LOG.error('%s error code: %s' % (status_msgs[129], 129))
         return get_fault_result(RESULT_DESCRIPTION, 129)
 
     target = action_target[TemplateFields.TARGET]
@@ -223,7 +223,7 @@ def validate_add_causal_relationship_action(action, entities_ids):
     action_target = action[TemplateFields.ACTION_TARGET]
 
     if TemplateFields.TARGET not in action_target:
-        LOG.error('%s error code: %s' % (error_msgs[130], 130))
+        LOG.error('%s error code: %s' % (status_msgs[130], 130))
         return get_fault_result(RESULT_DESCRIPTION, 130)
 
     target = action_target[TemplateFields.TARGET]
@@ -233,7 +233,7 @@ def validate_add_causal_relationship_action(action, entities_ids):
         return result
 
     if TemplateFields.SOURCE not in action_target:
-        LOG.error('%s error code: %s' % (error_msgs[130], 130))
+        LOG.error('%s error code: %s' % (status_msgs[130], 130))
         return get_fault_result(RESULT_DESCRIPTION, 130)
 
     source = action_target[TemplateFields.SOURCE]
@@ -243,7 +243,7 @@ def validate_add_causal_relationship_action(action, entities_ids):
 def _validate_template_id(ids, id_to_check):
 
     if id_to_check not in ids:
-        LOG.error('%s error code: %s' % (error_msgs[3], 3))
+        LOG.error('%s error code: %s' % (status_msgs[3], 3))
         return get_fault_result(RESULT_DESCRIPTION, 3)
 
     return get_correct_result(RESULT_DESCRIPTION)

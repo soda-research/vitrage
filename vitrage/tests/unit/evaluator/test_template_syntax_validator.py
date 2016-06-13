@@ -17,7 +17,7 @@ from oslo_log import log as logging
 
 from vitrage.common import file_utils
 from vitrage.evaluator.template_fields import TemplateFields
-from vitrage.evaluator.template_validation.error_messages import error_msgs
+from vitrage.evaluator.template_validation.status_messages import status_msgs
 from vitrage.evaluator.template_validation import template_syntax_validator
 from vitrage.tests import base
 from vitrage.tests.mocks import utils
@@ -205,11 +205,11 @@ class TemplateSyntaxValidatorTest(base.BaseTest):
 
         self._test_validate_action_without_required_field(
             TemplateFields.ACTION_TYPE,
-            error_msgs[123])
+            status_msgs[123])
 
         self._test_validate_action_without_required_field(
             TemplateFields.ACTION_TARGET,
-            error_msgs[124])
+            status_msgs[124])
 
     def _test_validate_action_without_required_field(self,
                                                      field_name,
@@ -228,7 +228,7 @@ class TemplateSyntaxValidatorTest(base.BaseTest):
         action_dict = action[TemplateFields.ACTION]
         action_dict[TemplateFields.ACTION_TYPE] = 'unknown'
 
-        self._test_execution_with_fault_result(template, error_msgs[100])
+        self._test_execution_with_fault_result(template, status_msgs[100])
 
     def _test_execution_with_fault_result(self, template, expected_code):
 
@@ -237,7 +237,7 @@ class TemplateSyntaxValidatorTest(base.BaseTest):
 
         # Test assertions
         self.assertFalse(result.is_valid)
-        self.assertTrue(result.comment.startswith(error_msgs[expected_code]))
+        self.assertTrue(result.comment.startswith(status_msgs[expected_code]))
         self.assertEqual(result.status_code, expected_code)
 
     def _test_execution_with_correct_result(self, template):
@@ -247,5 +247,5 @@ class TemplateSyntaxValidatorTest(base.BaseTest):
 
         # Test assertions
         self.assertTrue(result.is_valid)
-        self.assertEqual(result.comment, error_msgs[4])
+        self.assertEqual(result.comment, status_msgs[4])
         self.assertEqual(result.status_code, 4)

@@ -15,7 +15,7 @@ from vitrage.common.constants import edge_labels
 from vitrage.common.constants import entities_categories
 from vitrage.evaluator.actions.base import action_types
 
-error_msgs = {
+status_msgs = {
 
     # General 1-19
     1: 'template_id field contains incorrect string value.',
