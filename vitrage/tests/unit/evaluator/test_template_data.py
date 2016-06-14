@@ -15,9 +15,9 @@ from oslo_log import log as logging
 
 from vitrage.common.constants import EdgeLabel
 from vitrage.common import file_utils
-from vitrage.evaluator.template import ConditionVar
-from vitrage.evaluator.template import EdgeDescription
-from vitrage.evaluator.template import Template
+from vitrage.evaluator.template_data import ConditionVar
+from vitrage.evaluator.template_data import EdgeDescription
+from vitrage.evaluator.template_data import TemplateData
 from vitrage.evaluator.template_fields import TemplateFields as TFields
 from vitrage.graph import Vertex
 from vitrage.tests import base
@@ -37,10 +37,10 @@ class BasicTemplateTest(base.BaseTest):
                                                      self.BASIC_TEMPLATE)
         template_definition = file_utils.load_yaml_file(template_path, True)
 
-        template = Template(template_definition)
-        entities = template.entities
-        relationships = template.relationships
-        scenarios = template.scenarios
+        template_data = TemplateData(template_definition)
+        entities = template_data.entities
+        relationships = template_data.relationships
+        scenarios = template_data.scenarios
         definitions = template_definition[TFields.DEFINITIONS]
 
         # Assertions

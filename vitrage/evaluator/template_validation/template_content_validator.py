@@ -15,7 +15,7 @@
 from oslo_log import log
 from six.moves import reduce
 from vitrage.evaluator.actions.base import ActionType
-from vitrage.evaluator.template import Template
+from vitrage.evaluator.template_data import TemplateData
 from vitrage.evaluator.template_fields import TemplateFields
 from vitrage.evaluator.template_validation.base import get_correct_result
 from vitrage.evaluator.template_validation.base import get_fault_result
@@ -135,7 +135,7 @@ def validate_scenarios(scenarios, template_ids):
 def validate_scenario_condition(condition, template_ids):
 
     try:
-        Template.convert_to_dnf_format(condition)
+        TemplateData.convert_to_dnf_format(condition)
     except Exception:
         LOG.error('%s error code: %s' % (status_msgs[85], 85))
         return get_fault_result(RESULT_DESCRIPTION, 85)

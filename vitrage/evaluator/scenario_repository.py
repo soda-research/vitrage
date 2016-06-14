@@ -17,8 +17,8 @@ from collections import namedtuple
 from oslo_log import log
 
 from vitrage.common import file_utils
-from vitrage.evaluator.template import RELATIONSHIP
-from vitrage.evaluator.template import Template
+from vitrage.evaluator.template_data import RELATIONSHIP
+from vitrage.evaluator.template_data import TemplateData
 from vitrage.evaluator.template_fields import TemplateFields
 from vitrage.evaluator.template_validation.template_content_validator import \
     content_validation
@@ -71,9 +71,9 @@ class ScenarioRepository(object):
         content_validation_result = content_validation(template_def)
         if syntax_validation_result.is_valid and \
                 content_validation_result.is_valid:
-            template = Template(template_def)
-            self.templates[template.name] = template
-            self._add_template_scenarios(template)
+            template_data = TemplateData(template_def)
+            self.templates[template_data.name] = template_data
+            self._add_template_scenarios(template_data)
         else:
             metadata = template_def.get(TemplateFields.METADATA, None)
             if metadata:

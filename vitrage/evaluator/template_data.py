@@ -38,7 +38,7 @@ RELATIONSHIP = 'relationship'
 
 
 # noinspection PyAttributeOutsideInit
-class Template(object):
+class TemplateData(object):
 
     def __init__(self, template_def):
 

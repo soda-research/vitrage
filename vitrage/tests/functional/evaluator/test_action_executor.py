@@ -29,7 +29,7 @@ from vitrage.evaluator.actions.action_executor import ActionExecutor
 from vitrage.evaluator.actions.base import ActionMode
 from vitrage.evaluator.actions.base import ActionType
 from vitrage.evaluator.actions.evaluator_event_transformer import VITRAGE_TYPE
-from vitrage.evaluator.template import ActionSpecs
+from vitrage.evaluator.template_data import ActionSpecs
 from vitrage.evaluator.template_fields import TemplateFields as TFields
 from vitrage.service import load_datasource
 from vitrage.tests.functional.base import TestFunctionalBase

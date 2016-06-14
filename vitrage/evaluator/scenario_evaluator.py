@@ -24,9 +24,9 @@ from vitrage.evaluator.actions.action_executor import ActionExecutor
 from vitrage.evaluator.actions.base import ActionMode
 from vitrage.evaluator.actions.base import ActionType
 import vitrage.evaluator.actions.priority_tools as pt
-from vitrage.evaluator.template import ActionSpecs
-from vitrage.evaluator.template import EdgeDescription
-from vitrage.evaluator.template import ENTITY
+from vitrage.evaluator.template_data import ActionSpecs
+from vitrage.evaluator.template_data import EdgeDescription
+from vitrage.evaluator.template_data import ENTITY
 from vitrage.graph.algo_driver.algorithm import Mapping
 from vitrage.graph import create_algorithm
 from vitrage.graph import create_graph

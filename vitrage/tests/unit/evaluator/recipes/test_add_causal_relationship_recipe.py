@@ -20,7 +20,7 @@ from vitrage.evaluator.actions.recipes.action_steps import ADD_EDGE
 from vitrage.evaluator.actions.recipes.action_steps import REMOVE_EDGE
 from vitrage.evaluator.actions.recipes.add_causal_relationship import \
     AddCausalRelationship
-from vitrage.evaluator.template import ActionSpecs
+from vitrage.evaluator.template_data import ActionSpecs
 from vitrage.evaluator.template_fields import TemplateFields as TField
 from vitrage.graph import Vertex
 from vitrage.tests import base

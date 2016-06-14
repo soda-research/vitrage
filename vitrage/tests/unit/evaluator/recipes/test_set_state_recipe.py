@@ -18,7 +18,7 @@ from vitrage.common.constants import VertexProperties as VProps
 from vitrage.evaluator.actions.base import ActionType
 from vitrage.evaluator.actions.recipes.action_steps import UPDATE_VERTEX
 from vitrage.evaluator.actions.recipes.set_state import SetState
-from vitrage.evaluator.template import ActionSpecs
+from vitrage.evaluator.template_data import ActionSpecs
 from vitrage.evaluator.template_fields import TemplateFields as TFields
 from vitrage.graph import Vertex
 from vitrage.tests import base
