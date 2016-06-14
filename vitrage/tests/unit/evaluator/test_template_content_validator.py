@@ -311,8 +311,8 @@ class TemplateContentValidatorTest(base.BaseTest):
     def _test_assert_with_correct_result(self, result):
 
         self.assertTrue(result.is_valid)
-        self.assertEqual(result.comment, status_msgs[4])
-        self.assertEqual(result.status_code, 4)
+        self.assertEqual(result.comment, status_msgs[0])
+        self.assertEqual(result.status_code, 0)
 
     def _create_scenario_actions(self, target, source):
 

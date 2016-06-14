@@ -250,8 +250,8 @@ class TemplateSyntaxValidatorTest(base.BaseTest):
 
         # Test assertions
         self.assertTrue(result.is_valid)
-        self.assertEqual(result.comment, status_msgs[4])
-        self.assertEqual(result.status_code, 4)
+        self.assertEqual(result.comment, status_msgs[0])
+        self.assertEqual(result.status_code, 0)
 
     @staticmethod
     def _hide_useless_logging_messages():

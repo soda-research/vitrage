@@ -22,7 +22,7 @@ Result = namedtuple('Result', ['description', 'is_valid', 'status_code',
 
 
 def get_correct_result(description):
-    return Result(description, True, 4, status_msgs[4])
+    return Result(description, True, 0, status_msgs[0])
 
 
 def get_fault_result(description, code):
