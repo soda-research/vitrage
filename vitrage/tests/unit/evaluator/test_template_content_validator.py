@@ -12,6 +12,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 import copy
+import logging
 
 from oslo_log import log
 
@@ -36,6 +37,8 @@ class TemplateContentValidatorTest(base.BaseTest):
         template_dir_path = '%s/templates/general' % utils.get_resources_dir()
         cls.templates = file_utils.load_yaml_files(template_dir_path)
         cls.first_template = cls.templates[0]
+
+        cls._hide_useless_logging_messages()
 
     @property
     def clone_template(self):
@@ -372,3 +375,11 @@ class TemplateContentValidatorTest(base.BaseTest):
             TemplateFields.PROPERTIES: properties
         }
         return action
+
+    @staticmethod
+    def _hide_useless_logging_messages():
+
+        validator_path = 'vitrage.evaluator.template_validation.' \
+                         'template_content_validator'
+        content_validator_log = logging.getLogger(validator_path)
+        content_validator_log.setLevel(logging.FATAL)

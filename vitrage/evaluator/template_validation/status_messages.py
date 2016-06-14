@@ -27,7 +27,7 @@ status_msgs = {
     20: 'definitions section must contain entities field.',
     21: 'definitions section is a mandatory section.',
 
-    # Entities syntax error messages 40-59
+    # Entities status messages 40-59
     41: 'Entity definition must contain template_id field.',
     42: 'Entity definition must contain category field.',
     43: 'At least one entity must be defined.',
@@ -35,11 +35,11 @@ status_msgs = {
         '%s' % entities_categories,
     46: 'Entity field is required.',
 
-    # metadata section syntax error messages 60-79
+    # metadata section status messages 60-79
     60: 'metadata section must contain id field.',
     62: 'metadata is a mandatory section.',
 
-    # scenarios section 80-99
+    # scenarios section status messages 80-99
     80: 'scenarios is a mandatory section.',
     81: 'At least one scenario must be defined.',
     82: 'scenario field is required.',
@@ -47,7 +47,7 @@ status_msgs = {
     84: 'Entity definition must contain actions field.',
     85: 'Failed to convert condition.',
 
-    # relationships syntax error messages 100-119
+    # relationships status messages 100-119
     100: 'Invalid relation type. Relation type must be from types: '
          '%s' % edge_labels,
     101: 'Relationship field is required.',
@@ -55,7 +55,7 @@ status_msgs = {
     103: 'Relationship definition must contain target field.',
     104: 'Relationship definition must contain template_id field.',
 
-    # actions syntax error messages 120-139
+    # actions status messages 120-139
     120: 'Invalid action type. Action type must be from types: '
          '%s' % action_types,
     121: 'At least one action must be defined.',

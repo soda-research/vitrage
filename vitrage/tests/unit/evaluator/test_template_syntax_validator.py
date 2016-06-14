@@ -12,8 +12,9 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 import copy
+import logging
 
-from oslo_log import log as logging
+from oslo_log import log
 
 from vitrage.common import file_utils
 from vitrage.evaluator.template_fields import TemplateFields
@@ -23,7 +24,7 @@ from vitrage.tests import base
 from vitrage.tests.mocks import utils
 
 
-LOG = logging.getLogger(__name__)
+LOG = log.getLogger(__name__)
 
 
 # noinspection PyAttributeOutsideInit
@@ -36,6 +37,8 @@ class TemplateSyntaxValidatorTest(base.BaseTest):
         template_dir_path = '%s/templates/general' % utils.get_resources_dir()
         cls.template_yamls = file_utils.load_yaml_files(template_dir_path)
         cls.first_template = cls.template_yamls[0]
+
+        cls._hide_useless_logging_messages()
 
     @property
     def clone_template(self):
@@ -249,3 +252,11 @@ class TemplateSyntaxValidatorTest(base.BaseTest):
         self.assertTrue(result.is_valid)
         self.assertEqual(result.comment, status_msgs[4])
         self.assertEqual(result.status_code, 4)
+
+    @staticmethod
+    def _hide_useless_logging_messages():
+
+        validator_path = 'vitrage.evaluator.template_validation.' \
+                         'template_syntax_validator'
+        syntax_validator_log = logging.getLogger(validator_path)
+        syntax_validator_log.setLevel(logging.FATAL)
