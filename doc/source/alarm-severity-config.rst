@@ -10,11 +10,15 @@ the cloud, and stores and combines this information into a unified system
 model. An important property of an alarm is its **severity**. This severity can
 be used both in the Vitrage templates to trigger actions, and in the Horizon UI
 for color-coding purposes. Therefore, it is important that within the Vitrage
-data model, severity names are normalized.
+data model, severity names are aggregated and normalized.
 
 Since each data-source might represent severity differently, for each
-data-source we can supply it's own mapping to the normalized severity supported
-in Vitrage. This page explains how to handle this mapping for a given
+data-source we can supply it's own mapping to the aggregated severity supported
+in Vitrage. This way we can know which severity is more important.
+In addition we also normalize the severities for the horizon UI (called
+operational_severity) in order for the UI to know what color to show in
+Horizon.
+This page explains how to handle this mapping for a given
 data-source.
 
 
@@ -37,16 +41,16 @@ Configure Alarm Severity Mapping
 --------------------------------
 
 The alarm severity configuration files configure how the severity of each
-alarm is normalized. There are several guidelines for creating a config file:
+alarm is aggregated and normalized. There are several guidelines for creating
+a config file:
 
-- Normalized alarm values which can be mapped to can be found in
-  normalized_alarm_severity.py (OperationalAlarmSeverity class).
-- Each normalized severity also comes with a priority, so
-  that if an alarm is given different severities from different sources (e.g.,
-  a host alarm raised both by nagios and Vitrage), the severity with the
-  highest priority will be used as the **aggregated severity**.
-- The *UNKNOWN* severity will be used for severities with no corresponding
-  normalized severity. This severity *must* appear in the config file.
+- Operational severity is a normalized severity values can be mapped to
+  specific defined values which can be found in operational_alarm_severity.py
+  (OperationalAlarmSeverity class).
+- Aggregated severity comes with a priority, so that if an alarm is given
+  different severities from different sources (e.g., a host alarm raised both
+  by nagios and Vitrage), the severity with the highest priority will be used
+  as the **aggregated severity**.
 - The config file is in YAML format.
 - The config filename must be <datasource name>.yaml, for the relevant
   datasource.
@@ -71,16 +75,16 @@ Format
 
     category: ALARM
     values:
-      - normalized value:
-          name: <normalized alarm severity>
+      - aggregated values:
           priority: <Alarm severity priority - an integer>
           original values:
             - name: <Original alarm severity name>
-            - name: ... # can list several severities for one normalized
-      - normalized value:
-          name: ... # can list several normalized severities
+              operational_value: <normalized alarm severity - from
+                                  OperationalAlarmSeverity class>
+            - name: ... # can list several severities for one aggregation
+      - aggregated values:
+          priority: ... # can list several aggregated severities
           ...
-
 
   ...
 
@@ -89,37 +93,35 @@ Example
 +++++++
 
 The following file will map alarm severities.
-Original severities 'CRITICAL' and 'DOWN' will be mapped to normalized value
-'CRITICAL'. Normalized value 'SEVERE' has no original severity.
-Original value 'WARNING' is mapped to normalized value 'WARNING', etc.
-
+For aggregated severity with priority 40 we have 2 severities and each one of
+them is mapped to operational severity CRITICAL.
+For aggregated severity with priority 30 we have 1 severity called WARNING and
+it is mapped to operational severity WARNING, etc...
 ::
 
     category: ALARM
     values:
-      - normalized value:
-          name: CRITICAL
-          priority: 50
-          original values:
-            - name: CRITICAL
-            - name: DOWN
-      - normalized value:
-          name: SEVERE
+      - aggregated values:
           priority: 40
           original values:
-      - normalized value:
-          name: WARNING
+            - name: CRITICAL
+              operational_value: CRITICAL
+            - name: DOWN
+              operational_value: CRITICAL
+      - aggregated values:
           priority: 30
           original values:
             - name: WARNING
-      - normalized value:
-          name: UNKNOWN
+              operational_value: WARNING
+      - aggregated values:
           priority: 20
           original values:
             - name: UNKNOWN
-      - normalized value:
-          name: OK
+              operational_value: N/A
+      - aggregated values:
           priority: 10
           original values:
             - name: OK
+              operational_value: OK
             - name: UP
+              operational_value: OK
