@@ -43,12 +43,14 @@ AVAILABLE = 'available'
 
 
 def extract_field_value(entity_event, *args):
+    try:
+        value = entity_event
+        for key in args:
+            value = value[key]
 
-    value = entity_event
-    for key in args:
-        value = value[key]
-
-    return value
+        return value
+    except Exception:
+        return None
 
 
 def build_key(key_values):

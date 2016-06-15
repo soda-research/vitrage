@@ -27,7 +27,9 @@ class NetworkDriver(NeutronBase):
 
     @staticmethod
     def get_event_types(conf):
-        return ['network.']
+        return ['network.create.end',
+                'network.update.end',
+                'network.delete.end']
 
     @staticmethod
     def enrich_event(event, event_type):

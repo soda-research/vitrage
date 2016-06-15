@@ -27,7 +27,9 @@ class PortDriver(NeutronBase):
 
     @staticmethod
     def get_event_types(conf):
-        return ['port.']
+        return ['port.create.end',
+                'port.update.end',
+                'port.delete.end']
 
     @staticmethod
     def enrich_event(event, event_type):
