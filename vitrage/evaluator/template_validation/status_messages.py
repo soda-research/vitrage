@@ -22,6 +22,7 @@ status_msgs = {
     1: 'template_id field contains incorrect string value.',
     2: 'Duplicate template_id definition.',
     3: 'template_id does not appear in the definition block.',
+    4: 'Syntax error: %s',
 
     # definitions section 20-39
     20: 'definitions section must contain entities field.',

@@ -236,12 +236,26 @@ def _validate_dict_schema(schema, value):
     try:
         schema(value)
     except Error as e:
-        status_code = int(str(e).split(' ')[0].strip())
-        LOG.error('%s error code: %s' % (status_msgs[status_code],
-                                         status_code))
+
+        status_code = _get_status_code(e)
+        if status_code:
+            msg = status_msgs[status_code]
+        else:
+            # General syntax error
+            status_code = 4
+            msg = status_msgs[4] % e
+
+        LOG.error('%s error code: %s' % (msg, status_code))
         return get_fault_result(RESULT_DESCRIPTION, status_code)
 
     return get_correct_result(RESULT_DESCRIPTION)
+
+
+def _get_status_code(e):
+    prefix = str(e).split(' ')[0].strip()
+    if prefix.isdigit():
+        return int(prefix)
+    return None
 
 
 def _validate_template_id_value(msg=None):

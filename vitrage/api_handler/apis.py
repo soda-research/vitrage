@@ -213,8 +213,8 @@ class TemplateApis(object):
             self._add_result(path,
                              self.OK_MSG,
                              'Template validation',
-                             status_msgs[4],
-                             4,
+                             status_msgs[0],
+                             0,
                              results)
 
         return json.dumps({'results': results})
