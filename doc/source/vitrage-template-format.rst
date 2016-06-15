@@ -17,7 +17,7 @@ The template is written in YAML language, with the following structure.
  ::
 
   metadata:
-    id: <unique template identifier>
+    name: <unique template identifier>
     description: <what this template does>
   definitions:
     entities:
@@ -35,7 +35,7 @@ The template is written in YAML language, with the following structure.
 
 The template is divided into three main sections:
 
-- *metadata:* Contains the template identifier, and brief description of what the template does (optional)
+- *metadata:* Contains the template name, and brief description of what the template does (optional)
 - *definitions:* This section contains the atomic definitions referenced later on, for entities and relationships
    - *entities –* describes the resources and alarms which are relevant to the template scenario (conceptually, corresponds to a vertex in the entity graph)
    - *relationships –* the relationships between the entities (conceptually, corresponds to an edge in the entity graph)
@@ -84,7 +84,7 @@ The following template demonstrates
  ::
 
     metadata:
-        id: host_high_mem_load_to_instance_mem_suboptimal
+        name: host_high_mem_load_to_instance_mem_suboptimal
         description: when there is high memory on the host, show implications on the instances
     definitions:
         entities:
@@ -193,7 +193,7 @@ case-insensitive.
  ::
 
     metadata:
-        id: deduced_alarm_for_all_host_in_error
+        name: deduced_alarm_for_all_host_in_error
         description: raise deduced alarm for all hosts in error
     definitions:
         entities:
@@ -222,7 +222,7 @@ an alarm on the hosting zone or an alarm on the hosting host.
  ::
 
     metadata:
-        id: deduced_alarm_two_possibile_triggers
+        name: deduced_alarm_two_possibile_triggers
         description: deduced alarm using or in condition
     definitions:
         entities:
@@ -337,7 +337,7 @@ E2 both are instances like this:
  ::
 
     metadata:
-        id: two_similar_instances
+        name: two_similar_instances
     definitions:
         entities:
             - entity:

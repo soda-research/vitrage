@@ -77,8 +77,8 @@ class ScenarioRepository(object):
         else:
             metadata = template_def.get(TemplateFields.METADATA, None)
             if metadata:
-                template_id = metadata.get(TemplateFields.ID, None)
-                LOG.info('Unable to load template: %s' % template_id)
+                template_name = metadata.get(TemplateFields.NAME, None)
+                LOG.info('Unable to load template: %s' % template_name)
             else:
                 LOG.info('Unable to load template with invalid metadata')
 

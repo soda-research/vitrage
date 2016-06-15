@@ -1,5 +1,5 @@
 metadata:
- id: deduced_alarm_on_instance
+ name: deduced_alarm_on_instance
 definitions:
  entities:
   - entity:

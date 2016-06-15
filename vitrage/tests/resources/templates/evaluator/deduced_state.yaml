@@ -1,5 +1,5 @@
 metadata:
- id: deduced_state_for_host_alarms
+ name: deduced_state_for_host_alarms
 definitions:
  entities:
   - entity:
