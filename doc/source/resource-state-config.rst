@@ -10,11 +10,14 @@ the cloud, and stores and combines this information into a unified system
 model. An important property of a resource is its **state**. This state can
 be used both in the Vitrage templates to trigger actions, and in the Horizon UI
 for color-coding purposes. Therefore, it is important that within the Vitrage
-data model, state names are normalized.
+data model, state names are aggregated and normalized.
 
 Since each data-source might represent state differently, for each
-data-source we can supply it's own mapping to the normalized state supported
-in Vitrage. This page explains how to handle this mapping for a given
+data-source we can supply it's own mapping to the aggregated state supported
+in Vitrage. This way we can know which state is more important.
+In addition we also normalize the states for the horizon UI (called
+operational_state) in order for the UI to know what color to show in Horizon.
+This page explains how to handle this mapping for a given
 data-source.
 
 
@@ -71,14 +74,15 @@ Format
 
     category: RESOURCE
     values:
-      - normalized value:
-          name: <normalized resource state>
-          priority: <resource state priority - an integer>
+      - aggregated values:
+          priority: <Resource state priority - an integer>
           original values:
             - name: <Original resource state name>
-            - name: ... # can list several states for one normalized
-      - normalized value:
-          name: ... # can list several normalized states
+              operational_value: <normalized resource state - from
+                                  OperationalResourceState class>
+            - name: ... # can list several states for one aggregation
+      - aggregated values:
+          priority: ... # can list several aggregated states
           ...
 
 
@@ -88,27 +92,51 @@ Format
 Example
 +++++++
 
-The following is mapping resource values.
-Original values 'DELETED' and 'TERMINATED' will be mapped to normalized value 'TERMINATED'.
-Original values 'ACTIVE' and 'RUNNING' to normalized value 'RUNNING'.
+The following file will map resource states.
+For aggregated state with priority 40 we have 4 states and each one of them is
+mapped to operational severity ERROR.
+For aggregated state with priority 30 we have 6 states and each one of them is
+mapped to operational severity TRANSIENT, etc...
 
 ::
 
   category: RESOURCE
-  values:
-    - normalized value:
-        name: TERMINATED
-        priority: 30
-        original values:
-          - name: DELETED
-          - name: TERMINATED
-    - normalized value:
-        name: RUNNING
-        priority: 20
-        original values:
-          - name: ACTIVE
-          - name: RUNNING
-    - normalized value:
-        name: UNRECOGNIZED
-        priority: 10
-        original values:
+    values:
+      - aggregated values:
+          priority: 40
+          original values:
+            - name: ERROR
+              operational_value: ERROR
+            - name: ERROR_DELETING
+              operational_value: ERROR
+            - name: ERROR_RESTORING
+              operational_value: ERROR
+            - name: ERROR_EXTENDING
+              operational_value: ERROR
+      - aggregated values:
+          priority: 30
+          original values:
+            - name: CREATING
+              operational_value: TRANSIENT
+            - name: ATTACHING
+              operational_value: TRANSIENT
+            - name: DELETING
+              operational_value: TRANSIENT
+            - name: RESTORING-BACKUP
+              operational_value: TRANSIENT
+            - name: BACKING-UP
+              operational_value: TRANSIENT
+            - name: DETACHING
+              operational_value: TRANSIENT
+      - aggregated values:
+          priority: 20
+          original values:
+            - name: SUBOPTIMAL
+              operational_value: SUBOPTIMAL
+      - aggregated values:
+          priority: 10
+          original values:
+            - name: AVAILABLE
+              operational_value: OK
+            - name: IN-USE
+              operational_value: OK
