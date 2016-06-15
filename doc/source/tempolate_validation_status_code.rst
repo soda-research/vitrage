@@ -22,6 +22,8 @@ The following describes all the possible status code and their messages:
 +------------------+---------------------------------------------------------+-------------------------------+
 | 3                | template_id does not appear in the definition block     | content                       |
 +------------------+---------------------------------------------------------+-------------------------------+
+| 4                | Syntax error: [error message]                           | syntax                        |
++------------------+---------------------------------------------------------+-------------------------------+
 | 20               | definitions section must contain entities field         | syntax                        |
 +------------------+---------------------------------------------------------+-------------------------------+
 | 21               | definitions section is a mandatory section              | syntax                        |

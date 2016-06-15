@@ -25,5 +25,7 @@ def get_correct_result(description):
     return Result(description, True, 0, status_msgs[0])
 
 
-def get_fault_result(description, code):
+def get_fault_result(description, code, msg=None):
+    if msg:
+        return Result(description, False, code, msg)
     return Result(description, False, code, status_msgs[code])
