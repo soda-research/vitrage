@@ -1,5 +1,5 @@
 metadata:
- id: deduced_state_for_host_alarms_2
+ name: deduced_state_for_host_alarms_2
  description: replicates deduced_state.yaml, with changes to template_ids, to test overlapping templates
 definitions:
  entities:

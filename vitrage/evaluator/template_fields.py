@@ -29,7 +29,7 @@ class TemplateFields(object):
     DESCRIPTION = 'description'
     ENTITIES = 'entities'
     ENTITY = 'entity'
-    ID = 'id'
+    NAME = 'name'
     PROPERTIES = 'properties'
     RELATIONSHIPS = 'relationships'
     RELATIONSHIP = 'relationship'

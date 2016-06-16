@@ -57,7 +57,7 @@ class TemplateSyntaxValidatorTest(base.BaseTest):
     def test_validate_template_without_id_in_metadata_section(self):
 
         template = self.clone_template
-        template[TemplateFields.METADATA].pop(TemplateFields.ID)
+        template[TemplateFields.METADATA].pop(TemplateFields.NAME)
         self._test_execution_with_fault_result(template, 60)
 
     def test_validate_template_without_definitions_section(self):

@@ -1,5 +1,5 @@
 metadata:
- id: host_high_cpu_load_to_instance_cpu_suboptimal
+ name: host_high_cpu_load_to_instance_cpu_suboptimal
 definitions:
  entities:
   - entity:

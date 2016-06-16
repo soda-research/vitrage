@@ -70,7 +70,7 @@ def validate_metadata_section(metadata):
     any_str = Any(str, six.text_type)
 
     schema = Schema({
-        Required(TemplateFields.ID, msg=60): any_str,
+        Required(TemplateFields.NAME, msg=60): any_str,
         TemplateFields.DESCRIPTION: any_str
     })
     return _validate_dict_schema(schema, metadata)

@@ -1,5 +1,5 @@
 metadata:
- id: basic_causal_links
+ name: basic_causal_links
 definitions:
  entities:
   - entity:

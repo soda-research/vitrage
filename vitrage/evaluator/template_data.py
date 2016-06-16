@@ -42,7 +42,7 @@ class TemplateData(object):
 
     def __init__(self, template_def):
 
-        self.name = template_def[TFields.METADATA][TFields.ID]
+        self.name = template_def[TFields.METADATA][TFields.NAME]
 
         defs = template_def[TFields.DEFINITIONS]
         self.entities = self._build_entities(defs[TFields.ENTITIES])

@@ -30,7 +30,7 @@ Evaluator Design
       |Loading    | load                                                             |
       |           |                                                                  |
       |     +-----v-------------+        +---------------+       +---------------+   |
-      |     |     Template      |        |               |       |               |   |
+      |     |   Template Data   |        |               |       |               |   |
       |     |                   |process |   Template    |  add  |   Scenario    |   |
       |     |(Python Dictionary)+-------->    Object     +------->     Repo      |   |
       |     |                   |        |               |       |               |   |
