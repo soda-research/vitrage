@@ -53,13 +53,21 @@ class ScenarioEvaluator(object):
                  event_queue,
                  enabled=False):
         self.conf = conf
+        self._scenario_repo = scenario_repo
         self._entity_graph = entity_graph
         self._graph_algs = create_algorithm(entity_graph)
-        self._scenario_repo = scenario_repo
         self._action_executor = ActionExecutor(event_queue)
         self._entity_graph.subscribe(self.process_event)
         self._action_tracker = ActionTracker(DatasourceInfoMapper(self.conf))
         self.enabled = enabled
+
+    @property
+    def scenario_repo(self):
+        return self._scenario_repo
+
+    @scenario_repo.setter
+    def scenario_repo(self, scenario_repo):
+        self._scenario_repo = scenario_repo
 
     def process_event(self, before, current, is_vertex):
         """Notification of a change in the entity graph.

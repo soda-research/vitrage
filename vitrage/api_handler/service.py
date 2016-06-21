@@ -29,10 +29,11 @@ eventlet.monkey_patch()
 
 class VitrageApiHandlerService(os_service.Service):
 
-    def __init__(self, conf, e_graph):
+    def __init__(self, conf, e_graph, scenario_repo):
         super(VitrageApiHandlerService, self).__init__()
         self.conf = conf
         self.entity_graph = e_graph
+        self.scenario_repo = scenario_repo
 
     def start(self):
         LOG.info("Vitrage Api Handler Service - Starting...")
@@ -44,7 +45,8 @@ class VitrageApiHandlerService(os_service.Service):
         target = oslo_messaging.Target(topic=self.conf.rpc_topic,
                                        server=rabbit_hosts)
 
-        endpoints = [EntityGraphApis(self.entity_graph), TemplateApis()]
+        endpoints = [EntityGraphApis(self.entity_graph),
+                     TemplateApis(self.scenario_repo.templates)]
 
         server = vitrage_rpc.get_server(target, endpoints, transport)
 

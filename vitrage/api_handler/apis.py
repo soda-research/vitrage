@@ -23,6 +23,7 @@ from vitrage.datasources.nova.host import NOVA_HOST_DATASOURCE
 from vitrage.datasources.nova.instance import NOVA_INSTANCE_DATASOURCE
 from vitrage.datasources.nova.zone import NOVA_ZONE_DATASOURCE
 from vitrage.datasources import OPENSTACK_CLUSTER
+from vitrage.evaluator.template_fields import TemplateFields
 from vitrage.evaluator.template_validation.status_messages import status_msgs
 from vitrage.evaluator.template_validation.template_content_validator import \
     content_validation
@@ -180,8 +181,27 @@ class TemplateApis(object):
     FAILED_MSG = 'validation failed'
     OK_MSG = 'validation OK'
 
+    def __init__(self, templates):
+        self.templates = templates
+
+    def get_templates(self, ctx):
+        LOG.debug("TemplateApis get_templates")
+
+        templates_details = []
+        for template in self.templates:
+
+            template_metadata = template.data[TemplateFields.METADATA]
+
+            templates_details.append({
+                'name': template_metadata[TemplateFields.NAME],
+                'status': self._get_template_status(template.result),
+                'status details': template.result.comment,
+                'date': template.date.strftime('%Y-%m-%dT%H:%M:%SZ')
+            })
+        return json.dumps({'templates_details': templates_details})
+
     def validate_template(self, ctx, templates):
-        LOG.debug("EntityGraphApis validate_template templates:"
+        LOG.debug("TemplateApis validate_template templates:"
                   "%s", str(templates))
 
         results = []
@@ -230,3 +250,11 @@ class TemplateApis(object):
             'message': str(message),
             'error code': status_code
         })
+
+    @staticmethod
+    def _get_template_status(result):
+
+        if result.is_valid:
+            return 'pass'
+        else:
+            return 'failed'

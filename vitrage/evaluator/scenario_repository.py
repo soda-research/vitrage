@@ -16,10 +16,11 @@ from collections import namedtuple
 
 from oslo_log import log
 
+from vitrage.common import datetime_utils
 from vitrage.common import file_utils
+from vitrage.evaluator.base import Template
 from vitrage.evaluator.template_data import RELATIONSHIP
 from vitrage.evaluator.template_data import TemplateData
-from vitrage.evaluator.template_fields import TemplateFields
 from vitrage.evaluator.template_validation.template_content_validator import \
     content_validation
 from vitrage.evaluator.template_validation.template_syntax_validator import \
@@ -34,10 +35,18 @@ EdgeKeyScenario = namedtuple('EdgeKeyScenario', ['label', 'source', 'target'])
 class ScenarioRepository(object):
 
     def __init__(self, conf):
-        self.templates = defaultdict(list)
+        self._templates = []
         self.relationship_scenarios = defaultdict(list)
         self.entity_scenarios = defaultdict(list)
         self._load_templates_files(conf)
+
+    @property
+    def templates(self):
+        return self._templates
+
+    @templates.setter
+    def templates(self, templates):
+        self._templates = templates
 
     def get_scenarios_by_vertex(self, vertex):
 
@@ -67,20 +76,21 @@ class ScenarioRepository(object):
 
     def add_template(self, template_def):
 
-        syntax_validation_result = syntax_validation(template_def)
-        content_validation_result = content_validation(template_def)
-        if syntax_validation_result.is_valid and \
-                content_validation_result.is_valid:
-            template_data = TemplateData(template_def)
-            self.templates[template_data.name] = template_data
-            self._add_template_scenarios(template_data)
+        current_time = datetime_utils.utcnow()
+
+        result = syntax_validation(template_def)
+        if not result.is_valid:
+            LOG.info('Unable to load template: %s' % result.comment)
         else:
-            metadata = template_def.get(TemplateFields.METADATA, None)
-            if metadata:
-                template_name = metadata.get(TemplateFields.NAME, None)
-                LOG.info('Unable to load template: %s' % template_name)
-            else:
-                LOG.info('Unable to load template with invalid metadata')
+            result = content_validation(template_def)
+            if not result.is_valid:
+                LOG.info('Unable to load template: %s' % result.comment)
+
+        self.templates.append(Template(template_def, current_time, result))
+
+        if result.is_valid:
+            template_data = TemplateData(template_def)
+            self._add_template_scenarios(template_data)
 
     def _load_templates_files(self, conf):
 

@@ -53,7 +53,7 @@ def main():
         conf, mp_queue, evaluator_queue, evaluator, e_graph, init_status))
 
     launcher.launch_service(api_handler_svc.VitrageApiHandlerService(
-        conf, e_graph))
+        conf, e_graph, evaluator.scenario_repo))
 
     datasources.launch()
 

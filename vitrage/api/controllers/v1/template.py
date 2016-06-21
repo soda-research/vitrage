@@ -28,6 +28,21 @@ LOG = log.getLogger(__name__)
 class TemplateController(RootRestController):
 
     @pecan.expose('json')
+    def get_all(self):
+
+        LOG.info(_LI('returns template list'))
+
+        enforce("template list",
+                pecan.request.headers,
+                pecan.request.enforcer,
+                {})
+        try:
+            return self._get_templates()
+        except Exception as e:
+            LOG.exception('failed to get template list %s', e)
+            abort(404, str(e))
+
+    @pecan.expose('json')
     def post(self, **kwargs):
 
         LOG.info(_LI('validate template. args: %s') % kwargs)
@@ -43,6 +58,19 @@ class TemplateController(RootRestController):
             return self._validate(templates)
         except Exception as e:
             LOG.exception('failed to validate template(s) %s', e)
+            abort(404, str(e))
+
+    @staticmethod
+    def _get_templates():
+        templates_json = pecan.request.client.call(pecan.request.context,
+                                                   'get_templates')
+        LOG.info(templates_json)
+
+        try:
+            template_list = json.loads(templates_json)['templates_details']
+            return template_list
+        except Exception as e:
+            LOG.exception('failed to get template list %s ', e)
             abort(404, str(e))
 
     @staticmethod
