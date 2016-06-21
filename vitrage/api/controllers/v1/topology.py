@@ -54,6 +54,7 @@ class TopologyController(RootRestController):
 
     @staticmethod
     def get_graph(graph_type, depth, query, root):
+        TopologyController._check_input_para(graph_type, depth, query, root)
 
         try:
             graph_data = pecan.request.client.call(pecan.request.context,
@@ -77,3 +78,9 @@ class TopologyController(RootRestController):
         except Exception as e:
             LOG.exception('failed to get topology %s ', e)
             abort(404, str(e))
+
+    @staticmethod
+    def _check_input_para(graph_type, depth, query, root):
+        if graph_type == 'graph' and depth is not None and root is None:
+            LOG.exception("Graph-type 'graph' requires a 'root' with 'depth'")
+            abort(403, "Graph-type 'graph' requires a 'root' with 'depth'")
