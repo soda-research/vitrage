@@ -105,19 +105,23 @@ class EntityGraphApis(object):
 
         ga = create_algorithm(self.entity_graph)
         if graph_type == 'tree':
-            if query:
-                final_query = query
-            else:
+            if not query:
                 LOG.error("Graph-type 'tree' requires a filter.")
                 return {}
-        else:
+            found_graph = ga.graph_query_vertices(
+                query_dict=query,
+                root_id=root,
+                depth=depth)
+        elif graph_type == 'graph':
             final_query = query if query else TOPOLOGY_AND_ALARMS_QUERY
-
-        found_graph = ga.graph_query_vertices(
-            query_dict=final_query,
-            root_id=root,
-            depth=depth)
-
+            if root:
+                found_graph = ga.graph_query_vertices(
+                    query_dict=final_query,
+                    root_id=root,
+                    depth=depth)
+            else:
+                found_graph = ga.create_graph_from_matching_vertices(
+                    query_dict=final_query)
         return found_graph.json_output_graph()
 
     def get_rca(self, ctx, root):
