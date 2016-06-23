@@ -248,7 +248,7 @@ class TemplateApis(object):
             'status': status,
             'description': description,
             'message': str(message),
-            'error code': status_code
+            'status code': status_code
         })
 
     @staticmethod
