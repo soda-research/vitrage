@@ -192,11 +192,12 @@ class TemplateApis(object):
         LOG.debug("TemplateApis get_templates")
 
         templates_details = []
-        for template in self.templates:
+        for uuid, template in self.templates.items():
 
             template_metadata = template.data[TemplateFields.METADATA]
 
             templates_details.append({
+                'uuid': str(template.uuid),
                 'name': template_metadata[TemplateFields.NAME],
                 'status': self._get_template_status(template.result),
                 'status details': template.result.comment,

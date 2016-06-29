@@ -13,6 +13,7 @@
 # under the License.
 from collections import defaultdict
 from collections import namedtuple
+import uuid
 
 from oslo_log import log
 
@@ -28,14 +29,12 @@ from vitrage.evaluator.template_validation.template_syntax_validator import \
 
 LOG = log.getLogger(__name__)
 
-
 EdgeKeyScenario = namedtuple('EdgeKeyScenario', ['label', 'source', 'target'])
 
 
 class ScenarioRepository(object):
-
     def __init__(self, conf):
-        self._templates = []
+        self._templates = {}
         self.relationship_scenarios = defaultdict(list)
         self.entity_scenarios = defaultdict(list)
         self._load_templates_files(conf)
@@ -86,8 +85,11 @@ class ScenarioRepository(object):
             if not result.is_valid:
                 LOG.info('Unable to load template: %s' % result.comment)
 
-        self.templates.append(Template(template_def, current_time, result))
-
+        template_uuid = uuid.uuid4()
+        self.templates[template_uuid] = Template(template_uuid,
+                                                 template_def,
+                                                 current_time,
+                                                 result)
         if result.is_valid:
             template_data = TemplateData(template_def)
             self._add_template_scenarios(template_data)

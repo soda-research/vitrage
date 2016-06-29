@@ -13,4 +13,4 @@
 # under the License.
 from collections import namedtuple
 
-Template = namedtuple('Template', ['data', 'date', 'result'])
+Template = namedtuple('Template', ['uuid', 'data', 'date', 'result'])
