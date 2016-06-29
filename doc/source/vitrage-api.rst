@@ -915,22 +915,86 @@ Response Examples
 ^^^^^^^^^^^^^^^^^
 
 ::
-
-{
-  "results": [
     {
-      "status": "validation failed",
-      "file path": "/tmp/templates/basic_no_meta.yaml",
-      "description": "Template syntax validation",
-      "message": "metadata is a mandatory section.",
-      "status code": 62
-    },
-    {
-      "status": "validation OK",
-      "file path": "/tmp/templates/basic.yaml",
-      "description": "Template validation",
-      "message": "Template validation is OK",
-      "status code": 4
+      "results": [
+        {
+          "status": "validation failed",
+          "file path": "/tmp/templates/basic_no_meta.yaml",
+          "description": "Template syntax validation",
+          "message": "metadata is a mandatory section.",
+          "status code": 62
+        },
+        {
+          "status": "validation OK",
+          "file path": "/tmp/templates/basic.yaml",
+          "description": "Template validation",
+          "message": "Template validation is OK",
+          "status code": 4
+        }
+      ]
     }
-  ]
-}
+
+Template List
+^^^^^^^^^^^^^
+
+List all templates loaded from /etc/vitrage/templates, both those that past validation and those that did not.
+
+GET /v1/template/
+~~~~~~~~~~~~~~~~~
+
+Headers
+=======
+
+-  X-Auth-Token (string, required) - Keystone auth token
+-  Accept (string) - application/json
+-  User-Agent (String)
+
+Path Parameters
+===============
+
+None
+
+Query Parameters
+================
+
+None
+
+Request Body
+============
+
+None
+
+Request Examples
+================
+
+::
+
+    GET /v1/template/
+    Host: 135.248.18.122:8999
+    User-Agent: keystoneauth1/2.3.0 python-requests/2.9.1 CPython/2.7.6
+    Accept: application/json
+    X-Auth-Token: 2b8882ba2ec44295bf300aecb2caa4f7
+
+Response Status code
+====================
+
+None
+
+Response Body
+=============
+
+Returns list of all templates loaded from /etc/vitrage/templates, both those that past validation and those that did not.
+
+Response Examples
+=================
+
+::
+    +--------------------------------------+---------------------------------------+--------+--------------------------------------------------+----------------------+
+    | uuid                                 | name                                  | status | status details                                   | date                 |
+    +--------------------------------------+---------------------------------------+--------+--------------------------------------------------+----------------------+
+    | 67bebcb4-53b1-4240-ad05-451f34db2438 | vm_down_causes_suboptimal_application | failed | Entity definition must contain template_id field | 2016-06-29T12:24:16Z |
+    | 4cc899e6-f6cb-43d8-94a0-6fa937e41ae2 | host_cpu_load_causes_vm_problem       | pass   | Template validation is OK                        | 2016-06-29T12:24:16Z |
+    | 0548367e-711a-4c08-9bdb-cb61f96fed04 | switch_connectivity_issues            | pass   | Template validation is OK                        | 2016-06-29T12:24:16Z |
+    | 33cb4400-f846-4c64-b168-530824d38f3e | host_nic_down                         | pass   | Template validation is OK                        | 2016-06-29T12:24:16Z |
+    | a04cd155-0fcf-4409-a27c-c83ba8b20a3c | disconnected_storage_problems         | pass   | Template validation is OK                        | 2016-06-29T12:24:16Z |
+    +--------------------------------------+---------------------------------------+--------+--------------------------------------------------+----------------------+
