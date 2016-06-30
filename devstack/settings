@@ -32,3 +32,5 @@ TEMPEST_SERVICES+=,vitrage
 
 # for now dont use pip install for the client
 LIBS_FROM_GIT=python-vitrageclient
+
+VITRAGECLIENT_BRANCH=stable/liberty
