@@ -937,7 +937,7 @@ Response Examples
 Template List
 ^^^^^^^^^^^^^
 
-List all templates loaded from /etc/vitrage/templates, both those that past validation and those that did not.
+List all templates loaded from /etc/vitrage/templates, both those that passed validation and those that did not.
 
 GET /v1/template/
 ~~~~~~~~~~~~~~~~~
@@ -983,7 +983,7 @@ None
 Response Body
 =============
 
-Returns list of all templates loaded from /etc/vitrage/templates, both those that past validation and those that did not.
+Returns list of all templates loaded from /etc/vitrage/templates, both those that passed validation and those that did not.
 
 Response Examples
 =================
