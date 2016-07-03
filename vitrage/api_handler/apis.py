@@ -205,6 +205,17 @@ class TemplateApis(object):
             })
         return json.dumps({'templates_details': templates_details})
 
+    def show_template(self, ctx, template_uuid):
+
+        LOG.debug("Show template with uuid: $s", str(template_uuid))
+
+        template = self.templates[template_uuid]
+
+        if template:
+            return json.dumps(template.data)
+        else:
+            return json.dumps({'ERROR': 'Incorrect uuid'})
+
     def validate_template(self, ctx, templates):
         LOG.debug("TemplateApis validate_template templates:"
                   "%s", str(templates))

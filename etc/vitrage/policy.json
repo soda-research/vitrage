@@ -5,5 +5,6 @@
   "list alarms": "role:admin",
   "get rca": "role:admin",
   "template validate": "role:admin",
-  "template list": "role:admin"
+  "template list": "role:admin",
+  "template show": "role:admin"
 }

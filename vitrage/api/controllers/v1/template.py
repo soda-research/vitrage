@@ -43,6 +43,22 @@ class TemplateController(RootRestController):
             abort(404, str(e))
 
     @pecan.expose('json')
+    def get(self, template_uuid):
+
+        LOG.info(_LI('get template content'))
+
+        enforce("template show",
+                pecan.request.headers,
+                pecan.request.enforcer,
+                {})
+
+        try:
+            return self._show_template(template_uuid)
+        except Exception as e:
+            LOG.exception('failed to show template %s' % template_uuid, e)
+            abort(404, str(e))
+
+    @pecan.expose('json')
     def post(self, **kwargs):
 
         LOG.info(_LI('validate template. args: %s') % kwargs)
@@ -71,6 +87,20 @@ class TemplateController(RootRestController):
             return template_list
         except Exception as e:
             LOG.exception('failed to get template list %s ', e)
+            abort(404, str(e))
+
+    @staticmethod
+    def _show_template(template_uuid):
+
+        template_json = pecan.request.client.call(pecan.request.context,
+                                                  'show_template',
+                                                  template_uuid=template_uuid)
+        LOG.info(template_json)
+
+        try:
+            return json.loads(template_json)
+        except Exception as e:
+            LOG.exception('failed to show template with uuid: %s ', e)
             abort(404, str(e))
 
     @staticmethod

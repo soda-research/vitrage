@@ -86,10 +86,10 @@ class ScenarioRepository(object):
                 LOG.info('Unable to load template: %s' % result.comment)
 
         template_uuid = uuid.uuid4()
-        self.templates[template_uuid] = Template(template_uuid,
-                                                 template_def,
-                                                 current_time,
-                                                 result)
+        self.templates[str(template_uuid)] = Template(template_uuid,
+                                                      template_def,
+                                                      current_time,
+                                                      result)
         if result.is_valid:
             template_data = TemplateData(template_def)
             self._add_template_scenarios(template_data)
