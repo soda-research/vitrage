@@ -17,10 +17,10 @@ from oslo_config import cfg
 
 # Register options for the service
 OPTS = [
-    cfg.PortOpt('port',
-                default=8999,
-                help='The port for the vitrage API server.',
-                ),
+    cfg.IntOpt('port',
+               default=8999,
+               help='The port for the vitrage API server.',
+               ),
     cfg.StrOpt('host',
                default='0.0.0.0',
                help='The listen IP for the vitrage API server.',

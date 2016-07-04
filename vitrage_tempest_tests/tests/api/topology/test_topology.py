@@ -48,7 +48,7 @@ class TestTopology(BaseTopologyTest):
          cli via api
         """
         api_graph = self.vitrage_client.topology.get()
-        cli_graph = utils.run_vitrage_command('vitrage topology show',
+        cli_graph = utils.run_vitrage_command('vitrage topology show -f json',
                                               self.conf)
         self._compare_graphs(api_graph, cli_graph)
 

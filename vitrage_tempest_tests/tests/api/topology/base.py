@@ -68,7 +68,16 @@ class BaseTopologyTest(BaseApiTest):
         self.assertNotEqual(len(cli_graph), 0,
                             'The topology graph taken from terminal is empty')
 
-        parsed_topology = json.loads(cli_graph)
+        try:
+            parsed_topology = json.loads(cli_graph)
+            LOG.debug("CLI output after json loading: {}"
+                      .format(str(cli_graph)))
+            LOG.debug("CLI output type: {}"
+                      .format(str(type(cli_graph))))
+        except ValueError:
+            LOG.error("CLI output could not be converted to JSON. Value: {}"
+                      .format(str(cli_graph)))
+            raise
 
         sorted_cli_graph = sorted(parsed_topology.items())
         sorted_api_graph = sorted(api_graph.items())
