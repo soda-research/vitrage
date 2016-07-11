@@ -32,6 +32,7 @@ class VertexProperties(object):
     AGGREGATED_SEVERITY = 'aggregated_severity'
     OPERATIONAL_SEVERITY = 'operational_severity'
     VITRAGE_ID = 'vitrage_id'
+    IS_MARKED_DOWN = 'is_marked_down'
     INFO = 'info'
     GRAPH_INDEX = 'graph_index'
 
@@ -93,3 +94,5 @@ class EventAction(object):
 class NotifierEventTypes(object):
     ACTIVATE_DEDUCED_ALARM_EVENT = 'vitrage.deduced_alarm.activate'
     DEACTIVATE_DEDUCED_ALARM_EVENT = 'vitrage.deduced_alarm.deactivate'
+    ACTIVATE_MARK_DOWN_EVENT = 'vitrage.mark_down.activate'
+    DEACTIVATE_MARK_DOWN_EVENT = 'vitrage.mark_down.deactivate'

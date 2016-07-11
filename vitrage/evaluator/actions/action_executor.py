@@ -32,6 +32,7 @@ from vitrage.evaluator.actions.recipes.action_steps import UPDATE_VERTEX
 from vitrage.evaluator.actions.recipes.add_causal_relationship import \
     AddCausalRelationship
 from vitrage.evaluator.actions.recipes.base import EVALUATOR_EVENT_TYPE
+from vitrage.evaluator.actions.recipes.mark_down import MarkDown
 from vitrage.evaluator.actions.recipes.raise_alarm import RaiseAlarm
 from vitrage.evaluator.actions.recipes.set_state import SetState
 
@@ -127,5 +128,8 @@ class ActionExecutor(object):
             importutils.import_object(
             "%s.%s" % (AddCausalRelationship.__module__,
                        AddCausalRelationship.__name__))
+
+        recipes[ActionType.MARK_DOWN] = importutils.import_object(
+            "%s.%s" % (MarkDown.__module__, MarkDown.__name__))
 
         return recipes

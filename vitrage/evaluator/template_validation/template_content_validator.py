@@ -168,16 +168,19 @@ def validate_scenario_actions(actions, entities_ids):
 def validate_scenario_action(action, entities_ids):
 
     action_type = action[TemplateFields.ACTION_TYPE]
+    actions = {
+        ActionType.RAISE_ALARM: validate_raise_alarm_action,
+        ActionType.SET_STATE: validate_set_state_action,
+        ActionType.ADD_CAUSAL_RELATIONSHIP:
+        validate_add_causal_relationship_action,
+        ActionType.MARK_DOWN: validate_mark_down_action,
+    }
 
-    if action_type == ActionType.RAISE_ALARM:
-        return validate_raise_alarm_action(action, entities_ids)
-    elif action_type == ActionType.SET_STATE:
-        return validate_set_state_action(action, entities_ids)
-    elif action_type == ActionType.ADD_CAUSAL_RELATIONSHIP:
-        return validate_add_causal_relationship_action(action, entities_ids)
-    else:
+    if action_type not in actions.keys():
         LOG.error('%s status code: %s' % (status_msgs[120], 120))
         return get_fault_result(RESULT_DESCRIPTION, 120)
+
+    return actions[action_type](action, entities_ids)
 
 
 def validate_raise_alarm_action(action, entities_ids):
@@ -238,6 +241,17 @@ def validate_add_causal_relationship_action(action, entities_ids):
 
     source = action_target[TemplateFields.SOURCE]
     return _validate_template_id(entities_ids, source)
+
+
+def validate_mark_down_action(action, entities_ids):
+
+    action_target = action[TemplateFields.ACTION_TARGET]
+    if TemplateFields.TARGET not in action_target:
+        LOG.error('%s status code: %s' % (status_msgs[131], 131))
+        return get_fault_result(RESULT_DESCRIPTION, 131)
+
+    target = action_target[TemplateFields.TARGET]
+    return _validate_template_id(entities_ids, target)
 
 
 def _validate_template_id(ids, id_to_check):

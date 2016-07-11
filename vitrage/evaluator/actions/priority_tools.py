@@ -16,7 +16,7 @@ from vitrage.common.constants import VertexProperties as VProps
 from vitrage.evaluator.template_fields import TemplateFields
 
 
-class CausalTools(object):
+class BaselineTools(object):
     @staticmethod
     def get_score(action_info):
         return 1  # no priorities
