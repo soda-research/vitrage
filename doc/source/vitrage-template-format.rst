@@ -312,8 +312,61 @@ Common parameters and their acceptable values - for writing templates
 | action            | action_type   | raise_alarm,            |                                    |
 |                   |               | set_state,              |                                    |
 |                   |               | add_causal_relationship |                                    |
+|                   |               | mark_down               |                                    |
 +-------------------+---------------+-------------------------+------------------------------------+
 
+
+Supported Actions
+-----------------
+
+raise_alarm
+^^^^^^^^^^^
+Raise a deduced alarm on a target entity
+ ::
+
+    action:
+        action_type : raise_alarm
+            properties:
+                alarm_name: some problem # mandatory; string that is valid variable name
+                severity: critical       # mandatory; should match values in "vitrage.yaml"
+            action_target:
+                target: instance         # mandatory. entity (from the definitions section) to raise an alarm on. Should not be an alarm.
+
+set_state
+^^^^^^^^^^^
+Set state of specified entity. This will directly affect the state as seen in vitrage, but will not impact the state at the relevant datasource of this entity.
+ ::
+
+    action:
+        action_type : set_state
+            properties:
+                state: error # mandatory; should match values in the relevant datasource_values YAML file for this entity.
+            action_target:
+                target: host # mandatory. entity (from the definitions section) to change state
+
+
+add_causal_relationship
+^^^^^^^^^^^
+Add a causal relationship between alarms.
+ ::
+
+    action:
+        action_type : add_causal_relationship
+            action_target:
+                source: host_alarm     # mandatory. the alarm that caused the target alarm (name from the definitions section)
+                target: instance_alarm # mandatory. the alarm that was caused by the source alarm (name from the definitions section)
+
+
+mark_down
+^^^^^^^^^
+Set an entity marked_down field.
+This can be used along with nova notifier to call force_down for a host
+ ::
+
+    action:
+        action_type : mark_down
+            action_target:
+                target: instance # mandatory. entity (from the definitions section) to be marked as down
 
 Future support & Open Issues
 ============================

@@ -68,7 +68,10 @@ status_msgs = {
     126: 'raise_alarm action must contain severity field in properties block.',
     127: 'raise_alarm action must contain target field in target_action block',
     128: 'set_state action must contain state field in properties block.',
-    129: 'set_state action must contain target field in target_action block',
+    129: 'set_state action must contain target field in target_action block.',
     130: 'add_causal_relationship action must contain target and source field '
-         'in target_action block',
+         'in target_action block.',
+    131: 'mark_down action must contain \'target\' field in'
+         ' \'target_action\' block.',
+
 }

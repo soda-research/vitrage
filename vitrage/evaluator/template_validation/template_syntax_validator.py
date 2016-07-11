@@ -246,7 +246,7 @@ def _validate_dict_schema(schema, value):
             msg = status_msgs[4] % e
 
         LOG.error('%s status code: %s' % (msg, status_code))
-        return get_fault_result(RESULT_DESCRIPTION, status_code)
+        return get_fault_result(RESULT_DESCRIPTION, status_code, msg)
 
     return get_correct_result(RESULT_DESCRIPTION)
 

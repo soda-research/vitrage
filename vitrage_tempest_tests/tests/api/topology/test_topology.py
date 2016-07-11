@@ -12,6 +12,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import unittest
+
 from oslo_log import log as logging
 
 from vitrage_tempest_tests.tests.api.topology.base import BaseTopologyTest
@@ -41,6 +43,7 @@ class TestTopology(BaseTopologyTest):
         cls.default_ports = \
             len(cls.neutron_client.list_ports()['ports'])
 
+    @unittest.skip("skip test")
     def test_compare_api_and_cli(self):
         """compare_api_and_cli
 
