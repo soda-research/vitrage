@@ -24,6 +24,6 @@ OPTS = [
                ),
     cfg.StrOpt('notifier_topic',
                default='vitrage.graph',
-               help='The topic that vitrage-graph uses for alarm '
+               help='The topic that vitrage-graph uses for graph '
                     'notification messages.'),
 ]
