@@ -61,7 +61,7 @@ notification_driver = messagingv2
 
 [[post-config|\$VITRAGE_CONF]]
 [datasources]
-snapshots_interval = 7200
+snapshots_interval = 180
 EOF
 
 $GATE_DEST/devstack-gate/devstack-vm-gate.sh

@@ -24,7 +24,7 @@ VITRAGE_USE_MOD_WSGI=${VITRAGE_USE_MOD_WSGI:-${ENABLE_HTTPD_MOD_WSGI_SERVICES}}
 # Toggle for deploying Vitrage with/without nagios
 VITRAGE_USE_NAGIOS=$(trueorfalse False VITRAGE_USE_NAGIOS)
 
-VITRAGE_DEFAULT_DATASOURCES=${VITRAGE_DEFAULT_DATASOURCES:-nova.host,nova.instance,nova.zone,nagios,static_physical,aodh,cinder.volume}
+VITRAGE_DEFAULT_DATASOURCES=${VITRAGE_DEFAULT_DATASOURCES:-nova.host,nova.instance,nova.zone,nagios,static_physical,aodh,cinder.volume,neutron.network,neutron.port}
 
 
 # Tell Tempest this project is present
