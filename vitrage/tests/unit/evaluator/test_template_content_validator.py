@@ -228,6 +228,43 @@ class TemplateContentValidatorTest(base.BaseTest):
         # Test assertions
         self._test_assert_with_fault_result(result, 128)
 
+    def test_validate_mark_down_action(self):
+
+        # Test setup
+        ids = ['123', '456', '789']
+        action = self._create_mark_down_action('123')
+
+        # Test action and assertions
+        result = validator.validate_mark_down_action(action, ids)
+
+        # Test Assertions
+        self._test_assert_with_correct_result(result)
+
+    def test_validate_mark_down_action_with_invalid_target_id(self):
+
+        # Test setup
+        ids = ['123', '456', '789']
+        action = self._create_mark_down_action('unknown')
+
+        # Test action
+        result = validator.validate_mark_down_action(action, ids)
+
+        # Test assertions
+        self._test_assert_with_fault_result(result, 3)
+
+    def test_validate_mark_down_action_without_target_id(self):
+
+        # Test setup
+        ids = ['123', '456', '789']
+        action = self._create_mark_down_action('123')
+        action[TemplateFields.ACTION_TARGET].pop(TemplateFields.TARGET)
+
+        # Test action
+        result = validator.validate_mark_down_action(action, ids)
+
+        # Test assertions
+        self._test_assert_with_fault_result(result, 131)
+
     def test_validate_add_causal_relationship_action(self):
 
         # Test setup
@@ -323,6 +360,9 @@ class TemplateContentValidatorTest(base.BaseTest):
         set_state_action = self._create_set_state_action(target)
         actions.append({TemplateFields.ACTION: set_state_action})
 
+        mark_host_down_action = self._create_mark_down_action(target)
+        actions.append({TemplateFields.ACTION: mark_host_down_action})
+
         causal_action = self._create_add_causal_relationship_action(target,
                                                                     source)
         actions.append({TemplateFields.ACTION: causal_action})
@@ -341,6 +381,18 @@ class TemplateContentValidatorTest(base.BaseTest):
             TemplateFields.ACTION_TYPE: ActionType.ADD_CAUSAL_RELATIONSHIP,
             TemplateFields.ACTION_TARGET: action_target}
 
+        return action
+
+    @staticmethod
+    def _create_mark_down_action(target):
+
+        action_target = {
+            TemplateFields.TARGET: target
+        }
+        action = {
+            TemplateFields.ACTION_TYPE: ActionType.MARK_DOWN,
+            TemplateFields.ACTION_TARGET: action_target,
+        }
         return action
 
     @staticmethod
