@@ -222,7 +222,7 @@ an alarm on the hosting zone or an alarm on the hosting host.
  ::
 
     metadata:
-        name: deduced_alarm_two_possibile_triggers
+        name: deduced_alarm_two_possible_triggers
         description: deduced alarm using or in condition
     definitions:
         entities:
