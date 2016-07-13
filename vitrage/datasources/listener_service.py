@@ -13,7 +13,6 @@
 # under the License.
 
 from collections import defaultdict
-import json
 
 from oslo_log import log
 import oslo_messaging
@@ -91,9 +90,6 @@ class NotificationsEndpoint(object):
         self.enqueue_callback = enqueue_callback
 
     def info(self, ctxt, publisher_id, event_type, payload, metadata):
-        LOG.debug('EVENT RECEIVED: %(event_type)s -> %(payload)s ' %
-                  {'event_type': str(event_type),
-                   'payload': json.dumps(payload)})
         for event_string in self.enrich_callbacks_by_events:
             if str(event_type) == event_string:
 
