@@ -24,7 +24,7 @@ from vitrage.messaging import get_transport
 LOG = log.getLogger(__name__)
 
 
-class DeducedAlarmNotifier(object):
+class GraphNotifier(object):
     """Allows writing to message bus"""
     def __init__(self, conf):
         self.oslo_notifier = None
@@ -32,16 +32,16 @@ class DeducedAlarmNotifier(object):
             topic = conf.entity_graph.notifier_topic
             notifier_plugins = conf.notifiers
             if not topic or not notifier_plugins:
-                LOG.info('DeducedAlarmNotifier is disabled')
+                LOG.info('Graph Notifier is disabled')
                 return
 
             self.oslo_notifier = oslo_messaging.Notifier(
                 get_transport(conf),
                 driver='messagingv2',
-                publisher_id='vitrage.deduced',
+                publisher_id='vitrage.graph',
                 topic=topic)
         except Exception as e:
-            LOG.info('DeducedAlarmNotifier missing configuration %s' % str(e))
+            LOG.info('Graph Notifier - missing configuration %s' % str(e))
 
     @property
     def enabled(self):
@@ -57,38 +57,67 @@ class DeducedAlarmNotifier(object):
         change that happened. Deleted elements should arrive with the
         is_deleted property set to True
         """
-        notification_type = _get_notification_type(before, current, is_vertex)
-        if not notification_type:
+        notification_types = _get_notification_type(before, current, is_vertex)
+        if not notification_types:
             return
 
-        LOG.debug('DeducedAlarmNotifier : %s', notification_type)
-        LOG.debug('DeducedAlarmNotifier : %s', current.properties)
+        LOG.info('notification_types : %s', str(notification_types))
+        LOG.info('notification properties : %s', current.properties)
 
-        try:
-            self.oslo_notifier.info({}, notification_type, current.properties)
-        except Exception as e:
-            LOG.exception('DeducedAlarmNotifier cannot notify - %s', e)
+        for notification_type in notification_types:
+            try:
+                self.oslo_notifier.info(
+                    {},
+                    notification_type,
+                    current.properties)
+            except Exception as e:
+                LOG.exception('Cannot notify - %s - %s', notification_type, e)
 
 
 def _get_notification_type(before, current, is_vertex):
     if not is_vertex:
         return None
-    if not _is_active_deduced_alarm(before) and \
-            _is_active_deduced_alarm(current):
-        return NotifierEventTypes.ACTIVATE_DEDUCED_ALARM_EVENT
-    if _is_active_deduced_alarm(before) and \
-            not _is_active_deduced_alarm(current):
-        return NotifierEventTypes.DEACTIVATE_DEDUCED_ALARM_EVENT
+
+    def notification_type(is_active,
+                          activate_event_type,
+                          deactivate_event_type):
+        if not is_active(before):
+            if is_active(current):
+                return activate_event_type
+        else:
+            if not is_active(current):
+                return deactivate_event_type
+
+    notification_types = [
+        notification_type(_is_active_deduced_alarm,
+                          NotifierEventTypes.ACTIVATE_DEDUCED_ALARM_EVENT,
+                          NotifierEventTypes.DEACTIVATE_DEDUCED_ALARM_EVENT),
+        notification_type(_is_marked_down,
+                          NotifierEventTypes.ACTIVATE_MARK_DOWN_EVENT,
+                          NotifierEventTypes.DEACTIVATE_MARK_DOWN_EVENT),
+    ]
+    return list(filter(None, notification_types))
 
 
 def _is_active_deduced_alarm(vertex):
     if not vertex:
         return False
+    if vertex.get(VProps.CATEGORY) == EntityCategory.ALARM and \
+            vertex.get(VProps.TYPE) == evaluator.VITRAGE_TYPE:
+        return _is_relevant_vertex(vertex)
+    return False
 
-    if not (vertex.get(VProps.CATEGORY) == EntityCategory.ALARM and
-            vertex.get(VProps.TYPE) == evaluator.VITRAGE_TYPE):
+
+def _is_marked_down(vertex):
+    if not vertex:
         return False
+    if vertex.get(VProps.CATEGORY) == EntityCategory.RESOURCE and \
+            vertex.get(VProps.IS_MARKED_DOWN) is True:
+        return _is_relevant_vertex(vertex)
+    return False
 
+
+def _is_relevant_vertex(vertex):
     if vertex.get(VProps.IS_DELETED, False) or \
             vertex.get(VProps.IS_PLACEHOLDER, False):
         return False

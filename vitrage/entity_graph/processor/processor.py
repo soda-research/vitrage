@@ -22,7 +22,7 @@ from vitrage.entity_graph.mappings.datasource_info_mapper import \
     DatasourceInfoMapper
 from vitrage.entity_graph.processor import base as processor
 from vitrage.entity_graph.processor import entity_graph
-from vitrage.entity_graph.processor.notifier import DeducedAlarmNotifier
+from vitrage.entity_graph.processor.notifier import GraphNotifier
 from vitrage.entity_graph.processor import processor_utils as PUtils
 from vitrage.entity_graph.transformer_manager import TransformerManager
 from vitrage.graph import Direction
@@ -41,7 +41,7 @@ class Processor(processor.ProcessorBase):
         self.initialization_status = initialization_status
         self.entity_graph = entity_graph.EntityGraph("Entity Graph") if \
             e_graph is None else e_graph
-        self._notifier = DeducedAlarmNotifier(conf)
+        self._notifier = GraphNotifier(conf)
 
     def process_event(self, event):
         """Decides which action to run on given event
