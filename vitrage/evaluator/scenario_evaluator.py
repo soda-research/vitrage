@@ -304,8 +304,8 @@ class ActionTracker(object):
                              if _is_equivalent(entry))
             self._tracker[key].remove(to_remove)
         except StopIteration:
-            LOG.warn("Could not find action entry to remove "
-                     "from tracker: {}".format(action))
+            LOG.warning("Could not find action entry to remove "
+                        "from tracker: {}".format(action))
 
     def get_dominant_action(self, key):
         return self._tracker[key][0] if self._tracker.get(key, None) else None
