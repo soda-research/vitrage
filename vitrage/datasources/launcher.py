@@ -15,7 +15,6 @@
 
 import itertools
 
-from oslo_log import log
 from oslo_service import service as os_service
 from oslo_utils import importutils as utils
 from vitrage.datasources.listener_service import ListenerService
@@ -24,7 +23,6 @@ from services import ChangesService
 from services import SnapshotsService
 from vitrage.common.utils import opt_exists
 
-LOG = log.getLogger(__name__)
 CHANGES_INTERVAL = 'changes_interval'
 
 
