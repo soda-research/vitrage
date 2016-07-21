@@ -5,7 +5,6 @@
 hacking<0.11,>=0.10.0
 python-dateutil>=2.4.2
 coverage>=3.6
-discover
 lxml>=2.3
 networkx>=1.10
 python-ceilometerclient>=2.2.1  # Apache-2.0
