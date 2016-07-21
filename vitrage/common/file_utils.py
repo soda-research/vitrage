@@ -26,9 +26,9 @@ def load_files(dir_path,
                with_exception=False):
     try:
         loaded_files = os.listdir(dir_path)
-    except Exception as e:
+    except Exception:
         if with_exception:
-            raise e
+            raise
         else:
             return []
     if suffix:
@@ -56,7 +56,7 @@ def load_yaml_file(full_path, with_exception=False):
             return yaml.load(stream, Loader=yaml.BaseLoader)
         except Exception as e:
             if with_exception:
-                raise e
+                raise
             else:
                 LOG.error("Fails to parse file: %s. %s" % (full_path, e))
                 return None
