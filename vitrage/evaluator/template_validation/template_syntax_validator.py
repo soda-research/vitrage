@@ -243,7 +243,7 @@ def _validate_dict_schema(schema, value):
         else:
             # General syntax error
             status_code = 4
-            msg = status_msgs[4] % e
+            msg = status_msgs[4] + str(e)
 
         LOG.error('%s status code: %s' % (msg, status_code))
         return get_fault_result(RESULT_DESCRIPTION, status_code, msg)
