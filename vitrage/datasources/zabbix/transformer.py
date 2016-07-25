@@ -18,14 +18,22 @@ from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import EdgeLabel
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import VertexProperties as VProps
+from vitrage.common.datetime_utils import change_time_str_format
+from vitrage.common.datetime_utils import format_unix_timestamp
 from vitrage.datasources.alarm_properties import AlarmProperties as AlarmProps
 from vitrage.datasources.alarm_transformer_base import AlarmTransformerBase
 from vitrage.datasources.nova.host import NOVA_HOST_DATASOURCE
 from vitrage.datasources.static_physical import SWITCH
 from vitrage.datasources import transformer_base as tbase
 from vitrage.datasources.transformer_base import Neighbor
-from vitrage.datasources.zabbix.properties import ZabbixProperties
-from vitrage.datasources.zabbix.properties import ZabbixTriggerStatus
+from vitrage.datasources.zabbix.properties import ZabbixProperties \
+    as ZabbixProps
+from vitrage.datasources.zabbix.properties import ZabbixTriggerSeverity \
+    as TriggerSeverity
+from vitrage.datasources.zabbix.properties import ZabbixTriggerValue\
+    as TriggerValue
+
+
 import vitrage.graph.utils as graph_utils
 
 LOG = logging.getLogger(__name__)
@@ -43,25 +51,23 @@ class ZabbixTransformer(AlarmTransformerBase):
         return self._create_vertex(entity_event)
 
     def _create_vertex(self, entity_event):
-        # TODO(Alexey): need to check the correct format for the date
-        # update_timestamp = datetime_utils.change_time_str_format(
-        #     entity_event[ZabbixProperties.LAST_CHANGE],
-        #     '%Y-%m-%d %H:%M:%S',
-        #     tbase.TIMESTAMP_FORMAT)
-        update_timestamp = entity_event[ZabbixProperties.LAST_CHANGE]
+        self._unify_time_format(entity_event)
+
+        update_timestamp = entity_event[ZabbixProps.TIMESTAMP]
 
         sample_timestamp = entity_event[DSProps.SAMPLE_DATE]
 
         update_timestamp = self._format_update_timestamp(update_timestamp,
                                                          sample_timestamp)
 
-        severity = entity_event[ZabbixProperties.STATUS]
+        value = entity_event[ZabbixProps.VALUE]
         entity_state = AlarmProps.INACTIVE_STATE if \
-            severity == ZabbixTriggerStatus.OK else AlarmProps.ACTIVE_STATE
+            value == TriggerValue.OK else AlarmProps.ACTIVE_STATE
 
         metadata = {
-            VProps.NAME: entity_event[ZabbixProperties.DESCRIPTION],
-            VProps.SEVERITY: severity
+            VProps.NAME: entity_event[ZabbixProps.DESCRIPTION],
+            VProps.SEVERITY: TriggerSeverity.str(
+                entity_event[ZabbixProps.PRIORITY])
         }
 
         return graph_utils.create_vertex(
@@ -80,21 +86,18 @@ class ZabbixTransformer(AlarmTransformerBase):
         return self._create_zabbix_neighbors(entity_event)
 
     def _create_zabbix_neighbors(self, entity_event):
-        vitrage_id = self._create_entity_key(entity_event)
-        # TODO(Alexey): need to check the correct format for the date
-        # timestamp = datetime_utils.change_time_str_format(
-        #     entity_event[ZabbixProperties.LAST_CHANGE],
-        #     '%Y-%m-%d %H:%M:%S',
-        #     tbase.TIMESTAMP_FORMAT)
-        timestamp = entity_event[DSProps.SAMPLE_DATE]
+        self._unify_time_format(entity_event)
 
-        resource_type = entity_event[ZabbixProperties.RESOURCE_TYPE]
+        vitrage_id = self._create_entity_key(entity_event)
+        timestamp = entity_event[ZabbixProps.TIMESTAMP]
+
+        resource_type = entity_event[ZabbixProps.RESOURCE_TYPE]
         if resource_type == NOVA_HOST_DATASOURCE or resource_type == SWITCH:
             return [self._create_neighbor(
                 vitrage_id,
                 timestamp,
                 resource_type,
-                entity_event[ZabbixProperties.RESOURCE_NAME])]
+                entity_event[ZabbixProps.RESOURCE_NAME])]
 
         return []
 
@@ -125,13 +128,24 @@ class ZabbixTransformer(AlarmTransformerBase):
         return None
 
     def _ok_status(self, entity_event):
-        return entity_event[ZabbixProperties.STATUS] == ZabbixTriggerStatus.OK
+        return entity_event[ZabbixProps.VALUE] == TriggerValue.OK
 
     def _create_entity_key(self, entity_event):
 
         sync_type = entity_event[DSProps.SYNC_TYPE]
-        alarm_name = entity_event[ZabbixProperties.DESCRIPTION]
-        resource_name = entity_event[ZabbixProperties.RESOURCE_NAME]
+        alarm_name = entity_event[ZabbixProps.DESCRIPTION]
+        resource_name = entity_event[ZabbixProps.RESOURCE_NAME]
         return tbase.build_key(self._key_values(sync_type,
                                                 resource_name,
                                                 alarm_name))
+
+    @staticmethod
+    def _unify_time_format(entity_event):
+        try:
+            entity_event[ZabbixProps.TIMESTAMP] = format_unix_timestamp(
+                entity_event[ZabbixProps.LAST_CHANGE], tbase.TIMESTAMP_FORMAT)
+        except ValueError:
+            entity_event[ZabbixProps.TIMESTAMP] = change_time_str_format(
+                entity_event[ZabbixProps.LAST_CHANGE],
+                ZabbixProps.ZABBIX_TIMESTAMP_FORMAT,
+                tbase.TIMESTAMP_FORMAT)

@@ -87,13 +87,6 @@ class TestZabbixConfig(base.BaseTest):
         for expected_mapping in self.NON_EXISTING_MAPPINGS.items():
             self.assertFalse(self._check_contains(expected_mapping, mappings))
 
-    def test_zabbix_status_mapping(self):
-        # Action
-        mappings = ZabbixDriver._status_mapping()
-
-        # Test assertions
-        self.assertEqual(7, len(mappings))
-
     @staticmethod
     def _check_contains(expected_mapping, mappings):
         for mapping in mappings.items():
