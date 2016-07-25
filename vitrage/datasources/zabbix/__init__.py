@@ -39,4 +39,7 @@ OPTS = [
                help='Zabbix url'),
     cfg.StrOpt('config_file', default='/etc/vitrage/zabbix_conf.yaml',
                help='Zabbix configuration file'),
+    cfg.StrOpt('notification_topic',
+               default='vitrage_notifications',
+               help='Zabbix configured notifications topic for Vitrage'),
 ]
