@@ -50,13 +50,17 @@ class EdgeLabel(object):
     ATTACHED = 'attached'
     ATTACHED_PUBLIC = 'attached_public'
     ATTACHED_PRIVATE = 'attached_private'
+    CONNECT = 'connect'
+    MANAGED_BY = 'managed_by'
 
 edge_labels = [EdgeLabel.ON,
                EdgeLabel.CONTAINS,
                EdgeLabel.CAUSES,
                EdgeLabel.ATTACHED,
                EdgeLabel.ATTACHED_PRIVATE,
-               EdgeLabel.ATTACHED_PUBLIC]
+               EdgeLabel.ATTACHED_PUBLIC,
+               EdgeLabel.CONNECT,
+               EdgeLabel.MANAGED_BY]
 
 
 class SyncMode(object):
