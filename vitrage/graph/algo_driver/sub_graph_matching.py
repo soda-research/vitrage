@@ -15,6 +15,7 @@ from oslo_log import log as logging
 
 from vitrage.common.exception import VitrageAlgorithmError
 from vitrage.graph.filter import check_filter
+from vitrage.i18n import _LW
 
 LOG = logging.getLogger(__name__)
 
@@ -68,8 +69,8 @@ def subgraph_matching(base_graph, subgraph, matches, validate=False):
                                           subgraph,
                                           validate)
     if not initial_sg:
-        LOG.warning('subgraph_matching: Initial sub-graph creation failed')
-        LOG.warning('subgraph_matching: Known matches: %s',
+        LOG.warning(_LW('subgraph_matching:Initial sub-graph creation failed'))
+        LOG.warning(_LW('subgraph_matching: Known matches: %s'),
                     str(matches))
         return final_subgraphs
     queue = [initial_sg]
