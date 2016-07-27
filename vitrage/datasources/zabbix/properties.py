@@ -18,19 +18,43 @@ class ZabbixProperties(object):
     RESOURCE_NAME = 'resource_name'
     DESCRIPTION = 'description'
     STATUS = 'status'
+    VALUE = 'value'
     HOST = 'host'
     HOST_ID = 'hostid'
-    IS_ALARM_DISABLED = 'status'
-    IS_ALARM_ON = 'value'
-    SEVERITY = 'priority'
+    PRIORITY = 'priority'
     LAST_CHANGE = 'lastchange'
+    TIMESTAMP = 'timestamp'
+    ZABBIX_TIMESTAMP_FORMAT = '%Y.%m.%d %H:%M:%S'
+
+
+class ZabbixTriggerValue(object):
+    OK = '0'
+    PROBLEM = '1'
 
 
 class ZabbixTriggerStatus(object):
-    OK = 'OK'
+    ENABLED = '0'
+    DISABLED = '1'
+
+
+class ZabbixTriggerSeverity(object):
+
     INFORMATION = 'INFORMATION'
     WARNING = 'WARNING'
     AVERAGE = 'AVERAGE'
     HIGH = 'HIGH'
     DISASTER = 'DISASTER'
     NOT_CLASSIFIED = 'NOT CLASSIFIED'
+
+    _SEVERITY_MAPPING = {
+        '0': NOT_CLASSIFIED,
+        '1': INFORMATION,
+        '2': WARNING,
+        '3': AVERAGE,
+        '4': HIGH,
+        '5': DISASTER
+    }
+
+    @staticmethod
+    def str(num):
+        return ZabbixTriggerSeverity._SEVERITY_MAPPING[num]

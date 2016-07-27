@@ -23,3 +23,8 @@ def utcnow(with_timezone=True):
 def change_time_str_format(timestamp_str, old_format, new_format):
     utc = datetime.strptime(timestamp_str, old_format)
     return utc.strftime(new_format)
+
+
+def format_unix_timestamp(timestamp, date_format):
+    return datetime.fromtimestamp(float(timestamp)) \
+        .strftime(date_format)

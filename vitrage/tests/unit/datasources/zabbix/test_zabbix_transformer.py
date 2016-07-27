@@ -20,13 +20,16 @@ from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import EventAction
 from vitrage.common.constants import SyncMode
 from vitrage.common.constants import VertexProperties as VProps
+from vitrage.common.datetime_utils import format_unix_timestamp
 from vitrage.datasources.alarm_properties import AlarmProperties as AlarmProps
 from vitrage.datasources.nova.host import NOVA_HOST_DATASOURCE
 from vitrage.datasources.nova.host.transformer import HostTransformer
+from vitrage.datasources import transformer_base as tbase
 from vitrage.datasources.transformer_base import TransformerBase
-from vitrage.datasources.zabbix.driver import ZabbixDriver
-from vitrage.datasources.zabbix.properties import ZabbixProperties
-from vitrage.datasources.zabbix.properties import ZabbixTriggerStatus
+from vitrage.datasources.zabbix.properties import ZabbixProperties\
+    as ZabbixProps
+from vitrage.datasources.zabbix.properties import ZabbixTriggerSeverity
+from vitrage.datasources.zabbix.properties import ZabbixTriggerValue
 from vitrage.datasources.zabbix.transformer import ZabbixTransformer
 from vitrage.tests import base
 from vitrage.tests.mocks import mock_driver as mock_sync
@@ -54,6 +57,7 @@ class ZabbixTransformerTest(base.BaseTest):
         zabbix_alarms = mock_sync.generate_sequential_events_list(spec_list)
         transformer = ZabbixTransformer(self.transformers)
         event = zabbix_alarms[0]
+        self.enrich_event(event)
 
         # Test action
         observed_key = transformer._create_entity_key(event)
@@ -64,9 +68,9 @@ class ZabbixTransformerTest(base.BaseTest):
 
         self.assertEqual(EntityCategory.ALARM, observed_key_fields[0])
         self.assertEqual(event[DSProps.SYNC_TYPE], observed_key_fields[1])
-        self.assertEqual(event[ZabbixProperties.RESOURCE_NAME],
+        self.assertEqual(event[ZabbixProps.RESOURCE_NAME],
                          observed_key_fields[2])
-        self.assertEqual(event[ZabbixProperties.DESCRIPTION],
+        self.assertEqual(event[ZabbixProps.DESCRIPTION],
                          observed_key_fields[3])
 
     def test_zabbix_alarm_transform(self):
@@ -77,13 +81,9 @@ class ZabbixTransformerTest(base.BaseTest):
                                                              events_num=10)
         zabbix_alarms = mock_sync.generate_sequential_events_list(spec_list)
 
-        # convert to correct status
-        for alar in zabbix_alarms:
-            alar[ZabbixProperties.STATUS] = \
-                ZabbixDriver._status_mapping()[alar[ZabbixProperties.SEVERITY]]
-
         for alarm in zabbix_alarms:
             # Test action
+            self.enrich_event(alarm, format_timestamp=False)
             wrapper = ZabbixTransformer(self.transformers).transform(alarm)
             self._validate_vertex(wrapper.vertex, alarm)
 
@@ -100,7 +100,7 @@ class ZabbixTransformerTest(base.BaseTest):
     def _validate_action(self, alarm, wrapper):
         sync_mode = alarm[DSProps.SYNC_MODE]
         if sync_mode in (SyncMode.SNAPSHOT, SyncMode.UPDATE):
-            if alarm[ZabbixProperties.STATUS] == 'OK':
+            if alarm[ZabbixProps.VALUE] == ZabbixTriggerValue.OK:
                 self.assertEqual(EventAction.DELETE_ENTITY, wrapper.action)
             else:
                 self.assertEqual(EventAction.UPDATE_ENTITY, wrapper.action)
@@ -111,19 +111,21 @@ class ZabbixTransformerTest(base.BaseTest):
 
         self.assertEqual(EntityCategory.ALARM, vertex[VProps.CATEGORY])
         self.assertEqual(event[DSProps.SYNC_TYPE], vertex[VProps.TYPE])
-        self.assertEqual(event[ZabbixProperties.DESCRIPTION],
+        self.assertEqual(event[ZabbixProps.DESCRIPTION],
                          vertex[VProps.NAME])
 
-        event_status = event[ZabbixProperties.STATUS]
+        event_status = event[ZabbixProps.VALUE]
 
-        if event_status == ZabbixTriggerStatus.OK:
+        if event_status == ZabbixTriggerValue.OK:
             self.assertEqual(AlarmProps.INACTIVE_STATE,
                              vertex[VProps.STATE])
         else:
             self.assertEqual(AlarmProps.ACTIVE_STATE,
                              vertex[VProps.STATE])
 
-        self.assertEqual(event_status, vertex[VProps.SEVERITY])
+        event_severity = ZabbixTriggerSeverity.str(
+            event[ZabbixProps.PRIORITY])
+        self.assertEqual(event_severity, vertex[VProps.SEVERITY])
 
         self.assertFalse(vertex[VProps.IS_DELETED])
         self.assertFalse(vertex[VProps.IS_PLACEHOLDER])
@@ -136,13 +138,13 @@ class ZabbixTransformerTest(base.BaseTest):
 
         self.assertEqual(EntityCategory.RESOURCE, key_fields[0])
         self.assertEqual(NOVA_HOST_DATASOURCE, key_fields[1])
-        self.assertEqual(event[ZabbixProperties.RESOURCE_NAME], key_fields[2])
+        self.assertEqual(event[ZabbixProps.RESOURCE_NAME], key_fields[2])
 
         self.assertFalse(host_vertex[VProps.IS_DELETED])
         self.assertTrue(host_vertex[VProps.IS_PLACEHOLDER])
 
         self.assertEqual(EntityCategory.RESOURCE, host_vertex[VProps.CATEGORY])
-        self.assertEqual(event[ZabbixProperties.RESOURCE_NAME],
+        self.assertEqual(event[ZabbixProps.RESOURCE_NAME],
                          host_vertex[VProps.ID])
         self.assertEqual(NOVA_HOST_DATASOURCE, host_vertex[VProps.TYPE])
 
@@ -153,3 +155,9 @@ class ZabbixTransformerTest(base.BaseTest):
             ZabbixTransformer(self.transformers)._create_entity_key(event)
         self.assertEqual(alarm_key, edge.source_id)
         self.assertEqual(host_vertex.vertex_id, edge.target_id)
+
+    @staticmethod
+    def enrich_event(event, format_timestamp=True):
+        if format_timestamp:
+            event[ZabbixProps.TIMESTAMP] = format_unix_timestamp(
+                event[ZabbixProps.LAST_CHANGE], tbase.TIMESTAMP_FORMAT)

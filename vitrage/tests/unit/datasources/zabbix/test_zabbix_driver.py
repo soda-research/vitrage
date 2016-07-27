@@ -49,24 +49,24 @@ class ZabbixDriverTest(ZabbixBaseTest):
 
         alarm_data1 = {ZabbixProps.RESOURCE_NAME: 'compute-1',
                        ZabbixProps.DESCRIPTION: 'CPU utilization 1',
-                       ZabbixProps.IS_ALARM_DISABLED: '1',
-                       ZabbixProps.IS_ALARM_ON: '0',
-                       ZabbixProps.SEVERITY: '1'}
+                       ZabbixProps.STATUS: '1',
+                       ZabbixProps.VALUE: '0',
+                       ZabbixProps.PRIORITY: '1'}
         alarm_data2 = {ZabbixProps.RESOURCE_NAME: 'compute-1',
                        ZabbixProps.DESCRIPTION: 'CPU utilization 2',
-                       ZabbixProps.IS_ALARM_DISABLED: '1',
-                       ZabbixProps.IS_ALARM_ON: '1',
-                       ZabbixProps.SEVERITY: '1'}
+                       ZabbixProps.STATUS: '1',
+                       ZabbixProps.VALUE: '1',
+                       ZabbixProps.PRIORITY: '1'}
         alarm_data3 = {ZabbixProps.RESOURCE_NAME: 'compute-1',
                        ZabbixProps.DESCRIPTION: 'CPU utilization 3',
-                       ZabbixProps.IS_ALARM_DISABLED: '0',
-                       ZabbixProps.IS_ALARM_ON: '1',
-                       ZabbixProps.SEVERITY: '1'}
+                       ZabbixProps.STATUS: '0',
+                       ZabbixProps.VALUE: '1',
+                       ZabbixProps.PRIORITY: '1'}
         alarm_data4 = {ZabbixProps.RESOURCE_NAME: 'compute-1',
                        ZabbixProps.DESCRIPTION: 'CPU utilization 4',
-                       ZabbixProps.IS_ALARM_DISABLED: '0',
-                       ZabbixProps.IS_ALARM_ON: '0',
-                       ZabbixProps.SEVERITY: '1'}
+                       ZabbixProps.STATUS: '0',
+                       ZabbixProps.VALUE: '0',
+                       ZabbixProps.PRIORITY: '1'}
 
         zabbix_driver.set_alarm_datas([alarm_data1,
                                        alarm_data2,
@@ -75,7 +75,7 @@ class ZabbixDriverTest(ZabbixBaseTest):
 
         expected_alarm1 = {ZabbixProps.RESOURCE_NAME: 'compute-1',
                            ZabbixProps.DESCRIPTION: 'CPU utilization 3',
-                           ZabbixProps.SEVERITY: '1'}
+                           ZabbixProps.PRIORITY: '1'}
 
         # Action
         alarms = zabbix_driver._get_all_alarms()
@@ -100,13 +100,13 @@ class ZabbixDriverTest(ZabbixBaseTest):
         # Action
         alarm_data1 = {ZabbixProps.RESOURCE_NAME: 'compute-1',
                        ZabbixProps.DESCRIPTION: 'CPU utilization',
-                       ZabbixProps.SEVERITY: '-1'}
+                       ZabbixProps.VALUE: '0'}
         alarm_data2 = {ZabbixProps.RESOURCE_NAME: 'compute-2',
                        ZabbixProps.DESCRIPTION: 'CPU utilization',
-                       ZabbixProps.SEVERITY: '-1'}
+                       ZabbixProps.VALUE: '0'}
         alarm_data3 = {ZabbixProps.RESOURCE_NAME: 'compute-2',
                        ZabbixProps.DESCRIPTION: 'Uptime',
-                       ZabbixProps.SEVERITY: '-1'}
+                       ZabbixProps.VALUE: '0'}
 
         zabbix_driver.set_alarm_datas([alarm_data1,
                                        alarm_data2,
@@ -122,13 +122,14 @@ class ZabbixDriverTest(ZabbixBaseTest):
         # Action
         alarm_data1 = {ZabbixProps.RESOURCE_NAME: 'compute-1',
                        ZabbixProps.DESCRIPTION: 'CPU utilization',
-                       ZabbixProps.SEVERITY: '1'}
+                       ZabbixProps.VALUE: '1',
+                       ZabbixProps.PRIORITY: '1'}
         alarm_data2 = {ZabbixProps.RESOURCE_NAME: 'compute-2',
                        ZabbixProps.DESCRIPTION: 'CPU utilization',
-                       ZabbixProps.SEVERITY: '-1'}
+                       ZabbixProps.VALUE: '0'}
         alarm_data3 = {ZabbixProps.RESOURCE_NAME: 'compute-2',
                        ZabbixProps.DESCRIPTION: 'Uptime',
-                       ZabbixProps.SEVERITY: '-1'}
+                       ZabbixProps.VALUE: '0'}
 
         zabbix_driver.set_alarm_datas([alarm_data1,
                                        alarm_data2,
@@ -144,54 +145,58 @@ class ZabbixDriverTest(ZabbixBaseTest):
         # Action
         alarm_data1 = {ZabbixProps.RESOURCE_NAME: 'compute-1',
                        ZabbixProps.DESCRIPTION: 'CPU utilization',
-                       ZabbixProps.SEVERITY: '4'}
+                       ZabbixProps.VALUE: '1',
+                       ZabbixProps.PRIORITY: '4'}
         alarm_data2 = {ZabbixProps.RESOURCE_NAME: 'compute-2',
                        ZabbixProps.DESCRIPTION: 'CPU utilization',
-                       ZabbixProps.SEVERITY: '1'}
+                       ZabbixProps.VALUE: '1',
+                       ZabbixProps.PRIORITY: '1'}
         alarm_data3 = {ZabbixProps.RESOURCE_NAME: 'compute-2',
                        ZabbixProps.DESCRIPTION: 'Uptime',
-                       ZabbixProps.SEVERITY: '-1'}
+                       ZabbixProps.VALUE: '0'}
 
         zabbix_driver.set_alarm_datas([alarm_data1,
                                        alarm_data2,
                                        alarm_data3])
 
-        excpected_alarm1 = {ZabbixProps.RESOURCE_NAME: 'compute-1',
-                            ZabbixProps.DESCRIPTION: 'CPU utilization',
-                            ZabbixProps.SEVERITY: '4'}
-        excpected_alarm2 = {ZabbixProps.RESOURCE_NAME: 'host2',
-                            ZabbixProps.DESCRIPTION: 'CPU utilization',
-                            ZabbixProps.SEVERITY: '1'}
+        expected_alarm1 = {ZabbixProps.RESOURCE_NAME: 'compute-1',
+                           ZabbixProps.DESCRIPTION: 'CPU utilization',
+                           ZabbixProps.VALUE: '1',
+                           ZabbixProps.PRIORITY: '4'}
+        expected_alarm2 = {ZabbixProps.RESOURCE_NAME: 'host2',
+                           ZabbixProps.DESCRIPTION: 'CPU utilization',
+                           ZabbixProps.VALUE: '1',
+                           ZabbixProps.PRIORITY: '1'}
 
         alarms = zabbix_driver._get_all_alarms()
 
         # Test assertions
         self.assertIsNotNone(alarms, 'No alarms returned')
         self.assertEqual(2, len(alarms))
-        self._assert_contains(excpected_alarm1, alarms)
-        self._assert_contains(excpected_alarm2, alarms)
+        self._assert_contains(expected_alarm1, alarms)
+        self._assert_contains(expected_alarm2, alarms)
 
         # Action
         alarm_data1 = {ZabbixProps.RESOURCE_NAME: 'compute-1',
                        ZabbixProps.DESCRIPTION: 'CPU utilization',
-                       ZabbixProps.SEVERITY: '-1'}
+                       ZabbixProps.VALUE: '0'}
         alarm_data2 = {ZabbixProps.RESOURCE_NAME: 'compute-2',
                        ZabbixProps.DESCRIPTION: 'CPU utilization',
-                       ZabbixProps.SEVERITY: '-1'}
+                       ZabbixProps.VALUE: '0'}
         alarm_data3 = {ZabbixProps.RESOURCE_NAME: 'compute-2',
                        ZabbixProps.DESCRIPTION: 'Uptime',
-                       ZabbixProps.SEVERITY: '-1'}
+                       ZabbixProps.VALUE: '0'}
 
         zabbix_driver.set_alarm_datas([alarm_data1,
                                        alarm_data2,
                                        alarm_data3])
 
-        excpected_alarm1 = {ZabbixProps.RESOURCE_NAME: 'compute-1',
-                            ZabbixProps.DESCRIPTION: 'CPU utilization',
-                            ZabbixProps.SEVERITY: '-1'}
-        excpected_alarm2 = {ZabbixProps.RESOURCE_NAME: 'host2',
-                            ZabbixProps.DESCRIPTION: 'CPU utilization',
-                            ZabbixProps.SEVERITY: '-1'}
+        expected_alarm1 = {ZabbixProps.RESOURCE_NAME: 'compute-1',
+                           ZabbixProps.DESCRIPTION: 'CPU utilization',
+                           ZabbixProps.VALUE: '0'}
+        expected_alarm2 = {ZabbixProps.RESOURCE_NAME: 'host2',
+                           ZabbixProps.DESCRIPTION: 'CPU utilization',
+                           ZabbixProps.VALUE: '0'}
 
         alarms = zabbix_driver._get_all_alarms()
 
@@ -200,8 +205,8 @@ class ZabbixDriverTest(ZabbixBaseTest):
         # status is OK, because they were not OK earlier
         self.assertIsNotNone(alarms, 'No alarms returned')
         self.assertEqual(2, len(alarms))
-        self._assert_contains(excpected_alarm1, alarms)
-        self._assert_contains(excpected_alarm2, alarms)
+        self._assert_contains(expected_alarm1, alarms)
+        self._assert_contains(expected_alarm2, alarms)
 
         # Action
         alarms = zabbix_driver._get_all_alarms()
@@ -225,13 +230,16 @@ class ZabbixDriverTest(ZabbixBaseTest):
         # Action
         alarm_data1 = {ZabbixProps.RESOURCE_NAME: 'compute-1',
                        ZabbixProps.DESCRIPTION: 'CPU utilization',
-                       ZabbixProps.SEVERITY: '-1'}
+                       ZabbixProps.PRIORITY: '2',
+                       ZabbixProps.VALUE: '0'}
         alarm_data2 = {ZabbixProps.RESOURCE_NAME: 'compute-2',
                        ZabbixProps.DESCRIPTION: 'CPU utilization',
-                       ZabbixProps.SEVERITY: '-1'}
+                       ZabbixProps.PRIORITY: '2',
+                       ZabbixProps.VALUE: '0'}
         alarm_data3 = {ZabbixProps.RESOURCE_NAME: 'compute-2',
                        ZabbixProps.DESCRIPTION: 'Uptime',
-                       ZabbixProps.SEVERITY: '-1'}
+                       ZabbixProps.PRIORITY: '1',
+                       ZabbixProps.VALUE: '0'}
 
         zabbix_driver.set_alarm_datas([alarm_data1,
                                        alarm_data2,
@@ -247,13 +255,16 @@ class ZabbixDriverTest(ZabbixBaseTest):
         # Action
         alarm_data1 = {ZabbixProps.RESOURCE_NAME: 'compute-1',
                        ZabbixProps.DESCRIPTION: 'CPU utilization',
-                       ZabbixProps.SEVERITY: '1'}
+                       ZabbixProps.PRIORITY: '2',
+                       ZabbixProps.VALUE: '1'}
         alarm_data2 = {ZabbixProps.RESOURCE_NAME: 'compute-2',
                        ZabbixProps.DESCRIPTION: 'CPU utilization',
-                       ZabbixProps.SEVERITY: '-1'}
+                       ZabbixProps.PRIORITY: '2',
+                       ZabbixProps.VALUE: '0'}
         alarm_data3 = {ZabbixProps.RESOURCE_NAME: 'compute-2',
                        ZabbixProps.DESCRIPTION: 'Uptime',
-                       ZabbixProps.SEVERITY: '-1'}
+                       ZabbixProps.PRIORITY: '1',
+                       ZabbixProps.VALUE: '0'}
 
         zabbix_driver.set_alarm_datas([alarm_data1,
                                        alarm_data2,
@@ -269,88 +280,102 @@ class ZabbixDriverTest(ZabbixBaseTest):
         # Action
         alarm_data1 = {ZabbixProps.RESOURCE_NAME: 'compute-1',
                        ZabbixProps.DESCRIPTION: 'CPU utilization',
-                       ZabbixProps.SEVERITY: '4'}
+                       ZabbixProps.PRIORITY: '4',
+                       ZabbixProps.VALUE: '1'}
         alarm_data2 = {ZabbixProps.RESOURCE_NAME: 'compute-2',
                        ZabbixProps.DESCRIPTION: 'CPU utilization',
-                       ZabbixProps.SEVERITY: '1'}
+                       ZabbixProps.PRIORITY: '1',
+                       ZabbixProps.VALUE: '1'}
         alarm_data3 = {ZabbixProps.RESOURCE_NAME: 'compute-2',
                        ZabbixProps.DESCRIPTION: 'Uptime',
-                       ZabbixProps.SEVERITY: '-1'}
+                       ZabbixProps.PRIORITY: '1',
+                       ZabbixProps.VALUE: '0'}
 
         zabbix_driver.set_alarm_datas([alarm_data1,
                                        alarm_data2,
                                        alarm_data3])
 
-        excpected_alarm1 = {ZabbixProps.RESOURCE_NAME: 'compute-1',
-                            ZabbixProps.DESCRIPTION: 'CPU utilization',
-                            ZabbixProps.SEVERITY: '4'}
-        excpected_alarm2 = {ZabbixProps.RESOURCE_NAME: 'host2',
-                            ZabbixProps.DESCRIPTION: 'CPU utilization',
-                            ZabbixProps.SEVERITY: '1'}
+        expected_alarm1 = {ZabbixProps.RESOURCE_NAME: 'compute-1',
+                           ZabbixProps.DESCRIPTION: 'CPU utilization',
+                           ZabbixProps.PRIORITY: '4',
+                           ZabbixProps.VALUE: '1'}
+        expected_alarm2 = {ZabbixProps.RESOURCE_NAME: 'host2',
+                           ZabbixProps.DESCRIPTION: 'CPU utilization',
+                           ZabbixProps.PRIORITY: '1',
+                           ZabbixProps.VALUE: '1'}
 
         alarms = zabbix_driver._get_changed_alarms()
 
         # Test assertions
         self.assertIsNotNone(alarms, 'No alarms returned')
         self.assertEqual(2, len(alarms))
-        self._assert_contains(excpected_alarm1, alarms)
-        self._assert_contains(excpected_alarm2, alarms)
+        self._assert_contains(expected_alarm1, alarms)
+        self._assert_contains(expected_alarm2, alarms)
 
         # Action
         alarm_data1 = {ZabbixProps.RESOURCE_NAME: 'compute-1',
                        ZabbixProps.DESCRIPTION: 'CPU utilization',
-                       ZabbixProps.SEVERITY: '4'}
+                       ZabbixProps.PRIORITY: '4',
+                       ZabbixProps.VALUE: '1'}
         alarm_data2 = {ZabbixProps.RESOURCE_NAME: 'compute-2',
                        ZabbixProps.DESCRIPTION: 'CPU utilization',
-                       ZabbixProps.SEVERITY: '4'}
+                       ZabbixProps.PRIORITY: '4',
+                       ZabbixProps.VALUE: '1'}
         alarm_data3 = {ZabbixProps.RESOURCE_NAME: 'compute-2',
                        ZabbixProps.DESCRIPTION: 'Uptime',
-                       ZabbixProps.SEVERITY: '-1'}
+                       ZabbixProps.PRIORITY: '1',
+                       ZabbixProps.VALUE: '0'}
 
         zabbix_driver.set_alarm_datas([alarm_data1,
                                        alarm_data2,
                                        alarm_data3])
 
-        excpected_alarm1 = {ZabbixProps.RESOURCE_NAME: 'host2',
-                            ZabbixProps.DESCRIPTION: 'CPU utilization',
-                            ZabbixProps.SEVERITY: '4'}
+        expected_alarm1 = {ZabbixProps.RESOURCE_NAME: 'host2',
+                           ZabbixProps.DESCRIPTION: 'CPU utilization',
+                           ZabbixProps.PRIORITY: '4',
+                           ZabbixProps.VALUE: '1'}
 
         alarms = zabbix_driver._get_changed_alarms()
 
         # Test assertions
         self.assertIsNotNone(alarms, 'No alarms returned')
         self.assertEqual(1, len(alarms))
-        self._assert_contains(excpected_alarm1, alarms)
+        self._assert_contains(expected_alarm1, alarms)
 
         # Action
         alarm_data1 = {ZabbixProps.RESOURCE_NAME: 'compute-1',
                        ZabbixProps.DESCRIPTION: 'CPU utilization',
-                       ZabbixProps.SEVERITY: '-1'}
+                       ZabbixProps.PRIORITY: '4',
+                       ZabbixProps.VALUE: '0'}
         alarm_data2 = {ZabbixProps.RESOURCE_NAME: 'compute-2',
                        ZabbixProps.DESCRIPTION: 'CPU utilization',
-                       ZabbixProps.SEVERITY: '-1'}
+                       ZabbixProps.PRIORITY: '4',
+                       ZabbixProps.VALUE: '0'}
         alarm_data3 = {ZabbixProps.RESOURCE_NAME: 'compute-2',
                        ZabbixProps.DESCRIPTION: 'Uptime',
-                       ZabbixProps.SEVERITY: '-1'}
+                       ZabbixProps.PRIORITY: '1',
+                       ZabbixProps.VALUE: '0'}
 
         zabbix_driver.set_alarm_datas([alarm_data1,
                                        alarm_data2,
                                        alarm_data3])
 
-        excpected_alarm1 = {ZabbixProps.RESOURCE_NAME: 'compute-1',
-                            ZabbixProps.DESCRIPTION: 'CPU utilization',
-                            ZabbixProps.SEVERITY: '-1'}
-        excpected_alarm2 = {ZabbixProps.RESOURCE_NAME: 'host2',
-                            ZabbixProps.DESCRIPTION: 'CPU utilization',
-                            ZabbixProps.SEVERITY: '-1'}
+        expected_alarm1 = {ZabbixProps.RESOURCE_NAME: 'compute-1',
+                           ZabbixProps.DESCRIPTION: 'CPU utilization',
+                           ZabbixProps.PRIORITY: '4',
+                           ZabbixProps.VALUE: '0'}
+        expected_alarm2 = {ZabbixProps.RESOURCE_NAME: 'host2',
+                           ZabbixProps.DESCRIPTION: 'CPU utilization',
+                           ZabbixProps.PRIORITY: '4',
+                           ZabbixProps.VALUE: '0'}
 
         alarms = zabbix_driver._get_changed_alarms()
 
         # Test assertions
         self.assertIsNotNone(alarms, 'No alarms returned')
         self.assertEqual(2, len(alarms))
-        self._assert_contains(excpected_alarm1, alarms)
-        self._assert_contains(excpected_alarm2, alarms)
+        self._assert_contains(expected_alarm1, alarms)
+        self._assert_contains(expected_alarm2, alarms)
 
         # Action
         alarms = zabbix_driver._get_changed_alarms()
@@ -368,13 +393,16 @@ class ZabbixDriverTest(ZabbixBaseTest):
         # Action
         alarm_data1 = {ZabbixProps.RESOURCE_NAME: 'compute-1',
                        ZabbixProps.DESCRIPTION: 'CPU utilization',
-                       ZabbixProps.SEVERITY: '1'}
+                       ZabbixProps.PRIORITY: '2',
+                       ZabbixProps.VALUE: '1'}
         alarm_data2 = {ZabbixProps.RESOURCE_NAME: 'compute-2',
                        ZabbixProps.DESCRIPTION: 'CPU utilization',
-                       ZabbixProps.SEVERITY: '-1'}
+                       ZabbixProps.PRIORITY: '2',
+                       ZabbixProps.VALUE: '0'}
         alarm_data3 = {ZabbixProps.RESOURCE_NAME: 'compute-2',
                        ZabbixProps.DESCRIPTION: 'Uptime',
-                       ZabbixProps.SEVERITY: '-1'}
+                       ZabbixProps.PRIORITY: '1',
+                       ZabbixProps.VALUE: '0'}
 
         zabbix_driver.set_alarm_datas([alarm_data1,
                                        alarm_data2,
@@ -415,32 +443,37 @@ class ZabbixDriverTest(ZabbixBaseTest):
         # Action
         alarm_data1 = {ZabbixProps.RESOURCE_NAME: 'compute-1',
                        ZabbixProps.DESCRIPTION: 'CPU utilization',
-                       ZabbixProps.SEVERITY: '4'}
+                       ZabbixProps.PRIORITY: '4',
+                       ZabbixProps.VALUE: '1'}
         alarm_data2 = {ZabbixProps.RESOURCE_NAME: 'compute-2',
                        ZabbixProps.DESCRIPTION: 'CPU utilization',
-                       ZabbixProps.SEVERITY: '1'}
+                       ZabbixProps.PRIORITY: '1',
+                       ZabbixProps.VALUE: '1'}
         alarm_data3 = {ZabbixProps.RESOURCE_NAME: 'compute-2',
                        ZabbixProps.DESCRIPTION: 'Uptime',
-                       ZabbixProps.SEVERITY: '-1'}
+                       ZabbixProps.PRIORITY: '1',
+                       ZabbixProps.VALUE: '0'}
 
         zabbix_driver.set_alarm_datas([alarm_data1,
                                        alarm_data2,
                                        alarm_data3])
 
-        excpected_alarm1 = {ZabbixProps.RESOURCE_NAME: 'compute-1',
-                            ZabbixProps.DESCRIPTION: 'CPU utilization',
-                            ZabbixProps.SEVERITY: '4'}
-        excpected_alarm2 = {ZabbixProps.RESOURCE_NAME: 'host2',
-                            ZabbixProps.DESCRIPTION: 'CPU utilization',
-                            ZabbixProps.SEVERITY: '1'}
+        expected_alarm1 = {ZabbixProps.RESOURCE_NAME: 'compute-1',
+                           ZabbixProps.DESCRIPTION: 'CPU utilization',
+                           ZabbixProps.PRIORITY: '4',
+                           ZabbixProps.VALUE: '1'}
+        expected_alarm2 = {ZabbixProps.RESOURCE_NAME: 'host2',
+                           ZabbixProps.DESCRIPTION: 'CPU utilization',
+                           ZabbixProps.PRIORITY: '1',
+                           ZabbixProps.VALUE: '1'}
 
         alarms = zabbix_driver._get_all_alarms()
 
         # Test assertions
         self.assertIsNotNone(alarms, 'No alarms returned')
         self.assertEqual(2, len(alarms))
-        self._assert_contains(excpected_alarm1, alarms)
-        self._assert_contains(excpected_alarm2, alarms)
+        self._assert_contains(expected_alarm1, alarms)
+        self._assert_contains(expected_alarm2, alarms)
 
         # Action
         alarms = zabbix_driver._get_changed_alarms()
@@ -457,49 +490,57 @@ class ZabbixDriverTest(ZabbixBaseTest):
         # Calling get_all for the second time should return the same results
         self.assertIsNotNone(alarms, 'No alarms returned')
         self.assertEqual(2, len(alarms))
-        self._assert_contains(excpected_alarm1, alarms)
-        self._assert_contains(excpected_alarm2, alarms)
+        self._assert_contains(expected_alarm1, alarms)
+        self._assert_contains(expected_alarm2, alarms)
 
         # Action
         alarm_data1 = {ZabbixProps.RESOURCE_NAME: 'compute-1',
                        ZabbixProps.DESCRIPTION: 'CPU utilization',
-                       ZabbixProps.SEVERITY: '4'}
+                       ZabbixProps.PRIORITY: '4',
+                       ZabbixProps.VALUE: '1'}
         alarm_data2 = {ZabbixProps.RESOURCE_NAME: 'compute-2',
                        ZabbixProps.DESCRIPTION: 'CPU utilization',
-                       ZabbixProps.SEVERITY: '4'}
+                       ZabbixProps.PRIORITY: '4',
+                       ZabbixProps.VALUE: '1'}
         alarm_data3 = {ZabbixProps.RESOURCE_NAME: 'compute-2',
                        ZabbixProps.DESCRIPTION: 'Uptime',
-                       ZabbixProps.SEVERITY: '4'}
+                       ZabbixProps.PRIORITY: '4',
+                       ZabbixProps.VALUE: '1'}
 
         zabbix_driver.set_alarm_datas([alarm_data1,
                                        alarm_data2,
                                        alarm_data3])
 
-        excpected_alarm1 = {ZabbixProps.RESOURCE_NAME: 'host2',
-                            ZabbixProps.DESCRIPTION: 'CPU utilization',
-                            ZabbixProps.SEVERITY: '4'}
-        excpected_alarm2 = {ZabbixProps.RESOURCE_NAME: 'host2',
-                            ZabbixProps.DESCRIPTION: 'Uptime',
-                            ZabbixProps.SEVERITY: '4'}
+        expected_alarm1 = {ZabbixProps.RESOURCE_NAME: 'host2',
+                           ZabbixProps.DESCRIPTION: 'CPU utilization',
+                           ZabbixProps.PRIORITY: '4',
+                           ZabbixProps.VALUE: '1'}
+        expected_alarm2 = {ZabbixProps.RESOURCE_NAME: 'host2',
+                           ZabbixProps.DESCRIPTION: 'Uptime',
+                           ZabbixProps.PRIORITY: '4',
+                           ZabbixProps.VALUE: '1'}
 
         alarms = zabbix_driver._get_changed_alarms()
 
         # Test assertions
         self.assertIsNotNone(alarms, 'No alarms returned')
         self.assertEqual(2, len(alarms))
-        self._assert_contains(excpected_alarm1, alarms)
-        self._assert_contains(excpected_alarm2, alarms)
+        self._assert_contains(expected_alarm1, alarms)
+        self._assert_contains(expected_alarm2, alarms)
 
         # Action
         alarm_data1 = {ZabbixProps.RESOURCE_NAME: 'compute-1',
                        ZabbixProps.DESCRIPTION: 'CPU utilization',
-                       ZabbixProps.SEVERITY: '1'}
+                       ZabbixProps.PRIORITY: '1',
+                       ZabbixProps.VALUE: '1'}
         alarm_data2 = {ZabbixProps.RESOURCE_NAME: 'compute-2',
                        ZabbixProps.DESCRIPTION: 'CPU utilization',
-                       ZabbixProps.SEVERITY: '4'}
+                       ZabbixProps.PRIORITY: '4',
+                       ZabbixProps.VALUE: '1'}
         alarm_data3 = {ZabbixProps.RESOURCE_NAME: 'compute-2',
                        ZabbixProps.DESCRIPTION: 'Uptime',
-                       ZabbixProps.SEVERITY: '4'}
+                       ZabbixProps.PRIORITY: '4',
+                       ZabbixProps.VALUE: '1'}
 
         zabbix_driver.set_alarm_datas([alarm_data1,
                                        alarm_data2,
@@ -507,7 +548,8 @@ class ZabbixDriverTest(ZabbixBaseTest):
 
         expected_alarm1 = {ZabbixProps.RESOURCE_NAME: 'compute-1',
                            ZabbixProps.DESCRIPTION: 'CPU utilization',
-                           ZabbixProps.SEVERITY: '1'}
+                           ZabbixProps.PRIORITY: '1',
+                           ZabbixProps.VALUE: '1'}
 
         alarms = zabbix_driver._get_changed_alarms()
 
@@ -516,15 +558,18 @@ class ZabbixDriverTest(ZabbixBaseTest):
         self.assertEqual(1, len(alarms))
         self._assert_contains(expected_alarm1, alarms)
 
-        excpected_alarm1 = {ZabbixProps.RESOURCE_NAME: 'compute-1',
-                            ZabbixProps.DESCRIPTION: 'CPU utilization',
-                            ZabbixProps.SEVERITY: '1'}
-        excpected_alarm2 = {ZabbixProps.RESOURCE_NAME: 'host2',
-                            ZabbixProps.DESCRIPTION: 'CPU utilization',
-                            ZabbixProps.SEVERITY: '4'}
+        expected_alarm1 = {ZabbixProps.RESOURCE_NAME: 'compute-1',
+                           ZabbixProps.DESCRIPTION: 'CPU utilization',
+                           ZabbixProps.PRIORITY: '1',
+                           ZabbixProps.VALUE: '1'}
+        expected_alarm2 = {ZabbixProps.RESOURCE_NAME: 'host2',
+                           ZabbixProps.DESCRIPTION: 'CPU utilization',
+                           ZabbixProps.PRIORITY: '4',
+                           ZabbixProps.VALUE: '1'}
         excpected_alarm3 = {ZabbixProps.RESOURCE_NAME: 'host2',
                             ZabbixProps.DESCRIPTION: 'Uptime',
-                            ZabbixProps.SEVERITY: '4'}
+                            ZabbixProps.PRIORITY: '4',
+                            ZabbixProps.VALUE: '1'}
 
         # Action
         alarms = zabbix_driver._get_changed_alarms()
@@ -540,8 +585,8 @@ class ZabbixDriverTest(ZabbixBaseTest):
         # Calling get_all for the second time should return the same results
         self.assertIsNotNone(alarms, 'No alarms returned')
         self.assertEqual(3, len(alarms))
-        self._assert_contains(excpected_alarm1, alarms)
-        self._assert_contains(excpected_alarm2, alarms)
+        self._assert_contains(expected_alarm1, alarms)
+        self._assert_contains(expected_alarm2, alarms)
         self._assert_contains(excpected_alarm3, alarms)
 
     def test_delete_alarm(self):
@@ -553,13 +598,14 @@ class ZabbixDriverTest(ZabbixBaseTest):
         # Action
         alarm_data1 = {ZabbixProps.RESOURCE_NAME: 'compute-1',
                        ZabbixProps.DESCRIPTION: 'CPU utilization',
-                       ZabbixProps.SEVERITY: '1'}
+                       ZabbixProps.PRIORITY: '1',
+                       ZabbixProps.VALUE: '1'}
         alarm_data2 = {ZabbixProps.RESOURCE_NAME: 'compute-2',
                        ZabbixProps.DESCRIPTION: 'CPU utilization',
-                       ZabbixProps.SEVERITY: '-1'}
+                       ZabbixProps.VALUE: '0'}
         alarm_data3 = {ZabbixProps.RESOURCE_NAME: 'compute-2',
                        ZabbixProps.DESCRIPTION: 'Uptime',
-                       ZabbixProps.SEVERITY: '-1'}
+                       ZabbixProps.VALUE: '0'}
 
         zabbix_driver.set_alarm_datas([alarm_data1,
                                        alarm_data2,
@@ -575,10 +621,12 @@ class ZabbixDriverTest(ZabbixBaseTest):
         # Action - delete a alarm that was OK
         alarm_data1 = {ZabbixProps.RESOURCE_NAME: 'compute-1',
                        ZabbixProps.DESCRIPTION: 'CPU utilization',
-                       ZabbixProps.SEVERITY: '1'}
+                       ZabbixProps.PRIORITY: '1',
+                       ZabbixProps.VALUE: '1'}
         alarm_data2 = {ZabbixProps.RESOURCE_NAME: 'compute-2',
                        ZabbixProps.DESCRIPTION: 'CPU utilization',
-                       ZabbixProps.SEVERITY: '-1'}
+                       ZabbixProps.PRIORITY: '1',
+                       ZabbixProps.VALUE: '0'}
 
         zabbix_driver.set_alarm_datas([alarm_data1, alarm_data2])
 
@@ -592,7 +640,8 @@ class ZabbixDriverTest(ZabbixBaseTest):
         # Action - delete a alarm that was not OK
         alarm_data2 = {ZabbixProps.RESOURCE_NAME: 'compute-2',
                        ZabbixProps.DESCRIPTION: 'CPU utilization',
-                       ZabbixProps.SEVERITY: '-1'}
+                       ZabbixProps.PRIORITY: '1',
+                       ZabbixProps.VALUE: '0'}
 
         zabbix_driver.set_alarm_datas([alarm_data2])
 
@@ -615,10 +664,12 @@ class ZabbixDriverTest(ZabbixBaseTest):
         # Action - "undelete" the alarm that was OK
         alarm_data1 = {ZabbixProps.RESOURCE_NAME: 'compute-1',
                        ZabbixProps.DESCRIPTION: 'CPU utilization',
-                       ZabbixProps.SEVERITY: '1'}
+                       ZabbixProps.PRIORITY: '1',
+                       ZabbixProps.VALUE: '1'}
         alarm_data2 = {ZabbixProps.RESOURCE_NAME: 'compute-2',
                        ZabbixProps.DESCRIPTION: 'CPU utilization',
-                       ZabbixProps.SEVERITY: '-1'}
+                       ZabbixProps.PRIORITY: '1',
+                       ZabbixProps.VALUE: '0'}
 
         zabbix_driver.set_alarm_datas([alarm_data1, alarm_data2])
 
@@ -633,7 +684,8 @@ class ZabbixDriverTest(ZabbixBaseTest):
         # Action - delete a alarm that was not OK and call get_changes
         alarm_data2 = {ZabbixProps.RESOURCE_NAME: 'compute-2',
                        ZabbixProps.DESCRIPTION: 'CPU utilization',
-                       ZabbixProps.SEVERITY: '-1'}
+                       ZabbixProps.PRIORITY: '1',
+                       ZabbixProps.VALUE: '0'}
 
         zabbix_driver.set_alarm_datas([alarm_data2])
 
