@@ -30,7 +30,7 @@ OPTS = [
                required=True),
     cfg.IntOpt('changes_interval',
                default=20,
-               min=20,
+               min=5,
                help='interval between checking changes in the configuration '
                     'files of the physical topology data sources',
                required=True),

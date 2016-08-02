@@ -30,7 +30,7 @@ fi
 
 (cd $DEVSTACK_PATH/tempest/; sudo oslo-config-generator --config-file etc/config-generator.tempest.conf --output-file etc/tempest.conf)
 (cd $DEVSTACK_PATH/; sudo sh -c 'cp -rf vitrage/devstack/files/tempest/tempest.conf /etc/tempest.conf')
-(cd $DEVSTACK_PATH/; sudo sh -c 'cp -rf vitrage/vitrage_tempest_tests/tests/resources/static_physical/* /etc/vitrage/static_datasources/')
+(cd $DEVSTACK_PATH/; sudo sh -c 'cp -rf vitrage/vitrage_tempest_tests/tests/resources/static_physical/static_physical_configuration.yaml /etc/vitrage/')
 (cd $DEVSTACK_PATH/; sudo sh -c 'cp -rf vitrage/vitrage_tempest_tests/tests/resources/templates/api/* /etc/vitrage/templates/')
 
 

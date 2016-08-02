@@ -61,8 +61,11 @@ notification_topics = notifications,vitrage_notifications
 notification_driver = messagingv2
 
 [[post-config|\$VITRAGE_CONF]]
+[static_physical]
+changes_interval = 5
+
 [datasources]
-snapshots_interval = 180
+snapshots_interval = 120
 EOF
 
 $GATE_DEST/devstack-gate/devstack-vm-gate.sh

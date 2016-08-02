@@ -22,6 +22,7 @@ from novaclient import client as n_client
 
 
 from vitrage import keystone_client
+
 LOG = log.getLogger(__name__)
 
 OPTS = [
