@@ -159,5 +159,5 @@ class ZabbixDriver(AlarmDriverBase):
                 'zabbix.alarm.problem']
 
     @staticmethod
-    def get_topic(conf):
-        return conf[ZABBIX_DATASOURCE].notification_topic
+    def get_update_method(conf):
+        return conf[ZABBIX_DATASOURCE].update_method

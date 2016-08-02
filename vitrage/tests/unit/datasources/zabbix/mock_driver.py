@@ -13,6 +13,7 @@
 # under the License.
 
 from vitrage.datasources.zabbix.driver import ZabbixDriver
+from vitrage.datasources.zabbix import ZABBIX_DATASOURCE
 from vitrage.tests.mocks import mock_driver
 
 
@@ -32,8 +33,8 @@ class MockZabbixDriver(ZabbixDriver):
         pass
 
     @staticmethod
-    def get_topic(conf):
-        return None
+    def get_update_method(conf):
+        return conf[ZABBIX_DATASOURCE].update_method
 
     def __init__(self, conf):
         super(MockZabbixDriver, self).__init__(conf)

@@ -69,5 +69,5 @@ class InstanceDriver(NovaDriverBase):
                 'compute.instance.unpause.end']
 
     @staticmethod
-    def get_topic(conf):
-        return conf[NOVA_INSTANCE_DATASOURCE].notification_topic
+    def get_update_method(conf):
+        return conf[NOVA_INSTANCE_DATASOURCE].update_method

@@ -69,6 +69,12 @@ class SyncMode(object):
     UPDATE = 'update'
 
 
+class UpdateMethod(object):
+    NONE = 'none'
+    PULL = 'pull'
+    PUSH = 'push'
+
+
 class EntityCategory(object):
     RESOURCE = 'RESOURCE'
     ALARM = 'ALARM'

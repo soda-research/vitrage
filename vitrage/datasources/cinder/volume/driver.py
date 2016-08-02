@@ -67,5 +67,5 @@ class CinderVolumeDriver(DriverBase):
                 'volume.delete.end']
 
     @staticmethod
-    def get_topic(conf):
-        return conf[CINDER_VOLUME_DATASOURCE].notification_topic
+    def get_update_method(conf):
+        return conf[CINDER_VOLUME_DATASOURCE].update_method
