@@ -26,8 +26,7 @@ from vitrage.datasources.nova.host import NOVA_HOST_DATASOURCE
 from vitrage.datasources.static_physical import SWITCH
 from vitrage.datasources import transformer_base as tbase
 from vitrage.datasources.transformer_base import Neighbor
-from vitrage.datasources.zabbix.properties import ZabbixProperties \
-    as ZabbixProps
+from vitrage.datasources.zabbix.properties import ZabbixProperties as ZProps
 from vitrage.datasources.zabbix.properties import ZabbixTriggerSeverity \
     as TriggerSeverity
 from vitrage.datasources.zabbix.properties import ZabbixTriggerValue\
@@ -53,21 +52,22 @@ class ZabbixTransformer(AlarmTransformerBase):
     def _create_vertex(self, entity_event):
         self._unify_time_format(entity_event)
 
-        update_timestamp = entity_event[ZabbixProps.TIMESTAMP]
+        update_timestamp = entity_event[ZProps.TIMESTAMP]
 
         sample_timestamp = entity_event[DSProps.SAMPLE_DATE]
 
         update_timestamp = self._format_update_timestamp(update_timestamp,
                                                          sample_timestamp)
 
-        value = entity_event[ZabbixProps.VALUE]
+        value = entity_event[ZProps.VALUE]
         entity_state = AlarmProps.INACTIVE_STATE if \
             value == TriggerValue.OK else AlarmProps.ACTIVE_STATE
 
         metadata = {
-            VProps.NAME: entity_event[ZabbixProps.DESCRIPTION],
+            VProps.NAME: entity_event[ZProps.DESCRIPTION],
             VProps.SEVERITY: TriggerSeverity.str(
-                entity_event[ZabbixProps.PRIORITY])
+                entity_event[ZProps.PRIORITY]),
+            VProps.RAWTEXT: entity_event[ZProps.RAWTEXT]
         }
 
         return graph_utils.create_vertex(
@@ -89,15 +89,15 @@ class ZabbixTransformer(AlarmTransformerBase):
         self._unify_time_format(entity_event)
 
         vitrage_id = self._create_entity_key(entity_event)
-        timestamp = entity_event[ZabbixProps.TIMESTAMP]
+        timestamp = entity_event[ZProps.TIMESTAMP]
 
-        resource_type = entity_event[ZabbixProps.RESOURCE_TYPE]
+        resource_type = entity_event[ZProps.RESOURCE_TYPE]
         if resource_type == NOVA_HOST_DATASOURCE or resource_type == SWITCH:
             return [self._create_neighbor(
                 vitrage_id,
                 timestamp,
                 resource_type,
-                entity_event[ZabbixProps.RESOURCE_NAME])]
+                entity_event[ZProps.RESOURCE_NAME])]
 
         return []
 
@@ -128,13 +128,13 @@ class ZabbixTransformer(AlarmTransformerBase):
         return None
 
     def _ok_status(self, entity_event):
-        return entity_event[ZabbixProps.VALUE] == TriggerValue.OK
+        return entity_event[ZProps.VALUE] == TriggerValue.OK
 
     def _create_entity_key(self, entity_event):
 
         sync_type = entity_event[DSProps.SYNC_TYPE]
-        alarm_name = entity_event[ZabbixProps.DESCRIPTION]
-        resource_name = entity_event[ZabbixProps.RESOURCE_NAME]
+        alarm_name = entity_event[ZProps.DESCRIPTION]
+        resource_name = entity_event[ZProps.RESOURCE_NAME]
         return tbase.build_key(self._key_values(sync_type,
                                                 resource_name,
                                                 alarm_name))
@@ -142,10 +142,10 @@ class ZabbixTransformer(AlarmTransformerBase):
     @staticmethod
     def _unify_time_format(entity_event):
         try:
-            entity_event[ZabbixProps.TIMESTAMP] = format_unix_timestamp(
-                entity_event[ZabbixProps.LAST_CHANGE], tbase.TIMESTAMP_FORMAT)
+            entity_event[ZProps.TIMESTAMP] = format_unix_timestamp(
+                entity_event[ZProps.LAST_CHANGE], tbase.TIMESTAMP_FORMAT)
         except ValueError:
-            entity_event[ZabbixProps.TIMESTAMP] = change_time_str_format(
-                entity_event[ZabbixProps.LAST_CHANGE],
-                ZabbixProps.ZABBIX_TIMESTAMP_FORMAT,
+            entity_event[ZProps.TIMESTAMP] = change_time_str_format(
+                entity_event[ZProps.LAST_CHANGE],
+                ZProps.ZABBIX_TIMESTAMP_FORMAT,
                 tbase.TIMESTAMP_FORMAT)

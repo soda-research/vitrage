@@ -27,9 +27,9 @@ class ZabbixBaseTest(base.BaseTest):
                 self._assert_expected_alarm(expected_serv, alarm)
                 return
 
-        self.fail("alarm not found: %(resource_name)s %(alarm_name)s" %
-                  {'resource_name': expected_serv[ZabbixProps.RESOURCE_NAME],
-                   'alarm_name': expected_serv[ZabbixProps.DESCRIPTION]})
+        self.fail("alarm not found: %s %s" %
+                  (expected_serv[ZabbixProps.RESOURCE_NAME],
+                   expected_serv[ZabbixProps.DESCRIPTION]))
 
     def _assert_expected_alarm(self, expected_alarm, alarm):
         for key, value in expected_alarm.items():

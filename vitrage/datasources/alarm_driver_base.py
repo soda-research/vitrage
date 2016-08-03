@@ -54,7 +54,7 @@ class AlarmDriverBase(DriverBase):
         """
         pass
 
-    def _status_changed(self, alarm1, alarm2):
+    def _status_changed(self, new_alarm, old_alarm):
         """Check if the status of the two alarms is different
 
         :param alarm1:

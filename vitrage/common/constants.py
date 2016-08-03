@@ -35,6 +35,7 @@ class VertexProperties(object):
     IS_MARKED_DOWN = 'is_marked_down'
     INFO = 'info'
     GRAPH_INDEX = 'graph_index'
+    RAWTEXT = 'rawtext'
 
 
 class EdgeProperties(object):

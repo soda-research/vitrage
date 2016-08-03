@@ -10,5 +10,6 @@
   "sample_date": "2015-12-01T12:46:41Z",
   "value": "1",
   "priority": "1|2|3|4|5",
-  "sync_mode": "snapshot|init_snapshot|update"
+  "sync_mode": "snapshot|init_snapshot|update",
+  "rawtext": "CPU utilization|Check_MK|Uptime"
 }
