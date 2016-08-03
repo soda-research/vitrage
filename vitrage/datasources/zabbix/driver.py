@@ -21,8 +21,7 @@ from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import SyncMode
 from vitrage.common import file_utils
 from vitrage.datasources.alarm_driver_base import AlarmDriverBase
-from vitrage.datasources.zabbix.properties import ZabbixProperties \
-    as ZabbixProps
+from vitrage.datasources.zabbix.properties import ZabbixProperties as ZProps
 from vitrage.datasources.zabbix.properties import ZabbixTriggerStatus \
     as TriggerStatus
 from vitrage.datasources.zabbix.properties import ZabbixTriggerValue \
@@ -48,8 +47,8 @@ class ZabbixDriver(AlarmDriverBase):
         return ZABBIX_DATASOURCE
 
     def _alarm_key(self, alarm):
-        return self.ServiceKey(host_name=alarm[ZabbixProps.RESOURCE_NAME],
-                               service=alarm[ZabbixProps.DESCRIPTION])
+        return self.ServiceKey(host_name=alarm[ZProps.RESOURCE_NAME],
+                               service=alarm[ZProps.DESCRIPTION])
 
     def _get_alarms(self):
         zabbix_user = self.conf.zabbix.user
@@ -74,52 +73,82 @@ class ZabbixDriver(AlarmDriverBase):
 
         alarms = []
         valid_hosts = (host for host in
-                       self.client.host.get(output=[ZabbixProps.HOST])
-                       if host[ZabbixProps.HOST] in ZabbixDriver.conf_map)
+                       self.client.host.get(output=[ZProps.HOST])
+                       if host[ZProps.HOST] in ZabbixDriver.conf_map)
         for host in valid_hosts:
             self._get_triggers_per_host(host, alarms)
 
         return alarms
 
     def _get_triggers_per_host(self, host, alarms):
-        host_id = host[ZabbixProps.HOST_ID]
-        triggers = self.client.trigger.get(hostids=host_id)
+
+        host_id = host[ZProps.HOST_ID]
+        triggers = self.client.trigger.get(hostids=host_id,
+                                           expandDescription=True)
+
+        triggers_rawtexts = self._get_triggers_rawtexts(host_id)
 
         for trigger in triggers:
-            trigger[ZabbixProps.RESOURCE_NAME] = host[ZabbixProps.HOST]
+            trigger[ZProps.ZABBIX_RESOURCE_NAME] = host[ZProps.HOST]
+
+            trigger_id = trigger[ZProps.TRIGGER_ID]
+            trigger[ZProps.RAWTEXT] = triggers_rawtexts[trigger_id]
             alarms.append(trigger)
 
-    def _enrich_alarms(self, alarms):
-        for alarm in alarms:
-            # based on zabbix configuration file, convert zabbix host name
-            # to vitrage resource type and name
-            zabbix_host = alarm[ZabbixProps.RESOURCE_NAME]
-            vitrage_resource = ZabbixDriver.conf_map[zabbix_host]
+    def _get_triggers_rawtexts(self, host_id):
 
-            alarm[ZabbixProps.VALUE] = self._get_value(alarm)
-            alarm[ZabbixProps.RESOURCE_TYPE] = \
-                vitrage_resource[ZabbixProps.RESOURCE_TYPE]
-            alarm[ZabbixProps.RESOURCE_NAME] = \
-                vitrage_resource[ZabbixProps.RESOURCE_NAME]
+        output = [ZProps.TRIGGER_ID, ZProps.DESCRIPTION]
+        triggers = self.client.trigger.get(hostids=host_id, output=output)
+
+        return {trigger[ZProps.TRIGGER_ID]: trigger[ZProps.DESCRIPTION]
+                for trigger in triggers}
+
+    def _enrich_alarms(self, alarms):
+        """Enrich zabbix alarm using zabbix configuration file
+
+        converting Zabbix host name to Vitrage resource type and name
+
+        :param alarms: Zabbix alarm
+        :return: enriched alarm
+        """
+
+        for alarm in alarms:
+            alarm[ZProps.VALUE] = self._get_value(alarm)
+
+            zabbix_host = alarm[ZProps.ZABBIX_RESOURCE_NAME]
+            vitrage_host = ZabbixDriver.conf_map[zabbix_host]
+            alarm[ZProps.RESOURCE_TYPE] = vitrage_host[ZProps.RESOURCE_TYPE]
+
+            vitrage_host_name = vitrage_host[ZProps.RESOURCE_NAME]
+            alarm[ZProps.RESOURCE_NAME] = vitrage_host[ZProps.RESOURCE_NAME]
+            alarm[ZProps.DESCRIPTION] = alarm[ZProps.DESCRIPTION].replace(
+                zabbix_host,
+                vitrage_host_name)
 
     def _is_erroneous(self, alarm):
         return alarm and \
-            alarm[ZabbixProps.VALUE] == TriggerValue.PROBLEM
+            alarm[ZProps.VALUE] == TriggerValue.PROBLEM
 
-    def _status_changed(self, alarm1, alarm2):
-        return (alarm1 and alarm2) and \
-               (alarm1[ZabbixProps.VALUE] != alarm2[ZabbixProps.VALUE] or
-                alarm1[ZabbixProps.PRIORITY] != alarm2[ZabbixProps.PRIORITY])
+    def _status_changed(self, new_alarm, old_alarm):
+
+        if not (new_alarm and old_alarm):
+            return False
+
+        if new_alarm[ZProps.VALUE] != old_alarm[ZProps.VALUE]:
+            return True
+
+        if new_alarm[ZProps.VALUE] == TriggerValue.PROBLEM:
+            return new_alarm[ZProps.PRIORITY] != old_alarm[ZProps.PRIORITY]
 
     def _is_valid(self, alarm):
-        return alarm[ZabbixProps.RESOURCE_TYPE] is not None and \
-            alarm[ZabbixProps.RESOURCE_NAME] is not None
+        return alarm[ZProps.RESOURCE_TYPE] is not None and \
+            alarm[ZProps.RESOURCE_NAME] is not None
 
     @staticmethod
     def _get_value(alarm):
-        if alarm[ZabbixProps.STATUS] == TriggerStatus.DISABLED:
+        if alarm[ZProps.STATUS] == TriggerStatus.DISABLED:
             return TriggerValue.OK
-        return alarm[ZabbixProps.VALUE]
+        return alarm[ZProps.VALUE]
 
     @staticmethod
     def _configuration_mapping(conf):
@@ -131,8 +160,8 @@ class ZabbixDriver(AlarmDriverBase):
             mappings = {}
             for element_config in zabbix_config_elements:
                 mappings[element_config['zabbix_host']] = {
-                    ZabbixProps.RESOURCE_TYPE: element_config['type'],
-                    ZabbixProps.RESOURCE_NAME: element_config['name']
+                    ZProps.RESOURCE_TYPE: element_config['type'],
+                    ZProps.RESOURCE_NAME: element_config['name']
                 }
 
             return mappings
@@ -143,20 +172,19 @@ class ZabbixDriver(AlarmDriverBase):
     @staticmethod
     def enrich_event(event, event_type):
         event[DSProps.EVENT_TYPE] = event_type
+
         if ZabbixDriver.conf_map:
-            zabbix_host = event[ZabbixProps.HOST]
-            vitrage_resource = ZabbixDriver.conf_map[zabbix_host]
-            event[ZabbixProps.RESOURCE_NAME] = \
-                vitrage_resource[ZabbixProps.RESOURCE_NAME]
-            event[ZabbixProps.RESOURCE_TYPE] = \
-                vitrage_resource[ZabbixProps.RESOURCE_TYPE]
+            zabbix_host = event[ZProps.HOST]
+            v_resource = ZabbixDriver.conf_map[zabbix_host]
+            event[ZProps.RESOURCE_NAME] = v_resource[ZProps.RESOURCE_NAME]
+            event[ZProps.RESOURCE_TYPE] = v_resource[ZProps.RESOURCE_TYPE]
+
         return ZabbixDriver.make_pickleable([event], ZABBIX_DATASOURCE,
                                             SyncMode.UPDATE)[0]
 
     @staticmethod
     def get_event_types(conf):
-        return ['zabbix.alarm.ok',
-                'zabbix.alarm.problem']
+        return ['zabbix.alarm.ok', 'zabbix.alarm.problem']
 
     @staticmethod
     def get_topic(conf):

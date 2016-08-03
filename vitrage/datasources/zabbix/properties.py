@@ -18,6 +18,7 @@ class ZabbixProperties(object):
     RESOURCE_NAME = 'resource_name'
     DESCRIPTION = 'description'
     STATUS = 'status'
+    ZABBIX_VALUE = 'zabbix_value'
     VALUE = 'value'
     HOST = 'host'
     HOST_ID = 'hostid'
@@ -25,6 +26,9 @@ class ZabbixProperties(object):
     LAST_CHANGE = 'lastchange'
     TIMESTAMP = 'timestamp'
     ZABBIX_TIMESTAMP_FORMAT = '%Y.%m.%d %H:%M:%S'
+    RAWTEXT = 'rawtext'
+    TRIGGER_ID = 'triggerid'
+    ZABBIX_RESOURCE_NAME = 'zabbix_resource_name'
 
 
 class ZabbixTriggerValue(object):
