@@ -60,11 +60,9 @@ class InstanceTransformer(ResourceTransformerBase):
 
     def _create_vertex(self, entity_event, name, entity_id, state):
 
-        project = extract_field_value(entity_event, 'tenant_id')
-
         metadata = {
             VProps.NAME: name,
-            VProps.PROJECT_ID: project
+            VProps.TENANT_ID: entity_event.get(VProps.TENANT_ID, None),
         }
 
         sample_timestamp = entity_event[DSProps.SAMPLE_DATE]

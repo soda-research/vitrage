@@ -21,7 +21,7 @@ OPTS = [
                min=60,
                help='minimum time until deleting entity (in seconds)'),
     cfg.IntOpt('initialization_interval',
-               default=3,
+               default=1,
                min=1,
                help='interval between consistency initialization checks for '
                     'finding if all end messages from datasources were '

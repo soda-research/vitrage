@@ -45,7 +45,8 @@ class CinderVolumeDriver(DriverBase):
             self.extract_events(self.client.volumes.list(
                 search_opts={'all_tenants': 1})),
             CINDER_VOLUME_DATASOURCE,
-            sync_mode)
+            sync_mode,
+            'manager')
 
     @staticmethod
     def enrich_event(event, event_type):

@@ -51,7 +51,7 @@ class AodhTransformer(AlarmTransformerBase):
             VProps.SEVERITY: entity_event[AodhProps.SEVERITY],
             AodhProps.DESCRIPTION: entity_event[AodhProps.DESCRIPTION],
             AodhProps.ENABLED: entity_event[AodhProps.ENABLED],
-            VProps.PROJECT_ID: entity_event[AodhProps.PROJECT_ID],
+            VProps.TENANT_ID: entity_event.get(AodhProps.PROJECT_ID, None),
             AodhProps.REPEAT_ACTIONS: entity_event[AodhProps.REPEAT_ACTIONS],
             'alarm_type': entity_event[AodhProps.TYPE]
         }

@@ -50,12 +50,14 @@ class CinderVolumeTransformer(ResourceTransformerBase):
         volume_name = extract_field_value(entity_event, 'display_name')
         volume_id = extract_field_value(entity_event, 'id')
         volume_state = extract_field_value(entity_event, 'status')
+        tenant_id = entity_event.get('os-vol-tenant-attr:tenant_id', None)
         timestamp = extract_field_value(entity_event, 'created_at')
 
         return self._create_vertex(entity_event,
                                    volume_name,
                                    volume_id,
                                    volume_state,
+                                   tenant_id,
                                    timestamp)
 
     def _create_update_entity_vertex(self, entity_event):
@@ -63,18 +65,26 @@ class CinderVolumeTransformer(ResourceTransformerBase):
         volume_name = extract_field_value(entity_event, 'display_name')
         volume_id = extract_field_value(entity_event, 'volume_id')
         volume_state = extract_field_value(entity_event, 'status')
+        tenant_id = entity_event.get(VProps.TENANT_ID, None)
         timestamp = entity_event.get('updated_at', None)
 
         return self._create_vertex(entity_event,
                                    volume_name,
                                    volume_id,
                                    volume_state,
+                                   tenant_id,
                                    timestamp)
 
-    def _create_vertex(self, entity_event, volume_name, volume_id,
-                       volume_state, update_timestamp):
+    def _create_vertex(self,
+                       entity_event,
+                       volume_name,
+                       volume_id,
+                       volume_state,
+                       tenant_id,
+                       update_timestamp):
         metadata = {
-            VProps.NAME: volume_name
+            VProps.NAME: volume_name,
+            VProps.TENANT_ID: tenant_id,
         }
 
         entity_key = self._create_entity_key(entity_event)
