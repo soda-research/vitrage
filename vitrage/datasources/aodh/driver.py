@@ -113,6 +113,10 @@ class AodhDriver(AlarmDriverBase):
         else:
             LOG.warning('Unsupported Aodh alarm of type %s' % alarm_type)
 
+    @staticmethod
+    def get_update_method(conf):
+        return conf[AODH_DATASOURCE].update_method
+
 
 def _parse_query(data, key):
     query_fields = data.get(AodhProps.QUERY, {})

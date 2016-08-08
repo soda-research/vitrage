@@ -33,8 +33,8 @@ class StaticPhysicalDriver(DriverBase):
         pass
 
     @staticmethod
-    def get_topic(conf):
-        return None
+    def get_update_method(conf):
+        return conf[STATIC_PHYSICAL_DATASOURCE].update_method
 
     ENTITIES_SECTION = 'entities'
 
