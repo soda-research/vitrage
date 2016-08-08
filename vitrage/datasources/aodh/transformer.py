@@ -21,6 +21,7 @@ from vitrage.common.constants import VertexProperties as VProps
 from vitrage.common import datetime_utils
 from vitrage.datasources.alarm_transformer_base import AlarmTransformerBase
 from vitrage.datasources.aodh.properties import AodhProperties as AodhProps
+from vitrage.datasources.aodh.properties import AodhState
 from vitrage.datasources import transformer_base as tbase
 from vitrage.datasources.transformer_base import Neighbor
 import vitrage.graph.utils as graph_utils
@@ -29,8 +30,6 @@ LOG = logging.getLogger(__name__)
 
 
 class AodhTransformer(AlarmTransformerBase):
-
-    STATUS_OK = 'ok'
 
     def __init__(self, transformers):
         super(AodhTransformer, self).__init__(transformers)
@@ -120,7 +119,7 @@ class AodhTransformer(AlarmTransformerBase):
             metadata=metadata)
 
     def _ok_status(self, entity_event):
-        return entity_event[AodhProps.STATE] == self.STATUS_OK
+        return entity_event[AodhProps.STATE] != AodhState.ALARM
 
     def _create_entity_key(self, entity_event):
         if _is_vitrage_alarm(entity_event):

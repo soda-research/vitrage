@@ -50,7 +50,7 @@ class AodhDriver(AlarmDriverBase):
         return []
 
     def _is_erroneous(self, alarm):
-        return alarm and alarm[AodhProps.STATE] != AodhState.OK
+        return alarm and alarm[AodhProps.STATE] == AodhState.ALARM
 
     def _status_changed(self, alarm1, alarm2):
         return alarm1 and alarm2 and \
