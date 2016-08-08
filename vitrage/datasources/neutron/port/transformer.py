@@ -100,7 +100,8 @@ class PortTransformer(ResourceTransformerBase):
             ip_addresses = [ip['ip_address'] for ip in fixed_ips]
         metadata = {
             VProps.NAME: name,
-            'ip_addresses': tuple(ip_addresses)
+            VProps.TENANT_ID: entity_event.get(VProps.TENANT_ID, None),
+            'ip_addresses': tuple(ip_addresses),
         }
 
         sample_timestamp = entity_event[DSProps.SAMPLE_DATE]

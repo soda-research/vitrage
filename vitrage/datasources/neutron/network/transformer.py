@@ -84,6 +84,7 @@ class NetworkTransformer(ResourceTransformerBase):
 
         metadata = {
             VProps.NAME: name,
+            VProps.TENANT_ID: entity_event.get(VProps.TENANT_ID, None),
         }
 
         sample_timestamp = entity_event[DSProps.SAMPLE_DATE]
