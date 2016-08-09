@@ -42,8 +42,8 @@ class CinderVolumeTransformer(ResourceTransformerBase):
         'volume.attach.end': EventAction.UPDATE_RELATIONSHIP
     }
 
-    def __init__(self, transformers):
-        super(CinderVolumeTransformer, self).__init__(transformers)
+    def __init__(self, transformers, conf):
+        super(CinderVolumeTransformer, self).__init__(transformers, conf)
 
     def _create_snapshot_entity_vertex(self, entity_event):
 
@@ -161,3 +161,6 @@ class CinderVolumeTransformer(ResourceTransformerBase):
             relationship_type=EdgeLabel.ATTACHED)
 
         return Neighbor(instance_vertex, relationship_edge)
+
+    def get_type(self):
+        return CINDER_VOLUME_DATASOURCE
