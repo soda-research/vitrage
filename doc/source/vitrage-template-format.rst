@@ -232,7 +232,7 @@ an alarm on the hosting zone or an alarm on the hosting host.
                 template_id: zone_alarm
             - entity:
                 category: ALARM
-                Type: host_connectivity_problem
+                type: host_connectivity_problem
                 template_id: host_alarm
             - entity:
                 category: RESOURCE
