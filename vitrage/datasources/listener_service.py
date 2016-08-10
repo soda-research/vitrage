@@ -64,8 +64,8 @@ class ListenerService(os_service.Service):
 
     @staticmethod
     def _get_push_drivers(drivers, conf):
-        return (driver for driver in drivers.values()
-                if driver.get_update_method(conf).lower() == UpdateMethod.PUSH)
+        return (driver_cls for datasource, driver_cls in drivers.items()
+                if conf[datasource].update_method.lower() == UpdateMethod.PUSH)
 
     def _get_topic_listener(self, conf, topic, callback):
         # Create a listener for each topic

@@ -66,7 +66,3 @@ class CinderVolumeDriver(DriverBase):
                 'volume.detach.end',
                 'volume.delete.start',
                 'volume.delete.end']
-
-    @staticmethod
-    def get_update_method(conf):
-        return conf[CINDER_VOLUME_DATASOURCE].update_method
