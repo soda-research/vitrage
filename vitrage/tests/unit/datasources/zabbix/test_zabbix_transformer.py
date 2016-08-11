@@ -70,7 +70,7 @@ class ZabbixTransformerTest(base.BaseTest):
         self.assertEqual(event[DSProps.SYNC_TYPE], observed_key_fields[1])
         self.assertEqual(event[ZabbixProps.RESOURCE_NAME],
                          observed_key_fields[2])
-        self.assertEqual(event[ZabbixProps.DESCRIPTION],
+        self.assertEqual(event[ZabbixProps.TRIGGER_ID],
                          observed_key_fields[3])
 
     def test_zabbix_alarm_transform(self):

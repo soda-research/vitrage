@@ -113,20 +113,3 @@ class DriverBase(object):
         """
 
         return []
-
-    @staticmethod
-    @abc.abstractmethod
-    def get_update_method(conf):
-        """Return the update method for this driver
-
-           update methods available are:
-           None: updates only via overall snapshots
-           Pull: updates every [changes_interval] seconds
-           Push: updates by getting notifications from the datasource itself
-
-        :param conf: the datasource's configuration
-        :return: the update method of the datasource
-        :rtype: str
-        """
-
-        return None

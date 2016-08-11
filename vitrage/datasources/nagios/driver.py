@@ -34,7 +34,7 @@ LOG = log.getLogger(__name__)
 
 
 class NagiosDriver(AlarmDriverBase):
-    ServiceKey = namedtuple('ServiceKey', ['host_name', 'service'])
+    ServiceKey = namedtuple('ServiceKey', ['hostname', 'service'])
 
     def __init__(self, conf):
         super(NagiosDriver, self).__init__()
@@ -45,7 +45,7 @@ class NagiosDriver(AlarmDriverBase):
         return NAGIOS_DATASOURCE
 
     def _alarm_key(self, alarm):
-        return self.ServiceKey(host_name=alarm[NagiosProps.RESOURCE_NAME],
+        return self.ServiceKey(hostname=alarm[NagiosProps.RESOURCE_NAME],
                                service=alarm[NagiosProps.SERVICE])
 
     def _get_alarms(self):
@@ -103,7 +103,3 @@ class NagiosDriver(AlarmDriverBase):
     def _is_valid(self, alarm):
         return alarm[NagiosProps.RESOURCE_TYPE] is not None and \
             alarm[NagiosProps.RESOURCE_NAME] is not None
-
-    @staticmethod
-    def get_update_method(conf):
-        return conf[NAGIOS_DATASOURCE].update_method

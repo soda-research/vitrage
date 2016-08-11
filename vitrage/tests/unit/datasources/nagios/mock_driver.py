@@ -13,7 +13,6 @@
 # under the License.
 
 from vitrage.datasources.nagios.driver import NagiosDriver
-from vitrage.datasources.nagios import NAGIOS_DATASOURCE
 from vitrage.tests.mocks import mock_driver
 
 
@@ -31,10 +30,6 @@ class MockNagiosDriver(NagiosDriver):
     @staticmethod
     def enrich_event(event, event_type):
         pass
-
-    @staticmethod
-    def get_update_method(conf):
-        return conf[NAGIOS_DATASOURCE].update_method
 
     def __init__(self, conf):
         super(MockNagiosDriver, self).__init__(conf)

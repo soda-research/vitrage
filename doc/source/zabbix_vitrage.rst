@@ -48,7 +48,7 @@ To forward zabbix events to Vitrage a new media script needs to be created and a
           | host={HOST.NAME1}
           | hostid={HOST.ID1}
           | hostip={HOST.IP1}
-          | id={TRIGGER.ID}
+          | triggerid={TRIGGER.ID}
           | description={TRIGGER.NAME}
           | rawtext={TRIGGER.NAME.ORIG}
           | expression={TRIGGER.EXPRESSION}
