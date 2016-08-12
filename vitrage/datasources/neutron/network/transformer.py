@@ -43,8 +43,8 @@ class NetworkTransformer(ResourceTransformerBase):
         'network.delete.end': EventAction.DELETE_ENTITY,
     }
 
-    def __init__(self, transformers):
-        super(NetworkTransformer, self).__init__(transformers)
+    def __init__(self, transformers, conf):
+        super(NetworkTransformer, self).__init__(transformers, conf)
 
     def _create_snapshot_entity_vertex(self, entity_event):
 
@@ -106,3 +106,6 @@ class NetworkTransformer(ResourceTransformerBase):
 
         key_fields = self._key_values(NEUTRON_NETWORK_DATASOURCE, network_id)
         return tbase.build_key(key_fields)
+
+    def get_type(self):
+        return NEUTRON_NETWORK_DATASOURCE

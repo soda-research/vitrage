@@ -54,8 +54,8 @@ class PortTransformer(ResourceTransformerBase):
         'port.delete.end': EventAction.DELETE_ENTITY,
     }
 
-    def __init__(self, transformers):
-        super(PortTransformer, self).__init__(transformers)
+    def __init__(self, transformers, conf):
+        super(PortTransformer, self).__init__(transformers, conf)
 
     def _create_snapshot_entity_vertex(self, entity_event):
 
@@ -199,3 +199,6 @@ class PortTransformer(ResourceTransformerBase):
         key_fields = self._key_values(NEUTRON_PORT_DATASOURCE, port_id)
 
         return tbase.build_key(key_fields)
+
+    def get_type(self):
+        return NEUTRON_PORT_DATASOURCE

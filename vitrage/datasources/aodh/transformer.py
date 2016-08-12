@@ -20,6 +20,7 @@ from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.common import datetime_utils
 from vitrage.datasources.alarm_transformer_base import AlarmTransformerBase
+from vitrage.datasources.aodh import AODH_DATASOURCE
 from vitrage.datasources.aodh.properties import AodhProperties as AodhProps
 from vitrage.datasources.aodh.properties import AodhState
 from vitrage.datasources import transformer_base as tbase
@@ -31,8 +32,8 @@ LOG = logging.getLogger(__name__)
 
 class AodhTransformer(AlarmTransformerBase):
 
-    def __init__(self, transformers):
-        super(AodhTransformer, self).__init__(transformers)
+    def __init__(self, transformers, conf):
+        super(AodhTransformer, self).__init__(transformers, conf)
 
     def _create_snapshot_entity_vertex(self, entity_event):
         if _is_vitrage_alarm(entity_event):
@@ -146,6 +147,9 @@ class AodhTransformer(AlarmTransformerBase):
         if not affected_resource_id:
             return None
         return {VProps.ID: affected_resource_id}
+
+    def get_type(self):
+        return AODH_DATASOURCE
 
 
 def _is_vitrage_alarm(entity_event):

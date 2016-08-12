@@ -31,6 +31,7 @@ from vitrage.datasources.zabbix.properties import ZabbixTriggerSeverity \
     as TriggerSeverity
 from vitrage.datasources.zabbix.properties import ZabbixTriggerValue\
     as TriggerValue
+from vitrage.datasources.zabbix import ZABBIX_DATASOURCE
 
 
 import vitrage.graph.utils as graph_utils
@@ -40,8 +41,8 @@ LOG = logging.getLogger(__name__)
 
 class ZabbixTransformer(AlarmTransformerBase):
 
-    def __init__(self, transformers):
-        super(ZabbixTransformer, self).__init__(transformers)
+    def __init__(self, transformers, conf):
+        super(ZabbixTransformer, self).__init__(transformers, conf)
 
     def _create_snapshot_entity_vertex(self, entity_event):
         return self._create_vertex(entity_event)
@@ -154,3 +155,6 @@ class ZabbixTransformer(AlarmTransformerBase):
                 entity_event[ZProps.LAST_CHANGE],
                 ZProps.ZABBIX_TIMESTAMP_FORMAT,
                 tbase.TIMESTAMP_FORMAT)
+
+    def get_type(self):
+        return ZABBIX_DATASOURCE
