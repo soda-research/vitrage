@@ -366,7 +366,7 @@ This can be used along with nova notifier to call force_down for a host
     action:
         action_type : mark_down
             action_target:
-                target: instance # mandatory. entity (from the definitions section) to be marked as down
+                target: host # mandatory. entity (from the definitions section, only host) to be marked as down
 
 Future support & Open Issues
 ============================
