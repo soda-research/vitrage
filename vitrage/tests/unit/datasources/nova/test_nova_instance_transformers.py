@@ -176,7 +176,7 @@ class NovaInstanceTransformerTest(base.BaseTest):
                          vertex[VertexProperties.TYPE])
 
         expected_project = extract_value(event, 'tenant_id')
-        observed_project = vertex[VertexProperties.TENANT_ID]
+        observed_project = vertex[VertexProperties.PROJECT_ID]
         self.assertEqual(expected_project, observed_project)
 
         state = 'state' if is_update_event else 'status'

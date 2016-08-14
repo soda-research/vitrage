@@ -62,7 +62,7 @@ class InstanceTransformer(ResourceTransformerBase):
 
         metadata = {
             VProps.NAME: name,
-            VProps.TENANT_ID: entity_event.get(VProps.TENANT_ID, None),
+            VProps.PROJECT_ID: entity_event.get('tenant_id', None),
         }
 
         sample_timestamp = entity_event[DSProps.SAMPLE_DATE]

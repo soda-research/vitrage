@@ -24,7 +24,6 @@ class VertexProperties(object):
     AGGREGATED_STATE = 'aggregated_state'
     OPERATIONAL_STATE = 'operational_state'
     PROJECT_ID = 'project_id'
-    TENANT_ID = 'tenant_id'
     UPDATE_TIMESTAMP = 'update_timestamp'
     SAMPLE_TIMESTAMP = 'sample_timestamp'
     NAME = 'name'
