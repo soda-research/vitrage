@@ -24,7 +24,6 @@ from vitrage.datasources.nagios import NAGIOS_DATASOURCE
 from vitrage.datasources.nagios.properties import NagiosProperties
 from vitrage.datasources.nagios.properties import NagiosTestStatus
 from vitrage.datasources.nova.host import NOVA_HOST_DATASOURCE
-from vitrage.datasources.static_physical import SWITCH
 from vitrage.datasources import transformer_base as tbase
 from vitrage.datasources.transformer_base import Neighbor
 import vitrage.graph.utils as graph_utils
@@ -84,7 +83,7 @@ class NagiosTransformer(AlarmTransformerBase):
             tbase.TIMESTAMP_FORMAT)
 
         resource_type = entity_event[NagiosProperties.RESOURCE_TYPE]
-        if resource_type == NOVA_HOST_DATASOURCE or resource_type == SWITCH:
+        if resource_type:
             return [self._create_neighbor(
                 vitrage_id,
                 timestamp,
@@ -98,7 +97,8 @@ class NagiosTransformer(AlarmTransformerBase):
                          sample_timestamp,
                          resource_type,
                          resource_name):
-        transformer = self.transformers[resource_type]
+        # Any resource transformer will do (nova for example)
+        transformer = self.transformers[NOVA_HOST_DATASOURCE]
 
         if transformer:
             properties = {

@@ -84,7 +84,8 @@ class StaticPhysicalTransformer(ResourceTransformerBase):
         entity_key = self._create_entity_key(entity_event)
         timestamp = entity_event[DSProps.SAMPLE_DATE]
 
-        for neighbor_details in entity_event[self.RELATIONSHIPS_SECTION]:
+        for neighbor_details in entity_event.get(
+                self.RELATIONSHIPS_SECTION, {}):
             # TODO(alexey): need to decide what to do if one of the entities
             #               fails
             neighbor = self._create_neighbor(neighbor_details, entity_type,

@@ -23,7 +23,6 @@ from vitrage.common.datetime_utils import format_unix_timestamp
 from vitrage.datasources.alarm_properties import AlarmProperties as AlarmProps
 from vitrage.datasources.alarm_transformer_base import AlarmTransformerBase
 from vitrage.datasources.nova.host import NOVA_HOST_DATASOURCE
-from vitrage.datasources.static_physical import SWITCH
 from vitrage.datasources import transformer_base as tbase
 from vitrage.datasources.transformer_base import Neighbor
 from vitrage.datasources.zabbix.properties import ZabbixProperties as ZProps
@@ -98,7 +97,7 @@ class ZabbixTransformer(AlarmTransformerBase):
         timestamp = entity_event[ZProps.TIMESTAMP]
 
         resource_type = entity_event[ZProps.RESOURCE_TYPE]
-        if resource_type == NOVA_HOST_DATASOURCE or resource_type == SWITCH:
+        if resource_type:
             return [self._create_neighbor(
                 vitrage_id,
                 timestamp,
@@ -112,7 +111,8 @@ class ZabbixTransformer(AlarmTransformerBase):
                          sample_timestamp,
                          resource_type,
                          resource_name):
-        transformer = self.transformers[resource_type]
+        # Any resource transformer will do (nova for example)
+        transformer = self.transformers[NOVA_HOST_DATASOURCE]
 
         if transformer:
             properties = {
