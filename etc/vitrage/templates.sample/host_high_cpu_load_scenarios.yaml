@@ -64,8 +64,8 @@ scenarios:
          target: instance_alarm
  - scenario:
     condition: high_cpu_load_on_host
-    actions: 
-     - action: 
+    actions:
+     - action:
         action_type: set_state
         action_target:
          target: host
