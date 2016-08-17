@@ -64,7 +64,7 @@ class TestConsistencyTransformer(base.BaseTest):
             self._validate_consistency_vertex_props(vertex, event)
 
             neighbors = wrapper.neighbors
-            self.assertEqual(None, neighbors)
+            self.assertIsNone(neighbors)
 
             action = wrapper.action
             self.assertIn(action, self.actions)
@@ -88,7 +88,7 @@ class TestConsistencyTransformer(base.BaseTest):
             self._validate_consistency_vertex_props(vertex, event)
 
             neighbors = wrapper.neighbors
-            self.assertEqual(None, neighbors)
+            self.assertIsNone(neighbors)
 
             action = wrapper.action
             self.assertIn(action, self.actions)
