@@ -111,6 +111,7 @@ class ScenarioEvaluator(object):
             LOG.debug("Actions to perform: %s", actions.values())
             filtered_actions = \
                 self._analyze_and_filter_actions(actions.values())
+            LOG.debug("Actions filtered: %s", filtered_actions)
             for action in filtered_actions:
                 self._action_executor.execute(action.specs, action.mode)
 
