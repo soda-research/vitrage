@@ -73,5 +73,6 @@ status_msgs = {
          'in target_action block.',
     131: 'mark_down action must contain \'target\' field in'
          ' \'target_action\' block.',
+    132: 'add_causal_relationship action requires action_target to be ALARM'
 
 }

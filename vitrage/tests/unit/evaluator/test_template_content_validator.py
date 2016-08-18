@@ -16,7 +16,9 @@ import logging
 
 from oslo_log import log
 
+from vitrage.common.constants import EntityCategory
 from vitrage.common import file_utils
+
 from vitrage.evaluator.actions.base import ActionType
 from vitrage.evaluator.template_fields import TemplateFields
 from vitrage.evaluator.template_validation.status_messages import status_msgs
@@ -30,7 +32,13 @@ LOG = log.getLogger(__name__)
 DEFINITIONS_INDEX_MOCK = {
     '123': {},
     '456': {},
-    '789': {}
+    '789': {},
+    'a1': {
+        TemplateFields.CATEGORY: EntityCategory.ALARM
+    },
+    'a2': {
+        TemplateFields.CATEGORY: EntityCategory.ALARM
+    }
 }
 
 
@@ -275,7 +283,7 @@ class TemplateContentValidatorTest(base.BaseTest):
 
         # Test setup
         idx = DEFINITIONS_INDEX_MOCK.copy()
-        action = self._create_add_causal_relationship_action('456', '123')
+        action = self._create_add_causal_relationship_action('a1', 'a2')
 
         # Test action and assertions
         result = validator.validate_add_causal_relationship_action(action, idx)
@@ -287,7 +295,7 @@ class TemplateContentValidatorTest(base.BaseTest):
 
         # Test setup
         idx = DEFINITIONS_INDEX_MOCK.copy()
-        action = self._create_add_causal_relationship_action('unknown', '123')
+        action = self._create_add_causal_relationship_action('unknown', 'a1')
 
         # Test action
         result = validator.validate_add_causal_relationship_action(action, idx)
@@ -299,7 +307,7 @@ class TemplateContentValidatorTest(base.BaseTest):
 
         # Test setup
         idx = DEFINITIONS_INDEX_MOCK.copy()
-        action = self._create_add_causal_relationship_action('456', '123')
+        action = self._create_add_causal_relationship_action('a1', 'a2')
         action[TemplateFields.ACTION_TARGET].pop(TemplateFields.TARGET, None)
 
         # Test action
@@ -312,7 +320,7 @@ class TemplateContentValidatorTest(base.BaseTest):
 
         # Test setup
         idx = DEFINITIONS_INDEX_MOCK.copy()
-        action = self._create_add_causal_relationship_action('456', 'unknown')
+        action = self._create_add_causal_relationship_action('a1', 'unknown')
 
         # Test action
         result = validator.validate_add_causal_relationship_action(action, idx)
@@ -324,7 +332,7 @@ class TemplateContentValidatorTest(base.BaseTest):
 
         # Test setup
         idx = DEFINITIONS_INDEX_MOCK.copy()
-        action = self._create_add_causal_relationship_action('456', '123')
+        action = self._create_add_causal_relationship_action('a1', 'a2')
         action[TemplateFields.ACTION_TARGET].pop(TemplateFields.SOURCE, None)
 
         # Test action
@@ -332,6 +340,30 @@ class TemplateContentValidatorTest(base.BaseTest):
 
         # Test assertion
         self._test_assert_with_fault_result(result, 130)
+
+    def test_validate_add_causal_relationship_action_wrong_src_category(self):
+
+        # Test setup
+        idx = DEFINITIONS_INDEX_MOCK.copy()
+        action = self._create_add_causal_relationship_action('a1', '123')
+
+        # Test action
+        result = validator.validate_add_causal_relationship_action(action, idx)
+
+        # Test assertion
+        self._test_assert_with_fault_result(result, 132)
+
+    def test_validate_add_causal_relationship_action_wrong_tgt_category(self):
+
+        # Test setup
+        idx = DEFINITIONS_INDEX_MOCK.copy()
+        action = self._create_add_causal_relationship_action('123', 'a1')
+
+        # Test action
+        result = validator.validate_add_causal_relationship_action(action, idx)
+
+        # Test assertion
+        self._test_assert_with_fault_result(result, 132)
 
     def _test_execute_and_assert_with_fault_result(self,
                                                    template,
