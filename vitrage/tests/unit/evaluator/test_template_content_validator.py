@@ -27,6 +27,12 @@ from vitrage.tests.mocks import utils
 
 LOG = log.getLogger(__name__)
 
+DEFINITIONS_INDEX_MOCK = {
+    '123': {},
+    '456': {},
+    '789': {}
+}
+
 
 class TemplateContentValidatorTest(base.BaseTest):
 
@@ -118,11 +124,11 @@ class TemplateContentValidatorTest(base.BaseTest):
 
     def test_validate_raise_alarm_action(self):
         # Test setup
-        ids = ['123', '456', '789']
+        idx = DEFINITIONS_INDEX_MOCK.copy()
         action = self._create_raise_alarm_action('123')
 
         # Test action and assertions
-        result = validator.validate_raise_alarm_action(action, ids)
+        result = validator.validate_raise_alarm_action(action, idx)
 
         # Test Assertions
         self._test_assert_with_correct_result(result)
@@ -130,11 +136,11 @@ class TemplateContentValidatorTest(base.BaseTest):
     def test_raise_alarm_action_validate_invalid_target_id(self):
 
         # Test setup
-        ids = ['123', '456', '789']
+        idx = DEFINITIONS_INDEX_MOCK.copy()
         action = self._create_raise_alarm_action('unknown')
 
         # Test action
-        result = validator.validate_raise_alarm_action(action, ids)
+        result = validator.validate_raise_alarm_action(action, idx)
 
         # Test assertions
         self._test_assert_with_fault_result(result, 3)
@@ -142,12 +148,12 @@ class TemplateContentValidatorTest(base.BaseTest):
     def test_validate_raise_alarm_action_without_target_id(self):
 
         # Test setup
-        ids = ['123', '456', '789']
+        idx = DEFINITIONS_INDEX_MOCK.copy()
         action = self._create_raise_alarm_action('123')
         action[TemplateFields.ACTION_TARGET].pop(TemplateFields.TARGET)
 
         # Test action
-        result = validator.validate_raise_alarm_action(action, ids)
+        result = validator.validate_raise_alarm_action(action, idx)
 
         # Test assertions
         self._test_assert_with_fault_result(result, 127)
@@ -155,12 +161,12 @@ class TemplateContentValidatorTest(base.BaseTest):
     def test_validate_raise_alarm_action_without_severity(self):
 
         # Test setup
-        ids = ['123', '456', '789']
+        idx = DEFINITIONS_INDEX_MOCK.copy()
         action = self._create_raise_alarm_action('abc')
         action[TemplateFields.PROPERTIES].pop(TemplateFields.SEVERITY)
 
         # Test action
-        result = validator.validate_raise_alarm_action(action, ids)
+        result = validator.validate_raise_alarm_action(action, idx)
 
         # Test assertions
         self._test_assert_with_fault_result(result, 126)
@@ -168,12 +174,12 @@ class TemplateContentValidatorTest(base.BaseTest):
     def test_validate_raise_alarm_action_without_alarm_name(self):
 
         # Test setup
-        ids = ['123', '456', '789']
+        idx = DEFINITIONS_INDEX_MOCK.copy()
         action = self._create_raise_alarm_action('abc')
         action[TemplateFields.PROPERTIES].pop(TemplateFields.ALARM_NAME)
 
         # Test action
-        result = validator.validate_raise_alarm_action(action, ids)
+        result = validator.validate_raise_alarm_action(action, idx)
 
         # Test assertions
         self._test_assert_with_fault_result(result, 125)
@@ -181,11 +187,11 @@ class TemplateContentValidatorTest(base.BaseTest):
     def test_validate_set_state_action(self):
 
         # Test setup
-        ids = ['123', '456', '789']
+        idx = DEFINITIONS_INDEX_MOCK.copy()
         action = self._create_set_state_action('123')
 
         # Test action and assertions
-        result = validator.validate_set_state_action(action, ids)
+        result = validator.validate_set_state_action(action, idx)
 
         # Test Assertions
         self._test_assert_with_correct_result(result)
@@ -193,11 +199,11 @@ class TemplateContentValidatorTest(base.BaseTest):
     def test_validate_set_state_action_with_invalid_target_id(self):
 
         # Test setup
-        ids = ['123', '456', '789']
+        idx = DEFINITIONS_INDEX_MOCK.copy()
         action = self._create_set_state_action('unknown')
 
         # Test action
-        result = validator.validate_set_state_action(action, ids)
+        result = validator.validate_set_state_action(action, idx)
 
         # Test assertions
         self._test_assert_with_fault_result(result, 3)
@@ -205,12 +211,12 @@ class TemplateContentValidatorTest(base.BaseTest):
     def test_validate_set_state_action_without_target_id(self):
 
         # Test setup
-        ids = ['123', '456', '789']
+        idx = DEFINITIONS_INDEX_MOCK.copy()
         action = self._create_set_state_action('123')
         action[TemplateFields.ACTION_TARGET].pop(TemplateFields.TARGET)
 
         # Test action
-        result = validator.validate_set_state_action(action, ids)
+        result = validator.validate_set_state_action(action, idx)
 
         # Test assertions
         self._test_assert_with_fault_result(result, 129)
@@ -218,12 +224,12 @@ class TemplateContentValidatorTest(base.BaseTest):
     def test_validate_set_state_action_without_state_property(self):
 
         # Test setup
-        ids = ['123', '456', '789']
+        idx = DEFINITIONS_INDEX_MOCK.copy()
         action = self._create_set_state_action('123')
         action[TemplateFields.PROPERTIES].pop(TemplateFields.STATE, None)
 
         # Test action
-        result = validator.validate_set_state_action(action, ids)
+        result = validator.validate_set_state_action(action, idx)
 
         # Test assertions
         self._test_assert_with_fault_result(result, 128)
@@ -231,11 +237,11 @@ class TemplateContentValidatorTest(base.BaseTest):
     def test_validate_mark_down_action(self):
 
         # Test setup
-        ids = ['123', '456', '789']
+        idx = DEFINITIONS_INDEX_MOCK.copy()
         action = self._create_mark_down_action('123')
 
         # Test action and assertions
-        result = validator.validate_mark_down_action(action, ids)
+        result = validator.validate_mark_down_action(action, idx)
 
         # Test Assertions
         self._test_assert_with_correct_result(result)
@@ -243,11 +249,11 @@ class TemplateContentValidatorTest(base.BaseTest):
     def test_validate_mark_down_action_with_invalid_target_id(self):
 
         # Test setup
-        ids = ['123', '456', '789']
+        idx = DEFINITIONS_INDEX_MOCK.copy()
         action = self._create_mark_down_action('unknown')
 
         # Test action
-        result = validator.validate_mark_down_action(action, ids)
+        result = validator.validate_mark_down_action(action, idx)
 
         # Test assertions
         self._test_assert_with_fault_result(result, 3)
@@ -255,12 +261,12 @@ class TemplateContentValidatorTest(base.BaseTest):
     def test_validate_mark_down_action_without_target_id(self):
 
         # Test setup
-        ids = ['123', '456', '789']
+        idx = DEFINITIONS_INDEX_MOCK.copy()
         action = self._create_mark_down_action('123')
         action[TemplateFields.ACTION_TARGET].pop(TemplateFields.TARGET)
 
         # Test action
-        result = validator.validate_mark_down_action(action, ids)
+        result = validator.validate_mark_down_action(action, idx)
 
         # Test assertions
         self._test_assert_with_fault_result(result, 131)
@@ -268,11 +274,11 @@ class TemplateContentValidatorTest(base.BaseTest):
     def test_validate_add_causal_relationship_action(self):
 
         # Test setup
-        ids = ['123', '456', '789']
+        idx = DEFINITIONS_INDEX_MOCK.copy()
         action = self._create_add_causal_relationship_action('456', '123')
 
         # Test action and assertions
-        result = validator.validate_add_causal_relationship_action(action, ids)
+        result = validator.validate_add_causal_relationship_action(action, idx)
 
         # Test action and assertions
         self._test_assert_with_correct_result(result)
@@ -280,11 +286,11 @@ class TemplateContentValidatorTest(base.BaseTest):
     def test_validate_add_causal_relationship_action_with_invalid_target(self):
 
         # Test setup
-        ids = ['123', '456', '789']
+        idx = DEFINITIONS_INDEX_MOCK.copy()
         action = self._create_add_causal_relationship_action('unknown', '123')
 
         # Test action
-        result = validator.validate_add_causal_relationship_action(action, ids)
+        result = validator.validate_add_causal_relationship_action(action, idx)
 
         # Test assertion
         self._test_assert_with_fault_result(result, 3)
@@ -292,12 +298,12 @@ class TemplateContentValidatorTest(base.BaseTest):
     def test_validate_add_causal_relationship_action_without_target(self):
 
         # Test setup
-        ids = ['123', '456', '789']
+        idx = DEFINITIONS_INDEX_MOCK.copy()
         action = self._create_add_causal_relationship_action('456', '123')
         action[TemplateFields.ACTION_TARGET].pop(TemplateFields.TARGET, None)
 
         # Test action
-        result = validator.validate_add_causal_relationship_action(action, ids)
+        result = validator.validate_add_causal_relationship_action(action, idx)
 
         # Test assertion
         self._test_assert_with_fault_result(result, 130)
@@ -305,11 +311,11 @@ class TemplateContentValidatorTest(base.BaseTest):
     def test_validate_add_causal_relationship_action_with_invalid_source(self):
 
         # Test setup
-        ids = ['123', '456', '789']
+        idx = DEFINITIONS_INDEX_MOCK.copy()
         action = self._create_add_causal_relationship_action('456', 'unknown')
 
         # Test action
-        result = validator.validate_add_causal_relationship_action(action, ids)
+        result = validator.validate_add_causal_relationship_action(action, idx)
 
         # Test assertion
         self._test_assert_with_fault_result(result, 3)
@@ -317,12 +323,12 @@ class TemplateContentValidatorTest(base.BaseTest):
     def test_validate_add_causal_relationship_action_without_source(self):
 
         # Test setup
-        ids = ['123', '456', '789']
+        idx = DEFINITIONS_INDEX_MOCK.copy()
         action = self._create_add_causal_relationship_action('456', '123')
         action[TemplateFields.ACTION_TARGET].pop(TemplateFields.SOURCE, None)
 
         # Test action
-        result = validator.validate_add_causal_relationship_action(action, ids)
+        result = validator.validate_add_causal_relationship_action(action, idx)
 
         # Test assertion
         self._test_assert_with_fault_result(result, 130)
