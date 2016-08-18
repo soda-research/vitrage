@@ -157,18 +157,18 @@ def validate_scenario_condition(condition, template_ids):
     return get_correct_result(RESULT_DESCRIPTION)
 
 
-def validate_scenario_actions(actions, entities_ids):
+def validate_scenario_actions(actions, template_ids):
 
     for action in actions:
         result = validate_scenario_action(action[TemplateFields.ACTION],
-                                          entities_ids)
+                                          template_ids)
         if not result.is_valid:
             return result
 
     return get_correct_result(RESULT_DESCRIPTION)
 
 
-def validate_scenario_action(action, entities_ids):
+def validate_scenario_action(action, template_ids):
 
     action_type = action[TemplateFields.ACTION_TYPE]
     actions = {
@@ -183,10 +183,10 @@ def validate_scenario_action(action, entities_ids):
         LOG.error('%s status code: %s' % (status_msgs[120], 120))
         return get_fault_result(RESULT_DESCRIPTION, 120)
 
-    return actions[action_type](action, entities_ids)
+    return actions[action_type](action, template_ids)
 
 
-def validate_raise_alarm_action(action, entities_ids):
+def validate_raise_alarm_action(action, template_ids):
 
     properties = action[TemplateFields.PROPERTIES]
 
@@ -204,10 +204,10 @@ def validate_raise_alarm_action(action, entities_ids):
         return get_fault_result(RESULT_DESCRIPTION, 127)
 
     target = action_target[TemplateFields.TARGET]
-    return _validate_template_id(entities_ids, target)
+    return _validate_template_id(template_ids, target)
 
 
-def validate_set_state_action(action, entities_ids):
+def validate_set_state_action(action, template_ids):
 
     properties = action[TemplateFields.PROPERTIES]
 
@@ -221,10 +221,10 @@ def validate_set_state_action(action, entities_ids):
         return get_fault_result(RESULT_DESCRIPTION, 129)
 
     target = action_target[TemplateFields.TARGET]
-    return _validate_template_id(entities_ids, target)
+    return _validate_template_id(template_ids, target)
 
 
-def validate_add_causal_relationship_action(action, entities_ids):
+def validate_add_causal_relationship_action(action, template_ids):
 
     action_target = action[TemplateFields.ACTION_TARGET]
 
@@ -233,7 +233,7 @@ def validate_add_causal_relationship_action(action, entities_ids):
         return get_fault_result(RESULT_DESCRIPTION, 130)
 
     target = action_target[TemplateFields.TARGET]
-    result = _validate_template_id(entities_ids, target)
+    result = _validate_template_id(template_ids, target)
 
     if not result.is_valid:
         return result
@@ -243,10 +243,10 @@ def validate_add_causal_relationship_action(action, entities_ids):
         return get_fault_result(RESULT_DESCRIPTION, 130)
 
     source = action_target[TemplateFields.SOURCE]
-    return _validate_template_id(entities_ids, source)
+    return _validate_template_id(template_ids, source)
 
 
-def validate_mark_down_action(action, entities_ids):
+def validate_mark_down_action(action, template_ids):
 
     action_target = action[TemplateFields.ACTION_TARGET]
     if TemplateFields.TARGET not in action_target:
@@ -254,7 +254,7 @@ def validate_mark_down_action(action, entities_ids):
         return get_fault_result(RESULT_DESCRIPTION, 131)
 
     target = action_target[TemplateFields.TARGET]
-    return _validate_template_id(entities_ids, target)
+    return _validate_template_id(template_ids, target)
 
 
 def _validate_template_id(ids, id_to_check):
