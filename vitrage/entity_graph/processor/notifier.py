@@ -47,7 +47,7 @@ class GraphNotifier(object):
     def enabled(self):
         return self.oslo_notifier is not None
 
-    def notify_when_applicable(self, before, current, is_vertex):
+    def notify_when_applicable(self, before, current, is_vertex, graph):
         """Callback subscribed to driver.graph updates
 
         :param is_vertex:
@@ -56,10 +56,17 @@ class GraphNotifier(object):
         :param current: The graph element (vertex or edge) after the
         change that happened. Deleted elements should arrive with the
         is_deleted property set to True
+        :param graph: The graph
         """
         notification_types = _get_notification_type(before, current, is_vertex)
         if not notification_types:
             return
+
+        # in case the vertex point to some resource add the resource to the
+        # notification (useful for deduce alarm notifications)
+        if current.get(VProps.RESOURCE_ID):
+            current.properties[VProps.RESOURCE] = graph.get_vertex(
+                current.get(VProps.RESOURCE_ID))
 
         LOG.info('notification_types : %s', str(notification_types))
         LOG.info('notification properties : %s', current.properties)

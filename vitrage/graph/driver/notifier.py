@@ -28,7 +28,7 @@ def _after_func(graph, item, data_before=None):
         return
     element = graph.get_item(item)
     is_vertex = isinstance(element, Vertex)
-    graph.notifier.notify(data_before, graph.get_item(item), is_vertex)
+    graph.notifier.notify(data_before, graph.get_item(item), is_vertex, graph)
 
 
 class Notifier(object):

@@ -417,7 +417,8 @@ class GraphTest(GraphTestBase):
 
         def callback(pre_item,
                      current_item,
-                     is_vertex):
+                     is_vertex,
+                     graph):
             LOG.info('called with: pre_event_item ' + str(pre_item) +
                      ' current_item ' + str(current_item))
             self.assertIsNotNone(current_item)

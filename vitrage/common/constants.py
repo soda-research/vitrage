@@ -36,6 +36,8 @@ class VertexProperties(object):
     INFO = 'info'
     GRAPH_INDEX = 'graph_index'
     RAWTEXT = 'rawtext'
+    RESOURCE_ID = 'resource_id'
+    RESOURCE = 'resource'
 
 
 class EdgeProperties(object):

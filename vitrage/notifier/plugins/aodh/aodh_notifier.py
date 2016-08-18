@@ -77,9 +77,7 @@ class AodhNotifier(NotifierBase):
 
 
 def _alarm_request(data, state):
-    # TODO(ihefetz) resource id should come from the alarm
-    affected_resource_id = data.get(VProps.VITRAGE_ID).replace(
-        'ALARM:vitrage:deduced_vm_alarm:RESOURCE:nova.instance:', '')
+    affected_resource_id = data.get(VProps.RESOURCE, {}).get(VProps.ID, '')
     alarm_name = data.get(VProps.NAME)
     aodh_alarm_name = '_'.join([alarm_name, affected_resource_id])
     severity = severity_translation.get(data.get(VProps.SEVERITY), 'low')

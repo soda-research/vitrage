@@ -66,7 +66,8 @@ class EvaluatorEventTransformer(transformer_base.TransformerBase):
                 VProps.IS_MARKED_DOWN: event.get(VProps.IS_MARKED_DOWN),
                 VProps.UPDATE_TIMESTAMP: update_timestamp,
                 VProps.SAMPLE_TIMESTAMP: event[VProps.SAMPLE_TIMESTAMP],
-                VProps.IS_PLACEHOLDER: False
+                VProps.IS_PLACEHOLDER: False,
+                VProps.RESOURCE_ID: event.get(TFields.TARGET)
             }
             return Vertex(event[VProps.VITRAGE_ID], properties)
 
@@ -75,7 +76,8 @@ class EvaluatorEventTransformer(transformer_base.TransformerBase):
             metadata = {
                 VProps.NAME: event[TFields.ALARM_NAME],
                 VProps.SEVERITY: event[TFields.SEVERITY],
-                VProps.STATE: event[VProps.STATE]
+                VProps.STATE: event[VProps.STATE],
+                VProps.RESOURCE_ID: event.get(TFields.TARGET)
             }
             return graph_utils.create_vertex(
                 self._create_entity_key(event),

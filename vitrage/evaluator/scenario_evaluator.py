@@ -69,7 +69,7 @@ class ScenarioEvaluator(object):
     def scenario_repo(self, scenario_repo):
         self._scenario_repo = scenario_repo
 
-    def process_event(self, before, current, is_vertex):
+    def process_event(self, before, current, is_vertex, *args, **kwargs):
         """Notification of a change in the entity graph.
 
         :param is_vertex:
