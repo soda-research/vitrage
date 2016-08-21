@@ -12,4 +12,12 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-pass
+from oslo_config import cfg
+
+OPTS = [
+    cfg.BoolOpt('enable_host_evacuate', default=False,
+                help='Evacuate a host that is marked as down'),
+    cfg.BoolOpt('on_shared_storage', default=False,
+                help='Indicates that all instance files are '
+                     'on a shared storage'),
+]
