@@ -746,8 +746,8 @@ List Alarms
 
 Shows the alarms on a resource or all alarms
 
-GET /v1/alarms/
-~~~~~~~~~~~~~~~
+GET /v1/alarm/
+~~~~~~~~~~~~~~
 
 Headers
 =======
