@@ -906,15 +906,16 @@ Response Status code
 None
 
 Response Body
-^^^^^^^^^^^^^
+=============
 
 Returns a JSON object that is a list of results.
 Each result describes a full validation (syntax and content) of one template file.
 
 Response Examples
-^^^^^^^^^^^^^^^^^
+=================
 
 ::
+
     {
       "results": [
         {
@@ -935,7 +936,7 @@ Response Examples
     }
 
 Template List
-^^^^^^^^^^^^^
+=============
 
 List all templates loaded from /etc/vitrage/templates, both those that passed validation and those that did not.
 
@@ -989,6 +990,7 @@ Response Examples
 =================
 
 ::
+
     +--------------------------------------+---------------------------------------+--------+--------------------------------------------------+----------------------+
     | uuid                                 | name                                  | status | status details                                   | date                 |
     +--------------------------------------+---------------------------------------+--------+--------------------------------------------------+----------------------+
@@ -998,3 +1000,165 @@ Response Examples
     | 33cb4400-f846-4c64-b168-530824d38f3e | host_nic_down                         | pass   | Template validation is OK                        | 2016-06-29T12:24:16Z |
     | a04cd155-0fcf-4409-a27c-c83ba8b20a3c | disconnected_storage_problems         | pass   | Template validation is OK                        | 2016-06-29T12:24:16Z |
     +--------------------------------------+---------------------------------------+--------+--------------------------------------------------+----------------------+
+
+
+Template Show
+^^^^^^^^^^^^^
+
+Shows the template body for given template ID
+
+GET /v1/template/[template_uuid]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Headers
+=======
+
+-  User-Agent (string)
+-  X-Auth-Token (string, required) - Keystone auth token
+-  Accept (string) - application/json
+
+Path Parameters
+===============
+
+- template uuid
+
+Query Parameters
+================
+
+None
+
+Request Body
+============
+
+None
+
+Request Examples
+================
+
+::
+
+    GET /v1/template/a0bdb89a-fe4c-4b27-adc2-507b7ec44c24
+    Host: 135.248.19.18:8999
+    User-Agent: keystoneauth1/2.3.0 python-requests/2.9.1 CPython/2.7.6
+    X-Auth-Token: 2b8882ba2ec44295bf300aecb2caa4f7
+    Accept: application/json
+
+
+
+Response Status code
+====================
+
+-  200 - OK
+-  404 - failed to show template with uuid: [template_uuid]
+
+Response Body
+=============
+
+Returns a JSON object which represents the template body
+
+Response Examples
+=================
+
+::
+
+    {
+      "scenarios": [
+        {
+          "scenario": {
+            "actions": [
+              {
+                "action": {
+                  "action_target": {
+                    "target": "instance"
+                  },
+                  "properties": {
+                    "alarm_name": "exploding_world",
+                    "severity": "CRITICAL"
+                  },
+                  "action_type": "raise_alarm"
+                }
+              }
+            ],
+            "condition": "alarm_1_on_host and host_contains_instance"
+          }
+        },
+        {
+          "scenario": {
+            "actions": [
+              {
+                "action": {
+                  "action_target": {
+                    "source": "alarm_1",
+                    "target": "alarm_2"
+                  },
+                  "action_type": "add_causal_relationship"
+                }
+              }
+            ],
+            "condition": "alarm_1_on_host and alarm_2_on_instance and host_contains_instance"
+          }
+        }
+      ],
+      "definitions": {
+        "relationships": [
+          {
+            "relationship": {
+              "relationship_type": "on",
+              "source": "alarm_1",
+              "target": "host",
+              "template_id": "alarm_1_on_host"
+            }
+          },
+          {
+            "relationship": {
+              "relationship_type": "on",
+              "source": "alarm_2",
+              "target": "instance",
+              "template_id": "alarm_2_on_instance"
+            }
+          },
+          {
+            "relationship": {
+              "relationship_type": "contains",
+              "source": "host",
+              "target": "instance",
+              "template_id": "host_contains_instance"
+            }
+          }
+        ],
+        "entities": [
+          {
+            "entity": {
+              "category": "ALARM",
+              "type": "nagios",
+              "name": "check_libvirtd",
+              "template_id": "alarm_1"
+            }
+          },
+          {
+            "entity": {
+              "category": "RESOURCE",
+              "type": "nova.host",
+              "template_id": "host"
+            }
+          },
+          {
+            "entity": {
+              "category": "RESOURCE",
+              "type": "nova.instance",
+              "template_id": "instance"
+            }
+          },
+          {
+            "entity": {
+              "category": "ALARM",
+              "type": "vitrage",
+              "name": "exploding_world",
+              "template_id": "alarm_2"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "name": "first_deduced_alarm_ever"
+    }
