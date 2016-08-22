@@ -15,7 +15,7 @@
 from collections import namedtuple
 
 from oslo_log import log
-from pyzabbix import ZabbixAPI
+from oslo_utils import importutils as utils
 
 from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import SyncMode
@@ -41,7 +41,27 @@ class ZabbixDriver(AlarmDriverBase):
         if ZabbixDriver.conf_map is None:
             ZabbixDriver.conf_map =\
                 ZabbixDriver._configuration_mapping(conf)
-        self.client = None
+        self._client = None
+
+    def zabbix_client_login(self):
+        if not self.conf.zabbix.user:
+            LOG.warning('Zabbix user is not defined')
+        if not self.conf.zabbix.password:
+            LOG.warning('Zabbix password is not defined')
+        if not self.conf.zabbix.url:
+            LOG.warning('Zabbix url is not defined')
+
+        try:
+            if not self._client:
+                self._client = utils.import_object(
+                    'pyzabbix.ZabbixAPI',
+                    self.conf.zabbix.url)
+            self._client.login(
+                self.conf.zabbix.user,
+                self.conf.zabbix.password)
+        except Exception as e:
+            LOG.exception('pyzabbix.ZabbixAPI %s', e)
+            self._client = None
 
     def _sync_type(self):
         return ZABBIX_DATASOURCE
@@ -51,29 +71,13 @@ class ZabbixDriver(AlarmDriverBase):
                                triggerid=alarm[ZProps.TRIGGER_ID])
 
     def _get_alarms(self):
-        zabbix_user = self.conf.zabbix.user
-        zabbix_password = self.conf.zabbix.password
-        zabbix_url = self.conf.zabbix.url
-
-        if not zabbix_user:
-            LOG.warning('Zabbix user is not defined')
+        self.zabbix_client_login()
+        if not self._client:
             return []
-
-        if not zabbix_password:
-            LOG.warning('Zabbix password is not defined')
-            return []
-
-        if not zabbix_url:
-            LOG.warning('Zabbix url is not defined')
-            return []
-
-        if not self.client:
-            self.client = ZabbixAPI(zabbix_url)
-            self.client.login(zabbix_user, zabbix_password)
 
         alarms = []
         valid_hosts = (host for host in
-                       self.client.host.get(output=[ZProps.HOST])
+                       self._client.host.get(output=[ZProps.HOST])
                        if host[ZProps.HOST] in ZabbixDriver.conf_map)
         for host in valid_hosts:
             self._get_triggers_per_host(host, alarms)
@@ -83,8 +87,8 @@ class ZabbixDriver(AlarmDriverBase):
     def _get_triggers_per_host(self, host, alarms):
 
         host_id = host[ZProps.HOST_ID]
-        triggers = self.client.trigger.get(hostids=host_id,
-                                           expandDescription=True)
+        triggers = self._client.trigger.get(hostids=host_id,
+                                            expandDescription=True)
 
         triggers_rawtexts = self._get_triggers_rawtexts(host_id)
 
@@ -97,7 +101,7 @@ class ZabbixDriver(AlarmDriverBase):
     def _get_triggers_rawtexts(self, host_id):
 
         output = [ZProps.TRIGGER_ID, ZProps.DESCRIPTION]
-        triggers = self.client.trigger.get(hostids=host_id, output=output)
+        triggers = self._client.trigger.get(hostids=host_id, output=output)
 
         return {trigger[ZProps.TRIGGER_ID]: trigger[ZProps.DESCRIPTION]
                 for trigger in triggers}
