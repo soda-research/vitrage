@@ -14,6 +14,7 @@
 
 from oslo_log import log
 from six.moves import reduce
+from vitrage.common.constants import EntityCategory
 from vitrage.evaluator.actions.base import ActionType
 from vitrage.evaluator.template_data import TemplateData
 from vitrage.evaluator.template_fields import TemplateFields
@@ -241,6 +242,11 @@ def validate_add_causal_relationship_action(action, definitions_index):
         if not result.is_valid:
             return result
 
+        entity = definitions_index[template_id]
+        result = _validate_entity_category(entity, EntityCategory.ALARM)
+        if not result.is_valid:
+            return result
+
     return get_correct_result(RESULT_DESCRIPTION)
 
 
@@ -261,5 +267,17 @@ def _validate_template_id(definitions_index, id_to_check):
         msg = status_msgs[3] + ' template id: %s' % id_to_check
         LOG.error('%s status code: %s' % (msg, 3))
         return get_fault_result(RESULT_DESCRIPTION, 3, msg)
+
+    return get_correct_result(RESULT_DESCRIPTION)
+
+
+def _validate_entity_category(entity_to_check, category):
+
+    if TemplateFields.CATEGORY not in entity_to_check \
+            or entity_to_check[TemplateFields.CATEGORY] != category:
+        msg = status_msgs[132] + ' expect %s to be %s' \
+                                 % (entity_to_check, category)
+        LOG.error('%s status code: %s' % (msg, 132))
+        return get_fault_result(RESULT_DESCRIPTION, 132, msg)
 
     return get_correct_result(RESULT_DESCRIPTION)
