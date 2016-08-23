@@ -34,7 +34,9 @@ class InstanceDriver(NovaDriverBase):
                 search_opts={'all_tenants': 1})),
             NOVA_INSTANCE_DATASOURCE,
             sync_mode,
-            'manager')
+            'manager',
+            'OS-EXT-SRV-ATTR:user_data',
+            '_info')
 
     @staticmethod
     def enrich_event(event, event_type):
