@@ -16,7 +16,6 @@ from oslo_config import cfg
 
 from vitrage.datasources.aodh import AODH_DATASOURCE
 from vitrage.datasources.cinder.volume import CINDER_VOLUME_DATASOURCE
-from vitrage.datasources.heat.stack import HEAT_STACK_DATASOURCE
 from vitrage.datasources.nagios import NAGIOS_DATASOURCE
 from vitrage.datasources.neutron.network import NEUTRON_NETWORK_DATASOURCE
 from vitrage.datasources.nova.host import NOVA_HOST_DATASOURCE
@@ -37,7 +36,6 @@ OPTS = [
                          AODH_DATASOURCE,
                          CINDER_VOLUME_DATASOURCE,
                          NEUTRON_NETWORK_DATASOURCE,
-                         HEAT_STACK_DATASOURCE,
                          ],
                 help='Names of supported data sources'),
     cfg.ListOpt('path',

@@ -58,6 +58,11 @@ notification_driver = messagingv2
 [DEFAULT]
 notification_topics = notifications,vitrage_notifications
 notification_driver = messagingv2
+
+[[post-config|\$HEAT_CONF]]
+[DEFAULT]
+notification_topics = notifications,vitrage_notifications
+notification_driver = messagingv2
 EOF
 
 $GATE_DEST/devstack-gate/devstack-vm-gate.sh

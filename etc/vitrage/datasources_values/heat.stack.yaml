@@ -1,0 +1,46 @@
+category: RESOURCE
+values:
+  - aggregated values:
+      priority: 40
+      original values:
+        - name: DELETE FAILED
+          operational_value: ERROR
+        - name: CREATE FAILED
+          operational_value: ERROR
+        - name: UPDATE FAILED
+          operational_value: ERROR
+        - name: RESUME FAILED
+          operational_value: ERROR
+        - name: SUSPEND FAILED
+          operational_value: ERROR
+  - aggregated values:
+      priority: 30
+      original values:
+        - name: DELETE IN PROGRESS
+          operational_value: TRANSIENT
+        - name: CREATE IN PROGRESS
+          operational_value: TRANSIENT
+        - name: UPDATE IN PROGRESS
+          operational_value: TRANSIENT
+        - name: RESUME IN PROGRESS
+          operational_value: TRANSIENT
+        - name: SUSPEND IN PROGRESS
+          operational_value: TRANSIENT
+  - aggregated values:
+      priority: 20
+      original values:
+        - name: SUBOPTIMAL
+          operational_value: SUBOPTIMAL
+  - aggregated values:
+      priority: 10
+      original values:
+        - name: DELETE COMPLETE
+          operational_value: OK
+        - name: CREATE COMPLETE
+          operational_value: OK
+        - name: UPDATE COMPLETE
+          operational_value: OK
+        - name: RESUME COMPLETE
+          operational_value: OK
+        - name: SUSPEND COMPLETE
+          operational_value: OK
