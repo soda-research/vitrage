@@ -29,6 +29,8 @@ LOG = logging.getLogger(__name__)
 
 class HeatStackDriver(DriverBase):
 
+    _client = None
+
     FAILED = 'FAILED'
 
     RESOURCE_TYPE_CONVERSION = {
@@ -40,9 +42,9 @@ class HeatStackDriver(DriverBase):
 
     def __init__(self, conf):
         super(HeatStackDriver, self).__init__()
-        self._client = None
         self.conf = conf
         self._filter_resource_types()
+        HeatStackDriver._client = self.client
 
     @property
     def client(self):
@@ -72,6 +74,8 @@ class HeatStackDriver(DriverBase):
         # and hence all the edges to it
 
         event[DSProps.EVENT_TYPE] = event_type
+        event = HeatStackDriver._retrieve_stack_resources(
+            event, event['stack_identity'])
 
         return HeatStackDriver.make_pickleable([event],
                                                HEAT_STACK_DATASOURCE,
@@ -81,34 +85,27 @@ class HeatStackDriver(DriverBase):
         types = self.conf.datasources.types
         tmp_dict = {}
 
-        for key, value in self.RESOURCE_TYPE_CONVERSION.items():
+        for key, value in HeatStackDriver.RESOURCE_TYPE_CONVERSION.items():
             if value in types:
                 tmp_dict[key] = value
 
-        self.RESOURCE_TYPE_CONVERSION = tmp_dict
+        HeatStackDriver.RESOURCE_TYPE_CONVERSION = tmp_dict
 
     def _make_stacks_list(self, stacks):
-        stacks_list = []
-        for stack in stacks:
-            stack_dict = stack.__dict__
-            if self.FAILED not in stack_dict['stack_status']:
-                stacks_list.append(stack_dict)
-        return stacks_list
+        return [stack.__dict__ for stack in stacks
+                if self.FAILED not in stack.__dict__['stack_status']]
 
     def _append_stacks_resources(self, stacks):
-        updated_stacks = []
-        for stack in stacks:
-            resources = self. client.resources.list(stack['id'])
-            new_stack = stack
-            new_stack['resources'] = []
-            for resource in resources:
-                resource_dict = resource.__dict__
-                if resource_dict['resource_type'] in \
-                        self.RESOURCE_TYPE_CONVERSION.keys():
-                    new_stack['resources'].append(resource_dict)
-            # LOG.error("Resources were attached to stack: %s", new_stack)
-            updated_stacks.append(new_stack)
-        return updated_stacks
+        return [self._retrieve_stack_resources(stack, stack['id'])
+                for stack in stacks]
+
+    @classmethod
+    def _retrieve_stack_resources(cls, stack, stack_id):
+        resources = cls._client.resources.list(stack_id)
+        stack['resources'] = [resource.__dict__ for resource in resources
+                              if resource.__dict__['resource_type'] in
+                              HeatStackDriver.RESOURCE_TYPE_CONVERSION]
+        return stack
 
     def get_all(self, sync_mode):
         stacks = self.client.stacks.list(global_tenant=True)

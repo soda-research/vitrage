@@ -38,8 +38,8 @@ class ZabbixDriver(AlarmDriverBase):
     def __init__(self, conf):
         super(ZabbixDriver, self).__init__()
         self.conf = conf
-        if ZabbixDriver.conf_map is None:
-            ZabbixDriver.conf_map =\
+        if not ZabbixDriver.conf_map:
+            ZabbixDriver.conf_map = \
                 ZabbixDriver._configuration_mapping(conf)
         self._client = None
 
