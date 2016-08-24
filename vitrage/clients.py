@@ -12,11 +12,14 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from keystoneclient.auth.identity import v2 as v2_auth
+from keystoneclient import session as keystone_session
 from oslo_config import cfg
 from oslo_log import log
 
 from ceilometerclient import client as cm_client
 from cinderclient import client as cin_client
+from heatclient import client as he_client
 from neutronclient.v2_0 import client as ne_client
 from novaclient import client as n_client
 
@@ -28,6 +31,7 @@ OPTS = [
     cfg.StrOpt('aodh_version', default='2', help='Aodh version'),
     cfg.FloatOpt('nova_version', default='2.11', help='Nova version'),
     cfg.StrOpt('cinder_version', default='1', help='Cinder version'),
+    cfg.StrOpt('heat_version', default='1', help='Heat version'),
 ]
 
 
@@ -92,3 +96,46 @@ def neutron_client(conf):
         return client
     except Exception as e:
         LOG.exception('Create Neutron client - Got Exception: %s', e)
+
+
+def heat_client(conf):
+    """Get an instance of heat client"""
+    # auth_config = conf.service_credentials
+    try:
+        service_type = 'orchestration'
+        interface = 'publicURL'
+        # region_name = conf.service_credentials.region_name
+        region_name = 'regionOne'
+        keystone_sess = keystone_session.Session()
+        keystone_auth = v2_auth.Password(
+            auth_url=conf.service_credentials.auth_url,
+            username=conf.service_credentials.username,
+            password=conf.service_credentials.password,
+            tenant_name='admin')
+
+        endpoint = keystone_auth.get_endpoint(
+            keystone_sess,
+            service_type=service_type,
+            interface=interface,
+            region_name=region_name
+        )
+
+        kwargs = {
+            'auth_url': conf.service_credentials.auth_url,
+            'session': keystone_sess,
+            'auth': keystone_auth,
+            'service_type': service_type,
+            'endpoint_type': interface,
+            'region_name': region_name,
+            'username': conf.service_credentials.username,
+            'password': conf.service_credentials.password,
+        }
+
+        client = he_client.Client(
+            conf.heat_version,
+            endpoint,
+            **kwargs)
+        LOG.info('Heat client created')
+        return client
+    except Exception as e:
+        LOG.exception('Create Heat client - Got Exception: %s', e)

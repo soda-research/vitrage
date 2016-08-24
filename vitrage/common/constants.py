@@ -49,6 +49,7 @@ class EdgeLabel(object):
     CONTAINS = 'contains'
     CAUSES = 'causes'
     ATTACHED = 'attached'
+    COMPRISED = 'comprised'
     ATTACHED_PUBLIC = 'attached_public'
     ATTACHED_PRIVATE = 'attached_private'
 
