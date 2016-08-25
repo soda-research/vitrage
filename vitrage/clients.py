@@ -109,6 +109,8 @@ def heat_client(conf):
         session = kssession.Session(auth=auth)
         endpoint = session.get_endpoint(service_type='orchestration',
                                         interface='publicURL')
-        return he_client.Client(session=session, endpoint=endpoint)
+        client = he_client.Client(session=session, endpoint=endpoint)
+        LOG.info('Heat client created')
+        return client
     except Exception as e:
         LOG.exception('Create Heat client - Got Exception: %s', e)

@@ -53,6 +53,8 @@ DRIVER_ZABBIX_SNAPSHOT_D = 'driver_zabbix_snapshot_dynamic.json'
 DRIVER_SWITCH_SNAPSHOT_D = 'driver_switch_snapshot_dynamic.json'
 DRIVER_VOLUME_UPDATE_D = 'driver_volume_update_dynamic.json'
 DRIVER_VOLUME_SNAPSHOT_D = 'driver_volume_snapshot_dynamic.json'
+DRIVER_STACK_UPDATE_D = 'driver_stack_update_dynamic.json'
+DRIVER_STACK_SNAPSHOT_D = 'driver_stack_snapshot_dynamic.json'
 DRIVER_CONSISTENCY_UPDATE_D = 'driver_consistency_update_dynamic.json'
 DRIVER_ZONE_SNAPSHOT_D = 'driver_zone_snapshot_dynamic.json'
 
@@ -105,6 +107,8 @@ class EventTraceGenerator(object):
              DRIVER_ZONE_SNAPSHOT_D: _get_zone_snapshot_driver_values,
              DRIVER_VOLUME_SNAPSHOT_D: _get_volume_snapshot_driver_values,
              DRIVER_VOLUME_UPDATE_D: _get_volume_update_driver_values,
+             DRIVER_STACK_SNAPSHOT_D: _get_stack_snapshot_driver_values,
+             DRIVER_STACK_UPDATE_D: _get_stack_update_driver_values,
              DRIVER_SWITCH_SNAPSHOT_D: _get_switch_snapshot_driver_values,
              DRIVER_NAGIOS_SNAPSHOT_D: _get_nagios_alarm_driver_values,
              DRIVER_ZABBIX_SNAPSHOT_D: _get_zabbix_alarm_driver_values,
@@ -311,6 +315,63 @@ def _get_volume_update_driver_values(spec):
         mapping = {'volume_id': volume_name,
                    'display_name': volume_name,
                    'volume_attachment': [{'instance_uuid': instance_name}]}
+        static_values.append(combine_data(
+            static_info_re, mapping, spec.get(EXTERNAL_INFO_KEY, None)
+        ))
+    return static_values
+
+
+def _get_stack_snapshot_driver_values(spec):
+    """Generates the static driver values for each stack.
+
+    :param spec: specification of event generation.
+    :type spec: dict
+    :return: list of static driver values for each stack.
+    :rtype: list
+    """
+
+    stack_instance_volume_mapping = spec[MAPPING_KEY]
+    static_info_re = None
+    if spec[STATIC_INFO_FKEY] is not None:
+        static_info_re = utils.load_specs(spec[STATIC_INFO_FKEY])
+    static_values = []
+
+    for stack_name, instance_name, volume_name \
+            in stack_instance_volume_mapping:
+        mapping = {'id': stack_name,
+                   'stack_name': stack_name,
+                   'resources': [{'resource_type': "OS::Nova::Server",
+                                  'physical_resource_id': instance_name},
+                                 {'resource_type': "OS::Cinder::Volume",
+                                  'physical_resource_id': volume_name}]}
+        static_values.append(combine_data(
+            static_info_re, mapping, spec.get(EXTERNAL_INFO_KEY, None)
+        ))
+    return static_values
+
+
+def _get_stack_update_driver_values(spec):
+    """Generates the static driver values for each volume.
+
+    :param spec: specification of event generation.
+    :type spec: dict
+    :return: list of static driver values for each volume.
+    :rtype: list
+    """
+
+    volume_instance_mapping = spec[MAPPING_KEY]
+    static_info_re = None
+    if spec[STATIC_INFO_FKEY] is not None:
+        static_info_re = utils.load_specs(spec[STATIC_INFO_FKEY])
+    static_values = []
+
+    for stack_name, instance_name, volume_name in volume_instance_mapping:
+        mapping = {'stack_identity': stack_name,
+                   'stack_name': stack_name,
+                   'resources': [{'resource_type': "OS::Nova::Server",
+                                  'physical_resource_id': instance_name},
+                                 {'resource_type': "OS::Cinder::Volume",
+                                  'physical_resource_id': volume_name}]}
         static_values.append(combine_data(
             static_info_re, mapping, spec.get(EXTERNAL_INFO_KEY, None)
         ))

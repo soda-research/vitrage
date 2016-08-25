@@ -237,6 +237,55 @@ def simple_volume_generators(volume_num, instance_num,
     return tg.get_trace_generators(test_entity_spec_list)
 
 
+def simple_stack_generators(stack_num, instance_and_volume_num,
+                            snapshot_events=0, update_events=0,
+                            snap_vals=None, update_vals=None):
+    """A function for returning vm event generators.
+
+    Returns generators for a given number of stacks, instances and
+    volumes. Instances and Volumes will be distributed across stacks in
+    round-robin style.
+
+    :param update_vals:  number of values from update event
+    :param update_events: number of events from update event
+    :param stack_num: number of stacks
+    :param volume_num: number of volumes
+    :param instance_num: number of instances
+    :param snapshot_events: number of snapshot events per host
+    :param snap_vals: preset vals for ALL snapshot events
+    :return: generators for volume_num volumes as specified
+    """
+
+    mapping = [('stack-{0}'.format(index % stack_num),
+                'vm-{0}'.format(index),
+                'volume-{0}')
+               for index in range(instance_and_volume_num)
+               ]
+
+    test_entity_spec_list = []
+    if snapshot_events:
+        test_entity_spec_list.append(
+            {tg.DYNAMIC_INFO_FKEY: tg.DRIVER_STACK_SNAPSHOT_D,
+             tg.STATIC_INFO_FKEY: None,
+             tg.EXTERNAL_INFO_KEY: snap_vals,
+             tg.MAPPING_KEY: mapping,
+             tg.NAME_KEY: 'Stack snapshot generator',
+             tg.NUM_EVENTS: snapshot_events
+             }
+        )
+    if update_events:
+        test_entity_spec_list.append(
+            {tg.DYNAMIC_INFO_FKEY: tg.DRIVER_STACK_UPDATE_D,
+             tg.STATIC_INFO_FKEY: None,
+             tg.EXTERNAL_INFO_KEY: update_vals,
+             tg.MAPPING_KEY: mapping,
+             tg.NAME_KEY: 'Stack update generator',
+             tg.NUM_EVENTS: update_events
+             }
+        )
+    return tg.get_trace_generators(test_entity_spec_list)
+
+
 def simple_consistency_generators(consistency_num, update_events=0,
                                   snap_vals=None, update_vals=None):
     """A function for returning consistency event generators.
