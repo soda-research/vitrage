@@ -32,8 +32,10 @@ export DEVSTACK_LOCAL_CONFIG
 if [ -z ${ENABLED_SERVICES+x} ]; then
     ENABLED_SERVICES=tempest
 fi
-ENABLED_SERVICES+=,vitrage-api,vitrage-graph
+
+ENABLED_SERVICES+=,h-eng h-api h-api-cfn h-api-cw
 ENABLED_SERVICES+=,q-svc,q-dhcp,q-meta,q-agt,q-l3
+ENABLED_SERVICES+=,vitrage-api,vitrage-graph
 ENABLED_SERVICES+=,key,aodi-api,aodh-notifier,aodh-evaluator
 ENABLED_SERVICES+=,ceilometer-alarm-evaluator,ceilometer-alarm-notifier
 ENABLED_SERVICES+=,ceilometer-api

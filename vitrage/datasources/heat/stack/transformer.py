@@ -102,7 +102,7 @@ class HeatStackTransformer(ResourceTransformerBase):
             entity_key,
             entity_id=stack_id,
             entity_category=EntityCategory.RESOURCE,
-            entity_type=CINDER_VOLUME_DATASOURCE,
+            entity_type=HEAT_STACK_DATASOURCE,
             entity_state=stack_state,
             sample_timestamp=sample_timestamp,
             update_timestamp=update_timestamp,
