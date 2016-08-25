@@ -11,6 +11,7 @@ python-dateutil>=2.4.2
 python-keystoneclient!=1.8.0,!=2.1.0,>=1.6.0 # Apache-2.0
 python-neutronclient!=4.1.0,>=2.6.0 # Apache-2.0
 python-novaclient>=2.26.0
+python-heatclient>=1.1.0 # Apache-2.0
 pyzabbix>=0.7.4  # LGPL
 networkx>=1.10
 oslo.config>=2.7.0 # Apache-2.0

@@ -12,15 +12,16 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import keystoneauth1.identity.v2 as v2
+import keystoneauth1.session as kssession
 from oslo_config import cfg
 from oslo_log import log
 
 from ceilometerclient import client as cm_client
 from cinderclient import client as cin_client
+from heatclient.v1 import client as he_client
 from neutronclient.v2_0 import client as ne_client
 from novaclient import client as n_client
-
-
 from vitrage import keystone_client
 
 LOG = log.getLogger(__name__)
@@ -29,6 +30,7 @@ OPTS = [
     cfg.StrOpt('aodh_version', default='2', help='Aodh version'),
     cfg.FloatOpt('nova_version', default='2.11', help='Nova version'),
     cfg.StrOpt('cinder_version', default='2', help='Cinder version'),
+    cfg.StrOpt('heat_version', default='1', help='Heat version'),
 ]
 
 
@@ -93,3 +95,20 @@ def neutron_client(conf):
         return client
     except Exception as e:
         LOG.exception('Create Neutron client - Got Exception: %s', e)
+
+
+def heat_client(conf):
+    """Get an instance of heat client"""
+    # auth_config = conf.service_credentials
+    try:
+        auth = v2.Password(
+            auth_url=conf.service_credentials.auth_url + '/v2.0',
+            username=conf.service_credentials.username,
+            password=conf.service_credentials.password,
+            tenant_name=conf.service_credentials.project_name)
+        session = kssession.Session(auth=auth)
+        endpoint = session.get_endpoint(service_type='orchestration',
+                                        interface='publicURL')
+        return he_client.Client(session=session, endpoint=endpoint)
+    except Exception as e:
+        LOG.exception('Create Heat client - Got Exception: %s', e)

@@ -55,6 +55,7 @@ class EdgeLabel(object):
     ATTACHED_PRIVATE = 'attached_private'
     CONNECT = 'connect'
     MANAGED_BY = 'managed_by'
+    COMPRISED = 'comprised'
 
 edge_labels = [EdgeLabel.ON,
                EdgeLabel.CONTAINS,

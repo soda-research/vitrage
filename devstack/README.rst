@@ -40,4 +40,13 @@ Enabling Vitrage in DevStack
    notification_topics = notifications,vitrage_notifications
    notification_driver=messagingv2
 
-6. Run ``stack.sh``.
+6. Add this to add notification from heat to vitrage
+
+::
+
+   [[post-config|$HEAT_CONF]]
+   [DEFAULT]
+   notification_topics = notifications,vitrage_notifications
+   notification_driver=messagingv2
+
+7. Run ``stack.sh``.
