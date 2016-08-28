@@ -143,6 +143,11 @@ function configure_vitrage {
         disable_vitrage_datasource aodh
     fi
 
+    # remove heat vitrage datasource if heat datasource not installed
+    if ! is_service_enabled heat; then
+        disable_vitrage_datasource heat.stack
+    fi
+
     # remove nagios vitrage datasource if nagios datasource not installed
     if [ "$VITRAGE_USE_NAGIOS" == "False" ]; then
         disable_vitrage_datasource nagios
