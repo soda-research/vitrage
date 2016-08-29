@@ -96,33 +96,39 @@ class EntityGraphApis(object):
                                     VProps.IS_DELETED: False})
 
         # TODO(alexey) this should not be here, but in the transformer
-        modified_alarms = self._add_resource_details_to_alarms(items_list)
+        self._add_resource_details_to_alarms(items_list)
 
-        return json.dumps({'alarms': [v.properties for v in modified_alarms]})
+        return json.dumps({'alarms': [v.properties for v in items_list]})
 
     def get_topology(self, ctx, graph_type, depth, query, root):
-        LOG.debug("EntityGraphApis get_topology root:%s", str(root))
 
+        LOG.debug("EntityGraphApis get_topology root:%s", str(root))
         ga = create_algorithm(self.entity_graph)
+
         if graph_type == 'tree':
             if not query:
                 LOG.error("Graph-type 'tree' requires a filter.")
                 return {}
-            found_graph = ga.graph_query_vertices(
+            graph = ga.graph_query_vertices(
                 query_dict=query,
                 root_id=root,
                 depth=depth)
-        elif graph_type == 'graph':
-            final_query = query if query else TOPOLOGY_AND_ALARMS_QUERY
+        # By default the graph_type is 'graph'
+        else:
+            q = query if query else TOPOLOGY_AND_ALARMS_QUERY
             if root:
-                found_graph = ga.graph_query_vertices(
-                    query_dict=final_query,
+                graph = ga.graph_query_vertices(
+                    query_dict=q,
                     root_id=root,
                     depth=depth)
             else:
-                found_graph = ga.create_graph_from_matching_vertices(
-                    query_dict=final_query)
-        return found_graph.json_output_graph()
+                graph = ga.create_graph_from_matching_vertices(query_dict=q)
+
+        alarms = graph.get_vertices(query_dict=ALARMS_ALL_QUERY)
+        self._add_resource_details_to_alarms(alarms)
+        graph.update_vertices(alarms)
+
+        return graph.json_output_graph()
 
     def get_rca(self, ctx, root):
         LOG.debug("EntityGraphApis get_rca root:%s", str(root))
@@ -138,6 +144,11 @@ class EntityGraphApis(object):
             direction=Direction.OUT)
         unified_graph = found_graph_in
         unified_graph.union(found_graph_out)
+
+        alarms = unified_graph.get_vertices(query_dict=ALARMS_ALL_QUERY)
+        self._add_resource_details_to_alarms(alarms)
+        unified_graph.update_vertices(alarms)
+
         json_graph = unified_graph.json_output_graph(
             inspected_index=self._find_rca_index(unified_graph, root))
         return json_graph
@@ -150,7 +161,6 @@ class EntityGraphApis(object):
             return None
 
     def _add_resource_details_to_alarms(self, alarms):
-        incorrect_alarms = []
         for alarm in alarms:
             try:
                 resources = self.entity_graph.neighbors(
@@ -167,10 +177,7 @@ class EntityGraphApis(object):
                     alarm["resource_type"] = ''
 
             except ValueError as ve:
-                incorrect_alarms.append(alarm)
                 LOG.error('Alarm %s\nException %s', alarm, ve)
-
-        return [item for item in alarms if item not in incorrect_alarms]
 
     @staticmethod
     def _find_rca_index(found_graph, root):
