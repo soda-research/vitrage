@@ -208,6 +208,21 @@ class Graph(object):
         pass
 
     @abc.abstractmethod
+    def update_vertices(self, vertices, hard_update=False):
+        """For each vertex, update its properties
+
+        For each existing vertex, update its properties and create it if
+        non existing.
+        Hard update: can be used to remove existing fields.
+
+        :param vertices: the vertex with the new data
+        :type vertices: List
+        :param hard_update: if True, original properties will be removed.
+        :type hard_update: bool
+        """
+        pass
+
+    @abc.abstractmethod
     def update_edge(self, e, hard_update=False):
         """Update the edge properties
 

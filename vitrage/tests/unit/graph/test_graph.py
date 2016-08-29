@@ -28,7 +28,7 @@ from vitrage.tests.unit.graph.base import *  # noqa
 LOG = logging.getLogger(__name__)
 
 
-class GraphTest(GraphTestBase):
+class TestGraph(GraphTestBase):
 
     def test_graph(self):
         g = create_graph('test_graph')
@@ -121,6 +121,30 @@ class GraphTest(GraphTestBase):
         self.assertEqual(1, len(g), 'graph __len__ after remove vertex')
         v = g.get_vertex(another_vertex.vertex_id)
         self.assertIsNone(v, 'removed vertex not in graph')
+
+    def test_update_vertices(self):
+
+        # Test Setup
+        g = create_graph('test_update_vertices')
+        g.add_vertex(v_node)
+        v_node_copy = g.get_vertex(v_node.vertex_id)
+        v_node_copy[VProps.NAME] = 'test_node'
+        v_node_copy[VProps.CATEGORY] = 'super_node'
+
+        g.add_vertex(v_host)
+        v_host_copy = g.get_vertex(v_host.vertex_id)
+        v_host_copy[VProps.NAME] = 'test_host'
+
+        # Test Action
+        g.update_vertices([v_node_copy, v_host_copy])
+
+        # Test Assertions
+        updated_v_node = g.get_vertex(v_node.vertex_id)
+        self.assertEqual('test_node', updated_v_node[VProps.NAME])
+        self.assertEqual('super_node', updated_v_node[VProps.CATEGORY])
+
+        updated_v_host = g.get_vertex(v_host.vertex_id)
+        self.assertEqual('test_host', updated_v_host[VProps.NAME])
 
     def test_edge_crud(self):
         g = create_graph('test_edge_crud')

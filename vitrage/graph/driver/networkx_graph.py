@@ -158,6 +158,15 @@ class NXGraph(Graph):
         new_prop = self._merge_properties(orig_prop, v.properties, hard_update)
         self._g.node[v.vertex_id] = new_prop
 
+    def update_vertices(self, vertices, hard_update=False):
+        """For each vertex, update its properties
+
+        :param hard_update:
+        :type vertices: List
+        """
+        for v in vertices:
+            self.update_vertex(v, hard_update)
+
     @Notifier.update_notify
     def update_edge(self, e, hard_update=False):
         """Update the edge properties
