@@ -41,7 +41,7 @@ The following describes all the possible status code and their messages:
 +------------------+---------------------------------------------------------+-------------------------------+
 | 60               | metadata section must contain id field                  | syntax                        |
 +------------------+---------------------------------------------------------+-------------------------------+
-| 61               | metadata is a mandatory section                         | syntax                        |
+| 62               | metadata is a mandatory section                         | syntax                        |
 +------------------+---------------------------------------------------------+-------------------------------+
 | 80               | scenarios is a mandatory section                        | syntax                        |
 +------------------+---------------------------------------------------------+-------------------------------+
@@ -94,4 +94,10 @@ The following describes all the possible status code and their messages:
 +------------------+---------------------------------------------------------+-------------------------------+
 | 130              | add_causal_relationship action must contain target and  | content                       |
 |                  | source field in target_action block                     |                               |
++------------------+---------------------------------------------------------+-------------------------------+
+| 131              | mark_down action must contain target field in           | content                       |
+|                  | target_action block.                                    |                               |
++------------------+---------------------------------------------------------+-------------------------------+
+| 132              | add_causal_relationship action requires action_target to| content                       |
+|                  | be ALARM                                                |                               |
 +------------------+---------------------------------------------------------+-------------------------------+
