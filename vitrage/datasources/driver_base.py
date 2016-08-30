@@ -48,13 +48,12 @@ class DriverBase(object):
         pass
 
     @classmethod
-    def make_pickleable(cls, entities, sync_type,
-                        sync_mode, *args):
+    def make_pickleable(cls, entities, sync_type, sync_mode, *args):
         pickleable_entities = []
 
         for entity in entities:
             for field in args:
-                entity.pop(field)
+                entity.pop(field, None)
 
             cls._add_sync_type(entity, sync_type)
             cls._add_sync_mode(entity, sync_mode)

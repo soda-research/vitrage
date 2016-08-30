@@ -62,7 +62,8 @@ class PortTransformer(ResourceTransformerBase):
         name = entity_event['name'] if entity_event['name'] else None
         entity_id = entity_event['id']
         state = entity_event['status']
-        update_timestamp = entity_event['updated_at']
+        update_timestamp = \
+            entity_event.get('updated_at', entity_event[DSProps.SAMPLE_DATE])
 
         return self._create_vertex(entity_event,
                                    name,
