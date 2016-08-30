@@ -1,4 +1,3 @@
-# Copyright 2016 - Alcatel-Lucent
 # Copyright 2016 - Nokia
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -15,18 +14,18 @@
 
 from oslo_log import log
 from oslo_service import service as os_service
-
 from vitrage.common.constants import SyncMode
+from vitrage.datasources.rescheduler import ReScheduler
 
 LOG = log.getLogger(__name__)
 
 
 class DatasourceService(os_service.Service):
-    def __init__(self, conf, registered_datasources, callback_function):
+    def __init__(self, conf, registered_datasources, send_to_queue_func):
         super(DatasourceService, self).__init__()
         self.conf = conf
         self.registered_datasources = registered_datasources
-        self.callback_function = callback_function
+        self.send_to_queue = send_to_queue_func
 
 
 class SnapshotsService(DatasourceService):
@@ -34,40 +33,51 @@ class SnapshotsService(DatasourceService):
         super(SnapshotsService, self).__init__(conf,
                                                registered_datasources,
                                                callback_function)
-        self.first_time = True
 
     def start(self):
         LOG.info("Vitrage datasources Snapshot Service - Starting...")
-
         super(SnapshotsService, self).start()
-        interval = self.conf.datasources.snapshots_interval
-        self.tg.add_timer(interval, self._get_all)
 
-        LOG.info("Vitrage datasources Snapshot Service - Started!")
+        standard_interval = self.conf.datasources.snapshots_interval
+        fault_interval = self.conf.datasources.snapshot_interval_on_fault
+        init_ttl = self.conf.consistency.initialization_max_retries * \
+            self.conf.consistency.initialization_interval
+
+        snap_scheduler = ReScheduler()
+
+        for ds_driver in self.registered_datasources.values():
+
+            snap_scheduler.schedule(
+                func=self.entities_to_queue(ds_driver, SyncMode.INIT_SNAPSHOT),
+                standard_interval=standard_interval,
+                fault_interval=fault_interval,
+                times=1,
+                ttl=init_ttl,
+                fault_callback=ds_driver.callback_on_fault)
+
+            snap_scheduler.schedule(
+                func=self.entities_to_queue(ds_driver, SyncMode.SNAPSHOT),
+                initial_delay=standard_interval,
+                standard_interval=standard_interval,
+                fault_interval=fault_interval,
+                fault_callback=ds_driver.callback_on_fault)
+
+        self.tg.add_thread(snap_scheduler.run)
+
+        LOG.info('Vitrage datasources Snapshot Service - Started!')
+
+    def entities_to_queue(self, driver, sync_mode):
+        def _entities_to_queue():
+            for entity in driver.get_all(sync_mode):
+                self.send_to_queue(entity)
+        return _entities_to_queue
 
     def stop(self, graceful=False):
         LOG.info("Vitrage datasources Snapshot Service - Stopping...")
 
-        super(SnapshotsService, self).stop()
+        super(SnapshotsService, self).stop(graceful)
 
         LOG.info("Vitrage datasources Snapshot Service - Stopped!")
-
-    def _get_all(self):
-        sync_mode = SyncMode.INIT_SNAPSHOT \
-            if self.first_time else SyncMode.SNAPSHOT
-        LOG.debug("start get all with sync mode %s" % sync_mode)
-
-        for plugin_type, plugin in self.registered_datasources.items():
-            try:
-                entities_dictionaries = plugin.get_all(sync_mode)
-                for entity in entities_dictionaries:
-                    self.callback_function(entity)
-            except Exception:
-                LOG.error("'Get all' Failed for datasource: %s", plugin_type)
-                LOG.exception(plugin_type)
-
-        LOG.debug("end get all with sync mode %s" % sync_mode)
-        self.first_time = False
 
 
 class ChangesService(DatasourceService):
@@ -96,7 +106,7 @@ class ChangesService(DatasourceService):
         LOG.info("Vitrage Datasource Changes Service For: %s - Stopping...",
                  self.registered_datasources[0].__class__.__name__)
 
-        super(ChangesService, self).stop()
+        super(ChangesService, self).stop(graceful)
 
         LOG.info("Vitrage Datasource Changes Service For: %s - Stopped!",
                  self.registered_datasources[0].__class__.__name__)
@@ -106,7 +116,7 @@ class ChangesService(DatasourceService):
         for datasource in self.registered_datasources:
             try:
                 for entity in datasource.get_changes(SyncMode.UPDATE):
-                    self.callback_function(entity)
+                    self.send_to_queue(entity)
             except Exception as e:
                 LOG.error("Get changes Failed - %s", e.message)
         LOG.debug("end get changes")
