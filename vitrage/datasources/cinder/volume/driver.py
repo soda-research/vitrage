@@ -12,15 +12,11 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from oslo_log import log as logging
-
 from vitrage import clients
 from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import SyncMode
 from vitrage.datasources.cinder.volume import CINDER_VOLUME_DATASOURCE
 from vitrage.datasources.driver_base import DriverBase
-
-LOG = logging.getLogger(__name__)
 
 
 class CinderVolumeDriver(DriverBase):

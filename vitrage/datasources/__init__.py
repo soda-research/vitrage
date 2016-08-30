@@ -43,7 +43,12 @@ OPTS = [
     cfg.IntOpt('snapshots_interval',
                default=600,
                min=10,
-               help='interval between full snapshots'),
+               help='Time to wait between subsequent datasource snapshots'),
+    cfg.IntOpt('snapshot_interval_on_fault',
+               default=20,
+               min=1,
+               help='Time to wait until retrying to snapshot the datasource'
+                    ' in case of fault'),
     cfg.StrOpt('notification_topic',
                default='vitrage_notifications',
                help='Vitrage configured notifications topic')
