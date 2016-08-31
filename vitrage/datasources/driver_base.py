@@ -35,6 +35,9 @@ class DriverBase(object):
     def get_all(self, sync_mode):
         pass
 
+    def callback_on_fault(self, exception):
+        LOG.exception('Exception: {0}'.format(exception))
+
     @staticmethod
     def _get_end_message(sync_type):
         end_message = {
