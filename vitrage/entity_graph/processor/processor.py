@@ -142,6 +142,8 @@ class Processor(processor.ProcessorBase):
 
         for neighbor in neighbors:
             # TODO(Alexey): maybe to check if the vertices exists
+            if entity_vertex is not None:
+                self.entity_graph.update_vertex(entity_vertex)
             self.entity_graph.update_edge(neighbor.edge)
 
     def delete_relationship(self, updated_vertex, neighbors):
@@ -151,6 +153,8 @@ class Processor(processor.ProcessorBase):
             graph_edge = self.entity_graph.get_edge(neighbor.edge.source_id,
                                                     neighbor.edge.target_id,
                                                     neighbor.edge.label)
+            if updated_vertex is not None:
+                self.entity_graph.update_vertex(updated_vertex)
             if graph_edge:
                 self.entity_graph.remove_edge(graph_edge)
 

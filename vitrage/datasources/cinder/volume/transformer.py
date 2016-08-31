@@ -20,6 +20,8 @@ from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import EventAction
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.datasources.cinder.volume import CINDER_VOLUME_DATASOURCE
+from vitrage.datasources.cinder.volume.properties import \
+    CinderProperties as CinderProps
 from vitrage.datasources.nova.instance import NOVA_INSTANCE_DATASOURCE
 from vitrage.datasources.resource_transformer_base import \
     ResourceTransformerBase
@@ -51,12 +53,19 @@ class CinderVolumeTransformer(ResourceTransformerBase):
         volume_id = extract_field_value(entity_event, 'id')
         volume_state = extract_field_value(entity_event, 'status')
         timestamp = extract_field_value(entity_event, 'created_at')
+        size = extract_field_value(entity_event, 'size')
+        volume_type = extract_field_value(entity_event, 'volume_type')
+        attachments = extract_field_value(entity_event, 'attachments')
 
         return self._create_vertex(entity_event,
                                    volume_name,
                                    volume_id,
                                    volume_state,
-                                   timestamp)
+                                   timestamp,
+                                   size,
+                                   volume_type,
+                                   attachments,
+                                   'server_id')
 
     def _create_update_entity_vertex(self, entity_event):
 
@@ -64,21 +73,38 @@ class CinderVolumeTransformer(ResourceTransformerBase):
         volume_id = extract_field_value(entity_event, 'volume_id')
         volume_state = extract_field_value(entity_event, 'status')
         timestamp = entity_event.get('updated_at', None)
+        size = extract_field_value(entity_event, 'size')
+        volume_type = extract_field_value(entity_event, 'volume_type')
+        attachments = extract_field_value(entity_event, 'volume_attachment')
 
         return self._create_vertex(entity_event,
                                    volume_name,
                                    volume_id,
                                    volume_state,
-                                   timestamp)
+                                   timestamp,
+                                   size,
+                                   volume_type,
+                                   attachments,
+                                   'instance_uuid')
 
     def _create_vertex(self, entity_event, volume_name, volume_id,
-                       volume_state, update_timestamp):
+                       volume_state, update_timestamp,
+                       volume_size, volume_type, attachments,
+                       server_id_key):
+
+        server_ids = []
+
+        for attachment in attachments:
+            server_ids.append((attachment[server_id_key]))
+
         metadata = {
-            VProps.NAME: volume_name
+            VProps.NAME: volume_name,
+            CinderProps.SIZE: volume_size,
+            CinderProps.VOLUME_TYPE: volume_type,
+            CinderProps.ATTACHMENTS: str(server_ids)
         }
 
         entity_key = self._create_entity_key(entity_event)
-
         sample_timestamp = entity_event[DSProps.SAMPLE_DATE]
 
         return graph_utils.create_vertex(
