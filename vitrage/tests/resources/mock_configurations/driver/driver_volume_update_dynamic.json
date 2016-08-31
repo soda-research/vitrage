@@ -7,5 +7,7 @@
   "sync_type": "cinder\\.volume",
   "sync_mode": "update",
   "event_type": "volume.create.start",
-  "sample_date": "2015-12-01T12:46:41Z"
+  "sample_date": "2015-12-01T12:46:41Z",
+  "volume_type": "SCSIID",
+  "size": "1559"
 }

@@ -6,5 +6,7 @@
   "id": "12345",
   "sync_type": "cinder\\.volume",
   "sync_mode": "snapshot",
-  "sample_date": "2015-12-01T12:46:41Z"
+  "sample_date": "2015-12-01T12:46:41Z",
+  "volume_type": "lvmdriver-1",
+  "size": "1559"
 }

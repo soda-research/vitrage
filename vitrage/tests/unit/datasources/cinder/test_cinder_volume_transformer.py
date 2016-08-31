@@ -23,6 +23,8 @@ from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import UpdateMethod
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.datasources.cinder.volume import CINDER_VOLUME_DATASOURCE
+from vitrage.datasources.cinder.volume.properties \
+    import CinderProperties as CinderProps
 from vitrage.datasources.cinder.volume.transformer \
     import CinderVolumeTransformer
 from vitrage.datasources.nova.instance import NOVA_INSTANCE_DATASOURCE
@@ -179,6 +181,16 @@ class TestCinderVolumeTransformer(base.BaseTest):
         self.assertEqual(
             tbase.extract_field_value(event, state_field_path),
             vertex[VProps.STATE])
+
+        size_field_path = 'size'
+        self.assertEqual(
+            tbase.extract_field_value(event, size_field_path),
+            vertex[CinderProps.SIZE])
+
+        volume_type_field_path = 'volume_type'
+        self.assertEqual(
+            tbase.extract_field_value(event, volume_type_field_path),
+            vertex[CinderProps.VOLUME_TYPE])
 
         self.assertFalse(vertex[VProps.IS_PLACEHOLDER])
         self.assertFalse(vertex[VProps.IS_DELETED])
