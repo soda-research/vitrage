@@ -30,6 +30,7 @@ LOG = logging.getLogger(__name__)
 class HeatStackDriver(DriverBase):
 
     _client = None
+    conf = None
 
     FAILED = 'FAILED'
 
@@ -42,15 +43,15 @@ class HeatStackDriver(DriverBase):
 
     def __init__(self, conf):
         super(HeatStackDriver, self).__init__()
-        self.conf = conf
+        HeatStackDriver.conf = conf
         self._filter_resource_types()
-        HeatStackDriver._client = self.client
+        HeatStackDriver.client()
 
-    @property
-    def client(self):
-        if not self._client:
-            self._client = clients.heat_client(self.conf)
-        return self._client
+    @staticmethod
+    def client():
+        if not HeatStackDriver._client:
+            HeatStackDriver._client = clients.heat_client(HeatStackDriver.conf)
+        return HeatStackDriver._client
 
     @staticmethod
     def get_topic(conf):
@@ -99,16 +100,16 @@ class HeatStackDriver(DriverBase):
         return [self._retrieve_stack_resources(stack, stack['id'])
                 for stack in stacks]
 
-    @classmethod
-    def _retrieve_stack_resources(cls, stack, stack_id):
-        resources = cls._client.resources.list(stack_id)
+    @staticmethod
+    def _retrieve_stack_resources(stack, stack_id):
+        resources = HeatStackDriver.client().resources.list(stack_id)
         stack['resources'] = [resource.__dict__ for resource in resources
                               if resource.__dict__['resource_type'] in
                               HeatStackDriver.RESOURCE_TYPE_CONVERSION]
         return stack
 
     def get_all(self, sync_mode):
-        stacks = self.client.stacks.list(global_tenant=True)
+        stacks = HeatStackDriver.client().stacks.list(global_tenant=True)
         stacks_list = self._make_stacks_list(stacks)
         stacks_with_resources = self._append_stacks_resources(stacks_list)
         return self.make_pickleable(stacks_with_resources,
