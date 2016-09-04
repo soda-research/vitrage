@@ -66,6 +66,7 @@ notification_driver = messagingv2
 [DEFAULT]
 notification_topics = notifications,vitrage_notifications
 notification_driver = messagingv2
+policy_file = /etc/heat/policy.json-tempest
 
 [[post-config|\$VITRAGE_CONF]]
 [static_physical]
