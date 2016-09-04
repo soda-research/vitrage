@@ -69,10 +69,6 @@ class HeatStackDriver(DriverBase):
 
     @staticmethod
     def enrich_event(event, event_type):
-        # TODO(Nofar): add call to get resources of the stack if not deleted
-        # change transformer that if delete we remove the stack from the graph
-        # and hence all the edges to it
-
         event[DSProps.EVENT_TYPE] = event_type
         event = HeatStackDriver._retrieve_stack_resources(
             event, event['stack_identity'])
