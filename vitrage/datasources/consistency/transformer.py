@@ -12,8 +12,6 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from oslo_log import log as logging
-
 from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import EventAction
 from vitrage.common.constants import VertexProperties as VProps
@@ -21,9 +19,6 @@ from vitrage.datasources.consistency import CONSISTENCY_DATASOURCE
 from vitrage.datasources.resource_transformer_base import \
     ResourceTransformerBase
 import vitrage.graph.utils as graph_utils
-
-
-LOG = logging.getLogger(__name__)
 
 
 class ConsistencyTransformer(ResourceTransformerBase):

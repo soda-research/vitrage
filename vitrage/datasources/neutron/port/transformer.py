@@ -15,8 +15,6 @@
 from vitrage.datasources.resource_transformer_base import \
     ResourceTransformerBase
 
-from oslo_log import log as logging
-
 from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import EdgeLabel
 from vitrage.common.constants import EntityCategory
@@ -30,8 +28,6 @@ from vitrage.datasources.transformer_base import extract_field_value
 from vitrage.datasources.transformer_base import Neighbor
 
 import vitrage.graph.utils as graph_utils
-
-LOG = logging.getLogger(__name__)
 
 
 class PortTransformer(ResourceTransformerBase):

@@ -14,7 +14,6 @@
 
 import copy
 
-from oslo_log import log as logging
 from oslo_utils import importutils
 
 from vitrage.common.constants import DatasourceProperties as DSProps
@@ -35,9 +34,6 @@ from vitrage.evaluator.actions.recipes.base import EVALUATOR_EVENT_TYPE
 from vitrage.evaluator.actions.recipes.mark_down import MarkDown
 from vitrage.evaluator.actions.recipes.raise_alarm import RaiseAlarm
 from vitrage.evaluator.actions.recipes.set_state import SetState
-
-
-LOG = logging.getLogger(__name__)
 
 
 class ActionExecutor(object):

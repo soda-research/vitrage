@@ -13,7 +13,6 @@
 # under the License.
 
 from oslo_config import cfg
-from oslo_log import log as logging
 
 from vitrage.datasources.nagios import NAGIOS_DATASOURCE
 from vitrage.datasources.nagios.transformer import NagiosTransformer
@@ -26,8 +25,6 @@ from vitrage.datasources.nova.zone.transformer import ZoneTransformer
 from vitrage.entity_graph.transformer_manager import TransformerManager
 from vitrage.opts import register_opts
 from vitrage.tests import base
-
-LOG = logging.getLogger(__name__)
 
 
 class TransformerManagerTest(base.BaseTest):

@@ -12,7 +12,6 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 from collections import namedtuple
-from oslo_log import log
 from sympy.logic.boolalg import And
 from sympy.logic.boolalg import Not
 from sympy.logic.boolalg import Or
@@ -23,8 +22,6 @@ from sympy import Symbol
 from vitrage.evaluator.template_fields import TemplateFields as TFields
 from vitrage.graph import Edge
 from vitrage.graph import Vertex
-
-LOG = log.getLogger(__name__)
 
 
 ConditionVar = namedtuple('ConditionVar', ['variable', 'type', 'positive'])

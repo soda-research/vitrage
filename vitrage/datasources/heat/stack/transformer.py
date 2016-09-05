@@ -12,8 +12,6 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from oslo_log import log as logging
-
 from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import EdgeLabel
 from vitrage.common.constants import EntityCategory
@@ -31,9 +29,6 @@ from vitrage.datasources.transformer_base import build_key
 from vitrage.datasources.transformer_base import extract_field_value
 from vitrage.datasources.transformer_base import Neighbor
 import vitrage.graph.utils as graph_utils
-
-
-LOG = logging.getLogger(__name__)
 
 
 class HeatStackTransformer(ResourceTransformerBase):

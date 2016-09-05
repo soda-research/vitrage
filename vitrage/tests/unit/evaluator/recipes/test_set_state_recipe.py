@@ -12,8 +12,6 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from oslo_log import log as logging
-
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.evaluator.actions.base import ActionType
 from vitrage.evaluator.actions.recipes.action_steps import UPDATE_VERTEX
@@ -22,8 +20,6 @@ from vitrage.evaluator.template_data import ActionSpecs
 from vitrage.evaluator.template_fields import TemplateFields as TFields
 from vitrage.graph import Vertex
 from vitrage.tests import base
-
-LOG = logging.getLogger(__name__)
 
 
 class SetStateRecipeTest(base.BaseTest):

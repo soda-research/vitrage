@@ -12,10 +12,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 from collections import namedtuple
-from oslo_log import log
 from vitrage.evaluator.template_validation.status_messages import status_msgs
-
-LOG = log.getLogger(__name__)
 
 Result = namedtuple('Result', ['description', 'is_valid', 'status_code',
                                'comment'])

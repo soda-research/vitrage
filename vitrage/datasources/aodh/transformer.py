@@ -12,8 +12,6 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from oslo_log import log as logging
-
 from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import EdgeLabel
 from vitrage.common.constants import EntityCategory
@@ -26,8 +24,6 @@ from vitrage.datasources.aodh.properties import AodhState
 from vitrage.datasources import transformer_base as tbase
 from vitrage.datasources.transformer_base import Neighbor
 import vitrage.graph.utils as graph_utils
-
-LOG = logging.getLogger(__name__)
 
 
 class AodhTransformer(AlarmTransformerBase):

@@ -11,7 +11,6 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-from oslo_log import log as logging
 
 from vitrage.datasources.alarm_properties import AlarmProperties
 from vitrage.evaluator.actions.base import ActionType
@@ -22,9 +21,6 @@ from vitrage.evaluator.template_data import ActionSpecs
 from vitrage.evaluator.template_fields import TemplateFields as TFields
 from vitrage.graph import Vertex
 from vitrage.tests import base
-
-
-LOG = logging.getLogger(__name__)
 
 
 class RaiseAlarmRecipeTest(base.BaseTest):

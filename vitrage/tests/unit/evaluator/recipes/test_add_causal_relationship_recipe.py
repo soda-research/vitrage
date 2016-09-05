@@ -11,7 +11,6 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-from oslo_log import log as logging
 
 from vitrage.common.constants import EdgeLabel
 from vitrage.common.constants import EdgeProperties
@@ -24,9 +23,6 @@ from vitrage.evaluator.template_data import ActionSpecs
 from vitrage.evaluator.template_fields import TemplateFields as TField
 from vitrage.graph import Vertex
 from vitrage.tests import base
-
-
-LOG = logging.getLogger(__name__)
 
 
 class AddCausalRelationshipTest(base.BaseTest):

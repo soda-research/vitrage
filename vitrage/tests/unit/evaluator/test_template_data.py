@@ -11,7 +11,6 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-from oslo_log import log as logging
 
 from vitrage.common.constants import EdgeLabel
 from vitrage.common import file_utils
@@ -22,8 +21,6 @@ from vitrage.evaluator.template_fields import TemplateFields as TFields
 from vitrage.graph import Vertex
 from vitrage.tests import base
 from vitrage.tests.mocks import utils
-
-LOG = logging.getLogger(__name__)
 
 
 class BasicTemplateTest(base.BaseTest):
