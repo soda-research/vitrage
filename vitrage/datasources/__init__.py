@@ -14,14 +14,12 @@
 
 from oslo_config import cfg
 
-from vitrage.datasources.aodh import AODH_DATASOURCE
 from vitrage.datasources.cinder.volume import CINDER_VOLUME_DATASOURCE
-from vitrage.datasources.nagios import NAGIOS_DATASOURCE
 from vitrage.datasources.neutron.network import NEUTRON_NETWORK_DATASOURCE
+from vitrage.datasources.neutron.port import NEUTRON_PORT_DATASOURCE
 from vitrage.datasources.nova.host import NOVA_HOST_DATASOURCE
 from vitrage.datasources.nova.instance import NOVA_INSTANCE_DATASOURCE
 from vitrage.datasources.nova.zone import NOVA_ZONE_DATASOURCE
-from vitrage.datasources.static_physical import STATIC_PHYSICAL_DATASOURCE
 
 OPENSTACK_CLUSTER = 'openstack.cluster'
 
@@ -31,10 +29,8 @@ OPTS = [
                 default=[NOVA_HOST_DATASOURCE,
                          NOVA_INSTANCE_DATASOURCE,
                          NOVA_ZONE_DATASOURCE,
-                         NAGIOS_DATASOURCE,
-                         STATIC_PHYSICAL_DATASOURCE,
-                         AODH_DATASOURCE,
                          CINDER_VOLUME_DATASOURCE,
+                         NEUTRON_PORT_DATASOURCE,
                          NEUTRON_NETWORK_DATASOURCE],
                 help='Names of supported data sources'),
     cfg.ListOpt('path',
