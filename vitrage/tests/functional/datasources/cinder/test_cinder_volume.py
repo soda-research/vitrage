@@ -16,8 +16,8 @@ from oslo_config import cfg
 
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import VertexProperties as VProps
-from vitrage.datasources import CINDER_VOLUME_DATASOURCE
-from vitrage.datasources import NAGIOS_DATASOURCE
+from vitrage.datasources.cinder.volume import CINDER_VOLUME_DATASOURCE
+from vitrage.datasources.nagios import NAGIOS_DATASOURCE
 from vitrage.datasources import NOVA_HOST_DATASOURCE
 from vitrage.datasources import NOVA_INSTANCE_DATASOURCE
 from vitrage.datasources import NOVA_ZONE_DATASOURCE

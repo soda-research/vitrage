@@ -21,12 +21,12 @@ OPTS = [
     cfg.StrOpt('transformer',
                default='vitrage.datasources.cinder.volume.transformer.'
                        'CinderVolumeTransformer',
-               help='Nova host transformer class path',
+               help='Cinder volume transformer class path',
                required=True),
     cfg.StrOpt('driver',
                default='vitrage.datasources.cinder.volume.driver.'
                        'CinderVolumeDriver',
-               help='Nova host driver class path',
+               help='Cinder volume driver class path',
                required=True),
     cfg.StrOpt('update_method',
                default=UpdateMethod.PUSH,
