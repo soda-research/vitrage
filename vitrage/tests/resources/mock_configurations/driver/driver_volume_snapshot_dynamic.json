@@ -4,7 +4,7 @@
   "created_at": "2015-12-01T12:46:41Z",
   "status": "In-use",
   "id": "12345",
-  "sync_type": "cinder\\.volume",
+  "sync_type": "cinder.volume",
   "sync_mode": "snapshot",
   "sample_date": "2015-12-01T12:46:41Z",
   "volume_type": "lvmdriver-1",

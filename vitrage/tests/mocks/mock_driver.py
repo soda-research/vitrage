@@ -257,8 +257,8 @@ def simple_stack_generators(stack_num, instance_and_volume_num,
     """
 
     mapping = [('stack-{0}'.format(index % stack_num),
-                'vm-{0}'.format(index),
-                'volume-{0}')
+                'stack-vm-{0}'.format(index),
+                'stack-volume-{0}')
                for index in range(instance_and_volume_num)
                ]
 

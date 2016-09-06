@@ -24,8 +24,6 @@ multiple instances of the same entity type.
 
 from random import randint
 
-import exrex
-
 # noinspection PyPep8Naming
 from vitrage.datasources.nova.host import NOVA_HOST_DATASOURCE
 from vitrage.tests.mocks.entity_model import BasicEntityModel as Bem
@@ -190,13 +188,15 @@ def _get_vm_snapshot_driver_values(spec):
     host_ids = {}
     for vm_name, host_name in vm_host_mapping:
         if host_name not in host_ids.keys():
-            host_ids[host_name] = exrex.getone('[0-9a-f]{56}')
+            host_ids[host_name] = str(randint(0, 1000000))
 
         mapping = {'hostid': host_ids[host_name],
                    'hostname': host_name,
                    "OS-EXT-SRV-ATTR:host": host_name,
                    "OS-EXT-SRV-ATTR:hypervisor_hostname": host_name,
-                   'name': vm_name}
+                   'name': vm_name,
+                   'id': str(randint(0, 1000000)),
+                   }
         static_values.append(combine_data(
             static_info_re, mapping, spec.get(EXTERNAL_INFO_KEY, None)
         ))

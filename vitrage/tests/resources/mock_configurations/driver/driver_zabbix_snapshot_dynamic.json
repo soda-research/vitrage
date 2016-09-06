@@ -1,17 +1,17 @@
 {
   "sync_type": "zabbix",
-  "resource_type": "nova\\.host",
+  "resource_type": "nova.host",
   "resource_name": "compute-[1-9]",
   "zabbix_resource_name": "computer-[1-9]",
-  "description": "CPU utilization|Check_MK|Uptime",
-  "name": "CPU utilization|Check_MK|Uptime",
+  "description": "CPU utilization",
+  "name": "CPU utilization",
   "triggerid": "[0-9]*",
   "lastchange": "1469450551",
   "timestamp": "2015.12.01 12:46:41",
   "status": "0",
   "sample_date": "2015-12-01T12:46:41Z",
   "value": "1",
-  "priority": "1|2|3|4|5",
-  "sync_mode": "snapshot|init_snapshot|update",
-  "rawtext": "CPU utilization|Check_MK|Uptime"
+  "priority": "1",
+  "sync_mode": "snapshot",
+  "rawtext": "CPU utilization"
 }

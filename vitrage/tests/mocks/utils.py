@@ -17,8 +17,6 @@ import json
 from os.path import dirname
 from os import walk
 
-import exrex
-
 
 def store_specs(spec, target_filename, target_folder=None):
     """Stores specs in JSON format.
@@ -93,18 +91,10 @@ def generate_vals(param_specs):
         # convert tuples to lists
         current_info = [generate_vals(param) for param in param_specs]
     elif param_specs:  # assumes primitive type
-        if _is_regex(str(param_specs)):
-            current_info = str(exrex.getone(str(param_specs)))
-        else:
-            current_info = str(param_specs)
+        current_info = str(param_specs)
     else:
         current_info = None
     return current_info
-
-
-def _is_regex(s):
-    regex_chars = r'|}{+?\[]'
-    return any(c in s for c in regex_chars)
 
 
 def merge_vals(current, update):
