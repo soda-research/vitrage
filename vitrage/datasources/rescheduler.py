@@ -174,8 +174,8 @@ class ReScheduler(object):
                 self._decrease_count()
                 self.next_schedule = self.standard_interval
                 self.next_priority = self.standard_priority
-            except AssertionError as e:
-                raise e
+            except AssertionError:
+                raise
             except Exception as e:
                 self.next_schedule = self.fault_interval
                 self.next_priority = self.fault_priority
