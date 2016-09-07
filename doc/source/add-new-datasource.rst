@@ -11,7 +11,7 @@ In order to add a new datasource to Vitrage do the following steps:
     put it under 'vitrage.datasources', For example:
     vitrage.datasource.cinder.volume.
  2. Under your datasource package, have both your datasources' driver class
-    your datasources' transformer class. See below for details on those
+    and your datasources' transformer class. See below for details on those
     classes.
  3. Under your datasources' package __init__.py you must import cfg
     from oslo_config and declare a list named OPTS. Under OPTS, you can define
@@ -34,8 +34,8 @@ In order to add a new datasource to Vitrage do the following steps:
 
     a. add the datasource name to the types property in the "devstack.settings"
        file.
-    b. if the datasource is not is not one of the main and basic projects of
-       devstack, add the following data in the "devstack.plugin.sh" file":
+    b. if the datasource is not one of the main and basic projects of devstack,
+       add the following data in the "devstack.plugin.sh" file":
 
        # remove <datasource_name> vitrage datasource if <datasource_name>
        datasource not installed
@@ -205,7 +205,7 @@ or by configuring vitrage.conf.
 
     # Names of supported plugins (list value)
 
-    types = nova.host,nova.instance,nova.zone,static_physical,aodh,cinder.volume,neutron.network,neutron.port,heat.stack
+    types = nova.host,nova.instance,nova.zone,static_physical,nagios,aodh,cinder.volume,neutron.network,neutron.port,heat.stack
 
 
     [zabbix]
