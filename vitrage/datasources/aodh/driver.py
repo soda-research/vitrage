@@ -14,11 +14,11 @@
 
 from oslo_log import log
 
-from vitrage import clients
 from vitrage.datasources.alarm_driver_base import AlarmDriverBase
 from vitrage.datasources.aodh import AODH_DATASOURCE
 from vitrage.datasources.aodh.properties import AodhProperties as AodhProps
 from vitrage.datasources.aodh.properties import AodhState
+from vitrage import os_clients
 
 LOG = log.getLogger(__name__)
 
@@ -32,7 +32,7 @@ class AodhDriver(AlarmDriverBase):
     @property
     def client(self):
         if not self._client:
-            self._client = clients.ceilometer_client(self.conf)
+            self._client = os_clients.ceilometer_client(self.conf)
         return self._client
 
     def _sync_type(self):

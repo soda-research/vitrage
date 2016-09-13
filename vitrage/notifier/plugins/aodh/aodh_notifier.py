@@ -13,13 +13,13 @@
 # under the License.
 from oslo_log import log as logging
 
-from vitrage import clients
 from vitrage.common.constants import NotifierEventTypes
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.datasources.aodh.properties import AodhState
 from vitrage.entity_graph.mappings.operational_alarm_severity import \
     OperationalAlarmSeverity
 from vitrage.notifier.plugins.base import NotifierBase
+from vitrage import os_clients
 
 
 LOG = logging.getLogger(__name__)
@@ -40,7 +40,7 @@ class AodhNotifier(NotifierBase):
 
     def __init__(self, conf):
         super(AodhNotifier, self).__init__(conf)
-        self.client = clients.ceilometer_client(conf)
+        self.client = os_clients.ceilometer_client(conf)
 
     def process_event(self, data, event_type):
         response = None

@@ -12,11 +12,11 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from vitrage import clients
 from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import SyncMode
 from vitrage.datasources.cinder.volume import CINDER_VOLUME_DATASOURCE
 from vitrage.datasources.driver_base import DriverBase
+from vitrage import os_clients
 
 
 class CinderVolumeDriver(DriverBase):
@@ -29,7 +29,7 @@ class CinderVolumeDriver(DriverBase):
     @property
     def client(self):
         if not self._client:
-            self._client = clients.cinder_client(self.conf)
+            self._client = os_clients.cinder_client(self.conf)
         return self._client
 
     @staticmethod

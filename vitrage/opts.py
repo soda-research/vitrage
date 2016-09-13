@@ -19,12 +19,12 @@ from oslo_log import log
 from oslo_utils import importutils
 
 import vitrage.api
-import vitrage.clients
 import vitrage.datasources
 import vitrage.entity_graph.consistency
 import vitrage.evaluator
 import vitrage.keystone_client
 import vitrage.notifier
+import vitrage.os_clients
 import vitrage.rpc
 
 LOG = log.getLogger(__name__)
@@ -44,7 +44,7 @@ def list_opts():
         ('entity_graph', vitrage.entity_graph.OPTS),
         ('service_credentials', vitrage.keystone_client.OPTS),
         ('DEFAULT', itertools.chain(
-            vitrage.clients.OPTS,
+            vitrage.os_clients.OPTS,
             vitrage.rpc.OPTS,
             vitrage.notifier.OPTS))
     ]
