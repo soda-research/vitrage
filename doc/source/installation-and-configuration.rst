@@ -22,3 +22,6 @@ Configuration
 * `Resource State Configuration <https://github.com/openstack/vitrage/blob/master/doc/source/resource-state-config.rst>`_
 
 * `Alarm State Configuration <https://github.com/openstack/vitrage/blob/master/doc/source/alarm-state-config.rst>`_
+
+* `Zabbix Configuration <https://github.com/openstack/vitrage/blob/master/doc/source/zabbix_vitrage.rst>`_
+

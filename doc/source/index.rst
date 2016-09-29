@@ -3,23 +3,43 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to vitrage's documentation!
-===================================
+Welcome to Vitrage documentation!
+=================================
 
-Contents:
+Vitrage is the OpenStack RCA (Root Cause Analysis) service for organizing, analyzing and expanding OpenStack alarms & events, yielding insights regarding the root cause of problems and deducing their existence before they are directly detected.
+
+
+High Level Functionality
+------------------------
+
+* Physical-to-Virtual entities mapping
+
+* Deduced alarms and states (i.e., raising an alarm or modifying a state based on analysis of the system, instead of direct monitoring)
+
+* Root Cause Analysis (RCA) for alarms/events
+
+* Horizon plugin for the above features
+
+
+Developer Guide
+---------------
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1 
 
-   readme
-   installation
-   usage
-   contributing
+   vitrage-first_steps
+   vitrage-api
+   vitrage-template-format
+   installation-and-configuration
 
-Indices and tables
-==================
+Design Documents
+----------------
 
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+.. toctree::
+   :maxdepth: 1 
+
+   vitrage-graph-design
+   scenario-evaluator
+   vitrage-use-cases
+   add-new-datasource
 

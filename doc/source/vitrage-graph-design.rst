@@ -9,7 +9,6 @@ Vitrage Graph Design
 
 Main Components
 ===============
-**Note:** The gray datasources will not be implemented in Mitaka
 
 Graph
 -----

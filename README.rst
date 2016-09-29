@@ -2,9 +2,9 @@
 Vitrage
 =======
 
-The OpenStack RCA Engine
+The OpenStack RCA Service
 
-Vitrage is the OpenStack RCA (Root Cause Analysis) Engine for organizing, analyzing and expanding OpenStack alarms & events, yielding insights regarding the root cause of problems and deducing the existence of problems before they are directly detected.
+Vitrage is the OpenStack RCA (Root Cause Analysis) Service for organizing, analyzing and expanding OpenStack alarms & events, yielding insights regarding the root cause of problems and deducing the existence of problems before they are directly detected.
 
 Enabling Vitrage in DevStack
 ----------------------------

@@ -22,7 +22,7 @@ Overview
 ********
 **This document describes the Vitrage API v1.**
 
-**The Vitrage API provides a RESTful JSON interface for interacting with Vitrage Engine.**
+**The Vitrage API provides a RESTful JSON interface for interacting with Vitrage Service.**
 
 List Versions
 ^^^^^^^^^^^^^
