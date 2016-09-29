@@ -39,8 +39,8 @@ class ReschedulerTester(base.BaseTest):
                 current_failure = datetime.now()
                 time_diff = (current_failure - self.last_failure).seconds
                 self.last_failure = current_failure
-                self.assertTrue(
-                    time_diff < STANDARD_INTERVAL * TIME_DIFF_MARGIN_PRECENT)
+                self.assertLess(time_diff,
+                                STANDARD_INTERVAL * TIME_DIFF_MARGIN_PRECENT)
             else:
                 self.last_failure = datetime.now()
 
@@ -59,8 +59,8 @@ class ReschedulerTester(base.BaseTest):
                 current_failure = datetime.now()
                 time_diff = (current_failure - self.last_failure).seconds
                 self.last_failure = current_failure
-                self.assertTrue(
-                    time_diff < FAULT_INTERVAL * TIME_DIFF_MARGIN_PRECENT)
+                self.assertLess(time_diff,
+                                FAULT_INTERVAL * TIME_DIFF_MARGIN_PRECENT)
             else:
                 self.last_failure = datetime.now()
 
@@ -208,5 +208,5 @@ class ReschedulerTester(base.BaseTest):
         # Test action
         self.rescheduler.run()
         # Test assertions
-        self.assertTrue((datetime.now() - start).seconds <
+        self.assertLess((datetime.now() - start).seconds,
                         TTL * TIME_DIFF_MARGIN_PRECENT)

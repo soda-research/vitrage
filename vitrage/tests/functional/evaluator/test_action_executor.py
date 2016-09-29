@@ -75,9 +75,9 @@ class TestActionExecutor(TestFunctionalBase):
 
         # Test Assertions
         agg_state_before = host_vertex_before.get(VProps.AGGREGATED_STATE)
-        self.assertTrue(agg_state_before !=
-                        OperationalResourceState.SUBOPTIMAL)
-        self.assertFalse(VProps.VITRAGE_STATE in host_vertex_before.properties)
+        self.assertNotEqual(agg_state_before,
+                            OperationalResourceState.SUBOPTIMAL)
+        self.assertNotIn(VProps.VITRAGE_STATE, host_vertex_before.properties)
 
         agg_state_after = host_vertex_after.get(VProps.AGGREGATED_STATE)
         self.assertEqual(agg_state_after, OperationalResourceState.SUBOPTIMAL)
@@ -94,8 +94,8 @@ class TestActionExecutor(TestFunctionalBase):
         # Test Assertions
         agg_state_after_undo = host_vertex_before.get(VProps.AGGREGATED_STATE)
         self.assertEqual(agg_state_after_undo, agg_state_before)
-        self.assertTrue(
-            VProps.VITRAGE_STATE not in host_vertex_after_undo.properties)
+        self.assertNotIn(
+            VProps.VITRAGE_STATE, host_vertex_after_undo.properties)
 
     def test_execute_add_edge(self):
 

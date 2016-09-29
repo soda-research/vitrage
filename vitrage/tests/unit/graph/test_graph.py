@@ -95,7 +95,7 @@ class TestGraph(GraphTestBase):
         g.update_vertex(updated_v)
         # Get it again
         v = g.get_vertex(v_node.vertex_id)
-        self.assertFalse('KUKU' in v.properties,
+        self.assertNotIn('KUKU', v.properties,
                          'Update value to None should entirely remove the key')
 
         # check metadata
@@ -208,7 +208,7 @@ class TestGraph(GraphTestBase):
         g.update_edge(updated_e)
         # Get it again
         e = g.get_edge(v_node.vertex_id, v_host.vertex_id, label)
-        self.assertFalse(EProps.IS_DELETED in e.properties,
+        self.assertNotIn(EProps.IS_DELETED, e.properties,
                          'Update value to None should entirely remove the key')
 
         # check metadata
