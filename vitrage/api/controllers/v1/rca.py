@@ -31,6 +31,10 @@ LOG = log.getLogger(__name__)
 class RCAController(RootRestController):
     @pecan.expose('json')
     def index(self, alarm_id):
+        return self.get(alarm_id)
+
+    @pecan.expose('json')
+    def get(self, alarm_id):
         enforce('get rca', pecan.request.headers,
                 pecan.request.enforcer, {})
 
