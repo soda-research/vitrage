@@ -13,7 +13,7 @@ Installation
 ============
 - `Enable Vitrage in devstack <https://github.com/openstack/vitrage/blob/master/devstack/README.rst/>`_
 - `Enable Vitrage in horizon <https://github.com/openstack/vitrage-dashboard/blob/master/README.rst/>`_
-- run ./stack
+- run ./stack.sh
 
 
 Nagios Installation & Configuration
