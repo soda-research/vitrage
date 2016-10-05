@@ -13,8 +13,8 @@
 # under the License.
 
 
-from vitrage import clients
 from vitrage.datasources.driver_base import DriverBase
+from vitrage import os_clients
 
 
 class NeutronBase(DriverBase):
@@ -26,5 +26,5 @@ class NeutronBase(DriverBase):
     @property
     def client(self):
         if not self._client:
-            self._client = clients.neutron_client(self.conf)
+            self._client = os_clients.neutron_client(self.conf)
         return self._client

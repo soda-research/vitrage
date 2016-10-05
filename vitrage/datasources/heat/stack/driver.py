@@ -12,7 +12,6 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from vitrage import clients
 from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import SyncMode
 from vitrage.datasources.cinder.volume import CINDER_VOLUME_DATASOURCE
@@ -21,6 +20,7 @@ from vitrage.datasources.heat.stack import HEAT_STACK_DATASOURCE
 from vitrage.datasources.neutron.network import NEUTRON_NETWORK_DATASOURCE
 from vitrage.datasources.neutron.port import NEUTRON_PORT_DATASOURCE
 from vitrage.datasources.nova.instance import NOVA_INSTANCE_DATASOURCE
+from vitrage import os_clients
 
 
 class HeatStackDriver(DriverBase):
@@ -46,7 +46,8 @@ class HeatStackDriver(DriverBase):
     @staticmethod
     def client():
         if not HeatStackDriver._client:
-            HeatStackDriver._client = clients.heat_client(HeatStackDriver.conf)
+            HeatStackDriver._client = os_clients.heat_client(
+                HeatStackDriver.conf)
         return HeatStackDriver._client
 
     @staticmethod

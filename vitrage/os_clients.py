@@ -16,12 +16,8 @@ import keystoneauth1.identity.v2 as v2
 import keystoneauth1.session as kssession
 from oslo_config import cfg
 from oslo_log import log
+from oslo_utils import importutils as utils
 
-from ceilometerclient import client as cm_client
-from cinderclient import client as cin_client
-from heatclient.v1 import client as he_client
-from neutronclient.v2_0 import client as ne_client
-from novaclient import client as n_client
 from vitrage import keystone_client
 
 LOG = log.getLogger(__name__)
@@ -33,11 +29,26 @@ OPTS = [
     cfg.StrOpt('heat_version', default='1', help='Heat version'),
 ]
 
+_client_modules = {
+    'ceilometer': 'ceilometerclient.client',
+    'nova': 'novaclient.client',
+    'cinder': 'cinderclient.client',
+    'neutron': 'neutronclient.v2_0.client',
+    'heat': 'heatclient.v1.client',
+}
+
+
+def driver_module(driver):
+    mod_name = _client_modules[driver]
+    module = utils.import_module(mod_name)
+    return module
+
 
 def ceilometer_client(conf):
     """Get an instance of ceilometer client"""
     auth_config = conf.service_credentials
     try:
+        cm_client = driver_module('ceilometer')
         client = cm_client.get_client(
             version=conf.aodh_version,
             session=keystone_client.get_session(conf),
@@ -54,6 +65,7 @@ def nova_client(conf):
     """Get an instance of nova client"""
     auth_config = conf.service_credentials
     try:
+        n_client = driver_module('nova')
         client = n_client.Client(
             version=conf.nova_version,
             session=keystone_client.get_session(conf),
@@ -70,6 +82,7 @@ def cinder_client(conf):
     """Get an instance of cinder client"""
     auth_config = conf.service_credentials
     try:
+        cin_client = driver_module('cinder')
         client = cin_client.Client(
             version=conf.cinder_version,
             session=keystone_client.get_session(conf),
@@ -86,6 +99,7 @@ def neutron_client(conf):
     """Get an instance of neutron client"""
     auth_config = conf.service_credentials
     try:
+        ne_client = driver_module('neutron')
         client = ne_client.Client(
             session=keystone_client.get_session(conf),
             region_name=auth_config.region_name,
@@ -109,6 +123,7 @@ def heat_client(conf):
         session = kssession.Session(auth=auth)
         endpoint = session.get_endpoint(service_type='orchestration',
                                         interface='publicURL')
+        he_client = driver_module('heat')
         client = he_client.Client(session=session, endpoint=endpoint)
         LOG.info('Heat client created')
         return client

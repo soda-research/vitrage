@@ -13,11 +13,11 @@
 # under the License.
 from oslo_log import log as logging
 
-from vitrage import clients
 from vitrage.common.constants import NotifierEventTypes
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.datasources import NOVA_HOST_DATASOURCE
 from vitrage.notifier.plugins.base import NotifierBase
+from vitrage import os_clients
 
 LOG = logging.getLogger(__name__)
 
@@ -30,7 +30,7 @@ class NovaNotifier(NotifierBase):
 
     def __init__(self, conf):
         super(NovaNotifier, self).__init__(conf)
-        self.client = clients.nova_client(conf)
+        self.client = os_clients.nova_client(conf)
         self.enable_evacuate = conf.nova.enable_host_evacuate
         self.on_shared_storage = conf.nova.on_shared_storage
 
