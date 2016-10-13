@@ -24,7 +24,7 @@ Installation
 2. Update your repo with the OMD site. For example, for ubuntu trusty release:
    ::
 
-    sudo bash -c "echo 'deb http://labs.consol.de/repo/stable/ubuntu trusty main' >> /etc/apt/sources.list"
+    sudo bash -c "echo 'deb https://labs.consol.de/repo/stable/ubuntu trusty main' >> /etc/apt/sources.list"
     sudo apt-get update
 
  For additional distros, see https://labs.consol.de/repo/stable/
