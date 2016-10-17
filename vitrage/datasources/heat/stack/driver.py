@@ -55,7 +55,7 @@ class HeatStackDriver(DriverBase):
         return conf[HEAT_STACK_DATASOURCE].notification_topic
 
     @staticmethod
-    def get_event_types(conf):
+    def get_event_types():
         return ['orchestration.stack.create.end',
                 'orchestration.stack.delete.end',
                 'orchestration.stack.update.error',

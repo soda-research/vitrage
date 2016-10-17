@@ -25,7 +25,7 @@ from vitrage.datasources.static_physical import STATIC_PHYSICAL_DATASOURCE
 
 class StaticPhysicalDriver(DriverBase):
     @staticmethod
-    def get_event_types(conf):
+    def get_event_types():
         return []
 
     @staticmethod

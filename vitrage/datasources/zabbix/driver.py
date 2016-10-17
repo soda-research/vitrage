@@ -186,5 +186,5 @@ class ZabbixDriver(AlarmDriverBase):
                                             SyncMode.UPDATE)[0]
 
     @staticmethod
-    def get_event_types(conf):
+    def get_event_types():
         return ['zabbix.alarm.ok', 'zabbix.alarm.problem']

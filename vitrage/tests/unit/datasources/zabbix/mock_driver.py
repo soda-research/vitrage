@@ -24,7 +24,7 @@ class MockZabbixDriver(ZabbixDriver):
     """
 
     @staticmethod
-    def get_event_types(conf):
+    def get_event_types():
         return []
 
     @staticmethod

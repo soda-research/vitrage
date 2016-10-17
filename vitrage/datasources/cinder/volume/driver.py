@@ -53,7 +53,7 @@ class CinderVolumeDriver(DriverBase):
                                                   SyncMode.UPDATE)[0]
 
     @staticmethod
-    def get_event_types(conf):
+    def get_event_types():
         return ['volume.create.start',
                 'volume.create.end',
                 'volume.attach.start',

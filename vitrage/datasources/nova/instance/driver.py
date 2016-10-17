@@ -43,7 +43,7 @@ class InstanceDriver(NovaDriverBase):
                                               SyncMode.UPDATE)[0]
 
     @staticmethod
-    def get_event_types(conf):
+    def get_event_types():
         # Add event_types to receive notifications about
         return ['compute.instance.create.error',
                 'compute.instance.create.end',

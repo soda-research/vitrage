@@ -57,7 +57,7 @@ class ListenerService(os_service.Service):
         push_drivers = cls._get_push_drivers(drivers, conf)
 
         for driver in push_drivers:
-            for event in driver.get_event_types(conf):
+            for event in driver.get_event_types():
                 ret[event].append(driver.enrich_event)
 
         return ret

@@ -22,7 +22,7 @@ from vitrage.datasources.neutron.network import NEUTRON_NETWORK_DATASOURCE
 class NetworkDriver(NeutronBase):
 
     @staticmethod
-    def get_event_types(conf):
+    def get_event_types():
         return ['network.create.end',
                 'network.update.end',
                 'network.delete.end']

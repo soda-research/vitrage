@@ -97,7 +97,7 @@ class DriverBase(object):
 
     @staticmethod
     @abc.abstractmethod
-    def get_event_types(conf):
+    def get_event_types():
         """Return a list of all event types relevant to this datasource
 
         Example:
