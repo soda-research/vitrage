@@ -4,17 +4,21 @@ Enabling Vitrage in DevStack
 
 1. Download DevStack:
 
+.. code:: bash
+
     git clone https://git.openstack.org/openstack-dev/devstack.git
     cd devstack
 
 2. Add this repo as an external repository in ``local.conf`` file:
+
+.. code:: bash
 
     [[local|localrc]]
     enable_plugin vitrage https://git.openstack.org/openstack/vitrage
 
 3. Add this to add notification from nova to vitrage
 
-::
+.. code:: bash
 
    [[post-config|$NOVA_CONF]]
    [DEFAULT]
@@ -24,7 +28,7 @@ Enabling Vitrage in DevStack
 4. Add this to add notification from neutron to vitrage
    (make sure neutron is enabled in devstack)
 
-::
+.. code:: bash
 
    [[post-config|$NEUTRON_CONF]]
    [DEFAULT]
@@ -33,7 +37,7 @@ Enabling Vitrage in DevStack
 
 5. Add this to add notification from cinder to vitrage
 
-::
+.. code:: bash
 
    [[post-config|$CINDER_CONF]]
    [DEFAULT]
@@ -42,11 +46,11 @@ Enabling Vitrage in DevStack
 
 6. Add this to add notification from heat to vitrage
 
-::
+.. code:: bash
 
    [[post-config|$HEAT_CONF]]
    [DEFAULT]
    notification_topics = notifications,vitrage_notifications
    notification_driver=messagingv2
 
-7. Run ``stack.sh``.
+7. Run ``./stack.sh``
