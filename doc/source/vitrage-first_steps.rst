@@ -50,16 +50,27 @@ Setting up
 - Deploy several (3-5) instances on your devstack. Make sure that they are
   in state "Running" before continuing.
 - In your browser, go to the Nagios site you defined. If you used the
-  steps defined above,
-  - URL: *http://<IP>:54321/my_site/omd/*.
+  steps defined above:
+
+  - URL: *http://<IP>:54321/my_site/omd/*
   - Select "Classic Nagios GUI" (other views are ok as well, the instructions
-    below on raising alarms are for this view)
+    below on raising alarms are for this view). If you do not see "Classic Nagios GUI", please do as following:
+
+    .. code:: bash
+
+      su - my_site
+      omd config
+      # Change GUI to Nagios
+      # Restart my_site
+      omd restart
+
   - User/Password: omdadmin/omd
 - Set the "Memory Used" test to "Warning":
+
   - Click on *Services --> Memory Used*
   - On the right pane, select "Submit passive check result for this service"
-  - For the "Check result" enter "Warning", and for "Check Output" enter
-    "High memory usage". Click *commit*, then *Done*.
+  - For the "Check result" enter "Warning"
+  - For "Check Output" enter "High memory usage". Click *commit*, then *Done*.
   - On the right pane, select "Stop accepting passive checks for this service"
     and then *Done*.
 
