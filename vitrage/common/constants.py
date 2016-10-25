@@ -36,6 +36,8 @@ class VertexProperties(object):
     INFO = 'info'
     GRAPH_INDEX = 'graph_index'
     RAWTEXT = 'rawtext'
+    RESOURCE_ID = 'resource_id'
+    RESOURCE = 'resource'
 
 
 class EdgeProperties(object):
@@ -52,13 +54,15 @@ class EdgeLabel(object):
     COMPRISED = 'comprised'
     ATTACHED_PUBLIC = 'attached_public'
     ATTACHED_PRIVATE = 'attached_private'
+    CONNECT = 'connect'
+    MANAGED_BY = 'managed_by'
+    COMPRISED = 'comprised'
 
-edge_labels = [EdgeLabel.ON,
-               EdgeLabel.CONTAINS,
-               EdgeLabel.CAUSES,
-               EdgeLabel.ATTACHED,
-               EdgeLabel.ATTACHED_PRIVATE,
-               EdgeLabel.ATTACHED_PUBLIC]
+    @staticmethod
+    def labels():
+        return [EdgeLabel.__dict__[label]
+                for label in vars(EdgeLabel)
+                if not label.startswith(('_', 'labels'))]
 
 
 class SyncMode(object):
@@ -77,9 +81,11 @@ class EntityCategory(object):
     RESOURCE = 'RESOURCE'
     ALARM = 'ALARM'
 
-
-entities_categories = [EntityCategory.RESOURCE,
-                       EntityCategory.ALARM]
+    @staticmethod
+    def categories():
+        return [EntityCategory.__dict__[category]
+                for category in vars(EntityCategory)
+                if not category.startswith(('_', 'categories'))]
 
 
 class DatasourceProperties(object):

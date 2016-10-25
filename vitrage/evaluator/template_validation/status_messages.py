@@ -11,8 +11,8 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-from vitrage.common.constants import edge_labels
-from vitrage.common.constants import entities_categories
+from vitrage.common.constants import EdgeLabel
+from vitrage.common.constants import EntityCategory
 from vitrage.evaluator.actions.base import action_types
 
 status_msgs = {
@@ -33,7 +33,7 @@ status_msgs = {
     42: 'Entity definition must contain category field.',
     43: 'At least one entity must be defined.',
     45: 'Invalid entity category. Category must be from types: '
-        '%s' % entities_categories,
+        '{categories}'.format(categories=EntityCategory.categories()),
     46: 'Entity field is required.',
 
     # metadata section status messages 60-79
@@ -50,7 +50,7 @@ status_msgs = {
 
     # relationships status messages 100-119
     100: 'Invalid relation type. Relation type must be from types: '
-         '%s' % edge_labels,
+         '{labels}'.format(labels=EdgeLabel.labels()),
     101: 'Relationship field is required.',
     102: 'Relationship definition must contain source field.',
     103: 'Relationship definition must contain target field.',
@@ -58,7 +58,7 @@ status_msgs = {
 
     # actions status messages 120-139
     120: 'Invalid action type. Action type must be from types: '
-         '%s' % action_types,
+         '{actions}'.format(actions=action_types),
     121: 'At least one action must be defined.',
     122: 'Action field is required.',
     123: 'Relationship definition must contain action_type field.',
