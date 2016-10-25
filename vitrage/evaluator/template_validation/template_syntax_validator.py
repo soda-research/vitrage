@@ -22,8 +22,8 @@ from voluptuous import Invalid
 from voluptuous import Required
 from voluptuous import Schema
 
-from vitrage.common.constants import edge_labels
-from vitrage.common.constants import entities_categories
+from vitrage.common.constants import EdgeLabel
+from vitrage.common.constants import EntityCategory
 from vitrage.evaluator.actions.base import action_types
 from vitrage.evaluator.template_fields import TemplateFields
 from vitrage.evaluator.template_validation.base import get_correct_result
@@ -269,7 +269,7 @@ def _validate_template_id_value(msg=None):
 
 def _validate_category_field(msg=None):
     def f(v):
-        if str(v) in entities_categories:
+        if str(v) in EntityCategory.categories():
             return str(v)
         else:
             raise Invalid(msg or 45)
@@ -278,7 +278,7 @@ def _validate_category_field(msg=None):
 
 def _validate_relationship_type_field(msg=None):
     def f(v):
-        if str(v) in edge_labels:
+        if str(v) in EdgeLabel.labels():
             return str(v)
         else:
             raise Invalid(msg or 100)
