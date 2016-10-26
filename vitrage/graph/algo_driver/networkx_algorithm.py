@@ -34,7 +34,7 @@ class NXAlgorithm(GraphAlgorithm):
         super(NXAlgorithm, self).__init__(graph)
 
     def graph_query_vertices(self, query_dict=None, root_id=None, depth=None,
-                             direction=Direction.BOTH):
+                             direction=Direction.BOTH, edge_query_dict=None):
 
         graph = NXGraph('graph')
 
@@ -46,6 +46,10 @@ class NXAlgorithm(GraphAlgorithm):
             match_func = lambda item: True
         else:
             match_func = create_predicate(query_dict)
+        if not edge_query_dict:
+            edge_match_func = lambda item: True
+        else:
+            edge_match_func = create_predicate(edge_query_dict)
 
         if not match_func(root_data):
             LOG.info('graph_query_vertices: root %s does not match filter %s',
@@ -64,7 +68,8 @@ class NXAlgorithm(GraphAlgorithm):
             (n_list, e_list) = self.graph._neighboring_nodes_edges_query(
                 node_id,
                 direction=direction,
-                vertex_predicate=match_func)
+                vertex_predicate=match_func,
+                edge_predicate=edge_match_func)
             n_result.extend([v_id for v_id, data in n_list])
             nodes_q.extend([(v_id, curr_depth + 1) for v_id, data in n_list])
 
@@ -95,6 +100,13 @@ class NXAlgorithm(GraphAlgorithm):
 
         graph = NXGraph('graph')
         graph._g = self.graph._g.subgraph(vertices_ids)
+
+        # This is a quick solution for the problem of not deleting
+        # is_deleted=True edges from the graph
+        for source, target, edge_data in graph._g.edges_iter(data=True):
+            if edge_data['is_deleted']:
+                graph._g.remove_edge(u=source, v=target)
+
         LOG.debug('match query, find graph: nodes %s, edges %s',
                   str(graph._g.nodes(data=True)),
                   str(graph._g.edges(data=True)))
