@@ -33,7 +33,7 @@ class GraphAlgorithm(object):
 
     @abc.abstractmethod
     def graph_query_vertices(self, query_dict=None, root_id=None, depth=None,
-                             direction=None):
+                             direction=None, edge_query_dict=None):
         """Create a sub graph of all the matching vertices and their edges
 
         BFS traversal over the graph starting from root, each vertex is

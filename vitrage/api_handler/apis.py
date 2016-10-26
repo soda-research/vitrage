@@ -78,6 +78,8 @@ ALARMS_ALL_QUERY = {
     ]
 }
 
+EDGE_QUERY = {'==': {EProps.IS_DELETED: False}}
+
 
 class EntityGraphApis(object):
     def __init__(self, entity_graph):
@@ -112,7 +114,9 @@ class EntityGraphApis(object):
             graph = ga.graph_query_vertices(
                 query_dict=query,
                 root_id=root,
-                depth=depth)
+                depth=depth,
+                edge_query_dict=EDGE_QUERY
+            )
         # By default the graph_type is 'graph'
         else:
             q = query if query else TOPOLOGY_AND_ALARMS_QUERY
@@ -120,7 +124,9 @@ class EntityGraphApis(object):
                 graph = ga.graph_query_vertices(
                     query_dict=q,
                     root_id=root,
-                    depth=depth)
+                    depth=depth,
+                    edge_query_dict=EDGE_QUERY
+                )
             else:
                 graph = ga.create_graph_from_matching_vertices(query_dict=q)
 
