@@ -3,28 +3,28 @@ values:
   - aggregated values:
       priority: 40
       original values:
-        - name: DELETE FAILED
+        - name: DELETE_FAILED
           operational_value: ERROR
-        - name: CREATE FAILED
+        - name: CREATE_FAILED
           operational_value: ERROR
-        - name: UPDATE FAILED
+        - name: UPDATE_FAILED
           operational_value: ERROR
-        - name: RESUME FAILED
+        - name: RESUME_FAILED
           operational_value: ERROR
-        - name: SUSPEND FAILED
+        - name: SUSPEND_FAILED
           operational_value: ERROR
   - aggregated values:
       priority: 30
       original values:
-        - name: DELETE IN PROGRESS
+        - name: DELETE_IN_PROGRESS
           operational_value: TRANSIENT
-        - name: CREATE IN PROGRESS
+        - name: CREATE_IN_PROGRESS
           operational_value: TRANSIENT
-        - name: UPDATE IN PROGRESS
+        - name: UPDATE_IN_PROGRESS
           operational_value: TRANSIENT
-        - name: RESUME IN PROGRESS
+        - name: RESUME_IN_PROGRESS
           operational_value: TRANSIENT
-        - name: SUSPEND IN PROGRESS
+        - name: SUSPEND_IN_PROGRESS
           operational_value: TRANSIENT
   - aggregated values:
       priority: 20
@@ -34,13 +34,13 @@ values:
   - aggregated values:
       priority: 10
       original values:
-        - name: DELETE COMPLETE
+        - name: DELETE_COMPLETE
           operational_value: OK
-        - name: CREATE COMPLETE
+        - name: CREATE_COMPLETE
           operational_value: OK
-        - name: UPDATE COMPLETE
+        - name: UPDATE_COMPLETE
           operational_value: OK
-        - name: RESUME COMPLETE
+        - name: RESUME_COMPLETE
           operational_value: OK
-        - name: SUSPEND COMPLETE
+        - name: SUSPEND_COMPLETE
           operational_value: OK
