@@ -30,13 +30,17 @@ LOG = log.getLogger(__name__)
 class AlarmsController(RootRestController):
 
     @pecan.expose('json')
-    def index(self, vitrage_id=None):
-        return self.post(vitrage_id)
+    def index(self, vitrage_id, all_tenants='0'):
+        return self.post(vitrage_id, all_tenants)
 
     @pecan.expose('json')
-    def post(self, vitrage_id):
-        enforce("list alarms", pecan.request.headers,
-                pecan.request.enforcer, {})
+    def post(self, vitrage_id, all_tenants='0'):
+        if all_tenants == '1':
+            enforce("list alarms:all_tenants", pecan.request.headers,
+                    pecan.request.enforcer, {})
+        else:
+            enforce("list alarms", pecan.request.headers,
+                    pecan.request.enforcer, {})
 
         LOG.info(_LI('returns list alarms with vitrage id %s') %
                  vitrage_id)
@@ -45,16 +49,17 @@ class AlarmsController(RootRestController):
             if pecan.request.cfg.api.use_mock_file:
                 return self.get_mock_data('alarms.sample.json')
             else:
-                return self._get_alarms(vitrage_id)
+                return self._get_alarms(vitrage_id, all_tenants)
         except Exception as e:
             LOG.exception('failed to get alarms %s', e)
             abort(404, str(e))
 
     @staticmethod
-    def _get_alarms(vitrage_id=None):
+    def _get_alarms(vitrage_id=None, all_tenants=0):
         alarms_json = pecan.request.client.call(pecan.request.context,
                                                 'get_alarms',
-                                                arg=vitrage_id)
+                                                vitrage_id=vitrage_id,
+                                                all_tenants=all_tenants)
         LOG.info(alarms_json)
 
         try:

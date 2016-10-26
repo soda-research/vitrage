@@ -34,9 +34,13 @@ LOG = log.getLogger(__name__)
 class TopologyController(RootRestController):
 
     @pecan.expose('json')
-    def post(self, depth, graph_type, query, root):
-        enforce("get topology", pecan.request.headers,
-                pecan.request.enforcer, {})
+    def post(self, depth, graph_type, query, root, all_tenants=0):
+        if all_tenants:
+            enforce('get topology:all_tenants', pecan.request.headers,
+                    pecan.request.enforcer, {})
+        else:
+            enforce("get topology", pecan.request.headers,
+                    pecan.request.enforcer, {})
 
         LOG.info(_LI('received get topology: depth->%(depth)s '
                      'graph_type->%(graph_type)s root->%(root)s') %
@@ -50,18 +54,24 @@ class TopologyController(RootRestController):
         if pecan.request.cfg.api.use_mock_file:
             return self.get_mock_data('graph.sample.json', graph_type)
         else:
-            return self.get_graph(graph_type, depth, query, root)
+            return self.get_graph(graph_type, depth, query, root, all_tenants)
 
     @staticmethod
-    def get_graph(graph_type, depth, query, root):
-        TopologyController._check_input_para(graph_type, depth, query, root)
+    def get_graph(graph_type, depth, query, root, all_tenants):
+        TopologyController._check_input_para(graph_type,
+                                             depth,
+                                             query,
+                                             root,
+                                             all_tenants)
 
         try:
             graph_data = pecan.request.client.call(pecan.request.context,
                                                    'get_topology',
                                                    graph_type=graph_type,
                                                    depth=depth,
-                                                   query=query, root=root)
+                                                   query=query,
+                                                   root=root,
+                                                   all_tenants=all_tenants)
             LOG.info(graph_data)
             graph = json.loads(graph_data)
             if graph_type == 'graph':
@@ -80,7 +90,7 @@ class TopologyController(RootRestController):
             abort(404, str(e))
 
     @staticmethod
-    def _check_input_para(graph_type, depth, query, root):
+    def _check_input_para(graph_type, depth, query, root, all_tenants):
         if graph_type == 'graph' and depth is not None and root is None:
             LOG.exception("Graph-type 'graph' requires a 'root' with 'depth'")
             abort(403, "Graph-type 'graph' requires a 'root' with 'depth'")

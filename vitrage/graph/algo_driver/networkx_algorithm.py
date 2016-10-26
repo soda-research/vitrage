@@ -12,6 +12,9 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from networkx.algorithms import components
+from networkx.algorithms import simple_paths
+
 from oslo_log import log as logging
 
 from vitrage.graph.algo_driver.algorithm import GraphAlgorithm
@@ -102,3 +105,17 @@ class NXAlgorithm(GraphAlgorithm):
                   str(self.graph._g.nodes(data=True)),
                   str(self.graph._g.edges(data=True)))
         return graph
+
+    def subgraph(self, entities):
+        subgraph = NXGraph('graph')
+        subgraph._g = self.graph._g.subgraph(entities)
+        return subgraph
+
+    def connected_component_subgraphs(self, subgraph):
+        return components.connected_component_subgraphs(
+            subgraph._g.to_undirected(), copy=False)
+
+    def all_simple_paths(self, source, target):
+        return simple_paths.all_simple_paths(self.graph._g,
+                                             source=source,
+                                             target=target)

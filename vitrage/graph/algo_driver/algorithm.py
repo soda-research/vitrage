@@ -59,7 +59,48 @@ class GraphAlgorithm(object):
         pass
 
     @abc.abstractmethod
+    def subgraph(self, entities):
+        """Return the subgraph induced on nodes in entities.
+
+        The induced subgraph of the graph contains the nodes in entities and
+        the edges between those nodes.
+
+        :type entities: list
+        :rtype: NXGraph
+        """
+        pass
+
+    @staticmethod
+    def connected_component_subgraphs(subgraph):
+        """Generate connected components as subgraphs.
+
+        :type subgraph: NetworkX graph.
+        :rtype: list of NXGraphs
+        """
+        pass
+
+    def all_simple_paths(self, source, target):
+        """Generate all simple paths in the graph G from source to target.
+
+        A simple path is a path with no repeated nodes.
+
+        :type source: Starting node for path
+        :type target: Ending node for path
+        :rtype: lists of simple paths
+        """
+        pass
+
+    @abc.abstractmethod
     def create_graph_from_matching_vertices(self,
                                             vertex_attr_filter=None,
                                             query_dict=None):
+        """Generate graph using the query
+
+        Finds all the vertices in the graph matching the query, and returns
+        a subgraph consisted from the vertices
+
+        :type vertex_attr_filter: dictionary
+        :type query_dict: dictionary
+        :rtype: NXGraph
+        """
         pass

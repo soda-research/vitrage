@@ -30,26 +30,31 @@ LOG = log.getLogger(__name__)
 
 class RCAController(RootRestController):
     @pecan.expose('json')
-    def index(self, alarm_id):
-        return self.get(alarm_id)
+    def index(self, alarm_id, all_tenants='0'):
+        return self.get(alarm_id, all_tenants)
 
     @pecan.expose('json')
-    def get(self, alarm_id):
-        enforce('get rca', pecan.request.headers,
-                pecan.request.enforcer, {})
+    def get(self, alarm_id, all_tenants='0'):
+        if all_tenants == '1':
+            enforce('get rca:all_tenants', pecan.request.headers,
+                    pecan.request.enforcer, {})
+        else:
+            enforce('get rca', pecan.request.headers,
+                    pecan.request.enforcer, {})
 
         LOG.info(_LI('received show rca with alarm id %s') % alarm_id)
         if pecan.request.cfg.api.use_mock_file:
             return self.get_mock_data('rca.sample.json')
         else:
-            return self.get_rca(alarm_id)
+            return self.get_rca(alarm_id, all_tenants)
 
     @staticmethod
-    def get_rca(alarm_id):
+    def get_rca(alarm_id, all_tenants):
         try:
             graph_data = pecan.request.client.call(pecan.request.context,
                                                    'get_rca',
-                                                   root=alarm_id)
+                                                   root=alarm_id,
+                                                   all_tenants=all_tenants)
             LOG.info(graph_data)
             graph = json.loads(graph_data)
             return graph

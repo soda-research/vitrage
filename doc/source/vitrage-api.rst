@@ -135,6 +135,7 @@ Consists of a topology request definition which has the following properties:
 * depth - (int, optional) the depth of the topology graph. defaults to max depth
 * graph_type-(string, optional) can be either tree or graph. defaults to graph
 * query - (string, optional) a json query filter to filter the graph components. defaults to return all the graph
+* all_tenants -
 
 query expression
 ================

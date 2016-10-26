@@ -1,10 +1,13 @@
 {
-  "get topology": "role:admin",
-  "get resource": "role:admin",
-  "list resources": "role:admin",
-  "list alarms": "role:admin",
-  "get rca": "role:admin",
-  "template validate": "role:admin",
-  "template list": "role:admin",
-  "template show": "role:admin"
+  "get topology": "",
+  "get topology:all_tenants": "role:admin",
+  "get resource": "",
+  "list resources": "",
+  "list alarms": "",
+  "list alarms:all_tenants": "role:admin",
+  "get rca": "",
+  "get rca:all_tenants": "role:admin",
+  "template validate": "",
+  "template list": "",
+  "template show": ""
 }

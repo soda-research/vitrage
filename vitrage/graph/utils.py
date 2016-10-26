@@ -27,6 +27,7 @@ def create_vertex(vitrage_id,
                   sample_timestamp=None,
                   update_timestamp=None,
                   is_placeholder=False,
+                  project_id=None,
                   metadata=None):
     """A builder to create a vertex
 
@@ -50,6 +51,8 @@ def create_vertex(vitrage_id,
     :type metadata: dict
     :param is_placeholder:
     :type is_placeholder: boolean
+    :param project_id:
+    :type project_id: str
     :return:
     :rtype: Vertex
     """
@@ -63,7 +66,8 @@ def create_vertex(vitrage_id,
         VConst.UPDATE_TIMESTAMP: update_timestamp,
         VConst.SAMPLE_TIMESTAMP: sample_timestamp,
         VConst.IS_PLACEHOLDER: is_placeholder,
-        VConst.VITRAGE_ID: vitrage_id
+        VConst.VITRAGE_ID: vitrage_id,
+        VConst.PROJECT_ID: project_id
     }
     if metadata:
         properties.update(metadata)

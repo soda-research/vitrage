@@ -17,7 +17,6 @@ from oslo_config import cfg
 from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import SyncMode
-from vitrage.common.datetime_utils import utcnow
 from vitrage.datasources.nagios import NAGIOS_DATASOURCE
 from vitrage.datasources.nova.host import NOVA_HOST_DATASOURCE
 from vitrage.datasources.nova.instance import NOVA_INSTANCE_DATASOURCE
@@ -134,7 +133,7 @@ class TestEntityGraphUnitBase(base.BaseTest):
         return events_list[0]
 
     @staticmethod
-    def _create_alarm(vitrage_id, alarm_type):
+    def _create_alarm(vitrage_id, alarm_type, project_id=None):
         return graph_utils.create_vertex(
             vitrage_id,
             entity_id=vitrage_id,
@@ -142,8 +141,23 @@ class TestEntityGraphUnitBase(base.BaseTest):
             entity_type=alarm_type,
             entity_state='active',
             is_deleted=False,
-            sample_timestamp=utcnow(),
+            sample_timestamp=None,
             is_placeholder=False,
+            project_id=project_id
+        )
+
+    @staticmethod
+    def _create_resource(vitrage_id, resource_type, project_id=None):
+        return graph_utils.create_vertex(
+            vitrage_id,
+            entity_id=vitrage_id,
+            entity_category=EntityCategory.RESOURCE,
+            entity_type=resource_type,
+            entity_state='active',
+            is_deleted=False,
+            sample_timestamp=None,
+            is_placeholder=False,
+            project_id=project_id
         )
 
     def _num_total_expected_vertices(self):

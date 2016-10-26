@@ -17,8 +17,10 @@ from oslo_log import log
 import oslo_messaging
 from oslo_service import service as os_service
 
-from vitrage.api_handler.apis import EntityGraphApis
-from vitrage.api_handler.apis import TemplateApis
+from vitrage.api_handler.apis.alarm import AlarmApis
+from vitrage.api_handler.apis.rca import RcaApis
+from vitrage.api_handler.apis.template import TemplateApis
+from vitrage.api_handler.apis.topology import TopologyApis
 from vitrage import messaging
 from vitrage import rpc as vitrage_rpc
 
@@ -45,7 +47,9 @@ class VitrageApiHandlerService(os_service.Service):
         target = oslo_messaging.Target(topic=self.conf.rpc_topic,
                                        server=rabbit_hosts)
 
-        endpoints = [EntityGraphApis(self.entity_graph),
+        endpoints = [TopologyApis(self.entity_graph, self.conf),
+                     AlarmApis(self.entity_graph, self.conf),
+                     RcaApis(self.entity_graph, self.conf),
                      TemplateApis(self.scenario_repo.templates)]
 
         server = vitrage_rpc.get_server(target, endpoints, transport)
