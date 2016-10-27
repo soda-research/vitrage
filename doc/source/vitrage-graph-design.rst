@@ -2,7 +2,7 @@
 Vitrage Graph Design
 ====================
 
-.. image:: ./images/vitrage_graph_architecture.png
+.. image:: ./images/low_level_design.png
    :width: 100%
    :align: center
 
