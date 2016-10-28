@@ -297,16 +297,19 @@ class ActionTracker(object):
 
     def remove_action(self, key, action):
         # actions are unique in their trigger and scenario_ids
-        def _is_equivalent(entry):
-            return entry.trigger_id == action.trigger_id and \
-                entry.scenario_id == action.scenario_id
-        try:
-            to_remove = next(entry for entry in self._tracker[key]
-                             if _is_equivalent(entry))
-            self._tracker[key].remove(to_remove)
-        except StopIteration:
+        def _is_equivalent(action_entry):
+            return action_entry.trigger_id == action.trigger_id and \
+                action_entry.scenario_id == action.scenario_id
+
+        to_remove = [entry for entry in self._tracker.get(key, [])
+                     if _is_equivalent(entry)]
+
+        if len(to_remove) == 0:
             LOG.warning("Could not find action entry to remove "
                         "from tracker: {}".format(action))
+
+        for entry in to_remove:
+            self._tracker[key].remove(entry)
 
     def get_dominant_action(self, key):
         return self._tracker[key][0] if self._tracker.get(key, None) else None
