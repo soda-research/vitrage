@@ -69,7 +69,7 @@ class ScenarioEvaluator(object):
     def scenario_repo(self, scenario_repo):
         self._scenario_repo = scenario_repo
 
-    def process_event(self, before, current, is_vertex):
+    def process_event(self, before, current, is_vertex, *args, **kwargs):
         """Notification of a change in the entity graph.
 
         :param is_vertex:
@@ -111,6 +111,7 @@ class ScenarioEvaluator(object):
             LOG.debug("Actions to perform: %s", actions.values())
             filtered_actions = \
                 self._analyze_and_filter_actions(actions.values())
+            LOG.debug("Actions filtered: %s", filtered_actions)
             for action in filtered_actions:
                 self._action_executor.execute(action.specs, action.mode)
 
@@ -296,16 +297,19 @@ class ActionTracker(object):
 
     def remove_action(self, key, action):
         # actions are unique in their trigger and scenario_ids
-        def _is_equivalent(entry):
-            return entry.trigger_id == action.trigger_id and \
-                entry.scenario_id == action.scenario_id
-        try:
-            to_remove = next(entry for entry in self._tracker[key]
-                             if _is_equivalent(entry))
-            self._tracker[key].remove(to_remove)
-        except StopIteration:
-            LOG.warn("Could not find action entry to remove "
-                     "from tracker: {}".format(action))
+        def _is_equivalent(action_entry):
+            return action_entry.trigger_id == action.trigger_id and \
+                action_entry.scenario_id == action.scenario_id
+
+        to_remove = [entry for entry in self._tracker.get(key, [])
+                     if _is_equivalent(entry)]
+
+        if len(to_remove) == 0:
+            LOG.warning("Could not find action entry to remove "
+                        "from tracker: {}".format(action))
+
+        for entry in to_remove:
+            self._tracker[key].remove(entry)
 
     def get_dominant_action(self, key):
         return self._tracker[key][0] if self._tracker.get(key, None) else None
