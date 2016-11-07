@@ -39,7 +39,7 @@ class AodhDriver(AlarmDriverBase):
         return AODH_DATASOURCE
 
     def _alarm_key(self, alarm):
-        return alarm[AodhProps.NAME]
+        return alarm[AodhProps.ALARM_ID]
 
     def _get_alarms(self):
         try:

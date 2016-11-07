@@ -123,12 +123,12 @@ class AodhTransformer(AlarmTransformerBase):
             return entity_event.get(AodhProps.VITRAGE_ID)
 
         sync_type = entity_event[DSProps.SYNC_TYPE]
-        alarm_name = entity_event[AodhProps.NAME]
+        alarm_id = entity_event[AodhProps.ALARM_ID]
         resource_id = entity_event[AodhProps.RESOURCE_ID]
         return (tbase.build_key(self._key_values(sync_type,
                                                  resource_id,
-                                                 alarm_name)) if resource_id
-                else tbase.build_key(self._key_values(sync_type, alarm_name)))
+                                                 alarm_id)) if resource_id
+                else tbase.build_key(self._key_values(sync_type, alarm_id)))
 
     @staticmethod
     def _timestamp(entity_event):
