@@ -72,13 +72,13 @@ and must implement the following methods:
 +----------------------+------------------------------------+--------------------------------+--------------------------------+
 | Name                 | Input                              | Output                         | Comments                       |
 +======================+====================================+================================+================================+
-| get_all              | sync mode                          | void                           | for snapshot mechanism         |
+| get_all              | sync mode                          | entities                       | for snapshot mechanism         |
 +----------------------+------------------------------------+--------------------------------+--------------------------------+
-| get_changes          | sync mode                          | void                           | for update pulling mechanism   |
+| get_changes          | sync mode                          | entities                       | for update pulling mechanism   |
 +----------------------+------------------------------------+--------------------------------+--------------------------------+
-| get_event_types      | conf                               | void                           | for update pushing mechanism   |
+| get_event_types      |                                    | event types                    | for update pushing mechanism   |
 +----------------------+------------------------------------+--------------------------------+--------------------------------+
-| enrich_event         | event, event_type                  | void                           | for update pushing mechanism   |
+| enrich_event         | event, event_type                  | entity event                   | for update pushing mechanism   |
 +----------------------+------------------------------------+--------------------------------+--------------------------------+
 
 
@@ -113,7 +113,7 @@ must implement the following methods:
 +----------------------------------+------------------------------------+----------------------------------------+
 | _create_entity_key               | entity event                       | the unique key of this entity          |
 +----------------------------------+------------------------------------+----------------------------------------+
-| get_type                         |                                    | datasources' type                      |
+| get_type                         |                                    | datasources type                       |
 +----------------------------------+------------------------------------+----------------------------------------+
 
 
