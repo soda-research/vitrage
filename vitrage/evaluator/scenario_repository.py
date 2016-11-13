@@ -79,11 +79,11 @@ class ScenarioRepository(object):
 
         result = syntax_validation(template_def)
         if not result.is_valid:
-            LOG.info('Unable to load template: %s' % result.comment)
+            LOG.info('Unable to load template: %s', result.comment)
         else:
             result = content_validation(template_def)
             if not result.is_valid:
-                LOG.info('Unable to load template: %s' % result.comment)
+                LOG.info('Unable to load template: %s', result.comment)
 
         template_uuid = uuid.uuid4()
         self.templates[str(template_uuid)] = Template(template_uuid,
