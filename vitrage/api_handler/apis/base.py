@@ -78,6 +78,8 @@ ALARM_QUERY = {
     VProps.IS_PLACEHOLDER: False
 }
 
+EDGE_QUERY = {'==': {EProps.IS_DELETED: False}}
+
 
 class EntityGraphApisBase(object):
     TENANT_PROPERTY = 'tenant'

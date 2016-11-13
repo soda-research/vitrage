@@ -15,6 +15,7 @@
 from oslo_log import log
 
 from vitrage.api_handler.apis.base import ALARMS_ALL_QUERY
+from vitrage.api_handler.apis.base import EDGE_QUERY
 from vitrage.api_handler.apis.base import EntityGraphApisBase
 from vitrage.api_handler.apis.base import TOPOLOGY_AND_ALARMS_QUERY
 from vitrage.common.constants import EntityCategory
@@ -54,24 +55,24 @@ class TopologyApis(EntityGraphApisBase):
                             {'==': {VProps.PROJECT_ID: None}}]}
                 current_query = {'and': [query, project_query]}
 
-            graph = ga.graph_query_vertices(
-                query_dict=current_query,
-                root_id=root,
-                depth=depth)
+            graph = ga.graph_query_vertices(query_dict=current_query,
+                                            root_id=root,
+                                            depth=depth,
+                                            edge_query_dict=EDGE_QUERY)
         # By default the graph_type is 'graph'
         else:
             if all_tenants:
                 q = query if query else TOPOLOGY_AND_ALARMS_QUERY
-                graph = \
-                    ga.create_graph_from_matching_vertices(query_dict=q)
+                graph = ga.create_graph_from_matching_vertices(
+                    query_dict=q,
+                    edge_attr_filter={VProps.IS_DELETED: False})
             else:
-                graph = \
-                    self._get_topology_for_specific_project(
-                        ga,
-                        query,
-                        project_id,
-                        is_admin_project,
-                        root)
+                graph = self._get_topology_for_specific_project(
+                    ga,
+                    query,
+                    project_id,
+                    is_admin_project,
+                    root)
 
             alarms = graph.get_vertices(query_dict=ALARMS_ALL_QUERY)
             self._add_resource_details_to_alarms(alarms)
@@ -113,7 +114,9 @@ class TopologyApis(EntityGraphApisBase):
             default_query = {'or': [resource_query, alarm_query]}
             q = default_query
 
-        tmp_graph = ga.create_graph_from_matching_vertices(query_dict=q)
+        tmp_graph = ga.create_graph_from_matching_vertices(
+            query_dict=q,
+            edge_attr_filter={VProps.IS_DELETED: False})
         graph = ga.subgraph(self._topology_for_unrooted_graph(ga,
                                                               tmp_graph,
                                                               root))

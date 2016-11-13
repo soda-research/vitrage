@@ -253,7 +253,9 @@ class Graph(object):
         pass
 
     @abc.abstractmethod
-    def get_vertices(self, vertex_attr_filter=None, query_dict=None):
+    def get_vertices(self,
+                     vertex_attr_filter=None,
+                     query_dict=None):
         """Get vertices list with an optional match filter
 
         To filter the vertices, specify property values for

@@ -32,8 +32,12 @@ class GraphAlgorithm(object):
         self.graph = graph
 
     @abc.abstractmethod
-    def graph_query_vertices(self, query_dict=None, root_id=None, depth=None,
-                             direction=None):
+    def graph_query_vertices(self,
+                             query_dict=None,
+                             root_id=None,
+                             depth=None,
+                             direction=None,
+                             edge_query_dict=None):
         """Create a sub graph of all the matching vertices and their edges
 
         BFS traversal over the graph starting from root, each vertex is
@@ -93,7 +97,8 @@ class GraphAlgorithm(object):
     @abc.abstractmethod
     def create_graph_from_matching_vertices(self,
                                             vertex_attr_filter=None,
-                                            query_dict=None):
+                                            query_dict=None,
+                                            edge_attr_filter=None):
         """Generate graph using the query
 
         Finds all the vertices in the graph matching the query, and returns
@@ -101,6 +106,7 @@ class GraphAlgorithm(object):
 
         :type vertex_attr_filter: dictionary
         :type query_dict: dictionary
+        :type edge_attr_filter: dictionary
         :rtype: NXGraph
         """
         pass

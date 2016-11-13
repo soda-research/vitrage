@@ -21,6 +21,7 @@ from vitrage.graph.algo_driver.algorithm import GraphAlgorithm
 from vitrage.graph.algo_driver.sub_graph_matching import subgraph_matching
 from vitrage.graph.driver import Direction
 from vitrage.graph.driver import NXGraph
+from vitrage.graph.filter import check_filter
 from vitrage.graph.query import create_predicate
 
 LOG = logging.getLogger(__name__)
@@ -36,8 +37,12 @@ class NXAlgorithm(GraphAlgorithm):
         """
         super(NXAlgorithm, self).__init__(graph)
 
-    def graph_query_vertices(self, query_dict=None, root_id=None, depth=None,
-                             direction=Direction.BOTH):
+    def graph_query_vertices(self,
+                             query_dict=None,
+                             root_id=None,
+                             depth=None,
+                             direction=Direction.BOTH,
+                             edge_query_dict=None):
 
         graph = NXGraph('graph')
 
@@ -49,6 +54,11 @@ class NXAlgorithm(GraphAlgorithm):
             match_func = lambda item: True
         else:
             match_func = create_predicate(query_dict)
+
+        if not edge_query_dict:
+            edge_match_func = lambda item: True
+        else:
+            edge_match_func = create_predicate(edge_query_dict)
 
         if not match_func(root_data):
             LOG.info('graph_query_vertices: root %s does not match filter %s',
@@ -67,7 +77,8 @@ class NXAlgorithm(GraphAlgorithm):
             (n_list, e_list) = self.graph._neighboring_nodes_edges_query(
                 node_id,
                 direction=direction,
-                vertex_predicate=match_func)
+                vertex_predicate=match_func,
+                edge_predicate=edge_match_func)
             n_result.extend([v_id for v_id, data in n_list])
             nodes_q.extend([(v_id, curr_depth + 1) for v_id, data in n_list])
 
@@ -85,7 +96,8 @@ class NXAlgorithm(GraphAlgorithm):
 
     def create_graph_from_matching_vertices(self,
                                             vertex_attr_filter=None,
-                                            query_dict=None):
+                                            query_dict=None,
+                                            edge_attr_filter=None):
         if query_dict:
             vertices = self.graph.get_vertices(query_dict=query_dict)
         elif vertex_attr_filter:
@@ -98,6 +110,13 @@ class NXAlgorithm(GraphAlgorithm):
 
         graph = NXGraph('graph')
         graph._g = self.graph._g.subgraph(vertices_ids)
+
+        # delete non matching edges
+        if edge_attr_filter:
+            for source, target, edge_data in graph._g.edges_iter(data=True):
+                if not check_filter(edge_data, edge_attr_filter):
+                    graph.remove_edge(u=source, v=target)
+
         LOG.debug('match query, find graph: nodes %s, edges %s',
                   str(graph._g.nodes(data=True)),
                   str(graph._g.edges(data=True)))

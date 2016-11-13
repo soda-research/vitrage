@@ -15,6 +15,7 @@
 from oslo_log import log
 
 from vitrage.api_handler.apis.base import ALARMS_ALL_QUERY
+from vitrage.api_handler.apis.base import EDGE_QUERY
 from vitrage.api_handler.apis.base import EntityGraphApisBase
 from vitrage.api_handler.apis.base import RCA_QUERY
 from vitrage.graph import create_algorithm
@@ -38,14 +39,14 @@ class RcaApis(EntityGraphApisBase):
         is_admin_project = ctx.get(self.IS_ADMIN_PROJECT_PROPERTY, False)
         ga = create_algorithm(self.entity_graph)
 
-        found_graph_out = ga.graph_query_vertices(
-            query_dict=RCA_QUERY,
-            root_id=root,
-            direction=Direction.OUT)
-        found_graph_in = ga.graph_query_vertices(
-            query_dict=RCA_QUERY,
-            root_id=root,
-            direction=Direction.IN)
+        found_graph_out = ga.graph_query_vertices(query_dict=RCA_QUERY,
+                                                  root_id=root,
+                                                  direction=Direction.OUT,
+                                                  edge_query_dict=EDGE_QUERY)
+        found_graph_in = ga.graph_query_vertices(query_dict=RCA_QUERY,
+                                                 root_id=root,
+                                                 direction=Direction.IN,
+                                                 edge_query_dict=EDGE_QUERY)
 
         if all_tenants == '1':
             unified_graph = found_graph_in

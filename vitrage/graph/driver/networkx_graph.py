@@ -206,7 +206,9 @@ class NXGraph(Graph):
         """
         self._g.remove_edge(u=e.source_id, v=e.target_id, key=e.label)
 
-    def get_vertices(self, vertex_attr_filter=None, query_dict=None):
+    def get_vertices(self,
+                     vertex_attr_filter=None,
+                     query_dict=None):
         def check_vertex(vertex_data):
             return check_filter(vertex_data[1], vertex_attr_filter)
 
@@ -242,8 +244,7 @@ class NXGraph(Graph):
     def _neighboring_nodes_edges_query(self, v_id,
                                        vertex_predicate=None,
                                        edge_predicate=None,
-                                       direction=Direction.BOTH,
-                                       ):
+                                       direction=Direction.BOTH):
         if not direction:
             LOG.error("_neighboring_nodes_edges: direction cannot be None")
             raise AttributeError("neighbors: direction cannot be None")
