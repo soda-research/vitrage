@@ -49,7 +49,7 @@ In order to add a new datasource to Vitrage do the following steps:
 
 
 Driver Class
-__________________
+____________
 
 Responsible for importing information regarding entities in the cloud.
 Entities in this context refer both to resources (physical, virtual,
