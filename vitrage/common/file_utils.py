@@ -20,26 +20,30 @@ import yaml
 LOG = log.getLogger(__name__)
 
 
-def load_files(dir_path,
+def list_files(dir_path,
                suffix=None,
                with_pathname=False,
                with_exception=False):
+    if not os.path.isdir(dir_path):
+        return []
+
     try:
-        loaded_files = os.listdir(dir_path)
-    except Exception:
+        file_list = os.listdir(dir_path)
+    except Exception as e:
         if with_exception:
             raise
         else:
+            LOG.error("Fails to list files in %s: %s" % (dir_path, e))
             return []
     if suffix:
-        loaded_files = [dir_path + '/' + f if with_pathname else f
-                        for f in loaded_files if f.endswith(suffix)]
+        file_list = [os.path.join(dir_path, f) if with_pathname else f
+                     for f in file_list if f.endswith(suffix)]
 
-    return loaded_files
+    return file_list
 
 
 def load_yaml_files(dir_path, with_exception=False):
-    files = load_files(dir_path, '.yaml', with_pathname=True)
+    files = list_files(dir_path, '.yaml', with_pathname=True)
 
     yaml_files = []
     for f in files:

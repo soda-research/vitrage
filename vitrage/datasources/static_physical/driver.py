@@ -13,7 +13,6 @@
 # under the License.
 
 import copy
-import os
 
 from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import EventAction
@@ -52,15 +51,14 @@ class StaticPhysicalDriver(DriverBase):
     def _get_all_entities(self):
         static_entities = []
 
-        if os.path.isdir(self.cfg.static_physical.directory):
-            files = file_utils.load_files(
-                self.cfg.static_physical.directory, '.yaml')
+        files = file_utils.list_files(
+            self.cfg.static_physical.directory, '.yaml')
 
-            for file_ in files:
-                full_path = self.cfg.static_physical.directory \
-                    + '/' + file_
-                static_entities += self._get_entities_from_file(file_,
-                                                                full_path)
+        for file_ in files:
+            full_path = self.cfg.static_physical.directory \
+                + '/' + file_
+            static_entities += self._get_entities_from_file(file_,
+                                                            full_path)
 
         return static_entities
 
@@ -78,7 +76,7 @@ class StaticPhysicalDriver(DriverBase):
     def _get_changes_entities(self):
 
         entities_updates = []
-        files = file_utils.load_files(
+        files = file_utils.list_files(
             self.cfg.static_physical.directory, '.yaml')
 
         for file_ in files:
