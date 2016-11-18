@@ -8,9 +8,9 @@
     ],
   "name": "switch-[0-9]",
   "id": "[1-9]{5}",
-  "sample_date": "2015-12-01T12:46:41Z",
+  "vitrage_sample_date": "2015-12-01T12:46:41Z",
   "type": "switch",
-  "sync_mode": "snapshot",
+  "vitrage_sync_mode": "snapshot",
   "state": "available",
-  "event_type": "entity_update"
+  "vitrage_event_type": "entity_update"
 }

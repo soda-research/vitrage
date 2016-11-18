@@ -88,10 +88,10 @@ class EntityCategory(object):
 
 
 class DatasourceProperties(object):
-    SYNC_TYPE = 'sync_type'
-    SYNC_MODE = 'sync_mode'
-    SAMPLE_DATE = 'sample_date'
-    EVENT_TYPE = 'event_type'
+    SYNC_TYPE = 'vitrage_sync_type'
+    SYNC_MODE = 'vitrage_sync_mode'
+    SAMPLE_DATE = 'vitrage_sample_date'
+    EVENT_TYPE = 'vitrage_event_type'
 
 
 class EventAction(object):

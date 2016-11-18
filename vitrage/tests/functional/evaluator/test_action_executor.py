@@ -259,19 +259,19 @@ class TestActionExecutor(TestFunctionalBase):
                 'service': 'Check_MK',
                 'status': 'CRITICAL',
                 'status_info': 'test test test',
-                'sync_mode': 'snapshot',
-                'sync_type': 'nagios',
-                'sample_date': '2016-02-07 15:26:04'}
+                'vitrage_sync_mode': 'snapshot',
+                'vitrage_sync_type': 'nagios',
+                'vitrage_sample_date': '2016-02-07 15:26:04'}
 
     @staticmethod
     def _get_vitrage_add_vertex_event(target_vertex, alarm_name, severity):
 
         return {'target': target_vertex.vertex_id,
                 'update_timestamp': '2016-03-17 11:33:32.443002',
-                'sync_mode': 'update',
+                'vitrage_sync_mode': 'update',
                 'alarm_name': alarm_name,
                 'state': 'Active',
                 'type': 'add_vertex',
-                'sync_type': 'vitrage',
+                'vitrage_sync_type': 'vitrage',
                 'severity': 'CRITICAL',
                 'sample_timestamp': '2016-03-17 11:33:32.443002+00:00'}

@@ -8,9 +8,9 @@
   },
   "_loaded": "True",
   "hosts": {},
-  "sample_date": "2015-12-01T12:46:41Z",
-  "sync_type": "nova.zone",
-  "sync_mode": "snapshot",
+  "vitrage_sample_date": "2015-12-01T12:46:41Z",
+  "vitrage_sync_type": "nova.zone",
+  "vitrage_sync_mode": "snapshot",
   "zoneName": "zone0",
   "zoneState": {
     "available": "True"
