@@ -13,7 +13,7 @@
 # under the License.
 from collections import defaultdict
 from collections import namedtuple
-import uuid
+from hashlib import md5
 
 from oslo_log import log
 
@@ -85,7 +85,7 @@ class ScenarioRepository(object):
             if not result.is_valid:
                 LOG.info('Unable to load template: %s' % result.comment)
 
-        template_uuid = uuid.uuid4()
+        template_uuid = md5(str(template_def).encode()).hexdigest()
         self.templates[str(template_uuid)] = Template(template_uuid,
                                                       template_def,
                                                       current_time,
