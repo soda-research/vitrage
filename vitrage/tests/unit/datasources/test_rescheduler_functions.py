@@ -16,11 +16,11 @@ from datetime import datetime
 from vitrage.datasources.rescheduler import ReScheduler
 from vitrage.tests import base
 
-RESCHEDULING_TIMES = 6
-STANDARD_INTERVAL = 2
-FAULT_INTERVAL = 1
-TTL = 7
-FAULT_NUM = 3
+RESCHEDULING_TIMES = 2
+STANDARD_INTERVAL = 0.8
+FAULT_INTERVAL = 0.2
+TTL = 3
+FAULT_NUM = 2
 TIME_DIFF_MARGIN_PRECENT = 1.05
 
 
