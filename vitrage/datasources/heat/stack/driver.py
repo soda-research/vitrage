@@ -28,8 +28,6 @@ class HeatStackDriver(DriverBase):
     _client = None
     conf = None
 
-    FAILED = 'FAILED'
-
     RESOURCE_TYPE_CONVERSION = {
         'OS::Nova::Server': NOVA_INSTANCE_DATASOURCE,
         'OS::Cinder::Volume': CINDER_VOLUME_DATASOURCE,
@@ -90,8 +88,7 @@ class HeatStackDriver(DriverBase):
         HeatStackDriver.RESOURCE_TYPE_CONVERSION = tmp_dict
 
     def _make_stacks_list(self, stacks):
-        return [stack.__dict__ for stack in stacks
-                if self.FAILED not in stack.__dict__['stack_status']]
+        return [stack.__dict__ for stack in stacks]
 
     def _append_stacks_resources(self, stacks):
         return [self._retrieve_stack_resources(stack, stack['id'])
