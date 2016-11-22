@@ -18,12 +18,11 @@
 # under the License.
 
 from oslo_config import cfg
-import six
 
 
 def recursive_keypairs(d, separator='.'):
     # taken from ceilometer and gnocchi
-    for name, value in sorted(six.iteritems(d)):
+    for name, value in sorted(d.items()):
         if isinstance(value, dict):
             for subname, subvalue in recursive_keypairs(value, separator):
                 yield ('%s%s%s' % (name, separator, subname), subvalue)
