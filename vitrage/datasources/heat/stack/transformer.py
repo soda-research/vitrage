@@ -49,11 +49,12 @@ class HeatStackTransformer(ResourceTransformerBase):
         super(HeatStackTransformer, self).__init__(transformers, conf)
 
     def _create_snapshot_entity_vertex(self, entity_event):
+
         stack_name = extract_field_value(entity_event, 'stack_name')
         stack_id = extract_field_value(entity_event, 'id')
         stack_state = extract_field_value(entity_event, 'stack_status')
         timestamp = extract_field_value(entity_event, 'creation_time')
-        project_id = extract_field_value(entity_event, 'project_id')
+        project_id = extract_field_value(entity_event, 'project')
 
         return self._create_vertex(entity_event,
                                    stack_name,
