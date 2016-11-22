@@ -107,7 +107,7 @@ class DatasourceInfoMapper(object):
         valid_datasources_conf = {}
         erroneous_datasources_conf = []
 
-        files = file_utils.load_files(
+        files = file_utils.list_files(
             self.conf.entity_graph.datasources_values_dir, '.yaml')
 
         for file_name in files:
