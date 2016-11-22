@@ -103,12 +103,14 @@ class NagiosTransformerTest(base.BaseTest):
             self._validate_action(alarm, wrapper)
 
     def _validate_action(self, alarm, wrapper):
+        if DSProps.EVENT_TYPE in alarm \
+            and alarm[DSProps.EVENT_TYPE] in EventAction.__dict__.values():
+            self.assertEqual(alarm[DSProps.EVENT_TYPE], wrapper.action)
+            return
+
         action_type = alarm[DSProps.ACTION_TYPE]
         if action_type in (ActionType.SNAPSHOT, ActionType.UPDATE):
-            if alarm[NagiosProperties.STATUS] == 'OK':
-                self.assertEqual(EventAction.DELETE_ENTITY, wrapper.action)
-            else:
-                self.assertEqual(EventAction.UPDATE_ENTITY, wrapper.action)
+            self.assertEqual(EventAction.UPDATE_ENTITY, wrapper.action)
         else:
             self.assertEqual(EventAction.CREATE_ENTITY, wrapper.action)
 

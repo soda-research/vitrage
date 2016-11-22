@@ -103,6 +103,9 @@ class AlarmDriverBase(DriverBase):
             old_alarm, timestamp = self.cache.get(alarm_key, (None, None))
 
             if filter_(self, alarm, old_alarm):
+                # delete state changed alarm: alarm->OK
+                if not self._is_erroneous(alarm):
+                    alarm[DSProps.EVENT_TYPE] = EventAction.DELETE_ENTITY
                 alarms_to_update.append(alarm)
 
             self.cache[alarm_key] = alarm, now

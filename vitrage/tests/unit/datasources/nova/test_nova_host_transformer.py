@@ -192,8 +192,8 @@ class NovaHostTransformerTest(base.BaseTest):
         is_deleted = vertex[VertexProperties.IS_DELETED]
         self.assertFalse(is_deleted)
 
-    def test_extract_action_type(self):
-        LOG.debug('Test extract action type')
+    def test_extract_event_action(self):
+        LOG.debug('Test extract event action')
 
         # Test setup
         spec_list = mock_sync.simple_host_generators(
@@ -206,7 +206,7 @@ class NovaHostTransformerTest(base.BaseTest):
         host_transformer = self.transformers[NOVA_HOST_DATASOURCE]
 
         # Test action
-        action = host_transformer._extract_action_type(hosts_events[0])
+        action = host_transformer._extract_event_action(hosts_events[0])
 
         # Test assertion
         self.assertEqual(EventAction.UPDATE_ENTITY, action)
@@ -221,7 +221,7 @@ class NovaHostTransformerTest(base.BaseTest):
         host_transformer = self.transformers[NOVA_HOST_DATASOURCE]
 
         # Test action
-        action = host_transformer._extract_action_type(hosts_events[0])
+        action = host_transformer._extract_event_action(hosts_events[0])
 
         # Test assertions
         self.assertEqual(EventAction.CREATE_ENTITY, action)

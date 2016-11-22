@@ -131,7 +131,7 @@ class EvaluatorEventTransformer(transformer_base.TransformerBase):
 
         return []
 
-    def _extract_action_type(self, event):
+    def _extract_event_action(self, event):
         event_type = event[EVALUATOR_EVENT_TYPE]
 
         try:
