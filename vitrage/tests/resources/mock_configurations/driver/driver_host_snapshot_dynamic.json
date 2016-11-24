@@ -7,8 +7,8 @@
   "_loaded": "True",
   "host_name": "compute-0-0.local",
   "service": "compute",
-  "sync_type": "nova.host",
+  "vitrage_sync_type": "nova.host",
   "zone": "zone0",
-  "sync_mode": "init_snapshot",
-  "sample_date": "2015-12-01T12:46:41Z"
+  "vitrage_sync_mode": "init_snapshot",
+  "vitrage_sample_date": "2015-12-01T12:46:41Z"
 }

@@ -1,8 +1,8 @@
 {
-  "sync_mode": "update",
-  "sample_date": "2015-12-01T12:46:41Z",
+  "vitrage_sync_mode": "update",
+  "vitrage_sample_date": "2015-12-01T12:46:41Z",
   "publisher_id": "compute.emalin-devstack",
-  "event_type": "compute.instance.pause.end|compute.instance.delete.end|compute.instance.create.start",
+  "vitrage_event_type": "compute.instance.pause.end|compute.instance.delete.end|compute.instance.create.start",
   "state_description": "",
   "availability_zone": "nova",
   "terminated_at": "",
