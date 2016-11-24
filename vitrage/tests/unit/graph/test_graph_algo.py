@@ -18,7 +18,11 @@ test_vitrage graph algorithms
 
 Tests for `vitrage` graph driver algorithms
 """
+
+from vitrage.common.constants import EdgeLabel
+from vitrage.common.constants import EdgeProperties as EProps
 from vitrage.common.constants import VertexProperties as VProps
+from vitrage.graph.driver.elements import Edge
 from vitrage.graph import create_algorithm, Mapping, Direction  # noqa
 from vitrage.tests.unit.graph.base import *  # noqa
 
@@ -72,7 +76,7 @@ class GraphAlgorithmTest(GraphTestBase):
         subgraph = ga.graph_query_vertices(
             query_dict=query, root_id=first_host_id, depth=1)
         self.assertEqual(
-            1 +  # For tye host
+            1 +  # For host
             1 +  # For Cluster
             ENTITY_GRAPH_ALARMS_PER_HOST +
             ENTITY_GRAPH_TESTS_PER_HOST +
@@ -134,6 +138,52 @@ class GraphAlgorithmTest(GraphTestBase):
                          'num of BOTH edges Node (depth 3)')
         self.assertEqual(1, subgraph.num_vertices(),
                          'num of BOTH vertices Node (depth 3)')
+
+        # check the edge_query_dict parameter
+        query = {'!=': {'NOTHING': 'IS EVERYTHING'}}
+        edge_query = {'==': {EProps.RELATIONSHIP_TYPE: EdgeLabel.CONTAINS}}
+        subgraph = ga.graph_query_vertices(
+            query_dict=query, depth=5, edge_query_dict=edge_query)
+        alarms = subgraph.get_vertices(
+            vertex_attr_filter={VProps.CATEGORY: ALARM})
+        self.assertEqual(len(alarms), 0, 'We filtered the ON relationship,'
+                                         ' so no alarms should exist')
+
+        # check that the is_deleted=True edges are deleted from the graph
+        hosts_query = {VProps.CATEGORY: 'RESOURCE',
+                       VProps.TYPE: NOVA_HOST_DATASOURCE}
+        hosts = self.entity_graph.get_vertices(
+            vertex_attr_filter=hosts_query)
+        instances_query = {VProps.CATEGORY: 'RESOURCE',
+                           VProps.TYPE: NOVA_INSTANCE_DATASOURCE}
+        instances = self.entity_graph.get_vertices(
+            vertex_attr_filter=instances_query)
+        instance_edges = self.entity_graph.get_edges(instances[0].vertex_id)
+
+        for edge in instance_edges:
+            if 'nova.host' in edge.source_id:
+                host_instance_edge = edge
+        host_instance_edge[VProps.IS_DELETED] = True
+        self.entity_graph.update_edge(host_instance_edge)
+
+        edges_query = {'relationship_type': 'contains', 'is_deleted': False}
+        if host_instance_edge.source_id != hosts[0].vertex_id:
+            new_edge = Edge(hosts[0].vertex_id, instances[0].vertex_id,
+                            EdgeLabel.CONTAINS, properties=edges_query)
+            self.entity_graph.update_edge(new_edge)
+        else:
+            new_edge = Edge(hosts[1].vertex_id, instances[0].vertex_id,
+                            EdgeLabel.CONTAINS, properties=edges_query)
+            self.entity_graph.update_edge(new_edge)
+
+        query = {'!=': {'NOTHING': 'IS EVERYTHING'}}
+        edge_query = {'==': {EProps.IS_DELETED: False}}
+        subgraph = ga.graph_query_vertices(
+            query_dict=query, depth=5, edge_query_dict=edge_query)
+        self.assertEqual(self.entity_graph.num_edges() - 1,
+                         subgraph.num_edges(),
+                         'We filtered the ON relationship, so no alarms '
+                         'should exist')
 
     def test_no_match_graph_query_vertices(self):
         ga = create_algorithm(self.entity_graph)
