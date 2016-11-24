@@ -74,7 +74,6 @@ class GraphAlgorithmTest(GraphTestBase):
         self.assertEqual(
             1 +  # For tye host
             1 +  # For Cluster
-            1 +  # For SWITCH
             ENTITY_GRAPH_ALARMS_PER_HOST +
             ENTITY_GRAPH_TESTS_PER_HOST +
             ENTITY_GRAPH_VMS_PER_HOST,

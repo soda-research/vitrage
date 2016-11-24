@@ -45,10 +45,16 @@ class NXGraph(Graph):
 
     GRAPH_TYPE = "networkx"
 
-    def __init__(self, name='networkx_graph', root_id=None):
+    def __init__(self,
+                 name='networkx_graph',
+                 root_id=None,
+                 vertices=None,
+                 edges=None):
         super(NXGraph, self).__init__(name, NXGraph.GRAPH_TYPE)
         self._g = nx.MultiDiGraph()
         self.root_id = root_id
+        self.add_vertices(vertices)
+        self.add_edges(edges)
 
     def __len__(self):
         return len(self._g)
@@ -71,6 +77,13 @@ class NXGraph(Graph):
         properties_copy = copy.copy(v.properties)
         self._g.add_node(n=v.vertex_id, attr_dict=properties_copy)
 
+    def add_vertices(self, vertices):
+        if not vertices:
+            return
+
+        for v in vertices:
+            self.add_vertex(v)
+
     @Notifier.update_notify
     def add_edge(self, e):
         """Add an edge to the graph
@@ -84,6 +97,13 @@ class NXGraph(Graph):
         properties_copy = copy.copy(e.properties)
         self._g.add_edge(u=e.source_id, v=e.target_id,
                          key=e.label, attr_dict=properties_copy)
+
+    def add_edges(self, edges):
+        if not edges:
+            return
+
+        for e in edges:
+            self.add_edge(e)
 
     def get_vertex(self, v_id):
         """Fetch a vertex from the graph
