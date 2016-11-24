@@ -17,7 +17,9 @@ from oslo_log import log as logging
 from vitrage.graph.algo_driver.algorithm import GraphAlgorithm
 from vitrage.graph.algo_driver.sub_graph_matching import subgraph_matching
 from vitrage.graph.driver import Direction
+from vitrage.graph.driver import Edge
 from vitrage.graph.driver import NXGraph
+from vitrage.graph.driver import Vertex
 from vitrage.graph.query import create_predicate
 
 LOG = logging.getLogger(__name__)
@@ -42,23 +44,19 @@ class NXAlgorithm(GraphAlgorithm):
             root_id = self.graph.root_id
         root_data = self.graph._g.node[root_id]
 
-        if not query_dict:
-            match_func = lambda item: True
-        else:
-            match_func = create_predicate(query_dict)
-        if not edge_query_dict:
-            edge_match_func = lambda item: True
-        else:
-            edge_match_func = create_predicate(edge_query_dict)
+        match_func = create_predicate(query_dict) if query_dict else None
+        edge_match_func = create_predicate(edge_query_dict) \
+            if edge_query_dict else None
 
-        if not match_func(root_data):
+        if match_func and not match_func(root_data):
             LOG.info('graph_query_vertices: root %s does not match filter %s',
                      str(root_id), str(query_dict))
             return graph
 
         n_result = []
         visited_nodes = set()
-        n_result.append(root_id)
+        n_result.append((root_id, self.graph.get_vertex(root_id).properties))
+        e_result = []
         nodes_q = [(root_id, 0)]
         while nodes_q:
             node_id, curr_depth = nodes_q.pop(0)
@@ -70,10 +68,15 @@ class NXAlgorithm(GraphAlgorithm):
                 direction=direction,
                 vertex_predicate=match_func,
                 edge_predicate=edge_match_func)
-            n_result.extend([v_id for v_id, data in n_list])
+            n_result.extend(n_list)
+            e_result.extend(e_list)
             nodes_q.extend([(v_id, curr_depth + 1) for v_id, data in n_list])
 
-        graph._g = self.graph._g.subgraph(n_result)
+        graph = NXGraph(graph.name,
+                        graph.root_id,
+                        vertices=self._vertex_result_to_list(n_result),
+                        edges=self._edge_result_to_list(e_result))
+
         LOG.debug('graph_query_vertices: find graph: nodes %s, edges %s',
                   str(graph._g.nodes(data=True)),
                   str(graph._g.edges(data=True)))
@@ -81,6 +84,21 @@ class NXAlgorithm(GraphAlgorithm):
                   str(self.graph._g.nodes(data=True)),
                   str(self.graph._g.edges(data=True)))
         return graph
+
+    @staticmethod
+    def _edge_result_to_list(edge_result):
+        d = dict()
+        for source_id, target_id, label, data in edge_result:
+            d[(source_id, target_id, label)] = \
+                Edge(source_id, target_id, label, properties=data)
+        return d.values()
+
+    @staticmethod
+    def _vertex_result_to_list(vertex_result):
+        d = dict()
+        for v_id, data in vertex_result:
+            d[v_id] = Vertex(vertex_id=v_id, properties=data)
+        return d.values()
 
     def sub_graph_matching(self, subgraph, known_matches, validate=False):
         return subgraph_matching(self.graph, subgraph, known_matches, validate)

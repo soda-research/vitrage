@@ -35,11 +35,13 @@ class Direction(object):
 
 @six.add_metaclass(abc.ABCMeta)
 class Graph(object):
-    def __init__(self, name, graph_type):
+    def __init__(self, name, graph_type, vertices=None, edges=None):
         """Create a Graph instance
 
         :type name: str
         :type graph_type: str
+        :type vertices: list of Vertex
+        :type edges: list of Edge
         :rtype: Graph
         """
         self.name = name
@@ -103,6 +105,16 @@ class Graph(object):
         """
         pass
 
+    def add_vertices(self, vertices):
+        """Add a list of vertices to the graph
+
+        Uses add_vertex to add each vertex
+
+        :param vertices:
+        :type vertices:list of Vertex
+        """
+        pass
+
     @abc.abstractmethod
     def add_edge(self, e):
         """Add an edge to the graph
@@ -127,6 +139,16 @@ class Graph(object):
 
         :param e: the edge to add
         :type e: Edge
+        """
+        pass
+
+    def add_edges(self, edges):
+        """Add a list of edges to the graph
+
+        Uses add_edge to add each edge
+
+        :param edges:
+        :type edges:list of Edge
         """
         pass
 
