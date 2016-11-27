@@ -1,7 +1,7 @@
 {
   "vitrage_sample_date": "2015-12-01T12:46:41Z",
-  "vitrage_sync_type": "consistency",
-  "vitrage_sync_mode": "update",
+  "vitrage_entity_type": "consistency",
+  "vitrage_action_type": "update",
   "vitrage_event_type": "delete_entity",
   "vitrage_id": "[0-9]{5}"
 }

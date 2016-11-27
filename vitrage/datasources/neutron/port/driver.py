@@ -12,8 +12,8 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from vitrage.common.constants import ActionType
 from vitrage.common.constants import DatasourceProperties as DSProps
-from vitrage.common.constants import SyncMode
 from vitrage.datasources.neutron.base import NeutronBase
 from vitrage.datasources.neutron.port import NEUTRON_PORT_DATASOURCE
 
@@ -32,10 +32,10 @@ class PortDriver(NeutronBase):
         event[DSProps.EVENT_TYPE] = event_type
 
         return PortDriver.make_pickleable([event], NEUTRON_PORT_DATASOURCE,
-                                          SyncMode.UPDATE)[0]
+                                          ActionType.UPDATE)[0]
 
-    def get_all(self, sync_mode):
+    def get_all(self, action_type):
         return self.make_pickleable(
             self.client.list_ports()['ports'],
             NEUTRON_PORT_DATASOURCE,
-            sync_mode)
+            action_type)

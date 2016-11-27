@@ -10,8 +10,8 @@
 # distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
 # WARRANTIES OR CONDITIONS OF ANY KIND,  either express or implied. See the
 # License for the specific language governing permissions and limitations
-
 # under the License.
+
 from vitrage.datasources.nova.nova_driver_base import NovaDriverBase
 from vitrage.datasources.nova.zone import NOVA_ZONE_DATASOURCE
 
@@ -27,9 +27,9 @@ class ZoneDriver(NovaDriverBase):
                 zones_res.append(zone_dict)
         return zones_res
 
-    def get_all(self, sync_mode):
+    def get_all(self, action_type):
         return self.make_pickleable(self.filter_internal_zone(
             self.client.availability_zones.list()),
             NOVA_ZONE_DATASOURCE,
-            sync_mode,
+            action_type,
             'manager')

@@ -12,8 +12,8 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from vitrage.common.constants import ActionType
 from vitrage.common.constants import DatasourceProperties as DSProps
-from vitrage.common.constants import SyncMode
 from vitrage.datasources.cinder.volume import CINDER_VOLUME_DATASOURCE
 from vitrage.datasources.driver_base import DriverBase
 from vitrage.datasources.heat.stack import HEAT_STACK_DATASOURCE
@@ -75,7 +75,7 @@ class HeatStackDriver(DriverBase):
 
         return HeatStackDriver.make_pickleable([event],
                                                HEAT_STACK_DATASOURCE,
-                                               SyncMode.UPDATE)[0]
+                                               ActionType.UPDATE)[0]
 
     def _filter_resource_types(self):
         types = self.conf.datasources.types
@@ -102,11 +102,11 @@ class HeatStackDriver(DriverBase):
                               HeatStackDriver.RESOURCE_TYPE_CONVERSION]
         return stack
 
-    def get_all(self, sync_mode):
+    def get_all(self, action_type):
         stacks = HeatStackDriver.client().stacks.list(global_tenant=True)
         stacks_list = self._make_stacks_list(stacks)
         stacks_with_resources = self._append_stacks_resources(stacks_list)
         return self.make_pickleable(stacks_with_resources,
                                     HEAT_STACK_DATASOURCE,
-                                    sync_mode,
+                                    action_type,
                                     'manager')

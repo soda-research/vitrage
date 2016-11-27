@@ -38,15 +38,15 @@ class StaticPhysicalDriver(DriverBase):
         self.cfg = conf
         self.cache = {}
 
-    def get_all(self, sync_mode):
+    def get_all(self, action_type):
         return self.make_pickleable(self._get_all_entities(),
                                     STATIC_PHYSICAL_DATASOURCE,
-                                    sync_mode)
+                                    action_type)
 
-    def get_changes(self, sync_mode):
+    def get_changes(self, action_type):
         return self.make_pickleable(self._get_changes_entities(),
                                     STATIC_PHYSICAL_DATASOURCE,
-                                    sync_mode)
+                                    action_type)
 
     def _get_all_entities(self):
         static_entities = []

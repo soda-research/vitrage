@@ -162,7 +162,7 @@ class TestCinderVolumeTransformer(base.BaseTest):
         is_update_event = tbase.is_update_event(event)
 
         self.assertEqual(EntityCategory.RESOURCE, vertex[VProps.CATEGORY])
-        self.assertEqual(event[DSProps.SYNC_TYPE], vertex[VProps.TYPE])
+        self.assertEqual(event[DSProps.ENTITY_TYPE], vertex[VProps.TYPE])
 
         id_field_path = 'volume_id' if is_update_event else 'id'
         self.assertEqual(

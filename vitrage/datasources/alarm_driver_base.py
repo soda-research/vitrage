@@ -26,8 +26,8 @@ class AlarmDriverBase(DriverBase):
         super(DriverBase, self).__init__()
         self.cache = dict()
 
-    def _sync_type(self):
-        """Return the type of the plugin """
+    def _entity_type(self):
+        """Return the type of the datasource """
         pass
 
     def _alarm_key(self, alarm):
@@ -71,15 +71,15 @@ class AlarmDriverBase(DriverBase):
         """
         pass
 
-    def get_all(self, sync_mode):
+    def get_all(self, action_type):
         return self.make_pickleable(self._get_all_alarms(),
-                                    self._sync_type(),
-                                    sync_mode)
+                                    self._entity_type(),
+                                    action_type)
 
-    def get_changes(self, sync_mode):
+    def get_changes(self, action_type):
         return self.make_pickleable(self._get_changed_alarms(),
-                                    self._sync_type(),
-                                    sync_mode)
+                                    self._entity_type(),
+                                    action_type)
 
     def _get_all_alarms(self):
         alarms = self._get_alarms()

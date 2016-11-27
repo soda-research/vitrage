@@ -17,9 +17,9 @@ import os
 from oslo_config import cfg
 from oslo_log import log as logging
 
+from vitrage.common.constants import ActionType
 from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import EventAction
-from vitrage.common.constants import SyncMode
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.common import file_utils
 from vitrage.datasources.static_physical import driver
@@ -92,7 +92,8 @@ class TestStaticPhysicalDriver(base.BaseTest):
 
     def test_get_all(self):
         # Action
-        static_entities = self.static_physical_driver.get_all(SyncMode.UPDATE)
+        static_entities = \
+            self.static_physical_driver.get_all(ActionType.UPDATE)
 
         # Test assertions
         self.assertEqual(5, len(static_entities))
@@ -100,7 +101,7 @@ class TestStaticPhysicalDriver(base.BaseTest):
     # noinspection PyAttributeOutsideInit
     def test_get_changes(self):
         # Setup
-        entities = self.static_physical_driver.get_all(SyncMode.UPDATE)
+        entities = self.static_physical_driver.get_all(ActionType.UPDATE)
         self.assertEqual(5, len(entities))
 
         self.conf = cfg.ConfigOpts()

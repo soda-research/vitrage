@@ -67,7 +67,7 @@ class TestStaticPhysical(TestDataSourcesBase):
             snapshot_events=1)
         static_events = mock_driver.generate_random_events_list(spec_list)
         static_physical_event = static_events[0]
-        static_physical_event[DSProps.SYNC_TYPE] = SWITCH
+        static_physical_event[DSProps.ENTITY_TYPE] = SWITCH
         static_physical_event['relationships'][0]['name'] = \
             self._find_entity_id_by_type(processor.entity_graph,
                                          NOVA_HOST_DATASOURCE)

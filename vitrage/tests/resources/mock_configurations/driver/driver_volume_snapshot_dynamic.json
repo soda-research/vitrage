@@ -4,8 +4,8 @@
   "created_at": "2015-12-01T12:46:41Z",
   "status": "In-use",
   "id": "12345",
-  "vitrage_sync_type": "cinder.volume",
-  "vitrage_sync_mode": "snapshot",
+  "vitrage_entity_type": "cinder.volume",
+  "vitrage_action_type": "snapshot",
   "vitrage_sample_date": "2015-12-01T12:46:41Z",
   "volume_type": "lvmdriver-1",
   "size": "1559"

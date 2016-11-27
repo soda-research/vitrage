@@ -64,7 +64,7 @@ class EdgeLabel(object):
                 if not label.startswith(('_', 'labels'))]
 
 
-class SyncMode(object):
+class ActionType(object):
     SNAPSHOT = 'snapshot'
     INIT_SNAPSHOT = 'init_snapshot'
     UPDATE = 'update'
@@ -88,8 +88,8 @@ class EntityCategory(object):
 
 
 class DatasourceProperties(object):
-    SYNC_TYPE = 'vitrage_sync_type'
-    SYNC_MODE = 'vitrage_sync_mode'
+    ENTITY_TYPE = 'vitrage_entity_type'
+    ACTION_TYPE = 'vitrage_action_type'
     SAMPLE_DATE = 'vitrage_sample_date'
     EVENT_TYPE = 'vitrage_event_type'
 

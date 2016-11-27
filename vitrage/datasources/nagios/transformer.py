@@ -63,7 +63,7 @@ class NagiosTransformer(AlarmTransformerBase):
         return graph_utils.create_vertex(
             self._create_entity_key(entity_event),
             entity_category=EntityCategory.ALARM,
-            entity_type=entity_event[DSProps.SYNC_TYPE],
+            entity_type=entity_event[DSProps.ENTITY_TYPE],
             entity_state=self._get_alarm_state(entity_event),
             sample_timestamp=sample_timestamp,
             update_timestamp=update_timestamp,
@@ -124,10 +124,10 @@ class NagiosTransformer(AlarmTransformerBase):
 
     def _create_entity_key(self, entity_event):
 
-        sync_type = entity_event[DSProps.SYNC_TYPE]
+        entity_type = entity_event[DSProps.ENTITY_TYPE]
         alarm_name = entity_event[NagiosProperties.SERVICE]
         resource_name = entity_event[NagiosProperties.RESOURCE_NAME]
-        return tbase.build_key(self._key_values(sync_type,
+        return tbase.build_key(self._key_values(entity_type,
                                                 resource_name,
                                                 alarm_name))
 

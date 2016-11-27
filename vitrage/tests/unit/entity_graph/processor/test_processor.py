@@ -14,9 +14,9 @@
 
 from oslo_config import cfg
 
+from vitrage.common.constants import ActionType
 from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import EventAction
-from vitrage.common.constants import SyncMode
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.common.datetime_utils import utcnow
 from vitrage.datasources.transformer_base import Neighbor
@@ -51,13 +51,13 @@ class TestProcessor(TestEntityGraphUnitBase):
         # check create instance event
         processor = proc.Processor(self.conf, InitializationStatus())
         event = self._create_event(spec_type=self.INSTANCE_SPEC,
-                                   sync_mode=SyncMode.INIT_SNAPSHOT)
+                                   action_type=ActionType.INIT_SNAPSHOT)
         processor.process_event(event)
         self._check_graph(processor, self.NUM_VERTICES_AFTER_CREATION,
                           self.NUM_EDGES_AFTER_CREATION)
 
         # check update instance even
-        event[DSProps.SYNC_MODE] = SyncMode.UPDATE
+        event[DSProps.ACTION_TYPE] = ActionType.UPDATE
         event[DSProps.EVENT_TYPE] = 'compute.instance.volume.attach'
         event['hostname'] = 'new_host'
         event['instance_id'] = event['id']
@@ -68,7 +68,7 @@ class TestProcessor(TestEntityGraphUnitBase):
                           self.NUM_EDGES_AFTER_CREATION)
 
         # check delete instance event
-        event[DSProps.SYNC_MODE] = SyncMode.UPDATE
+        event[DSProps.ACTION_TYPE] = ActionType.UPDATE
         event[DSProps.EVENT_TYPE] = 'compute.instance.delete.end'
         processor.process_event(event)
         self._check_graph(processor, self.NUM_VERTICES_AFTER_DELETION,
@@ -133,10 +133,10 @@ class TestProcessor(TestEntityGraphUnitBase):
         # setup
         vertex1, neighbors1, processor = self._create_entity(
             spec_type=self.INSTANCE_SPEC,
-            sync_mode=SyncMode.INIT_SNAPSHOT)
+            action_type=ActionType.INIT_SNAPSHOT)
         vertex2, neighbors2, processor = self._create_entity(
             spec_type=self.INSTANCE_SPEC,
-            sync_mode=SyncMode.INIT_SNAPSHOT,
+            action_type=ActionType.INIT_SNAPSHOT,
             processor=processor)
         self.assertEqual(2, processor.entity_graph.num_edges())
 
@@ -155,10 +155,10 @@ class TestProcessor(TestEntityGraphUnitBase):
         # setup
         vertex1, neighbors1, processor = self._create_entity(
             spec_type=self.INSTANCE_SPEC,
-            sync_mode=SyncMode.INIT_SNAPSHOT)
+            action_type=ActionType.INIT_SNAPSHOT)
         vertex2, neighbors2, processor = self._create_entity(
             spec_type=self.INSTANCE_SPEC,
-            sync_mode=SyncMode.INIT_SNAPSHOT,
+            action_type=ActionType.INIT_SNAPSHOT,
             processor=processor)
         self.assertEqual(2, processor.entity_graph.num_edges())
 
@@ -179,7 +179,7 @@ class TestProcessor(TestEntityGraphUnitBase):
         # setup
         vertex, neighbors, processor = self._create_entity(
             spec_type=self.INSTANCE_SPEC,
-            sync_mode=SyncMode.INIT_SNAPSHOT)
+            action_type=ActionType.INIT_SNAPSHOT)
         self.assertEqual(1, processor.entity_graph.num_edges())
         vertex[VProps.IS_DELETED] = True
         processor.entity_graph.update_vertex(vertex)
@@ -302,7 +302,7 @@ class TestProcessor(TestEntityGraphUnitBase):
         # create instance event with host neighbor
         (vertex, neighbors, processor) = self._create_entity(
             spec_type=self.INSTANCE_SPEC,
-            sync_mode=SyncMode.INIT_SNAPSHOT,
+            action_type=ActionType.INIT_SNAPSHOT,
             properties=kwargs,
             processor=processor)
 

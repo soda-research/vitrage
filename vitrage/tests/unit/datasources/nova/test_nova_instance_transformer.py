@@ -17,11 +17,11 @@ import datetime
 from oslo_config import cfg
 from oslo_log import log as logging
 
+from vitrage.common.constants import ActionType
 from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import EdgeLabel
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import EventAction
-from vitrage.common.constants import SyncMode
 from vitrage.common.constants import UpdateMethod
 from vitrage.common.constants import VertexProperties
 from vitrage.datasources.nova.host import NOVA_HOST_DATASOURCE
@@ -118,10 +118,10 @@ class NovaInstanceTransformerTest(base.BaseTest):
             host_neighbor = wrapper.neighbors[0]
             self._validate_host_neighbor(host_neighbor, event)
 
-            sync_mode = event[DSProps.SYNC_MODE]
-            if sync_mode == SyncMode.INIT_SNAPSHOT:
+            action_type = event[DSProps.ACTION_TYPE]
+            if action_type == ActionType.INIT_SNAPSHOT:
                 self.assertEqual(EventAction.CREATE_ENTITY, wrapper.action)
-            elif sync_mode == SyncMode.SNAPSHOT:
+            elif action_type == ActionType.SNAPSHOT:
                 self.assertEqual(EventAction.UPDATE_ENTITY, wrapper.action)
 
     def test_update_event_transform(self):

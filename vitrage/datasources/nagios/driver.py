@@ -25,6 +25,7 @@ from vitrage.datasources.nagios.parser import NagiosParser
 from vitrage.datasources.nagios.properties import NagiosProperties\
     as NagiosProps
 from vitrage.datasources.nagios.properties import NagiosTestStatus
+
 # noinspection PyProtectedMember
 from vitrage.i18n import _LE
 # noinspection PyProtectedMember
@@ -41,7 +42,7 @@ class NagiosDriver(AlarmDriverBase):
         self.conf = conf
         self.config = NagiosConfig(conf)
 
-    def _sync_type(self):
+    def _entity_type(self):
         return NAGIOS_DATASOURCE
 
     def _alarm_key(self, alarm):
@@ -83,7 +84,7 @@ class NagiosDriver(AlarmDriverBase):
         for alarm in alarms:
             # based on nagios configuration file, convert nagios host name
             # to vitrage resource type and name
-            alarm[DSProps.SYNC_TYPE] = NagiosProps.NAGIOS
+            alarm[DSProps.ENTITY_TYPE] = NagiosProps.NAGIOS
 
             nagios_host = alarm[NagiosProps.RESOURCE_NAME]
             vitrage_resource = self.config.get_vitrage_resource(nagios_host)

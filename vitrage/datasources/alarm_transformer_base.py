@@ -14,10 +14,10 @@
 
 from oslo_log import log as logging
 
+from vitrage.common.constants import ActionType
 from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import EventAction
-from vitrage.common.constants import SyncMode
 from vitrage.common.exception import VitrageTransformerError
 from vitrage.datasources.alarm_properties import AlarmProperties as AlarmProps
 from vitrage.datasources import transformer_base as tbase
@@ -44,15 +44,16 @@ class AlarmTransformerBase(tbase.TransformerBase):
            entity_event[DSProps.EVENT_TYPE] == EventAction.DELETE_ENTITY:
             return entity_event[DSProps.EVENT_TYPE]
 
-        sync_mode = entity_event[DSProps.SYNC_MODE]
-        if sync_mode in (SyncMode.UPDATE, SyncMode.SNAPSHOT):
+        action_type = entity_event[DSProps.ACTION_TYPE]
+        if action_type in (ActionType.UPDATE, ActionType.SNAPSHOT):
             return EventAction.DELETE_ENTITY if self._ok_status(entity_event) \
                 else EventAction.UPDATE_ENTITY
 
-        if SyncMode.INIT_SNAPSHOT == sync_mode:
+        if ActionType.INIT_SNAPSHOT == action_type:
             return EventAction.CREATE_ENTITY
 
-        raise VitrageTransformerError('Invalid sync mode: (%s)' % sync_mode)
+        raise VitrageTransformerError('Invalid action type: (%s)'
+                                      % action_type)
 
     def _key_values(self, *args):
         return (EntityCategory.ALARM,) + args

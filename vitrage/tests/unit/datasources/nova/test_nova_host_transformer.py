@@ -17,11 +17,11 @@ import datetime
 from oslo_config import cfg
 from oslo_log import log as logging
 
+from vitrage.common.constants import ActionType
 from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import EdgeLabel
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import EventAction
-from vitrage.common.constants import SyncMode
 from vitrage.common.constants import UpdateMethod
 from vitrage.common.constants import VertexProperties
 from vitrage.datasources.nova.host import NOVA_HOST_DATASOURCE
@@ -133,7 +133,7 @@ class NovaHostTransformerTest(base.BaseTest):
             self.assertEqual(1, len(neighbors))
             self._validate_zone_neighbor(neighbors[0], event)
 
-            if SyncMode.SNAPSHOT == event[DSProps.SYNC_MODE]:
+            if ActionType.SNAPSHOT == event[DSProps.ACTION_TYPE]:
                 self.assertEqual(EventAction.UPDATE_ENTITY, wrapper.action)
             else:
                 self.assertEqual(EventAction.CREATE_ENTITY, wrapper.action)
@@ -200,7 +200,7 @@ class NovaHostTransformerTest(base.BaseTest):
             zone_num=1,
             host_num=1,
             snapshot_events=1,
-            snap_vals={DSProps.SYNC_MODE: SyncMode.SNAPSHOT})
+            snap_vals={DSProps.ACTION_TYPE: ActionType.SNAPSHOT})
 
         hosts_events = mock_sync.generate_random_events_list(spec_list)
         host_transformer = self.transformers[NOVA_HOST_DATASOURCE]
@@ -216,7 +216,7 @@ class NovaHostTransformerTest(base.BaseTest):
             zone_num=1,
             host_num=1,
             snapshot_events=1,
-            snap_vals={DSProps.SYNC_MODE: SyncMode.INIT_SNAPSHOT})
+            snap_vals={DSProps.ACTION_TYPE: ActionType.INIT_SNAPSHOT})
         hosts_events = mock_sync.generate_random_events_list(spec_list)
         host_transformer = self.transformers[NOVA_HOST_DATASOURCE]
 

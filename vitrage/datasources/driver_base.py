@@ -17,9 +17,9 @@ import six
 
 from oslo_log import log
 
+from vitrage.common.constants import ActionType
 from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import EventAction
-from vitrage.common.constants import SyncMode
 from vitrage.common import datetime_utils
 
 LOG = log.getLogger(__name__)
@@ -32,54 +32,54 @@ class DriverBase(object):
         pass
 
     @abc.abstractmethod
-    def get_all(self, sync_mode):
+    def get_all(self, action_type):
         pass
 
     def callback_on_fault(self, exception):
         LOG.exception('Exception: {0}'.format(exception))
 
     @staticmethod
-    def _get_end_message(sync_type):
+    def _get_end_message(entity_type):
         end_message = {
-            DSProps.SYNC_TYPE: sync_type,
-            DSProps.SYNC_MODE: SyncMode.INIT_SNAPSHOT,
+            DSProps.ENTITY_TYPE: entity_type,
+            DSProps.ACTION_TYPE: ActionType.INIT_SNAPSHOT,
             DSProps.EVENT_TYPE: EventAction.END_MESSAGE
         }
         return end_message
 
-    def get_changes(self, sync_mode):
+    def get_changes(self, action_type):
         pass
 
     @classmethod
-    def make_pickleable(cls, entities, sync_type, sync_mode, *args):
+    def make_pickleable(cls, entities, entity_type, action_type, *args):
         pickleable_entities = []
 
         for entity in entities:
             for field in args:
                 entity.pop(field, None)
 
-            cls._add_sync_type(entity, sync_type)
-            cls._add_sync_mode(entity, sync_mode)
+            cls._add_entity_type(entity, entity_type)
+            cls._add_action_type(entity, action_type)
             cls._add_sampling_time(entity)
             pickleable_entities.append(entity)
 
-        if sync_mode == SyncMode.INIT_SNAPSHOT:
-            pickleable_entities.append(cls._get_end_message(sync_type))
+        if action_type == ActionType.INIT_SNAPSHOT:
+            pickleable_entities.append(cls._get_end_message(entity_type))
 
         return pickleable_entities
 
     @staticmethod
-    def _add_sync_type(entity, sync_type):
-        if DSProps.SYNC_TYPE not in entity:
-            entity[DSProps.SYNC_TYPE] = sync_type
+    def _add_entity_type(entity, entity_type):
+        if DSProps.ENTITY_TYPE not in entity:
+            entity[DSProps.ENTITY_TYPE] = entity_type
 
     @staticmethod
     def _add_sampling_time(entity):
         entity[DSProps.SAMPLE_DATE] = str(datetime_utils.utcnow())
 
     @staticmethod
-    def _add_sync_mode(entity, sync_mode):
-        entity[DSProps.SYNC_MODE] = sync_mode
+    def _add_action_type(entity, action_type):
+        entity[DSProps.ACTION_TYPE] = action_type
 
     @staticmethod
     @abc.abstractmethod

@@ -35,7 +35,7 @@ class AodhDriver(AlarmDriverBase):
             self._client = os_clients.ceilometer_client(self.conf)
         return self._client
 
-    def _sync_type(self):
+    def _entity_type(self):
         return AODH_DATASOURCE
 
     def _alarm_key(self, alarm):

@@ -17,10 +17,10 @@ import time
 
 from oslo_log import log
 
+from vitrage.common.constants import ActionType
 from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import EventAction
-from vitrage.common.constants import SyncMode
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.common.datetime_utils import utcnow
 from vitrage.datasources.consistency import CONSISTENCY_DATASOURCE
@@ -152,8 +152,8 @@ class ConsistencyEnforcer(object):
     def _push_events_to_queue(self, vertices, action):
         for vertex in vertices:
             event = {
-                DSProps.SYNC_TYPE: CONSISTENCY_DATASOURCE,
-                DSProps.SYNC_MODE: SyncMode.UPDATE,
+                DSProps.ENTITY_TYPE: CONSISTENCY_DATASOURCE,
+                DSProps.ACTION_TYPE: ActionType.UPDATE,
                 DSProps.SAMPLE_DATE: str(utcnow()),
                 DSProps.EVENT_TYPE: action,
                 VProps.VITRAGE_ID: vertex[VProps.VITRAGE_ID]

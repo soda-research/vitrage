@@ -1,5 +1,5 @@
 {
-  "vitrage_sync_mode": "update",
+  "vitrage_action_type": "update",
   "vitrage_sample_date": "2015-12-01T12:46:41Z",
   "publisher_id": "compute.emalin-devstack",
   "vitrage_event_type": "compute.instance.pause.end|compute.instance.delete.end|compute.instance.create.start",

@@ -152,7 +152,7 @@ class NovaZoneTransformerTest(base.BaseTest):
                 self._validate_host_neighbor(neighbor,
                                              zone_vertex_id,
                                              hosts,
-                                             event[DSProps.SYNC_MODE])
+                                             event[DSProps.ACTION_TYPE])
 
         self.assertEqual(1,
                          cluster_neighbors_counter,
@@ -162,7 +162,7 @@ class NovaZoneTransformerTest(base.BaseTest):
                                 host_neighbor,
                                 zone_vertex_id,
                                 hosts,
-                                sync_mode):
+                                action_type):
 
         host_vertex = host_neighbor.vertex
         host_vertex_id = host_vertex.get(VertexProperties.ID)

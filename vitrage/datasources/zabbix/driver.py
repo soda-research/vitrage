@@ -17,8 +17,8 @@ from collections import namedtuple
 from oslo_log import log
 from oslo_utils import importutils as utils
 
+from vitrage.common.constants import ActionType
 from vitrage.common.constants import DatasourceProperties as DSProps
-from vitrage.common.constants import SyncMode
 from vitrage.common import file_utils
 from vitrage.datasources.alarm_driver_base import AlarmDriverBase
 from vitrage.datasources.zabbix.properties import ZabbixProperties as ZProps
@@ -63,7 +63,7 @@ class ZabbixDriver(AlarmDriverBase):
             LOG.exception('pyzabbix.ZabbixAPI %s', e)
             self._client = None
 
-    def _sync_type(self):
+    def _entity_type(self):
         return ZABBIX_DATASOURCE
 
     def _alarm_key(self, alarm):
@@ -183,7 +183,7 @@ class ZabbixDriver(AlarmDriverBase):
             event[ZProps.RESOURCE_TYPE] = v_resource[ZProps.RESOURCE_TYPE]
 
         return ZabbixDriver.make_pickleable([event], ZABBIX_DATASOURCE,
-                                            SyncMode.UPDATE)[0]
+                                            ActionType.UPDATE)[0]
 
     @staticmethod
     def get_event_types():

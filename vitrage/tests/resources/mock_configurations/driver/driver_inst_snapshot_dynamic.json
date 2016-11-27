@@ -1,7 +1,7 @@
 {
   "OS-EXT-STS:task_state": null,
-  "vitrage_sync_mode": "snapshot",
-  "vitrage_sync_type": "nova.instance",
+  "vitrage_action_type": "snapshot",
+  "vitrage_entity_type": "nova.instance",
   "vitrage_sample_date": "2015-12-01T12:46:41Z",
   "addresses": {
     "public": [

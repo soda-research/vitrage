@@ -68,7 +68,7 @@ class AodhTransformer(AlarmTransformerBase):
             self._create_entity_key(entity_event),
             entity_id=entity_event[AodhProps.ALARM_ID],
             entity_category=EntityCategory.ALARM,
-            entity_type=entity_event[DSProps.SYNC_TYPE],
+            entity_type=entity_event[DSProps.ENTITY_TYPE],
             entity_state=self._get_alarm_state(entity_event),
             sample_timestamp=sample_timestamp,
             update_timestamp=update_timestamp,
@@ -122,9 +122,9 @@ class AodhTransformer(AlarmTransformerBase):
         if _is_vitrage_alarm(entity_event):
             return entity_event.get(AodhProps.VITRAGE_ID)
 
-        sync_type = entity_event[DSProps.SYNC_TYPE]
+        entity_type = entity_event[DSProps.ENTITY_TYPE]
         alarm_id = entity_event[AodhProps.ALARM_ID]
-        return tbase.build_key(self._key_values(sync_type, alarm_id))
+        return tbase.build_key(self._key_values(entity_type, alarm_id))
 
     @staticmethod
     def _timestamp(entity_event):

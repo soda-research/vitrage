@@ -52,7 +52,7 @@ class StaticPhysicalTransformer(ResourceTransformerBase):
 
     def _create_vertex(self, entity_event):
 
-        sync_type = entity_event[VProps.TYPE]
+        entity_type = entity_event[VProps.TYPE]
         entity_id = entity_event[VProps.ID]
         sample_timestamp = entity_event[DSProps.SAMPLE_DATE]
         update_timestamp = self._format_update_timestamp(
@@ -66,7 +66,7 @@ class StaticPhysicalTransformer(ResourceTransformerBase):
             entity_key,
             entity_id=entity_id,
             entity_category=EntityCategory.RESOURCE,
-            entity_type=sync_type,
+            entity_type=entity_type,
             sample_timestamp=sample_timestamp,
             update_timestamp=update_timestamp,
             entity_state=state,
@@ -126,8 +126,8 @@ class StaticPhysicalTransformer(ResourceTransformerBase):
 
     def _create_entity_key(self, entity_event):
         entity_id = entity_event[VProps.ID]
-        sync_type = entity_event[VProps.TYPE]
-        key_fields = self._key_values(sync_type, entity_id)
+        entity_type = entity_event[VProps.TYPE]
+        key_fields = self._key_values(entity_type, entity_id)
         return transformer_base.build_key(key_fields)
 
     @staticmethod

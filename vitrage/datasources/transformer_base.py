@@ -21,9 +21,9 @@ import six
 from vitrage.common import datetime_utils
 
 import vitrage.common.constants as cons
+from vitrage.common.constants import ActionType
 from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import EventAction
-from vitrage.common.constants import SyncMode
 from vitrage.common.constants import UpdateMethod
 from vitrage.common.exception import VitrageTransformerError
 from vitrage.common import utils
@@ -87,7 +87,7 @@ def convert_timestamp_format(current_timestamp_format, timestamp):
 
 
 def is_update_event(event):
-    return event[DSProps.SYNC_MODE] == SyncMode.UPDATE
+    return event[DSProps.ACTION_TYPE] == ActionType.UPDATE
 
 
 @six.add_metaclass(abc.ABCMeta)
@@ -212,21 +212,21 @@ class TransformerBase(object):
         :rtype: str
         """
 
-        sync_mode = entity_event[DSProps.SYNC_MODE]
+        action_type = entity_event[DSProps.ACTION_TYPE]
 
-        if SyncMode.UPDATE == sync_mode:
+        if ActionType.UPDATE == action_type:
             return self.UPDATE_EVENT_TYPES.get(
                 entity_event.get(DSProps.EVENT_TYPE, None),
                 EventAction.UPDATE_ENTITY)
 
-        if SyncMode.SNAPSHOT == sync_mode:
+        if ActionType.SNAPSHOT == action_type:
             return EventAction.UPDATE_ENTITY
 
-        if SyncMode.INIT_SNAPSHOT == sync_mode:
+        if ActionType.INIT_SNAPSHOT == action_type:
             return EventAction.CREATE_ENTITY
 
         raise VitrageTransformerError(
-            'Invalid sync mode: (%s)' % sync_mode)
+            'Invalid action type: (%s)' % action_type)
 
     def _key_values(self, *args):
         """A list of key fields
@@ -240,16 +240,16 @@ class TransformerBase(object):
 
     @staticmethod
     def _create_end_vertex(entity_event):
-        sync_type = entity_event[DSProps.SYNC_TYPE]
+        entity_type = entity_event[DSProps.ENTITY_TYPE]
         return graph_utils.create_vertex(
-            'END_MESSAGE:' + sync_type,
-            entity_type=sync_type)
+            'END_MESSAGE:' + entity_type,
+            entity_type=entity_type)
 
     @staticmethod
     def _is_end_message(entity_event):
 
-        sync_mode = entity_event[DSProps.SYNC_MODE]
-        is_snapshot_event = sync_mode == SyncMode.INIT_SNAPSHOT
+        action_type = entity_event[DSProps.ACTION_TYPE]
+        is_snapshot_event = action_type == ActionType.INIT_SNAPSHOT
         event_type = entity_event.get(DSProps.EVENT_TYPE, None)
         return is_snapshot_event and event_type == EventAction.END_MESSAGE
 

@@ -1,5 +1,5 @@
 {
-  "vitrage_sync_mode": "init_snapshot",
+  "vitrage_action_type": "init_snapshot",
   "id": "host[0-3]",
   "name": "host[0-3]",
   "zone_id": "zone[0-1]",

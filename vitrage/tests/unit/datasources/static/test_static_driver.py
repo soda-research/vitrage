@@ -15,8 +15,8 @@
 from oslo_config import cfg
 from oslo_log import log as logging
 
+from vitrage.common.constants import ActionType
 from vitrage.common.constants import EventAction
-from vitrage.common.constants import SyncMode
 from vitrage.datasources.static import driver
 from vitrage.datasources.static import STATIC_DATASOURCE
 from vitrage.tests import base
@@ -70,7 +70,7 @@ class TestStaticDriver(base.BaseTest):
 
     def test_get_all(self):
         # Action
-        static_entities = self.static_driver.get_all(SyncMode.UPDATE)
+        static_entities = self.static_driver.get_all(ActionType.UPDATE)
 
         # Test assertions
         self.assertEqual(0, len(static_entities))
@@ -78,7 +78,7 @@ class TestStaticDriver(base.BaseTest):
     # noinspection PyAttributeOutsideInit
     def test_get_changes(self):
         # Setup
-        entities = self.static_driver.get_all(SyncMode.UPDATE)
+        entities = self.static_driver.get_all(ActionType.UPDATE)
         self.assertEqual(0, len(entities))
 
         self.conf = cfg.ConfigOpts()

@@ -15,11 +15,11 @@
 from oslo_config import cfg
 from oslo_log import log as logging
 
+from vitrage.common.constants import ActionType
 from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import EdgeLabel
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import EventAction
-from vitrage.common.constants import SyncMode
 from vitrage.common.constants import UpdateMethod
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.common.datetime_utils import format_unix_timestamp
@@ -77,7 +77,7 @@ class ZabbixTransformerTest(base.BaseTest):
             TransformerBase.KEY_SEPARATOR)
 
         self.assertEqual(EntityCategory.ALARM, observed_key_fields[0])
-        self.assertEqual(event[DSProps.SYNC_TYPE], observed_key_fields[1])
+        self.assertEqual(event[DSProps.ENTITY_TYPE], observed_key_fields[1])
         self.assertEqual(event[ZabbixProps.RESOURCE_NAME],
                          observed_key_fields[2])
         self.assertEqual(event[ZabbixProps.TRIGGER_ID],
@@ -109,8 +109,8 @@ class ZabbixTransformerTest(base.BaseTest):
             self._validate_action(alarm, wrapper)
 
     def _validate_action(self, alarm, wrapper):
-        sync_mode = alarm[DSProps.SYNC_MODE]
-        if sync_mode in (SyncMode.SNAPSHOT, SyncMode.UPDATE):
+        action_type = alarm[DSProps.ACTION_TYPE]
+        if action_type in (ActionType.SNAPSHOT, ActionType.UPDATE):
             if alarm[ZabbixProps.VALUE] == ZabbixTriggerValue.OK:
                 self.assertEqual(EventAction.DELETE_ENTITY, wrapper.action)
             else:
@@ -121,7 +121,7 @@ class ZabbixTransformerTest(base.BaseTest):
     def _validate_vertex(self, vertex, event):
 
         self.assertEqual(EntityCategory.ALARM, vertex[VProps.CATEGORY])
-        self.assertEqual(event[DSProps.SYNC_TYPE], vertex[VProps.TYPE])
+        self.assertEqual(event[DSProps.ENTITY_TYPE], vertex[VProps.TYPE])
         self.assertEqual(event[ZabbixProps.DESCRIPTION],
                          vertex[VProps.NAME])
 

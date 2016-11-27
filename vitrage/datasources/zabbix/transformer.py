@@ -78,7 +78,7 @@ class ZabbixTransformer(AlarmTransformerBase):
         return graph_utils.create_vertex(
             self._create_entity_key(entity_event),
             entity_category=EntityCategory.ALARM,
-            entity_type=entity_event[DSProps.SYNC_TYPE],
+            entity_type=entity_event[DSProps.ENTITY_TYPE],
             entity_state=entity_state,
             sample_timestamp=sample_timestamp,
             update_timestamp=update_timestamp,
@@ -138,10 +138,10 @@ class ZabbixTransformer(AlarmTransformerBase):
 
     def _create_entity_key(self, entity_event):
 
-        sync_type = entity_event[DSProps.SYNC_TYPE]
+        entity_type = entity_event[DSProps.ENTITY_TYPE]
         alarm_id = entity_event[ZProps.TRIGGER_ID]
         resource_name = entity_event[ZProps.RESOURCE_NAME]
-        return tbase.build_key(self._key_values(sync_type,
+        return tbase.build_key(self._key_values(entity_type,
                                                 resource_name,
                                                 alarm_id))
 

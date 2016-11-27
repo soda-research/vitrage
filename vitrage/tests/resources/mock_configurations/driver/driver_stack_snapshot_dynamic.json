@@ -4,11 +4,11 @@
   "creation_time": "2016-08-25T13:03:36",
   "stack_owner": "admin",
   "project": "a077142e250543be90f6fce8f623d45d",
-  "vitrage_sync_mode": "init_snapshot",
+  "vitrage_action_type": "init_snapshot",
   "id": "f22416fb-b33c-4e24-822e-0174421f5ece",
   "stack_status": "CREATE_COMPLETE",
   "vitrage_sample_date": "2016-08-2515:12:28.281460+00:00",
-  "vitrage_sync_type": "heat.stack",
+  "vitrage_entity_type": "heat.stack",
   "resources": [{
     "resource_name": "cinder_volume_1",
     "logical_resource_id": "cinder_volume_1",

@@ -29,7 +29,7 @@ from vitrage.tests.mocks import utils
 LOG = logging.getLogger(__name__)
 
 _TARGET_HOST = 'host-2'
-_NAGIOS_TEST_INFO = {'resource_name': _TARGET_HOST, 'sync_mode': 'snapshot'}
+_NAGIOS_TEST_INFO = {'resource_name': _TARGET_HOST, 'action_type': 'snapshot'}
 
 
 class TestScenarioEvaluator(TestFunctionalBase):

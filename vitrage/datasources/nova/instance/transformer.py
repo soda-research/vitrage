@@ -67,7 +67,7 @@ class InstanceTransformer(ResourceTransformerBase):
 
         sample_timestamp = entity_event[DSProps.SAMPLE_DATE]
 
-        # TODO(Alexey): need to check here that only the UPDATE sync_mode will
+        # TODO(Alexey): need to check that only the UPDATE action_type will
         #               update the UPDATE_TIMESTAMP property
         update_timestamp = self._format_update_timestamp(
             extract_field_value(entity_event, DSProps.SAMPLE_DATE),
