@@ -14,7 +14,7 @@
 
 from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import EntityCategory
-from vitrage.common.constants import EventAction
+from vitrage.common.constants import GraphAction
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.datasources.neutron.network import NEUTRON_NETWORK_DATASOURCE
 from vitrage.datasources.resource_transformer_base import \
@@ -33,9 +33,9 @@ class NetworkTransformer(ResourceTransformerBase):
         None: ('id',)
     }
 
-    # Event types which need to refer them differently
-    UPDATE_EVENT_TYPES = {
-        'network.delete.end': EventAction.DELETE_ENTITY,
+    # graph actions which need to refer them differently
+    GRAPH_ACTION_MAPPING = {
+        'network.delete.end': GraphAction.DELETE_ENTITY,
     }
 
     def __init__(self, transformers, conf):

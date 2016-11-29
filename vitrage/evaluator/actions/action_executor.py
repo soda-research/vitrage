@@ -16,7 +16,7 @@ import copy
 
 from oslo_utils import importutils
 
-from vitrage.common.constants import ActionType as AType
+from vitrage.common.constants import DatasourceAction as AType
 from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.common import datetime_utils
@@ -103,7 +103,7 @@ class ActionExecutor(object):
     @staticmethod
     def _add_default_properties(event):
 
-        event[DSProps.ACTION_TYPE] = AType.UPDATE
+        event[DSProps.DATASOURCE_ACTION] = AType.UPDATE
         event[DSProps.ENTITY_TYPE] = VITRAGE_TYPE
         event[VProps.UPDATE_TIMESTAMP] = str(datetime_utils.utcnow(False))
         event[VProps.SAMPLE_TIMESTAMP] = str(datetime_utils.utcnow())

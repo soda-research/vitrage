@@ -12,7 +12,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from vitrage.common.constants import ActionType
+from vitrage.common.constants import DatasourceAction
 from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.datasources.nova.instance import NOVA_INSTANCE_DATASOURCE
 from vitrage.datasources.nova.nova_driver_base import NovaDriverBase
@@ -24,12 +24,12 @@ class InstanceDriver(NovaDriverBase):
     def extract_events(instances):
         return [instance.__dict__ for instance in instances]
 
-    def get_all(self, action_type):
+    def get_all(self, datasource_action):
         return self.make_pickleable(
             self.extract_events(self.client.servers.list(
                 search_opts={'all_tenants': 1})),
             NOVA_INSTANCE_DATASOURCE,
-            action_type,
+            datasource_action,
             'manager',
             'OS-EXT-SRV-ATTR:user_data',
             '_info')
@@ -40,7 +40,7 @@ class InstanceDriver(NovaDriverBase):
 
         return InstanceDriver.make_pickleable([event],
                                               NOVA_INSTANCE_DATASOURCE,
-                                              ActionType.UPDATE)[0]
+                                              DatasourceAction.UPDATE)[0]
 
     @staticmethod
     def get_event_types():

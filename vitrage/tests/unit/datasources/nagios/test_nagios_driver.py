@@ -15,7 +15,7 @@
 from oslo_config import cfg
 from oslo_log import log as logging
 from vitrage.common.constants import DatasourceProperties as DSProps
-from vitrage.common.constants import EventAction
+from vitrage.common.constants import GraphAction
 from vitrage.datasources.nagios.properties import NagiosProperties as \
     NagiosProps
 from vitrage.tests.mocks import utils
@@ -498,7 +498,7 @@ class NagiosDriverTest(NagiosBaseTest):
         self.assertIsNotNone(services, 'No services returned')
         self.assertEqual(1, len(services))
         self._assert_contains(service_data1, services)
-        self.assertEqual(EventAction.DELETE_ENTITY,
+        self.assertEqual(GraphAction.DELETE_ENTITY,
                          services[0][DSProps.EVENT_TYPE])
 
         # Action - get changes, should not return the deleted alarm again
@@ -539,5 +539,5 @@ class NagiosDriverTest(NagiosBaseTest):
         self.assertIsNotNone(services, 'No services returned')
         self.assertEqual(1, len(services))
         self._assert_contains(service_data1, services)
-        self.assertEqual(EventAction.DELETE_ENTITY,
+        self.assertEqual(GraphAction.DELETE_ENTITY,
                          services[0][DSProps.EVENT_TYPE])

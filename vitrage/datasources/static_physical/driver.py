@@ -15,7 +15,7 @@
 import copy
 
 from vitrage.common.constants import DatasourceProperties as DSProps
-from vitrage.common.constants import EventAction
+from vitrage.common.constants import GraphAction
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.common import file_utils
 from vitrage.datasources.driver_base import DriverBase
@@ -38,15 +38,15 @@ class StaticPhysicalDriver(DriverBase):
         self.cfg = conf
         self.cache = {}
 
-    def get_all(self, action_type):
+    def get_all(self, datasource_action):
         return self.make_pickleable(self._get_all_entities(),
                                     STATIC_PHYSICAL_DATASOURCE,
-                                    action_type)
+                                    datasource_action)
 
-    def get_changes(self, action_type):
+    def get_changes(self, datasource_action):
         return self.make_pickleable(self._get_changes_entities(),
                                     STATIC_PHYSICAL_DATASOURCE,
-                                    action_type)
+                                    datasource_action)
 
     def _get_all_entities(self):
         static_entities = []
@@ -125,10 +125,10 @@ class StaticPhysicalDriver(DriverBase):
             if not new_entities or old_entity not in new_entities:
                 new_entity = self._find_entity(old_entity, new_entities)
                 if not new_entity:
-                    self._set_event_type(old_entity, EventAction.DELETE_ENTITY)
+                    self._set_event_type(old_entity, GraphAction.DELETE_ENTITY)
                     updates.append(old_entity.copy())
                 else:
-                    self._set_event_type(new_entity, EventAction.UPDATE_ENTITY)
+                    self._set_event_type(new_entity, GraphAction.UPDATE_ENTITY)
                     updates.append(new_entity.copy())
 
     @staticmethod

@@ -17,7 +17,7 @@ from collections import namedtuple
 from oslo_log import log
 from oslo_utils import importutils as utils
 
-from vitrage.common.constants import ActionType
+from vitrage.common.constants import DatasourceAction
 from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common import file_utils
 from vitrage.datasources.alarm_driver_base import AlarmDriverBase
@@ -183,7 +183,7 @@ class ZabbixDriver(AlarmDriverBase):
             event[ZProps.RESOURCE_TYPE] = v_resource[ZProps.RESOURCE_TYPE]
 
         return ZabbixDriver.make_pickleable([event], ZABBIX_DATASOURCE,
-                                            ActionType.UPDATE)[0]
+                                            DatasourceAction.UPDATE)[0]
 
     @staticmethod
     def get_event_types():

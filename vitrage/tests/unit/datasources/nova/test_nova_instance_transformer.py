@@ -17,11 +17,11 @@ import datetime
 from oslo_config import cfg
 from oslo_log import log as logging
 
-from vitrage.common.constants import ActionType
+from vitrage.common.constants import DatasourceAction
 from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import EdgeLabel
 from vitrage.common.constants import EntityCategory
-from vitrage.common.constants import EventAction
+from vitrage.common.constants import GraphAction
 from vitrage.common.constants import UpdateMethod
 from vitrage.common.constants import VertexProperties
 from vitrage.datasources.nova.host import NOVA_HOST_DATASOURCE
@@ -118,11 +118,11 @@ class NovaInstanceTransformerTest(base.BaseTest):
             host_neighbor = wrapper.neighbors[0]
             self._validate_host_neighbor(host_neighbor, event)
 
-            action_type = event[DSProps.ACTION_TYPE]
-            if action_type == ActionType.INIT_SNAPSHOT:
-                self.assertEqual(EventAction.CREATE_ENTITY, wrapper.action)
-            elif action_type == ActionType.SNAPSHOT:
-                self.assertEqual(EventAction.UPDATE_ENTITY, wrapper.action)
+            datasource_action = event[DSProps.DATASOURCE_ACTION]
+            if datasource_action == DatasourceAction.INIT_SNAPSHOT:
+                self.assertEqual(GraphAction.CREATE_ENTITY, wrapper.action)
+            elif datasource_action == DatasourceAction.SNAPSHOT:
+                self.assertEqual(GraphAction.UPDATE_ENTITY, wrapper.action)
 
     def test_update_event_transform(self):
         LOG.debug('Test tactual transform action for update events')
@@ -149,11 +149,11 @@ class NovaInstanceTransformerTest(base.BaseTest):
 
             event_type = event[DSProps.EVENT_TYPE]
             if event_type == 'compute.instance.delete.end':
-                self.assertEqual(EventAction.DELETE_ENTITY, wrapper.action)
+                self.assertEqual(GraphAction.DELETE_ENTITY, wrapper.action)
             elif event_type == 'compute.instance.create.start':
-                self.assertEqual(EventAction.CREATE_ENTITY, wrapper.action)
+                self.assertEqual(GraphAction.CREATE_ENTITY, wrapper.action)
             else:
-                self.assertEqual(EventAction.UPDATE_ENTITY, wrapper.action)
+                self.assertEqual(GraphAction.UPDATE_ENTITY, wrapper.action)
 
     def _validate_vertex_props(self, vertex, event):
 

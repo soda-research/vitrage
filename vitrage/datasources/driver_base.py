@@ -17,9 +17,9 @@ import six
 
 from oslo_log import log
 
-from vitrage.common.constants import ActionType
+from vitrage.common.constants import DatasourceAction
 from vitrage.common.constants import DatasourceProperties as DSProps
-from vitrage.common.constants import EventAction
+from vitrage.common.constants import GraphAction
 from vitrage.common import datetime_utils
 
 LOG = log.getLogger(__name__)
@@ -32,7 +32,7 @@ class DriverBase(object):
         pass
 
     @abc.abstractmethod
-    def get_all(self, action_type):
+    def get_all(self, datasource_action):
         pass
 
     def callback_on_fault(self, exception):
@@ -42,16 +42,16 @@ class DriverBase(object):
     def _get_end_message(entity_type):
         end_message = {
             DSProps.ENTITY_TYPE: entity_type,
-            DSProps.ACTION_TYPE: ActionType.INIT_SNAPSHOT,
-            DSProps.EVENT_TYPE: EventAction.END_MESSAGE
+            DSProps.DATASOURCE_ACTION: DatasourceAction.INIT_SNAPSHOT,
+            DSProps.EVENT_TYPE: GraphAction.END_MESSAGE
         }
         return end_message
 
-    def get_changes(self, action_type):
+    def get_changes(self, datasource_action):
         pass
 
     @classmethod
-    def make_pickleable(cls, entities, entity_type, action_type, *args):
+    def make_pickleable(cls, entities, entity_type, datasource_action, *args):
         pickleable_entities = []
 
         for entity in entities:
@@ -59,11 +59,11 @@ class DriverBase(object):
                 entity.pop(field, None)
 
             cls._add_entity_type(entity, entity_type)
-            cls._add_action_type(entity, action_type)
+            cls._add_datasource_action(entity, datasource_action)
             cls._add_sampling_time(entity)
             pickleable_entities.append(entity)
 
-        if action_type == ActionType.INIT_SNAPSHOT:
+        if datasource_action == DatasourceAction.INIT_SNAPSHOT:
             pickleable_entities.append(cls._get_end_message(entity_type))
 
         return pickleable_entities
@@ -78,8 +78,8 @@ class DriverBase(object):
         entity[DSProps.SAMPLE_DATE] = str(datetime_utils.utcnow())
 
     @staticmethod
-    def _add_action_type(entity, action_type):
-        entity[DSProps.ACTION_TYPE] = action_type
+    def _add_datasource_action(entity, datasource_action):
+        entity[DSProps.DATASOURCE_ACTION] = datasource_action
 
     @staticmethod
     @abc.abstractmethod

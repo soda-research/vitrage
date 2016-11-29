@@ -16,9 +16,10 @@ from oslo_config import cfg
 from oslo_log import log as logging
 
 from six.moves import queue
+from vitrage.common.constants import DatasourceAction
 from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import EdgeProperties as EProps
-from vitrage.common.constants import EventAction
+from vitrage.common.constants import GraphAction
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.datasources.nova.host import NOVA_HOST_DATASOURCE
 from vitrage.evaluator.scenario_evaluator import ScenarioEvaluator
@@ -31,7 +32,8 @@ from vitrage.tests.mocks import utils
 LOG = logging.getLogger(__name__)
 
 _TARGET_HOST = 'host-2'
-_NAGIOS_TEST_INFO = {'resource_name': _TARGET_HOST, 'action_type': 'snapshot'}
+_NAGIOS_TEST_INFO = {'resource_name': _TARGET_HOST,
+                     DSProps.DATASOURCE_ACTION: DatasourceAction.SNAPSHOT}
 
 
 class TestScenarioEvaluator(TestFunctionalBase):
@@ -237,7 +239,7 @@ class TestScenarioEvaluator(TestFunctionalBase):
 
         # remove WARNING nagios alarm, leaving only CRITICAL one
         warning_test['status'] = 'OK'
-        warning_test[DSProps.EVENT_TYPE] = EventAction.DELETE_ENTITY
+        warning_test[DSProps.EVENT_TYPE] = GraphAction.DELETE_ENTITY
         host_v = self.get_host_after_event(event_queue, warning_test,
                                            processor, _TARGET_HOST)
         alarms = \
@@ -249,7 +251,7 @@ class TestScenarioEvaluator(TestFunctionalBase):
 
         # next disable the alarm
         critical_test['status'] = 'OK'
-        critical_test[DSProps.EVENT_TYPE] = EventAction.DELETE_ENTITY
+        critical_test[DSProps.EVENT_TYPE] = GraphAction.DELETE_ENTITY
         host_v = self.get_host_after_event(event_queue, critical_test,
                                            processor, _TARGET_HOST)
         alarms = \

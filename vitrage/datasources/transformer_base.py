@@ -21,9 +21,9 @@ import six
 from vitrage.common import datetime_utils
 
 import vitrage.common.constants as cons
-from vitrage.common.constants import ActionType
+from vitrage.common.constants import DatasourceAction
 from vitrage.common.constants import DatasourceProperties as DSProps
-from vitrage.common.constants import EventAction
+from vitrage.common.constants import GraphAction
 from vitrage.common.constants import UpdateMethod
 from vitrage.common.exception import VitrageTransformerError
 from vitrage.common import utils
@@ -87,7 +87,7 @@ def convert_timestamp_format(current_timestamp_format, timestamp):
 
 
 def is_update_event(event):
-    return event[DSProps.ACTION_TYPE] == ActionType.UPDATE
+    return event[DSProps.DATASOURCE_ACTION] == DatasourceAction.UPDATE
 
 
 @six.add_metaclass(abc.ABCMeta)
@@ -96,7 +96,8 @@ class TransformerBase(object):
     KEY_SEPARATOR = ':'
     QUERY_RESULT = 'graph_query_result'
 
-    UPDATE_EVENT_TYPES = {}
+    # graph actions which need to refer them differently
+    GRAPH_ACTION_MAPPING = {}
 
     def __init__(self, transformers, conf):
         self.conf = conf
@@ -119,13 +120,13 @@ class TransformerBase(object):
         if not self._is_end_message(entity_event):
             entity_vertex = self._create_entity_vertex(entity_event)
             neighbors = self._create_neighbors(entity_event)
-            action = self._extract_event_action(entity_event)
+            action = self._extract_graph_action(entity_event)
 
             return EntityWrapper(entity_vertex, neighbors, action)
         else:
             return EntityWrapper(self._create_end_vertex(entity_event),
                                  None,
-                                 EventAction.END_MESSAGE)
+                                 GraphAction.END_MESSAGE)
 
     def _create_entity_vertex(self, entity_event):
         if is_update_event(entity_event) and \
@@ -201,10 +202,10 @@ class TransformerBase(object):
         """
         pass
 
-    def _extract_event_action(self, entity_event):
-        """Extract event action.
+    def _extract_graph_action(self, entity_event):
+        """Extract graph action.
 
-        Decides what action (from constants.EventAction) the processor need
+        Decides what action (from constants.GraphAction) the processor need
         to perform according to the data received from the event.
 
         :param entity_event: event that returns from the driver
@@ -213,24 +214,24 @@ class TransformerBase(object):
         """
 
         if DSProps.EVENT_TYPE in entity_event and \
-            entity_event[DSProps.EVENT_TYPE] in EventAction.__dict__.values():
+            entity_event[DSProps.EVENT_TYPE] in GraphAction.__dict__.values():
             return entity_event[DSProps.EVENT_TYPE]
 
-        action_type = entity_event[DSProps.ACTION_TYPE]
+        datasource_action = entity_event[DSProps.DATASOURCE_ACTION]
 
-        if ActionType.UPDATE == action_type:
-            return self.UPDATE_EVENT_TYPES.get(
+        if DatasourceAction.UPDATE == datasource_action:
+            return self.GRAPH_ACTION_MAPPING.get(
                 entity_event.get(DSProps.EVENT_TYPE, None),
-                EventAction.UPDATE_ENTITY)
+                GraphAction.UPDATE_ENTITY)
 
-        if ActionType.SNAPSHOT == action_type:
-            return EventAction.UPDATE_ENTITY
+        if DatasourceAction.SNAPSHOT == datasource_action:
+            return GraphAction.UPDATE_ENTITY
 
-        if ActionType.INIT_SNAPSHOT == action_type:
-            return EventAction.CREATE_ENTITY
+        if DatasourceAction.INIT_SNAPSHOT == datasource_action:
+            return GraphAction.CREATE_ENTITY
 
         raise VitrageTransformerError(
-            'Invalid action type: (%s)' % action_type)
+            'Invalid action type: (%s)' % datasource_action)
 
     def _key_values(self, *args):
         """A list of key fields
@@ -252,10 +253,10 @@ class TransformerBase(object):
     @staticmethod
     def _is_end_message(entity_event):
 
-        action_type = entity_event[DSProps.ACTION_TYPE]
-        is_snapshot_event = action_type == ActionType.INIT_SNAPSHOT
+        ds_action = entity_event[DSProps.DATASOURCE_ACTION]
+        is_snapshot_event = ds_action == DatasourceAction.INIT_SNAPSHOT
         event_type = entity_event.get(DSProps.EVENT_TYPE, None)
-        return is_snapshot_event and event_type == EventAction.END_MESSAGE
+        return is_snapshot_event and event_type == GraphAction.END_MESSAGE
 
     @staticmethod
     def _format_update_timestamp(update_timestamp, sample_timestamp):

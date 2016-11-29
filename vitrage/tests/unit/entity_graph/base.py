@@ -14,7 +14,7 @@
 
 from oslo_config import cfg
 
-from vitrage.common.constants import ActionType
+from vitrage.common.constants import DatasourceAction
 from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import EntityCategory
 from vitrage.datasources.nagios import NAGIOS_DATASOURCE
@@ -80,24 +80,31 @@ class TestEntityGraphUnitBase(base.BaseTest):
             self.NUM_ZONES,
             self.NUM_HOSTS,
             snapshot_events=self.NUM_ZONES,
-            snap_vals={DSProps.ACTION_TYPE: ActionType.INIT_SNAPSHOT})
+            snap_vals={DSProps.DATASOURCE_ACTION:
+                       DatasourceAction.INIT_SNAPSHOT})
         gen_list += mock_sync.simple_host_generators(
             self.NUM_ZONES,
             self.NUM_HOSTS,
             self.NUM_HOSTS,
-            snap_vals={DSProps.ACTION_TYPE: ActionType.INIT_SNAPSHOT})
+            snap_vals={DSProps.DATASOURCE_ACTION:
+                       DatasourceAction.INIT_SNAPSHOT})
         gen_list += mock_sync.simple_instance_generators(
             self.NUM_HOSTS,
             self.NUM_INSTANCES,
             self.NUM_INSTANCES,
-            snap_vals={DSProps.ACTION_TYPE: ActionType.INIT_SNAPSHOT})
+            snap_vals={DSProps.DATASOURCE_ACTION:
+                       DatasourceAction.INIT_SNAPSHOT})
         return mock_sync.generate_sequential_events_list(gen_list)
 
-    def _create_entity(self, processor=None, spec_type=None, action_type=None,
-                       event_type=None, properties=None):
+    def _create_entity(self,
+                       processor=None,
+                       spec_type=None,
+                       datasource_action=None,
+                       event_type=None,
+                       properties=None):
         # create instance event with host neighbor
         event = self._create_event(spec_type=spec_type,
-                                   action_type=action_type,
+                                   datasource_action=datasource_action,
                                    event_type=event_type,
                                    properties=properties)
 
@@ -112,16 +119,18 @@ class TestEntityGraphUnitBase(base.BaseTest):
         return vertex, neighbors, processor
 
     @staticmethod
-    def _create_event(spec_type=None, action_type=None,
-                      event_type=None, properties=None):
+    def _create_event(spec_type=None,
+                      datasource_action=None,
+                      event_type=None,
+                      properties=None):
         # generate event
         spec_list = mock_sync.simple_instance_generators(1, 1, 1)
         events_list = mock_sync.generate_random_events_list(
             spec_list)
 
         # update properties
-        if action_type is not None:
-            events_list[0][DSProps.ACTION_TYPE] = action_type
+        if datasource_action is not None:
+            events_list[0][DSProps.DATASOURCE_ACTION] = datasource_action
 
         if event_type is not None:
             events_list[0][DSProps.EVENT_TYPE] = event_type

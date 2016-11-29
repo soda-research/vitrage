@@ -1,5 +1,5 @@
 {
-  "vitrage_action_type": "init_snapshot",
+  "vitrage_datasource_action": "init_snapshot",
   "image": "cirros-[a-z]+",
   "status": "ACTIVE",
   "tenant_id": "[0-9a-f]{32}",

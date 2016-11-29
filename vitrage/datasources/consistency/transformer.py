@@ -13,7 +13,7 @@
 # under the License.
 
 from vitrage.common.constants import DatasourceProperties as DSProps
-from vitrage.common.constants import EventAction
+from vitrage.common.constants import GraphAction
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.datasources.consistency import CONSISTENCY_DATASOURCE
 from vitrage.datasources.resource_transformer_base import \
@@ -23,10 +23,10 @@ import vitrage.graph.utils as graph_utils
 
 class ConsistencyTransformer(ResourceTransformerBase):
 
-    # Event types which need to refer them differently
-    UPDATE_EVENT_TYPES = {
-        EventAction.DELETE_ENTITY: EventAction.DELETE_ENTITY,
-        EventAction.REMOVE_DELETED_ENTITY: EventAction.REMOVE_DELETED_ENTITY
+    # graph actions which need to refer them differently
+    GRAPH_ACTION_MAPPING = {
+        GraphAction.DELETE_ENTITY: GraphAction.DELETE_ENTITY,
+        GraphAction.REMOVE_DELETED_ENTITY: GraphAction.REMOVE_DELETED_ENTITY
     }
 
     def __init__(self, transformers, conf):

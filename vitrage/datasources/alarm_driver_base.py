@@ -14,7 +14,7 @@
 
 from oslo_log import log
 from vitrage.common.constants import DatasourceProperties as DSProps
-from vitrage.common.constants import EventAction
+from vitrage.common.constants import GraphAction
 from vitrage.common import datetime_utils
 from vitrage.datasources.driver_base import DriverBase
 
@@ -71,15 +71,15 @@ class AlarmDriverBase(DriverBase):
         """
         pass
 
-    def get_all(self, action_type):
+    def get_all(self, datasource_action):
         return self.make_pickleable(self._get_all_alarms(),
                                     self._entity_type(),
-                                    action_type)
+                                    datasource_action)
 
-    def get_changes(self, action_type):
+    def get_changes(self, datasource_action):
         return self.make_pickleable(self._get_changed_alarms(),
                                     self._entity_type(),
-                                    action_type)
+                                    datasource_action)
 
     def _get_all_alarms(self):
         alarms = self._get_alarms()
@@ -105,7 +105,7 @@ class AlarmDriverBase(DriverBase):
             if filter_(self, alarm, old_alarm):
                 # delete state changed alarm: alarm->OK
                 if not self._is_erroneous(alarm):
-                    alarm[DSProps.EVENT_TYPE] = EventAction.DELETE_ENTITY
+                    alarm[DSProps.EVENT_TYPE] = GraphAction.DELETE_ENTITY
                 alarms_to_update.append(alarm)
 
             self.cache[alarm_key] = alarm, now
@@ -115,7 +115,7 @@ class AlarmDriverBase(DriverBase):
         for cached_alarm, timestamp in values:
             if self._is_erroneous(cached_alarm) and timestamp is not now:
                 LOG.debug('deleting cached_alarm %s', cached_alarm)
-                cached_alarm[DSProps.EVENT_TYPE] = EventAction.DELETE_ENTITY
+                cached_alarm[DSProps.EVENT_TYPE] = GraphAction.DELETE_ENTITY
                 alarms_to_update.append(cached_alarm)
                 self.cache.pop(self._alarm_key(cached_alarm))
 

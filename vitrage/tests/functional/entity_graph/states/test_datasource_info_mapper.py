@@ -14,8 +14,8 @@
 
 from oslo_config import cfg
 
-from vitrage.common.constants import ActionType
-from vitrage.common.constants import EventAction
+from vitrage.common.constants import DatasourceAction as DSAction
+from vitrage.common.constants import GraphAction
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.datasources.nova.instance.transformer import InstanceTransformer
 from vitrage.entity_graph.initialization_status import InitializationStatus
@@ -40,7 +40,7 @@ class TestDatasourceInfoMapperFunctional(TestFunctionalBase):
         # setup
         processor = proc.Processor(self.conf, InitializationStatus())
         event = self._create_event(spec_type='INSTANCE_SPEC',
-                                   action_type=ActionType.INIT_SNAPSHOT)
+                                   datasource_action=DSAction.INIT_SNAPSHOT)
 
         # action
         processor.process_event(event)
@@ -57,14 +57,14 @@ class TestDatasourceInfoMapperFunctional(TestFunctionalBase):
         # setup
         vertex, neighbors, processor = self._create_entity(
             spec_type='INSTANCE_SPEC',
-            action_type=ActionType.INIT_SNAPSHOT)
+            datasource_action=DSAction.INIT_SNAPSHOT)
         self.assertEqual(2, processor.entity_graph.num_vertices())
 
         neighbors[0].vertex[VProps.STATE] = 'available'
         neighbors[0].vertex[VProps.IS_PLACEHOLDER] = False
 
         # action
-        processor._connect_neighbors(neighbors, [], EventAction.UPDATE_ENTITY)
+        processor._connect_neighbors(neighbors, [], GraphAction.UPDATE_ENTITY)
 
         # test assertions
         neighbor_vertex = processor.entity_graph.get_vertex(

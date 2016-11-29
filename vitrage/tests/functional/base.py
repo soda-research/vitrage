@@ -12,7 +12,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from vitrage.common.constants import ActionType
+from vitrage.common.constants import DatasourceAction
 from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.entity_graph.initialization_status import InitializationStatus
 from vitrage.entity_graph.processor import processor as proc
@@ -38,15 +38,18 @@ class TestFunctionalBase(TestEntityGraphUnitBase):
             self.NUM_ZONES,
             self.NUM_HOSTS,
             snapshot_events=self.NUM_ZONES,
-            snap_vals={DSProps.ACTION_TYPE: ActionType.INIT_SNAPSHOT})
+            snap_vals={DSProps.DATASOURCE_ACTION:
+                       DatasourceAction.INIT_SNAPSHOT})
         gen_list += mock_driver.simple_host_generators(
             self.NUM_ZONES,
             self.NUM_HOSTS,
             self.NUM_HOSTS,
-            snap_vals={DSProps.ACTION_TYPE: ActionType.INIT_SNAPSHOT})
+            snap_vals={DSProps.DATASOURCE_ACTION:
+                       DatasourceAction.INIT_SNAPSHOT})
         gen_list += mock_driver.simple_instance_generators(
             self.NUM_HOSTS,
             self.NUM_INSTANCES,
             self.NUM_INSTANCES,
-            snap_vals={DSProps.ACTION_TYPE: ActionType.INIT_SNAPSHOT})
+            snap_vals={DSProps.DATASOURCE_ACTION:
+                       DatasourceAction.INIT_SNAPSHOT})
         return mock_driver.generate_sequential_events_list(gen_list)

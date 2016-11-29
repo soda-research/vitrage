@@ -27,9 +27,9 @@ class HostDriver(NovaDriverBase):
                 compute_hosts.append(host_dict)
         return compute_hosts
 
-    def get_all(self, action_type):
+    def get_all(self, datasource_action):
         return self.make_pickleable(
             self.filter_none_compute_hosts(self.client.hosts.list()),
             NOVA_HOST_DATASOURCE,
-            action_type,
+            datasource_action,
             'manager')

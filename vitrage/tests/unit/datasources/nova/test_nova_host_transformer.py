@@ -17,11 +17,11 @@ import datetime
 from oslo_config import cfg
 from oslo_log import log as logging
 
-from vitrage.common.constants import ActionType
+from vitrage.common.constants import DatasourceAction
 from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import EdgeLabel
 from vitrage.common.constants import EntityCategory
-from vitrage.common.constants import EventAction
+from vitrage.common.constants import GraphAction
 from vitrage.common.constants import UpdateMethod
 from vitrage.common.constants import VertexProperties
 from vitrage.datasources.nova.host import NOVA_HOST_DATASOURCE
@@ -133,10 +133,10 @@ class NovaHostTransformerTest(base.BaseTest):
             self.assertEqual(1, len(neighbors))
             self._validate_zone_neighbor(neighbors[0], event)
 
-            if ActionType.SNAPSHOT == event[DSProps.ACTION_TYPE]:
-                self.assertEqual(EventAction.UPDATE_ENTITY, wrapper.action)
+            if DatasourceAction.SNAPSHOT == event[DSProps.DATASOURCE_ACTION]:
+                self.assertEqual(GraphAction.UPDATE_ENTITY, wrapper.action)
             else:
-                self.assertEqual(EventAction.CREATE_ENTITY, wrapper.action)
+                self.assertEqual(GraphAction.CREATE_ENTITY, wrapper.action)
 
     def _validate_zone_neighbor(self, zone, event):
 
@@ -200,30 +200,31 @@ class NovaHostTransformerTest(base.BaseTest):
             zone_num=1,
             host_num=1,
             snapshot_events=1,
-            snap_vals={DSProps.ACTION_TYPE: ActionType.SNAPSHOT})
+            snap_vals={DSProps.DATASOURCE_ACTION: DatasourceAction.SNAPSHOT})
 
         hosts_events = mock_sync.generate_random_events_list(spec_list)
         host_transformer = self.transformers[NOVA_HOST_DATASOURCE]
 
         # Test action
-        action = host_transformer._extract_event_action(hosts_events[0])
+        action = host_transformer._extract_graph_action(hosts_events[0])
 
         # Test assertion
-        self.assertEqual(EventAction.UPDATE_ENTITY, action)
+        self.assertEqual(GraphAction.UPDATE_ENTITY, action)
 
         # Test setup
         spec_list = mock_sync.simple_host_generators(
             zone_num=1,
             host_num=1,
             snapshot_events=1,
-            snap_vals={DSProps.ACTION_TYPE: ActionType.INIT_SNAPSHOT})
+            snap_vals={DSProps.DATASOURCE_ACTION:
+                       DatasourceAction.INIT_SNAPSHOT})
         hosts_events = mock_sync.generate_random_events_list(spec_list)
         host_transformer = self.transformers[NOVA_HOST_DATASOURCE]
 
         # Test action
-        action = host_transformer._extract_event_action(hosts_events[0])
+        action = host_transformer._extract_graph_action(hosts_events[0])
 
         # Test assertions
-        self.assertEqual(EventAction.CREATE_ENTITY, action)
+        self.assertEqual(GraphAction.CREATE_ENTITY, action)
 
         # TODO(lhartal): To add extract action from update event

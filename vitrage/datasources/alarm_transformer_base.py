@@ -16,7 +16,7 @@ from oslo_log import log as logging
 
 from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import EntityCategory
-from vitrage.common.constants import EventAction
+from vitrage.common.constants import GraphAction
 from vitrage.datasources.alarm_properties import AlarmProperties as AlarmProps
 from vitrage.datasources import transformer_base as tbase
 
@@ -42,7 +42,7 @@ class AlarmTransformerBase(tbase.TransformerBase):
         event_type = entity_event.get(DSProps.EVENT_TYPE, None)
         if event_type is not None:
             return AlarmProps.INACTIVE_STATE if \
-                EventAction.DELETE_ENTITY == event_type else \
+                GraphAction.DELETE_ENTITY == event_type else \
                 AlarmProps.ACTIVE_STATE
         else:
             return AlarmProps.INACTIVE_STATE if \

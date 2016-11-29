@@ -17,10 +17,10 @@ import time
 
 from oslo_log import log
 
-from vitrage.common.constants import ActionType
+from vitrage.common.constants import DatasourceAction
 from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import EntityCategory
-from vitrage.common.constants import EventAction
+from vitrage.common.constants import GraphAction
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.common.datetime_utils import utcnow
 from vitrage.datasources.consistency import CONSISTENCY_DATASOURCE
@@ -82,7 +82,7 @@ class ConsistencyEnforcer(object):
             LOG.debug('Found %s vertices to be deleted by consistency service'
                       ': %s', len(old_deleted_entities), old_deleted_entities)
             self._push_events_to_queue(old_deleted_entities,
-                                       EventAction.REMOVE_DELETED_ENTITY)
+                                       GraphAction.REMOVE_DELETED_ENTITY)
 
             # mark stale entities as is_deleted=True
             stale_entities = self._find_stale_entities()
@@ -90,7 +90,7 @@ class ConsistencyEnforcer(object):
                       'consistency service: %s', len(stale_entities),
                       stale_entities)
             self._push_events_to_queue(stale_entities,
-                                       EventAction.DELETE_ENTITY)
+                                       GraphAction.DELETE_ENTITY)
         except Exception as e:
             LOG.exception(
                 'Error in deleting vertices from entity_graph: %s', e)
@@ -147,13 +147,13 @@ class ConsistencyEnforcer(object):
     def _mark_old_deduced_alarms_as_deleted(self, timestamp):
         old_deduced_alarms = self._find_old_deduced_alarms(timestamp)
         self._push_events_to_queue(old_deduced_alarms,
-                                   EventAction.DELETE_ENTITY)
+                                   GraphAction.DELETE_ENTITY)
 
     def _push_events_to_queue(self, vertices, action):
         for vertex in vertices:
             event = {
                 DSProps.ENTITY_TYPE: CONSISTENCY_DATASOURCE,
-                DSProps.ACTION_TYPE: ActionType.UPDATE,
+                DSProps.DATASOURCE_ACTION: DatasourceAction.UPDATE,
                 DSProps.SAMPLE_DATE: str(utcnow()),
                 DSProps.EVENT_TYPE: action,
                 VProps.VITRAGE_ID: vertex[VProps.VITRAGE_ID]

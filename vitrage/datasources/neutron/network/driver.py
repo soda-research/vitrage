@@ -12,7 +12,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from vitrage.common.constants import ActionType
+from vitrage.common.constants import DatasourceAction
 from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.datasources.neutron.base import NeutronBase
 from vitrage.datasources.neutron.network import NEUTRON_NETWORK_DATASOURCE
@@ -33,10 +33,10 @@ class NetworkDriver(NeutronBase):
 
         return NetworkDriver.make_pickleable([event],
                                              NEUTRON_NETWORK_DATASOURCE,
-                                             ActionType.UPDATE)[0]
+                                             DatasourceAction.UPDATE)[0]
 
-    def get_all(self, action_type):
+    def get_all(self, datasource_action):
         return self.make_pickleable(
             self.client.list_networks()['networks'],
             NEUTRON_NETWORK_DATASOURCE,
-            action_type)
+            datasource_action)

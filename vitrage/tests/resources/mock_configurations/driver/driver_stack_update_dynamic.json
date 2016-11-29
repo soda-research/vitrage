@@ -4,7 +4,7 @@
   "stack_name": "newstack",
   "tenant_id": "a077142e250543be90f6fce8f623d45d",
   "stack_identity": "d2df0a2a-765c-44ef-b117-32d599bc9c3b",
-  "vitrage_action_type": "update",
+  "vitrage_datasource_action": "update",
   "create_at": "2016-08-25T15:23:02",
   "state": "CREATE_COMPLETE",
   "vitrage_event_type": "orchestration.stack.create.end",

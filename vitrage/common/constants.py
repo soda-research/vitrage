@@ -64,7 +64,7 @@ class EdgeLabel(object):
                 if not label.startswith(('_', 'labels'))]
 
 
-class ActionType(object):
+class DatasourceAction(object):
     SNAPSHOT = 'snapshot'
     INIT_SNAPSHOT = 'init_snapshot'
     UPDATE = 'update'
@@ -89,12 +89,12 @@ class EntityCategory(object):
 
 class DatasourceProperties(object):
     ENTITY_TYPE = 'vitrage_entity_type'
-    ACTION_TYPE = 'vitrage_action_type'
+    DATASOURCE_ACTION = 'vitrage_datasource_action'
     SAMPLE_DATE = 'vitrage_sample_date'
     EVENT_TYPE = 'vitrage_event_type'
 
 
-class EventAction(object):
+class GraphAction(object):
     CREATE_ENTITY = 'create_entity'
     DELETE_ENTITY = 'delete_entity'
     UPDATE_ENTITY = 'update_entity'

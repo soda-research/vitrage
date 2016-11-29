@@ -15,7 +15,7 @@
 from oslo_config import cfg
 from oslo_log import log as logging
 
-from vitrage.common.constants import EventAction
+from vitrage.common.constants import GraphAction
 from vitrage.common.constants import UpdateMethod
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.datasources.consistency import CONSISTENCY_DATASOURCE
@@ -42,8 +42,8 @@ class TestConsistencyTransformer(base.BaseTest):
         cls.conf.register_opts(cls.OPTS, group=CONSISTENCY_DATASOURCE)
         cls.transformers[CONSISTENCY_DATASOURCE] = \
             ConsistencyTransformer(cls.transformers, cls.conf)
-        cls.actions = [EventAction.DELETE_ENTITY,
-                       EventAction.REMOVE_DELETED_ENTITY]
+        cls.actions = [GraphAction.DELETE_ENTITY,
+                       GraphAction.REMOVE_DELETED_ENTITY]
 
     def test_snapshot_transform(self):
         LOG.debug('Consistency transformer test: transform entity event '

@@ -15,7 +15,7 @@
 from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import EdgeLabel
 from vitrage.common.constants import EntityCategory
-from vitrage.common.constants import EventAction
+from vitrage.common.constants import GraphAction
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.datasources.cinder.volume import CINDER_VOLUME_DATASOURCE
 from vitrage.datasources.heat.stack import HEAT_STACK_DATASOURCE
@@ -40,9 +40,9 @@ class HeatStackTransformer(ResourceTransformerBase):
         'OS::Neutron::Port': NEUTRON_PORT_DATASOURCE
     }
 
-    # Event types which need to refer them differently
-    UPDATE_EVENT_TYPES = {
-        'orchestration.stack.delete.end': EventAction.DELETE_ENTITY,
+    # graph actions which need to refer them differently
+    GRAPH_ACTION_MAPPING = {
+        'orchestration.stack.delete.end': GraphAction.DELETE_ENTITY,
     }
 
     def __init__(self, transformers, conf):

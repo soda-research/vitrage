@@ -17,7 +17,7 @@ from oslo_log import log as logging
 from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import EdgeLabel
 from vitrage.common.constants import EntityCategory
-from vitrage.common.constants import EventAction
+from vitrage.common.constants import GraphAction
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.datasources.cinder.volume import CINDER_VOLUME_DATASOURCE
 from vitrage.datasources.cinder.volume.properties import \
@@ -37,11 +37,11 @@ LOG = logging.getLogger(__name__)
 
 class CinderVolumeTransformer(ResourceTransformerBase):
 
-    # Event types which need to refer them differently
-    UPDATE_EVENT_TYPES = {
-        'volume.delete.end': EventAction.DELETE_ENTITY,
-        'volume.detach.start': EventAction.DELETE_RELATIONSHIP,
-        'volume.attach.end': EventAction.UPDATE_RELATIONSHIP
+    # graph actions which need to refer them differently
+    GRAPH_ACTION_MAPPING = {
+        'volume.delete.end': GraphAction.DELETE_ENTITY,
+        'volume.detach.start': GraphAction.DELETE_RELATIONSHIP,
+        'volume.attach.end': GraphAction.UPDATE_RELATIONSHIP
     }
 
     def __init__(self, transformers, conf):

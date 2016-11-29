@@ -17,9 +17,9 @@ import os
 from oslo_config import cfg
 from oslo_log import log as logging
 
-from vitrage.common.constants import ActionType
+from vitrage.common.constants import DatasourceAction
 from vitrage.common.constants import DatasourceProperties as DSProps
-from vitrage.common.constants import EventAction
+from vitrage.common.constants import GraphAction
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.common import file_utils
 from vitrage.datasources.static_physical import driver
@@ -93,7 +93,7 @@ class TestStaticPhysicalDriver(base.BaseTest):
     def test_get_all(self):
         # Action
         static_entities = \
-            self.static_physical_driver.get_all(ActionType.UPDATE)
+            self.static_physical_driver.get_all(DatasourceAction.UPDATE)
 
         # Test assertions
         self.assertEqual(5, len(static_entities))
@@ -101,7 +101,7 @@ class TestStaticPhysicalDriver(base.BaseTest):
     # noinspection PyAttributeOutsideInit
     def test_get_changes(self):
         # Setup
-        entities = self.static_physical_driver.get_all(ActionType.UPDATE)
+        entities = self.static_physical_driver.get_all(DatasourceAction.UPDATE)
         self.assertEqual(5, len(entities))
 
         self.conf = cfg.ConfigOpts()
@@ -111,7 +111,7 @@ class TestStaticPhysicalDriver(base.BaseTest):
 
         # Action
         changes = self.static_physical_driver.get_changes(
-            EventAction.UPDATE_ENTITY)
+            GraphAction.UPDATE_ENTITY)
 
         # Test Assertions
         status = any(change[VProps.TYPE] == SWITCH and
@@ -120,7 +120,7 @@ class TestStaticPhysicalDriver(base.BaseTest):
 
         status = any(change[VProps.TYPE] == SWITCH and
                      change[VProps.ID] == '23456' and
-                     change[DSProps.EVENT_TYPE] == EventAction.DELETE_ENTITY
+                     change[DSProps.EVENT_TYPE] == GraphAction.DELETE_ENTITY
                      for change in changes)
         self.assertEqual(True, status)
 
@@ -139,7 +139,7 @@ class TestStaticPhysicalDriver(base.BaseTest):
 
         # Action
         changes = self.static_physical_driver.get_changes(
-            EventAction.UPDATE_ENTITY)
+            GraphAction.UPDATE_ENTITY)
 
         # Test Assertions
         self.assertEqual(0, len(changes))

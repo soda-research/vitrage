@@ -218,7 +218,7 @@ class TemplateSyntaxValidatorTest(base.BaseTest):
         action[TemplateFields.ACTION].pop(field_name)
         self._test_execution_with_fault_result(template, expected_comment)
 
-    def _test_validate_action_with_invalid_action_type(self):
+    def _test_validate_action_with_invalid_datasource_action(self):
 
         template = self.clone_template
         scenario = template[TemplateFields.SCENARIOS][0]

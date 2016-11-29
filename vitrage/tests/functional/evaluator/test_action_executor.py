@@ -259,7 +259,7 @@ class TestActionExecutor(TestFunctionalBase):
                 'service': 'Check_MK',
                 'status': 'CRITICAL',
                 'status_info': 'test test test',
-                'vitrage_action_type': 'snapshot',
+                'vitrage_datasource_action': 'snapshot',
                 'vitrage_entity_type': 'nagios',
                 'vitrage_sample_date': '2016-02-07 15:26:04'}
 
@@ -268,7 +268,7 @@ class TestActionExecutor(TestFunctionalBase):
 
         return {'target': target_vertex.vertex_id,
                 'update_timestamp': '2016-03-17 11:33:32.443002',
-                'vitrage_action_type': 'update',
+                'vitrage_datasource_action': 'update',
                 'alarm_name': alarm_name,
                 'state': 'Active',
                 'type': 'add_vertex',

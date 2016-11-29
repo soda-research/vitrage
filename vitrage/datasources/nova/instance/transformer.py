@@ -17,7 +17,7 @@ from oslo_log import log as logging
 from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import EdgeLabel
 from vitrage.common.constants import EntityCategory
-from vitrage.common.constants import EventAction
+from vitrage.common.constants import GraphAction
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.datasources.nova.host import NOVA_HOST_DATASOURCE
 from vitrage.datasources.nova.instance import NOVA_INSTANCE_DATASOURCE
@@ -34,9 +34,9 @@ LOG = logging.getLogger(__name__)
 
 class InstanceTransformer(ResourceTransformerBase):
 
-    # Event types which need to refer them differently
-    UPDATE_EVENT_TYPES = {
-        'compute.instance.delete.end': EventAction.DELETE_ENTITY,
+    # graph actions which need to refer them differently
+    GRAPH_ACTION_MAPPING = {
+        'compute.instance.delete.end': GraphAction.DELETE_ENTITY,
     }
 
     def __init__(self, transformers, conf):
@@ -67,8 +67,8 @@ class InstanceTransformer(ResourceTransformerBase):
 
         sample_timestamp = entity_event[DSProps.SAMPLE_DATE]
 
-        # TODO(Alexey): need to check that only the UPDATE action_type will
-        #               update the UPDATE_TIMESTAMP property
+        # TODO(Alexey): need to check that only the UPDATE datasource_action
+        # will update the UPDATE_TIMESTAMP property
         update_timestamp = self._format_update_timestamp(
             extract_field_value(entity_event, DSProps.SAMPLE_DATE),
             sample_timestamp)

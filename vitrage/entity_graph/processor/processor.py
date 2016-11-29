@@ -15,7 +15,7 @@
 
 from oslo_log import log
 
-from vitrage.common.constants import EventAction
+from vitrage.common.constants import GraphAction
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.datasources.transformer_base import TransformerBase
 from vitrage.entity_graph.mappings.datasource_info_mapper import \
@@ -75,7 +75,7 @@ class Processor(processor.ProcessorBase):
 
         LOG.debug('Add entity to entity graph:\n%s', new_vertex)
         self.entity_graph.add_vertex(new_vertex)
-        self._connect_neighbors(neighbors, [], EventAction.CREATE_ENTITY)
+        self._connect_neighbors(neighbors, [], GraphAction.CREATE_ENTITY)
 
     def update_entity(self, updated_vertex, neighbors):
         """Updates the vertex in the entity graph
@@ -206,7 +206,7 @@ class Processor(processor.ProcessorBase):
         self._delete_old_connections(vertex, obsolete_edges)
         self._connect_neighbors(neighbors,
                                 valid_edges,
-                                EventAction.UPDATE_ENTITY)
+                                GraphAction.UPDATE_ENTITY)
 
     def _connect_neighbors(self, neighbors, valid_edges, action):
         """Updates the neighbor vertex and adds the connection edges """
@@ -289,28 +289,28 @@ class Processor(processor.ProcessorBase):
 
     def _initialize_events_actions(self):
         self.actions = {
-            EventAction.CREATE_ENTITY: self.create_entity,
-            EventAction.UPDATE_ENTITY: self.update_entity,
-            EventAction.DELETE_ENTITY: self.delete_entity,
-            EventAction.UPDATE_RELATIONSHIP: self.update_relationship,
-            EventAction.DELETE_RELATIONSHIP: self.delete_relationship,
-            EventAction.REMOVE_DELETED_ENTITY: self.remove_deleted_entity,
+            GraphAction.CREATE_ENTITY: self.create_entity,
+            GraphAction.UPDATE_ENTITY: self.update_entity,
+            GraphAction.DELETE_ENTITY: self.delete_entity,
+            GraphAction.UPDATE_RELATIONSHIP: self.update_relationship,
+            GraphAction.DELETE_RELATIONSHIP: self.delete_relationship,
+            GraphAction.REMOVE_DELETED_ENTITY: self.remove_deleted_entity,
             # should not be called explicitly
-            EventAction.END_MESSAGE: self.handle_end_message
+            GraphAction.END_MESSAGE: self.handle_end_message
         }
 
     def _calculate_aggregated_state(self, vertex, action):
         LOG.debug("calculate event state")
 
         try:
-            if action in [EventAction.UPDATE_ENTITY,
-                          EventAction.DELETE_ENTITY,
-                          EventAction.CREATE_ENTITY]:
+            if action in [GraphAction.UPDATE_ENTITY,
+                          GraphAction.DELETE_ENTITY,
+                          GraphAction.CREATE_ENTITY]:
                 graph_vertex = self.entity_graph.get_vertex(vertex.vertex_id)
-            elif action in [EventAction.END_MESSAGE,
-                            EventAction.REMOVE_DELETED_ENTITY,
-                            EventAction.UPDATE_RELATIONSHIP,
-                            EventAction.DELETE_RELATIONSHIP]:
+            elif action in [GraphAction.END_MESSAGE,
+                            GraphAction.REMOVE_DELETED_ENTITY,
+                            GraphAction.UPDATE_RELATIONSHIP,
+                            GraphAction.DELETE_RELATIONSHIP]:
                 return None
             else:
                 LOG.error('unrecognized action: %s for vertex: %s',

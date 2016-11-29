@@ -17,7 +17,7 @@ from oslo_log import log as logging
 from vitrage.common.constants import EdgeLabel
 from vitrage.common.constants import EdgeProperties as EProps
 from vitrage.common.constants import EntityCategory
-from vitrage.common.constants import EventAction
+from vitrage.common.constants import GraphAction
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.common.exception import VitrageTransformerError
 from vitrage.datasources import transformer_base
@@ -131,7 +131,7 @@ class EvaluatorEventTransformer(transformer_base.TransformerBase):
 
         return []
 
-    def _extract_event_action(self, event):
+    def _extract_graph_action(self, event):
         event_type = event[EVALUATOR_EVENT_TYPE]
 
         try:
@@ -143,11 +143,11 @@ class EvaluatorEventTransformer(transformer_base.TransformerBase):
     @staticmethod
     def _init_actions():
         return {
-            UPDATE_VERTEX: EventAction.UPDATE_ENTITY,
-            ADD_VERTEX: EventAction.CREATE_ENTITY,
-            REMOVE_VERTEX: EventAction.DELETE_ENTITY,
-            ADD_EDGE: EventAction.UPDATE_RELATIONSHIP,
-            REMOVE_EDGE: EventAction.DELETE_RELATIONSHIP
+            UPDATE_VERTEX: GraphAction.UPDATE_ENTITY,
+            ADD_VERTEX: GraphAction.CREATE_ENTITY,
+            REMOVE_VERTEX: GraphAction.DELETE_ENTITY,
+            ADD_EDGE: GraphAction.UPDATE_RELATIONSHIP,
+            REMOVE_EDGE: GraphAction.DELETE_RELATIONSHIP
         }
 
     def _create_entity_key(self, event):

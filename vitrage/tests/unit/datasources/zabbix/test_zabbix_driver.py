@@ -18,7 +18,7 @@ from oslo_config import cfg
 from oslo_log import log as logging
 
 from vitrage.common.constants import DatasourceProperties as DSProps
-from vitrage.common.constants import EventAction
+from vitrage.common.constants import GraphAction
 from vitrage.datasources.zabbix.properties import ZabbixProperties as ZProps
 from vitrage.tests.mocks import utils
 from vitrage.tests.unit.datasources.zabbix.mock_driver import MockZabbixDriver
@@ -394,7 +394,7 @@ class ZabbixDriverTest(ZabbixBaseTest):
         self.assertIsNotNone(alarms, 'No alarms returned')
         self.assertEqual(1, len(alarms))
         self._assert_contains(alarm_data1, alarms)
-        self.assertEqual(EventAction.DELETE_ENTITY,
+        self.assertEqual(GraphAction.DELETE_ENTITY,
                          alarms[0][DSProps.EVENT_TYPE])
 
         # Step 3 - get changes after get all should not return deleted alarm
@@ -418,7 +418,7 @@ class ZabbixDriverTest(ZabbixBaseTest):
         self.assertIsNotNone(alarms, 'No alarms returned')
         self.assertEqual(1, len(alarms))
         self._assert_contains(alarm_data1, alarms)
-        self.assertEqual(EventAction.DELETE_ENTITY,
+        self.assertEqual(GraphAction.DELETE_ENTITY,
                          alarms[0][DSProps.EVENT_TYPE])
 
     def _extract_alarm_data(self,

@@ -31,16 +31,16 @@ class StaticDriver(DriverBase):
     def enrich_event(event, event_type):
         pass
 
-    def get_all(self, action_type):
+    def get_all(self, datasource_action):
         """Query all entities and send events to the vitrage events queue"""
         return self.make_pickleable(self._get_all_entities(),
                                     STATIC_DATASOURCE,
-                                    action_type)
+                                    datasource_action)
 
-    def get_changes(self, action_type):
+    def get_changes(self, datasource_action):
         return self.make_pickleable(self._get_changes_entities(),
                                     STATIC_DATASOURCE,
-                                    action_type)
+                                    datasource_action)
 
     def _get_all_entities(self):
         """Internal method to get all entities"""

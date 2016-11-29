@@ -12,7 +12,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from vitrage.common.constants import ActionType
+from vitrage.common.constants import DatasourceAction
 from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.datasources.cinder.volume import CINDER_VOLUME_DATASOURCE
 from vitrage.datasources.driver_base import DriverBase
@@ -36,12 +36,12 @@ class CinderVolumeDriver(DriverBase):
     def extract_events(volumes):
         return [volume.__dict__ for volume in volumes]
 
-    def get_all(self, action_type):
+    def get_all(self, datasource_action):
         return self.make_pickleable(
             self.extract_events(self.client.volumes.list(
                 search_opts={'all_tenants': 1})),
             CINDER_VOLUME_DATASOURCE,
-            action_type,
+            datasource_action,
             'manager')
 
     @staticmethod
@@ -50,7 +50,7 @@ class CinderVolumeDriver(DriverBase):
 
         return CinderVolumeDriver.make_pickleable([event],
                                                   CINDER_VOLUME_DATASOURCE,
-                                                  ActionType.UPDATE)[0]
+                                                  DatasourceAction.UPDATE)[0]
 
     @staticmethod
     def get_event_types():

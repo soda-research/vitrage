@@ -27,9 +27,9 @@ class ZoneDriver(NovaDriverBase):
                 zones_res.append(zone_dict)
         return zones_res
 
-    def get_all(self, action_type):
+    def get_all(self, datasource_action):
         return self.make_pickleable(self.filter_internal_zone(
             self.client.availability_zones.list()),
             NOVA_ZONE_DATASOURCE,
-            action_type,
+            datasource_action,
             'manager')

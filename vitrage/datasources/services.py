@@ -14,7 +14,7 @@
 
 from oslo_log import log
 from oslo_service import service as os_service
-from vitrage.common.constants import ActionType
+from vitrage.common.constants import DatasourceAction
 from vitrage.datasources.rescheduler import ReScheduler
 
 LOG = log.getLogger(__name__)
@@ -49,7 +49,7 @@ class SnapshotsService(DatasourceService):
 
             snap_scheduler.schedule(
                 func=self.entities_to_queue(ds_driver,
-                                            ActionType.INIT_SNAPSHOT),
+                                            DatasourceAction.INIT_SNAPSHOT),
                 standard_interval=standard_interval,
                 fault_interval=fault_interval,
                 times=1,
@@ -57,7 +57,8 @@ class SnapshotsService(DatasourceService):
                 fault_callback=ds_driver.callback_on_fault)
 
             snap_scheduler.schedule(
-                func=self.entities_to_queue(ds_driver, ActionType.SNAPSHOT),
+                func=self.entities_to_queue(ds_driver,
+                                            DatasourceAction.SNAPSHOT),
                 initial_delay=standard_interval,
                 standard_interval=standard_interval,
                 fault_interval=fault_interval,
@@ -67,9 +68,9 @@ class SnapshotsService(DatasourceService):
 
         LOG.info('Vitrage datasources Snapshot Service - Started!')
 
-    def entities_to_queue(self, driver, action_type):
+    def entities_to_queue(self, driver, datasource_action):
         def _entities_to_queue():
-            for entity in driver.get_all(action_type):
+            for entity in driver.get_all(datasource_action):
                 self.send_to_queue(entity)
         return _entities_to_queue
 
@@ -116,7 +117,7 @@ class ChangesService(DatasourceService):
         LOG.debug("start get changes")
         for datasource in self.registered_datasources:
             try:
-                for entity in datasource.get_changes(ActionType.UPDATE):
+                for entity in datasource.get_changes(DatasourceAction.UPDATE):
                     self.send_to_queue(entity)
             except Exception as e:
                 LOG.error("Get changes Failed - %s", e.message)

@@ -15,11 +15,11 @@
 from oslo_config import cfg
 from oslo_log import log as logging
 
-from vitrage.common.constants import ActionType
+from vitrage.common.constants import DatasourceAction
 from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import EdgeLabel
 from vitrage.common.constants import EntityCategory
-from vitrage.common.constants import EventAction
+from vitrage.common.constants import GraphAction
 from vitrage.common.constants import UpdateMethod
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.datasources.alarm_properties import AlarmProperties as AlarmProps
@@ -104,15 +104,15 @@ class NagiosTransformerTest(base.BaseTest):
 
     def _validate_action(self, alarm, wrapper):
         if DSProps.EVENT_TYPE in alarm \
-            and alarm[DSProps.EVENT_TYPE] in EventAction.__dict__.values():
+            and alarm[DSProps.EVENT_TYPE] in GraphAction.__dict__.values():
             self.assertEqual(alarm[DSProps.EVENT_TYPE], wrapper.action)
             return
 
-        action_type = alarm[DSProps.ACTION_TYPE]
-        if action_type in (ActionType.SNAPSHOT, ActionType.UPDATE):
-            self.assertEqual(EventAction.UPDATE_ENTITY, wrapper.action)
+        ds_action = alarm[DSProps.DATASOURCE_ACTION]
+        if ds_action in (DatasourceAction.SNAPSHOT, DatasourceAction.UPDATE):
+            self.assertEqual(GraphAction.UPDATE_ENTITY, wrapper.action)
         else:
-            self.assertEqual(EventAction.CREATE_ENTITY, wrapper.action)
+            self.assertEqual(GraphAction.CREATE_ENTITY, wrapper.action)
 
     def _validate_vertex(self, vertex, event):
 
@@ -124,7 +124,7 @@ class NagiosTransformerTest(base.BaseTest):
         if event_type is not None:
             self.assertEqual(vertex[VProps.STATE],
                              AlarmProps.INACTIVE_STATE if
-                             EventAction.DELETE_ENTITY == event_type else
+                             GraphAction.DELETE_ENTITY == event_type else
                              AlarmProps.ACTIVE_STATE)
         else:
             actual_state = AlarmProps.INACTIVE_STATE if \

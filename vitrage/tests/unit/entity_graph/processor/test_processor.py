@@ -14,9 +14,9 @@
 
 from oslo_config import cfg
 
-from vitrage.common.constants import ActionType
+from vitrage.common.constants import DatasourceAction as DSAction
 from vitrage.common.constants import DatasourceProperties as DSProps
-from vitrage.common.constants import EventAction
+from vitrage.common.constants import GraphAction
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.common.datetime_utils import utcnow
 from vitrage.datasources.transformer_base import Neighbor
@@ -51,13 +51,13 @@ class TestProcessor(TestEntityGraphUnitBase):
         # check create instance event
         processor = proc.Processor(self.conf, InitializationStatus())
         event = self._create_event(spec_type=self.INSTANCE_SPEC,
-                                   action_type=ActionType.INIT_SNAPSHOT)
+                                   datasource_action=DSAction.INIT_SNAPSHOT)
         processor.process_event(event)
         self._check_graph(processor, self.NUM_VERTICES_AFTER_CREATION,
                           self.NUM_EDGES_AFTER_CREATION)
 
         # check update instance even
-        event[DSProps.ACTION_TYPE] = ActionType.UPDATE
+        event[DSProps.DATASOURCE_ACTION] = DSAction.UPDATE
         event[DSProps.EVENT_TYPE] = 'compute.instance.volume.attach'
         event['hostname'] = 'new_host'
         event['instance_id'] = event['id']
@@ -68,7 +68,7 @@ class TestProcessor(TestEntityGraphUnitBase):
                           self.NUM_EDGES_AFTER_CREATION)
 
         # check delete instance event
-        event[DSProps.ACTION_TYPE] = ActionType.UPDATE
+        event[DSProps.DATASOURCE_ACTION] = DSAction.UPDATE
         event[DSProps.EVENT_TYPE] = 'compute.instance.delete.end'
         processor.process_event(event)
         self._check_graph(processor, self.NUM_VERTICES_AFTER_DELETION,
@@ -133,10 +133,10 @@ class TestProcessor(TestEntityGraphUnitBase):
         # setup
         vertex1, neighbors1, processor = self._create_entity(
             spec_type=self.INSTANCE_SPEC,
-            action_type=ActionType.INIT_SNAPSHOT)
+            datasource_action=DSAction.INIT_SNAPSHOT)
         vertex2, neighbors2, processor = self._create_entity(
             spec_type=self.INSTANCE_SPEC,
-            action_type=ActionType.INIT_SNAPSHOT,
+            datasource_action=DSAction.INIT_SNAPSHOT,
             processor=processor)
         self.assertEqual(2, processor.entity_graph.num_edges())
 
@@ -155,10 +155,10 @@ class TestProcessor(TestEntityGraphUnitBase):
         # setup
         vertex1, neighbors1, processor = self._create_entity(
             spec_type=self.INSTANCE_SPEC,
-            action_type=ActionType.INIT_SNAPSHOT)
+            datasource_action=DSAction.INIT_SNAPSHOT)
         vertex2, neighbors2, processor = self._create_entity(
             spec_type=self.INSTANCE_SPEC,
-            action_type=ActionType.INIT_SNAPSHOT,
+            datasource_action=DSAction.INIT_SNAPSHOT,
             processor=processor)
         self.assertEqual(2, processor.entity_graph.num_edges())
 
@@ -179,7 +179,7 @@ class TestProcessor(TestEntityGraphUnitBase):
         # setup
         vertex, neighbors, processor = self._create_entity(
             spec_type=self.INSTANCE_SPEC,
-            action_type=ActionType.INIT_SNAPSHOT)
+            datasource_action=DSAction.INIT_SNAPSHOT)
         self.assertEqual(1, processor.entity_graph.num_edges())
         vertex[VProps.IS_DELETED] = True
         processor.entity_graph.update_vertex(vertex)
@@ -237,19 +237,19 @@ class TestProcessor(TestEntityGraphUnitBase):
         # state already exists and its updated
         instances[0][0][VProps.STATE] = 'SUSPENDED'
         instances[0][1]._calculate_aggregated_state(instances[0][0],
-                                                    EventAction.UPDATE_ENTITY)
+                                                    GraphAction.UPDATE_ENTITY)
 
         # vitrage state doesn't exist and its updated
         instances[1][0][VProps.STATE] = None
         instances[1][1].entity_graph.update_vertex(instances[1][0])
         instances[1][0][VProps.VITRAGE_STATE] = 'SUBOPTIMAL'
         instances[1][1]._calculate_aggregated_state(instances[1][0],
-                                                    EventAction.UPDATE_ENTITY)
+                                                    GraphAction.UPDATE_ENTITY)
 
         # state exists and vitrage state changes
         instances[2][0][VProps.VITRAGE_STATE] = 'SUBOPTIMAL'
         instances[2][1]._calculate_aggregated_state(instances[2][0],
-                                                    EventAction.UPDATE_ENTITY)
+                                                    GraphAction.UPDATE_ENTITY)
 
         # vitrage state exists and state changes
         instances[3][0][VProps.STATE] = None
@@ -257,20 +257,20 @@ class TestProcessor(TestEntityGraphUnitBase):
         instances[3][1].entity_graph.update_vertex(instances[3][0])
         instances[3][0][VProps.STATE] = 'SUSPENDED'
         instances[3][1]._calculate_aggregated_state(instances[3][0],
-                                                    EventAction.UPDATE_ENTITY)
+                                                    GraphAction.UPDATE_ENTITY)
 
         # state and vitrage state exists and state changes
         instances[4][0][VProps.VITRAGE_STATE] = 'SUBOPTIMAL'
         instances[4][1].entity_graph.update_vertex(instances[4][0])
         instances[4][0][VProps.STATE] = 'SUSPENDED'
         instances[4][1]._calculate_aggregated_state(instances[4][0],
-                                                    EventAction.UPDATE_ENTITY)
+                                                    GraphAction.UPDATE_ENTITY)
 
         # state and vitrage state exists and vitrage state changes
         instances[5][0][VProps.VITRAGE_STATE] = 'SUBOPTIMAL'
         instances[5][1].entity_graph.update_vertex(instances[5][0])
         instances[5][1]._calculate_aggregated_state(instances[5][0],
-                                                    EventAction.UPDATE_ENTITY)
+                                                    GraphAction.UPDATE_ENTITY)
 
         # test assertions
         self.assertEqual('SUSPENDED',
@@ -302,7 +302,7 @@ class TestProcessor(TestEntityGraphUnitBase):
         # create instance event with host neighbor
         (vertex, neighbors, processor) = self._create_entity(
             spec_type=self.INSTANCE_SPEC,
-            action_type=ActionType.INIT_SNAPSHOT,
+            datasource_action=DSAction.INIT_SNAPSHOT,
             properties=kwargs,
             processor=processor)
 
