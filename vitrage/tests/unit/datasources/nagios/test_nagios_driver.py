@@ -144,6 +144,9 @@ class NagiosDriverTest(NagiosBaseTest):
         self.assertEqual(2, len(services))
         self._assert_contains(service_data1, services)
         self._assert_contains(service_data2, services)
+        for service in services:
+            self.assertEqual(GraphAction.DELETE_ENTITY,
+                             service[DSProps.EVENT_TYPE])
 
         # Action
         services = nagios_driver._get_all_alarms()
@@ -275,6 +278,9 @@ class NagiosDriverTest(NagiosBaseTest):
         self.assertEqual(2, len(services))
         self._assert_contains(service_data1, services)
         self._assert_contains(service_data2, services)
+        for service in services:
+            self.assertEqual(GraphAction.DELETE_ENTITY,
+                             service[DSProps.EVENT_TYPE])
 
         # Action
         services = nagios_driver._get_changed_alarms()
