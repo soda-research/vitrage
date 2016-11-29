@@ -119,7 +119,7 @@ class TransformerBase(object):
         if not self._is_end_message(entity_event):
             entity_vertex = self._create_entity_vertex(entity_event)
             neighbors = self._create_neighbors(entity_event)
-            action = self._extract_action_type(entity_event)
+            action = self._extract_event_action(entity_event)
 
             return EntityWrapper(entity_vertex, neighbors, action)
         else:
@@ -201,8 +201,8 @@ class TransformerBase(object):
         """
         pass
 
-    def _extract_action_type(self, entity_event):
-        """Extract action type.
+    def _extract_event_action(self, entity_event):
+        """Extract event action.
 
         Decides what action (from constants.EventAction) the processor need
         to perform according to the data received from the event.
@@ -211,6 +211,10 @@ class TransformerBase(object):
         :return: the action that the processor needs to perform
         :rtype: str
         """
+
+        if DSProps.EVENT_TYPE in entity_event and \
+            entity_event[DSProps.EVENT_TYPE] in EventAction.__dict__.values():
+            return entity_event[DSProps.EVENT_TYPE]
 
         action_type = entity_event[DSProps.ACTION_TYPE]
 
