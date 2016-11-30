@@ -78,11 +78,11 @@ class ScenarioRepository(object):
         current_time = datetime_utils.utcnow()
 
         result = syntax_validation(template_def)
-        if not result.is_valid:
+        if not result.is_valid_config:
             LOG.info('Unable to load template: %s' % result.comment)
         else:
             result = content_validation(template_def)
-            if not result.is_valid:
+            if not result.is_valid_config:
                 LOG.info('Unable to load template: %s' % result.comment)
 
         template_uuid = md5(str(template_def).encode()).hexdigest()
@@ -90,7 +90,7 @@ class ScenarioRepository(object):
                                                       template_def,
                                                       current_time,
                                                       result)
-        if result.is_valid:
+        if result.is_valid_config:
             template_data = TemplateData(template_def)
             self._add_template_scenarios(template_data)
 

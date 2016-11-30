@@ -60,7 +60,7 @@ class ScenarioRepositoryTest(base.BaseTest):
         valid_template_counter = 0
         for template_definition in self.template_defs:
             syntax_validation_result = syntax_validation(template_definition)
-            if syntax_validation_result.is_valid:
+            if syntax_validation_result.is_valid_config:
                 valid_template_counter += 1
 
         # Test assertions

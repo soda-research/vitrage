@@ -40,15 +40,15 @@ def syntax_validation(template_conf):
 
     result = validate_template_sections(template_conf)
 
-    if result.is_valid:
+    if result.is_valid_config:
         metadata = template_conf[TemplateFields.METADATA]
         result = validate_metadata_section(metadata)
 
-    if result.is_valid:
+    if result.is_valid_config:
         definitions = template_conf[TemplateFields.DEFINITIONS]
         result = validate_definitions_section(definitions)
 
-    if result.is_valid:
+    if result.is_valid_config:
         scenarios = template_conf[TemplateFields.SCENARIOS]
         result = validate_scenarios_section(scenarios)
 
@@ -84,11 +84,11 @@ def validate_definitions_section(definitions):
     })
     result = _validate_dict_schema(schema, definitions)
 
-    if result.is_valid:
+    if result.is_valid_config:
         result = validate_entities(definitions[TemplateFields.ENTITIES])
 
         relationships = definitions.get(TemplateFields.RELATIONSHIPS, None)
-        if result.is_valid and relationships:
+        if result.is_valid_config and relationships:
             return validate_relationships(relationships)
 
     return result
@@ -107,10 +107,10 @@ def validate_entities(entities):
         })
         result = _validate_dict_schema(schema, entity)
 
-        if result.is_valid:
+        if result.is_valid_config:
             result = validate_entity_dict(entity[TemplateFields.ENTITY])
 
-        if not result.is_valid:
+        if not result.is_valid_config:
             return result
 
     return result
@@ -139,11 +139,11 @@ def validate_relationships(relationships):
         })
         result = _validate_dict_schema(schema, relationship)
 
-        if result.is_valid:
+        if result.is_valid_config:
             relationship_dict = relationship[TemplateFields.RELATIONSHIP]
             result = validate_relationship_dict(relationship_dict)
 
-            if not result.is_valid:
+            if not result.is_valid_config:
                 return result
     return result
 
@@ -174,10 +174,10 @@ def validate_scenarios_section(scenarios):
         })
         result = _validate_dict_schema(schema, scenario)
 
-        if result.is_valid:
+        if result.is_valid_config:
             result = validate_scenario(scenario[TemplateFields.SCENARIO])
 
-            if not result.is_valid:
+            if not result.is_valid_config:
                 return result
 
     return result
@@ -192,7 +192,7 @@ def validate_scenario(scenario):
     })
     result = _validate_dict_schema(schema, scenario)
 
-    if result.is_valid:
+    if result.is_valid_config:
         return validate_actions_schema(scenario[TemplateFields.ACTIONS])
 
     return result
@@ -211,10 +211,10 @@ def validate_actions_schema(actions):
         })
         result = _validate_dict_schema(schema, action)
 
-        if result.is_valid:
+        if result.is_valid_config:
             result = validate_action_schema(action[TemplateFields.ACTION])
 
-        if not result.is_valid:
+        if not result.is_valid_config:
             return result
 
     return result

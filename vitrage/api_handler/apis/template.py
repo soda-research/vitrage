@@ -73,7 +73,7 @@ class TemplateApis(object):
             path = template[0]
 
             syntax_result = syntax_validation(template_def)
-            if not syntax_result.is_valid:
+            if not syntax_result.is_valid_config:
                 self._add_result(path,
                                  self.FAILED_MSG,
                                  syntax_result.description,
@@ -83,7 +83,7 @@ class TemplateApis(object):
                 continue
 
             content_result = content_validation(template_def)
-            if not content_result.is_valid:
+            if not content_result.is_valid_config:
                 self._add_result(path,
                                  self.FAILED_MSG,
                                  content_result.description,
@@ -116,7 +116,7 @@ class TemplateApis(object):
     @staticmethod
     def _get_template_status(result):
 
-        if result.is_valid:
+        if result.is_valid_config:
             return 'pass'
         else:
             return 'failed'

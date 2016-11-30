@@ -14,7 +14,7 @@
 from collections import namedtuple
 from vitrage.evaluator.template_validation.status_messages import status_msgs
 
-Result = namedtuple('Result', ['description', 'is_valid', 'status_code',
+Result = namedtuple('Result', ['description', 'is_valid_config', 'status_code',
                                'comment'])
 
 

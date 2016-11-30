@@ -38,14 +38,14 @@ def content_validation(template):
 
     relationships_index = {}
 
-    if result.is_valid and \
+    if result.is_valid_config and \
        TemplateFields.RELATIONSHIPS in template_definitions:
 
         relationships = template_definitions[TemplateFields.RELATIONSHIPS]
         result = validate_relationships_definitions(relationships,
                                                     relationships_index,
                                                     entities_index)
-    if result.is_valid:
+    if result.is_valid_config:
         scenarios = template[TemplateFields.SCENARIOS]
         definitions_index = entities_index.copy()
         definitions_index.update(relationships_index)
@@ -61,7 +61,7 @@ def validate_entities_definition(entities, entities_index):
         entity_dict = entity[TemplateFields.ENTITY]
         result = validate_entity_definition(entity_dict, entities_index)
 
-        if not result.is_valid:
+        if not result.is_valid_config:
             return result
 
         entities_index[entity_dict[TemplateFields.TEMPLATE_ID]] = entity_dict
@@ -89,7 +89,7 @@ def validate_relationships_definitions(relationships,
         result = validate_relationship(relationship_dict,
                                        relationships_index,
                                        entities_index)
-        if not result.is_valid:
+        if not result.is_valid_config:
             return result
 
         template_id = relationship_dict[TemplateFields.TEMPLATE_ID]
@@ -107,7 +107,7 @@ def validate_relationship(relationship, relationships_index, entities_index):
     target = relationship[TemplateFields.TARGET]
     result = _validate_template_id(entities_index, target)
 
-    if result.is_valid:
+    if result.is_valid_config:
         source = relationship[TemplateFields.SOURCE]
         result = _validate_template_id(entities_index, source)
 
@@ -123,13 +123,13 @@ def validate_scenarios(scenarios, definitions_index):
         condition = scenario_values[TemplateFields.CONDITION]
         result = validate_scenario_condition(condition, definitions_index)
 
-        if not result.is_valid:
+        if not result.is_valid_config:
             return result
 
         actions = scenario_values[TemplateFields.ACTIONS]
         result = validate_scenario_actions(actions, definitions_index)
 
-        if not result.is_valid:
+        if not result.is_valid_config:
             return result
 
     return get_correct_result(RESULT_DESCRIPTION)
@@ -154,7 +154,7 @@ def validate_scenario_condition(condition, definitions_index):
             continue
 
         result = _validate_template_id(definitions_index, condition_var)
-        if not result.is_valid:
+        if not result.is_valid_config:
             return result
 
     return get_correct_result(RESULT_DESCRIPTION)
@@ -165,7 +165,7 @@ def validate_scenario_actions(actions, definitions_index):
     for action in actions:
         result = validate_scenario_action(action[TemplateFields.ACTION],
                                           definitions_index)
-        if not result.is_valid:
+        if not result.is_valid_config:
             return result
 
     return get_correct_result(RESULT_DESCRIPTION)
@@ -239,12 +239,12 @@ def validate_add_causal_relationship_action(action, definitions_index):
         template_id = action_target[key]
         result = _validate_template_id(definitions_index, template_id)
 
-        if not result.is_valid:
+        if not result.is_valid_config:
             return result
 
         entity = definitions_index[template_id]
         result = _validate_entity_category(entity, EntityCategory.ALARM)
-        if not result.is_valid:
+        if not result.is_valid_config:
             return result
 
     return get_correct_result(RESULT_DESCRIPTION)

@@ -17,6 +17,7 @@ from oslo_log import log as logging
 
 from vitrage.common.constants import DatasourceAction
 from vitrage.common.constants import GraphAction
+from vitrage.common.constants import TopologyFields
 from vitrage.datasources.static import driver
 from vitrage.datasources.static import STATIC_DATASOURCE
 from vitrage.tests import base
@@ -70,16 +71,20 @@ class TestStaticDriver(base.BaseTest):
 
     def test_get_all(self):
         # Action
-        static_entities = self.static_driver.get_all(DatasourceAction.UPDATE)
+        static_entities = self.static_driver.get_all(
+            DatasourceAction.INIT_SNAPSHOT)
 
         # Test assertions
-        self.assertEqual(0, len(static_entities))
+        self.assertEqual(9, len(static_entities))
+
+        for entity in static_entities[:-1]:  # exclude end message
+            self.assert_is_not_empty(entity[TopologyFields.RELATIONSHIPS])
 
     # noinspection PyAttributeOutsideInit
     def test_get_changes(self):
         # Setup
         entities = self.static_driver.get_all(DatasourceAction.UPDATE)
-        self.assertEqual(0, len(entities))
+        self.assertEqual(8, len(entities))
 
         self.conf = cfg.ConfigOpts()
         self.conf.register_opts(self.CHANGES_OPTS,
@@ -92,3 +97,5 @@ class TestStaticDriver(base.BaseTest):
 
         # Test Assertions
         self.assertEqual(0, len(changes))
+        for entity in changes:
+            self.assert_is_not_empty(entity[TopologyFields.RELATIONSHIPS])
