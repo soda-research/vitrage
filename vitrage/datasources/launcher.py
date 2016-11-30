@@ -18,11 +18,10 @@ import itertools
 from oslo_service import service as os_service
 from oslo_utils import importutils as utils
 from vitrage.common.constants import UpdateMethod
-from vitrage.common.utils import opt_exists
 from vitrage.datasources.listener_service import ListenerService
-
 from vitrage.datasources.services import ChangesService
 from vitrage.datasources.services import SnapshotsService
+from vitrage.utils import opt_exists
 
 CHANGES_INTERVAL = 'changes_interval'
 

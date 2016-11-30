@@ -19,7 +19,6 @@ from oslo_utils import importutils as utils
 
 from vitrage.common.constants import DatasourceAction
 from vitrage.common.constants import DatasourceProperties as DSProps
-from vitrage.common import file_utils
 from vitrage.datasources.alarm_driver_base import AlarmDriverBase
 from vitrage.datasources.zabbix.properties import ZabbixProperties as ZProps
 from vitrage.datasources.zabbix.properties import ZabbixTriggerStatus \
@@ -27,6 +26,7 @@ from vitrage.datasources.zabbix.properties import ZabbixTriggerStatus \
 from vitrage.datasources.zabbix.properties import ZabbixTriggerValue \
     as TriggerValue
 from vitrage.datasources.zabbix import ZABBIX_DATASOURCE
+from vitrage.utils import file as file_utils
 
 LOG = log.getLogger(__name__)
 

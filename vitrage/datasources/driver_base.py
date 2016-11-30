@@ -20,7 +20,7 @@ from oslo_log import log
 from vitrage.common.constants import DatasourceAction
 from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import GraphAction
-from vitrage.common import datetime_utils
+from vitrage.utils import datetime as datetime_utils
 
 LOG = log.getLogger(__name__)
 

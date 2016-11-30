@@ -13,16 +13,15 @@
 # under the License.
 
 from datetime import timedelta
+from six.moves import queue
 import time
 import unittest
 
 from oslo_config import cfg
 
-from six.moves import queue
 from vitrage.common.constants import EdgeLabel
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import VertexProperties as VProps
-from vitrage.common.datetime_utils import utcnow
 from vitrage.datasources.nagios import NAGIOS_DATASOURCE
 from vitrage.datasources.nova.host import NOVA_HOST_DATASOURCE
 from vitrage.datasources.nova.instance import NOVA_INSTANCE_DATASOURCE
@@ -37,6 +36,7 @@ from vitrage.evaluator.scenario_repository import ScenarioRepository
 import vitrage.graph.utils as graph_utils
 from vitrage.tests.functional.base import TestFunctionalBase
 from vitrage.tests.mocks import utils
+from vitrage.utils.datetime import utcnow
 
 
 class TestConsistencyFunctional(TestFunctionalBase):

@@ -16,7 +16,7 @@ import re
 
 from oslo_log import log
 
-from vitrage.common import file_utils
+from vitrage.utils import file as file_utils
 
 LOG = log.getLogger(__name__)
 NAGIOS_HOST = 'nagios_host'

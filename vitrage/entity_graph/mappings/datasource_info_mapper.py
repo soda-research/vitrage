@@ -18,10 +18,10 @@ from oslo_log import log
 
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import VertexProperties as VProps
-from vitrage.common import file_utils
 from vitrage.entity_graph.mappings.alarm_handler import AlarmHandler
 from vitrage.entity_graph.mappings.resource_handler import \
     ResourceHandler
+from vitrage.utils import file as file_utils
 
 LOG = log.getLogger(__name__)
 

@@ -18,7 +18,6 @@ from vitrage.common.constants import DatasourceAction as DSAction
 from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import GraphAction
 from vitrage.common.constants import VertexProperties as VProps
-from vitrage.common.datetime_utils import utcnow
 from vitrage.datasources.transformer_base import Neighbor
 from vitrage.entity_graph.initialization_status import InitializationStatus
 from vitrage.entity_graph.mappings.operational_resource_state import \
@@ -26,6 +25,7 @@ from vitrage.entity_graph.mappings.operational_resource_state import \
 from vitrage.entity_graph.processor import processor as proc
 import vitrage.graph.utils as graph_utils
 from vitrage.tests.unit.entity_graph.base import TestEntityGraphUnitBase
+from vitrage.utils.datetime import utcnow
 
 
 class TestProcessor(TestEntityGraphUnitBase):

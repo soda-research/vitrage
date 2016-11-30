@@ -12,7 +12,7 @@
 
 from pecan.core import abort
 
-from vitrage.common.utils import recursive_keypairs
+from vitrage.utils import recursive_keypairs
 
 
 def enforce(rule, headers, enforcer, target):

@@ -18,7 +18,6 @@ from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import EdgeLabel
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import VertexProperties as VProps
-from vitrage.common import datetime_utils
 from vitrage.datasources.alarm_transformer_base import AlarmTransformerBase
 from vitrage.datasources.nagios import NAGIOS_DATASOURCE
 from vitrage.datasources.nagios.properties import NagiosProperties
@@ -27,6 +26,7 @@ from vitrage.datasources.nova.host import NOVA_HOST_DATASOURCE
 from vitrage.datasources import transformer_base as tbase
 from vitrage.datasources.transformer_base import Neighbor
 import vitrage.graph.utils as graph_utils
+from vitrage.utils import datetime as datetime_utils
 
 LOG = logging.getLogger(__name__)
 

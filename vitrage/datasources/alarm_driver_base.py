@@ -13,10 +13,11 @@
 # under the License.
 
 from oslo_log import log
+
 from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import GraphAction
-from vitrage.common import datetime_utils
 from vitrage.datasources.driver_base import DriverBase
+from vitrage.utils import datetime as datetime_utils
 
 LOG = log.getLogger(__name__)
 

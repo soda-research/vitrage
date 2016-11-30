@@ -21,12 +21,12 @@ from vitrage.common.constants import DatasourceAction
 from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import GraphAction
 from vitrage.common.constants import VertexProperties as VProps
-from vitrage.common import file_utils
 from vitrage.datasources.static_physical import driver
 from vitrage.datasources.static_physical import STATIC_PHYSICAL_DATASOURCE
 from vitrage.datasources.static_physical import SWITCH
 from vitrage.tests import base
 from vitrage.tests.mocks import utils
+from vitrage.utils import file as file_utils
 
 
 LOG = logging.getLogger(__name__)

@@ -14,12 +14,12 @@
 import copy
 import logging
 
-from vitrage.common import file_utils
 from vitrage.evaluator.template_fields import TemplateFields
 from vitrage.evaluator.template_validation.status_messages import status_msgs
 from vitrage.evaluator.template_validation import template_syntax_validator
 from vitrage.tests import base
 from vitrage.tests.mocks import utils
+from vitrage.utils import file as file_utils
 
 
 # noinspection PyAttributeOutsideInit

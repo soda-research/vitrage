@@ -15,10 +15,9 @@
 
 import abc
 from collections import namedtuple
+import six
 
 from oslo_log import log as logging
-import six
-from vitrage.common import datetime_utils
 
 import vitrage.common.constants as cons
 from vitrage.common.constants import DatasourceAction
@@ -26,9 +25,10 @@ from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import GraphAction
 from vitrage.common.constants import UpdateMethod
 from vitrage.common.exception import VitrageTransformerError
-from vitrage.common import utils
 from vitrage.datasources import OPENSTACK_CLUSTER
 import vitrage.graph.utils as graph_utils
+from vitrage.utils import datetime as datetime_utils
+from vitrage.utils import opt_exists
 
 LOG = logging.getLogger(__name__)
 
@@ -130,8 +130,8 @@ class TransformerBase(object):
 
     def _create_entity_vertex(self, entity_event):
         if is_update_event(entity_event) and \
-                utils.opt_exists(self.conf, self.get_type()) and \
-                utils.opt_exists(self.conf[self.get_type()], 'update_method'):
+                opt_exists(self.conf, self.get_type()) and \
+                opt_exists(self.conf[self.get_type()], 'update_method'):
             update_method = self.conf[self.get_type()].update_method.lower()
             if update_method == UpdateMethod.PUSH:
                 return self._create_update_entity_vertex(entity_event)

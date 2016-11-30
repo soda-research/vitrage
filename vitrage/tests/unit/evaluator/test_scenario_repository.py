@@ -15,12 +15,12 @@ import os
 
 from oslo_config import cfg
 
-from vitrage.common import file_utils
 from vitrage.evaluator.scenario_repository import ScenarioRepository
 from vitrage.evaluator.template_validation.template_syntax_validator import \
     syntax_validation
 from vitrage.tests import base
 from vitrage.tests.mocks import utils
+from vitrage.utils import file as file_utils
 
 
 class ScenarioRepositoryTest(base.BaseTest):

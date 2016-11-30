@@ -13,7 +13,6 @@
 # under the License.
 
 from vitrage.common.constants import EdgeLabel
-from vitrage.common import file_utils
 from vitrage.evaluator.template_data import ConditionVar
 from vitrage.evaluator.template_data import EdgeDescription
 from vitrage.evaluator.template_data import TemplateData
@@ -21,6 +20,7 @@ from vitrage.evaluator.template_fields import TemplateFields as TFields
 from vitrage.graph import Vertex
 from vitrage.tests import base
 from vitrage.tests.mocks import utils
+from vitrage.utils import file as file_utils
 
 
 class BasicTemplateTest(base.BaseTest):

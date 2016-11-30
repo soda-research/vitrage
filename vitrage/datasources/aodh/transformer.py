@@ -16,7 +16,6 @@ from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import EdgeLabel
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import VertexProperties as VProps
-from vitrage.common import datetime_utils
 from vitrage.datasources.alarm_transformer_base import AlarmTransformerBase
 from vitrage.datasources.aodh import AODH_DATASOURCE
 from vitrage.datasources.aodh.properties import AodhProperties as AodhProps
@@ -24,6 +23,7 @@ from vitrage.datasources.aodh.properties import AodhState
 from vitrage.datasources import transformer_base as tbase
 from vitrage.datasources.transformer_base import Neighbor
 import vitrage.graph.utils as graph_utils
+from vitrage.utils import datetime as datetime_utils
 
 
 class AodhTransformer(AlarmTransformerBase):

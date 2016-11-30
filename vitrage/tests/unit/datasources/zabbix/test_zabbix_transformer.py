@@ -22,7 +22,6 @@ from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import GraphAction
 from vitrage.common.constants import UpdateMethod
 from vitrage.common.constants import VertexProperties as VProps
-from vitrage.common.datetime_utils import format_unix_timestamp
 from vitrage.datasources.alarm_properties import AlarmProperties as AlarmProps
 from vitrage.datasources.nova.host import NOVA_HOST_DATASOURCE
 from vitrage.datasources.nova.host.transformer import HostTransformer
@@ -36,7 +35,7 @@ from vitrage.datasources.zabbix.transformer import ZabbixTransformer
 from vitrage.datasources.zabbix import ZABBIX_DATASOURCE
 from vitrage.tests import base
 from vitrage.tests.mocks import mock_driver as mock_sync
-
+from vitrage.utils.datetime import format_unix_timestamp
 
 LOG = logging.getLogger(__name__)
 

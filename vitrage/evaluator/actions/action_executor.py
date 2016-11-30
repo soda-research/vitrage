@@ -19,7 +19,6 @@ from oslo_utils import importutils
 from vitrage.common.constants import DatasourceAction as AType
 from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import VertexProperties as VProps
-from vitrage.common import datetime_utils
 from vitrage.evaluator.actions.base import ActionMode
 from vitrage.evaluator.actions.base import ActionType
 from vitrage.evaluator.actions.evaluator_event_transformer import VITRAGE_TYPE
@@ -34,6 +33,7 @@ from vitrage.evaluator.actions.recipes.base import EVALUATOR_EVENT_TYPE
 from vitrage.evaluator.actions.recipes.mark_down import MarkDown
 from vitrage.evaluator.actions.recipes.raise_alarm import RaiseAlarm
 from vitrage.evaluator.actions.recipes.set_state import SetState
+from vitrage.utils import datetime as datetime_utils
 
 
 class ActionExecutor(object):

@@ -17,9 +17,9 @@ import copy
 from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import GraphAction
 from vitrage.common.constants import VertexProperties as VProps
-from vitrage.common import file_utils
 from vitrage.datasources.driver_base import DriverBase
 from vitrage.datasources.static_physical import STATIC_PHYSICAL_DATASOURCE
+from vitrage.utils import file as file_utils
 
 
 class StaticPhysicalDriver(DriverBase):

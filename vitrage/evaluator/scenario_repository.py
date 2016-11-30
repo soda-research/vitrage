@@ -17,8 +17,6 @@ from hashlib import md5
 
 from oslo_log import log
 
-from vitrage.common import datetime_utils
-from vitrage.common import file_utils
 from vitrage.evaluator.base import Template
 from vitrage.evaluator.template_data import RELATIONSHIP
 from vitrage.evaluator.template_data import TemplateData
@@ -26,6 +24,8 @@ from vitrage.evaluator.template_validation.template_content_validator import \
     content_validation
 from vitrage.evaluator.template_validation.template_syntax_validator import \
     syntax_validation
+from vitrage.utils import datetime as datetime_utils
+from vitrage.utils import file as file_utils
 
 LOG = log.getLogger(__name__)
 

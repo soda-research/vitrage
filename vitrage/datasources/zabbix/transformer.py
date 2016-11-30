@@ -18,8 +18,6 @@ from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import EdgeLabel
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import VertexProperties as VProps
-from vitrage.common.datetime_utils import change_time_str_format
-from vitrage.common.datetime_utils import format_unix_timestamp
 from vitrage.datasources.alarm_properties import AlarmProperties as AlarmProps
 from vitrage.datasources.alarm_transformer_base import AlarmTransformerBase
 from vitrage.datasources.nova.host import NOVA_HOST_DATASOURCE
@@ -31,9 +29,9 @@ from vitrage.datasources.zabbix.properties import ZabbixTriggerSeverity \
 from vitrage.datasources.zabbix.properties import ZabbixTriggerValue\
     as TriggerValue
 from vitrage.datasources.zabbix import ZABBIX_DATASOURCE
-
-
 import vitrage.graph.utils as graph_utils
+from vitrage.utils.datetime import change_time_str_format
+from vitrage.utils.datetime import format_unix_timestamp
 
 LOG = logging.getLogger(__name__)
 

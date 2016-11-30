@@ -22,10 +22,10 @@ from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import GraphAction
 from vitrage.common.constants import VertexProperties as VProps
-from vitrage.common.datetime_utils import utcnow
 from vitrage.datasources.consistency import CONSISTENCY_DATASOURCE
 from vitrage.datasources import OPENSTACK_CLUSTER
 from vitrage.evaluator.actions.evaluator_event_transformer import VITRAGE_TYPE
+from vitrage.utils.datetime import utcnow
 
 LOG = log.getLogger(__name__)
 
