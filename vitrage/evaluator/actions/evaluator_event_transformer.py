@@ -62,13 +62,18 @@ class EvaluatorEventTransformer(transformer_base.TransformerBase):
 
         if event_type == UPDATE_VERTEX:
             properties = {
-                VProps.VITRAGE_STATE: event.get(VProps.VITRAGE_STATE),
-                VProps.IS_MARKED_DOWN: event.get(VProps.IS_MARKED_DOWN),
                 VProps.UPDATE_TIMESTAMP: update_timestamp,
                 VProps.SAMPLE_TIMESTAMP: event[VProps.SAMPLE_TIMESTAMP],
                 VProps.IS_PLACEHOLDER: False,
                 VProps.RESOURCE_ID: event.get(TFields.TARGET)
             }
+            if VProps.VITRAGE_STATE in event:
+                properties[VProps.VITRAGE_STATE] = \
+                    event.get(VProps.VITRAGE_STATE)
+            if VProps.IS_MARKED_DOWN in event:
+                properties[VProps.IS_MARKED_DOWN] = \
+                    event.get(VProps.IS_MARKED_DOWN)
+
             return Vertex(event[VProps.VITRAGE_ID], properties)
 
         if event_type in [ADD_VERTEX, REMOVE_VERTEX]:
