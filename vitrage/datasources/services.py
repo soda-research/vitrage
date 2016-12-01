@@ -120,5 +120,5 @@ class ChangesService(DatasourceService):
                 for entity in datasource.get_changes(DatasourceAction.UPDATE):
                     self.send_to_queue(entity)
             except Exception as e:
-                LOG.error("Get changes Failed - %s", e.message)
+                LOG.error("Get changes Failed - %s", str(e))
         LOG.debug("end get changes")
