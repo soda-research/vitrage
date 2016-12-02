@@ -109,3 +109,22 @@ class NotifierEventTypes(object):
     DEACTIVATE_DEDUCED_ALARM_EVENT = 'vitrage.deduced_alarm.deactivate'
     ACTIVATE_MARK_DOWN_EVENT = 'vitrage.mark_down.activate'
     DEACTIVATE_MARK_DOWN_EVENT = 'vitrage.mark_down.deactivate'
+
+
+class TopologyFields(object):
+    """yaml fields for topology definitions"""
+    METADATA = 'metadata'
+    DESCRIPTION = 'description'
+    NAME = 'name'
+
+    DEFINITIONS = 'definitions'
+
+    ENTITIES = 'entities'
+    ENTITY = 'entity'
+    TYPE = 'type'
+
+    RELATIONSHIPS = 'relationships'
+    RELATIONSHIP = 'relationship'
+    RELATIONSHIP_TYPE = 'relationship_type'
+    SOURCE = 'source'
+    TARGET = 'target'
