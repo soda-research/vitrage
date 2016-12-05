@@ -22,10 +22,9 @@ import logging
 from logging.handlers import RotatingFileHandler
 from oslo_config import cfg
 import oslo_messaging as messaging
-import six
+from oslo_utils import uuidutils
 import socket
 import sys
-import uuid
 
 '''
 Expected input:
@@ -86,7 +85,7 @@ def main():
     logging.debug('[vitrage] publisher: %s, event: %s, payload %s',
                   publisher, event_type, payload)
 
-    notifier.info(ctxt={'message_id': six.text_type(uuid.uuid4()),
+    notifier.info(ctxt={'message_id': uuidutils.generate_uuid(),
                         'publisher_id': publisher,
                         'timestamp': datetime.utcnow()},
                   event_type=event_type,
