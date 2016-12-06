@@ -30,6 +30,7 @@ from vitrage.tests.mocks.entity_model import BasicEntityModel as Bem
 import vitrage.tests.mocks.utils as utils
 
 DYNAMIC_INFO_FKEY = 'filename'
+DYNAMIC_INFO_FPATH = 'filepath'
 STATIC_INFO_FKEY = 'static_filename'
 NAME_KEY = 'name'
 MAPPING_KEY = 'mapping'
@@ -41,6 +42,8 @@ GENERATOR = 'generator'
 
 # specification files for input types
 # Mock driver specs
+MOCK_DRIVER_PATH = '%s/mock_configurations/driver' % \
+    utils.get_resources_dir()
 DRIVER_HOST_SNAPSHOT_D = 'driver_host_snapshot_dynamic.json'
 DRIVER_INST_SNAPSHOT_D = 'driver_inst_snapshot_dynamic.json'
 DRIVER_INST_SNAPSHOT_S = 'driver_inst_snapshot_static.json'
@@ -58,6 +61,9 @@ DRIVER_ZONE_SNAPSHOT_D = 'driver_zone_snapshot_dynamic.json'
 
 
 # Mock transformer Specs (i.e., what the transformer outputs)
+MOCK_TRANSFORMER_PATH = '%s/mock_configurations/transformer' % \
+    utils.get_resources_dir()
+TRANS_AODH_SNAPSHOT_D = 'transformer_aodh_snapshot_dynamic.json'
 TRANS_INST_SNAPSHOT_D = 'transformer_inst_snapshot_dynamic.json'
 TRANS_INST_SNAPSHOT_S = 'transformer_inst_snapshot_static.json'
 TRANS_HOST_SNAPSHOT_D = 'transformer_host_snapshot_dynamic.json'
@@ -113,11 +119,15 @@ class EventTraceGenerator(object):
              DRIVER_CONSISTENCY_UPDATE_D:
                  _get_consistency_update_driver_values,
 
+             TRANS_AODH_SNAPSHOT_D: _get_trans_aodh_alarm_snapshot_values,
              TRANS_INST_SNAPSHOT_D: _get_trans_vm_snapshot_values,
              TRANS_HOST_SNAPSHOT_D: _get_trans_host_snapshot_values,
              TRANS_ZONE_SNAPSHOT_D: _get_trans_zone_snapshot_values}
 
-        dynam_specs = utils.load_specs(spec[DYNAMIC_INFO_FKEY])
+        target_folder = spec[DYNAMIC_INFO_FPATH] \
+            if spec.get(DYNAMIC_INFO_FPATH) else None
+        dynam_specs = utils.load_specs(spec[DYNAMIC_INFO_FKEY],
+                                       target_folder=target_folder)
         dynamic_spec_filename = spec[DYNAMIC_INFO_FKEY].split('/')[-1]
         static_specs = static_info_parsers[dynamic_spec_filename](spec)
         self.name = spec.get(NAME_KEY, 'generator')
@@ -566,6 +576,31 @@ def _get_trans_zone_snapshot_values(spec):
             static_info_re, mapping, spec.get(EXTERNAL_INFO_KEY, None)
         ))
 
+    return static_values
+
+
+def _get_trans_aodh_alarm_snapshot_values(spec):
+    """Generates the static transformer values for each vm.
+
+    :param spec: specification of event generation.
+    :type spec: dict
+    :return: list of static transformer values for each vm.
+    :rtype: list
+    """
+
+    alarm_resources_mapping = spec[MAPPING_KEY]
+    static_info_re = None
+    if spec[STATIC_INFO_FKEY] is not None:
+        static_info_re = utils.load_specs(spec[STATIC_INFO_FKEY])
+
+    static_values = []
+    for alarm_id, resource_id in alarm_resources_mapping:
+        mapping = {'alarm_id': alarm_id,
+                   'resource_id': resource_id,
+                   'graph_query_result': [{'id': resource_id}]}
+        static_values.append(combine_data(
+            static_info_re, mapping, spec.get(EXTERNAL_INFO_KEY, None)
+        ))
     return static_values
 
 

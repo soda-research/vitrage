@@ -129,3 +129,32 @@ def simple_zone_generators(zone_num, snapshot_events=0, snap_vals=None):
          }
     ]
     return tg.get_trace_generators(test_entity_spec_list)
+
+
+def simple_aodh_alarm_generators(alarm_num,
+                                 snapshot_events=0, snap_vals=None):
+    """A simple function for returning aodh alarm generators.
+
+    Returns generators for a given number of alarms.
+
+    :param alarm_num: number of alarms
+    :param snapshot_events: number of snapshot events
+    :param snap_vals: values of snapshot
+    :return: generators for alarm_num alarms as specified
+    """
+
+    mapping = [('alarm-{0}'.format(ind), 'resource-{0}'.format(ind))
+               for ind in range(alarm_num)
+               ]
+
+    test_entity_spec_list = [
+        {tg.DYNAMIC_INFO_FKEY: tg.TRANS_AODH_SNAPSHOT_D,
+         tg.DYNAMIC_INFO_FPATH: tg.MOCK_TRANSFORMER_PATH,
+         tg.STATIC_INFO_FKEY: None,
+         tg.MAPPING_KEY: mapping,
+         tg.EXTERNAL_INFO_KEY: snap_vals,
+         tg.NAME_KEY: 'Aodh snapshot generator',
+         tg.NUM_EVENTS: snapshot_events
+         }
+    ]
+    return tg.get_trace_generators(test_entity_spec_list)
