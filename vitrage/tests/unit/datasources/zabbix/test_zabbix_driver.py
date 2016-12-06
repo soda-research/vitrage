@@ -143,6 +143,9 @@ class ZabbixDriverTest(ZabbixBaseTest):
         self.assertEqual(2, len(alarms))
         self._assert_contains(expected_alarm1, alarms)
         self._assert_contains(expected_alarm2, alarms)
+        for alarm in alarms:
+            self.assertEqual(GraphAction.DELETE_ENTITY,
+                             alarm[DSProps.EVENT_TYPE])
 
         # Step 4 - get all when all alarms are inactivated and their status
         # was not changed
@@ -251,6 +254,9 @@ class ZabbixDriverTest(ZabbixBaseTest):
         self.assertEqual(2, len(alarms))
         self._assert_contains(expected_alarm1, alarms)
         self._assert_contains(expected_alarm2, alarms)
+        for alarm in alarms:
+            self.assertEqual(GraphAction.DELETE_ENTITY,
+                             alarm[DSProps.EVENT_TYPE])
 
         # Step 6 - get changes when no change occurred
         # Action
