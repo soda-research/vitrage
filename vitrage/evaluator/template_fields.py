@@ -12,11 +12,11 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from vitrage.common.constants import TopologyFields
 
-class TemplateFields(object):
 
-    METADATA = 'metadata'
-    DEFINITIONS = 'definitions'
+class TemplateFields(TopologyFields):
+
     SCENARIOS = 'scenarios'
 
     ALARM_NAME = 'alarm_name'
@@ -26,18 +26,9 @@ class TemplateFields(object):
     ACTION_TYPE = 'action_type'
     CATEGORY = 'category'
     CONDITION = 'condition'
-    DESCRIPTION = 'description'
-    ENTITIES = 'entities'
-    ENTITY = 'entity'
-    NAME = 'name'
-    PROPERTIES = 'properties'
-    RELATIONSHIPS = 'relationships'
-    RELATIONSHIP = 'relationship'
-    RELATIONSHIP_TYPE = 'relationship_type'
     SEVERITY = 'severity'
-    SOURCE = 'source'
     SCENARIO = 'scenario'
     STATE = 'state'
-    TARGET = 'target'
     TEMPLATE_ID = 'template_id'
-    TYPE = 'type'
+
+    PROPERTIES = 'properties'
