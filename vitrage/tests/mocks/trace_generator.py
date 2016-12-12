@@ -22,6 +22,7 @@ multiple instances of the same entity type.
 
 """
 
+from collections import defaultdict
 from random import randint
 
 # noinspection PyPep8Naming
@@ -54,6 +55,7 @@ DRIVER_NAGIOS_SNAPSHOT_D = 'driver_nagios_snapshot_dynamic.json'
 DRIVER_NAGIOS_SNAPSHOT_S = 'driver_nagios_snapshot_static.json'
 DRIVER_ZABBIX_SNAPSHOT_D = 'driver_zabbix_snapshot_dynamic.json'
 DRIVER_SWITCH_SNAPSHOT_D = 'driver_switch_snapshot_dynamic.json'
+DRIVER_STATIC_SNAPSHOT_D = 'driver_static_snapshot_dynamic.json'
 DRIVER_VOLUME_UPDATE_D = 'driver_volume_update_dynamic.json'
 DRIVER_VOLUME_SNAPSHOT_D = 'driver_volume_snapshot_dynamic.json'
 DRIVER_STACK_UPDATE_D = 'driver_stack_update_dynamic.json'
@@ -120,6 +122,7 @@ class EventTraceGenerator(object):
              DRIVER_STACK_SNAPSHOT_D: _get_stack_snapshot_driver_values,
              DRIVER_STACK_UPDATE_D: _get_stack_update_driver_values,
              DRIVER_SWITCH_SNAPSHOT_D: _get_switch_snapshot_driver_values,
+             DRIVER_STATIC_SNAPSHOT_D: _get_static_snapshot_driver_values,
              DRIVER_NAGIOS_SNAPSHOT_D: _get_nagios_alarm_driver_values,
              DRIVER_ZABBIX_SNAPSHOT_D: _get_zabbix_alarm_driver_values,
              DRIVER_CONSISTENCY_UPDATE_D:
@@ -516,6 +519,94 @@ def _get_switch_snapshot_driver_values(spec):
         static_values.append(combine_data(static_info_re,
                                           mapping,
                                           spec.get(EXTERNAL_INFO_KEY, None)))
+    return static_values
+
+
+def _get_static_snapshot_driver_values(spec):
+    """Generates the static driver values for static datasource.
+
+    :param spec: specification of event generation.
+    :type spec: dict
+    :return: list of driver values for static datasource.
+    :rtype: list
+    """
+
+    host_switch_mapping = spec[MAPPING_KEY]
+    static_info_spec = None
+    if spec[STATIC_INFO_FKEY] is not None:
+        static_info_spec = utils.load_specs(spec[STATIC_INFO_FKEY])
+
+    static_values = []
+
+    relationships = defaultdict(lambda: [])
+    entities = defaultdict(lambda: {})
+
+    for host_index, switch_index in host_switch_mapping:
+        host_id = "h{}".format(host_index)
+        switch_id = "s{}".format(switch_index)
+
+        relationship = {
+            "source": switch_id,
+            "target": host_id,
+            "relationship_type": "attached"
+        }
+        host_rel = relationship.copy()
+        host_rel['source'] = entities[switch_id]
+        relationships[host_id].append(host_rel)
+
+        switch_rel = relationship.copy()
+        switch_rel['target'] = entities[host_id]
+        relationships[switch_id].append(switch_rel)
+
+    for host_index, switch_index in host_switch_mapping:
+        mapping = {}
+
+        switch_id = "s{}".format(switch_index)
+        if switch_id not in entities:
+            switch_name = "switch-{}".format(switch_index)
+            mapping = {
+                'name': switch_name,
+                'config_id': switch_id,
+                'id': str(randint(0, 100000)),
+                'type': 'switch',
+                'relationships': relationships[switch_id]
+            }
+            entities[switch_id].update(**mapping)
+
+        host_id = "h{}".format(host_index)
+        if host_id not in entities:
+            mapping = {
+                'config_id': host_id,
+                'type': 'nova.host',
+                'id': str(randint(0, 100000)),
+                'relationships': relationships[host_id]
+            }
+            entities[host_id].update(**mapping)
+
+        static_values.append(combine_data(static_info_spec,
+                                          mapping,
+                                          spec.get(EXTERNAL_INFO_KEY, None)))
+
+    for index in range(10):
+        custom_id = 'c{}'.format(index)
+        # self-pointing relationship
+        relationships = [
+            {
+                "source": custom_id,
+                "target": custom_id,
+                "relationship_type": "custom"
+            }
+        ]
+        mapping = {
+            'config_id': custom_id,
+            'type': 'custom',
+            'id': str(randint(0, 100000)),
+            'relationships': relationships
+        }
+        static_values.append(combine_data(static_info_spec,
+                                          mapping,
+                                          spec.get(EXTERNAL_INFO_KEY, None)))
+
     return static_values
 
 

@@ -70,7 +70,7 @@ class StaticPhysicalDriver(DriverBase):
         static_entities = []
         config = file_utils.load_yaml_file(path)
 
-        if StaticDriver.is_valid_config(config):
+        if StaticDriver._is_valid_config(config):
             LOG.warning("Skipped config of new static datasource: {}"
                         .format(file_))
             return []
@@ -93,7 +93,7 @@ class StaticPhysicalDriver(DriverBase):
                 '/' + file_
             config = file_utils.load_yaml_file(full_path)
 
-            if StaticDriver.is_valid_config(config):
+            if StaticDriver._is_valid_config(config):
                 LOG.warning("Skipped config of new static datasource: {}"
                             .format(file_))
                 return []

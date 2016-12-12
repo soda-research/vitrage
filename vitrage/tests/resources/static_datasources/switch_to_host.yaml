@@ -37,28 +37,28 @@ definitions:
   relationships:
     - source: s1
       target: r1
-      relation_type: attached
+      relationship_type: attached
     - source: s2
       target: r1
-      relation_type: attached
+      relationship_type: attached
     - source: s3
       target: r1
-      relation_type: attached
+      relationship_type: attached
     - source: s1
       target: h1
-      relation_type: attached
+      relationship_type: attached
     - source: s1
       target: h2
-      relation_type: attached
+      relationship_type: attached
     - source: s2
       target: h2
-      relation_type: attached
+      relationship_type: attached
     - source: s2
       target: h3
-      relation_type: attached
+      relationship_type: attached
     - source: s3
       target: h3
-      relation_type: attached
+      relationship_type: attached
     - source: s3
       target: h4
-      relation_type: attached
+      relationship_type: attached

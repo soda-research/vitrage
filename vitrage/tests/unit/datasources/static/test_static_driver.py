@@ -20,6 +20,7 @@ from vitrage.common.constants import GraphAction
 from vitrage.common.constants import TopologyFields
 from vitrage.datasources.static import driver
 from vitrage.datasources.static import STATIC_DATASOURCE
+from vitrage.datasources.static import StaticFields
 from vitrage.tests import base
 from vitrage.tests.mocks import utils
 
@@ -78,7 +79,7 @@ class TestStaticDriver(base.BaseTest):
         self.assertEqual(9, len(static_entities))
 
         for entity in static_entities[:-1]:  # exclude end message
-            self.assert_is_not_empty(entity[TopologyFields.RELATIONSHIPS])
+            self._validate_static_entity(entity)
 
     # noinspection PyAttributeOutsideInit
     def test_get_changes(self):
@@ -98,4 +99,20 @@ class TestStaticDriver(base.BaseTest):
         # Test Assertions
         self.assertEqual(0, len(changes))
         for entity in changes:
-            self.assert_is_not_empty(entity[TopologyFields.RELATIONSHIPS])
+            self._validate_static_entity(entity)
+
+    def _validate_static_entity(self, entity):
+        self.assertTrue(isinstance(entity[TopologyFields.METADATA], dict))
+        for rel in entity[TopologyFields.RELATIONSHIPS]:
+            self._validate_static_rel(entity, rel)
+
+    def _validate_static_rel(self, entity, rel):
+        self.assertTrue(entity[StaticFields.CONFIG_ID] in
+                        (rel[StaticFields.SOURCE], rel[StaticFields.TARGET]))
+        self.assertTrue(
+            isinstance(rel[StaticFields.SOURCE], dict)
+            and entity[StaticFields.CONFIG_ID] == rel[StaticFields.TARGET]
+            or isinstance(rel[StaticFields.TARGET], dict)
+            and entity[StaticFields.CONFIG_ID] == rel[StaticFields.SOURCE]
+            or entity[StaticFields.CONFIG_ID] == rel[StaticFields.SOURCE]
+            and entity[StaticFields.CONFIG_ID] == rel[StaticFields.TARGET])

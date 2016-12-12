@@ -13,6 +13,7 @@
 # under the License.
 
 from oslo_config import cfg
+from vitrage.common.constants import TopologyFields
 from vitrage.common.constants import UpdateMethod
 
 STATIC_DATASOURCE = 'static'
@@ -43,5 +44,8 @@ OPTS = [
     # configuration files will NOT be converted automatically. But user will
     # receive deprecation warnings.
     cfg.StrOpt('directory', default='/etc/vitrage/static_datasources',
-               help='static data sources configuration directory')
-]
+               help='static data sources configuration directory')]
+
+
+class StaticFields(TopologyFields):
+    CONFIG_ID = 'config_id'
