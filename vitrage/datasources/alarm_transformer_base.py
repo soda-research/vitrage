@@ -14,9 +14,11 @@
 
 from oslo_log import log as logging
 
+from vitrage.common.constants import DatasourceAction
 from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import GraphAction
+from vitrage.common.exception import VitrageTransformerError
 from vitrage.datasources.alarm_properties import AlarmProperties as AlarmProps
 from vitrage.datasources import transformer_base as tbase
 
@@ -30,6 +32,27 @@ class AlarmTransformerBase(tbase.TransformerBase):
 
     def _ok_status(self, entity_event):
         pass
+
+    def _extract_graph_action(self, entity_event):
+
+        if DSProps.EVENT_TYPE in entity_event and \
+           entity_event[DSProps.EVENT_TYPE] == GraphAction.DELETE_ENTITY:
+            return entity_event[DSProps.EVENT_TYPE]
+
+        datasource_action = entity_event[DSProps.DATASOURCE_ACTION]
+
+        if datasource_action in \
+            (DatasourceAction.UPDATE, DatasourceAction.SNAPSHOT):
+            return GraphAction.DELETE_ENTITY if self._ok_status(entity_event) else \
+                self.GRAPH_ACTION_MAPPING.get(
+                entity_event.get(DSProps.EVENT_TYPE, None),
+                GraphAction.UPDATE_ENTITY)
+
+        if DatasourceAction.INIT_SNAPSHOT == datasource_action:
+            return GraphAction.CREATE_ENTITY
+
+        raise VitrageTransformerError('Invalid datasource action: (%s)'
+                                      % datasource_action)
 
     def create_placeholder_vertex(self, **kwargs):
         LOG.info('An alarm cannot be a placeholder')

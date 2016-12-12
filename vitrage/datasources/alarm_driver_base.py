@@ -85,15 +85,16 @@ class AlarmDriverBase(DriverBase):
     def _get_all_alarms(self):
         alarms = self._get_alarms()
         self._enrich_alarms(alarms)
-        return self._filter_and_cache_alarms(alarms,
-                                             AlarmDriverBase._filter_get_all)
+        return self._filter_and_cache_alarms(
+            alarms,
+            self._filter_get_erroneous)
 
     def _get_changed_alarms(self):
         alarms = self._get_alarms()
         self._enrich_alarms(alarms)
         return self._filter_and_cache_alarms(
             alarms,
-            AlarmDriverBase._filter_get_changes)
+            self._filter_get_change)
 
     def _filter_and_cache_alarms(self, alarms, filter_):
         alarms_to_update = []
@@ -101,15 +102,10 @@ class AlarmDriverBase(DriverBase):
 
         for alarm in alarms:
             alarm_key = self._alarm_key(alarm)
-            old_alarm, timestamp = self.cache.get(alarm_key, (None, None))
-
-            if filter_(self, alarm, old_alarm):
-                # delete state changed alarm: alarm->OK
-                if not self._is_erroneous(alarm):
-                    alarm[DSProps.EVENT_TYPE] = GraphAction.DELETE_ENTITY
+            old_alarm = self.cache.get(alarm_key, (None, None))[0]
+            if self._filter_and_cache_alarm(
+                alarm, old_alarm, filter_, now):
                 alarms_to_update.append(alarm)
-
-            self.cache[alarm_key] = alarm, now
 
         # add alarms that were deleted
         values = list(self.cache.values())
@@ -122,13 +118,16 @@ class AlarmDriverBase(DriverBase):
 
         return alarms_to_update
 
-    def _filter_get_all(self, alarm, old_alarm):
+    def _filter_get_valid(self, alarm, old_alarm):
+        return alarm if self._is_valid(alarm) else None
+
+    def _filter_get_erroneous(self, alarm, old_alarm):
         return alarm \
             if self._is_valid(alarm) and \
             (self._is_erroneous(alarm) or self._is_erroneous(old_alarm)) \
             else None
 
-    def _filter_get_changes(self, alarm, old_alarm):
+    def _filter_get_change(self, alarm, old_alarm):
         if not self._is_valid(alarm):
             return None
         if self._status_changed(alarm, old_alarm):
@@ -137,3 +136,8 @@ class AlarmDriverBase(DriverBase):
             return alarm
         else:
             return None
+
+    def _filter_and_cache_alarm(self, alarm, old_alarm, filter_, time):
+        ret = alarm if filter_(alarm, old_alarm) else None
+        self.cache[self._alarm_key(alarm)] = alarm, time
+        return ret

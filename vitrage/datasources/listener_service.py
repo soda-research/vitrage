@@ -95,5 +95,6 @@ class NotificationsEndpoint(object):
 
     def _enqueue_events(self, enriched_events):
         for event in enriched_events:
-            self.enqueue_callback(event)
-            LOG.debug('EVENT ENQUEUED: \n' + str(event))
+            if event is not None:
+                self.enqueue_callback(event)
+                LOG.debug('EVENT ENQUEUED: \n' + str(event))

@@ -15,9 +15,11 @@
 from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import EdgeLabel
 from vitrage.common.constants import EntityCategory
+from vitrage.common.constants import GraphAction
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.datasources.alarm_transformer_base import AlarmTransformerBase
 from vitrage.datasources.aodh import AODH_DATASOURCE
+from vitrage.datasources.aodh.properties import AodhEventType
 from vitrage.datasources.aodh.properties import AodhProperties as AodhProps
 from vitrage.datasources.aodh.properties import AodhState
 from vitrage.datasources import transformer_base as tbase
@@ -27,6 +29,11 @@ from vitrage.utils import datetime as datetime_utils
 
 
 class AodhTransformer(AlarmTransformerBase):
+
+    # Event types which need to refer them differently
+    GRAPH_ACTION_MAPPING = {
+        AodhEventType.DELETION: GraphAction.DELETE_ENTITY,
+    }
 
     def __init__(self, transformers, conf):
         super(AodhTransformer, self).__init__(transformers, conf)

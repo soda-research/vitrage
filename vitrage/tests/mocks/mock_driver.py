@@ -435,3 +435,34 @@ def simple_zabbix_alarm_generators(host_num,
         })
 
     return tg.get_trace_generators(test_entity_spec_list)
+
+
+def simple_aodh_alarm_notification_generators(alarm_num,
+                                              update_events=0,
+                                              update_vals=None):
+    """A function for returning aodh alarm event generators.
+
+    Returns generators for a given number of Aodh alarms.
+
+    :param alarm_num: number of alarms
+    :param update_events: number of update alarms
+    :param update_vals: preset vals for ALL update events
+    :return: generators for alarm_num zones as specified
+
+    Returns generators for a given number of alarms and
+    instances.
+    """
+
+    alarms = ['alarm-{0}'.format(index) for index in range(alarm_num)]
+
+    test_entity_spec_list = [
+        {tg.DYNAMIC_INFO_FKEY: tg.DRIVER_AODH_UPDATE_D,
+         tg.STATIC_INFO_FKEY: None,
+         tg.MAPPING_KEY: alarms,
+         tg.EXTERNAL_INFO_KEY: update_vals,
+         tg.NAME_KEY: 'Aodh update generator',
+         tg.NUM_EVENTS: update_events
+         }
+    ]
+
+    return tg.get_trace_generators(test_entity_spec_list)

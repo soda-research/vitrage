@@ -41,6 +41,7 @@ ENABLED_SERVICES+=,vitrage-api,vitrage-graph
 ENABLED_SERVICES+=,key,aodi-api,aodh-notifier,aodh-evaluator
 ENABLED_SERVICES+=,ceilometer-alarm-evaluator,ceilometer-alarm-notifier
 ENABLED_SERVICES+=,ceilometer-api
+ENABLED_SERVICES+=,aodh-api
 export ENABLED_SERVICES
 
 
@@ -68,6 +69,11 @@ notification_driver = messagingv2
 notification_topics = notifications,vitrage_notifications
 notification_driver = messagingv2
 policy_file = /etc/heat/policy.json-tempest
+
+[[post-config|\$AODH_CONF]]
+[oslo_messaging_notifications]
+driver = messagingv2
+topics = notifications, vitrage_notifications
 
 [[post-config|\$VITRAGE_CONF]]
 [static_physical]

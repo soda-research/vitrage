@@ -15,32 +15,25 @@
 from oslo_config import cfg
 from oslo_log import log as logging
 
-from vitrage.common.constants import DatasourceAction
 from vitrage.common.constants import DatasourceProperties as DSProps
-from vitrage.common.constants import EdgeLabel
 from vitrage.common.constants import EntityCategory
-from vitrage.common.constants import GraphAction
 from vitrage.common.constants import UpdateMethod
-from vitrage.common.constants import VertexProperties as VProps
-from vitrage.datasources.alarm_properties import AlarmProperties as AlarmProps
 from vitrage.datasources.aodh import AODH_DATASOURCE
 from vitrage.datasources.aodh.properties import AodhProperties as AodhProps
-from vitrage.datasources.aodh.properties import AodhState
 from vitrage.datasources.aodh.transformer import AodhTransformer
-from vitrage.datasources.nova.instance import NOVA_INSTANCE_DATASOURCE
 from vitrage.datasources.transformer_base import TransformerBase
-from vitrage.graph.driver.elements import Vertex
-from vitrage.tests import base
 from vitrage.tests.mocks import mock_transformer as mock_sync
+from vitrage.tests.unit.datasources.aodh.aodh_transformer_base_test import \
+    AodhTransformerBaseTest
 
 LOG = logging.getLogger(__name__)
 
 
-class TestAodhAlarmTransformer(base.BaseTest):
+class TestAodhAlarmTransformer(AodhTransformerBaseTest):
 
     OPTS = [
         cfg.StrOpt('update_method',
-                   default=UpdateMethod.PUSH),
+                   default=UpdateMethod.PULL),
     ]
 
     @classmethod
@@ -112,86 +105,49 @@ class TestAodhAlarmTransformer(base.BaseTest):
 
             self._validate_action(event, wrapper)
 
-    def _validate_aodh_vertex_props(self, vertex, event):
 
-        self.assertEqual(EntityCategory.ALARM, vertex[VProps.CATEGORY])
-        self.assertEqual(event[DSProps.ENTITY_TYPE], vertex[VProps.TYPE])
-        self.assertEqual(event[AodhProps.NAME], vertex[VProps.NAME])
-        self.assertEqual(event[AodhProps.SEVERITY], vertex[VProps.SEVERITY])
-        self.assertEqual(event[AodhProps.DESCRIPTION],
-                         vertex[AodhProps.DESCRIPTION])
-        self.assertEqual(event[AodhProps.ENABLED], vertex[AodhProps.ENABLED])
-        self.assertEqual(event[AodhProps.PROJECT_ID],
-                         vertex[VProps.PROJECT_ID])
-        self.assertEqual(event[AodhProps.REPEAT_ACTIONS],
-                         vertex[AodhProps.REPEAT_ACTIONS])
-        self.assertEqual(event[AodhProps.TYPE], vertex['alarm_type'])
-        if event[AodhProps.TYPE] == AodhProps.EVENT:
-            self.assertEqual(event[AodhProps.EVENT_TYPE],
-                             vertex[AodhProps.EVENT_TYPE])
-        elif event[AodhProps.TYPE] == AodhProps.THRESHOLD:
-            self.assertEqual(event[AodhProps.STATE_TIMESTAMP],
-                             vertex[AodhProps.STATE_TIMESTAMP])
-        self.assertEqual(event[DSProps.SAMPLE_DATE],
-                         vertex[VProps.SAMPLE_TIMESTAMP])
+class TestAodhAlarmPushTransformer(AodhTransformerBaseTest):
 
-        event_status = event[AodhProps.STATE]
-        if event_status == AodhState.OK:
-            self.assertEqual(AlarmProps.INACTIVE_STATE,
-                             vertex[VProps.STATE])
-        else:
-            self.assertEqual(AlarmProps.ACTIVE_STATE,
-                             vertex[VProps.STATE])
-        self.assertFalse(vertex[VProps.IS_PLACEHOLDER])
-        self.assertFalse(vertex[VProps.IS_DELETED])
+    OPTS = [
+        cfg.StrOpt('update_method',
+                   default=UpdateMethod.PUSH),
+    ]
 
-    def _validate_action(self, alarm, wrapper):
-        if DSProps.EVENT_TYPE in alarm \
-            and alarm[DSProps.EVENT_TYPE] in GraphAction.__dict__.values():
-            self.assertEqual(alarm[DSProps.EVENT_TYPE], wrapper.action)
-            return
+    @classmethod
+    def setUpClass(cls):
+        cls.transformers = {}
+        cls.conf = cfg.ConfigOpts()
+        cls.conf.register_opts(cls.OPTS, group=AODH_DATASOURCE)
+        cls.transformers[AODH_DATASOURCE] = \
+            AodhTransformer(cls.transformers, cls.conf)
 
-        ds_action = alarm[DSProps.DATASOURCE_ACTION]
-        if ds_action in (DatasourceAction.SNAPSHOT, DatasourceAction.UPDATE):
-            self.assertEqual(GraphAction.UPDATE_ENTITY, wrapper.action)
-        else:
-            self.assertEqual(GraphAction.CREATE_ENTITY, wrapper.action)
+    def test_update_transform(self):
+        LOG.debug('Aodh update alarm transformer test:'
+                  'transform entity event update')
 
-    def _validate_neighbors(self, neighbors, alarm_id, event):
-        resource_counter = 0
+        # Test setup
+        spec_list = \
+            mock_sync.simple_aodh_update_alarm_generators(alarm_num=5,
+                                                          update_events=5)
+        static_events = mock_sync.generate_random_events_list(spec_list)
 
-        for neighbor in neighbors:
-            resource_id = event[AodhProps.RESOURCE_ID]
-            self._validate_instance_neighbor(neighbor,
-                                             resource_id,
-                                             alarm_id)
-            resource_counter += 1
+        for event in static_events:
+            # convert neighbor from dict to vertex object
+            neighbors = event[TransformerBase.QUERY_RESULT]
+            vertices = []
+            for neighbor in neighbors:
+                vertices.append(self._convert_dist_to_vertex(neighbor))
+            event[TransformerBase.QUERY_RESULT] = vertices
 
-        self.assertEqual(1,
-                         resource_counter,
-                         'Alarm can be belonged to only one resource')
+            # Test action
+            wrapper = self.transformers[AODH_DATASOURCE].transform(event)
 
-    def _validate_instance_neighbor(self,
-                                    alarm_neighbor,
-                                    resource_id,
-                                    alarm_vertex_id):
-        # validate neighbor vertex
-        self.assertEqual(EntityCategory.RESOURCE,
-                         alarm_neighbor.vertex[VProps.CATEGORY])
-        self.assertEqual(NOVA_INSTANCE_DATASOURCE,
-                         alarm_neighbor.vertex[VProps.TYPE])
-        self.assertEqual(resource_id, alarm_neighbor.vertex[VProps.ID])
-        self.assertFalse(alarm_neighbor.vertex[VProps.IS_PLACEHOLDER])
-        self.assertFalse(alarm_neighbor.vertex[VProps.IS_DELETED])
+            # Test assertions
+            vertex = wrapper.vertex
+            self._validate_aodh_vertex_props(vertex, event)
 
-        # Validate neighbor edge
-        edge = alarm_neighbor.edge
-        self.assertEqual(edge.target_id, alarm_neighbor.vertex.vertex_id)
-        self.assertEqual(edge.source_id, alarm_vertex_id)
-        self.assertEqual(edge.label, EdgeLabel.ON)
+            neighbors = wrapper.neighbors
+            self.assertEqual(1, len(neighbors))
+            self._validate_neighbors(neighbors, vertex.vertex_id, event)
 
-    def _convert_dist_to_vertex(self, neighbor):
-        ver_id = neighbor[VProps.CATEGORY] + \
-            TransformerBase.KEY_SEPARATOR + neighbor[VProps.TYPE] + \
-            TransformerBase.KEY_SEPARATOR + neighbor[VProps.ID]
-        return Vertex(vertex_id=ver_id, properties=neighbor)
+            self._validate_action(event, wrapper)
