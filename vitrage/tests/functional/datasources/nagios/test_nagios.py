@@ -32,8 +32,7 @@ class TestNagios(TestDataSourcesBase):
                     default=[NAGIOS_DATASOURCE,
                              NOVA_HOST_DATASOURCE,
                              NOVA_INSTANCE_DATASOURCE,
-                             NOVA_ZONE_DATASOURCE,
-                             NAGIOS_DATASOURCE],
+                             NOVA_ZONE_DATASOURCE],
                     help='Names of supported driver data sources'),
 
         cfg.ListOpt('path',
