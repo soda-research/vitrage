@@ -68,7 +68,9 @@ function _vitrage_config_apache_wsgi {
 function _vitrage_create_accounts {
     if is_service_enabled vitrage-api; then
 
-        create_service_user "vitrage" "admin"
+        get_or_create_user "vitrage" "$ADMIN_PASSWORD" "$ADMIN_DOMAIN_NAME"
+        get_or_add_user_project_role "admin" "vitrage" "$SERVICE_PROJECT_NAME" "$SERVICE_DOMAIN_NAME" "$SERVICE_DOMAIN_NAME"
+        get_or_add_user_project_role "admin" "vitrage" "admin" "$ADMIN_DOMAIN_NAME" "$ADMIN_DOMAIN_NAME"
 
         local vitrage_service=$(get_or_create_service "vitrage" \
             "rca" "Root Cause Analysis Service")
@@ -125,7 +127,7 @@ function configure_vitrage {
 
     # Service credentials - openstack clients using keystone
     iniset $VITRAGE_CONF service_credentials auth_type password
-    iniset $VITRAGE_CONF service_credentials username admin
+    iniset $VITRAGE_CONF service_credentials username vitrage
     iniset $VITRAGE_CONF service_credentials user_domain_id default
     iniset $VITRAGE_CONF service_credentials project_domain_id default
     iniset $VITRAGE_CONF service_credentials password $ADMIN_PASSWORD
@@ -169,6 +171,11 @@ function configure_vitrage {
 
 
     configure_auth_token_middleware $VITRAGE_CONF vitrage $VITRAGE_AUTH_CACHE_DIR
+
+    iniset $VITRAGE_CONF "keystone_authtoken" password $ADMIN_PASSWORD
+    iniset $VITRAGE_CONF "keystone_authtoken" user_domain_name $admin_domain_name
+    iniset $VITRAGE_CONF "keystone_authtoken" project_name $admin_project_name
+    iniset $VITRAGE_CONF "keystone_authtoken" project_domain_name $admin_domain_name
 
     if [ "$VITRAGE_USE_MOD_WSGI" == "True" ]; then
         iniset $VITRAGE_CONF api pecan_debug "False"
