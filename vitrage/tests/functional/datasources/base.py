@@ -24,6 +24,6 @@ class TestDataSourcesBase(TestFunctionalBase):
             VProps.CATEGORY: EntityCategory.RESOURCE,
             VProps.TYPE: type_
         })
-        self.assertTrue(len(entity_vertices) > 0)
+        self.assertGreater(len(entity_vertices), 0)
 
         return entity_vertices[0][VProps.ID]
