@@ -32,8 +32,7 @@ class StaticPhysicalDriver(DriverBase):
     def get_event_types():
         return []
 
-    @staticmethod
-    def enrich_event(event, event_type):
+    def enrich_event(self, event, event_type):
         pass
 
     ENTITIES_SECTION = 'entities'

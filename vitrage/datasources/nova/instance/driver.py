@@ -34,8 +34,7 @@ class InstanceDriver(NovaDriverBase):
             'OS-EXT-SRV-ATTR:user_data',
             '_info')
 
-    @staticmethod
-    def enrich_event(event, event_type):
+    def enrich_event(self, event, event_type):
         event[DSProps.EVENT_TYPE] = event_type
 
         return InstanceDriver.make_pickleable([event],

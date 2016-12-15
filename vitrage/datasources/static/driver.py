@@ -45,8 +45,7 @@ class StaticDriver(DriverBase):
     def get_event_types():
         return []
 
-    @staticmethod
-    def enrich_event(event, event_type):
+    def enrich_event(self, event, event_type):
         pass
 
     def get_all(self, datasource_action):

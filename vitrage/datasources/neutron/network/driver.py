@@ -27,8 +27,7 @@ class NetworkDriver(NeutronBase):
                 'network.update.end',
                 'network.delete.end']
 
-    @staticmethod
-    def enrich_event(event, event_type):
+    def enrich_event(self, event, event_type):
         event[DSProps.EVENT_TYPE] = event_type
 
         return NetworkDriver.make_pickleable([event],
