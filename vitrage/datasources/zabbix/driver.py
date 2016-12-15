@@ -171,8 +171,7 @@ class ZabbixDriver(AlarmDriverBase):
             LOG.exception('failed in init %s ', e)
             return {}
 
-    @staticmethod
-    def enrich_event(event, event_type):
+    def enrich_event(self, event, event_type):
         event[DSProps.EVENT_TYPE] = event_type
 
         if ZabbixDriver.conf_map:

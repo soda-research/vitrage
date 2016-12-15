@@ -81,9 +81,7 @@ class DriverBase(object):
     def _add_datasource_action(entity, datasource_action):
         entity[DSProps.DATASOURCE_ACTION] = datasource_action
 
-    @staticmethod
-    @abc.abstractmethod
-    def enrich_event(event, event_type):
+    def enrich_event(self, event, event_type):
         """Return the given event with extra fields
 
         We add extra data, which the transformer uses later on.

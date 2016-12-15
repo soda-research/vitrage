@@ -63,8 +63,7 @@ class HeatStackDriver(DriverBase):
                 'orchestration.stack.resume.error',
                 'orchestration.stack.resume.end']
 
-    @staticmethod
-    def enrich_event(event, event_type):
+    def enrich_event(self, event, event_type):
         # TODO(Nofar): add call to get resources of the stack if not deleted
         # change transformer that if delete we remove the stack from the graph
         # and hence all the edges to it

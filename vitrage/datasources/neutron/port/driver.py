@@ -27,8 +27,7 @@ class PortDriver(NeutronBase):
                 'port.update.end',
                 'port.delete.end']
 
-    @staticmethod
-    def enrich_event(event, event_type):
+    def enrich_event(self, event, event_type):
         event[DSProps.EVENT_TYPE] = event_type
 
         return PortDriver.make_pickleable([event], NEUTRON_PORT_DATASOURCE,

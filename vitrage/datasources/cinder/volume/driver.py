@@ -44,8 +44,7 @@ class CinderVolumeDriver(DriverBase):
             datasource_action,
             'manager')
 
-    @staticmethod
-    def enrich_event(event, event_type):
+    def enrich_event(self, event, event_type):
         event[DSProps.EVENT_TYPE] = event_type
 
         return CinderVolumeDriver.make_pickleable([event],

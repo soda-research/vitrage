@@ -27,8 +27,7 @@ class MockZabbixDriver(ZabbixDriver):
     def get_event_types():
         return []
 
-    @staticmethod
-    def enrich_event(event, event_type):
+    def enrich_event(self, event, event_type):
         pass
 
     def __init__(self, conf):
