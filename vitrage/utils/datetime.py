@@ -18,6 +18,9 @@ from datetime import datetime
 from oslo_utils import timeutils
 
 
+TIMESTAMP_FORMAT = '%Y-%m-%dT%H:%M:%SZ'
+
+
 def utcnow(with_timezone=True):
     """Better version of utcnow() that returns utcnow with a correct TZ."""
     return timeutils.utcnow(with_timezone)
@@ -28,6 +31,6 @@ def change_time_str_format(timestamp_str, old_format, new_format):
     return utc.strftime(new_format)
 
 
-def format_unix_timestamp(timestamp, date_format):
+def format_unix_timestamp(timestamp, date_format=TIMESTAMP_FORMAT):
     return datetime.fromtimestamp(float(timestamp)) \
         .strftime(date_format)

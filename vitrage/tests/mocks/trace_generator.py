@@ -46,6 +46,7 @@ MOCK_DRIVER_PATH = '%s/mock_configurations/driver' % \
     utils.get_resources_dir()
 DRIVER_AODH_UPDATE_D = 'driver_aodh_update_dynamic.json'
 DRIVER_DOCTOR_UPDATE_D = 'driver_doctor_update_dynamic.json'
+DRIVER_COLLECTD_UPDATE_D = 'driver_collectd_update_dynamic.json'
 DRIVER_HOST_SNAPSHOT_D = 'driver_host_snapshot_dynamic.json'
 DRIVER_INST_SNAPSHOT_D = 'driver_inst_snapshot_dynamic.json'
 DRIVER_INST_SNAPSHOT_S = 'driver_inst_snapshot_static.json'
@@ -68,6 +69,7 @@ MOCK_TRANSFORMER_PATH = '%s/mock_configurations/transformer' % \
 TRANS_AODH_SNAPSHOT_D = 'transformer_aodh_snapshot_dynamic.json'
 TRANS_AODH_UPDATE_D = 'transformer_aodh_update_dynamic.json'
 TRANS_DOCTOR_UPDATE_D = 'transformer_doctor_update_dynamic.json'
+TRANS_COLLECTD_UPDATE_D = 'transformer_collectd_update_dynamic.json'
 TRANS_INST_SNAPSHOT_D = 'transformer_inst_snapshot_dynamic.json'
 TRANS_INST_SNAPSHOT_S = 'transformer_inst_snapshot_static.json'
 TRANS_HOST_SNAPSHOT_D = 'transformer_host_snapshot_dynamic.json'
@@ -111,6 +113,7 @@ class EventTraceGenerator(object):
         static_info_parsers = \
             {DRIVER_AODH_UPDATE_D: _get_aodh_alarm_update_driver_values,
              DRIVER_DOCTOR_UPDATE_D: _get_doctor_update_driver_values,
+             DRIVER_COLLECTD_UPDATE_D: _get_collectd_update_driver_values,
              DRIVER_INST_SNAPSHOT_D: _get_vm_snapshot_driver_values,
              DRIVER_INST_UPDATE_D: _get_vm_update_driver_values,
              DRIVER_HOST_SNAPSHOT_D: _get_host_snapshot_driver_values,
@@ -128,6 +131,7 @@ class EventTraceGenerator(object):
              TRANS_AODH_SNAPSHOT_D: _get_trans_aodh_alarm_snapshot_values,
              TRANS_AODH_UPDATE_D: _get_trans_aodh_alarm_snapshot_values,
              TRANS_DOCTOR_UPDATE_D: _get_trans_doctor_alarm_update_values,
+             TRANS_COLLECTD_UPDATE_D: _get_trans_collectd_alarm_update_values,
              TRANS_INST_SNAPSHOT_D: _get_trans_vm_snapshot_values,
              TRANS_HOST_SNAPSHOT_D: _get_trans_host_snapshot_values,
              TRANS_ZONE_SNAPSHOT_D: _get_trans_zone_snapshot_values}
@@ -249,6 +253,17 @@ def _get_host_snapshot_driver_values(spec):
 
 def _get_doctor_update_driver_values(spec):
     """Generates the static driver values for Doctor monitor notification.
+
+    :param spec: specification of event generation.
+    :type spec: dict
+    :return: list of notifications of Doctor monitor
+    :rtype: list
+    """
+    return [combine_data(None, None, spec.get(EXTERNAL_INFO_KEY, None))]
+
+
+def _get_collectd_update_driver_values(spec):
+    """Generates the static driver values for Collectd monitor notification.
 
     :param spec: specification of event generation.
     :type spec: dict
@@ -642,6 +657,23 @@ def _get_trans_doctor_alarm_update_values(spec):
     :param spec: specification of event generation.
     :type spec: dict
     :return: list of dynamic transformer values for a Doctor alarm
+    :rtype: list with one alarm
+    """
+
+    static_info_re = None
+    if spec[STATIC_INFO_FKEY] is not None:
+        static_info_re = utils.load_specs(spec[STATIC_INFO_FKEY])
+
+    return [combine_data(static_info_re,
+                         None, spec.get(EXTERNAL_INFO_KEY, None))]
+
+
+def _get_trans_collectd_alarm_update_values(spec):
+    """Generates the dynamic transformer values for a Collectd alarm
+
+    :param spec: specification of event generation.
+    :type spec: dict
+    :return: list of dynamic transformer values for a Collectd alarm
     :rtype: list with one alarm
     """
 
