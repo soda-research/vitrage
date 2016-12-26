@@ -254,8 +254,7 @@ class AodhDriver(AlarmDriverBase):
                        "event_type": "instance.update"}}
         """
 
-        alarm_key = self._alarm_key(event)
-        old_alarm = self.cache.get(alarm_key, (None, None))[0]
+        old_alarm = self._old_alarm(event)
         entity = old_alarm.copy()
 
         changed_rule = event[AodhProps.DETAIL]
@@ -273,8 +272,7 @@ class AodhDriver(AlarmDriverBase):
                                             datetime_utils.utcnow(False))
 
     def _convert_alarm_state_transition_event(self, event):
-        alarm_key = self._alarm_key(event)
-        old_alarm = self.cache.get(alarm_key, (None, None))[0]
+        old_alarm = self._old_alarm(event)
         entity = old_alarm.copy()
         entity[AodhProps.STATE] = event[AodhProps.DETAIL][AodhProps.STATE]
 

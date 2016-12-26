@@ -15,14 +15,11 @@
 from oslo_log import log as logging
 
 from vitrage.common.constants import DatasourceProperties as DSProps
-from vitrage.common.constants import EdgeLabel
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.datasources.alarm_properties import AlarmProperties as AlarmProps
 from vitrage.datasources.alarm_transformer_base import AlarmTransformerBase
-from vitrage.datasources.nova.host import NOVA_HOST_DATASOURCE
 from vitrage.datasources import transformer_base as tbase
-from vitrage.datasources.transformer_base import Neighbor
 from vitrage.datasources.zabbix.properties import ZabbixProperties as ZProps
 from vitrage.datasources.zabbix.properties import ZabbixTriggerSeverity \
     as TriggerSeverity
@@ -103,33 +100,6 @@ class ZabbixTransformer(AlarmTransformerBase):
                 entity_event[ZProps.RESOURCE_NAME])]
 
         return []
-
-    def _create_neighbor(self,
-                         vitrage_id,
-                         sample_timestamp,
-                         resource_type,
-                         resource_name):
-        # Any resource transformer will do (nova for example)
-        transformer = self.transformers[NOVA_HOST_DATASOURCE]
-
-        if transformer:
-            properties = {
-                VProps.TYPE: resource_type,
-                VProps.ID: resource_name,
-                VProps.SAMPLE_TIMESTAMP: sample_timestamp
-            }
-            resource_vertex = transformer.create_placeholder_vertex(
-                **properties)
-
-            relationship_edge = graph_utils.create_edge(
-                source_id=vitrage_id,
-                target_id=resource_vertex.vertex_id,
-                relationship_type=EdgeLabel.ON)
-
-            return Neighbor(resource_vertex, relationship_edge)
-
-        LOG.warning('Cannot transform host, host transformer does not exist')
-        return None
 
     def _ok_status(self, entity_event):
         return entity_event[ZProps.VALUE] == TriggerValue.OK

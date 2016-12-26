@@ -141,3 +141,7 @@ class AlarmDriverBase(DriverBase):
         ret = alarm if filter_(alarm, old_alarm) else None
         self.cache[self._alarm_key(alarm)] = alarm, time
         return ret
+
+    def _old_alarm(self, event):
+        alarm_key = self._alarm_key(event)
+        return self.cache.get(alarm_key, (None, None))[0]

@@ -39,13 +39,19 @@ class TransformerManager(object):
 
         transformers = {}
         for datasource_type in conf.datasources.types:
-            transformers[datasource_type] = importutils.import_object(
-                conf[datasource_type].transformer,
-                transformers, conf)
-            if opt_exists(conf[datasource_type], ENTITIES):
-                for entity in conf[datasource_type].entities:
-                    transformers[entity] = importutils.import_object(
-                        conf[datasource_type].transformer, transformers, conf)
+            try:
+                transformers[datasource_type] = importutils.import_object(
+                    conf[datasource_type].transformer,
+                    transformers, conf)
+                if opt_exists(conf[datasource_type], ENTITIES):
+                    for entity in conf[datasource_type].entities:
+                        transformers[entity] = importutils.import_object(
+                            conf[datasource_type].transformer,
+                            transformers, conf)
+
+            except Exception as e:
+                LOG.exception('Failed to register transformer %s. '
+                              'Exception: %s', datasource_type, e)
 
         transformers[VITRAGE_TYPE] = importutils.import_object(
             "%s.%s" % (EvaluatorEventTransformer.__module__,
