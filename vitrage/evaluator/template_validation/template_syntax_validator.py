@@ -78,11 +78,16 @@ def validate_metadata_section(metadata):
 
 def validate_definitions_section(definitions):
 
-    schema = Schema({
-        Required(TemplateFields.ENTITIES, msg=20): list,
-        TemplateFields.RELATIONSHIPS: list
-    })
-    result = _validate_dict_schema(schema, definitions)
+    if TemplateFields.RELATIONSHIPS not in definitions or \
+        definitions[TemplateFields.RELATIONSHIPS] != '':
+        schema = Schema({
+            Required(TemplateFields.ENTITIES, msg=20): list,
+            TemplateFields.RELATIONSHIPS: list
+        })
+        result = _validate_dict_schema(schema, definitions)
+
+    else:
+        result = get_correct_result(RESULT_DESCRIPTION)
 
     if result.is_valid_config:
         result = validate_entities(definitions[TemplateFields.ENTITIES])
