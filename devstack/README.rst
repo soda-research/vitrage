@@ -53,4 +53,13 @@ Enabling Vitrage in DevStack
    notification_topics = notifications,vitrage_notifications
    notification_driver=messagingv2
 
-7. Run ``./stack.sh``
+7. Add this to add notification from aodh to vitrage
+
+.. code:: bash
+
+   [[post-config|$AODH_CONF]]
+   [oslo_messaging_notifications]
+   driver = messagingv2
+   topics = notifications,vitrage_notifications
+
+8. Run ``./stack.sh``

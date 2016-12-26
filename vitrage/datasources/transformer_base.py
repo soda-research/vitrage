@@ -212,7 +212,6 @@ class TransformerBase(object):
         :return: the action that the processor needs to perform
         :rtype: str
         """
-
         if DSProps.EVENT_TYPE in entity_event and \
             entity_event[DSProps.EVENT_TYPE] in GraphAction.__dict__.values():
             return entity_event[DSProps.EVENT_TYPE]

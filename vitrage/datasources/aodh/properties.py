@@ -32,9 +32,18 @@ class AodhProperties(object):
     TIMESTAMP = 'timestamp'
     TYPE = 'type'
     VITRAGE_ID = 'vitrage_id'
+    DETAIL = 'detail'
+    RULE = 'rule'
 
 
 class AodhState(object):
     OK = 'ok'
     ALARM = 'alarm'
     INSUFFICIENT_DATA = 'insufficient_data'
+
+
+class AodhEventType(object):
+    CREATION = 'alarm.creation'
+    RULE_CHANGE = 'alarm.rule_change'
+    STATE_TRANSITION = 'alarm.state_transition'
+    DELETION = 'alarm.deletion'

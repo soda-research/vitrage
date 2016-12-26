@@ -28,7 +28,7 @@ OPTS = [
                help='Aodh driver class path',
                required=True),
     cfg.StrOpt('update_method',
-               default=UpdateMethod.PULL,
+               default=UpdateMethod.PUSH,
                help='None: updates only via Vitrage periodic snapshots.'
                     'Pull: updates every [changes_interval] seconds.'
                     'Push: updates by getting notifications from the'
