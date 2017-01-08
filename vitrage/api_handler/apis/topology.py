@@ -46,7 +46,7 @@ class TopologyApis(EntityGraphApisBase):
         if graph_type == 'tree':
             if not query:
                 LOG.error("Graph-type 'tree' requires a filter.")
-                return {}
+                raise Exception("Graph-type 'tree' requires a filter.")
 
             current_query = query
             if not all_tenants:
