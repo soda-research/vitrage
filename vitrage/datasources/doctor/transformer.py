@@ -15,6 +15,7 @@
 from oslo_log import log as logging
 
 from vitrage.common.constants import DatasourceProperties as DSProps
+from vitrage.common.constants import DatasourceProperties as EdgeLabel
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.datasources.alarm_transformer_base import AlarmTransformerBase
@@ -57,13 +58,15 @@ class DoctorTransformer(AlarmTransformerBase):
 
     def _create_update_neighbors(self, entity_event):
         return [self._create_neighbor(
-            self._create_entity_key(entity_event),
-            entity_event[DoctorProps.TIME],
+            entity_event,
+            get_detail(entity_event, DoctorDetails.HOSTNAME),
             DoctorProps.HOST_TYPE,
-            get_detail(entity_event, DoctorDetails.HOSTNAME))]
+            EdgeLabel.ON,
+            neighbor_category=EntityCategory.RESOURCE)]
 
     def _create_entity_key(self, entity_event):
-        return tbase.build_key(self._key_values(
+        return tbase.build_key((
+            EntityCategory.ALARM,
             entity_event[DSProps.ENTITY_TYPE],
             entity_event[DoctorProps.TYPE],
             get_detail(entity_event, DoctorDetails.HOSTNAME)))

@@ -16,16 +16,10 @@ from oslo_log import log as logging
 
 from vitrage.common.constants import DatasourceAction
 from vitrage.common.constants import DatasourceProperties as DSProps
-from vitrage.common.constants import EdgeLabel
-from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import GraphAction
-from vitrage.common.constants import VertexProperties as VProps
 from vitrage.common.exception import VitrageTransformerError
 from vitrage.datasources.alarm_properties import AlarmProperties as AlarmProps
-from vitrage.datasources.nova.host import NOVA_HOST_DATASOURCE
 from vitrage.datasources import transformer_base as tbase
-from vitrage.datasources.transformer_base import Neighbor
-import vitrage.graph.utils as graph_utils
 
 LOG = logging.getLogger(__name__)
 
@@ -59,45 +53,13 @@ class AlarmTransformerBase(tbase.TransformerBase):
         raise VitrageTransformerError('Invalid datasource action: (%s)'
                                       % datasource_action)
 
-    def create_placeholder_vertex(self, **kwargs):
-        LOG.info('An alarm cannot be a placeholder')
-        pass
-
-    def _key_values(self, *args):
-        return (EntityCategory.ALARM,) + args
-
     def _get_alarm_state(self, entity_event):
         event_type = entity_event.get(DSProps.EVENT_TYPE, None)
-        if event_type and event_type == GraphAction.DELETE_ENTITY:
-            return AlarmProps.INACTIVE_STATE
+        if event_type is not None:
+            return AlarmProps.INACTIVE_STATE if \
+                GraphAction.DELETE_ENTITY == event_type else \
+                AlarmProps.ACTIVE_STATE
         else:
             return AlarmProps.INACTIVE_STATE if \
                 self._ok_status(entity_event) else \
                 AlarmProps.ACTIVE_STATE
-
-    def _create_neighbor(self,
-                         vitrage_id,
-                         sample_timestamp,
-                         resource_type,
-                         resource_name):
-        # Any resource transformer will do (nova for example)
-        transformer = self.transformers[NOVA_HOST_DATASOURCE]
-
-        if transformer:
-            properties = {
-                VProps.TYPE: resource_type,
-                VProps.ID: resource_name,
-                VProps.SAMPLE_TIMESTAMP: sample_timestamp
-            }
-            resource_vertex = transformer.create_placeholder_vertex(
-                **properties)
-
-            relationship_edge = graph_utils.create_edge(
-                source_id=vitrage_id,
-                target_id=resource_vertex.vertex_id,
-                relationship_type=EdgeLabel.ON)
-
-            return Neighbor(resource_vertex, relationship_edge)
-
-        LOG.warning('Cannot create neighbour, host transformer does not exist')
-        return None

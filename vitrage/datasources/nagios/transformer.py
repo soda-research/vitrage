@@ -15,6 +15,7 @@
 from oslo_log import log as logging
 
 from vitrage.common.constants import DatasourceProperties as DSProps
+from vitrage.common.constants import EdgeLabel
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.datasources.alarm_transformer_base import AlarmTransformerBase
@@ -73,19 +74,14 @@ class NagiosTransformer(AlarmTransformerBase):
         return self._create_nagios_neighbors(entity_event)
 
     def _create_nagios_neighbors(self, entity_event):
-        vitrage_id = self._create_entity_key(entity_event)
-        timestamp = datetime_utils.change_time_str_format(
-            entity_event[NagiosProperties.LAST_CHECK],
-            '%Y-%m-%d %H:%M:%S',
-            tbase.TIMESTAMP_FORMAT)
-
         resource_type = entity_event[NagiosProperties.RESOURCE_TYPE]
         if resource_type:
             return [self._create_neighbor(
-                vitrage_id,
-                timestamp,
+                entity_event,
+                entity_event[NagiosProperties.RESOURCE_NAME],
                 resource_type,
-                entity_event[NagiosProperties.RESOURCE_NAME])]
+                EdgeLabel.ON,
+                neighbor_category=EntityCategory.RESOURCE)]
 
         return []
 
@@ -97,9 +93,10 @@ class NagiosTransformer(AlarmTransformerBase):
         entity_type = entity_event[DSProps.ENTITY_TYPE]
         alarm_name = entity_event[NagiosProperties.SERVICE]
         resource_name = entity_event[NagiosProperties.RESOURCE_NAME]
-        return tbase.build_key(self._key_values(entity_type,
-                                                resource_name,
-                                                alarm_name))
+        return tbase.build_key((EntityCategory.ALARM,
+                                entity_type,
+                                resource_name,
+                                alarm_name))
 
     def get_type(self):
         return NAGIOS_DATASOURCE

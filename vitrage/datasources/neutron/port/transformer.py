@@ -25,7 +25,6 @@ from vitrage.datasources.neutron.port import NEUTRON_PORT_DATASOURCE
 from vitrage.datasources.nova.instance import NOVA_INSTANCE_DATASOURCE
 from vitrage.datasources import transformer_base as tbase
 from vitrage.datasources.transformer_base import extract_field_value
-from vitrage.datasources.transformer_base import Neighbor
 
 import vitrage.graph.utils as graph_utils
 
@@ -134,63 +133,27 @@ class PortTransformer(ResourceTransformerBase):
                                device_owner_property,
                                device_id_property,
                                network_id_property):
-        neighbors = [self._create_network_neighbor(entity_event,
-                                                   network_id_property)]
+        network_neighbor_id = extract_field_value(entity_event,
+                                                  *network_id_property)
+        neighbors = [self._create_neighbor(entity_event,
+                                           network_neighbor_id,
+                                           NEUTRON_NETWORK_DATASOURCE,
+                                           EdgeLabel.CONTAINS,
+                                           is_entity_source=False)]
 
         device_owner = \
             extract_field_value(entity_event, *device_owner_property)
         if device_owner == 'compute:nova' or device_owner == 'compute:None':
-            instance = self._create_instance_neighbor(
-                entity_event,
-                device_id_property)
+            instance_neighbor_id = \
+                extract_field_value(entity_event, *device_id_property)
+            instance = self._create_neighbor(entity_event,
+                                             instance_neighbor_id,
+                                             NOVA_INSTANCE_DATASOURCE,
+                                             EdgeLabel.ATTACHED,
+                                             is_entity_source=True)
             neighbors.append(instance)
 
         return neighbors
-
-    def _create_instance_neighbor(self,
-                                  entity_event,
-                                  instance_id_property):
-        port_vitrage_id = self._create_entity_key(entity_event)
-
-        instance_id = extract_field_value(entity_event, *instance_id_property)
-
-        sample_timestamp = entity_event[DSProps.SAMPLE_DATE]
-
-        properties = {
-            VProps.ID: instance_id,
-            VProps.TYPE: NOVA_INSTANCE_DATASOURCE,
-            VProps.SAMPLE_TIMESTAMP: sample_timestamp
-        }
-        instance_vertex = self.create_placeholder_vertex(**properties)
-
-        relationship_edge = graph_utils.create_edge(
-            source_id=port_vitrage_id,
-            target_id=instance_vertex.vertex_id,
-            relationship_type=EdgeLabel.ATTACHED)
-
-        return Neighbor(instance_vertex, relationship_edge)
-
-    def _create_network_neighbor(self, entity_event, net_id_property):
-        port_vitrage_id = self._create_entity_key(entity_event)
-
-        net_id = extract_field_value(entity_event, *net_id_property)
-
-        sample_timestamp = entity_event[DSProps.SAMPLE_DATE]
-
-        properties = {
-            VProps.ID: net_id,
-            VProps.TYPE: NEUTRON_NETWORK_DATASOURCE,
-            VProps.SAMPLE_TIMESTAMP: sample_timestamp
-        }
-
-        net_vertex = self.create_placeholder_vertex(**properties)
-
-        relationship_edge = graph_utils.create_edge(
-            source_id=net_vertex.vertex_id,
-            target_id=port_vitrage_id,
-            relationship_type=EdgeLabel.CONTAINS)
-
-        return Neighbor(net_vertex, relationship_edge)
 
     def _create_entity_key(self, entity_event):
         event_type = entity_event.get(DSProps.EVENT_TYPE, None)

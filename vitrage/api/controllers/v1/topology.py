@@ -22,9 +22,9 @@ from pecan.core import abort
 from vitrage.api.controllers.rest import RootRestController
 from vitrage.api.policy import enforce
 from vitrage.common.constants import VertexProperties as VProps
-from vitrage.datasources import OPENSTACK_CLUSTER
 
 # noinspection PyProtectedMember
+from vitrage.datasources.transformer_base import CLUSTER_ID
 from vitrage.i18n import _LI
 
 
@@ -77,7 +77,7 @@ class TopologyController(RootRestController):
             if graph_type == 'graph':
                 return graph
             if graph_type == 'tree':
-                node_id = OPENSTACK_CLUSTER
+                node_id = CLUSTER_ID
                 if root:
                     for node in graph['nodes']:
                         if node[VProps.VITRAGE_ID] == root:

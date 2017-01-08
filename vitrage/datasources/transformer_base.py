@@ -22,8 +22,10 @@ from oslo_log import log as logging
 import vitrage.common.constants as cons
 from vitrage.common.constants import DatasourceAction
 from vitrage.common.constants import DatasourceProperties as DSProps
+from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import GraphAction
 from vitrage.common.constants import UpdateMethod
+from vitrage.common.constants import VertexProperties as VProps
 from vitrage.common.exception import VitrageTransformerError
 from vitrage.datasources import OPENSTACK_CLUSTER
 import vitrage.graph.utils as graph_utils
@@ -42,6 +44,7 @@ TIMESTAMP_FORMAT = '%Y-%m-%dT%H:%M:%SZ'
 
 
 AVAILABLE = 'available'
+CLUSTER_ID = 'OpenStack Cluster'
 
 
 def extract_field_value(entity_event, *args):
@@ -61,7 +64,8 @@ def build_key(key_values):
 
 def create_cluster_placeholder_vertex():
     key = build_key([cons.EntityCategory.RESOURCE,
-                     OPENSTACK_CLUSTER])
+                     OPENSTACK_CLUSTER,
+                     CLUSTER_ID])
 
     metadata = {
         cons.VertexProperties.NAME: OPENSTACK_CLUSTER
@@ -69,7 +73,7 @@ def create_cluster_placeholder_vertex():
 
     return graph_utils.create_vertex(
         key,
-        entity_id=OPENSTACK_CLUSTER,
+        entity_id=CLUSTER_ID,
         entity_category=cons.EntityCategory.RESOURCE,
         entity_type=OPENSTACK_CLUSTER,
         entity_state=AVAILABLE,
@@ -95,6 +99,7 @@ class TransformerBase(object):
 
     KEY_SEPARATOR = ':'
     QUERY_RESULT = 'graph_query_result'
+    METADATA = 'metadata'
 
     # graph actions which need to refer them differently
     GRAPH_ACTION_MAPPING = {}
@@ -188,19 +193,78 @@ class TransformerBase(object):
         """
         pass
 
-    @abc.abstractmethod
-    def create_placeholder_vertex(self, **kwargs):
-        """Creates placeholder vertex.
+    def _create_neighbor(self,
+                         entity_event,
+                         neighbor_id,
+                         neighbor_datasource_type,
+                         relationship_type,
+                         neighbor_category=EntityCategory.RESOURCE,
+                         is_entity_source=True,
+                         metadata={}):
+        # create placeholder vertex
+        entity_vitrage_id = self._create_entity_key(entity_event)
+        sample_timestamp = entity_event[DSProps.SAMPLE_DATE]
+        properties = {
+            VProps.ID: neighbor_id,
+            VProps.TYPE: neighbor_datasource_type,
+            VProps.CATEGORY: neighbor_category,
+            VProps.SAMPLE_TIMESTAMP: sample_timestamp,
+            self.METADATA: metadata
 
-        Placeholder vertex contains only mandatory fields of this entity.
-        This way other datasources can create placeholder vertices of those
-        entities
+        }
+        neighbor_vertex = \
+            self.create_neighbor_placeholder_vertex(**properties)
 
-        :param kwargs: the properties for the placeholder vertex
-        :return: Placeholder vertex
-        :rtype: Vertex
-        """
-        pass
+        # connect placeholder vertex to entity vertex
+        edge_direction = self._get_edge_direction(entity_vitrage_id,
+                                                  neighbor_vertex.vertex_id,
+                                                  is_entity_source)
+        relationship_edge = graph_utils.create_edge(
+            source_id=edge_direction[0],
+            target_id=edge_direction[1],
+            relationship_type=relationship_type)
+
+        return Neighbor(neighbor_vertex, relationship_edge)
+
+    @staticmethod
+    def _get_edge_direction(entity_id,
+                            neighbor_id,
+                            is_entity_source):
+        source_id = entity_id
+        target_id = neighbor_id
+
+        if not is_entity_source:
+            source_id = neighbor_id
+            target_id = entity_id
+
+        return source_id, target_id
+
+    def _key_values(self, *args):
+        return (EntityCategory.RESOURCE,) + args
+
+    def create_neighbor_placeholder_vertex(self, **kwargs):
+        if VProps.TYPE not in kwargs:
+            LOG.error("Can't create placeholder vertex. Missing property TYPE")
+            raise ValueError('Missing property TYPE')
+
+        if VProps.ID not in kwargs:
+            LOG.error("Can't create placeholder vertex. Missing property ID")
+            raise ValueError('Missing property ID')
+
+        metadata = {}
+        if self.METADATA in kwargs:
+            metadata = kwargs[self.METADATA]
+
+        key_fields = self._key_values(kwargs[VProps.TYPE], kwargs[VProps.ID])
+
+        return graph_utils.create_vertex(
+            build_key(key_fields),
+            entity_id=kwargs[VProps.ID],
+            entity_category=kwargs[VProps.CATEGORY],
+            entity_type=kwargs[VProps.TYPE],
+            sample_timestamp=kwargs[VProps.SAMPLE_TIMESTAMP],
+            is_placeholder=True,
+            metadata=metadata)
 
     def _extract_graph_action(self, entity_event):
         """Extract graph action.
@@ -231,16 +295,6 @@ class TransformerBase(object):
 
         raise VitrageTransformerError(
             'Invalid action type: (%s)' % datasource_action)
-
-    def _key_values(self, *args):
-        """A list of key fields
-
-        The fields which consist the entity key
-
-        :param args: a tuple of mutable key fields
-        :return: ()
-        """
-        pass
 
     @staticmethod
     def _create_end_vertex(entity_event):

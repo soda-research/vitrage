@@ -25,7 +25,6 @@ from vitrage.datasources.resource_transformer_base import \
     ResourceTransformerBase
 from vitrage.datasources import transformer_base as tbase
 from vitrage.datasources.transformer_base import extract_field_value
-from vitrage.datasources.transformer_base import Neighbor
 import vitrage.graph.utils as graph_utils
 
 
@@ -84,29 +83,22 @@ class InstanceTransformer(ResourceTransformerBase):
             metadata=metadata)
 
     def _create_snapshot_neighbors(self, entity_event):
-        return self._create_nova_instance_neighbors(entity_event)
+        return self._create_instance_neighbors(entity_event,
+                                               'OS-EXT-SRV-ATTR:host')
 
     def _create_update_neighbors(self, entity_event):
-        return self._create_nova_instance_neighbors(entity_event)
+        return self._create_instance_neighbors(entity_event,
+                                               'host')
 
-    def _create_nova_instance_neighbors(self, entity_event):
-        neighbors = []
-        host_transformer = self.transformers[NOVA_HOST_DATASOURCE]
+    def _create_instance_neighbors(self, entity_event, host_property_name):
+        host_name = entity_event.get(host_property_name)
+        host_neighbor = self._create_neighbor(entity_event,
+                                              host_name,
+                                              NOVA_HOST_DATASOURCE,
+                                              EdgeLabel.CONTAINS,
+                                              is_entity_source=False)
 
-        host_name = 'host' if tbase.is_update_event(entity_event) \
-            else 'OS-EXT-SRV-ATTR:host'
-
-        if host_transformer:
-            host_neighbor = self._create_host_neighbor(
-                self._create_entity_key(entity_event),
-                extract_field_value(entity_event, host_name),
-                entity_event[DSProps.SAMPLE_DATE],
-                host_transformer)
-            neighbors.append(host_neighbor)
-        else:
-            LOG.warning('Cannot find host transformer')
-
-        return neighbors
+        return [host_neighbor]
 
     def _create_entity_key(self, event):
 
@@ -115,25 +107,6 @@ class InstanceTransformer(ResourceTransformerBase):
                                       extract_field_value(event,
                                                           instance_id))
         return tbase.build_key(key_fields)
-
-    @staticmethod
-    def _create_host_neighbor(vertex_id,
-                              host_name,
-                              sample_timestamp,
-                              host_transformer):
-        properties = {
-            VProps.ID: host_name,
-            VProps.TYPE: NOVA_HOST_DATASOURCE,
-            VProps.SAMPLE_TIMESTAMP: sample_timestamp
-        }
-        host_vertex = host_transformer.create_placeholder_vertex(**properties)
-
-        relationship_edge = graph_utils.create_edge(
-            source_id=host_vertex.vertex_id,
-            target_id=vertex_id,
-            relationship_type=EdgeLabel.CONTAINS)
-
-        return Neighbor(host_vertex, relationship_edge)
 
     def get_type(self):
         return NOVA_INSTANCE_DATASOURCE

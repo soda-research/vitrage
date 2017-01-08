@@ -137,12 +137,13 @@ class TestApis(TestEntityGraphUnitBase):
         ctx = {'tenant': 'project_1', 'is_admin': True}
 
         # Action
-        graph_topology = apis.get_topology(ctx,
-                                           graph_type='graph',
-                                           depth=10,
-                                           query=None,
-                                           root='RESOURCE:openstack.cluster',
-                                           all_tenants=0)
+        graph_topology = apis.get_topology(
+            ctx,
+            graph_type='graph',
+            depth=10,
+            query=None,
+            root='RESOURCE:openstack.cluster:OpenStack Cluster',
+            all_tenants=0)
         graph_topology = json.loads(graph_topology)
 
         # Test assertions
@@ -158,12 +159,13 @@ class TestApis(TestEntityGraphUnitBase):
         ctx = {'tenant': 'project_2', 'is_admin': False}
 
         # Action
-        graph_topology = apis.get_topology(ctx,
-                                           graph_type='graph',
-                                           depth=10,
-                                           query=None,
-                                           root='RESOURCE:openstack.cluster',
-                                           all_tenants=0)
+        graph_topology = apis.get_topology(
+            ctx,
+            graph_type='graph',
+            depth=10,
+            query=None,
+            root='RESOURCE:openstack.cluster:OpenStack Cluster',
+            all_tenants=0)
         graph_topology = json.loads(graph_topology)
 
         # Test assertions
@@ -179,12 +181,13 @@ class TestApis(TestEntityGraphUnitBase):
         ctx = {'tenant': 'project_1', 'is_admin': False}
 
         # Action
-        graph_topology = apis.get_topology(ctx,
-                                           graph_type='graph',
-                                           depth=10,
-                                           query=None,
-                                           root='RESOURCE:openstack.cluster',
-                                           all_tenants=1)
+        graph_topology = apis.get_topology(
+            ctx,
+            graph_type='graph',
+            depth=10,
+            query=None,
+            root='RESOURCE:openstack.cluster:OpenStack Cluster',
+            all_tenants=1)
         graph_topology = json.loads(graph_topology)
 
         # Test assertions
@@ -209,8 +212,9 @@ class TestApis(TestEntityGraphUnitBase):
         graph = NXGraph('Multi tenancy graph')
 
         # create vertices
-        cluster_vertex = self._create_resource('RESOURCE:openstack.cluster',
-                                               OPENSTACK_CLUSTER)
+        cluster_vertex = self._create_resource(
+            'RESOURCE:openstack.cluster:OpenStack Cluster',
+            OPENSTACK_CLUSTER)
         zone_vertex = self._create_resource('zone_1',
                                             NOVA_ZONE_DATASOURCE)
         host_vertex = self._create_resource('host_1',

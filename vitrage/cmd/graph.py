@@ -23,6 +23,7 @@ from vitrage.api_handler import service as api_handler_svc
 from vitrage.common.constants import EntityCategory
 from vitrage.datasources import launcher as datasource_launcher
 from vitrage.datasources import OPENSTACK_CLUSTER
+from vitrage.datasources.transformer_base import CLUSTER_ID
 from vitrage.entity_graph.consistency import service as consistency_svc
 from vitrage.entity_graph.initialization_status import InitializationStatus
 from vitrage.entity_graph.processor import entity_graph
@@ -68,7 +69,7 @@ def init(conf):
     evaluator_q = queue.Queue()
     e_graph = entity_graph.EntityGraph(
         'Entity Graph',
-        '%s:%s' % (EntityCategory.RESOURCE, OPENSTACK_CLUSTER))
+        '%s:%s:%s' % (EntityCategory.RESOURCE, OPENSTACK_CLUSTER, CLUSTER_ID))
     scenario_repo = ScenarioRepository(conf)
 
     evaluator = ScenarioEvaluator(conf, e_graph, scenario_repo, evaluator_q)

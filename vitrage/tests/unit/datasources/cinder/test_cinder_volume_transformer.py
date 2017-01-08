@@ -65,12 +65,14 @@ class TestCinderVolumeTransformer(base.BaseTest):
         properties = {
             VProps.ID: volume_id,
             VProps.TYPE: CINDER_VOLUME_DATASOURCE,
+            VProps.CATEGORY: EntityCategory.RESOURCE,
             VProps.SAMPLE_TIMESTAMP: timestamp
         }
         transformer = self.transformers[CINDER_VOLUME_DATASOURCE]
 
         # Test action
-        placeholder = transformer.create_placeholder_vertex(**properties)
+        placeholder = \
+            transformer.create_neighbor_placeholder_vertex(**properties)
 
         # Test assertions
         observed_id_values = placeholder.vertex_id.split(

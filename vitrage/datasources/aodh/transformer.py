@@ -131,7 +131,7 @@ class AodhTransformer(AlarmTransformerBase):
 
         entity_type = entity_event[DSProps.ENTITY_TYPE]
         alarm_id = entity_event[AodhProps.ALARM_ID]
-        return tbase.build_key(self._key_values(entity_type, alarm_id))
+        return tbase.build_key((EntityCategory.ALARM, entity_type, alarm_id))
 
     @staticmethod
     def _timestamp(entity_event):

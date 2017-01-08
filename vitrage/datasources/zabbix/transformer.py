@@ -15,6 +15,7 @@
 from oslo_log import log as logging
 
 from vitrage.common.constants import DatasourceProperties as DSProps
+from vitrage.common.constants import EdgeLabel
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.datasources.alarm_properties import AlarmProperties as AlarmProps
@@ -88,16 +89,14 @@ class ZabbixTransformer(AlarmTransformerBase):
     def _create_zabbix_neighbors(self, entity_event):
         self._unify_time_format(entity_event)
 
-        vitrage_id = self._create_entity_key(entity_event)
-        timestamp = entity_event[ZProps.TIMESTAMP]
-
         resource_type = entity_event[ZProps.RESOURCE_TYPE]
         if resource_type:
             return [self._create_neighbor(
-                vitrage_id,
-                timestamp,
+                entity_event,
+                entity_event[ZProps.RESOURCE_NAME],
                 resource_type,
-                entity_event[ZProps.RESOURCE_NAME])]
+                EdgeLabel.ON,
+                neighbor_category=EntityCategory.RESOURCE)]
 
         return []
 
@@ -109,9 +108,10 @@ class ZabbixTransformer(AlarmTransformerBase):
         entity_type = entity_event[DSProps.ENTITY_TYPE]
         alarm_id = entity_event[ZProps.TRIGGER_ID]
         resource_name = entity_event[ZProps.RESOURCE_NAME]
-        return tbase.build_key(self._key_values(entity_type,
-                                                resource_name,
-                                                alarm_id))
+        return tbase.build_key((EntityCategory.ALARM,
+                                entity_type,
+                                resource_name,
+                                alarm_id))
 
     @staticmethod
     def _unify_time_format(entity_event):

@@ -30,6 +30,7 @@ from vitrage.datasources.nova.host import NOVA_HOST_DATASOURCE
 from vitrage.datasources.nova.instance import NOVA_INSTANCE_DATASOURCE
 from vitrage.datasources import OPENSTACK_CLUSTER
 from vitrage.datasources.static_physical import SWITCH
+from vitrage.datasources.transformer_base import CLUSTER_ID
 from vitrage.graph import create_graph
 from vitrage.graph import utils as graph_utils
 from vitrage.tests import base
@@ -50,8 +51,11 @@ ALARM_ON_VM = 'ALARM_ON_VM'
 ALARM_ON_HOST = 'ALARM_ON_HOST'
 TEST_ON_HOST = 'TEST_ON_HOST'
 
+cluster_vitrage_id = EntityCategory.RESOURCE + ':' + \
+    OPENSTACK_CLUSTER + ':' + \
+    CLUSTER_ID
 v_node = graph_utils.create_vertex(
-    vitrage_id=EntityCategory.RESOURCE + ':' + OPENSTACK_CLUSTER,
+    vitrage_id=cluster_vitrage_id,
     entity_id='111111111111',
     entity_type=OPENSTACK_CLUSTER,
     entity_category=RESOURCE)
@@ -141,7 +145,8 @@ class GraphTestBase(base.BaseTest):
 
         start = time.time()
         g = create_graph(name, EntityCategory.RESOURCE + ':' +
-                         OPENSTACK_CLUSTER)
+                         OPENSTACK_CLUSTER + ':' +
+                         CLUSTER_ID)
         g.add_vertex(v_node)
         g.add_vertex(v_switch)
         g.add_edge(e_node_to_switch)

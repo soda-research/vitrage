@@ -27,7 +27,6 @@ from vitrage.datasources.resource_transformer_base import \
 from vitrage.datasources import transformer_base as tbase
 from vitrage.datasources.transformer_base import build_key
 from vitrage.datasources.transformer_base import extract_field_value
-from vitrage.datasources.transformer_base import Neighbor
 import vitrage.graph.utils as graph_utils
 
 
@@ -105,10 +104,10 @@ class HeatStackTransformer(ResourceTransformerBase):
             metadata=metadata)
 
     def _create_snapshot_neighbors(self, entity_event):
-        return self._create_neighbors(entity_event)
+        return self._create_stack_neighbors(entity_event)
 
     def _create_update_neighbors(self, entity_event):
-        return self._create_neighbors(entity_event)
+        return self._create_stack_neighbors(entity_event)
 
     def _create_entity_key(self, entity_event):
 
@@ -119,36 +118,20 @@ class HeatStackTransformer(ResourceTransformerBase):
         key_fields = self._key_values(HEAT_STACK_DATASOURCE, volume_id)
         return build_key(key_fields)
 
-    def _create_neighbors(self, entity_event):
-        return [self._create_neighbor(entity_event, neighbor)
-                for neighbor in entity_event['resources']]
+    def _create_stack_neighbors(self, entity_event):
+        neighbors = []
 
-    def _create_neighbor(self,
-                         entity_event,
-                         neighbor):
-        datasource_type = \
-            self.RESOURCE_TYPE_CONVERSION[neighbor['resource_type']]
-        transformer = self.transformers.get(datasource_type, None)
+        for neighbor in entity_event['resources']:
+            neighbor_id = neighbor['physical_resource_id']
+            neighbor_datasource_type = \
+                self.RESOURCE_TYPE_CONVERSION[neighbor['resource_type']]
+            neighbors.append(self._create_neighbor(entity_event,
+                                                   neighbor_id,
+                                                   neighbor_datasource_type,
+                                                   EdgeLabel.COMPRISED,
+                                                   is_entity_source=True))
 
-        stack_vitrage_id = self._create_entity_key(entity_event)
-
-        neighbor_id = neighbor['physical_resource_id']
-
-        sample_timestamp = entity_event[DSProps.SAMPLE_DATE]
-
-        properties = {
-            VProps.ID: neighbor_id,
-            VProps.TYPE: datasource_type,
-            VProps.SAMPLE_TIMESTAMP: sample_timestamp
-        }
-        instance_vertex = transformer.create_placeholder_vertex(**properties)
-
-        relationship_edge = graph_utils.create_edge(
-            source_id=stack_vitrage_id,
-            target_id=instance_vertex.vertex_id,
-            relationship_type=EdgeLabel.COMPRISED)
-
-        return Neighbor(instance_vertex, relationship_edge)
+        return neighbors
 
     def get_type(self):
         return HEAT_STACK_DATASOURCE

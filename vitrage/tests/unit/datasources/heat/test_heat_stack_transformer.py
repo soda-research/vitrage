@@ -66,12 +66,14 @@ class TestHeatStackTransformer(base.BaseTest):
         properties = {
             VProps.ID: stack_id,
             VProps.TYPE: HEAT_STACK_DATASOURCE,
+            VProps.CATEGORY: EntityCategory.RESOURCE,
             VProps.SAMPLE_TIMESTAMP: timestamp
         }
         transformer = self.transformers[HEAT_STACK_DATASOURCE]
 
         # Test action
-        placeholder = transformer.create_placeholder_vertex(**properties)
+        placeholder = \
+            transformer.create_neighbor_placeholder_vertex(**properties)
 
         # Test assertions
         observed_id_values = placeholder.vertex_id.split(

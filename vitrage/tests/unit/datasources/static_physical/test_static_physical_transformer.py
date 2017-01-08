@@ -67,10 +67,11 @@ class TestStaticPhysicalTransformer(base.BaseTest):
         properties = {
             VProps.TYPE: switch_type,
             VProps.ID: switch_name,
+            VProps.CATEGORY: EntityCategory.RESOURCE,
             VProps.SAMPLE_TIMESTAMP: timestamp
         }
-        placeholder = static_transformer.create_placeholder_vertex(
-            **properties)
+        placeholder = \
+            static_transformer.create_neighbor_placeholder_vertex(**properties)
 
         # Test assertions
         observed_id_values = placeholder.vertex_id.split(

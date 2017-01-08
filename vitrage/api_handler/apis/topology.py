@@ -23,6 +23,7 @@ from vitrage.common.constants import VertexProperties as VProps
 from vitrage.datasources.nova.instance import NOVA_INSTANCE_DATASOURCE
 from vitrage.datasources import OPENSTACK_CLUSTER
 from vitrage.datasources.transformer_base import build_key
+from vitrage.datasources.transformer_base import CLUSTER_ID
 from vitrage.graph import create_algorithm
 
 
@@ -174,7 +175,9 @@ class TopologyApis(EntityGraphApisBase):
         entities = []
 
         if not root:
-            root = build_key([EntityCategory.RESOURCE, OPENSTACK_CLUSTER])
+            root = build_key([EntityCategory.RESOURCE,
+                              OPENSTACK_CLUSTER,
+                              CLUSTER_ID])
 
         root_vertex = \
             self.entity_graph.get_vertex(root)

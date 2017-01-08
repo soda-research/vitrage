@@ -24,7 +24,6 @@ from vitrage.datasources.resource_transformer_base import \
 from vitrage.datasources.static_physical import STATIC_PHYSICAL_DATASOURCE
 from vitrage.datasources.static_physical import SWITCH
 from vitrage.datasources import transformer_base
-from vitrage.datasources.transformer_base import Neighbor
 import vitrage.graph.utils as graph_utils
 
 LOG = logging.getLogger(__name__)
@@ -81,48 +80,25 @@ class StaticPhysicalTransformer(ResourceTransformerBase):
     def _create_static_physical_neighbors(self, entity_event):
         neighbors = []
         entity_type = entity_event[VProps.TYPE]
-        entity_key = self._create_entity_key(entity_event)
-        timestamp = entity_event[DSProps.SAMPLE_DATE]
 
         for neighbor_details in entity_event.get(
                 self.RELATIONSHIPS_SECTION, {}):
             # TODO(alexey): need to decide what to do if one of the entities
             #               fails
-            neighbor = self._create_neighbor(neighbor_details, entity_type,
-                                             entity_key, timestamp)
+            neighbor_id = neighbor_details[VProps.ID]
+            neighbor_type = neighbor_details[VProps.TYPE]
+            relation_type = neighbor_details[self.RELATION_TYPE]
+            is_entity_source = not self._find_relation_direction_source(
+                entity_type, neighbor_type)
+            neighbor = self._create_neighbor(entity_event,
+                                             neighbor_id,
+                                             neighbor_type,
+                                             relation_type,
+                                             is_entity_source=is_entity_source)
             if neighbor is not None:
                 neighbors.append(neighbor)
 
         return neighbors
-
-    def _create_neighbor(self, neighbor_details, entity_type,
-                         entity_key, sample_timestamp):
-        neighbor_type = neighbor_details[VProps.TYPE]
-        entity_transformer = self.transformers[neighbor_type]
-
-        if entity_transformer:
-            neighbor_id = neighbor_details[VProps.ID]
-            relation_type = neighbor_details[self.RELATION_TYPE]
-            is_source = self._find_relation_direction_source(
-                entity_type, neighbor_type)
-
-            properties = {
-                VProps.TYPE: neighbor_type,
-                VProps.ID: neighbor_id,
-                VProps.SAMPLE_TIMESTAMP: sample_timestamp
-            }
-            neighbor = entity_transformer.create_placeholder_vertex(
-                **properties)
-
-            relation_edge = graph_utils.create_edge(
-                source_id=neighbor.vertex_id if is_source else entity_key,
-                target_id=entity_key if is_source else neighbor.vertex_id,
-                relationship_type=relation_type)
-
-            return Neighbor(neighbor, relation_edge)
-        else:
-            LOG.warning('Cannot find zone transformer')
-            return None
 
     def _create_entity_key(self, entity_event):
         entity_id = entity_event[VProps.ID]

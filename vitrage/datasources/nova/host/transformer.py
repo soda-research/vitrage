@@ -24,7 +24,6 @@ from vitrage.datasources.resource_transformer_base import \
     ResourceTransformerBase
 from vitrage.datasources import transformer_base
 from vitrage.datasources.transformer_base import extract_field_value
-from vitrage.datasources.transformer_base import Neighbor
 import vitrage.graph.utils as graph_utils
 
 
@@ -63,55 +62,19 @@ class HostTransformer(ResourceTransformerBase):
             metadata=metadata)
 
     def _create_snapshot_neighbors(self, entity_event):
-        return self._create_nova_host_neighbors(entity_event)
+        return self._create_host_neighbors(entity_event)
 
     def _create_update_neighbors(self, entity_event):
-        return self._create_nova_host_neighbors(entity_event)
+        return self._create_host_neighbors(entity_event)
 
-    def _create_nova_host_neighbors(self, entity_event):
-        neighbors = []
-
-        # Support snapshot and snapshot_init events only
-        zone_neighbor = self._create_zone_neighbor(
-            entity_event,
-            entity_event[DSProps.SAMPLE_DATE],
-            self._create_entity_key(entity_event),
-            'zone')
-
-        if zone_neighbor is not None:
-            neighbors.append(zone_neighbor)
-
-        return neighbors
-
-    def _create_zone_neighbor(self,
-                              entity_event,
-                              sample_timestamp,
-                              host_vertex_id,
-                              zone_name_path):
-
-        zone_transformer = self.transformers[NOVA_ZONE_DATASOURCE]
-
-        if zone_transformer:
-
-            zone_name = extract_field_value(entity_event, zone_name_path)
-
-            properties = {
-                VProps.ID: zone_name,
-                VProps.TYPE: NOVA_ZONE_DATASOURCE,
-                VProps.SAMPLE_TIMESTAMP: sample_timestamp
-            }
-            zone_neighbor = zone_transformer.create_placeholder_vertex(
-                **properties)
-
-            relation_edge = graph_utils.create_edge(
-                source_id=zone_neighbor.vertex_id,
-                target_id=host_vertex_id,
-                relationship_type=EdgeLabel.CONTAINS)
-            return Neighbor(zone_neighbor, relation_edge)
-        else:
-            LOG.warning('Cannot find zone transformer')
-
-        return None
+    def _create_host_neighbors(self, entity_event):
+        zone_name = extract_field_value(entity_event, 'zone')
+        zone_neighbor = self._create_neighbor(entity_event,
+                                              zone_name,
+                                              NOVA_ZONE_DATASOURCE,
+                                              EdgeLabel.CONTAINS,
+                                              is_entity_source=False)
+        return [zone_neighbor]
 
     def _create_entity_key(self, entity_event):
 

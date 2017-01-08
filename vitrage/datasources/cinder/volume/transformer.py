@@ -28,7 +28,6 @@ from vitrage.datasources.resource_transformer_base import \
 from vitrage.datasources import transformer_base as tbase
 from vitrage.datasources.transformer_base import build_key
 from vitrage.datasources.transformer_base import extract_field_value
-from vitrage.datasources.transformer_base import Neighbor
 import vitrage.graph.utils as graph_utils
 
 
@@ -131,14 +130,14 @@ class CinderVolumeTransformer(ResourceTransformerBase):
             metadata=metadata)
 
     def _create_snapshot_neighbors(self, entity_event):
-        return self._create_instance_neighbors(entity_event,
-                                               'attachments',
-                                               'server_id')
+        return self._create_volume_neighbors(entity_event,
+                                             'attachments',
+                                             'server_id')
 
     def _create_update_neighbors(self, entity_event):
-        return self._create_instance_neighbors(entity_event,
-                                               'volume_attachment',
-                                               'instance_uuid')
+        return self._create_volume_neighbors(entity_event,
+                                             'volume_attachment',
+                                             'instance_uuid')
 
     def _create_entity_key(self, entity_event):
 
@@ -149,47 +148,21 @@ class CinderVolumeTransformer(ResourceTransformerBase):
         key_fields = self._key_values(CINDER_VOLUME_DATASOURCE, volume_id)
         return build_key(key_fields)
 
-    def _create_instance_neighbors(self,
-                                   entity_event,
-                                   attachments_property,
-                                   instance_id_property):
-        transformer = self.transformers[NOVA_INSTANCE_DATASOURCE]
+    def _create_volume_neighbors(self,
+                                 entity_event,
+                                 attachments_property,
+                                 instance_id_property):
+        neighbors = []
 
-        if transformer:
-            return [self._create_instance_neighbor(entity_event,
-                                                   attachment,
-                                                   transformer,
-                                                   instance_id_property)
-                    for attachment in entity_event[attachments_property]]
-        else:
-            LOG.warning('Cannot find instance transformer')
+        for attachment in entity_event[attachments_property]:
+            instance_neighbor_id = attachment[instance_id_property]
+            neighbors.append(self._create_neighbor(entity_event,
+                                                   instance_neighbor_id,
+                                                   NOVA_INSTANCE_DATASOURCE,
+                                                   EdgeLabel.ATTACHED,
+                                                   is_entity_source=True))
 
-    def _create_instance_neighbor(self,
-                                  entity_event,
-                                  attachment,
-                                  instance_transformer,
-                                  instance_id_property):
-        volume_vitrage_id = self._create_entity_key(entity_event)
-
-        instance_id = attachment[instance_id_property]
-
-        sample_timestamp = entity_event[DSProps.SAMPLE_DATE]
-
-        properties = {
-            VProps.ID: instance_id,
-            VProps.TYPE: NOVA_INSTANCE_DATASOURCE,
-            VProps.SAMPLE_TIMESTAMP: sample_timestamp
-        }
-        instance_vertex = \
-            instance_transformer.create_placeholder_vertex(
-                **properties)
-
-        relationship_edge = graph_utils.create_edge(
-            source_id=volume_vitrage_id,
-            target_id=instance_vertex.vertex_id,
-            relationship_type=EdgeLabel.ATTACHED)
-
-        return Neighbor(instance_vertex, relationship_edge)
+        return neighbors
 
     def get_type(self):
         return CINDER_VOLUME_DATASOURCE
