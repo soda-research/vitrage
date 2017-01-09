@@ -16,6 +16,7 @@ from oslo_config import cfg
 
 from vitrage.common.constants import DatasourceAction as DSAction
 from vitrage.common.constants import DatasourceProperties as DSProps
+from vitrage.common.constants import EdgeProperties as EProps
 from vitrage.common.constants import GraphAction
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.datasources.transformer_base import Neighbor
@@ -214,6 +215,80 @@ class TestProcessor(TestEntityGraphUnitBase):
         self._check_graph(processor, self.NUM_VERTICES_AFTER_CREATION,
                           self.NUM_EDGES_AFTER_CREATION)
 
+    def test_update_neighbors_by_changing_label(self):
+        # create instance event with host neighbor and check validity
+        (vertex, neighbors, processor) = self._create_and_check_entity()
+
+        # update instance event with state running
+        (neighbor_vertex, neighbor_edge) = neighbors[0]
+        old_label = neighbor_edge.label
+        neighbor_vertex[VProps.IS_PLACEHOLDER] = False
+        processor.entity_graph.update_vertex(neighbor_vertex)
+        neighbor_vertex[VProps.IS_PLACEHOLDER] = True
+        neighbor_edge.label = 'new label'
+
+        processor._update_neighbors(vertex, neighbors)
+
+        # check state
+        self._check_graph(processor,
+                          self.NUM_VERTICES_AFTER_CREATION,
+                          self.NUM_EDGES_AFTER_CREATION,
+                          vertex_id=vertex.vertex_id)
+        old_edge = processor.entity_graph.get_edge(neighbor_vertex.vertex_id,
+                                                   vertex.vertex_id,
+                                                   old_label)
+        new_edge = processor.entity_graph.get_edge(neighbor_vertex.vertex_id,
+                                                   vertex.vertex_id,
+                                                   neighbor_edge.label)
+        self.assertIsNotNone(old_edge)
+        self.assertEqual(old_edge[EProps.IS_DELETED], True)
+        self.assertIsNotNone(new_edge)
+        self.assertEqual(new_edge[EProps.IS_DELETED], False)
+
+        # update instance with the same neighbor
+        processor._update_neighbors(vertex, neighbors)
+
+        # check state
+        self._check_graph(processor,
+                          self.NUM_VERTICES_AFTER_CREATION,
+                          self.NUM_EDGES_AFTER_CREATION,
+                          vertex_id=vertex.vertex_id)
+
+    def test_update_neighbors_by_changing_label_with_placeholder(self):
+        # create instance event with host neighbor and check validity
+        (vertex, neighbors, processor) = self._create_and_check_entity()
+
+        # update instance event with state running
+        (neighbor_vertex, neighbor_edge) = neighbors[0]
+        old_label = neighbor_edge.label
+        neighbor_edge.label = 'new label'
+
+        processor._update_neighbors(vertex, neighbors)
+
+        # check state
+        self._check_graph(processor,
+                          self.NUM_VERTICES_AFTER_CREATION,
+                          self.NUM_EDGES_AFTER_CREATION,
+                          vertex_id=vertex.vertex_id)
+        old_edge = processor.entity_graph.get_edge(neighbor_vertex.vertex_id,
+                                                   vertex.vertex_id,
+                                                   old_label)
+        new_edge = processor.entity_graph.get_edge(neighbor_vertex.vertex_id,
+                                                   vertex.vertex_id,
+                                                   neighbor_edge.label)
+        self.assertIsNone(old_edge)
+        self.assertIsNotNone(new_edge)
+        self.assertEqual(new_edge[EProps.IS_DELETED], False)
+
+        # update instance with the same neighbor
+        processor._update_neighbors(vertex, neighbors)
+
+        # check state
+        self._check_graph(processor,
+                          self.NUM_VERTICES_AFTER_CREATION,
+                          self.NUM_EDGES_AFTER_CREATION,
+                          vertex_id=vertex.vertex_id)
+
     def test_delete_old_connections(self):
         # create instance event with host neighbor and check validity
         (vertex, neighbors, processor) = self._create_and_check_entity()
@@ -313,6 +388,18 @@ class TestProcessor(TestEntityGraphUnitBase):
 
         return vertex, neighbors, processor
 
-    def _check_graph(self, processor, num_vertices, num_edges):
+    def _check_graph(self,
+                     processor,
+                     num_vertices,
+                     num_edges,
+                     vertex_id=None):
         self.assertEqual(num_vertices, len(processor.entity_graph))
-        self.assertEqual(num_edges, processor.entity_graph.num_edges())
+
+        if not vertex_id:
+            self.assertEqual(num_edges, processor.entity_graph.num_edges())
+        else:
+            deleted_edges = processor.entity_graph.get_edges(
+                vertex_id,
+                attr_filter={VProps.IS_DELETED: True})
+            self.assertEqual(num_edges + len(deleted_edges),
+                             processor.entity_graph.num_edges())
