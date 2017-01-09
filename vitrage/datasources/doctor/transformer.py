@@ -15,7 +15,7 @@
 from oslo_log import log as logging
 
 from vitrage.common.constants import DatasourceProperties as DSProps
-from vitrage.common.constants import DatasourceProperties as EdgeLabel
+from vitrage.common.constants import EdgeLabel
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.datasources.alarm_transformer_base import AlarmTransformerBase
@@ -46,13 +46,14 @@ class DoctorTransformer(AlarmTransformerBase):
 
         details = entity_event.get(DoctorProps.DETAILS, {})
         details[VProps.NAME] = entity_event[DoctorProps.TYPE]
+        details[DoctorProps.TIME] = entity_event[DoctorProps.TIME]
 
         return graph_utils.create_vertex(
             self._create_entity_key(entity_event),
             entity_category=EntityCategory.ALARM,
             entity_type=entity_event[DSProps.ENTITY_TYPE],
             entity_state=self._get_alarm_state(entity_event),
-            sample_timestamp=entity_event[DoctorProps.TIME],
+            sample_timestamp=entity_event[DSProps.SAMPLE_DATE],
             update_timestamp=entity_event[DoctorProps.UPDATE_TIME],
             metadata=details)
 

@@ -73,7 +73,6 @@ class DoctorDriverTest(base.BaseTest):
         # Test assertions
         self._assert_event_equal(event, event_type, host1,
                                  DoctorStatus.UP, time3, time3)
-        # self._assert_marked_as_deleted(driver, event, True)
 
         # Send again the second event. The sample time should be new, but the
         # update time should remain with its old value (since the state has

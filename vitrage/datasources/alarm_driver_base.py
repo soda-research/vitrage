@@ -108,6 +108,7 @@ class AlarmDriverBase(DriverBase):
                 alarms_to_update.append(alarm)
 
         # add alarms that were deleted
+        # (i.e. the alarm definition was deleted from the datasource)
         values = list(self.cache.values())
         for cached_alarm, timestamp in values:
             if self._is_erroneous(cached_alarm) and timestamp is not now:

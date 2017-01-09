@@ -3,6 +3,7 @@
   "type": "compute.host.down",
   "vitrage_entity_type" : "doctor",
   "vitrage_datasource_action" : "update",
+  "vitrage_sample_date": "2016-11-29T06:31:50.094836",
   "details": {
     "hostname": "compute-1",
     "source": "sample_monitor",
