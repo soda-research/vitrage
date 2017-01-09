@@ -200,7 +200,8 @@ class TransformerBase(object):
                          relationship_type,
                          neighbor_category=EntityCategory.RESOURCE,
                          is_entity_source=True,
-                         metadata={}):
+                         metadata=None):
+        metadata = {} if metadata is None else metadata
         # create placeholder vertex
         entity_vitrage_id = self._create_entity_key(entity_event)
         sample_timestamp = entity_event[DSProps.SAMPLE_DATE]
