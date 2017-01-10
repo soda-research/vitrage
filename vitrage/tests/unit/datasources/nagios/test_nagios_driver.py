@@ -524,7 +524,7 @@ class NagiosDriverTest(NagiosBaseTest):
         self.assertIsNotNone(services, 'No services returned')
         self.assertEqual(1, len(services))
         self._assert_contains(service_data1, services)
-        self.assertFalse(DSProps.EVENT_TYPE in services[0])
+        self.assertNotIn(DSProps.EVENT_TYPE, services[0])
 
         # Action - delete a service that was not OK and call get_changes
         service_data2 = {NagiosProps.RESOURCE_NAME: 'compute-1',

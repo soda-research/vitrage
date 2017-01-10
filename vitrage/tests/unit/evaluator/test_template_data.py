@@ -56,13 +56,13 @@ class BasicTemplateTest(base.BaseTest):
             self.assertIsInstance(entity, Vertex)
             self.assertEqual(entity_id, entity.vertex_id)
             self.assertIsNotNone(entity.properties)
-            self.assertTrue(TFields.CATEGORY in entity.properties)
+            self.assertIn(TFields.CATEGORY, entity.properties)
 
         self.assertEqual(len(entities), len(entities_def))
 
         for entity_def in entities_def:
             entity_def_dict = entity_def[TFields.ENTITY]
-            self.assertTrue(entity_def_dict[TFields.TEMPLATE_ID] in entities)
+            self.assertIn(entity_def_dict[TFields.TEMPLATE_ID], entities)
             entity = entities[entity_def_dict[TFields.TEMPLATE_ID]]
 
             for key, value in entity_def_dict.items():
@@ -76,8 +76,8 @@ class BasicTemplateTest(base.BaseTest):
         for relationship_id, relationship in relationships.items():
 
             self.assertIsInstance(relationship, EdgeDescription)
-            self.assertTrue(relationship.source.vertex_id in entities)
-            self.assertTrue(relationship.target.vertex_id in entities)
+            self.assertIn(relationship.source.vertex_id, entities)
+            self.assertIn(relationship.target.vertex_id, entities)
 
             relationship_props = relationship.edge.properties
             self.assertIsNotNone(relationship_props)
@@ -92,7 +92,7 @@ class BasicTemplateTest(base.BaseTest):
             relation_def_dict = relation_def[TFields.RELATIONSHIP]
 
             template_id = relation_def_dict[TFields.TEMPLATE_ID]
-            self.assertTrue(template_id in relationships)
+            self.assertIn(template_id, relationships)
             relationship = relationships[template_id].edge
 
             for key, value in relation_def_dict.items():
