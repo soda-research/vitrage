@@ -100,6 +100,9 @@ function cleanup_vitrage {
     if [ "$VITRAGE_USE_MOD_WSGI" == "True" ]; then
         _vitrage_cleanup_apache_wsgi
     fi
+
+    # delete all vitrage configurations
+    sudo rm -rf /etc/vitrage/*
 }
 
 function disable_vitrage_datasource {
