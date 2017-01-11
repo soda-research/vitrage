@@ -62,12 +62,12 @@ class TestCollectdDriver(base.BaseTest):
     def _generate_event(time, hostname, severity):
         update_vals = {}
         if hostname:
-            update_vals['host'] = hostname
+            update_vals[CProps.HOST] = hostname
         if severity:
             update_vals[CProps.SEVERITY] = severity
 
         if time:
-            update_vals['time'] = time
+            update_vals[CProps.TIME] = time
 
         generators = mock_driver.simple_doctor_alarm_generators(
             update_vals=update_vals)
@@ -81,7 +81,7 @@ class TestCollectdDriver(base.BaseTest):
                             expected_severity,
                             expected_sample_date):
         self.assertIsNotNone(event, 'No event returned')
-        self.assertEqual(expected_hostname, event['host'])
+        self.assertEqual(expected_hostname, event[CProps.HOST])
         self.assertEqual(expected_severity, event[CProps.SEVERITY])
-        self.assertEqual(expected_sample_date, event['time'])
+        self.assertEqual(expected_sample_date, event[CProps.TIME])
         self.assertEqual(expected_event_type, event[DSProps.EVENT_TYPE])

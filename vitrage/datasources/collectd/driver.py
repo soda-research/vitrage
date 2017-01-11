@@ -40,7 +40,7 @@ class CollectdDriver(AlarmDriverBase):
         return COLLECTD_DATASOURCE
 
     def _alarm_key(self, alarm):
-        return alarm['id']
+        return alarm[CProps.ID]
 
     def _get_alarms(self):
         return []
@@ -79,7 +79,7 @@ class CollectdDriver(AlarmDriverBase):
         event[DSProps.EVENT_TYPE] = event_type
 
         if CollectdDriver.conf_map:
-            collectd_host = event['host']
+            collectd_host = event[CProps.HOST]
             v_resource = CollectdDriver.conf_map[collectd_host]
             event[CProps.RESOURCE_NAME] = v_resource[CProps.RESOURCE_NAME]
             event[CProps.RESOURCE_TYPE] = v_resource[CProps.RESOURCE_TYPE]
@@ -89,5 +89,6 @@ class CollectdDriver(AlarmDriverBase):
 
     @staticmethod
     def get_event_types():
-        return ['collectd.alarm.ok', 'collectd.alarm.failure',
+        return ['collectd.alarm.ok',
+                'collectd.alarm.failure',
                 'collectd.alarm.warning']

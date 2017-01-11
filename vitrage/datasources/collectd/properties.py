@@ -17,3 +17,7 @@ class CollectdProperties(object):
     RESOURCE_TYPE = 'resource_type'
     RESOURCE_NAME = 'resource_name'
     SEVERITY = 'severity'
+    TIME = 'time'
+    MESSAGE = 'message'
+    HOST = 'host'
+    ID = 'id'

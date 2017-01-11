@@ -45,7 +45,7 @@ class CollectdTransformer(AlarmTransformerBase):
     def _create_vertex(self, entity_event):
 
         entity_event['timestamp'] = format_unix_timestamp(
-            entity_event['time'], tbase.TIMESTAMP_FORMAT)
+            entity_event[CProps.TIME], tbase.TIMESTAMP_FORMAT)
 
         update_timestamp = entity_event['timestamp']
 
@@ -55,7 +55,7 @@ class CollectdTransformer(AlarmTransformerBase):
             if self._ok_status(entity_event) else AlarmProps.ACTIVE_STATE
 
         metadata = {
-            VProps.NAME: entity_event['message'],
+            VProps.NAME: entity_event[CProps.MESSAGE],
             VProps.SEVERITY: entity_event[CProps.SEVERITY],
         }
 
@@ -93,7 +93,7 @@ class CollectdTransformer(AlarmTransformerBase):
     def _create_entity_key(self, entity_event):
 
         entity_type = entity_event[DSProps.ENTITY_TYPE]
-        alarm_id = entity_event['id']
+        alarm_id = entity_event[CProps.ID]
         resource_name = entity_event[CProps.RESOURCE_NAME]
         return tbase.build_key(self._key_values(entity_type,
                                                 resource_name,

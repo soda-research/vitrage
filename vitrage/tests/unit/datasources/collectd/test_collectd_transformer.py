@@ -17,8 +17,11 @@ import time
 from oslo_config import cfg
 from oslo_log import log as logging
 
+from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import UpdateMethod
 from vitrage.datasources.collectd import COLLECTD_DATASOURCE
+from vitrage.datasources.collectd.properties import \
+    CollectdProperties as CProps
 from vitrage.datasources.collectd.transformer import CollectdTransformer
 from vitrage.datasources.nova.host import NOVA_HOST_DATASOURCE
 from vitrage.datasources.nova.host.transformer import HostTransformer
@@ -90,17 +93,19 @@ class TestCollectdTransformer(BaseAlarmTransformerTest):
         self._validate_graph_action(wrapper)
 
     def _validate_vertex_props(self, vertex, event):
-        timestamp = format_unix_timestamp(event['time'])
+        timestamp = format_unix_timestamp(event[CProps.TIME])
         self._validate_alarm_vertex_props(vertex,
-                                          event['message'],
+                                          event[CProps.MESSAGE],
                                           COLLECTD_DATASOURCE,
                                           timestamp)
 
     @staticmethod
     def _generate_event(time, hostname, severity):
-        update_vals = {'host': hostname, 'severity': severity, 'time': time,
-                       'vitrage_sample_date': format_unix_timestamp(time),
-                       'resource_name': hostname}
+        update_vals = {CProps.HOST: hostname,
+                       CProps.SEVERITY: severity,
+                       CProps.TIME: time,
+                       DSProps.SAMPLE_DATE: format_unix_timestamp(time),
+                       CProps.RESOURCE_NAME: hostname}
 
         generators = mock_transformer.simple_collectd_alarm_generators(
             update_vals=update_vals)
@@ -108,4 +113,4 @@ class TestCollectdTransformer(BaseAlarmTransformerTest):
         return mock_transformer.generate_random_events_list(generators)[0]
 
     def _is_erroneous(self, vertex):
-        return vertex['severity'] != 'OK'
+        return vertex[CProps.SEVERITY] != 'OK'
