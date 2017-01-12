@@ -211,7 +211,6 @@ class TransformerBase(object):
             VProps.CATEGORY: neighbor_category,
             VProps.SAMPLE_TIMESTAMP: sample_timestamp,
             self.METADATA: metadata
-
         }
         neighbor_vertex = \
             self.create_neighbor_placeholder_vertex(**properties)

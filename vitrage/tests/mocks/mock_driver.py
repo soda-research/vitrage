@@ -35,6 +35,7 @@ usage example:
 
 import random
 
+from vitrage.common.constants import DatasourceProperties as DSProps
 import vitrage.tests.mocks.trace_generator as tg
 
 
@@ -317,7 +318,7 @@ def simple_consistency_generators(consistency_num, update_events=0,
 def simple_switch_generators(switch_num, host_num,
                              snapshot_events=0, snap_vals=None,
                              update_events=0, update_vals=None):
-    """A function for returning switch event generators.
+    """A function for returning switch events generators.
 
     Returns generators for a given number of switches and hosts.
     Hosts will be distributed across switches in round-robin style.
@@ -328,8 +329,8 @@ def simple_switch_generators(switch_num, host_num,
     :param switch_num: number of zones
     :param host_num: number of hosts
     :param snapshot_events: number of snapshot events per zone
-    :param snap_vals: preset vals for ALL snapshot events
-    :return: generators for zone_num zones as specified
+    :param snap_vals: preset values for ALL snapshot events
+    :return: generators for switch events as specified
     """
 
     mapping = [('host-{0}'.format(index), 'switch-{0}'.format(index %
@@ -357,6 +358,59 @@ def simple_switch_generators(switch_num, host_num,
              tg.EXTERNAL_INFO_KEY: update_vals,
              tg.MAPPING_KEY: mapping,
              tg.NAME_KEY: 'Switch update generator',
+             tg.NUM_EVENTS: update_events
+             }
+        )
+    return tg.get_trace_generators(test_entity_spec_list)
+
+
+def simple_static_generators(switch_num=2, host_num=10,
+                             snapshot_events=0, snap_vals=None,
+                             update_events=0, update_vals=None):
+    """A function for returning static datasource events generators.
+
+    Returns generators for a given number of routers, switches and hosts.
+    Hosts will be distributed across switches in round-robin style.
+    Switches are interconnected in a line.
+
+    :param switch_num: number of zones
+    :param host_num: number of hosts
+    :param snapshot_events: number of snapshot events per zone
+    :param snap_vals: preset values for ALL snapshot events
+    :param update_events: number of values from update event
+    :param update_vals: preset values for update event
+
+    :return: generators for static datasource events
+    """
+
+    # TODO(yujunz) mock routers which connects all switches
+    mapping = [(host_index, host_index % switch_num)
+               for host_index in range(host_num)]
+
+    test_entity_spec_list = []
+    if snapshot_events > 0:
+        if snap_vals is None:
+            snap_vals = {}
+        snap_vals[DSProps.DATASOURCE_ACTION] = 'update'
+        test_entity_spec_list.append(
+            {tg.DYNAMIC_INFO_FKEY: tg.DRIVER_STATIC_SNAPSHOT_D,
+             tg.STATIC_INFO_FKEY: None,
+             tg.EXTERNAL_INFO_KEY: snap_vals,
+             tg.MAPPING_KEY: mapping,
+             tg.NAME_KEY: 'Static snapshot generator',
+             tg.NUM_EVENTS: snapshot_events
+             }
+        )
+    if update_events > 0:
+        if update_vals is None:
+            update_vals = {}
+        update_vals[DSProps.DATASOURCE_ACTION] = 'update'
+        test_entity_spec_list.append(
+            {tg.DYNAMIC_INFO_FKEY: tg.DRIVER_STATIC_SNAPSHOT_D,
+             tg.STATIC_INFO_FKEY: None,
+             tg.EXTERNAL_INFO_KEY: update_vals,
+             tg.MAPPING_KEY: mapping,
+             tg.NAME_KEY: 'Static update generator',
              tg.NUM_EVENTS: update_events
              }
         )

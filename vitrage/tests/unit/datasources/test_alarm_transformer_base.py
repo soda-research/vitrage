@@ -62,7 +62,7 @@ class BaseAlarmTransformerTest(BaseTransformerTest):
             VProps.CATEGORY: EntityCategory.RESOURCE,
             VProps.SAMPLE_TIMESTAMP: wrapper.vertex[VProps.SAMPLE_TIMESTAMP],
         }
-        expected_neighbor = host_transformer. \
+        expected_neighbor = host_transformer.\
             create_neighbor_placeholder_vertex(**properties)
 
         self.assertEqual(expected_neighbor, host_neighbor.vertex)
