@@ -16,6 +16,7 @@
 
 from oslo_config import cfg
 import oslo_messaging as messaging
+from oslo_messaging.rpc import dispatcher
 
 OPTS = [
     cfg.StrOpt('rpc_topic',
@@ -38,8 +39,10 @@ def get_client(transport, target, version_cap=None, serializer=None):
 
 def get_server(target, endpoints, transport, serializer=None):
     assert transport is not None
+    access_policy = dispatcher.DefaultRPCAccessPolicy
     return messaging.get_rpc_server(transport,
                                     target,
                                     endpoints,
                                     executor='eventlet',
-                                    serializer=serializer)
+                                    serializer=serializer,
+                                    access_policy=access_policy)
