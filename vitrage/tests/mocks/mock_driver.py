@@ -35,8 +35,10 @@ usage example:
 
 import random
 
+from vitrage.common.constants import DatasourceAction
 from vitrage.common.constants import DatasourceProperties as DSProps
 import vitrage.tests.mocks.trace_generator as tg
+from vitrage.utils.datetime import utcnow
 
 
 def generate_random_events_list(generator_spec_list):
@@ -391,10 +393,12 @@ def simple_static_generators(switch_num=2, host_num=10,
     if snapshot_events > 0:
         if snap_vals is None:
             snap_vals = {}
-        snap_vals[DSProps.DATASOURCE_ACTION] = 'update'
+        snap_vals.update({
+            DSProps.DATASOURCE_ACTION: DatasourceAction.SNAPSHOT,
+            DSProps.SAMPLE_DATE: utcnow()})
         test_entity_spec_list.append(
             {tg.DYNAMIC_INFO_FKEY: tg.DRIVER_STATIC_SNAPSHOT_D,
-             tg.STATIC_INFO_FKEY: None,
+             tg.STATIC_INFO_FKEY: tg.DRIVER_STATIC_SNAPSHOT_S,
              tg.EXTERNAL_INFO_KEY: snap_vals,
              tg.MAPPING_KEY: mapping,
              tg.NAME_KEY: 'Static snapshot generator',
@@ -404,7 +408,9 @@ def simple_static_generators(switch_num=2, host_num=10,
     if update_events > 0:
         if update_vals is None:
             update_vals = {}
-        update_vals[DSProps.DATASOURCE_ACTION] = 'update'
+        update_vals.update({
+            DSProps.DATASOURCE_ACTION: DatasourceAction.UPDATE,
+            DSProps.SAMPLE_DATE: utcnow()})
         test_entity_spec_list.append(
             {tg.DYNAMIC_INFO_FKEY: tg.DRIVER_STATIC_SNAPSHOT_D,
              tg.STATIC_INFO_FKEY: None,

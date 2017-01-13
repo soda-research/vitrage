@@ -7,11 +7,5 @@
   "vitrage_datasource_action": "snapshot",
   "vitrage_sample_date": "2015-12-01T12:46:41Z",
   "vitrage_event_type": "entity_update",
-  "relationships": [
-    {
-      "source": "[sc][1-9]",
-      "target": "[hc][1-9]",
-      "relationship_type": "attached|custom"
-    }
-  ]
+  "relationships": []
 }

@@ -122,6 +122,7 @@ class TopologyFields(object):
     ENTITIES = 'entities'
     ENTITY = 'entity'
     TYPE = 'type'
+    ID = 'id'
 
     RELATIONSHIPS = 'relationships'
     RELATIONSHIP = 'relationship'

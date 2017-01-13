@@ -26,7 +26,10 @@ from collections import defaultdict
 from random import randint
 
 # noinspection PyPep8Naming
+from vitrage.common.constants import EdgeLabel
+from vitrage.common.constants import TopologyFields
 from vitrage.datasources.nova.host import NOVA_HOST_DATASOURCE
+from vitrage.datasources.static import StaticFields
 from vitrage.tests.mocks.entity_model import BasicEntityModel as Bem
 import vitrage.tests.mocks.utils as utils
 
@@ -57,6 +60,7 @@ DRIVER_NAGIOS_SNAPSHOT_S = 'driver_nagios_snapshot_static.json'
 DRIVER_ZABBIX_SNAPSHOT_D = 'driver_zabbix_snapshot_dynamic.json'
 DRIVER_SWITCH_SNAPSHOT_D = 'driver_switch_snapshot_dynamic.json'
 DRIVER_STATIC_SNAPSHOT_D = 'driver_static_snapshot_dynamic.json'
+DRIVER_STATIC_SNAPSHOT_S = 'driver_static_snapshot_static.json'
 DRIVER_VOLUME_UPDATE_D = 'driver_volume_update_dynamic.json'
 DRIVER_VOLUME_SNAPSHOT_D = 'driver_volume_snapshot_dynamic.json'
 DRIVER_STACK_UPDATE_D = 'driver_stack_update_dynamic.json'
@@ -547,80 +551,83 @@ def _get_static_snapshot_driver_values(spec):
     """
 
     host_switch_mapping = spec[MAPPING_KEY]
-    static_info_spec = None
+
     if spec[STATIC_INFO_FKEY] is not None:
         static_info_spec = utils.load_specs(spec[STATIC_INFO_FKEY])
+    else:
+        static_info_spec = None
 
     static_values = []
 
+    # use defaultdict to create placeholder
     relationships = defaultdict(lambda: [])
     entities = defaultdict(lambda: {})
+    touched = set({})
 
     for host_index, switch_index in host_switch_mapping:
         host_id = "h{}".format(host_index)
         switch_id = "s{}".format(switch_index)
 
         relationship = {
-            "source": switch_id,
-            "target": host_id,
-            "relationship_type": "attached"
+            TopologyFields.SOURCE: switch_id,
+            TopologyFields.TARGET: host_id,
+            TopologyFields.RELATIONSHIP_TYPE: EdgeLabel.ATTACHED
         }
-        host_rel = relationship.copy()
-        host_rel['source'] = entities[switch_id]
-        relationships[host_id].append(host_rel)
-
-        switch_rel = relationship.copy()
-        switch_rel['target'] = entities[host_id]
-        relationships[switch_id].append(switch_rel)
+        rel = relationship.copy()
+        rel[TopologyFields.TARGET] = entities[host_id]
+        relationships[switch_id].append(rel)
 
     for host_index, switch_index in host_switch_mapping:
-        mapping = {}
-
         switch_id = "s{}".format(switch_index)
-        if switch_id not in entities:
+        if switch_id not in touched:
             switch_name = "switch-{}".format(switch_index)
-            mapping = {
-                'name': switch_name,
-                'config_id': switch_id,
-                'id': str(randint(0, 100000)),
-                'type': 'switch',
-                'relationships': relationships[switch_id]
+            vals = {
+                StaticFields.CONFIG_ID: switch_id,
+                StaticFields.TYPE: 'switch',
+                StaticFields.ID: str(randint(0, 100000)),
+                StaticFields.NAME: switch_name,
+                StaticFields.RELATIONSHIPS: relationships[switch_id]
             }
-            entities[switch_id].update(**mapping)
+            entities[switch_id].update(**vals)
+            touched.add(switch_id)
 
         host_id = "h{}".format(host_index)
-        if host_id not in entities:
-            mapping = {
-                'config_id': host_id,
-                'type': 'nova.host',
-                'id': str(randint(0, 100000)),
-                'relationships': relationships[host_id]
+        if host_id not in touched:
+            vals = {
+                StaticFields.CONFIG_ID: host_id,
+                StaticFields.TYPE: NOVA_HOST_DATASOURCE,
+                StaticFields.ID: str(randint(0, 100000)),
+                StaticFields.RELATIONSHIPS: relationships[host_id]
             }
-            entities[host_id].update(**mapping)
+            entities[host_id].update(**vals)
+            touched.add(host_id)
 
+    for vals in entities.values():
         static_values.append(combine_data(static_info_spec,
-                                          mapping,
+                                          vals,
                                           spec.get(EXTERNAL_INFO_KEY, None)))
 
-    for index in range(10):
-        custom_id = 'c{}'.format(index)
-        # self-pointing relationship
-        relationships = [
-            {
-                "source": custom_id,
-                "target": custom_id,
-                "relationship_type": "custom"
-            }
-        ]
-        mapping = {
-            'config_id': custom_id,
-            'type': 'custom',
-            'id': str(randint(0, 100000)),
-            'relationships': relationships
+    custom_num = 10
+    for index in range(custom_num):
+        source_id = 'c{}'.format(index)
+        target_id = 'c{}'.format(custom_num - 1 - index)
+        source_name = 'custom-{}'.format(source_id)
+        vals = {
+            StaticFields.CONFIG_ID: source_id,
+            StaticFields.TYPE: 'custom',
+            StaticFields.ID: str(randint(0, 100000)),
+            StaticFields.NAME: source_name,
+            StaticFields.RELATIONSHIPS: [{
+                StaticFields.SOURCE: source_id,
+                StaticFields.TARGET: entities[target_id],
+                StaticFields.RELATIONSHIP_TYPE: 'custom'}]
         }
+        entities[source_id].update(**vals)
         static_values.append(combine_data(static_info_spec,
-                                          mapping,
+                                          vals,
                                           spec.get(EXTERNAL_INFO_KEY, None)))
+
+    # TODO(yujunz) verify self-pointing relationship
 
     return static_values
 

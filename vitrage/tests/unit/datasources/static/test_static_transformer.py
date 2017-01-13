@@ -19,6 +19,7 @@ from oslo_log import log as logging
 
 from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import EntityCategory
+from vitrage.common.constants import TopologyFields
 from vitrage.common.constants import UpdateMethod
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.datasources.nova.host import NOVA_HOST_DATASOURCE
@@ -86,13 +87,13 @@ class TestStaticTransformer(base.BaseTest):
         self.assertEqual(is_placeholder, True)
 
     def test_snapshot_transform(self):
-        spec_list = mock_driver.simple_static_generators(snapshot_events=10)
-        events = mock_driver.generate_random_events_list(spec_list)
+        vals_list = mock_driver.simple_static_generators(snapshot_events=1)
+        events = mock_driver.generate_random_events_list(vals_list)
         self._event_transform_test(events)
 
     def test_update_transform(self):
-        spec_list = mock_driver.simple_static_generators(update_events=10)
-        events = mock_driver.generate_random_events_list(spec_list)
+        vals_list = mock_driver.simple_static_generators(update_events=1)
+        events = mock_driver.generate_random_events_list(vals_list)
         self._event_transform_test(events)
 
     def _event_transform_test(self, events):
@@ -106,28 +107,35 @@ class TestStaticTransformer(base.BaseTest):
             self._validate_neighbors(neighbors, vertex.vertex_id, event)
 
     def _validate_vertex(self, vertex, event):
+        self._validate_common_props(vertex, event)
+        self.assertEqual(vertex[VProps.SAMPLE_TIMESTAMP],
+                         event[DSProps.SAMPLE_DATE])
+
+        for k, v in event.get(TopologyFields.METADATA, {}):
+            self.assertEqual(vertex[k], v)
+
+    def _validate_common_props(self, vertex, event):
         self.assertEqual(vertex[VProps.CATEGORY], EntityCategory.RESOURCE)
         self.assertEqual(vertex[VProps.TYPE], event[VProps.TYPE])
         self.assertEqual(vertex[VProps.ID], event[VProps.ID])
-        self.assertEqual(vertex[VProps.SAMPLE_TIMESTAMP],
-                         event[DSProps.SAMPLE_DATE])
         self.assertFalse(vertex[VProps.IS_DELETED])
 
     def _validate_neighbors(self, neighbors, vertex_id, event):
         for i in range(len(neighbors)):
-            if event['type'] == 'nova.host':
-                self._validate_switch_neighbor(neighbors[i],
-                                               event['relationships'][i],
-                                               vertex_id)
-            elif event['type'] == 'switch':
-                self._validate_host_neighbor(neighbors[i],
-                                             event['relationships'][i],
-                                             vertex_id)
+            self._validate_neighbor(neighbors[i],
+                                    event[TopologyFields.RELATIONSHIPS][i],
+                                    vertex_id)
 
-    def _validate_switch_neighbor(self, neighbor, rel, host_vertex_id):
-        # TODO(yujunz)
-        pass
+    def _validate_neighbor(self, neighbor, rel, vertex_id):
+        vertex = neighbor.vertex
+        self._validate_neighbor_vertex_props(vertex,
+                                             rel[TopologyFields.TARGET])
 
-    def _validate_host_neighbor(self, neighbor, rel, switch_vertex_id):
-        # TODO(yujunz)
-        pass
+        edge = neighbor.edge
+        self.assertEqual(edge.source_id, vertex_id)
+        self.assertEqual(edge.target_id, neighbor.vertex.vertex_id)
+        self.assertEqual(edge.label, rel[TopologyFields.RELATIONSHIP_TYPE])
+
+    def _validate_neighbor_vertex_props(self, vertex, event):
+        self._validate_common_props(vertex, event)
+        self.assertTrue(vertex[VProps.IS_PLACEHOLDER])
