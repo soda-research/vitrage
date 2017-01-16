@@ -206,9 +206,9 @@ def _get_vm_snapshot_driver_values(spec):
     """
 
     vm_host_mapping = spec[MAPPING_KEY]
-    static_info_re = None
+    static_info = None
     if spec[STATIC_INFO_FKEY] is not None:
-        static_info_re = utils.load_specs(spec[STATIC_INFO_FKEY])
+        static_info = utils.load_specs(spec[STATIC_INFO_FKEY])
     static_values = []
     host_ids = {}
     for vm_name, host_name in vm_host_mapping:
@@ -223,7 +223,7 @@ def _get_vm_snapshot_driver_values(spec):
                    'id': str(randint(0, 1000000)),
                    }
         static_values.append(combine_data(
-            static_info_re, mapping, spec.get(EXTERNAL_INFO_KEY, None)
+            static_info, mapping, spec.get(EXTERNAL_INFO_KEY, None)
         ))
     return static_values
 
@@ -238,9 +238,9 @@ def _get_host_snapshot_driver_values(spec):
     """
 
     host_zone_mapping = spec[MAPPING_KEY]
-    static_info_re = None
+    static_info = None
     if spec[STATIC_INFO_FKEY] is not None:
-        static_info_re = utils.load_specs(spec[STATIC_INFO_FKEY])
+        static_info = utils.load_specs(spec[STATIC_INFO_FKEY])
     static_values = []
     for host_name, zone_name in host_zone_mapping:
 
@@ -249,7 +249,7 @@ def _get_host_snapshot_driver_values(spec):
                    '_info': {'host_name': host_name,
                              'zone': zone_name}}
         static_values.append(combine_data(
-            static_info_re, mapping, spec.get(EXTERNAL_INFO_KEY, None)
+            static_info, mapping, spec.get(EXTERNAL_INFO_KEY, None)
         ))
     return static_values
 
@@ -286,9 +286,9 @@ def _get_zone_snapshot_driver_values(spec):
     """
 
     host_zone_mapping = spec[MAPPING_KEY]
-    static_info_re = None
+    static_info = None
     if spec[STATIC_INFO_FKEY] is not None:
-        static_info_re = utils.load_specs(spec[STATIC_INFO_FKEY])
+        static_info = utils.load_specs(spec[STATIC_INFO_FKEY])
     static_values = []
     host_info = {
         "nova-compute": {
@@ -313,7 +313,7 @@ def _get_zone_snapshot_driver_values(spec):
                       }
         }
         static_values.append(combine_data(
-            static_info_re, mapping, spec.get(EXTERNAL_INFO_KEY, None)
+            static_info, mapping, spec.get(EXTERNAL_INFO_KEY, None)
         ))
     return static_values
 
@@ -328,9 +328,9 @@ def _get_volume_snapshot_driver_values(spec):
     """
 
     volume_instance_mapping = spec[MAPPING_KEY]
-    static_info_re = None
+    static_info = None
     if spec[STATIC_INFO_FKEY] is not None:
-        static_info_re = utils.load_specs(spec[STATIC_INFO_FKEY])
+        static_info = utils.load_specs(spec[STATIC_INFO_FKEY])
     static_values = []
 
     for volume_name, instance_name in volume_instance_mapping:
@@ -338,7 +338,7 @@ def _get_volume_snapshot_driver_values(spec):
                    'display_name': volume_name,
                    'attachments': [{'server_id': instance_name}]}
         static_values.append(combine_data(
-            static_info_re, mapping, spec.get(EXTERNAL_INFO_KEY, None)
+            static_info, mapping, spec.get(EXTERNAL_INFO_KEY, None)
         ))
     return static_values
 
@@ -353,9 +353,9 @@ def _get_volume_update_driver_values(spec):
     """
 
     volume_instance_mapping = spec[MAPPING_KEY]
-    static_info_re = None
+    static_info = None
     if spec[STATIC_INFO_FKEY] is not None:
-        static_info_re = utils.load_specs(spec[STATIC_INFO_FKEY])
+        static_info = utils.load_specs(spec[STATIC_INFO_FKEY])
     static_values = []
 
     for volume_name, instance_name in volume_instance_mapping:
@@ -363,7 +363,7 @@ def _get_volume_update_driver_values(spec):
                    'display_name': volume_name,
                    'volume_attachment': [{'instance_uuid': instance_name}]}
         static_values.append(combine_data(
-            static_info_re, mapping, spec.get(EXTERNAL_INFO_KEY, None)
+            static_info, mapping, spec.get(EXTERNAL_INFO_KEY, None)
         ))
     return static_values
 
@@ -378,9 +378,9 @@ def _get_stack_snapshot_driver_values(spec):
     """
 
     stack_instance_volume_mapping = spec[MAPPING_KEY]
-    static_info_re = None
+    static_info = None
     if spec[STATIC_INFO_FKEY] is not None:
-        static_info_re = utils.load_specs(spec[STATIC_INFO_FKEY])
+        static_info = utils.load_specs(spec[STATIC_INFO_FKEY])
     static_values = []
 
     for stack_name, instance_name, volume_name \
@@ -392,7 +392,7 @@ def _get_stack_snapshot_driver_values(spec):
                                  {'resource_type': "OS::Cinder::Volume",
                                   'physical_resource_id': volume_name}]}
         static_values.append(combine_data(
-            static_info_re, mapping, spec.get(EXTERNAL_INFO_KEY, None)
+            static_info, mapping, spec.get(EXTERNAL_INFO_KEY, None)
         ))
     return static_values
 
@@ -407,9 +407,9 @@ def _get_stack_update_driver_values(spec):
     """
 
     volume_instance_mapping = spec[MAPPING_KEY]
-    static_info_re = None
+    static_info = None
     if spec[STATIC_INFO_FKEY] is not None:
-        static_info_re = utils.load_specs(spec[STATIC_INFO_FKEY])
+        static_info = utils.load_specs(spec[STATIC_INFO_FKEY])
     static_values = []
 
     for stack_name, instance_name, volume_name in volume_instance_mapping:
@@ -420,7 +420,7 @@ def _get_stack_update_driver_values(spec):
                                  {'resource_type': "OS::Cinder::Volume",
                                   'physical_resource_id': volume_name}]}
         static_values.append(combine_data(
-            static_info_re, mapping, spec.get(EXTERNAL_INFO_KEY, None)
+            static_info, mapping, spec.get(EXTERNAL_INFO_KEY, None)
         ))
     return static_values
 
@@ -435,15 +435,15 @@ def _get_consistency_update_driver_values(spec):
     """
 
     entity_num = spec[MAPPING_KEY]
-    static_info_re = None
+    static_info = None
     if spec[STATIC_INFO_FKEY] is not None:
-        static_info_re = utils.load_specs(spec[STATIC_INFO_FKEY])
+        static_info = utils.load_specs(spec[STATIC_INFO_FKEY])
     static_values = []
 
     for i in range(entity_num):
         mapping = {}
         static_values.append(combine_data(
-            static_info_re, mapping, spec.get(EXTERNAL_INFO_KEY, None)
+            static_info, mapping, spec.get(EXTERNAL_INFO_KEY, None)
         ))
     return static_values
 
@@ -458,16 +458,16 @@ def _get_trans_vm_snapshot_values(spec):
     """
 
     vm_host_mapping = spec[MAPPING_KEY]
-    static_info_re = None
+    static_info = None
     if spec[STATIC_INFO_FKEY] is not None:
-        static_info_re = utils.load_specs(spec[STATIC_INFO_FKEY])
+        static_info = utils.load_specs(spec[STATIC_INFO_FKEY])
     static_values = []
     for vm_name, host_name in vm_host_mapping:
         mapping = {'hostname': host_name,
                    'id': vm_name,
                    'name': vm_name}
         static_values.append(combine_data(
-            static_info_re, mapping, spec.get(EXTERNAL_INFO_KEY, None)
+            static_info, mapping, spec.get(EXTERNAL_INFO_KEY, None)
         ))
 
     return static_values
@@ -483,15 +483,15 @@ def _get_vm_update_driver_values(spec):
     """
 
     vm_host_mapping = spec[MAPPING_KEY]
-    static_info_re = None
+    static_info = None
     if spec[STATIC_INFO_FKEY] is not None:
-        static_info_re = utils.load_specs(spec[STATIC_INFO_FKEY])
+        static_info = utils.load_specs(spec[STATIC_INFO_FKEY])
     static_values = []
     for vm_name, host_name in vm_host_mapping:
         mapping = {'payload': {'host': host_name,
                                'display_name': vm_name}}
         static_values.append(combine_data(
-            static_info_re, mapping, spec.get(EXTERNAL_INFO_KEY, None)
+            static_info, mapping, spec.get(EXTERNAL_INFO_KEY, None)
         ))
 
     return static_values
@@ -507,9 +507,9 @@ def _get_switch_snapshot_driver_values(spec):
     """
 
     host_switch_mapping = spec[MAPPING_KEY]
-    static_info_re = None
+    static_info = None
     if spec[STATIC_INFO_FKEY] is not None:
-        static_info_re = utils.load_specs(spec[STATIC_INFO_FKEY])
+        static_info = utils.load_specs(spec[STATIC_INFO_FKEY])
 
     static_values = []
 
@@ -531,7 +531,7 @@ def _get_switch_snapshot_driver_values(spec):
                    'id': switch_name,
                    'relationships': switches_info[switch_name]
                    }
-        static_values.append(combine_data(static_info_re,
+        static_values.append(combine_data(static_info,
                                           mapping,
                                           spec.get(EXTERNAL_INFO_KEY, None)))
     return static_values
@@ -627,30 +627,30 @@ def _get_static_snapshot_driver_values(spec):
 
 def _get_nagios_alarm_driver_values(spec):
     hosts = spec[MAPPING_KEY]
-    static_info_re = None
+    static_info = None
     if spec[STATIC_INFO_FKEY] is not None:
-        static_info_re = utils.load_specs(spec[STATIC_INFO_FKEY])
+        static_info = utils.load_specs(spec[STATIC_INFO_FKEY])
 
     static_values = []
     for host_name in hosts:
         host_info = {'resource_name': host_name}
         static_values.append(combine_data(
-            static_info_re, host_info, spec.get(EXTERNAL_INFO_KEY, None)
+            static_info, host_info, spec.get(EXTERNAL_INFO_KEY, None)
         ))
     return static_values
 
 
 def _get_zabbix_alarm_driver_values(spec):
     hosts = spec[MAPPING_KEY]
-    static_info_re = None
+    static_info = None
     if spec[STATIC_INFO_FKEY] is not None:
-        static_info_re = utils.load_specs(spec[STATIC_INFO_FKEY])
+        static_info = utils.load_specs(spec[STATIC_INFO_FKEY])
 
     static_values = []
     for host_name in hosts:
         host_info = {'resource_name': host_name}
         static_values.append(combine_data(
-            static_info_re, host_info, spec.get(EXTERNAL_INFO_KEY, None)
+            static_info, host_info, spec.get(EXTERNAL_INFO_KEY, None)
         ))
     return static_values
 
@@ -665,16 +665,16 @@ def _get_trans_host_snapshot_values(spec):
         """
 
     host_zone_mapping = spec[MAPPING_KEY]
-    static_info_re = None
+    static_info = None
     if spec[STATIC_INFO_FKEY] is not None:
-        static_info_re = utils.load_specs(spec[STATIC_INFO_FKEY])
+        static_info = utils.load_specs(spec[STATIC_INFO_FKEY])
     static_values = []
     for host_name, zone_name in host_zone_mapping:
         mapping = {'zone_id': zone_name,
                    'name': host_name,
                    'id': host_name}
         static_values.append(combine_data(
-            static_info_re, mapping, spec.get(EXTERNAL_INFO_KEY, None)
+            static_info, mapping, spec.get(EXTERNAL_INFO_KEY, None)
         ))
 
     return static_values
@@ -690,15 +690,15 @@ def _get_trans_zone_snapshot_values(spec):
     """
 
     zone_cluster_mapping = spec[MAPPING_KEY]
-    static_info_re = None
+    static_info = None
     if spec[STATIC_INFO_FKEY] is not None:
-        static_info_re = utils.load_specs(spec[STATIC_INFO_FKEY])
+        static_info = utils.load_specs(spec[STATIC_INFO_FKEY])
     static_values = []
     for zone_name, cluster_name in zone_cluster_mapping:
         mapping = {'name': zone_name,
                    'id': zone_name}
         static_values.append(combine_data(
-            static_info_re, mapping, spec.get(EXTERNAL_INFO_KEY, None)
+            static_info, mapping, spec.get(EXTERNAL_INFO_KEY, None)
         ))
 
     return static_values
@@ -714,9 +714,9 @@ def _get_trans_aodh_alarm_snapshot_values(spec):
     """
 
     alarm_resources_mapping = spec[MAPPING_KEY]
-    static_info_re = None
+    static_info = None
     if spec[STATIC_INFO_FKEY] is not None:
-        static_info_re = utils.load_specs(spec[STATIC_INFO_FKEY])
+        static_info = utils.load_specs(spec[STATIC_INFO_FKEY])
 
     static_values = []
     for alarm_id, resource_id in alarm_resources_mapping:
@@ -724,21 +724,21 @@ def _get_trans_aodh_alarm_snapshot_values(spec):
                    'resource_id': resource_id,
                    'graph_query_result': [{'id': resource_id}]}
         static_values.append(combine_data(
-            static_info_re, mapping, spec.get(EXTERNAL_INFO_KEY, None)
+            static_info, mapping, spec.get(EXTERNAL_INFO_KEY, None)
         ))
     return static_values
 
 
 def _get_aodh_alarm_update_driver_values(spec):
     alarms = spec[MAPPING_KEY]
-    static_info_re = None
+    static_info = None
     if spec[STATIC_INFO_FKEY] is not None:
-        static_info_re = utils.load_specs(spec[STATIC_INFO_FKEY])
+        static_info = utils.load_specs(spec[STATIC_INFO_FKEY])
     static_values = []
     for alarm in alarms:
         alarm_id = {"alarm_id": alarm}
         static_values.append(combine_data(
-            static_info_re, alarm_id, spec.get(EXTERNAL_INFO_KEY, None)))
+            static_info, alarm_id, spec.get(EXTERNAL_INFO_KEY, None)))
     return static_values
 
 
@@ -768,18 +768,18 @@ def _get_trans_collectd_alarm_update_values(spec):
     :rtype: list with one alarm
     """
 
-    static_info_re = None
+    static_info = None
     if spec[STATIC_INFO_FKEY] is not None:
-        static_info_re = utils.load_specs(spec[STATIC_INFO_FKEY])
+        static_info = utils.load_specs(spec[STATIC_INFO_FKEY])
 
-    return [combine_data(static_info_re,
+    return [combine_data(static_info,
                          None, spec.get(EXTERNAL_INFO_KEY, None))]
 
 
-def combine_data(static_info_re, mapping_info, external_info):
+def combine_data(static_info, mapping_info, external_info):
     if external_info:
         mapping_info = utils.merge_vals(mapping_info, external_info)
-    static_info = utils.generate_vals(static_info_re)
+    static_info = utils.generate_vals(static_info)
     return utils.merge_vals(static_info, mapping_info)
 
 
