@@ -20,9 +20,4 @@ OPTS = [
                        'nova_notifier.NovaNotifier',
                help='nova notifier class path',
                required=True),
-    cfg.BoolOpt('enable_host_evacuate', default=False,
-                help='Evacuate a host that is marked as down'),
-    cfg.BoolOpt('on_shared_storage', default=False,
-                help='Indicates that all instance files are '
-                     'on a shared storage'),
 ]
