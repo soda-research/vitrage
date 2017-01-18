@@ -107,12 +107,12 @@ class TestStaticDriver(base.BaseTest):
             self._validate_static_rel(entity, rel)
 
     def _validate_static_rel(self, entity, rel):
-        self.assertTrue(entity[StaticFields.CONFIG_ID] in
+        self.assertTrue(entity[StaticFields.STATIC_ID] in
                         (rel[StaticFields.SOURCE], rel[StaticFields.TARGET]))
         self.assertTrue(
             isinstance(rel[StaticFields.SOURCE], dict)
-            and entity[StaticFields.CONFIG_ID] == rel[StaticFields.TARGET]
+            and entity[StaticFields.STATIC_ID] == rel[StaticFields.TARGET]
             or isinstance(rel[StaticFields.TARGET], dict)
-            and entity[StaticFields.CONFIG_ID] == rel[StaticFields.SOURCE]
-            or entity[StaticFields.CONFIG_ID] == rel[StaticFields.SOURCE]
-            and entity[StaticFields.CONFIG_ID] == rel[StaticFields.TARGET])
+            and entity[StaticFields.STATIC_ID] == rel[StaticFields.SOURCE]
+            or entity[StaticFields.STATIC_ID] == rel[StaticFields.SOURCE]
+            and entity[StaticFields.STATIC_ID] == rel[StaticFields.TARGET])

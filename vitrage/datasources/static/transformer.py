@@ -89,10 +89,10 @@ class StaticTransformer(ResourceTransformerBase):
                 metadata=metadata)
 
     def _create_static_neighbor(self, entity_event, rel):
-        if entity_event[StaticFields.CONFIG_ID] == rel[StaticFields.SOURCE]:
+        if entity_event[StaticFields.STATIC_ID] == rel[StaticFields.SOURCE]:
             neighbor = rel[StaticFields.TARGET]
             is_entity_source = True
-        elif entity_event[StaticFields.CONFIG_ID] == rel[StaticFields.TARGET]:
+        elif entity_event[StaticFields.STATIC_ID] == rel[StaticFields.TARGET]:
             neighbor = rel[StaticFields.SOURCE]
             is_entity_source = False
         else:
