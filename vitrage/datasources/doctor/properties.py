@@ -12,15 +12,13 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from vitrage.common.constants import EventProperties as EventProps
+
 
 class DoctorProperties(object):
-    TIME_FORMAT = '%Y-%m-%dT%H:%M:%S.%f'
     HOST_DOWN = 'compute.host.down'
     HOST_TYPE = 'nova.host'
-    TYPE = 'type'
-    TIME = 'time'
     UPDATE_TIME = 'update_time'
-    DETAILS = 'details'
 
 
 class DoctorDetails(object):
@@ -36,7 +34,7 @@ class DoctorStatus(object):
 
 
 def get_detail(alarm, detail):
-    return alarm[DoctorProperties.DETAILS][detail] if \
-        alarm and DoctorProperties.DETAILS in alarm and \
-        detail in alarm[DoctorProperties.DETAILS] \
+    return alarm[EventProps.DETAILS][detail] if \
+        alarm and EventProps.DETAILS in alarm and \
+        detail in alarm[EventProps.DETAILS] \
         else None

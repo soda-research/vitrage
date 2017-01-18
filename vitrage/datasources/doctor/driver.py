@@ -17,6 +17,7 @@ from oslo_log import log
 
 from vitrage.common.constants import DatasourceAction
 from vitrage.common.constants import DatasourceProperties as DSProps
+from vitrage.common.constants import EventProperties as EventProps
 from vitrage.datasources.alarm_driver_base import AlarmDriverBase
 from vitrage.datasources.doctor import DOCTOR_DATASOURCE
 from vitrage.datasources.doctor.properties import DoctorDetails
@@ -40,7 +41,7 @@ class DoctorDriver(AlarmDriverBase):
         return DOCTOR_DATASOURCE
 
     def _alarm_key(self, alarm):
-        return self.AlarmKey(alarm_name=alarm[DoctorProps.TYPE],
+        return self.AlarmKey(alarm_name=alarm[EventProps.TYPE],
                              hostname=get_detail(alarm,
                                                  DoctorDetails.HOSTNAME))
 
@@ -49,12 +50,12 @@ class DoctorDriver(AlarmDriverBase):
             get_detail(alarm, DoctorDetails.STATUS) != DoctorStatus.UP
 
     def _is_valid(self, alarm):
-        if not alarm or DoctorProps.TIME not in alarm or \
-                DoctorProps.TYPE not in alarm or \
-                DoctorProps.DETAILS not in alarm:
+        if not alarm or EventProps.TIME not in alarm or \
+                EventProps.TYPE not in alarm or \
+                EventProps.DETAILS not in alarm:
             return False
 
-        details = alarm[DoctorProps.DETAILS]
+        details = alarm[EventProps.DETAILS]
         return DoctorDetails.STATUS in details and \
             DoctorDetails.SEVERITY in details and \
             DoctorDetails.HOSTNAME in details
@@ -91,17 +92,21 @@ class DoctorDriver(AlarmDriverBase):
 
         """
 
+        LOG.debug('Going to enrich event: %s', str(event))
+
         event[DSProps.EVENT_TYPE] = event_type
 
         old_alarm = self._old_alarm(event)
         if old_alarm and not self._status_changed(old_alarm, event):
             event[DoctorProps.UPDATE_TIME] = old_alarm[DoctorProps.UPDATE_TIME]
         else:
-            event[DoctorProps.UPDATE_TIME] = event[DoctorProps.TIME]
+            event[DoctorProps.UPDATE_TIME] = event[EventProps.TIME]
 
         event = self._filter_and_cache_alarm(event, old_alarm,
                                              self._filter_get_erroneous,
-                                             event[DoctorProps.TIME])
+                                             event[EventProps.TIME])
+
+        LOG.debug('Enriched event: %s', str(event))
 
         if event:
             return DoctorDriver.make_pickleable([event], DOCTOR_DATASOURCE,

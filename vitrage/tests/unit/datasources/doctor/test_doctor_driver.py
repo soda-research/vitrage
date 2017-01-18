@@ -16,6 +16,7 @@ from datetime import datetime
 from oslo_config import cfg
 
 from vitrage.common.constants import DatasourceProperties as DSProps
+from vitrage.common.constants import EventProperties as EventProps
 from vitrage.datasources.doctor.driver import DoctorDriver
 from vitrage.datasources.doctor.properties import DoctorDetails
 from vitrage.datasources.doctor.properties import DoctorProperties \
@@ -107,9 +108,9 @@ class DoctorDriverTest(base.BaseTest):
         if status:
             details[DoctorDetails.STATUS] = status
 
-        update_vals = {DoctorProps.DETAILS: details}
+        update_vals = {EventProps.DETAILS: details}
         if time:
-            update_vals[DoctorProps.TIME] = time
+            update_vals[EventProps.TIME] = time
 
         generators = mock_driver.simple_doctor_alarm_generators(
             update_vals=update_vals)
@@ -125,9 +126,9 @@ class DoctorDriverTest(base.BaseTest):
                             expected_update_date):
         self.assertIsNotNone(event, 'No event returned')
         self.assertEqual(expected_hostname,
-                         event[DoctorProps.DETAILS][DoctorDetails.HOSTNAME])
+                         event[EventProps.DETAILS][DoctorDetails.HOSTNAME])
         self.assertEqual(expected_status,
-                         event[DoctorProps.DETAILS][DoctorDetails.STATUS])
-        self.assertEqual(expected_sample_date, event[DoctorProps.TIME])
+                         event[EventProps.DETAILS][DoctorDetails.STATUS])
+        self.assertEqual(expected_sample_date, event[EventProps.TIME])
         self.assertEqual(expected_update_date, event[DoctorProps.UPDATE_TIME])
         self.assertEqual(expected_event_type, event[DSProps.EVENT_TYPE])

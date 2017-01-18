@@ -11,6 +11,7 @@
 # under the License.
 
 from vitrage.api.controllers.v1 import alarm
+from vitrage.api.controllers.v1 import event
 from vitrage.api.controllers.v1 import rca
 from vitrage.api.controllers.v1 import resource
 from vitrage.api.controllers.v1 import template
@@ -23,3 +24,4 @@ class V1Controller(object):
     alarm = alarm.AlarmsController()
     rca = rca.RCAController()
     template = template.TemplateController()
+    event = event.EventController()
