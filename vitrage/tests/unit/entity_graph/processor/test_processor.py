@@ -24,6 +24,7 @@ from vitrage.entity_graph.initialization_status import InitializationStatus
 from vitrage.entity_graph.mappings.operational_resource_state import \
     OperationalResourceState
 from vitrage.entity_graph.processor import processor as proc
+from vitrage.entity_graph.processor import processor_utils as PUtils
 import vitrage.graph.utils as graph_utils
 from vitrage.tests.unit.entity_graph.base import TestEntityGraphUnitBase
 from vitrage.utils.datetime import utcnow
@@ -128,7 +129,7 @@ class TestProcessor(TestEntityGraphUnitBase):
         # check deleted entity
         self._check_graph(processor, self.NUM_VERTICES_AFTER_DELETION,
                           self.NUM_EDGES_AFTER_DELETION)
-        self.assertTrue(processor.entity_graph.is_vertex_deleted(vertex))
+        self.assertTrue(PUtils.is_deleted(vertex))
 
     def test_update_relationship(self):
         # setup

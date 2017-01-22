@@ -21,10 +21,10 @@ from vitrage.datasources.transformer_base import TransformerBase
 from vitrage.entity_graph.mappings.datasource_info_mapper import \
     DatasourceInfoMapper
 from vitrage.entity_graph.processor import base as processor
-from vitrage.entity_graph.processor import entity_graph
 from vitrage.entity_graph.processor.notifier import GraphNotifier
 from vitrage.entity_graph.processor import processor_utils as PUtils
 from vitrage.entity_graph.transformer_manager import TransformerManager
+from vitrage.graph import create_graph
 from vitrage.graph import Direction
 
 LOG = log.getLogger(__name__)
@@ -39,8 +39,8 @@ class Processor(processor.ProcessorBase):
         self.state_manager = DatasourceInfoMapper(self.conf)
         self._initialize_events_actions()
         self.initialization_status = initialization_status
-        self.entity_graph = entity_graph.EntityGraph("Entity Graph") if \
-            e_graph is None else e_graph
+        self.entity_graph = e_graph if e_graph is not None\
+            else create_graph("Entity Graph")
         self._notifier = GraphNotifier(conf)
 
     def process_event(self, event):
@@ -96,8 +96,9 @@ class Processor(processor.ProcessorBase):
 
         if (not graph_vertex) or \
                 PUtils.is_newer_vertex(graph_vertex, updated_vertex):
-            self.entity_graph.update_entity_graph_vertex(graph_vertex,
-                                                         updated_vertex)
+            PUtils.update_entity_graph_vertex(self.entity_graph,
+                                              graph_vertex,
+                                              updated_vertex)
             self._update_neighbors(updated_vertex, neighbors)
         else:
             LOG.warning("Update event arrived on invalid resource: %s",
@@ -127,12 +128,12 @@ class Processor(processor.ProcessorBase):
                 deleted_vertex.vertex_id)
 
             for edge in neighbor_edges:
-                self.entity_graph.mark_edge_as_deleted(edge)
+                PUtils.mark_deleted(self.entity_graph, edge)
 
             for vertex in neighbor_vertices:
-                self.entity_graph.delete_placeholder_vertex(vertex)
+                PUtils.delete_placeholder_vertex(self.entity_graph, vertex)
 
-            self.entity_graph.mark_vertex_as_deleted(deleted_vertex)
+            PUtils.mark_deleted(self.entity_graph, deleted_vertex)
         else:
             LOG.warning("Delete event arrived on invalid resource: %s",
                         deleted_vertex)
@@ -219,11 +220,12 @@ class Processor(processor.ProcessorBase):
         for (vertex, edge) in neighbors:
             graph_vertex = self.entity_graph.get_vertex(vertex.vertex_id)
             if not graph_vertex or not PUtils.is_deleted(graph_vertex):
-                if self.entity_graph.can_update_vertex(graph_vertex, vertex):
+                if PUtils.can_update_vertex(graph_vertex, vertex):
                     LOG.debug("Updates vertex: %s", vertex)
                     self._calculate_aggregated_state(vertex, action)
-                    self.entity_graph.update_entity_graph_vertex(graph_vertex,
-                                                                 vertex)
+                    PUtils.update_entity_graph_vertex(self.entity_graph,
+                                                      graph_vertex,
+                                                      vertex)
 
                 if edge not in valid_edges:
                     LOG.debug("Updates edge: %s", edge)
@@ -245,10 +247,10 @@ class Processor(processor.ProcessorBase):
         # remove old edges and placeholder vertices if exist
         for edge in obsolete_edges:
             LOG.debug("Delete obsolete edge:\n%s", edge)
-            self.entity_graph.mark_edge_as_deleted(edge)
+            PUtils.mark_deleted(self.entity_graph, edge)
             graph_ver = self.entity_graph.get_vertex(
                 edge.other_vertex(vertex.vertex_id))
-            self.entity_graph.delete_placeholder_vertex(graph_ver)
+            PUtils.delete_placeholder_vertex(self.entity_graph, graph_ver)
 
     def _find_edges_status(self, vertex, neighbors):
         """Finds "vertex" valid and old connections
@@ -262,7 +264,7 @@ class Processor(processor.ProcessorBase):
         obsolete_edges = []
 
         graph_neighbor_types = \
-            self.entity_graph.find_neighbor_types(neighbors)
+            PUtils.find_neighbor_types(neighbors)
 
         for curr_edge in self.entity_graph.get_edges(
                 vertex.vertex_id,
@@ -272,7 +274,7 @@ class Processor(processor.ProcessorBase):
             neighbor_vertex = self.entity_graph.get_vertex(
                 curr_edge.other_vertex(vertex.vertex_id))
 
-            is_connection_type_exist = self.entity_graph.get_vertex_category(
+            is_connection_type_exist = PUtils.get_vertex_types(
                 neighbor_vertex) in graph_neighbor_types
 
             if not is_connection_type_exist:
