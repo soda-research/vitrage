@@ -70,7 +70,7 @@ class ListenerService(os_service.Service):
     def _get_topic_listener(self, conf, topic, callback):
         # Create a listener for each topic
         transport = messaging.get_transport(conf)
-        targets = [oslo_messaging.Target(topic=topic, exchange='nova')]
+        targets = [oslo_messaging.Target(topic=topic)]
 
         return messaging.get_notification_listener(
             transport,
