@@ -70,7 +70,7 @@ def nova_client(conf):
             version=conf.nova_version,
             session=keystone_client.get_session(conf),
             region_name=auth_config.region_name,
-            interface=auth_config.interface,
+            endpoint_type='publicURL',
         )
         LOG.info('Nova client created')
         return client
