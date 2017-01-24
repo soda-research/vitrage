@@ -129,3 +129,10 @@ class TopologyFields(object):
     RELATIONSHIP_TYPE = 'relationship_type'
     SOURCE = 'source'
     TARGET = 'target'
+
+
+class EventProperties(object):
+    TIME_FORMAT = '%Y-%m-%dT%H:%M:%S.%f'
+    TYPE = 'type'
+    TIME = 'time'
+    DETAILS = 'details'

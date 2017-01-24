@@ -17,6 +17,7 @@ from oslo_config import cfg
 from oslo_log import log as logging
 
 from vitrage.common.constants import DatasourceProperties as DSProps
+from vitrage.common.constants import EventProperties as EventProps
 from vitrage.common.constants import UpdateMethod
 from vitrage.datasources.doctor import DOCTOR_DATASOURCE
 from vitrage.datasources.doctor.properties import DoctorDetails
@@ -94,7 +95,7 @@ class DoctorTransformerTest(BaseAlarmTransformerTest):
 
     def _validate_vertex_props(self, vertex, event):
         self._validate_alarm_vertex_props(vertex,
-                                          event[DoctorProps.TYPE],
+                                          event[EventProps.TYPE],
                                           DOCTOR_DATASOURCE,
                                           event[DSProps.SAMPLE_DATE])
 
@@ -106,9 +107,9 @@ class DoctorTransformerTest(BaseAlarmTransformerTest):
         if status:
             details[DoctorDetails.STATUS] = status
 
-        update_vals = {DoctorProps.DETAILS: details}
+        update_vals = {EventProps.DETAILS: details}
         if time:
-            update_vals[DoctorProps.TIME] = time
+            update_vals[EventProps.TIME] = time
             update_vals[DoctorProps.UPDATE_TIME] = time
 
         generators = mock_transformer.simple_doctor_alarm_generators(

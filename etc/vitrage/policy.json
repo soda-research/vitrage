@@ -9,5 +9,6 @@
   "get rca:all_tenants": "role:admin",
   "template validate": "",
   "template list": "",
-  "template show": ""
+  "template show": "",
+  "event post": ""
 }

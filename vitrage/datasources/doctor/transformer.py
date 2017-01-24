@@ -17,6 +17,7 @@ from oslo_log import log as logging
 from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import EdgeLabel
 from vitrage.common.constants import EntityCategory
+from vitrage.common.constants import EventProperties as EventProps
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.datasources.alarm_transformer_base import AlarmTransformerBase
 from vitrage.datasources.doctor import DOCTOR_DATASOURCE
@@ -44,9 +45,9 @@ class DoctorTransformer(AlarmTransformerBase):
     def _create_update_entity_vertex(self, entity_event):
         self._unify_time_format(entity_event)
 
-        details = entity_event.get(DoctorProps.DETAILS, {})
-        details[VProps.NAME] = entity_event[DoctorProps.TYPE]
-        details[DoctorProps.TIME] = entity_event[DoctorProps.TIME]
+        details = entity_event.get(EventProps.DETAILS, {})
+        details[VProps.NAME] = entity_event[EventProps.TYPE]
+        details[EventProps.TIME] = entity_event[EventProps.TIME]
 
         return graph_utils.create_vertex(
             self._create_entity_key(entity_event),
@@ -69,7 +70,7 @@ class DoctorTransformer(AlarmTransformerBase):
         return tbase.build_key((
             EntityCategory.ALARM,
             entity_event[DSProps.ENTITY_TYPE],
-            entity_event[DoctorProps.TYPE],
+            entity_event[EventProps.TYPE],
             get_detail(entity_event, DoctorDetails.HOSTNAME)))
 
     def get_type(self):
@@ -89,7 +90,7 @@ class DoctorTransformer(AlarmTransformerBase):
     @staticmethod
     def _unify_time_format(entity_event):
         DoctorTransformer._unify_prop_time_format(entity_event,
-                                                  DoctorProps.TIME)
+                                                  EventProps.TIME)
         DoctorTransformer._unify_prop_time_format(entity_event,
                                                   DoctorProps.UPDATE_TIME)
 
@@ -97,5 +98,5 @@ class DoctorTransformer(AlarmTransformerBase):
     def _unify_prop_time_format(entity_event, prop):
         entity_event[prop] = change_time_str_format(
             entity_event[prop],
-            DoctorProps.TIME_FORMAT,
+            EventProps.TIME_FORMAT,
             tbase.TIMESTAMP_FORMAT)
