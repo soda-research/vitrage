@@ -11,8 +11,6 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import logging
-
 from oslo_config import cfg
 from oslo_log import log
 from oslo_policy import opts as policy_opts
@@ -44,7 +42,7 @@ def prepare_service(args=None, conf=None, config_files=None):
 
     keystone_client.setup_keystoneauth(conf)
     log.setup(conf, 'vitrage')
-    conf.log_opt_values(LOG, logging.DEBUG)
+    conf.log_opt_values(LOG, log.DEBUG)
     messaging.setup()
 
     return conf
