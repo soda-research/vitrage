@@ -23,15 +23,32 @@ Tests for `vitrage` graph driver algorithms
 from vitrage.common.constants import EdgeLabel
 from vitrage.common.constants import EdgeProperties as EProps
 from vitrage.common.constants import VertexProperties as VProps
+from vitrage.graph.algo_driver.algorithm import Mapping
 from vitrage.graph.driver.elements import Edge
-from vitrage.graph import create_algorithm, Mapping, Direction  # noqa
+from vitrage.graph.driver.graph import Direction
 from vitrage.tests.unit.graph.base import *  # noqa
 
 
 class GraphAlgorithmTest(GraphTestBase):
 
+    # noinspection PyPep8Naming
+    @classmethod
+    def setUpClass(cls):
+        cls.vm_id = 10000000
+        cls.vm_alarm_id = 30000000
+        cls.vms = []
+        cls.host_alarm_id = 20000000
+        cls.host_test_id = 40000000
+        cls.entity_graph = cls._create_entity_graph(
+            'entity_graph',
+            num_of_hosts_per_node=ENTITY_GRAPH_HOSTS_PER_CLUSTER,
+            num_of_vms_per_host=ENTITY_GRAPH_VMS_PER_HOST,
+            num_of_alarms_per_host=ENTITY_GRAPH_ALARMS_PER_HOST,
+            num_of_alarms_per_vm=ENTITY_GRAPH_ALARMS_PER_VM,
+            num_of_tests_per_host=ENTITY_GRAPH_TESTS_PER_HOST)
+
     def test_graph_query_vertices(self):
-        ga = create_algorithm(self.entity_graph)
+        ga = self.entity_graph.algo
 
         query = {'==': {VProps.TYPE: OPENSTACK_CLUSTER}}
         subgraph = ga.graph_query_vertices(query)
@@ -186,11 +203,14 @@ class GraphAlgorithmTest(GraphTestBase):
                          'We filtered the ON relationship, so no alarms '
                          'should exist')
 
-    def test_no_match_graph_query_vertices(self):
-        ga = create_algorithm(self.entity_graph)
+        # Undo changes made by this test
+        host_instance_edge[VProps.IS_DELETED] = False
+        self.entity_graph.update_edge(host_instance_edge)
+        self.entity_graph.remove_edge(new_edge)
 
+    def test_no_match_graph_query_vertices(self):
         query = {'==': {VProps.TYPE: 'test'}}
-        subgraph = ga.graph_query_vertices(query)
+        subgraph = self.entity_graph.algo.graph_query_vertices(query)
         self.assertEqual(
             0,
             subgraph.num_vertices(), 'num of vertex node')
@@ -201,7 +221,7 @@ class GraphAlgorithmTest(GraphTestBase):
         Using the entity graph (created above) as a big graph we search
         for a sub graph match
         """
-        ga = create_algorithm(self.entity_graph)
+        ga = self.entity_graph.algo
 
         # Get ids of some of the elements in the entity graph:
         vm_alarm = self.entity_graph.get_vertex(
@@ -210,7 +230,7 @@ class GraphAlgorithmTest(GraphTestBase):
             ALARM_ON_HOST + str(self.host_alarm_id - 1))
 
         # Create a template for template matching
-        t = create_graph('template_graph')
+        t = NXGraph('template_graph')
         t_v_host_alarm = graph_utils.create_vertex(
             vitrage_id='1', entity_category=ALARM, entity_type=ALARM_ON_HOST)
         t_v_alarm_fail = graph_utils.create_vertex(

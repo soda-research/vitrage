@@ -23,7 +23,7 @@ from vitrage.datasources import NOVA_HOST_DATASOURCE
 from vitrage.datasources import NOVA_INSTANCE_DATASOURCE
 from vitrage.datasources import NOVA_ZONE_DATASOURCE
 from vitrage.datasources import OPENSTACK_CLUSTER
-from vitrage.graph import NXGraph
+from vitrage.graph.driver.networkx_graph import NXGraph
 import vitrage.graph.utils as graph_utils
 from vitrage.tests.unit.entity_graph.base import TestEntityGraphUnitBase
 

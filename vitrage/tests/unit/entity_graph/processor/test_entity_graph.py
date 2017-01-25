@@ -13,7 +13,7 @@
 # under the License.
 
 from vitrage.entity_graph.processor import processor_utils as PUtils
-from vitrage.graph import NXGraph
+from vitrage.graph.driver.networkx_graph import NXGraph
 from vitrage.tests.unit.entity_graph.processor import base
 
 

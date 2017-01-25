@@ -26,12 +26,13 @@ from oslo_log import log as logging
 
 from vitrage.common.constants import EdgeLabel as ELabel
 from vitrage.common.constants import EntityCategory
+from vitrage.common.exception import VitrageError
 from vitrage.datasources.nova.host import NOVA_HOST_DATASOURCE
 from vitrage.datasources.nova.instance import NOVA_INSTANCE_DATASOURCE
 from vitrage.datasources import OPENSTACK_CLUSTER
 from vitrage.datasources.static_physical import SWITCH
 from vitrage.datasources.transformer_base import CLUSTER_ID
-from vitrage.graph import create_graph
+from vitrage.graph.driver.networkx_graph import NXGraph
 from vitrage.graph import utils as graph_utils
 from vitrage.tests import base
 
@@ -120,33 +121,21 @@ class GraphTestBase(base.BaseTest):
     def __init__(self, *args, **kwds):
         super(GraphTestBase, self).__init__(*args, **kwds)
 
-        self.vm_id = 10000000
-        self.vm_alarm_id = 30000000
-        self.vms = []
-        self.host_alarm_id = 20000000
-        self.host_test_id = 40000000
-        self.entity_graph = self._create_entity_graph(
-            'entity_graph',
-            num_of_hosts_per_node=ENTITY_GRAPH_HOSTS_PER_CLUSTER,
-            num_of_vms_per_host=ENTITY_GRAPH_VMS_PER_HOST,
-            num_of_alarms_per_host=ENTITY_GRAPH_ALARMS_PER_HOST,
-            num_of_alarms_per_vm=ENTITY_GRAPH_ALARMS_PER_VM,
-            num_of_tests_per_host=ENTITY_GRAPH_TESTS_PER_HOST)
-
     def _assert_set_equal(self, d1, d2, message):
         super(GraphTestBase, self).assert_dict_equal(
             dict.fromkeys(d1, 0), dict.fromkeys(d2, 0), message)
 
-    def _create_entity_graph(self, name, num_of_alarms_per_host,
+    @classmethod
+    def _create_entity_graph(cls, name, num_of_alarms_per_host,
                              num_of_alarms_per_vm,
                              num_of_hosts_per_node,
                              num_of_vms_per_host,
                              num_of_tests_per_host):
 
         start = time.time()
-        g = create_graph(name, EntityCategory.RESOURCE + ':' +
-                         OPENSTACK_CLUSTER + ':' +
-                         CLUSTER_ID)
+        g = NXGraph(name, EntityCategory.RESOURCE + ':' +
+                    OPENSTACK_CLUSTER + ':' +
+                    CLUSTER_ID)
         g.add_vertex(v_node)
         g.add_vertex(v_switch)
         g.add_edge(e_node_to_switch)
@@ -167,34 +156,34 @@ class GraphTestBase(base.BaseTest):
             # Add Host Alarms
             for j in range(num_of_alarms_per_host):
                 add_connected_vertex(g, ALARM, ALARM_ON_HOST,
-                                     self.host_alarm_id, ELabel.ON,
+                                     cls.host_alarm_id, ELabel.ON,
                                      host_to_add)
-                self.host_alarm_id += 1
+                cls.host_alarm_id += 1
 
             # Add Host Tests
             for j in range(num_of_tests_per_host):
-                add_connected_vertex(g, TEST, TEST_ON_HOST, self.host_test_id,
+                add_connected_vertex(g, TEST, TEST_ON_HOST, cls.host_test_id,
                                      ELabel.ON, host_to_add)
-                self.host_test_id += 1
+                cls.host_test_id += 1
 
             # Add Host Vms
             for j in range(num_of_vms_per_host):
                 vm_to_add = add_connected_vertex(g,
                                                  RESOURCE,
                                                  NOVA_INSTANCE_DATASOURCE,
-                                                 self.vm_id,
+                                                 cls.vm_id,
                                                  ELabel.CONTAINS,
                                                  host_to_add,
                                                  True)
-                self.vm_id += 1
-                self.vms.append(vm_to_add)
+                cls.vm_id += 1
+                cls.vms.append(vm_to_add)
 
                 # Add Instance Alarms
                 for k in range(num_of_alarms_per_vm):
                     add_connected_vertex(g, ALARM, ALARM_ON_VM,
-                                         self.vm_alarm_id, ELabel.ON,
+                                         cls.vm_alarm_id, ELabel.ON,
                                          vm_to_add)
-                    self.vm_alarm_id += 1
+                    cls.vm_alarm_id += 1
 
         end = time.time()
         LOG.debug('Graph creation took ' + str(end - start) +
@@ -205,5 +194,10 @@ class GraphTestBase(base.BaseTest):
             num_of_vms_per_host + num_of_hosts_per_node * \
             num_of_vms_per_host * num_of_alarms_per_vm + \
             num_of_tests_per_host * num_of_hosts_per_node
-        assert expected_graph_size == len(g), 'Graph size'
+        if not expected_graph_size == len(g):
+            raise VitrageError('Init failed, graph size unexpected {0} != {1}'
+                               .format(expected_graph_size, len(g)))
+        # cls.assertEqual(
+        #     expected_graph_size,
+        #     len(g), 'num of vertex node')
         return g

@@ -15,6 +15,7 @@
 
 from oslo_config import cfg
 
+from stevedore import driver
 
 OPTS = [
     cfg.StrOpt('datasources_values_dir',
@@ -26,4 +27,17 @@ OPTS = [
                default='vitrage.graph',
                help='The topic that vitrage-graph uses for graph '
                     'notification messages.'),
+    cfg.StrOpt('graph_driver',
+               default='networkx',
+               help='graph driver implementation class'),
 ]
+
+
+def get_graph_driver(conf):
+    try:
+        mgr = driver.DriverManager('vitrage.entity_graph',
+                                   conf.entity_graph.graph_driver,
+                                   invoke_on_load=True)
+        return mgr.driver
+    except ImportError:
+        return None

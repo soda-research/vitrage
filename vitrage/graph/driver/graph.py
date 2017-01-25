@@ -20,6 +20,7 @@ vitrage.graph.driver namespace.
 
 """
 import abc
+import copy
 import six
 
 from vitrage.graph.driver.elements import Edge
@@ -60,6 +61,14 @@ class Graph(object):
             return self.get_edge(item.source_id, item.target_id, item.label)
         if isinstance(item, Vertex):
             return self.get_vertex(item.vertex_id)
+
+    @property
+    def algo(self):
+        """Get graph algorithms
+
+        :rtype: GraphAlgorithm
+        """
+        return None
 
     @abc.abstractmethod
     def copy(self):
@@ -105,7 +114,6 @@ class Graph(object):
         """
         pass
 
-    @abc.abstractmethod
     def add_vertices(self, vertices):
         """Add a list of vertices to the graph
 
@@ -114,7 +122,11 @@ class Graph(object):
         :param vertices:
         :type vertices:list of Vertex
         """
-        pass
+        if not vertices:
+            return
+
+        for v in vertices:
+            self.add_vertex(v)
 
     @abc.abstractmethod
     def add_edge(self, e):
@@ -143,7 +155,6 @@ class Graph(object):
         """
         pass
 
-    @abc.abstractmethod
     def add_edges(self, edges):
         """Add a list of edges to the graph
 
@@ -152,7 +163,11 @@ class Graph(object):
         :param edges:
         :type edges:list of Edge
         """
-        pass
+        if not edges:
+            return
+
+        for e in edges:
+            self.add_edge(e)
 
     @abc.abstractmethod
     def get_vertex(self, v_id):
@@ -213,52 +228,51 @@ class Graph(object):
         :type attr_filter: dict
 
         :return: All edges matching the requirements
-        :rtype: list of Edge
+        :rtype: set of Edge
         """
         pass
 
     @abc.abstractmethod
-    def update_vertex(self, v, hard_update=False):
+    def update_vertex(self, v):
         """Update the vertex properties
 
         Update an existing vertex and create it if non existing.
-        Hard update: can be used to remove existing fields.
 
         :param v: the vertex with the new data
         :type v: Vertex
-        :param hard_update: if True, original properties will be removed.
-        :type hard_update: bool
         """
         pass
 
-    @abc.abstractmethod
-    def update_vertices(self, vertices, hard_update=False):
+    def update_vertices(self, vertices):
         """For each vertex, update its properties
 
         For each existing vertex, update its properties and create it if
         non existing.
-        Hard update: can be used to remove existing fields.
 
         :param vertices: the vertex with the new data
         :type vertices: List
-        :param hard_update: if True, original properties will be removed.
-        :type hard_update: bool
         """
-        pass
+        for v in vertices:
+            self.update_vertex(v)
 
     @abc.abstractmethod
-    def update_edge(self, e, hard_update=False):
+    def update_edge(self, e):
         """Update the edge properties
 
         Update an existing edge and create it if non existing.
-        Hard update: can be used to remove existing fields.
 
         :param e: the edge with the new data
         :type e: Edge
-        :param hard_update: if True, original properties will be removed.
-        :type hard_update: bool
         """
         pass
+
+    @staticmethod
+    def _merge_properties(base_props, new_props):
+        if base_props is None:
+            base_props = copy.copy(new_props)
+        else:
+            base_props.update(copy.copy(new_props))
+        return {k: v for k, v in base_props.items() if v is not None}
 
     @abc.abstractmethod
     def remove_vertex(self, v):

@@ -19,6 +19,8 @@
 
 from oslo_config import cfg
 
+import cProfile
+
 
 def recursive_keypairs(d, separator='.'):
     # taken from ceilometer and gnocchi
@@ -35,3 +37,16 @@ def opt_exists(conf_parent, opt):
         return conf_parent[opt]
     except cfg.NoSuchOptError:
         return False
+
+
+def do_cprofile(func):
+    def profiled_func(*args, **kwargs):
+        profile = cProfile.Profile()
+        try:
+            profile.enable()
+            result = func(*args, **kwargs)
+            profile.disable()
+            return result
+        finally:
+            profile.print_stats('cumulative')
+    return profiled_func

@@ -24,7 +24,6 @@ from vitrage.datasources.nova.instance import NOVA_INSTANCE_DATASOURCE
 from vitrage.datasources import OPENSTACK_CLUSTER
 from vitrage.datasources.transformer_base import build_key
 from vitrage.datasources.transformer_base import CLUSTER_ID
-from vitrage.graph import create_algorithm
 
 
 LOG = log.getLogger(__name__)
@@ -42,7 +41,7 @@ class TopologyApis(EntityGraphApisBase):
 
         project_id = ctx.get(self.TENANT_PROPERTY, None)
         is_admin_project = ctx.get(self.IS_ADMIN_PROJECT_PROPERTY, False)
-        ga = create_algorithm(self.entity_graph)
+        ga = self.entity_graph.algo
 
         if graph_type == 'tree':
             if not query:
