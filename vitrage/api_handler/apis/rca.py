@@ -18,7 +18,6 @@ from vitrage.api_handler.apis.base import ALARMS_ALL_QUERY
 from vitrage.api_handler.apis.base import EDGE_QUERY
 from vitrage.api_handler.apis.base import EntityGraphApisBase
 from vitrage.api_handler.apis.base import RCA_QUERY
-from vitrage.graph import create_algorithm
 from vitrage.graph import Direction
 
 
@@ -37,7 +36,7 @@ class RcaApis(EntityGraphApisBase):
 
         project_id = ctx.get(self.TENANT_PROPERTY, None)
         is_admin_project = ctx.get(self.IS_ADMIN_PROJECT_PROPERTY, False)
-        ga = create_algorithm(self.entity_graph)
+        ga = self.entity_graph.algo
 
         found_graph_out = ga.graph_query_vertices(query_dict=RCA_QUERY,
                                                   root_id=root,

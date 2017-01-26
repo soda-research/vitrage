@@ -27,8 +27,8 @@ def _after_func(graph, item, data_before=None):
     if not graph.is_subscribed():
         return
     element = graph.get_item(item)
-    is_vertex = isinstance(element, Vertex)
-    graph.notifier.notify(data_before, graph.get_item(item), is_vertex, graph)
+    is_vertex = isinstance(element, Vertex) or isinstance(item, Vertex)
+    graph.notifier.notify(data_before, element, is_vertex, graph)
 
 
 class Notifier(object):

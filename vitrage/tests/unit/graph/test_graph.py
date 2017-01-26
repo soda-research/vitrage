@@ -31,7 +31,7 @@ LOG = logging.getLogger(__name__)
 class TestGraph(GraphTestBase):
 
     def test_graph(self):
-        g = create_graph('test_graph')
+        g = NXGraph('test_graph')
         self.assertEqual('test_graph', g.name, 'graph name')
         self.assertEqual(0, len(g), 'graph __len__')
 
@@ -59,7 +59,7 @@ class TestGraph(GraphTestBase):
                          'graph copy vertex unchanged after update')
 
     def test_vertex_crud(self):
-        g = create_graph('test_vertex_crud')
+        g = NXGraph('test_vertex_crud')
         g.add_vertex(v_node)
         v = g.get_vertex(v_node.vertex_id)
         self.assertEqual(v_node[VProps.ID], v[VProps.ID],
@@ -125,7 +125,7 @@ class TestGraph(GraphTestBase):
     def test_update_vertices(self):
 
         # Test Setup
-        g = create_graph('test_update_vertices')
+        g = NXGraph('test_update_vertices')
         g.add_vertex(v_node)
         v_node_copy = g.get_vertex(v_node.vertex_id)
         v_node_copy[VProps.NAME] = 'test_node'
@@ -147,7 +147,7 @@ class TestGraph(GraphTestBase):
         self.assertEqual('test_host', updated_v_host[VProps.NAME])
 
     def test_edge_crud(self):
-        g = create_graph('test_edge_crud')
+        g = NXGraph('test_edge_crud')
         g.add_vertex(v_node)
         g.add_vertex(v_host)
         g.add_edge(e_node_to_host)
@@ -256,7 +256,7 @@ class TestGraph(GraphTestBase):
             vitrage_id='kuku',
             entity_category=NOVA_HOST_DATASOURCE)
 
-        g = create_graph('test_neighbors')
+        g = NXGraph('test_neighbors')
         g.add_vertex(v1)
         g.add_vertex(v2)
         g.add_vertex(v3)
@@ -386,7 +386,7 @@ class TestGraph(GraphTestBase):
                                'Check neighbors for not connected vertex')
 
     def test_get_vertices(self):
-        g = create_graph('test_get_vertices')
+        g = NXGraph('test_get_vertices')
         g.add_vertex(v_node)
         g.add_vertex(v_host)
         g.add_edge(e_node_to_host)
@@ -436,7 +436,7 @@ class TestGraph(GraphTestBase):
     # noinspection PyAttributeOutsideInit
     def test_graph_callbacks(self):
 
-        g = create_graph('test_graph_callbacks')
+        g = NXGraph('test_graph_callbacks')
         self.result = None
 
         def callback(pre_item,
@@ -498,14 +498,14 @@ class TestGraph(GraphTestBase):
                                     target_id=v4.vertex_id,
                                     relationship_type='KUKU_v3_v4')
 
-        g1 = create_graph('test_union')
+        g1 = NXGraph('test_union')
         g1.add_vertex(v1)
         g1.add_vertex(v2)
         g1.add_vertex(v3)
         g1.add_edge(e_v1_v2)
         g1.add_edge(e_v2_v3)
 
-        g2 = create_graph('test_union_')
+        g2 = NXGraph('test_union_')
         g2.add_vertex(v3)
         g2.add_vertex(v4)
         g2.add_edge(e_v3_v4)

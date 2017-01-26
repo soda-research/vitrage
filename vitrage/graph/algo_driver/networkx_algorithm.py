@@ -21,7 +21,6 @@ from vitrage.graph.algo_driver.algorithm import GraphAlgorithm
 from vitrage.graph.algo_driver.sub_graph_matching import subgraph_matching
 from vitrage.graph.driver import Direction
 from vitrage.graph.driver import Edge
-from vitrage.graph.driver import NXGraph
 from vitrage.graph.driver import Vertex
 from vitrage.graph.filter import check_filter
 from vitrage.graph.query import create_predicate
@@ -39,14 +38,18 @@ class NXAlgorithm(GraphAlgorithm):
         """
         super(NXAlgorithm, self).__init__(graph)
 
+    @classmethod
+    def _create_new_graph(cls, *args, **kwargs):
+        from vitrage.graph.driver.networkx_graph import NXGraph
+        return NXGraph(args, **kwargs)
+
     def graph_query_vertices(self,
                              query_dict=None,
                              root_id=None,
                              depth=None,
                              direction=Direction.BOTH,
                              edge_query_dict=None):
-
-        graph = NXGraph('graph')
+        graph = self._create_new_graph('graph')
 
         if not root_id:
             root_id = self.graph.root_id
@@ -80,10 +83,11 @@ class NXAlgorithm(GraphAlgorithm):
             e_result.extend(e_list)
             nodes_q.extend([(v_id, curr_depth + 1) for v_id, data in n_list])
 
-        graph = NXGraph(graph.name,
-                        graph.root_id,
-                        vertices=self._vertex_result_to_list(n_result),
-                        edges=self._edge_result_to_list(e_result))
+        graph = self._create_new_graph(
+            graph.name,
+            graph.root_id,
+            vertices=self._vertex_result_to_list(n_result),
+            edges=self._edge_result_to_list(e_result))
 
         LOG.debug('graph_query_vertices: find graph: nodes %s, edges %s',
                   str(graph._g.nodes(data=True)),
@@ -125,7 +129,7 @@ class NXAlgorithm(GraphAlgorithm):
 
         vertices_ids = [vertex.vertex_id for vertex in vertices]
 
-        graph = NXGraph('graph')
+        graph = self._create_new_graph('graph')
         graph._g = self.graph._g.subgraph(vertices_ids)
 
         # delete non matching edges
@@ -143,7 +147,7 @@ class NXAlgorithm(GraphAlgorithm):
         return graph
 
     def subgraph(self, entities):
-        subgraph = NXGraph('graph')
+        subgraph = self._create_new_graph('graph')
         subgraph._g = self.graph._g.subgraph(entities)
         return subgraph
 

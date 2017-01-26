@@ -24,8 +24,8 @@ from vitrage.entity_graph.processor import base as processor
 from vitrage.entity_graph.processor.notifier import GraphNotifier
 from vitrage.entity_graph.processor import processor_utils as PUtils
 from vitrage.entity_graph.transformer_manager import TransformerManager
-from vitrage.graph import create_graph
 from vitrage.graph import Direction
+from vitrage.graph.driver.networkx_graph import NXGraph
 
 LOG = log.getLogger(__name__)
 
@@ -40,7 +40,7 @@ class Processor(processor.ProcessorBase):
         self._initialize_events_actions()
         self.initialization_status = initialization_status
         self.entity_graph = e_graph if e_graph is not None\
-            else create_graph("Entity Graph")
+            else NXGraph("Entity Graph")
         self._notifier = GraphNotifier(conf)
 
     def process_event(self, event):

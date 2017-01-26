@@ -14,16 +14,3 @@
 
 from vitrage.graph.driver.elements import *  # noqa
 from vitrage.graph.driver.graph import *  # noqa
-from vitrage.graph.driver.networkx_graph import NXGraph
-
-
-def create_graph(name, root_id=None):
-    """Create a Graph instance
-
-    For now only return NXGraph
-
-    :param root_id:
-    :type name: str
-    :rtype: Graph
-    """
-    return NXGraph(name, root_id)

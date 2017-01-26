@@ -21,6 +21,7 @@ from networkx.readwrite import json_graph
 from oslo_log import log as logging
 
 from vitrage.common.constants import VertexProperties as VProps
+from vitrage.graph.algo_driver.networkx_algorithm import NXAlgorithm
 from vitrage.graph.driver.elements import Edge
 from vitrage.graph.driver.elements import Vertex
 from vitrage.graph.driver.graph import Direction
@@ -59,6 +60,10 @@ class NXGraph(Graph):
     def __len__(self):
         return len(self._g)
 
+    @property
+    def algo(self):
+        return NXAlgorithm(self)
+
     def copy(self):
         self_copy = NXGraph(self.name, self.root_id)
         self_copy._g = self._g.copy()
@@ -77,13 +82,6 @@ class NXGraph(Graph):
         properties_copy = copy.copy(v.properties)
         self._g.add_node(n=v.vertex_id, attr_dict=properties_copy)
 
-    def add_vertices(self, vertices):
-        if not vertices:
-            return
-
-        for v in vertices:
-            self.add_vertex(v)
-
     @Notifier.update_notify
     def add_edge(self, e):
         """Add an edge to the graph
@@ -97,13 +95,6 @@ class NXGraph(Graph):
         properties_copy = copy.copy(e.properties)
         self._g.add_edge(u=e.source_id, v=e.target_id,
                          key=e.label, attr_dict=properties_copy)
-
-    def add_edges(self, edges):
-        if not edges:
-            return
-
-        for e in edges:
-            self.add_edge(e)
 
     def get_vertex(self, v_id):
         """Fetch a vertex from the graph
@@ -131,15 +122,15 @@ class NXGraph(Graph):
                   attr_filter=None):
         """Fetch multiple edges from the graph
 
-        :rtype: list of Edge
+        :rtype: set of Edge
         """
         def check_edge(edge_data):
             return check_filter(edge_data, attr_filter)
 
         nodes, edges = self._neighboring_nodes_edges_query(
             v_id, edge_predicate=check_edge, direction=direction)
-        edge_copies = [edge_copy(u, v, label, data)
-                       for u, v, label, data in edges]
+        edge_copies = set(edge_copy(u, v, label, data)
+                          for u, v, label, data in edges)
         return edge_copies
 
     def _get_edges_by_direction(self, v_id, direction):
@@ -165,33 +156,22 @@ class NXGraph(Graph):
         return self._g.number_of_edges()
 
     @Notifier.update_notify
-    def update_vertex(self, v, hard_update=False):
+    def update_vertex(self, v):
         """Update the vertex properties
 
-        :param hard_update:
         :type v: Vertex
         """
         orig_prop = self._g.node.get(v.vertex_id, None)
         if not orig_prop:
             self._add_vertex(v)
             return
-        new_prop = self._merge_properties(orig_prop, v.properties, hard_update)
+        new_prop = self._merge_properties(orig_prop, v.properties)
         self._g.node[v.vertex_id] = new_prop
 
-    def update_vertices(self, vertices, hard_update=False):
-        """For each vertex, update its properties
-
-        :param hard_update:
-        :type vertices: List
-        """
-        for v in vertices:
-            self.update_vertex(v, hard_update)
-
     @Notifier.update_notify
-    def update_edge(self, e, hard_update=False):
+    def update_edge(self, e):
         """Update the edge properties
 
-        :param hard_update:
         :type e: Edge
         """
         orig_prop = self._g.edge.get(
@@ -201,16 +181,8 @@ class NXGraph(Graph):
         if not orig_prop:
             self._add_edge(e)
             return
-        new_prop = self._merge_properties(orig_prop, e.properties, hard_update)
+        new_prop = self._merge_properties(orig_prop, e.properties)
         self._g.edge[e.source_id][e.target_id][e.label] = new_prop
-
-    @staticmethod
-    def _merge_properties(base_props, new_props, hard_update):
-        if base_props is None or hard_update:
-            base_props = copy.copy(new_props)
-        else:
-            base_props.update(copy.copy(new_props))
-        return {k: v for k, v in base_props.items() if v is not None}
 
     def remove_vertex(self, v):
         """Remove Vertex v and its edges from the graph

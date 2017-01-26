@@ -41,6 +41,7 @@ class Launcher(object):
         self.services = self._register_services()
 
     def launch(self):
+        # launcher = os_service.ServiceLauncher(self.conf)  # For Debugging
         launcher = os_service.ProcessLauncher(self.conf)
         for service in self.services:
             launcher.launch_service(service, 1)

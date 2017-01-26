@@ -28,8 +28,7 @@ from vitrage.evaluator.template_data import ActionSpecs
 from vitrage.evaluator.template_data import EdgeDescription
 from vitrage.evaluator.template_data import ENTITY
 from vitrage.graph.algo_driver.algorithm import Mapping
-from vitrage.graph import create_algorithm
-from vitrage.graph import create_graph
+from vitrage.graph.driver.networkx_graph import NXGraph
 from vitrage.graph.driver import Vertex
 
 LOG = log.getLogger(__name__)
@@ -55,7 +54,6 @@ class ScenarioEvaluator(object):
         self.conf = conf
         self._scenario_repo = scenario_repo
         self._entity_graph = entity_graph
-        self._graph_algs = create_algorithm(entity_graph)
         self._action_executor = ActionExecutor(event_queue)
         self._entity_graph.subscribe(self.process_event)
         self._action_tracker = ActionTracker(DatasourceInfoMapper(self.conf))
@@ -204,7 +202,7 @@ class ScenarioEvaluator(object):
 
     def _evaluate_and_condition(self, condition, element, scenario_element):
 
-        condition_g = create_graph("scenario condition")
+        condition_g = NXGraph("scenario condition")
         for term in condition:
             if not term.positive:
                 # todo(erosensw): add support for NOT clauses
@@ -224,7 +222,8 @@ class ScenarioEvaluator(object):
             initial_map = Mapping(scenario_element, element, True)
         else:
             initial_map = Mapping(scenario_element.edge, element, False)
-        return self._graph_algs.sub_graph_matching(condition_g, [initial_map])
+        return self._entity_graph.algo.sub_graph_matching(condition_g,
+                                                          [initial_map])
 
     @staticmethod
     def _set_relationship_not_deleted(edge_description):
