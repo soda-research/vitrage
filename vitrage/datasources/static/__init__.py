@@ -48,4 +48,4 @@ OPTS = [
 
 
 class StaticFields(TopologyFields):
-    CONFIG_ID = 'config_id'
+    STATIC_ID = 'static_id'

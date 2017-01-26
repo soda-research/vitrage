@@ -582,7 +582,7 @@ def _get_static_snapshot_driver_values(spec):
         if switch_id not in touched:
             switch_name = "switch-{}".format(switch_index)
             vals = {
-                StaticFields.CONFIG_ID: switch_id,
+                StaticFields.STATIC_ID: switch_id,
                 StaticFields.TYPE: 'switch',
                 StaticFields.ID: str(randint(0, 100000)),
                 StaticFields.NAME: switch_name,
@@ -594,7 +594,7 @@ def _get_static_snapshot_driver_values(spec):
         host_id = "h{}".format(host_index)
         if host_id not in touched:
             vals = {
-                StaticFields.CONFIG_ID: host_id,
+                StaticFields.STATIC_ID: host_id,
                 StaticFields.TYPE: NOVA_HOST_DATASOURCE,
                 StaticFields.ID: str(randint(0, 100000)),
                 StaticFields.RELATIONSHIPS: relationships[host_id]
@@ -613,7 +613,7 @@ def _get_static_snapshot_driver_values(spec):
         target_id = 'c{}'.format(custom_num - 1 - index)
         source_name = 'custom-{}'.format(source_id)
         vals = {
-            StaticFields.CONFIG_ID: source_id,
+            StaticFields.STATIC_ID: source_id,
             StaticFields.TYPE: 'custom',
             StaticFields.ID: str(randint(0, 100000)),
             StaticFields.NAME: source_name,

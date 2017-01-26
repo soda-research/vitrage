@@ -30,7 +30,7 @@ LOG = log.getLogger(__name__)
 
 class StaticDriver(DriverBase):
     # base fields are required for all entities, others are treated as metadata
-    BASE_FIELDS = {StaticFields.CONFIG_ID, StaticFields.TYPE, VProps.ID}
+    BASE_FIELDS = {StaticFields.STATIC_ID, StaticFields.TYPE, VProps.ID}
 
     def __init__(self, conf):
         super(StaticDriver, self).__init__()
@@ -95,11 +95,11 @@ class StaticDriver(DriverBase):
 
     @classmethod
     def _pack_entity(cls, entities_dict, entity):
-        config_id = entity[StaticFields.CONFIG_ID]
-        if config_id not in entities_dict:
+        static_id = entity[StaticFields.STATIC_ID]
+        if static_id not in entities_dict:
             metadata = {key: value for key, value in iteritems(entity)
                         if key not in cls.BASE_FIELDS}
-            entities_dict[config_id] = entity
+            entities_dict[static_id] = entity
             entity[TopologyFields.RELATIONSHIPS] = []
             entity[TopologyFields.METADATA] = metadata
         else:
@@ -123,15 +123,15 @@ class StaticDriver(DriverBase):
         """Expand config id to neighbor entity
 
         rel={'source': 's1', 'target': 'r1', 'relationship_type': 'attached'}
-        neighbor={'config_id': 'h1', 'type': 'host.nova', 'id': 1}
+        neighbor={'static_id': 'h1', 'type': 'host.nova', 'id': 1}
         result={'relationship_type': 'attached', 'source': 's1',
-                'target': {'config_id': 'h1', 'type': 'host.nova', 'id': 1}}
+                'target': {'static_id': 'h1', 'type': 'host.nova', 'id': 1}}
         """
 
         rel = rel.copy()
-        if rel[StaticFields.SOURCE] == neighbor[StaticFields.CONFIG_ID]:
+        if rel[StaticFields.SOURCE] == neighbor[StaticFields.STATIC_ID]:
             rel[StaticFields.SOURCE] = neighbor
-        elif rel[StaticFields.TARGET] == neighbor[StaticFields.CONFIG_ID]:
+        elif rel[StaticFields.TARGET] == neighbor[StaticFields.STATIC_ID]:
             rel[StaticFields.TARGET] = neighbor
         else:
             # TODO(yujunz) raise exception and ignore invalid relationship
