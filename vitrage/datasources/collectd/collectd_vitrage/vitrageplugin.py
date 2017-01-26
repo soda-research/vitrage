@@ -67,32 +67,43 @@ class VitrageNotifier(CollectDPlugin):
             collectd.NOTIF_OKAY: 'OK',
         }.get(notification.severity)
 
-        alarm = notification.host + notification.plugin_instance \
-            + notification.type_instance
-
-        alarm_uuid = hashlib.md5(six.b(alarm)).hexdigest()
-
-        details = {
-            'host': notification.host,
-            'plugin': notification.plugin,
-            'plugin_instance': notification.plugin_instance,
-            'type': notification.type,
-            'type_instance': notification.type_instance,
-            'message': notification.message,
-            'severity': severity,
-            'time': notification.time,
-            'id': alarm_uuid
-        }
-
+        alarm_uuid = self._generate_alarm_id(notification)
+        payload = self._create_payload(alarm_uuid, notification, severity)
         notification_id = str(uuid.uuid4())
 
         self.notifier.info(ctxt={'message_id': notification_id,
                                  'publisher_id': 'collectd',
                                  'timestamp': datetime.utcnow()},
                            event_type='collectd.alarm.' + severity.lower(),
-                           payload=details)
+                           payload=payload)
+
         self.info('notification id %r to vitrage: %r' % (notification_id,
-                                                         details))
+                                                         payload))
+
+    @staticmethod
+    def _create_payload(alarm_uuid, notification, severity):
+        payload = {
+            'host': notification.host,
+            'plugin': notification.plugin,
+            'type': notification.type,
+            'message': notification.message,
+            'severity': severity,
+            'time': notification.time,
+            'id': alarm_uuid
+        }
+        if notification.plugin_instance:
+            payload['plugin_instance'] = notification.plugin_instance
+        if notification.type_instance:
+            payload['type_instance'] = notification.type_instance
+        return payload
+
+    @staticmethod
+    def _generate_alarm_id(notification):
+        resources = [notification.host, notification.plugin_instance,
+                     notification.type_instance, notification.type]
+        alarm_id = ''.join([resource for resource in resources if resource])
+        alarm_uuid = hashlib.md5(six.b(alarm_id)).hexdigest()
+        return alarm_uuid
 
 
 # We have to call the constructor in order to actually register our plugin
