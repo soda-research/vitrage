@@ -79,8 +79,12 @@ class CollectdDriver(AlarmDriverBase):
         event[DSProps.EVENT_TYPE] = event_type
 
         if CollectdDriver.conf_map:
-            collectd_host = event[CProps.HOST]
-            v_resource = CollectdDriver.conf_map[collectd_host]
+            # PLUGIN_INSTANCE is optional
+            resources = [event[CProps.HOST], event[CProps.PLUGIN],
+                         event.get(CProps.PLUGIN_INSTANCE)]
+            resource = '/'.join([resource for resource in resources if
+                                 resource])
+            v_resource = CollectdDriver.conf_map[resource]
             event[CProps.RESOURCE_NAME] = v_resource[CProps.RESOURCE_NAME]
             event[CProps.RESOURCE_TYPE] = v_resource[CProps.RESOURCE_TYPE]
 

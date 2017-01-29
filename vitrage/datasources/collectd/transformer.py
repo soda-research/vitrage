@@ -57,6 +57,7 @@ class CollectdTransformer(AlarmTransformerBase):
         metadata = {
             VProps.NAME: entity_event[CProps.MESSAGE],
             VProps.SEVERITY: entity_event[CProps.SEVERITY],
+            VProps.RAWTEXT: self.generate_raw_text(entity_event)
         }
 
         return graph_utils.create_vertex(
@@ -101,3 +102,10 @@ class CollectdTransformer(AlarmTransformerBase):
 
     def get_type(self):
         return COLLECTD_DATASOURCE
+
+    @staticmethod
+    def generate_raw_text(entity_event):
+        resources = [entity_event.get(CProps.TYPE_INSTANCE),
+                     entity_event[CProps.PLUGIN],
+                     entity_event.get(CProps.PLUGIN_INSTANCE)]
+        return '-'.join([resource for resource in resources if resource])

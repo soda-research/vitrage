@@ -85,7 +85,7 @@ class VitrageNotifier(CollectDPlugin):
         payload = {
             'host': notification.host,
             'plugin': notification.plugin,
-            'type': notification.type,
+            'collectd_type': notification.type,
             'message': notification.message,
             'severity': severity,
             'time': notification.time,
