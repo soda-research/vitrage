@@ -43,10 +43,7 @@ class RCAController(RootRestController):
                     pecan.request.enforcer, {})
 
         LOG.info(_LI('received show rca with alarm id %s') % alarm_id)
-        if pecan.request.cfg.api.use_mock_file:
-            return self.get_mock_data('rca.sample.json')
-        else:
-            return self.get_rca(alarm_id, all_tenants)
+        return self.get_rca(alarm_id, all_tenants)
 
     @staticmethod
     def get_rca(alarm_id, all_tenants):

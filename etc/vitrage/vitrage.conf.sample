@@ -150,9 +150,6 @@
 # Toggle Pecan Debug Middleware. (boolean value)
 #pecan_debug = false
 
-# Toggle mock file for debugging. (boolean value)
-#use_mock_file = false
-
 
 [consistency]
 

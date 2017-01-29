@@ -161,9 +161,6 @@ function configure_vitrage {
     # add default datasources
     iniset $VITRAGE_CONF datasources types $VITRAGE_DEFAULT_DATASOURCES
 
-    # copy the mock sample files
-    cp $VITRAGE_DIR/etc/vitrage/*.sample.json $VITRAGE_CONF_DIR
-
     # create some folders
     mkdir -p $VITRAGE_CONF_DIR/datasources_values
     mkdir -p $VITRAGE_CONF_DIR/static_datasources

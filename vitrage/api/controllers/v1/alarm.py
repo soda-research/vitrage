@@ -46,10 +46,7 @@ class AlarmsController(RootRestController):
                  vitrage_id)
 
         try:
-            if pecan.request.cfg.api.use_mock_file:
-                return self.get_mock_data('alarms.sample.json')
-            else:
-                return self._get_alarms(vitrage_id, all_tenants)
+            return self._get_alarms(vitrage_id, all_tenants)
         except Exception as e:
             LOG.exception('failed to get alarms %s', e)
             abort(404, str(e))

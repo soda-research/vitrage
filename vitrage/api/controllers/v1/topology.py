@@ -51,10 +51,7 @@ class TopologyController(RootRestController):
 
         LOG.info(_LI("query is %s") % query)
 
-        if pecan.request.cfg.api.use_mock_file:
-            return self.get_mock_data('graph.sample.json', graph_type)
-        else:
-            return self.get_graph(graph_type, depth, query, root, all_tenants)
+        return self.get_graph(graph_type, depth, query, root, all_tenants)
 
     @staticmethod
     def get_graph(graph_type, depth, query, root, all_tenants):
