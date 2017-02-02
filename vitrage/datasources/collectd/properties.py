@@ -20,4 +20,7 @@ class CollectdProperties(object):
     TIME = 'time'
     MESSAGE = 'message'
     HOST = 'host'
+    PLUGIN = 'plugin'
+    PLUGIN_INSTANCE = 'plugin_instance'
+    TYPE_INSTANCE = 'type_instance'
     ID = 'id'

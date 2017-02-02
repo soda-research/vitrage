@@ -53,7 +53,7 @@ class TemplateApis(object):
 
     def show_template(self, ctx, template_uuid):
 
-        LOG.debug("Show template with uuid: $s", str(template_uuid))
+        LOG.debug("Show template with uuid: %s", str(template_uuid))
 
         template = self.templates[template_uuid]
 
