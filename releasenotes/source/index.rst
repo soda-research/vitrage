@@ -1,5 +1,6 @@
-Vitrage Release Notes
-=====================
+======================
+ Vitrage Release Notes
+======================
 
 Contents
 ========
@@ -10,8 +11,8 @@ Contents
    unreleased
 
 
-   Indices and tables
-   ==================
+Indices and tables
+==================
 
-   * :ref:`genindex`
-     * :ref:`search`
+* :ref:`genindex`
+* :ref:`search`
