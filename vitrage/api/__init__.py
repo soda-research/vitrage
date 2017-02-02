@@ -34,7 +34,4 @@ OPTS = [
 
     cfg.BoolOpt('pecan_debug', default=False,
                 help='Toggle Pecan Debug Middleware.'),
-
-    cfg.BoolOpt('use_mock_file', default=False,
-                help='Toggle mock file for debugging.'),
 ]
