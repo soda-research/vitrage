@@ -85,7 +85,8 @@ class ZoneTransformer(ResourceTransformerBase):
         neighbors = []
         metadata = {
             VProps.IS_PLACEHOLDER: False,
-            VProps.STATE: 'available'
+            VProps.STATE: 'available',
+            VProps.NAME: OPENSTACK_CLUSTER
         }
         cluster_neighbor = self._create_neighbor(entity_event,
                                                  CLUSTER_ID,

@@ -64,6 +64,9 @@ notification_driver = messagingv2
 notification_topics = notifications,vitrage_notifications
 notification_driver = messagingv2
 
+[oslo_messaging_notifications]
+transport_url = rabbit://$RABBIT_USERID:$RABBIT_PASSWORD@$RABBIT_HOST:5672/
+
 [[post-config|\$HEAT_CONF]]
 [DEFAULT]
 notification_topics = notifications,vitrage_notifications
