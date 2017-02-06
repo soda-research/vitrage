@@ -38,13 +38,11 @@ class NagiosTransformer(AlarmTransformerBase):
 
     def _create_vertex(self, entity_event):
 
-        update_timestamp = datetime_utils.change_time_str_format(
+        update_timestamp = datetime_utils.change_to_utc_time_and_format(
             entity_event[NagiosProperties.LAST_CHECK],
             '%Y-%m-%d %H:%M:%S',
             tbase.TIMESTAMP_FORMAT)
-
         sample_timestamp = entity_event[DSProps.SAMPLE_DATE]
-
         update_timestamp = self._format_update_timestamp(update_timestamp,
                                                          sample_timestamp)
 

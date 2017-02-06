@@ -15,6 +15,7 @@
 from __future__ import absolute_import
 
 from datetime import datetime
+from datetime import timedelta
 from oslo_utils import timeutils
 
 
@@ -29,6 +30,13 @@ def utcnow(with_timezone=True):
 def change_time_str_format(timestamp_str, old_format, new_format):
     utc = datetime.strptime(timestamp_str, old_format)
     return utc.strftime(new_format)
+
+
+def change_to_utc_time_and_format(timestamp_str, old_format, new_format):
+    timestamp = datetime.strptime(timestamp_str, old_format)
+    timestamp = timestamp - timedelta(seconds=(
+        datetime.now() - datetime.utcnow()).total_seconds())
+    return timestamp.strftime(new_format)
 
 
 def format_unix_timestamp(timestamp, date_format=TIMESTAMP_FORMAT):
