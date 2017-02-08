@@ -92,7 +92,7 @@ tuple with the following details:
 
     a. Neighbor vertex with it's partial data so vitrage will know to where
        to connect the edge.
-    b. Edge that connects the vertex to its' neighbor.
+    b. Edge that connects the vertex to its neighbor.
 
 Note that for every driver there should be a matching Transformer.
 A transformer should inherit from
