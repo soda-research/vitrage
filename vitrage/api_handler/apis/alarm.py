@@ -39,7 +39,7 @@ class AlarmApis(EntityGraphApisBase):
         is_admin_project = ctx.get(self.IS_ADMIN_PROJECT_PROPERTY, False)
 
         if not vitrage_id or vitrage_id == 'all':
-            if all_tenants == "1":
+            if all_tenants:
                 alarms = self.entity_graph.get_vertices(
                     query_dict=ALARMS_ALL_QUERY)
             else:
