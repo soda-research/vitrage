@@ -47,6 +47,7 @@ status_msgs = {
     83: 'Entity definition must contain condition field.',
     84: 'Entity definition must contain actions field.',
     85: 'Failed to convert condition.',
+    86: 'Not operator can be used only on relationships.',
 
     # relationships status messages 100-119
     100: 'Invalid relation type. Relation type must be from types: '

@@ -12,8 +12,13 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from sympy.logic.boolalg import Not
+from sympy import Symbol
+
 from oslo_log import log
 from six.moves import reduce
+
+from vitrage.common.constants import EdgeProperties as EProps
 from vitrage.common.constants import EntityCategory
 from vitrage.evaluator.actions.base import ActionType
 from vitrage.evaluator.template_data import TemplateData
@@ -34,7 +39,7 @@ def content_validation(template):
 
     entities_index = {}
     entities = template_definitions[TemplateFields.ENTITIES]
-    result = validate_entities_definition(entities, entities_index)
+    result = _validate_entities_definition(entities, entities_index)
 
     relationships_index = {}
 
@@ -42,24 +47,24 @@ def content_validation(template):
        TemplateFields.RELATIONSHIPS in template_definitions:
 
         relationships = template_definitions[TemplateFields.RELATIONSHIPS]
-        result = validate_relationships_definitions(relationships,
-                                                    relationships_index,
-                                                    entities_index)
+        result = _validate_relationships_definitions(relationships,
+                                                     relationships_index,
+                                                     entities_index)
     if result.is_valid_config:
         scenarios = template[TemplateFields.SCENARIOS]
         definitions_index = entities_index.copy()
         definitions_index.update(relationships_index)
-        result = validate_scenarios(scenarios, definitions_index)
+        result = _validate_scenarios(scenarios, definitions_index)
 
     return result
 
 
-def validate_entities_definition(entities, entities_index):
+def _validate_entities_definition(entities, entities_index):
 
     for entity in entities:
 
         entity_dict = entity[TemplateFields.ENTITY]
-        result = validate_entity_definition(entity_dict, entities_index)
+        result = _validate_entity_definition(entity_dict, entities_index)
 
         if not result.is_valid_config:
             return result
@@ -69,7 +74,7 @@ def validate_entities_definition(entities, entities_index):
     return get_correct_result(RESULT_DESCRIPTION)
 
 
-def validate_entity_definition(entity_dict, entities_index):
+def _validate_entity_definition(entity_dict, entities_index):
 
     template_id = entity_dict[TemplateFields.TEMPLATE_ID]
     if template_id in entities_index:
@@ -79,16 +84,16 @@ def validate_entity_definition(entity_dict, entities_index):
     return get_correct_result(RESULT_DESCRIPTION)
 
 
-def validate_relationships_definitions(relationships,
-                                       relationships_index,
-                                       entities_index):
+def _validate_relationships_definitions(relationships,
+                                        relationships_index,
+                                        entities_index):
 
     for relationship in relationships:
 
         relationship_dict = relationship[TemplateFields.RELATIONSHIP]
-        result = validate_relationship(relationship_dict,
-                                       relationships_index,
-                                       entities_index)
+        result = _validate_relationship(relationship_dict,
+                                        relationships_index,
+                                        entities_index)
         if not result.is_valid_config:
             return result
 
@@ -97,7 +102,7 @@ def validate_relationships_definitions(relationships,
     return get_correct_result(RESULT_DESCRIPTION)
 
 
-def validate_relationship(relationship, relationships_index, entities_index):
+def _validate_relationship(relationship, relationships_index, entities_index):
 
     template_id = relationship[TemplateFields.TEMPLATE_ID]
     if template_id in relationships_index or template_id in entities_index:
@@ -114,20 +119,20 @@ def validate_relationship(relationship, relationships_index, entities_index):
     return result
 
 
-def validate_scenarios(scenarios, definitions_index):
+def _validate_scenarios(scenarios, definitions_index):
 
     for scenario in scenarios:
 
         scenario_values = scenario[TemplateFields.SCENARIO]
 
         condition = scenario_values[TemplateFields.CONDITION]
-        result = validate_scenario_condition(condition, definitions_index)
+        result = _validate_scenario_condition(condition, definitions_index)
 
         if not result.is_valid_config:
             return result
 
         actions = scenario_values[TemplateFields.ACTIONS]
-        result = validate_scenario_actions(actions, definitions_index)
+        result = _validate_scenario_actions(actions, definitions_index)
 
         if not result.is_valid_config:
             return result
@@ -135,15 +140,21 @@ def validate_scenarios(scenarios, definitions_index):
     return get_correct_result(RESULT_DESCRIPTION)
 
 
-def validate_scenario_condition(condition, definitions_index):
-
+def _validate_scenario_condition(condition, definitions_index):
     try:
-        TemplateData.convert_to_dnf_format(condition)
+        dnf_result = TemplateData.convert_to_dnf_format(condition)
     except Exception:
         LOG.error('%s status code: %s' % (status_msgs[85], 85))
         return get_fault_result(RESULT_DESCRIPTION, 85)
 
-    values_to_replace = ' and ', ' or ', ' not ', '(', ')'
+    # not condition validation
+    not_condition_result = \
+        _validate_not_condition(dnf_result, definitions_index)
+    if not not_condition_result.is_valid_config:
+        return not_condition_result
+
+    # template id validation
+    values_to_replace = ' and ', ' or ', ' not ', 'not ', '(', ')'
     condition = reduce(lambda cond, v: cond.replace(v, ' '),
                        values_to_replace,
                        condition)
@@ -160,26 +171,60 @@ def validate_scenario_condition(condition, definitions_index):
     return get_correct_result(RESULT_DESCRIPTION)
 
 
-def validate_scenario_actions(actions, definitions_index):
+def _validate_not_condition(dnf_result, definitions_index):
+    """Not operator validation
+
+    Not operator can appear only on edges.
+
+    :param dnf_result:
+    :param definitions_index:
+    :return:
+    """
+
+    if isinstance(dnf_result, Not):
+        for arg in dnf_result.args:
+            if isinstance(arg, Symbol):
+                definition = definitions_index.get(str(arg), None)
+                if not (definition and
+                        definition.get(EProps.RELATIONSHIP_TYPE)):
+                    msg = status_msgs[86] + ' template id: %s' % arg
+                    LOG.error('%s status code: %s' % (msg, 86))
+                    return get_fault_result(RESULT_DESCRIPTION, 86, msg)
+            else:
+                res = _validate_not_condition(arg, definitions_index)
+                if not res.is_valid_config:
+                    return res
+        return get_correct_result(RESULT_DESCRIPTION)
+
+    for arg in dnf_result.args:
+        if not isinstance(arg, Symbol):
+            res = _validate_not_condition(arg, definitions_index)
+            if not res.is_valid_config:
+                return res
+
+    return get_correct_result(RESULT_DESCRIPTION)
+
+
+def _validate_scenario_actions(actions, definitions_index):
 
     for action in actions:
-        result = validate_scenario_action(action[TemplateFields.ACTION],
-                                          definitions_index)
+        result = _validate_scenario_action(action[TemplateFields.ACTION],
+                                           definitions_index)
         if not result.is_valid_config:
             return result
 
     return get_correct_result(RESULT_DESCRIPTION)
 
 
-def validate_scenario_action(action, definitions_index):
+def _validate_scenario_action(action, definitions_index):
 
     action_type = action[TemplateFields.ACTION_TYPE]
     actions = {
-        ActionType.RAISE_ALARM: validate_raise_alarm_action,
-        ActionType.SET_STATE: validate_set_state_action,
+        ActionType.RAISE_ALARM: _validate_raise_alarm_action,
+        ActionType.SET_STATE: _validate_set_state_action,
         ActionType.ADD_CAUSAL_RELATIONSHIP:
-        validate_add_causal_relationship_action,
-        ActionType.MARK_DOWN: validate_mark_down_action,
+        _validate_add_causal_relationship_action,
+        ActionType.MARK_DOWN: _validate_mark_down_action,
     }
 
     if action_type not in actions.keys():
@@ -189,7 +234,7 @@ def validate_scenario_action(action, definitions_index):
     return actions[action_type](action, definitions_index)
 
 
-def validate_raise_alarm_action(action, definitions_index):
+def _validate_raise_alarm_action(action, definitions_index):
 
     properties = action[TemplateFields.PROPERTIES]
 
@@ -210,7 +255,7 @@ def validate_raise_alarm_action(action, definitions_index):
     return _validate_template_id(definitions_index, target)
 
 
-def validate_set_state_action(action, definitions_index):
+def _validate_set_state_action(action, definitions_index):
 
     properties = action[TemplateFields.PROPERTIES]
 
@@ -227,7 +272,7 @@ def validate_set_state_action(action, definitions_index):
     return _validate_template_id(definitions_index, target)
 
 
-def validate_add_causal_relationship_action(action, definitions_index):
+def _validate_add_causal_relationship_action(action, definitions_index):
 
     action_target = action[TemplateFields.ACTION_TARGET]
 
@@ -250,7 +295,7 @@ def validate_add_causal_relationship_action(action, definitions_index):
     return get_correct_result(RESULT_DESCRIPTION)
 
 
-def validate_mark_down_action(action, definitions_index):
+def _validate_mark_down_action(action, definitions_index):
 
     action_target = action[TemplateFields.ACTION_TARGET]
     if TemplateFields.TARGET not in action_target:

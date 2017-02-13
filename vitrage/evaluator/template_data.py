@@ -192,6 +192,7 @@ class TemplateData(object):
         condition_str = condition_str.replace(' and ', '&')
         condition_str = condition_str.replace(' or ', '|')
         condition_str = condition_str.replace(' not ', '~')
+        condition_str = condition_str.replace('not ', '~')
 
         return sympy_to_dfn(condition_str)
 
