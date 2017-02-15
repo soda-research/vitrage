@@ -38,24 +38,24 @@ RESULT_DESCRIPTION = 'Template syntax validation'
 
 def syntax_validation(template_conf):
 
-    result = validate_template_sections(template_conf)
+    result = _validate_template_sections(template_conf)
 
     if result.is_valid_config:
         metadata = template_conf[TemplateFields.METADATA]
-        result = validate_metadata_section(metadata)
+        result = _validate_metadata_section(metadata)
 
     if result.is_valid_config:
         definitions = template_conf[TemplateFields.DEFINITIONS]
-        result = validate_definitions_section(definitions)
+        result = _validate_definitions_section(definitions)
 
     if result.is_valid_config:
         scenarios = template_conf[TemplateFields.SCENARIOS]
-        result = validate_scenarios_section(scenarios)
+        result = _validate_scenarios_section(scenarios)
 
     return result
 
 
-def validate_template_sections(template_conf):
+def _validate_template_sections(template_conf):
 
     schema = Schema({
         Required(TemplateFields.DEFINITIONS, msg=21): dict,
@@ -65,7 +65,7 @@ def validate_template_sections(template_conf):
     return _validate_dict_schema(schema, template_conf)
 
 
-def validate_metadata_section(metadata):
+def _validate_metadata_section(metadata):
 
     any_str = Any(str, six.text_type)
 
@@ -76,10 +76,10 @@ def validate_metadata_section(metadata):
     return _validate_dict_schema(schema, metadata)
 
 
-def validate_definitions_section(definitions):
+def _validate_definitions_section(definitions):
 
     if TemplateFields.RELATIONSHIPS not in definitions or \
-        definitions[TemplateFields.RELATIONSHIPS] != '':
+            definitions[TemplateFields.RELATIONSHIPS] != '':
         schema = Schema({
             Required(TemplateFields.ENTITIES, msg=20): list,
             TemplateFields.RELATIONSHIPS: list
@@ -90,16 +90,16 @@ def validate_definitions_section(definitions):
         result = get_correct_result(RESULT_DESCRIPTION)
 
     if result.is_valid_config:
-        result = validate_entities(definitions[TemplateFields.ENTITIES])
+        result = _validate_entities(definitions[TemplateFields.ENTITIES])
 
         relationships = definitions.get(TemplateFields.RELATIONSHIPS, None)
         if result.is_valid_config and relationships:
-            return validate_relationships(relationships)
+            return _validate_relationships(relationships)
 
     return result
 
 
-def validate_entities(entities):
+def _validate_entities(entities):
 
     if not entities:
         LOG.error('%s status code: %s' % (status_msgs[43], 43))
@@ -113,7 +113,7 @@ def validate_entities(entities):
         result = _validate_dict_schema(schema, entity)
 
         if result.is_valid_config:
-            result = validate_entity_dict(entity[TemplateFields.ENTITY])
+            result = _validate_entity_dict(entity[TemplateFields.ENTITY])
 
         if not result.is_valid_config:
             return result
@@ -121,7 +121,7 @@ def validate_entities(entities):
     return result
 
 
-def validate_entity_dict(entity_dict):
+def _validate_entity_dict(entity_dict):
 
     any_str = Any(str, six.text_type)
     schema = Schema({
@@ -135,7 +135,7 @@ def validate_entity_dict(entity_dict):
     return _validate_dict_schema(schema, entity_dict)
 
 
-def validate_relationships(relationships):
+def _validate_relationships(relationships):
 
     for relationship in relationships:
 
@@ -146,14 +146,14 @@ def validate_relationships(relationships):
 
         if result.is_valid_config:
             relationship_dict = relationship[TemplateFields.RELATIONSHIP]
-            result = validate_relationship_dict(relationship_dict)
+            result = _validate_relationship_dict(relationship_dict)
 
             if not result.is_valid_config:
                 return result
     return result
 
 
-def validate_relationship_dict(relationship_dict):
+def _validate_relationship_dict(relationship_dict):
 
     any_str = Any(str, six.text_type)
     schema = Schema({
@@ -166,7 +166,7 @@ def validate_relationship_dict(relationship_dict):
     return _validate_dict_schema(schema, relationship_dict)
 
 
-def validate_scenarios_section(scenarios):
+def _validate_scenarios_section(scenarios):
 
     if not scenarios:
         LOG.error('%s status code: %s' % (status_msgs[81], 81))
@@ -180,7 +180,7 @@ def validate_scenarios_section(scenarios):
         result = _validate_dict_schema(schema, scenario)
 
         if result.is_valid_config:
-            result = validate_scenario(scenario[TemplateFields.SCENARIO])
+            result = _validate_scenario(scenario[TemplateFields.SCENARIO])
 
             if not result.is_valid_config:
                 return result
@@ -188,7 +188,7 @@ def validate_scenarios_section(scenarios):
     return result
 
 
-def validate_scenario(scenario):
+def _validate_scenario(scenario):
 
     any_str = Any(str, six.text_type)
     schema = Schema({
@@ -198,12 +198,12 @@ def validate_scenario(scenario):
     result = _validate_dict_schema(schema, scenario)
 
     if result.is_valid_config:
-        return validate_actions_schema(scenario[TemplateFields.ACTIONS])
+        return _validate_actions_schema(scenario[TemplateFields.ACTIONS])
 
     return result
 
 
-def validate_actions_schema(actions):
+def _validate_actions_schema(actions):
 
     if not actions:
         LOG.error('%s status code: %s' % (status_msgs[121], 121))
@@ -217,7 +217,7 @@ def validate_actions_schema(actions):
         result = _validate_dict_schema(schema, action)
 
         if result.is_valid_config:
-            result = validate_action_schema(action[TemplateFields.ACTION])
+            result = _validate_action_schema(action[TemplateFields.ACTION])
 
         if not result.is_valid_config:
             return result
@@ -225,7 +225,7 @@ def validate_actions_schema(actions):
     return result
 
 
-def validate_action_schema(action):
+def _validate_action_schema(action):
 
     schema = Schema({
         Required(TemplateFields.ACTION_TYPE, msg=123):

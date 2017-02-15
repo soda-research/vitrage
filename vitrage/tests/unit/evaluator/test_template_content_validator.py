@@ -11,6 +11,7 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+
 import copy
 import logging
 
@@ -56,6 +57,43 @@ class TemplateContentValidatorTest(base.BaseTest):
     def test_template_validator(self):
         for template in self.templates:
             self._test_execute_and_assert_with_correct_result(template)
+
+    def test_not_operator(self):
+        basic_correct_not_condition_path = \
+            '%s/templates/not_operator/basic_correct_not_condition.yaml' % \
+            utils.get_resources_dir()
+        basic_correct_not_condition_template = \
+            file_utils.load_yaml_file(basic_correct_not_condition_path)
+        self._test_execute_and_assert_with_correct_result(
+            basic_correct_not_condition_template)
+
+        basic_incorrect_not_condition_path = \
+            '%s/templates/not_operator/basic_incorrect_not_condition.yaml' % \
+            utils.get_resources_dir()
+        basic_incorrect_not_condition_template = \
+            file_utils.load_yaml_file(basic_incorrect_not_condition_path)
+        self._test_execute_and_assert_with_fault_result(
+            basic_incorrect_not_condition_template,
+            86)
+
+        complicated_correct_not_condition_path = \
+            '%s/templates/not_operator/' \
+            'complicated_correct_not_condition.yaml' % \
+            utils.get_resources_dir()
+        complicated_correct_not_condition_template = \
+            file_utils.load_yaml_file(complicated_correct_not_condition_path)
+        self._test_execute_and_assert_with_correct_result(
+            complicated_correct_not_condition_template)
+
+        complicated_incorrect_not_condition_path = \
+            '%s/templates/not_operator/' \
+            'complicated_incorrect_not_condition.yaml' % \
+            utils.get_resources_dir()
+        complicated_incorrect_not_condition_template = \
+            file_utils.load_yaml_file(complicated_incorrect_not_condition_path)
+        self._test_execute_and_assert_with_fault_result(
+            complicated_incorrect_not_condition_template,
+            86)
 
     def test_validate_entity_definition_with_no_unique_template_id(self):
 
@@ -131,7 +169,7 @@ class TemplateContentValidatorTest(base.BaseTest):
         action = self._create_raise_alarm_action('123')
 
         # Test action and assertions
-        result = validator.validate_raise_alarm_action(action, idx)
+        result = validator._validate_raise_alarm_action(action, idx)
 
         # Test Assertions
         self._test_assert_with_correct_result(result)
@@ -143,7 +181,7 @@ class TemplateContentValidatorTest(base.BaseTest):
         action = self._create_raise_alarm_action('unknown')
 
         # Test action
-        result = validator.validate_raise_alarm_action(action, idx)
+        result = validator._validate_raise_alarm_action(action, idx)
 
         # Test assertions
         self._test_assert_with_fault_result(result, 3)
@@ -156,7 +194,7 @@ class TemplateContentValidatorTest(base.BaseTest):
         action[TemplateFields.ACTION_TARGET].pop(TemplateFields.TARGET)
 
         # Test action
-        result = validator.validate_raise_alarm_action(action, idx)
+        result = validator._validate_raise_alarm_action(action, idx)
 
         # Test assertions
         self._test_assert_with_fault_result(result, 127)
@@ -169,7 +207,7 @@ class TemplateContentValidatorTest(base.BaseTest):
         action[TemplateFields.PROPERTIES].pop(TemplateFields.SEVERITY)
 
         # Test action
-        result = validator.validate_raise_alarm_action(action, idx)
+        result = validator._validate_raise_alarm_action(action, idx)
 
         # Test assertions
         self._test_assert_with_fault_result(result, 126)
@@ -182,7 +220,7 @@ class TemplateContentValidatorTest(base.BaseTest):
         action[TemplateFields.PROPERTIES].pop(TemplateFields.ALARM_NAME)
 
         # Test action
-        result = validator.validate_raise_alarm_action(action, idx)
+        result = validator._validate_raise_alarm_action(action, idx)
 
         # Test assertions
         self._test_assert_with_fault_result(result, 125)
@@ -194,7 +232,7 @@ class TemplateContentValidatorTest(base.BaseTest):
         action = self._create_set_state_action('123')
 
         # Test action and assertions
-        result = validator.validate_set_state_action(action, idx)
+        result = validator._validate_set_state_action(action, idx)
 
         # Test Assertions
         self._test_assert_with_correct_result(result)
@@ -206,7 +244,7 @@ class TemplateContentValidatorTest(base.BaseTest):
         action = self._create_set_state_action('unknown')
 
         # Test action
-        result = validator.validate_set_state_action(action, idx)
+        result = validator._validate_set_state_action(action, idx)
 
         # Test assertions
         self._test_assert_with_fault_result(result, 3)
@@ -219,7 +257,7 @@ class TemplateContentValidatorTest(base.BaseTest):
         action[TemplateFields.ACTION_TARGET].pop(TemplateFields.TARGET)
 
         # Test action
-        result = validator.validate_set_state_action(action, idx)
+        result = validator._validate_set_state_action(action, idx)
 
         # Test assertions
         self._test_assert_with_fault_result(result, 129)
@@ -232,7 +270,7 @@ class TemplateContentValidatorTest(base.BaseTest):
         action[TemplateFields.PROPERTIES].pop(TemplateFields.STATE, None)
 
         # Test action
-        result = validator.validate_set_state_action(action, idx)
+        result = validator._validate_set_state_action(action, idx)
 
         # Test assertions
         self._test_assert_with_fault_result(result, 128)
@@ -244,7 +282,7 @@ class TemplateContentValidatorTest(base.BaseTest):
         action = self._create_mark_down_action('123')
 
         # Test action and assertions
-        result = validator.validate_mark_down_action(action, idx)
+        result = validator._validate_mark_down_action(action, idx)
 
         # Test Assertions
         self._test_assert_with_correct_result(result)
@@ -256,7 +294,7 @@ class TemplateContentValidatorTest(base.BaseTest):
         action = self._create_mark_down_action('unknown')
 
         # Test action
-        result = validator.validate_mark_down_action(action, idx)
+        result = validator._validate_mark_down_action(action, idx)
 
         # Test assertions
         self._test_assert_with_fault_result(result, 3)
@@ -269,7 +307,7 @@ class TemplateContentValidatorTest(base.BaseTest):
         action[TemplateFields.ACTION_TARGET].pop(TemplateFields.TARGET)
 
         # Test action
-        result = validator.validate_mark_down_action(action, idx)
+        result = validator._validate_mark_down_action(action, idx)
 
         # Test assertions
         self._test_assert_with_fault_result(result, 131)
@@ -281,7 +319,8 @@ class TemplateContentValidatorTest(base.BaseTest):
         action = self._create_add_causal_relationship_action('a1', 'a2')
 
         # Test action and assertions
-        result = validator.validate_add_causal_relationship_action(action, idx)
+        result = \
+            validator._validate_add_causal_relationship_action(action, idx)
 
         # Test action and assertions
         self._test_assert_with_correct_result(result)
@@ -293,7 +332,8 @@ class TemplateContentValidatorTest(base.BaseTest):
         action = self._create_add_causal_relationship_action('unknown', 'a1')
 
         # Test action
-        result = validator.validate_add_causal_relationship_action(action, idx)
+        result = \
+            validator._validate_add_causal_relationship_action(action, idx)
 
         # Test assertion
         self._test_assert_with_fault_result(result, 3)
@@ -306,7 +346,8 @@ class TemplateContentValidatorTest(base.BaseTest):
         action[TemplateFields.ACTION_TARGET].pop(TemplateFields.TARGET, None)
 
         # Test action
-        result = validator.validate_add_causal_relationship_action(action, idx)
+        result = \
+            validator._validate_add_causal_relationship_action(action, idx)
 
         # Test assertion
         self._test_assert_with_fault_result(result, 130)
@@ -318,7 +359,8 @@ class TemplateContentValidatorTest(base.BaseTest):
         action = self._create_add_causal_relationship_action('a1', 'unknown')
 
         # Test action
-        result = validator.validate_add_causal_relationship_action(action, idx)
+        result = \
+            validator._validate_add_causal_relationship_action(action, idx)
 
         # Test assertion
         self._test_assert_with_fault_result(result, 3)
@@ -331,7 +373,8 @@ class TemplateContentValidatorTest(base.BaseTest):
         action[TemplateFields.ACTION_TARGET].pop(TemplateFields.SOURCE, None)
 
         # Test action
-        result = validator.validate_add_causal_relationship_action(action, idx)
+        result = \
+            validator._validate_add_causal_relationship_action(action, idx)
 
         # Test assertion
         self._test_assert_with_fault_result(result, 130)
@@ -343,7 +386,8 @@ class TemplateContentValidatorTest(base.BaseTest):
         action = self._create_add_causal_relationship_action('a1', '123')
 
         # Test action
-        result = validator.validate_add_causal_relationship_action(action, idx)
+        result = \
+            validator._validate_add_causal_relationship_action(action, idx)
 
         # Test assertion
         self._test_assert_with_fault_result(result, 132)
@@ -355,7 +399,8 @@ class TemplateContentValidatorTest(base.BaseTest):
         action = self._create_add_causal_relationship_action('123', 'a1')
 
         # Test action
-        result = validator.validate_add_causal_relationship_action(action, idx)
+        result = \
+            validator._validate_add_causal_relationship_action(action, idx)
 
         # Test assertion
         self._test_assert_with_fault_result(result, 132)
