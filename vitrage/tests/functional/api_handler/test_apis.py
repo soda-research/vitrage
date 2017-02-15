@@ -37,7 +37,7 @@ class TestApis(TestEntityGraphUnitBase):
         ctx = {'tenant': 'project_1', 'is_admin': True}
 
         # Action
-        alarms = apis.get_alarms(ctx, vitrage_id='all', all_tenants='0')
+        alarms = apis.get_alarms(ctx, vitrage_id='all', all_tenants=False)
         alarms = json.loads(alarms)['alarms']
 
         # Test assertions
@@ -51,7 +51,7 @@ class TestApis(TestEntityGraphUnitBase):
         ctx = {'tenant': 'project_2', 'is_admin': False}
 
         # Action
-        alarms = apis.get_alarms(ctx, vitrage_id='all', all_tenants='0')
+        alarms = apis.get_alarms(ctx, vitrage_id='all', all_tenants=False)
         alarms = json.loads(alarms)['alarms']
 
         # Test assertions
@@ -65,7 +65,7 @@ class TestApis(TestEntityGraphUnitBase):
         ctx = {'tenant': 'project_1', 'is_admin': False}
 
         # Action
-        alarms = apis.get_alarms(ctx, vitrage_id='all', all_tenants='1')
+        alarms = apis.get_alarms(ctx, vitrage_id='all', all_tenants=True)
         alarms = json.loads(alarms)['alarms']
 
         # Test assertions
@@ -79,7 +79,7 @@ class TestApis(TestEntityGraphUnitBase):
         ctx = {'tenant': 'project_1', 'is_admin': True}
 
         # Action
-        graph_rca = apis.get_rca(ctx, root='alarm_on_host', all_tenants='0')
+        graph_rca = apis.get_rca(ctx, root='alarm_on_host', all_tenants=False)
         graph_rca = json.loads(graph_rca)
 
         # Test assertions
@@ -95,7 +95,7 @@ class TestApis(TestEntityGraphUnitBase):
         # Action
         graph_rca = apis.get_rca(ctx,
                                  root='alarm_on_instance_3',
-                                 all_tenants='0')
+                                 all_tenants=False)
         graph_rca = json.loads(graph_rca)
 
         # Test assertions
@@ -109,7 +109,7 @@ class TestApis(TestEntityGraphUnitBase):
         ctx = {'tenant': 'project_2', 'is_admin': False}
 
         # Action
-        graph_rca = apis.get_rca(ctx, root='alarm_on_host', all_tenants='0')
+        graph_rca = apis.get_rca(ctx, root='alarm_on_host', all_tenants=False)
         graph_rca = json.loads(graph_rca)
 
         # Test assertions
@@ -123,7 +123,7 @@ class TestApis(TestEntityGraphUnitBase):
         ctx = {'tenant': 'project_1', 'is_admin': False}
 
         # Action
-        graph_rca = apis.get_rca(ctx, root='alarm_on_host', all_tenants='1')
+        graph_rca = apis.get_rca(ctx, root='alarm_on_host', all_tenants=True)
         graph_rca = json.loads(graph_rca)
 
         # Test assertions
@@ -143,7 +143,7 @@ class TestApis(TestEntityGraphUnitBase):
             depth=10,
             query=None,
             root='RESOURCE:openstack.cluster:OpenStack Cluster',
-            all_tenants=0)
+            all_tenants=False)
         graph_topology = json.loads(graph_topology)
 
         # Test assertions
@@ -165,7 +165,7 @@ class TestApis(TestEntityGraphUnitBase):
             depth=10,
             query=None,
             root='RESOURCE:openstack.cluster:OpenStack Cluster',
-            all_tenants=0)
+            all_tenants=False)
         graph_topology = json.loads(graph_topology)
 
         # Test assertions
@@ -187,7 +187,7 @@ class TestApis(TestEntityGraphUnitBase):
             depth=10,
             query=None,
             root='RESOURCE:openstack.cluster:OpenStack Cluster',
-            all_tenants=1)
+            all_tenants=True)
         graph_topology = json.loads(graph_topology)
 
         # Test assertions

@@ -30,12 +30,12 @@ LOG = log.getLogger(__name__)
 class AlarmsController(RootRestController):
 
     @pecan.expose('json')
-    def index(self, vitrage_id, all_tenants='0'):
+    def index(self, vitrage_id, all_tenants=False):
         return self.post(vitrage_id, all_tenants)
 
     @pecan.expose('json')
-    def post(self, vitrage_id, all_tenants='0'):
-        if all_tenants == '1':
+    def post(self, vitrage_id, all_tenants=False):
+        if all_tenants:
             enforce("list alarms:all_tenants", pecan.request.headers,
                     pecan.request.enforcer, {})
         else:
@@ -52,7 +52,7 @@ class AlarmsController(RootRestController):
             abort(404, str(e))
 
     @staticmethod
-    def _get_alarms(vitrage_id=None, all_tenants=0):
+    def _get_alarms(vitrage_id=None, all_tenants=False):
         alarms_json = pecan.request.client.call(pecan.request.context,
                                                 'get_alarms',
                                                 vitrage_id=vitrage_id,

@@ -47,7 +47,7 @@ class RcaApis(EntityGraphApisBase):
                                                  direction=Direction.IN,
                                                  edge_query_dict=EDGE_QUERY)
 
-        if all_tenants == '1':
+        if all_tenants:
             unified_graph = found_graph_in
             unified_graph.union(found_graph_out)
         else:
