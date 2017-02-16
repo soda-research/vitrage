@@ -57,7 +57,6 @@ class DoctorDriver(AlarmDriverBase):
 
         details = alarm[EventProps.DETAILS]
         return DoctorDetails.STATUS in details and \
-            DoctorDetails.SEVERITY in details and \
             DoctorDetails.HOSTNAME in details
 
     def _status_changed(self, new_alarm, old_alarm):

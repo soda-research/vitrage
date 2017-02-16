@@ -48,6 +48,9 @@ class DoctorTransformer(AlarmTransformerBase):
         details = entity_event.get(EventProps.DETAILS, {})
         details[VProps.NAME] = entity_event[EventProps.TYPE]
         details[EventProps.TIME] = entity_event[EventProps.TIME]
+        if DoctorDetails.SEVERITY not in details:
+            LOG.debug('adding default severity - CRITICAL')
+            details[DoctorDetails.SEVERITY] = 'critical'
 
         return graph_utils.create_vertex(
             self._create_entity_key(entity_event),
