@@ -13,7 +13,6 @@
 # under the License.
 
 from oslo_config import cfg
-from oslo_log import log as logging
 
 from six.moves import queue
 from vitrage.common.constants import DatasourceAction
@@ -27,8 +26,6 @@ from vitrage.tests.functional.base import \
     TestFunctionalBase
 import vitrage.tests.mocks.mock_driver as mock_driver
 from vitrage.tests.mocks import utils
-
-LOG = logging.getLogger(__name__)
 
 _TARGET_HOST = 'host-2'
 _NAGIOS_TEST_INFO = {'resource_name': _TARGET_HOST,

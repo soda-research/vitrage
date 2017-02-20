@@ -13,7 +13,6 @@
 # under the License.
 
 import abc
-from oslo_log import log as logging
 
 from vitrage.common.constants import EdgeLabel
 from vitrage.common.constants import EntityCategory
@@ -23,8 +22,6 @@ from vitrage.datasources.alarm_properties import AlarmProperties as AlarmProps
 from vitrage.datasources.nova.host import NOVA_HOST_DATASOURCE
 from vitrage.tests.unit.datasources.test_transformer_base import \
     BaseTransformerTest
-
-LOG = logging.getLogger(__name__)
 
 
 # noinspection PyProtectedMember

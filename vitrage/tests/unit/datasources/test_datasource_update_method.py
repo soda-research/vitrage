@@ -13,7 +13,6 @@
 # under the License.
 
 from oslo_config import cfg
-from oslo_log import log as logging
 from oslo_utils import importutils as utils
 
 from vitrage.common.constants import UpdateMethod
@@ -27,7 +26,6 @@ from vitrage.tests import base
 
 
 CHANGES_INTERVAL = 'changes_interval'
-LOG = logging.getLogger(__name__)
 ZABBIX_DATASOURCE_NONE = '_'.join((ZABBIX_DATASOURCE, UpdateMethod.NONE))
 ZABBIX_DATASOURCE_PULL = '_'.join((ZABBIX_DATASOURCE, UpdateMethod.PULL))
 ZABBIX_DATASOURCE_PUSH = ZABBIX_DATASOURCE

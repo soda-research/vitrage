@@ -13,7 +13,6 @@
 # under the License.
 
 from oslo_config import cfg
-from oslo_log import log as logging
 
 from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import UpdateMethod
@@ -23,8 +22,6 @@ from vitrage.datasources.aodh.properties import AodhProperties as AodhProps
 from vitrage.tests import base
 from vitrage.tests.mocks import mock_driver
 from vitrage.tests.unit.datasources.aodh.mock_driver import MockAodhDriver
-
-LOG = logging.getLogger(__name__)
 
 
 class AodhDriverTest(base.BaseTest):

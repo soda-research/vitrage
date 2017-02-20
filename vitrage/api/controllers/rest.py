@@ -14,12 +14,9 @@
 
 import networkx as nx
 from networkx.readwrite import json_graph
-from oslo_log import log
 from pecan import rest
 
 from vitrage.datasources import OPENSTACK_CLUSTER
-
-LOG = log.getLogger(__name__)
 
 
 class RootRestController(rest.RestController):

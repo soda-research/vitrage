@@ -13,7 +13,6 @@
 # under the License.
 
 from oslo_config import cfg
-from oslo_log import log as logging
 
 from vitrage.datasources.nova.host import NOVA_HOST_DATASOURCE
 from vitrage.datasources.zabbix.driver import ZabbixDriver
@@ -21,9 +20,6 @@ from vitrage.datasources.zabbix.properties import ZabbixProperties \
     as ZabbixProps
 from vitrage.tests import base
 from vitrage.tests.mocks import utils
-
-
-LOG = logging.getLogger(__name__)
 
 
 class TestZabbixConfig(base.BaseTest):

@@ -15,7 +15,6 @@
 import time
 
 from oslo_config import cfg
-from oslo_log import log as logging
 
 from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import UpdateMethod
@@ -29,8 +28,6 @@ from vitrage.tests.mocks import mock_transformer
 from vitrage.tests.unit.datasources.test_alarm_transformer_base import \
     BaseAlarmTransformerTest
 from vitrage.utils.datetime import format_unix_timestamp
-
-LOG = logging.getLogger(__name__)
 
 
 # noinspection PyProtectedMember

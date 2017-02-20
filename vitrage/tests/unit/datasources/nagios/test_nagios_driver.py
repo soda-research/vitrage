@@ -13,7 +13,6 @@
 # under the License.
 
 from oslo_config import cfg
-from oslo_log import log as logging
 from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import GraphAction
 from vitrage.datasources.nagios.properties import NagiosProperties as \
@@ -22,8 +21,6 @@ from vitrage.tests.mocks import utils
 from vitrage.tests.unit.datasources.nagios.mock_driver import MockNagiosDriver
 from vitrage.tests.unit.datasources.nagios.nagios_base_test import \
     NagiosBaseTest
-
-LOG = logging.getLogger(__name__)
 
 
 # noinspection PyProtectedMember

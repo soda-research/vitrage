@@ -12,8 +12,6 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from oslo_log import log as logging
-
 from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import EdgeLabel
 from vitrage.common.constants import EntityCategory
@@ -26,8 +24,6 @@ from vitrage.datasources.collectd.properties import\
 from vitrage.datasources import transformer_base as tbase
 import vitrage.graph.utils as graph_utils
 from vitrage.utils.datetime import format_unix_timestamp
-
-LOG = logging.getLogger(__name__)
 
 
 class CollectdTransformer(AlarmTransformerBase):
