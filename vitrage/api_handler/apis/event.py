@@ -57,6 +57,6 @@ class EventApis(EntityGraphApisBase):
                 get_transport(self.conf),
                 driver='messagingv2',
                 publisher_id=self.publisher,
-                topic='vitrage_notifications')
+                topics=['vitrage_notifications'])
         except Exception as e:
             LOG.info('Failed to initialize oslo notifier %s', str(e))

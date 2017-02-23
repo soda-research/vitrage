@@ -64,7 +64,7 @@ class VitrageNotifier(object):
             transport,
             driver='messagingv2',
             publisher_id=publisher_id,
-            topic=topic)
+            topics=[topic])
 
     def notify(self, event_type, data):
         LOG.debug('notify : ' + event_type + ' ' + str(data))

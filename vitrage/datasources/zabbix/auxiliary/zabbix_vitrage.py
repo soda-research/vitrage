@@ -74,7 +74,7 @@ def main():
     notifier = messaging.Notifier(transport,
                                   driver=driver,
                                   publisher_id=publisher,
-                                  topic='vitrage_notifications')
+                                  topics=['vitrage_notifications'])
 
     alarm_status = args.topic.lower()
     event_type = '%s.%s' % (ZABBIX_EVENT_TYPE, alarm_status)
