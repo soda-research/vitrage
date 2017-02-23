@@ -1,4 +1,4 @@
-# Copyright 2016 - Nokia
+# Copyright 2017 - Nokia
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -11,13 +11,18 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+import abc
 
-from oslo_config import cfg
+import six
 
-OPTS = [
-    cfg.ListOpt('notifiers',
-                help='Names of enabled notifiers (example aodh, nova, snmp)'),
-    cfg.ListOpt('notifiers_path',
-                default=['vitrage.notifier.plugins'],
-                help='list of base path for notifiers'),
-]
+
+@six.add_metaclass(abc.ABCMeta)
+class SnmpSenderBase(object):
+    """Abstract Vitrage snmp trap sender"""
+
+    def __init__(self, conf):
+        self.conf = conf
+
+    @abc.abstractmethod
+    def send_snmp(self, alarm_data):
+        pass

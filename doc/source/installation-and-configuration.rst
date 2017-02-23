@@ -47,3 +47,5 @@ Configuration
 
 * `Zabbix Configuration <http://docs.openstack.org/developer/vitrage/zabbix_vitrage.html>`_
 
+* `SNMP Sender Configuration <https://github.com/openstack/vitrage/blob/master/doc/source/notifier-snmp-plugin.rst>`_
+

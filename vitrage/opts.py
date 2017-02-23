@@ -24,6 +24,7 @@ import vitrage.entity_graph.consistency
 import vitrage.evaluator
 import vitrage.keystone_client
 import vitrage.notifier
+import vitrage.notifier.plugins.snmp
 import vitrage.os_clients
 import vitrage.rpc
 
@@ -43,6 +44,7 @@ def list_opts():
         ('consistency', vitrage.entity_graph.consistency.OPTS),
         ('entity_graph', vitrage.entity_graph.OPTS),
         ('service_credentials', vitrage.keystone_client.OPTS),
+        ('snmp', vitrage.notifier.plugins.snmp.OPTS),
         ('DEFAULT', itertools.chain(
             vitrage.os_clients.OPTS,
             vitrage.rpc.OPTS,

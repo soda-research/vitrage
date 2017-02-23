@@ -55,6 +55,10 @@ def load_yaml_files(dir_path, with_exception=False):
 
 
 def load_yaml_file(full_path, with_exception=False):
+    if not os.path.isfile(full_path):
+        LOG.error("File doesn't exist: %s." % full_path)
+        return None
+
     with open(full_path, 'r') as stream:
         try:
             return yaml.load(stream, Loader=yaml.BaseLoader)
