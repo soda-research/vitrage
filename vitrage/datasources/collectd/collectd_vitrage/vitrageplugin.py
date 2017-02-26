@@ -54,7 +54,7 @@ class VitrageNotifier(CollectDPlugin):
         self.notifier = messaging.Notifier(transport,
                                            driver='messagingv2',
                                            publisher_id='collectd',
-                                           topic='vitrage_notifications')
+                                           topics=['vitrage_notifications'])
         self.add_notification_callback(self.notify)
 
     def notify(self, notification):

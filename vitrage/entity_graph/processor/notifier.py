@@ -39,7 +39,7 @@ class GraphNotifier(object):
                 get_transport(conf),
                 driver='messagingv2',
                 publisher_id='vitrage.graph',
-                topic=topic)
+                topics=[topic])
         except Exception as e:
             LOG.info('Graph Notifier - missing configuration %s' % str(e))
 
