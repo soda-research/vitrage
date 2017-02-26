@@ -30,25 +30,9 @@ DEVSTACK_LOCAL_CONFIG+=$'\nenable_plugin aodh git://git.openstack.org/openstack/
 DEVSTACK_LOCAL_CONFIG+=$'\ndisable_service ceilometer-alarm-evaluator,ceilometer-alarm-notifier'
 DEVSTACK_LOCAL_CONFIG+=$'\ndisable_service n-net'
 
-export DEVSTACK_LOCAL_CONFIG
-
-if [ -z ${ENABLED_SERVICES+x} ]; then
-    ENABLED_SERVICES=tempest
-fi
-ENABLED_SERVICES+=,q-svc,q-dhcp,q-meta,q-agt,q-l3
-ENABLED_SERVICES+=,h-eng h-api h-api-cfn h-api-cw
-ENABLED_SERVICES+=,vitrage-api,vitrage-graph
-ENABLED_SERVICES+=,key,aodi-api,aodh-notifier,aodh-evaluator
-ENABLED_SERVICES+=,ceilometer-alarm-evaluator,ceilometer-alarm-notifier
-ENABLED_SERVICES+=,ceilometer-api
-ENABLED_SERVICES+=,aodh-api
-export ENABLED_SERVICES
+DEVSTACK_LOCAL_CONFIG+="$(cat <<EOF
 
 
-GATE_DEST=$BASE/new
-DEVSTACK_PATH=$GATE_DEST/devstack
-
-cat > $DEVSTACK_PATH/local.conf <<EOF
 [[post-config|\$NOVA_CONF]]
 [DEFAULT]
 notification_topics = notifications,vitrage_notifications
@@ -63,9 +47,6 @@ notification_driver = messagingv2
 [DEFAULT]
 notification_topics = notifications,vitrage_notifications
 notification_driver = messagingv2
-
-[oslo_messaging_notifications]
-transport_url = rabbit://$RABBIT_USERID:$RABBIT_PASSWORD@$RABBIT_HOST:5672/
 
 [[post-config|\$HEAT_CONF]]
 [DEFAULT]
@@ -85,5 +66,23 @@ changes_interval = 5
 [datasources]
 snapshots_interval = 120
 EOF
+)"
 
+export DEVSTACK_LOCAL_CONFIG
+
+if [ -z ${ENABLED_SERVICES+x} ]; then
+    ENABLED_SERVICES=tempest
+fi
+ENABLED_SERVICES+=,q-svc,q-dhcp,q-meta,q-agt,q-l3
+ENABLED_SERVICES+=,h-eng h-api h-api-cfn h-api-cw
+ENABLED_SERVICES+=,vitrage-api,vitrage-graph
+ENABLED_SERVICES+=,key,aodi-api,aodh-notifier,aodh-evaluator
+ENABLED_SERVICES+=,ceilometer-alarm-evaluator,ceilometer-alarm-notifier
+ENABLED_SERVICES+=,ceilometer-api
+ENABLED_SERVICES+=,aodh-api
+export ENABLED_SERVICES
+
+
+GATE_DEST=$BASE/new
+DEVSTACK_PATH=$GATE_DEST/devstack
 $GATE_DEST/devstack-gate/devstack-vm-gate.sh
