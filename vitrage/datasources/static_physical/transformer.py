@@ -12,8 +12,6 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from oslo_log import log as logging
-
 from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import GraphAction
@@ -25,8 +23,6 @@ from vitrage.datasources.static_physical import STATIC_PHYSICAL_DATASOURCE
 from vitrage.datasources.static_physical import SWITCH
 from vitrage.datasources import transformer_base
 import vitrage.graph.utils as graph_utils
-
-LOG = logging.getLogger(__name__)
 
 
 class StaticPhysicalTransformer(ResourceTransformerBase):

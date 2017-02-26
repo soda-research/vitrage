@@ -15,7 +15,6 @@
 import datetime
 
 from oslo_config import cfg
-from oslo_log import log as logging
 
 from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import EntityCategory
@@ -28,8 +27,6 @@ from vitrage.datasources.static import STATIC_DATASOURCE
 from vitrage.datasources.static.transformer import StaticTransformer
 from vitrage.tests import base
 from vitrage.tests.mocks import mock_driver
-
-LOG = logging.getLogger(__name__)
 
 
 class TestStaticTransformer(base.BaseTest):

@@ -13,7 +13,6 @@
 # under the License.
 
 from oslo_config import cfg
-from oslo_log import log as logging
 
 from vitrage.datasources.nagios.config import NagiosConfig
 from vitrage.datasources.nagios.config import NagiosHostMapping
@@ -21,8 +20,6 @@ from vitrage.datasources.nova.host import NOVA_HOST_DATASOURCE
 from vitrage.datasources.nova.instance import NOVA_INSTANCE_DATASOURCE
 from vitrage.tests import base
 from vitrage.tests.mocks import utils
-
-LOG = logging.getLogger(__name__)
 
 
 class TestNagiosConfig(base.BaseTest):

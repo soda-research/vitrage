@@ -12,12 +12,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from oslo_log import log as logging
-
 from vitrage.datasources import transformer_base as tbase
-
-
-LOG = logging.getLogger(__name__)
 
 
 class ResourceTransformerBase(tbase.TransformerBase):

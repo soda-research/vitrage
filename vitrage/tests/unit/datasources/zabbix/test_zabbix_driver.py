@@ -15,7 +15,6 @@
 import copy
 
 from oslo_config import cfg
-from oslo_log import log as logging
 
 from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import GraphAction
@@ -24,8 +23,6 @@ from vitrage.tests.mocks import utils
 from vitrage.tests.unit.datasources.zabbix.mock_driver import MockZabbixDriver
 from vitrage.tests.unit.datasources.zabbix.zabbix_base_test import \
     ZabbixBaseTest
-
-LOG = logging.getLogger(__name__)
 
 
 # noinspection PyProtectedMember

@@ -14,7 +14,6 @@
 
 
 from oslo_config import cfg
-from oslo_log import log as logging
 
 from six.moves import queue
 from vitrage.common.constants import EdgeLabel
@@ -33,8 +32,6 @@ from vitrage.evaluator.template_data import ActionSpecs
 from vitrage.evaluator.template_fields import TemplateFields as TFields
 from vitrage.opts import register_opts
 from vitrage.tests.functional.base import TestFunctionalBase
-
-LOG = logging.getLogger(__name__)
 
 
 class TestActionExecutor(TestFunctionalBase):

@@ -13,7 +13,6 @@
 # under the License.
 
 from oslo_config import cfg
-from oslo_log import log as logging
 
 from vitrage.common.constants import DatasourceAction
 from vitrage.common.constants import GraphAction
@@ -23,9 +22,6 @@ from vitrage.datasources.static import STATIC_DATASOURCE
 from vitrage.datasources.static import StaticFields
 from vitrage.tests import base
 from vitrage.tests.mocks import utils
-
-
-LOG = logging.getLogger(__name__)
 
 
 class TestStaticDriver(base.BaseTest):

@@ -15,7 +15,6 @@
 import os
 
 from oslo_config import cfg
-from oslo_log import log as logging
 
 from vitrage.common.constants import DatasourceAction
 from vitrage.common.constants import DatasourceProperties as DSProps
@@ -27,9 +26,6 @@ from vitrage.datasources.static_physical import SWITCH
 from vitrage.tests import base
 from vitrage.tests.mocks import utils
 from vitrage.utils import file as file_utils
-
-
-LOG = logging.getLogger(__name__)
 
 
 class TestStaticPhysicalDriver(base.BaseTest):
