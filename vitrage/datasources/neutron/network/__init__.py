@@ -13,22 +13,23 @@
 # under the License.
 
 from oslo_config import cfg
+from vitrage.common.constants import DatasourceOpts as DSOpts
 from vitrage.common.constants import UpdateMethod
 
 NEUTRON_NETWORK_DATASOURCE = 'neutron.network'
 
 OPTS = [
-    cfg.StrOpt('transformer',
+    cfg.StrOpt(DSOpts.TRANSFORMER,
                default='vitrage.datasources.neutron.network.transformer.'
                        'NetworkTransformer',
                help='Neutron network transformer class path',
                required=True),
-    cfg.StrOpt('driver',
+    cfg.StrOpt(DSOpts.DRIVER,
                default='vitrage.datasources.neutron.network.driver.'
                        'NetworkDriver',
                help='Neutron network driver class path',
                required=True),
-    cfg.StrOpt('update_method',
+    cfg.StrOpt(DSOpts.UPDATE_METHOD,
                default=UpdateMethod.PUSH,
                help='None: updates only via Vitrage periodic snapshots.'
                     'Pull: updates every [changes_interval] seconds.'

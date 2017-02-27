@@ -14,6 +14,7 @@
 
 from oslo_config import cfg
 
+from vitrage.common.constants import DatasourceOpts as DSOpts
 from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import UpdateMethod
 from vitrage.datasources.aodh import AODH_DATASOURCE
@@ -27,7 +28,7 @@ from vitrage.tests.unit.datasources.aodh.mock_driver import MockAodhDriver
 class AodhDriverTest(base.BaseTest):
 
     OPTS = [
-        cfg.StrOpt('update_method',
+        cfg.StrOpt(DSOpts.UPDATE_METHOD,
                    default=UpdateMethod.PUSH),
     ]
 

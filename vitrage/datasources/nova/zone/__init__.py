@@ -13,22 +13,23 @@
 # under the License.
 
 from oslo_config import cfg
+from vitrage.common.constants import DatasourceOpts as DSOpts
 from vitrage.common.constants import UpdateMethod
 
 NOVA_ZONE_DATASOURCE = 'nova.zone'
 
 OPTS = [
-    cfg.StrOpt('transformer',
+    cfg.StrOpt(DSOpts.TRANSFORMER,
                default='vitrage.datasources.nova.zone.transformer.'
                        'ZoneTransformer',
                help='Nova zone transformer class path',
                required=True),
-    cfg.StrOpt('driver',
+    cfg.StrOpt(DSOpts.DRIVER,
                default='vitrage.datasources.nova.zone.driver'
                        '.ZoneDriver',
                help='Nova zone datasource class path',
                required=True),
-    cfg.StrOpt('update_method',
+    cfg.StrOpt(DSOpts.UPDATE_METHOD,
                default=UpdateMethod.NONE,
                help='None: updates only via Vitrage periodic snapshots.'
                     'Pull: updates every [changes_interval] seconds.'

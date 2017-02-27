@@ -15,6 +15,7 @@
 from oslo_config import cfg
 
 from vitrage.common.constants import DatasourceAction
+from vitrage.common.constants import DatasourceOpts as DSOpts
 from vitrage.common.constants import GraphAction
 from vitrage.common.constants import TopologyFields
 from vitrage.datasources.static import driver
@@ -27,13 +28,13 @@ from vitrage.tests.mocks import utils
 class TestStaticDriver(base.BaseTest):
 
     OPTS = [
-        cfg.StrOpt('transformer',
+        cfg.StrOpt(DSOpts.TRANSFORMER,
                    default='vitrage.datasources.static.transformer.'
                            'StaticTransformer'),
-        cfg.StrOpt('driver',
+        cfg.StrOpt(DSOpts.DRIVER,
                    default='vitrage.datasources.static.driver.'
                            'StaticDriver'),
-        cfg.IntOpt('changes_interval',
+        cfg.IntOpt(DSOpts.CHANGES_INTERVAL,
                    default=30,
                    min=30,
                    help='interval between checking changes in the '
@@ -43,13 +44,13 @@ class TestStaticDriver(base.BaseTest):
     ]
 
     CHANGES_OPTS = [
-        cfg.StrOpt('transformer',
+        cfg.StrOpt(DSOpts.TRANSFORMER,
                    default='vitrage.datasources.static.transformer.'
                            'StaticTransformer'),
-        cfg.StrOpt('driver',
+        cfg.StrOpt(DSOpts.DRIVER,
                    default='vitrage.datasources.static.driver.'
                            'StaticDriver'),
-        cfg.IntOpt('changes_interval',
+        cfg.IntOpt(DSOpts.CHANGES_INTERVAL,
                    default=30,
                    min=30,
                    help='interval between checking changes in the static '

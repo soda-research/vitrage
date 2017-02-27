@@ -13,28 +13,29 @@
 # under the License.
 
 from oslo_config import cfg
+from vitrage.common.constants import DatasourceOpts as DSOpts
 from vitrage.common.constants import UpdateMethod
 
 ZABBIX_DATASOURCE = 'zabbix'
 
 OPTS = [
-    cfg.StrOpt('transformer',
+    cfg.StrOpt(DSOpts.TRANSFORMER,
                default='vitrage.datasources.zabbix.transformer.'
                        'ZabbixTransformer',
                help='Zabbix transformer class path',
                required=True),
-    cfg.StrOpt('driver',
+    cfg.StrOpt(DSOpts.DRIVER,
                default='vitrage.datasources.zabbix.driver.ZabbixDriver',
                help='Zabbix driver class path',
                required=True),
-    cfg.StrOpt('update_method',
+    cfg.StrOpt(DSOpts.UPDATE_METHOD,
                default=UpdateMethod.PUSH,
                help='None: updates only via Vitrage periodic snapshots.'
                     'Pull: updates every [changes_interval] seconds.'
                     'Push: updates by getting notifications from the'
                     ' datasource itself.',
                required=True),
-    cfg.IntOpt('changes_interval',
+    cfg.IntOpt(DSOpts.CHANGES_INTERVAL,
                default=30,
                min=10,
                help='interval between checking changes in zabbix data source'),
@@ -44,6 +45,6 @@ OPTS = [
                help='Zabbix user password'),
     cfg.StrOpt('url', default='',
                help='Zabbix url'),
-    cfg.StrOpt('config_file', default='/etc/vitrage/zabbix_conf.yaml',
+    cfg.StrOpt(DSOpts.CONFIG_FILE, default='/etc/vitrage/zabbix_conf.yaml',
                help='Zabbix configuration file'),
 ]

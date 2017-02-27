@@ -13,21 +13,22 @@
 # under the License.
 
 from oslo_config import cfg
+from vitrage.common.constants import DatasourceOpts as DSOpts
 from vitrage.common.constants import UpdateMethod
 
 DOCTOR_DATASOURCE = 'doctor'
 
 OPTS = [
-    cfg.StrOpt('transformer',
+    cfg.StrOpt(DSOpts.TRANSFORMER,
                default='vitrage.datasources.doctor.transformer.'
                        'DoctorTransformer',
                help='Doctor transformer class path',
                required=True),
-    cfg.StrOpt('driver',
+    cfg.StrOpt(DSOpts.DRIVER,
                default='vitrage.datasources.doctor.driver.DoctorDriver',
                help='Doctor driver class path',
                required=True),
-    cfg.StrOpt('update_method',
+    cfg.StrOpt(DSOpts.UPDATE_METHOD,
                default=UpdateMethod.PUSH,
                help='None: updates only via Vitrage periodic snapshots.'
                     'Pull: updates every [changes_interval] seconds.'

@@ -13,28 +13,29 @@
 # under the License.
 
 from oslo_config import cfg
+from vitrage.common.constants import DatasourceOpts as DSOpts
 from vitrage.common.constants import UpdateMethod
 
 NAGIOS_DATASOURCE = 'nagios'
 
 OPTS = [
-    cfg.StrOpt('transformer',
+    cfg.StrOpt(DSOpts.TRANSFORMER,
                default='vitrage.datasources.nagios.transformer.'
                        'NagiosTransformer',
                help='Nagios transformer class path',
                required=True),
-    cfg.StrOpt('driver',
+    cfg.StrOpt(DSOpts.DRIVER,
                default='vitrage.datasources.nagios.driver.NagiosDriver',
                help='Nagios driver class path',
                required=True),
-    cfg.StrOpt('update_method',
+    cfg.StrOpt(DSOpts.UPDATE_METHOD,
                default=UpdateMethod.PULL,
                help='None: updates only via Vitrage periodic snapshots.'
                     'Pull: updates every [changes_interval] seconds.'
                     'Push: updates by getting notifications from the'
                     ' datasource itself.',
                required=True),
-    cfg.IntOpt('changes_interval',
+    cfg.IntOpt(DSOpts.CHANGES_INTERVAL,
                default=30,
                min=30,
                help='interval between checking changes in nagios data source'),
@@ -44,6 +45,6 @@ OPTS = [
                help='Nagios user password'),
     cfg.StrOpt('url', default='',
                help='Nagios url'),
-    cfg.StrOpt('config_file', default='/etc/vitrage/nagios_conf.yaml',
+    cfg.StrOpt(DSOpts.CONFIG_FILE, default='/etc/vitrage/nagios_conf.yaml',
                help='Nagios configuration file'),
 ]

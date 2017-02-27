@@ -15,6 +15,7 @@
 from oslo_config import cfg
 from oslo_log import log as logging
 
+from vitrage.common.constants import DatasourceOpts as DSOpts
 from vitrage.common.constants import GraphAction
 from vitrage.common.constants import UpdateMethod
 from vitrage.common.constants import VertexProperties as VProps
@@ -30,7 +31,7 @@ LOG = logging.getLogger(__name__)
 class TestConsistencyTransformer(base.BaseTest):
 
     OPTS = [
-        cfg.StrOpt('update_method',
+        cfg.StrOpt(DSOpts.UPDATE_METHOD,
                    default=UpdateMethod.PUSH),
     ]
 

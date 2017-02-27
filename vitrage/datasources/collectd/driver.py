@@ -16,6 +16,7 @@
 from oslo_log import log
 
 from vitrage.common.constants import DatasourceAction
+from vitrage.common.constants import DatasourceOpts as DSOpts
 from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.datasources.alarm_driver_base import AlarmDriverBase
 from vitrage.datasources.collectd import COLLECTD_DATASOURCE
@@ -59,9 +60,9 @@ class CollectdDriver(AlarmDriverBase):
     @staticmethod
     def _configuration_mapping(conf):
         try:
-            collectd_config_file = conf.collectd['config_file']
+            collectd_config_file = conf.collectd[DSOpts.CONFIG_FILE]
             collectd_config = file_utils.load_yaml_file(collectd_config_file)
-            collectd_config_elements = collectd_config['collectd']
+            collectd_config_elements = collectd_config[COLLECTD_DATASOURCE]
 
             mappings = {}
             for element_config in collectd_config_elements:

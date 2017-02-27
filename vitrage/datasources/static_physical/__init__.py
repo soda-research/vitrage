@@ -13,30 +13,31 @@
 # under the License.
 
 from oslo_config import cfg
+from vitrage.common.constants import DatasourceOpts as DSOpts
 from vitrage.common.constants import UpdateMethod
 
 STATIC_PHYSICAL_DATASOURCE = 'static_physical'
 SWITCH = 'switch'
 
 OPTS = [
-    cfg.StrOpt('transformer',
+    cfg.StrOpt(DSOpts.TRANSFORMER,
                default='vitrage.datasources.static_physical.transformer.'
                        'StaticPhysicalTransformer',
                help='Static physical transformer class path',
                required=True),
-    cfg.StrOpt('driver',
+    cfg.StrOpt(DSOpts.DRIVER,
                default='vitrage.datasources.static_physical.driver.'
                        'StaticPhysicalDriver',
                help='Static physical driver class path',
                required=True),
-    cfg.StrOpt('update_method',
+    cfg.StrOpt(DSOpts.UPDATE_METHOD,
                default=UpdateMethod.PULL,
                help='None: updates only via Vitrage periodic snapshots.'
                     'Pull: updates every [changes_interval] seconds.'
                     'Push: updates by getting notifications from the'
                     ' datasource itself.',
                required=True),
-    cfg.IntOpt('changes_interval',
+    cfg.IntOpt(DSOpts.CHANGES_INTERVAL,
                default=20,
                min=5,
                help='interval between checking changes in the configuration '

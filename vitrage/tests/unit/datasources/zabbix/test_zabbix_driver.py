@@ -16,6 +16,7 @@ import copy
 
 from oslo_config import cfg
 
+from vitrage.common.constants import DatasourceOpts as DSOpts
 from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import GraphAction
 from vitrage.datasources.zabbix.properties import ZabbixProperties as ZProps
@@ -29,7 +30,7 @@ from vitrage.tests.unit.datasources.zabbix.zabbix_base_test import \
 class ZabbixDriverTest(ZabbixBaseTest):
 
     OPTS = [
-        cfg.StrOpt('config_file',
+        cfg.StrOpt(DSOpts.CONFIG_FILE,
                    help='Zabbix configuration file',
                    default=utils.get_resources_dir()
                         + '/zabbix/zabbix_conf.yaml'),

@@ -13,6 +13,8 @@
 # under the License.
 
 from oslo_config import cfg
+
+from vitrage.common.constants import DatasourceOpts as DSOpts
 from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import GraphAction
 from vitrage.datasources.nagios.properties import NagiosProperties as \
@@ -27,7 +29,7 @@ from vitrage.tests.unit.datasources.nagios.nagios_base_test import \
 class NagiosDriverTest(NagiosBaseTest):
 
     OPTS = [
-        cfg.StrOpt('config_file',
+        cfg.StrOpt(DSOpts.CONFIG_FILE,
                    default=utils.get_resources_dir() +
                    '/nagios/nagios_conf.yaml',
                    help='Nagios configuration file'

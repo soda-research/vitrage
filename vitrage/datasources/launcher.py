@@ -17,13 +17,13 @@ import itertools
 
 from oslo_service import service as os_service
 from oslo_utils import importutils as utils
+
+from vitrage.common.constants import DatasourceOpts as DSOpts
 from vitrage.common.constants import UpdateMethod
 from vitrage.datasources.listener_service import ListenerService
 from vitrage.datasources.services import ChangesService
 from vitrage.datasources.services import SnapshotsService
 from vitrage.utils import opt_exists
-
-CHANGES_INTERVAL = 'changes_interval'
 
 
 def create_send_to_queue_callback(queue):
@@ -76,4 +76,4 @@ class Launcher(object):
     def _get_pull_datasources(conf):
         return (datasource for datasource in conf.datasources.types
                 if conf[datasource].update_method.lower() == UpdateMethod.PULL
-                and opt_exists(conf[datasource], CHANGES_INTERVAL))
+                and opt_exists(conf[datasource], DSOpts.CHANGES_INTERVAL))

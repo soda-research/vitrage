@@ -15,6 +15,7 @@
 from datetime import datetime
 from oslo_config import cfg
 
+from vitrage.common.constants import DatasourceOpts as DSOpts
 from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import EventProperties as EventProps
 from vitrage.common.constants import UpdateMethod
@@ -35,7 +36,7 @@ from vitrage.tests.unit.datasources.test_alarm_transformer_base import \
 class DoctorTransformerTest(BaseAlarmTransformerTest):
 
     OPTS = [
-        cfg.StrOpt('update_method',
+        cfg.StrOpt(DSOpts.UPDATE_METHOD,
                    default=UpdateMethod.PUSH),
     ]
 

@@ -16,6 +16,7 @@ import datetime
 
 from oslo_config import cfg
 
+from vitrage.common.constants import DatasourceOpts as DSOpts
 from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import TopologyFields
@@ -32,7 +33,7 @@ from vitrage.tests.mocks import mock_driver
 class TestStaticTransformer(base.BaseTest):
 
     OPTS = [
-        cfg.StrOpt('update_method',
+        cfg.StrOpt(DSOpts.UPDATE_METHOD,
                    default=UpdateMethod.PULL),
     ]
 

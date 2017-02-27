@@ -15,6 +15,7 @@
 from oslo_config import cfg
 from oslo_utils import importutils as utils
 
+from vitrage.common.constants import DatasourceOpts as DSOpts
 from vitrage.common.constants import UpdateMethod
 from vitrage.datasources.launcher import Launcher
 from vitrage.datasources.listener_service import ListenerService
@@ -25,7 +26,6 @@ from vitrage.datasources.zabbix import ZABBIX_DATASOURCE
 from vitrage.tests import base
 
 
-CHANGES_INTERVAL = 'changes_interval'
 ZABBIX_DATASOURCE_NONE = '_'.join((ZABBIX_DATASOURCE, UpdateMethod.NONE))
 ZABBIX_DATASOURCE_PULL = '_'.join((ZABBIX_DATASOURCE, UpdateMethod.PULL))
 ZABBIX_DATASOURCE_PUSH = ZABBIX_DATASOURCE
@@ -51,11 +51,11 @@ class DatasourceUpdateMethod(base.BaseTest):
     ]
 
     NOVA_HOST_OPTS = [
-        cfg.StrOpt('driver',
+        cfg.StrOpt(DSOpts.DRIVER,
                    default='vitrage.datasources.nova.host.driver.HostDriver',
                    help='Nova host driver class path',
                    required=True),
-        cfg.StrOpt('update_method',
+        cfg.StrOpt(DSOpts.UPDATE_METHOD,
                    default=UpdateMethod.NONE,
                    help='None: updates only via Vitrage periodic snapshots.'
                         'Pull: updates every [changes_interval] seconds.'
@@ -65,25 +65,25 @@ class DatasourceUpdateMethod(base.BaseTest):
     ]
 
     NOVA_INSTANCE_OPTS = [
-        cfg.StrOpt('driver',
+        cfg.StrOpt(DSOpts.DRIVER,
                    default='vitrage.datasources.nova.instance.driver.'
                            'InstanceDriver',
                    help='Nova instance driver class path',
                    required=True),
-        cfg.StrOpt('update_method',
+        cfg.StrOpt(DSOpts.UPDATE_METHOD,
                    default=UpdateMethod.PUSH,
                    required=True),
     ]
 
     NAGIOS_OPTS = [
-        cfg.StrOpt('driver',
+        cfg.StrOpt(DSOpts.DRIVER,
                    default='vitrage.datasources.nagios.driver.NagiosDriver',
                    help='Nagios driver class path',
                    required=True),
-        cfg.StrOpt('update_method',
+        cfg.StrOpt(DSOpts.UPDATE_METHOD,
                    default=UpdateMethod.PULL,
                    required=True),
-        cfg.IntOpt('changes_interval',
+        cfg.IntOpt(DSOpts.CHANGES_INTERVAL,
                    default=30,
                    min=30,
                    help='interval between checking changes in nagios'
@@ -91,14 +91,14 @@ class DatasourceUpdateMethod(base.BaseTest):
     ]
 
     ZABBIX_OPTS_PUSH = [
-        cfg.StrOpt('driver',
+        cfg.StrOpt(DSOpts.DRIVER,
                    default='vitrage.datasources.zabbix.driver.ZabbixDriver',
                    help='Zabbix driver class path',
                    required=True),
-        cfg.StrOpt('update_method',
+        cfg.StrOpt(DSOpts.UPDATE_METHOD,
                    default=UpdateMethod.PUSH,
                    required=True),
-        cfg.IntOpt('changes_interval',
+        cfg.IntOpt(DSOpts.CHANGES_INTERVAL,
                    default=30,
                    min=30,
                    help='interval between checking changes in zabbix'
@@ -106,14 +106,14 @@ class DatasourceUpdateMethod(base.BaseTest):
     ]
 
     ZABBIX_OPTS_PULL = [
-        cfg.StrOpt('driver',
+        cfg.StrOpt(DSOpts.DRIVER,
                    default='vitrage.datasources.zabbix.driver.ZabbixDriver',
                    help='Zabbix driver class path',
                    required=True),
-        cfg.StrOpt('update_method',
+        cfg.StrOpt(DSOpts.UPDATE_METHOD,
                    default=UpdateMethod.PULL,
                    required=True),
-        cfg.IntOpt('changes_interval',
+        cfg.IntOpt(DSOpts.CHANGES_INTERVAL,
                    default=30,
                    min=30,
                    help='interval between checking changes in zabbix'
@@ -121,24 +121,24 @@ class DatasourceUpdateMethod(base.BaseTest):
     ]
 
     ZABBIX_OPTS_PULL_NO_INTERVAL = [
-        cfg.StrOpt('driver',
+        cfg.StrOpt(DSOpts.DRIVER,
                    default='vitrage.datasources.zabbix.driver.ZabbixDriver',
                    help='Zabbix driver class path',
                    required=True),
-        cfg.StrOpt('update_method',
+        cfg.StrOpt(DSOpts.UPDATE_METHOD,
                    default=UpdateMethod.PULL,
                    required=True),
     ]
 
     ZABBIX_OPTS_NONE = [
-        cfg.StrOpt('driver',
+        cfg.StrOpt(DSOpts.DRIVER,
                    default='vitrage.datasources.zabbix.driver.ZabbixDriver',
                    help='Zabbix driver class path',
                    required=True),
-        cfg.StrOpt('update_method',
+        cfg.StrOpt(DSOpts.UPDATE_METHOD,
                    default=UpdateMethod.NONE,
                    required=True),
-        cfg.IntOpt('changes_interval',
+        cfg.IntOpt(DSOpts.CHANGES_INTERVAL,
                    default=30,
                    min=30,
                    help='interval between checking changes in zabbix'

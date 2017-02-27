@@ -13,21 +13,22 @@
 # under the License.
 
 from oslo_config import cfg
+from vitrage.common.constants import DatasourceOpts as DSOpts
 from vitrage.common.constants import UpdateMethod
 
 COLLECTD_DATASOURCE = 'collectd'
 
 OPTS = [
-    cfg.StrOpt('transformer',
+    cfg.StrOpt(DSOpts.TRANSFORMER,
                default='vitrage.datasources.collectd.transformer.'
                        'CollectdTransformer',
                help='Collectd transformer class path',
                required=True),
-    cfg.StrOpt('driver',
+    cfg.StrOpt(DSOpts.DRIVER,
                default='vitrage.datasources.collectd.driver.CollectdDriver',
                help='Collectd driver class path',
                required=True),
-    cfg.StrOpt('update_method',
+    cfg.StrOpt(DSOpts.UPDATE_METHOD,
                default=UpdateMethod.PUSH,
                help='None: updates only via Vitrage periodic snapshots.'
                     'Pull: updates every [changes_interval] seconds.'
@@ -35,6 +36,6 @@ OPTS = [
                     ' datasource itself.',
                required=True),
 
-    cfg.StrOpt('config_file', default='/etc/vitrage/collectd_conf.yaml',
+    cfg.StrOpt(DSOpts.CONFIG_FILE, default='/etc/vitrage/collectd_conf.yaml',
                help='Collectd configuration file'),
 ]

@@ -14,6 +14,7 @@
 
 from oslo_config import cfg
 
+from vitrage.common.constants import DatasourceOpts as DSOpts
 from vitrage.datasources.nova.host import NOVA_HOST_DATASOURCE
 from vitrage.datasources.zabbix.driver import ZabbixDriver
 from vitrage.datasources.zabbix.properties import ZabbixProperties \
@@ -25,16 +26,16 @@ from vitrage.tests.mocks import utils
 class TestZabbixConfig(base.BaseTest):
 
     OPTS = [
-        cfg.StrOpt('transformer',
+        cfg.StrOpt(DSOpts.TRANSFORMER,
                    default='vitrage.datasources.zabbix.transformer.'
                            'ZabbixTransformer',
                    help='Zabbix data source transformer class path',
                    required=True),
-        cfg.StrOpt('driver',
+        cfg.StrOpt(DSOpts.DRIVER,
                    default='vitrage.datasources.zabbix.driver.ZabbixDriver',
                    help='Zabbix driver class path',
                    required=True),
-        cfg.IntOpt('changes_interval',
+        cfg.IntOpt(DSOpts.CHANGES_INTERVAL,
                    default=30,
                    min=30,
                    help='interval between checking changes in zabbix plugin',
@@ -44,7 +45,7 @@ class TestZabbixConfig(base.BaseTest):
         cfg.StrOpt('password', default='zabbix',
                    help='Zabbix user password'),
         cfg.StrOpt('url', default='', help='Zabbix url'),
-        cfg.StrOpt('config_file',
+        cfg.StrOpt(DSOpts.CONFIG_FILE,
                    help='Zabbix configuration file',
                    default=utils.get_resources_dir()
                         + '/zabbix/zabbix_conf.yaml'),

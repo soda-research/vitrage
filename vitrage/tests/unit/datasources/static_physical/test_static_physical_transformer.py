@@ -17,6 +17,7 @@ import datetime
 from oslo_config import cfg
 from oslo_log import log as logging
 
+from vitrage.common.constants import DatasourceOpts as DSOpts
 from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import EdgeLabel
 from vitrage.common.constants import EntityCategory
@@ -37,7 +38,7 @@ LOG = logging.getLogger(__name__)
 class TestStaticPhysicalTransformer(base.BaseTest):
 
     OPTS = [
-        cfg.StrOpt('update_method',
+        cfg.StrOpt(DSOpts.UPDATE_METHOD,
                    default=UpdateMethod.PULL),
     ]
 

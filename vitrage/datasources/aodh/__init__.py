@@ -13,28 +13,29 @@
 # under the License.
 
 from oslo_config import cfg
+from vitrage.common.constants import DatasourceOpts as DSOpts
 from vitrage.common.constants import UpdateMethod
 
 AODH_DATASOURCE = 'aodh'
 
 OPTS = [
-    cfg.StrOpt('transformer',
+    cfg.StrOpt(DSOpts.TRANSFORMER,
                default='vitrage.datasources.aodh.'
                        'transformer.AodhTransformer',
                help='Aodh transformer class path',
                required=True),
-    cfg.StrOpt('driver',
+    cfg.StrOpt(DSOpts.DRIVER,
                default='vitrage.datasources.aodh.driver.AodhDriver',
                help='Aodh driver class path',
                required=True),
-    cfg.StrOpt('update_method',
+    cfg.StrOpt(DSOpts.UPDATE_METHOD,
                default=UpdateMethod.PUSH,
                help='None: updates only via Vitrage periodic snapshots.'
                     'Pull: updates every [changes_interval] seconds.'
                     'Push: updates by getting notifications from the'
                     ' datasource itself.',
                required=True),
-    cfg.IntOpt('changes_interval',
+    cfg.IntOpt(DSOpts.CHANGES_INTERVAL,
                default=20,
                min=20,
                help='interval between checking changes in aodh data source'),

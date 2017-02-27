@@ -13,30 +13,31 @@
 # under the License.
 
 from oslo_config import cfg
+from vitrage.common.constants import DatasourceOpts as DSOpts
 from vitrage.common.constants import TopologyFields
 from vitrage.common.constants import UpdateMethod
 
 STATIC_DATASOURCE = 'static'
 
 OPTS = [
-    cfg.StrOpt('transformer',
+    cfg.StrOpt(DSOpts.TRANSFORMER,
                default='vitrage.datasources.static.transformer.'
                        'StaticTransformer',
                help='Static transformer class path',
                required=True),
-    cfg.StrOpt('driver',
+    cfg.StrOpt(DSOpts.DRIVER,
                default='vitrage.datasources.static.driver.'
                        'StaticDriver',
                help='Static driver class path',
                required=True),
-    cfg.StrOpt('update_method',
+    cfg.StrOpt(DSOpts.UPDATE_METHOD,
                default=UpdateMethod.PULL,
                help='None: updates only via Vitrage periodic snapshots.'
                     'Pull: updates periodically.'
                     'Push: updates by getting notifications from the'
                     ' datasource itself.',
                required=True),
-    cfg.IntOpt('changes_interval',
+    cfg.IntOpt(DSOpts.CHANGES_INTERVAL,
                default=30,
                help='interval in seconds between checking changes in the'
                     'static configuration files'),

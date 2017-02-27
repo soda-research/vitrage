@@ -16,6 +16,7 @@ import re
 
 from oslo_log import log
 
+from vitrage.common.constants import DatasourceOpts as DSOpts
 from vitrage.utils import file as file_utils
 
 LOG = log.getLogger(__name__)
@@ -29,7 +30,7 @@ NAME = 'name'
 class NagiosConfig(object):
     def __init__(self, conf):
         try:
-            nagios_config_file = conf.nagios['config_file']
+            nagios_config_file = conf.nagios[DSOpts.CONFIG_FILE]
             nagios_config = file_utils.load_yaml_file(nagios_config_file)
             nagios = nagios_config[NAGIOS]      # nagios root in the yaml file
 

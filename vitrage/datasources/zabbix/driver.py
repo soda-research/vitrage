@@ -18,6 +18,7 @@ from oslo_log import log
 from oslo_utils import importutils as utils
 
 from vitrage.common.constants import DatasourceAction
+from vitrage.common.constants import DatasourceOpts as DSOpts
 from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.datasources.alarm_driver_base import AlarmDriverBase
 from vitrage.datasources.zabbix.properties import ZabbixProperties as ZProps
@@ -155,9 +156,9 @@ class ZabbixDriver(AlarmDriverBase):
     @staticmethod
     def _configuration_mapping(conf):
         try:
-            zabbix_config_file = conf.zabbix['config_file']
+            zabbix_config_file = conf.zabbix[DSOpts.CONFIG_FILE]
             zabbix_config = file_utils.load_yaml_file(zabbix_config_file)
-            zabbix_config_elements = zabbix_config['zabbix']
+            zabbix_config_elements = zabbix_config[ZABBIX_DATASOURCE]
 
             mappings = {}
             for element_config in zabbix_config_elements:

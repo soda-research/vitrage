@@ -136,3 +136,11 @@ class EventProperties(object):
     TYPE = 'type'
     TIME = 'time'
     DETAILS = 'details'
+
+
+class DatasourceOpts(object):
+    TRANSFORMER = 'transformer'
+    DRIVER = 'driver'
+    UPDATE_METHOD = 'update_method'
+    CHANGES_INTERVAL = 'changes_interval'
+    CONFIG_FILE = 'config_file'

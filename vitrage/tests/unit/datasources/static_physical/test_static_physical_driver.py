@@ -17,6 +17,7 @@ import os
 from oslo_config import cfg
 
 from vitrage.common.constants import DatasourceAction
+from vitrage.common.constants import DatasourceOpts as DSOpts
 from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import GraphAction
 from vitrage.common.constants import VertexProperties as VProps
@@ -31,13 +32,13 @@ from vitrage.utils import file as file_utils
 class TestStaticPhysicalDriver(base.BaseTest):
 
     OPTS = [
-        cfg.StrOpt('transformer',
+        cfg.StrOpt(DSOpts.TRANSFORMER,
                    default='vitrage.datasources.static_physical.transformer.'
                            'StaticPhysicalTransformer'),
-        cfg.StrOpt('driver',
+        cfg.StrOpt(DSOpts.DRIVER,
                    default='vitrage.datasources.static_physical.driver.'
                            'StaticPhysicalDriver'),
-        cfg.IntOpt('changes_interval',
+        cfg.IntOpt(DSOpts.CHANGES_INTERVAL,
                    default=30,
                    min=30,
                    help='interval between checking changes in the '
@@ -49,13 +50,13 @@ class TestStaticPhysicalDriver(base.BaseTest):
     ]
 
     CHANGES_OPTS = [
-        cfg.StrOpt('transformer',
+        cfg.StrOpt(DSOpts.TRANSFORMER,
                    default='vitrage.datasources.static_physical.transformer.'
                            'StaticPhysicalTransformer'),
-        cfg.StrOpt('driver',
+        cfg.StrOpt(DSOpts.DRIVER,
                    default='vitrage.datasources.static_physical.driver.'
                            'StaticPhysicalDriver'),
-        cfg.IntOpt('changes_interval',
+        cfg.IntOpt(DSOpts.CHANGES_INTERVAL,
                    default=30,
                    min=30,
                    help='interval between checking changes in the '
