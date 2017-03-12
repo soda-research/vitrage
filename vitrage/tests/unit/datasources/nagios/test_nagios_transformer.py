@@ -30,10 +30,11 @@ from vitrage.datasources.nagios.properties import NagiosTestStatus
 from vitrage.datasources.nagios.transformer import NagiosTransformer
 from vitrage.datasources.nova.host import NOVA_HOST_DATASOURCE
 from vitrage.datasources.nova.host.transformer import HostTransformer
+from vitrage.datasources import transformer_base as tbase
 from vitrage.datasources.transformer_base import TransformerBase
 from vitrage.tests import base
 from vitrage.tests.mocks import mock_driver as mock_sync
-
+from vitrage.utils import datetime as datetime_utils
 
 LOG = logging.getLogger(__name__)
 
@@ -119,7 +120,11 @@ class NagiosTransformerTest(base.BaseTest):
         self.assertEqual(EntityCategory.ALARM, vertex[VProps.CATEGORY])
         self.assertEqual(event[DSProps.ENTITY_TYPE], vertex[VProps.TYPE])
         self.assertEqual(event[NagiosProperties.SERVICE], vertex[VProps.NAME])
-
+        self.assertEqual(datetime_utils.change_to_utc_time_and_format(
+            event[NagiosProperties.LAST_CHECK],
+            '%Y-%m-%d %H:%M:%S',
+            tbase.TIMESTAMP_FORMAT),
+            vertex[VProps.UPDATE_TIMESTAMP])
         event_type = event.get(DSProps.EVENT_TYPE, None)
         if event_type is not None:
             self.assertEqual(vertex[VProps.STATE],
