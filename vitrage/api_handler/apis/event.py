@@ -13,7 +13,6 @@
 # under the License.
 
 from datetime import datetime
-import json
 from oslo_log import log
 import oslo_messaging
 from oslo_utils import uuidutils
@@ -36,7 +35,7 @@ class EventApis(EntityGraphApisBase):
         try:
             event = {EventProperties.TYPE: event_type,
                      EventProperties.TIME: event_time,
-                     EventProperties.DETAILS: json.loads(details)}
+                     EventProperties.DETAILS: details}
 
             self.oslo_notifier.info(
                 ctxt={'message_id': uuidutils.generate_uuid(),
