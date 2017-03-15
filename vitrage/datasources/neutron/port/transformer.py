@@ -118,19 +118,16 @@ class PortTransformer(ResourceTransformerBase):
 
     def _create_snapshot_neighbors(self, entity_event):
         return self._create_port_neighbors(entity_event,
-                                           ('device_owner',),
                                            ('device_id',),
                                            ('network_id',))
 
     def _create_update_neighbors(self, entity_event):
         return self._create_port_neighbors(entity_event,
-                                           ('port', 'device_owner'),
                                            ('port', 'device_id'),
                                            ('port', 'network_id'))
 
     def _create_port_neighbors(self,
                                entity_event,
-                               device_owner_property,
                                device_id_property,
                                network_id_property):
         network_neighbor_id = extract_field_value(entity_event,
@@ -141,17 +138,14 @@ class PortTransformer(ResourceTransformerBase):
                                            EdgeLabel.CONTAINS,
                                            is_entity_source=False)]
 
-        device_owner = \
-            extract_field_value(entity_event, *device_owner_property)
-        if device_owner == 'compute:nova' or device_owner == 'compute:None':
-            instance_neighbor_id = \
-                extract_field_value(entity_event, *device_id_property)
-            instance = self._create_neighbor(entity_event,
-                                             instance_neighbor_id,
-                                             NOVA_INSTANCE_DATASOURCE,
-                                             EdgeLabel.ATTACHED,
-                                             is_entity_source=True)
-            neighbors.append(instance)
+        instance_neighbor_id = \
+            extract_field_value(entity_event, *device_id_property)
+        instance = self._create_neighbor(entity_event,
+                                         instance_neighbor_id,
+                                         NOVA_INSTANCE_DATASOURCE,
+                                         EdgeLabel.ATTACHED,
+                                         is_entity_source=True)
+        neighbors.append(instance)
 
         return neighbors
 
