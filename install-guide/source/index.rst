@@ -1,5 +1,5 @@
 ===========================
-Root Cause Analyzis service
+Root Cause Analysis service
 ===========================
 
 .. toctree::
@@ -10,7 +10,7 @@ Root Cause Analyzis service
    verify.rst
    next-steps.rst
 
-The Root Cause Analyzis service (vitrage) provides...
+The Root Cause Analysis service (vitrage) provides...
 
 This chapter assumes a working setup of OpenStack following the
 `OpenStack Installation Tutorial <http://docs.openstack.org/#install-guides>`_.

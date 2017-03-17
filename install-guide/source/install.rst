@@ -4,17 +4,14 @@ Install and configure
 ~~~~~~~~~~~~~~~~~~~~~
 
 This section describes how to install and configure the
-Root Cause Analyzis service, code-named vitrage, on the controller node.
+Root Cause Analysis service, code-named vitrage, on the controller node.
 
 This section assumes that you already have a working OpenStack
-environment with at least the following components installed:
-.. (add the appropriate services here and further notes)
+environment.
 
 Note that installation and configuration vary by distribution.
 
 .. toctree::
    :maxdepth: 2
 
-   install-obs.rst
    install-rdo.rst
-   install-ubuntu.rst
