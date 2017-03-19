@@ -49,7 +49,7 @@ class GraphAlgorithm(object):
 
     @abc.abstractmethod
     def sub_graph_matching(self, sub_graph, known_mappings, validate=False):
-        """Search for occurrences of of a template graph in the graph
+        """Search for occurrences of a template graph in the graph
 
         In sub-graph matching algorithms complexity is high in the general case
         Here it is considerably mitigated  as we have an anchor in the graph.
