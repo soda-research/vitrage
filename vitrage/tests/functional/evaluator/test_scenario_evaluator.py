@@ -12,22 +12,32 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from six.moves import queue
+
 from oslo_config import cfg
 
-from six.moves import queue
 from vitrage.common.constants import DatasourceAction
 from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import EdgeProperties as EProps
+from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import VertexProperties as VProps
+from vitrage.datasources.nagios.properties import NagiosProperties
+from vitrage.datasources.nagios.properties import NagiosTestStatus
+from vitrage.datasources.neutron.network import NEUTRON_NETWORK_DATASOURCE
+from vitrage.datasources.neutron.port import NEUTRON_PORT_DATASOURCE
 from vitrage.datasources.nova.host import NOVA_HOST_DATASOURCE
+from vitrage.datasources.nova.instance import NOVA_INSTANCE_DATASOURCE
+from vitrage.datasources.nova.zone import NOVA_ZONE_DATASOURCE
 from vitrage.evaluator.scenario_evaluator import ScenarioEvaluator
 from vitrage.evaluator.scenario_repository import ScenarioRepository
+from vitrage.graph import create_edge
 from vitrage.tests.functional.base import \
     TestFunctionalBase
 import vitrage.tests.mocks.mock_driver as mock_driver
 from vitrage.tests.mocks import utils
 
 _TARGET_HOST = 'host-2'
+_TARGET_ZONE = 'zone-1'
 _NAGIOS_TEST_INFO = {'resource_name': _TARGET_HOST,
                      DSProps.DATASOURCE_ACTION: DatasourceAction.SNAPSHOT}
 
@@ -58,8 +68,9 @@ class TestScenarioEvaluator(TestFunctionalBase):
 
         event_queue, processor, evaluator = self._init_system()
 
-        host_v = self._get_host_from_graph(_TARGET_HOST,
-                                           processor.entity_graph)
+        host_v = self._get_entity_from_graph(NOVA_HOST_DATASOURCE,
+                                             _TARGET_HOST,
+                                             processor.entity_graph)
         self.assertEqual('AVAILABLE', host_v[VProps.AGGREGATED_STATE],
                          'host should be AVAILABLE when starting')
 
@@ -85,8 +96,9 @@ class TestScenarioEvaluator(TestFunctionalBase):
 
         event_queue, processor, evaluator = self._init_system()
 
-        host_v = self._get_host_from_graph(_TARGET_HOST,
-                                           processor.entity_graph)
+        host_v = self._get_entity_from_graph(NOVA_HOST_DATASOURCE,
+                                             _TARGET_HOST,
+                                             processor.entity_graph)
         self.assertEqual('AVAILABLE', host_v[VProps.AGGREGATED_STATE],
                          'host should be AVAILABLE when starting')
 
@@ -130,8 +142,9 @@ class TestScenarioEvaluator(TestFunctionalBase):
 
         event_queue, processor, evaluator = self._init_system()
 
-        host_v = self._get_host_from_graph(_TARGET_HOST,
-                                           processor.entity_graph)
+        host_v = self._get_entity_from_graph(NOVA_HOST_DATASOURCE,
+                                             _TARGET_HOST,
+                                             processor.entity_graph)
         self.assertEqual('AVAILABLE', host_v[VProps.AGGREGATED_STATE],
                          'host should be AVAILABLE when starting')
 
@@ -168,8 +181,9 @@ class TestScenarioEvaluator(TestFunctionalBase):
 
         event_queue, processor, evaluator = self._init_system()
 
-        host_v = self._get_host_from_graph(_TARGET_HOST,
-                                           processor.entity_graph)
+        host_v = self._get_entity_from_graph(NOVA_HOST_DATASOURCE,
+                                             _TARGET_HOST,
+                                             processor.entity_graph)
         self.assertEqual('AVAILABLE', host_v[VProps.AGGREGATED_STATE],
                          'host should be AVAILABLE when starting')
 
@@ -197,7 +211,6 @@ class TestScenarioEvaluator(TestFunctionalBase):
             self._get_deduced_alarms_on_host(host_v, processor.entity_graph)
         self.assertEqual(0, len(alarms))
 
-    # todo: (erosensw) uncomment this test
     def test_overlapping_deduced_alarm_1(self):
 
         event_queue, processor, evaluator = self._init_system()
@@ -293,13 +306,334 @@ class TestScenarioEvaluator(TestFunctionalBase):
         self.assertEqual(1, len(alarms))
         self.assertEqual('WARNING', alarms[0]['severity'])
 
+    def test_simple_not_operator_deduced_alarm(self):
+        """Handles a simple not operator use case
+
+        We have created the following template: if there is a neutron.port that
+        doesn't have a nagios alarm of type PORT_PROBLEM on it, then raise a
+        deduced alarm on the port called simple_port_deduced_alarm.
+        The test has 3 steps in it:
+        1. create neutron.network and neutron.port and check that the
+           simple_port_deduced_alarm is raised on the neutron.port because it
+           doesn't have a nagios alarm on it.
+        2. create a nagios alarm called PORT_PROBLEM on the port and check
+           that the alarm simple_port_deduced_alarm doesn't appear on the
+           neutron.port.
+        3. delete the nagios alarm called PORT_PROBLEM from the port, and
+           check that the alarm alarm simple_port_deduced_alarm appear on the
+           neutron.port.
+        """
+
+        event_queue, processor, evaluator = self._init_system()
+        entity_graph = processor.entity_graph
+
+        # constants
+        num_orig_vertices = entity_graph.num_vertices()
+        num_orig_edges = entity_graph.num_edges()
+        num_added_vertices = 2
+        num_added_edges = 2
+        num_deduced_vertices = 1
+        num_deduced_edges = 1
+        num_nagios_alarm_vertices = 1
+        num_nagios_alarm_edges = 1
+
+        # find instances
+        query = {
+            VProps.CATEGORY: 'RESOURCE',
+            VProps.TYPE: NOVA_INSTANCE_DATASOURCE
+        }
+        instance_ver = entity_graph.get_vertices(vertex_attr_filter=query)[0]
+
+        # update network
+        network_event = {
+            'tenant_id': 'admin',
+            'name': 'net-0',
+            'updated_at': '2015-12-01T12:46:41Z',
+            'status': 'active',
+            'id': '12345',
+            'vitrage_entity_type': 'neutron.network',
+            'vitrage_datasource_action': 'snapshot',
+            'vitrage_sample_date': '2015-12-01T12:46:41Z',
+        }
+
+        # update port
+        port_event = {
+            'tenant_id': 'admin',
+            'name': 'port-0',
+            'updated_at': '2015-12-01T12:46:41Z',
+            'status': 'active',
+            'id': '54321',
+            'vitrage_entity_type': 'neutron.port',
+            'vitrage_datasource_action': 'snapshot',
+            'vitrage_sample_date': '2015-12-01T12:46:41Z',
+            'network_id': '12345',
+            'device_id': instance_ver.get(VProps.ID),
+            'device_owner': 'compute:nova',
+            'fixed_ips': {}
+        }
+
+        processor.process_event(network_event)
+        processor.process_event(port_event)
+        port_vertex = entity_graph.get_vertices(
+            vertex_attr_filter={VProps.TYPE: NEUTRON_PORT_DATASOURCE})[0]
+        while not event_queue.empty():
+            processor.process_event(event_queue.get())
+
+        # test asserts
+        query = {VProps.CATEGORY: EntityCategory.ALARM}
+        port_neighbors = entity_graph.neighbors(port_vertex.vertex_id,
+                                                vertex_attr_filter=query)
+        self.assertEqual(num_orig_vertices + num_added_vertices +
+                         num_deduced_vertices, entity_graph.num_vertices())
+        self.assertEqual(num_orig_edges + num_added_edges + num_deduced_edges,
+                         entity_graph.num_edges())
+        self.assertEqual(1, len(port_neighbors))
+        self.assertEqual(port_neighbors[0][VProps.CATEGORY],
+                         EntityCategory.ALARM)
+        self.assertEqual(port_neighbors[0][VProps.TYPE], 'vitrage')
+        self.assertEqual(port_neighbors[0][VProps.NAME],
+                         'simple_port_deduced_alarm')
+
+        # Add PORT_PROBLEM alarm
+        test_vals = {'status': 'WARNING',
+                     'service': 'PORT_PROBLEM',
+                     'name': 'PORT_PROBLEM',
+                     DSProps.DATASOURCE_ACTION: DatasourceAction.SNAPSHOT,
+                     VProps.RESOURCE_ID: port_vertex.get(VProps.ID),
+                     'resource_name': port_vertex.get(VProps.ID),
+                     'resource_type': NEUTRON_PORT_DATASOURCE}
+        generator = mock_driver.simple_nagios_alarm_generators(1, 1, test_vals)
+        nagios_event = mock_driver.generate_random_events_list(generator)[0]
+
+        processor.process_event(nagios_event)
+        while not event_queue.empty():
+            processor.process_event(event_queue.get())
+
+        # test asserts
+        self.assertEqual(num_orig_vertices + num_added_vertices +
+                         num_deduced_vertices + num_nagios_alarm_vertices,
+                         entity_graph.num_vertices())
+        self.assertEqual(num_orig_edges + num_added_edges + num_deduced_edges +
+                         num_nagios_alarm_edges, entity_graph.num_edges())
+
+        query = {VProps.CATEGORY: EntityCategory.ALARM, VProps.TYPE: 'vitrage'}
+        port_neighbors = entity_graph.neighbors(port_vertex.vertex_id,
+                                                vertex_attr_filter=query)
+        self.assertEqual(1, len(port_neighbors))
+        self.assertEqual(port_neighbors[0][VProps.CATEGORY],
+                         EntityCategory.ALARM)
+        self.assertEqual(port_neighbors[0][VProps.TYPE], 'vitrage')
+        self.assertEqual(port_neighbors[0][VProps.NAME],
+                         'simple_port_deduced_alarm')
+        self.assertEqual(port_neighbors[0][VProps.IS_DELETED], True)
+
+        query = {VProps.CATEGORY: EntityCategory.ALARM, VProps.TYPE: 'nagios'}
+        port_neighbors = entity_graph.neighbors(port_vertex.vertex_id,
+                                                vertex_attr_filter=query)
+        self.assertEqual(port_neighbors[0][VProps.CATEGORY],
+                         EntityCategory.ALARM)
+        self.assertEqual(port_neighbors[0][VProps.TYPE], 'nagios')
+        self.assertEqual(port_neighbors[0][VProps.NAME], 'PORT_PROBLEM')
+        self.assertEqual(port_neighbors[0][VProps.IS_DELETED], False)
+        self.assertEqual(port_neighbors[0][VProps.IS_PLACEHOLDER], False)
+
+        # disable PORT_PROBLEM alarm
+        nagios_event[NagiosProperties.STATUS] = NagiosTestStatus.OK
+        processor.process_event(nagios_event)
+        while not event_queue.empty():
+            processor.process_event(event_queue.get())
+
+        # test asserts
+        self.assertEqual(num_orig_vertices + num_added_vertices +
+                         num_deduced_vertices + num_nagios_alarm_vertices,
+                         entity_graph.num_vertices())
+        self.assertEqual(num_orig_edges + num_added_edges + num_deduced_edges +
+                         num_nagios_alarm_edges, entity_graph.num_edges())
+
+        query = {VProps.CATEGORY: EntityCategory.ALARM, VProps.TYPE: 'vitrage'}
+        port_neighbors = entity_graph.neighbors(port_vertex.vertex_id,
+                                                vertex_attr_filter=query)
+        self.assertEqual(1, len(port_neighbors))
+        self.assertEqual(port_neighbors[0][VProps.CATEGORY],
+                         EntityCategory.ALARM)
+        self.assertEqual(port_neighbors[0][VProps.TYPE], 'vitrage')
+        self.assertEqual(port_neighbors[0][VProps.NAME],
+                         'simple_port_deduced_alarm')
+        self.assertEqual(port_neighbors[0][VProps.IS_DELETED], False)
+
+        query = {VProps.CATEGORY: EntityCategory.ALARM, VProps.TYPE: 'nagios'}
+        port_neighbors = entity_graph.neighbors(port_vertex.vertex_id,
+                                                vertex_attr_filter=query)
+        self.assertEqual(port_neighbors[0][VProps.CATEGORY],
+                         EntityCategory.ALARM)
+        self.assertEqual(port_neighbors[0][VProps.TYPE], 'nagios')
+        self.assertEqual(port_neighbors[0][VProps.NAME], 'PORT_PROBLEM')
+        self.assertEqual(port_neighbors[0][VProps.IS_DELETED], True)
+
+    def test_complex_not_operator_deduced_alarm(self):
+        """Handles a complex not operator use case
+
+        We have created the following template: if there is a openstack.cluster
+        that has a nova.zone which is connected to a neutron.network and also
+        there is no nagios alarm of type CLUSTER_PROBLEM on the cluster and no
+        nagios alarm of type NETWORK_PROBLEM on the neutron.network, then raise
+        a deduced alarm on the nova.zone called complex_zone_deduced_alarm.
+        The test has 3 steps in it:
+        1. create a neutron.network and connect it to a zone, and check that
+           the complex_zone_deduced_alarm is raised on the nova.zone because it
+           doesn't have nagios alarms the openstack.cluster and on the
+           neutron.network.
+        2. create a nagios alarm called NETWORK_PROBLEM on the network and
+           check that the alarm complex_zone_deduced_alarm doesn't appear on
+           the nova.zone.
+        3. delete the nagios alarm called NETWORK_PROBLEM from the port, and
+           check that the alarm alarm complex_zone_deduced_alarm appear on the
+           nova.zone.
+        """
+
+        event_queue, processor, evaluator = self._init_system()
+        entity_graph = processor.entity_graph
+
+        # constants
+        num_orig_vertices = entity_graph.num_vertices()
+        num_orig_edges = entity_graph.num_edges()
+        num_added_vertices = 2
+        num_added_edges = 3
+        num_deduced_vertices = 1
+        num_deduced_edges = 1
+        num_network_alarm_vertices = 1
+        num_network_alarm_edges = 1
+
+        # update zone
+        generator = mock_driver.simple_zone_generators(1, 1, snapshot_events=1)
+        zone_event = mock_driver.generate_random_events_list(generator)[0]
+        zone_event['zoneName'] = 'zone-7'
+
+        # update network
+        network_event = {
+            'tenant_id': 'admin',
+            'name': 'net-0',
+            'updated_at': '2015-12-01T12:46:41Z',
+            'status': 'active',
+            'id': '12345',
+            'vitrage_entity_type': 'neutron.network',
+            'vitrage_datasource_action': 'snapshot',
+            'vitrage_sample_date': '2015-12-01T12:46:41Z',
+        }
+
+        # process events
+        processor.process_event(zone_event)
+        query = {VProps.TYPE: NOVA_ZONE_DATASOURCE, VProps.ID: 'zone-7'}
+        zone_vertex = entity_graph.get_vertices(vertex_attr_filter=query)[0]
+        processor.process_event(network_event)
+        query = {VProps.TYPE: NEUTRON_NETWORK_DATASOURCE}
+        network_vertex = entity_graph.get_vertices(vertex_attr_filter=query)[0]
+
+        # add edge between network and zone
+        edge = create_edge(network_vertex.vertex_id, zone_vertex.vertex_id,
+                           'attached')
+        entity_graph.add_edge(edge)
+
+        while not event_queue.empty():
+            processor.process_event(event_queue.get())
+
+        # test asserts
+        query = {VProps.CATEGORY: EntityCategory.ALARM}
+        zone_neighbors = entity_graph.neighbors(zone_vertex.vertex_id,
+                                                vertex_attr_filter=query)
+        self.assertEqual(num_orig_vertices + num_added_vertices +
+                         num_deduced_vertices, entity_graph.num_vertices())
+        self.assertEqual(num_orig_edges + num_added_edges + num_deduced_edges,
+                         entity_graph.num_edges())
+        self.assertEqual(1, len(zone_neighbors))
+        self.assertEqual(zone_neighbors[0][VProps.CATEGORY],
+                         EntityCategory.ALARM)
+        self.assertEqual(zone_neighbors[0][VProps.TYPE], 'vitrage')
+        self.assertEqual(zone_neighbors[0][VProps.NAME],
+                         'complex_zone_deduced_alarm')
+
+        # Add NETWORK_PROBLEM alarm
+        test_vals = {'status': 'WARNING',
+                     'service': 'NETWORK_PROBLEM',
+                     'name': 'NETWORK_PROBLEM',
+                     DSProps.DATASOURCE_ACTION: DatasourceAction.SNAPSHOT,
+                     VProps.RESOURCE_ID: network_vertex[VProps.ID],
+                     'resource_name': network_vertex[VProps.ID],
+                     'resource_type': NEUTRON_NETWORK_DATASOURCE}
+        generator = mock_driver.simple_nagios_alarm_generators(1, 1, test_vals)
+        nagios_event = mock_driver.generate_random_events_list(generator)[0]
+
+        processor.process_event(nagios_event)
+        while not event_queue.empty():
+            processor.process_event(event_queue.get())
+
+        self.assertEqual(num_orig_vertices + num_added_vertices +
+                         num_deduced_vertices + num_network_alarm_vertices,
+                         entity_graph.num_vertices())
+        self.assertEqual(num_orig_edges + num_added_edges + num_deduced_edges +
+                         num_network_alarm_edges, entity_graph.num_edges())
+
+        query = {VProps.CATEGORY: EntityCategory.ALARM}
+        network_neighbors = entity_graph.neighbors(network_vertex.vertex_id,
+                                                   vertex_attr_filter=query)
+        self.assertEqual(1, len(network_neighbors))
+        self.assertEqual(network_neighbors[0][VProps.CATEGORY],
+                         EntityCategory.ALARM)
+        self.assertEqual(network_neighbors[0][VProps.TYPE], 'nagios')
+        self.assertEqual(network_neighbors[0][VProps.NAME], 'NETWORK_PROBLEM')
+        self.assertEqual(network_neighbors[0][VProps.IS_DELETED], False)
+        self.assertEqual(network_neighbors[0][VProps.IS_PLACEHOLDER], False)
+
+        zone_neighbors = entity_graph.neighbors(zone_vertex.vertex_id,
+                                                vertex_attr_filter=query)
+        self.assertEqual(1, len(zone_neighbors))
+        self.assertEqual(zone_neighbors[0][VProps.CATEGORY],
+                         EntityCategory.ALARM)
+        self.assertEqual(zone_neighbors[0][VProps.TYPE], 'vitrage')
+        self.assertEqual(zone_neighbors[0][VProps.NAME],
+                         'complex_zone_deduced_alarm')
+        self.assertEqual(zone_neighbors[0][VProps.IS_DELETED], True)
+
+        # delete NETWORK_PROBLEM alarm
+        nagios_event[NagiosProperties.STATUS] = NagiosTestStatus.OK
+        processor.process_event(nagios_event)
+        while not event_queue.empty():
+            processor.process_event(event_queue.get())
+
+        self.assertEqual(num_orig_vertices + num_added_vertices +
+                         num_deduced_vertices + num_network_alarm_vertices,
+                         entity_graph.num_vertices())
+        self.assertEqual(num_orig_edges + num_added_edges + num_deduced_edges +
+                         num_network_alarm_edges, entity_graph.num_edges())
+
+        query = {VProps.CATEGORY: EntityCategory.ALARM}
+        network_neighbors = entity_graph.neighbors(network_vertex.vertex_id,
+                                                   vertex_attr_filter=query)
+        self.assertEqual(1, len(network_neighbors))
+        self.assertEqual(network_neighbors[0][VProps.CATEGORY],
+                         EntityCategory.ALARM)
+        self.assertEqual(network_neighbors[0][VProps.TYPE], 'nagios')
+        self.assertEqual(network_neighbors[0][VProps.NAME], 'NETWORK_PROBLEM')
+        self.assertEqual(network_neighbors[0][VProps.IS_DELETED], True)
+
+        zone_neighbors = entity_graph.neighbors(zone_vertex.vertex_id,
+                                                vertex_attr_filter=query)
+        self.assertEqual(1, len(zone_neighbors))
+        self.assertEqual(zone_neighbors[0][VProps.CATEGORY],
+                         EntityCategory.ALARM)
+        self.assertEqual(zone_neighbors[0][VProps.TYPE], 'vitrage')
+        self.assertEqual(zone_neighbors[0][VProps.NAME],
+                         'complex_zone_deduced_alarm')
+        self.assertEqual(zone_neighbors[0][VProps.IS_DELETED], False)
+
     def get_host_after_event(self, event_queue, nagios_event,
                              processor, target_host):
         processor.process_event(nagios_event)
         while not event_queue.empty():
             processor.process_event(event_queue.get())
-        host_v = self._get_host_from_graph(target_host,
-                                           processor.entity_graph)
+        host_v = self._get_entity_from_graph(NOVA_HOST_DATASOURCE,
+                                             target_host,
+                                             processor.entity_graph)
         return host_v
 
     def _init_system(self):
@@ -311,13 +645,12 @@ class TestScenarioEvaluator(TestFunctionalBase):
         return event_queue, processor, evaluator
 
     @staticmethod
-    def _get_host_from_graph(host_name, entity_graph):
-        vertex_attrs = {VProps.TYPE: NOVA_HOST_DATASOURCE,
-                        VProps.NAME: host_name}
-        host_vertices = entity_graph.get_vertices(
-            vertex_attr_filter=vertex_attrs)
-        assert len(host_vertices) == 1, "incorrect number of vertices"
-        return host_vertices[0]
+    def _get_entity_from_graph(entity_type, entity_name, entity_graph):
+        vertex_attrs = {VProps.TYPE: entity_type,
+                        VProps.NAME: entity_name}
+        vertices = entity_graph.get_vertices(vertex_attr_filter=vertex_attrs)
+        # assert len(vertices) == 1, "incorrect number of vertices"
+        return vertices[0]
 
     @staticmethod
     def _get_deduced_alarms_on_host(host_v, entity_graph):

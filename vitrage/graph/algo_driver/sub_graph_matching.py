@@ -11,7 +11,9 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+
 from oslo_log import log as logging
+import six
 
 from vitrage.common.exception import VitrageAlgorithmError
 from vitrage.graph.filter import check_filter
@@ -22,6 +24,8 @@ LOG = logging.getLogger(__name__)
 MAPPED_V_ID = 'mapped_v_id'
 NEIGHBORS_MAPPED = 'neighbors_mapped'
 GRAPH_VERTEX = 'graph_vertex'
+NEG_VERTEX = 'negative vertex'
+NEG_CONDITION = 'negative_condition'
 
 
 def subgraph_matching(base_graph, subgraph, matches, validate=False):
@@ -94,7 +98,10 @@ def subgraph_matching(base_graph, subgraph, matches, validate=False):
             continue
 
         # STEP 3: FIND A SUB-GRAPH VERTEX TO MAP
-        v_with_unmapped_neighbors = vertices_with_unmapped_neighbors.pop(0)
+        v_with_unmapped_neighbors = _choose_vertex(
+            vertices_with_unmapped_neighbors,
+            curr_subgraph)
+
         unmapped_neighbors = list(filter(
             lambda v: not v.get(MAPPED_V_ID),
             curr_subgraph.neighbors(v_with_unmapped_neighbors.vertex_id)))
@@ -104,7 +111,10 @@ def subgraph_matching(base_graph, subgraph, matches, validate=False):
             curr_subgraph.update_vertex(v_with_unmapped_neighbors)
             queue.append(curr_subgraph)
             continue
-        subgraph_vertex_to_map = unmapped_neighbors.pop(0)
+        subgraph_vertex_to_map = _choose_vertex(
+            unmapped_neighbors,
+            curr_subgraph,
+            curr_v=v_with_unmapped_neighbors)
 
         # STEP 4: PROPERTIES CHECK
         graph_candidate_vertices = base_graph.neighbors(
@@ -114,23 +124,64 @@ def subgraph_matching(base_graph, subgraph, matches, validate=False):
         # STEP 5: STRUCTURE CHECK
         edges = _get_edges_to_mapped_vertices(curr_subgraph,
                                               subgraph_vertex_to_map.vertex_id)
+        neg_edges = set(e for e in edges if e.get(NEG_CONDITION))
+        pos_edges = edges.difference(neg_edges)
+
+        if not graph_candidate_vertices and neg_edges and not pos_edges:
+            subgraph_vertex_to_map[MAPPED_V_ID] = NEG_VERTEX
+            curr_subgraph.update_vertex(subgraph_vertex_to_map)
+            queue.append(curr_subgraph.copy())
+            continue
+
+        found_subgraphs = []
         for graph_vertex in graph_candidate_vertices:
             subgraph_vertex_to_map[MAPPED_V_ID] = graph_vertex.vertex_id
             subgraph_vertex_to_map[GRAPH_VERTEX] = graph_vertex
             curr_subgraph.update_vertex(subgraph_vertex_to_map)
-            if _graph_contains_subgraph_edges(base_graph,
-                                              curr_subgraph,
-                                              edges):
-                queue.append(curr_subgraph.copy())
+            if not _graph_contains_subgraph_edges(base_graph,
+                                                  curr_subgraph,
+                                                  pos_edges):
+                continue
+            if not _graph_contains_subgraph_edges(base_graph,
+                                                  curr_subgraph,
+                                                  neg_edges):
+                del found_subgraphs[:]
+                break
+            if neg_edges and not pos_edges:
+                subgraph_vertex_to_map[MAPPED_V_ID] = NEG_VERTEX
+                curr_subgraph.update_vertex(subgraph_vertex_to_map)
+            found_subgraphs.append(curr_subgraph.copy())
+
+        queue.extend(found_subgraphs)
 
     # Last thing: Convert results to the expected format!
+    return _generate_result(final_subgraphs)
+
+
+def _generate_result(final_subgraphs):
     result = []
     for mapping in final_subgraphs:
-        # TODO(ihefetz) If needed, Here we can easily extract the edge
-        # matches from the mapping graph
-        a = {v.vertex_id: v[GRAPH_VERTEX] for v in mapping.get_vertices()}
-        result.append(a)
+        subgraph_vertices = dict()
+        for v in mapping.get_vertices():
+            v_id = v[MAPPED_V_ID]
+            if isinstance(v_id, six.string_types) and v_id is not NEG_VERTEX:
+                subgraph_vertices[v.vertex_id] = v[GRAPH_VERTEX]
+
+        if subgraph_vertices not in result:
+            result.append(subgraph_vertices)
     return result
+
+
+def _choose_vertex(vertices, subgraph, curr_v=None):
+    """Return a vertex with a positive edge if exists, otherwise the first one.
+
+    """
+    for v in vertices:
+        curr_vertex_id = curr_v.vertex_id if curr_v else None
+        if not subgraph.get_edges(v.vertex_id, curr_vertex_id,
+                                  attr_filter={NEG_CONDITION: True}):
+            return v
+    return vertices.pop(0)
 
 
 def _get_edges_to_mapped_vertices(graph, vertex_id):
@@ -169,7 +220,12 @@ def _graph_contains_subgraph_edges(graph, subgraph, subgraph_edges):
         found_graph_edge = graph.get_edge(graph_v_id_source,
                                           graph_v_id_target,
                                           e.label)
-        if not found_graph_edge or not check_filter(found_graph_edge, e):
+
+        if not found_graph_edge and e.get(NEG_CONDITION):
+            continue
+
+        if not found_graph_edge or not check_filter(found_graph_edge, e,
+                                                    NEG_CONDITION):
             return False
     return True
 

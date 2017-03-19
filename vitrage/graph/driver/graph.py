@@ -202,11 +202,18 @@ class Graph(object):
         pass
 
     @abc.abstractmethod
-    def get_edges(self, v_id, direction=Direction.BOTH,
+    def get_edges(self,
+                  v1_id,
+                  v2_id=None,
+                  direction=Direction.BOTH,
                   attr_filter=None):
         """Fetch multiple edges from the graph,
 
-        Fetch an edge from the graph, according to its two vertices and label
+        Fetch all edges from the graph, according to its two vertices.
+        If only one vertex id is given it finds all the edges from this vertex
+        to all other vertices.
+        If two vertices ids are given it finds all the edges between those two
+        vertices.
 
         EXAMPLE
         -------
@@ -218,8 +225,11 @@ class Graph(object):
             v_id=v2.vertex_id,
             attr_filter={'LABEL': ['ON', 'WITH']})
 
-        :param v_id: vertex id a vertex
-        :type v_id: str
+        :param v1_id: first vertex id of vertex
+        :type v1_id: str
+
+        :param v2_id: second vertex id of vertex
+        :type v2_id: str
 
         :param direction: specify In/Out/Both for edge direction
         :type direction: int

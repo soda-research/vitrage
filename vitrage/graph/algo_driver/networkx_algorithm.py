@@ -17,7 +17,10 @@ from networkx.algorithms import simple_paths
 
 from oslo_log import log as logging
 
+from vitrage.common.constants import EdgeProperties as EProps
 from vitrage.graph.algo_driver.algorithm import GraphAlgorithm
+from vitrage.graph.algo_driver.algorithm import Mapping
+from vitrage.graph.algo_driver.sub_graph_matching import NEG_CONDITION
 from vitrage.graph.algo_driver.sub_graph_matching import subgraph_matching
 from vitrage.graph.driver import Direction
 from vitrage.graph.driver import Edge
@@ -97,23 +100,41 @@ class NXAlgorithm(GraphAlgorithm):
                   str(self.graph._g.edges(data=True)))
         return graph
 
-    @staticmethod
-    def _edge_result_to_list(edge_result):
-        d = dict()
-        for source_id, target_id, label, data in edge_result:
-            d[(source_id, target_id, label)] = \
-                Edge(source_id, target_id, label, properties=data)
-        return d.values()
+    def sub_graph_matching(self,
+                           subgraph,
+                           known_match,
+                           validate=False):
+        """Finds all the matching subgraphs in the graph
 
-    @staticmethod
-    def _vertex_result_to_list(vertex_result):
-        d = dict()
-        for v_id, data in vertex_result:
-            d[v_id] = Vertex(vertex_id=v_id, properties=data)
-        return d.values()
+        In case the known_match has a subgraph edge with property
+        "negative_condition" then run subgraph matching on the edge vertices
+        and unite the results.
+        Otherwise just run subgraph matching and return its result.
 
-    def sub_graph_matching(self, subgraph, known_matches, validate=False):
-        return subgraph_matching(self.graph, subgraph, known_matches, validate)
+        :param subgraph: the subgraph to match
+        :param known_match: starting point at the subgraph and the graph
+        :param validate:
+        :return: all the matching subgraphs in the graph
+        """
+        sge = known_match.subgraph_element
+        ge = known_match.graph_element
+
+        if not known_match.is_vertex and sge.get(NEG_CONDITION):
+            source_matches = self._filtered_subgraph_matching(ge.source_id,
+                                                              sge.source_id,
+                                                              subgraph,
+                                                              validate)
+            target_matches = self._filtered_subgraph_matching(ge.target_id,
+                                                              sge.target_id,
+                                                              subgraph,
+                                                              validate)
+
+            return self._list_union(source_matches, target_matches)
+        else:
+            return subgraph_matching(self.graph,
+                                     subgraph,
+                                     [known_match],
+                                     validate)
 
     def create_graph_from_matching_vertices(self,
                                             vertex_attr_filter=None,
@@ -159,3 +180,53 @@ class NXAlgorithm(GraphAlgorithm):
         return simple_paths.all_simple_paths(self.graph._g,
                                              source=source,
                                              target=target)
+
+    def _filtered_subgraph_matching(self,
+                                    ge_v_id,
+                                    sge_v_id,
+                                    subgraph,
+                                    validate):
+        """Runs subgraph_matching on edges vertices with filtering
+
+        Runs subgraph_matching on edges vertices after checking if that vertex
+        has real neighbors in the entity graph.
+        """
+        if self.graph.neighbors(ge_v_id,
+                                edge_attr_filter={EProps.IS_DELETED: False}):
+            template_vertex = subgraph.get_vertex(sge_v_id)
+            graph_vertex = self.graph.get_vertex(ge_v_id)
+            match = Mapping(template_vertex, graph_vertex, True)
+            return subgraph_matching(self.graph, subgraph, [match], validate)
+
+        return []
+
+    @staticmethod
+    def _edge_result_to_list(edge_result):
+        d = dict()
+        for source_id, target_id, label, data in edge_result:
+            d[(source_id, target_id, label)] = \
+                Edge(source_id, target_id, label, properties=data)
+        return d.values()
+
+    @staticmethod
+    def _vertex_result_to_list(vertex_result):
+        d = dict()
+        for v_id, data in vertex_result:
+            d[v_id] = Vertex(vertex_id=v_id, properties=data)
+        return d.values()
+
+    @staticmethod
+    def _list_union(list_1, list_2):
+        """Union of list that aren't hashable
+
+        Can't use here set union because the items in the lists are
+        dictionaries and they are not hashable for set.
+
+        :return: list - union list
+        """
+
+        for target_item in list_2:
+            if target_item not in list_1:
+                list_1.append(target_item)
+
+        return list_1

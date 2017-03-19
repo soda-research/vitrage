@@ -18,6 +18,8 @@ from vitrage.common.constants import DatasourceAction
 from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import EntityCategory
 from vitrage.datasources.nagios import NAGIOS_DATASOURCE
+from vitrage.datasources.neutron.network import NEUTRON_NETWORK_DATASOURCE
+from vitrage.datasources.neutron.port import NEUTRON_PORT_DATASOURCE
 from vitrage.datasources.nova.host import NOVA_HOST_DATASOURCE
 from vitrage.datasources.nova.instance import NOVA_INSTANCE_DATASOURCE
 from vitrage.datasources.nova.zone import NOVA_ZONE_DATASOURCE
@@ -42,7 +44,9 @@ class TestEntityGraphUnitBase(base.BaseTest):
                     default=[NAGIOS_DATASOURCE,
                              NOVA_HOST_DATASOURCE,
                              NOVA_INSTANCE_DATASOURCE,
-                             NOVA_ZONE_DATASOURCE],
+                             NOVA_ZONE_DATASOURCE,
+                             NEUTRON_NETWORK_DATASOURCE,
+                             NEUTRON_PORT_DATASOURCE],
                     help='Names of supported data sources'),
 
         cfg.ListOpt('path',

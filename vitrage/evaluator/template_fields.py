@@ -12,10 +12,10 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from vitrage.common.constants import TopologyFields
+from vitrage.common.constants import TemplateTopologyFields
 
 
-class TemplateFields(TopologyFields):
+class TemplateFields(TemplateTopologyFields):
 
     SCENARIOS = 'scenarios'
 

@@ -118,7 +118,10 @@ class NXGraph(Graph):
             return edge_copy(source_id, target_id, label, properties)
         return None
 
-    def get_edges(self, v_id, direction=Direction.BOTH,
+    def get_edges(self,
+                  v1_id,
+                  v2_id=None,
+                  direction=Direction.BOTH,
                   attr_filter=None):
         """Fetch multiple edges from the graph
 
@@ -128,9 +131,14 @@ class NXGraph(Graph):
             return check_filter(edge_data, attr_filter)
 
         nodes, edges = self._neighboring_nodes_edges_query(
-            v_id, edge_predicate=check_edge, direction=direction)
+            v1_id, edge_predicate=check_edge, direction=direction)
+
         edge_copies = set(edge_copy(u, v, label, data)
                           for u, v, label, data in edges)
+
+        if v2_id:
+            edge_copies = [e for e in edge_copies if e.has_vertex(v2_id)]
+
         return edge_copies
 
     def _get_edges_by_direction(self, v_id, direction):
