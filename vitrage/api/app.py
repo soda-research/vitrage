@@ -20,10 +20,6 @@ from paste import deploy
 from werkzeug import serving
 
 from vitrage.api import hooks
-# noinspection PyProtectedMember
-from vitrage.i18n import _LI
-# noinspection PyProtectedMember
-from vitrage.i18n import _LW
 from vitrage import service
 
 LOG = log.getLogger(__name__)
@@ -48,8 +44,8 @@ def setup_app(pecan_config=PECAN_CONFIG, conf=None):
     pecan_debug = conf.api.pecan_debug
     if conf.api.workers != 1 and pecan_debug:
         pecan_debug = False
-        LOG.warning(_LW('pecan_debug cannot be enabled, if workers is > 1, '
-                        'the value is overridden with False'))
+        LOG.warning('pecan_debug cannot be enabled, if workers is > 1, '
+                    'the value is overridden with False')
 
     app = pecan.make_app(
         pecan_config['app']['root'],
@@ -72,7 +68,7 @@ def load_app(conf):
 
     if not cfg_file:
         raise cfg.ConfigFilesNotFoundError([conf.api.paste_config])
-    LOG.info(_LI('Full WSGI config used: %s') % cfg_file)
+    LOG.info('Full WSGI config used: %s', cfg_file)
     return deploy.loadapp("config:" + cfg_file)
 
 
@@ -81,17 +77,17 @@ def build_server(conf):
     # Create the WSGI server and start it
     host, port = conf.api.host, conf.api.port
 
-    LOG.info(_LI('Starting server in PID %s') % os.getpid())
-    LOG.info(_LI('Configuration:'))
+    LOG.info('Starting server in PID %s', os.getpid())
+    LOG.info('Configuration:')
     conf.log_opt_values(LOG, log.INFO)
 
     if host == '0.0.0.0':
-        LOG.info(_LI(
-            'serving on 0.0.0.0:%(port)s, view at http://127.0.0.1:%(port)s')
-            % ({'port': port}))
+        LOG.info(
+            'serving on 0.0.0.0:%(port)s, view at http://127.0.0.1:%(port)s',
+            {'port': port})
     else:
-        LOG.info(_LI('serving on http://%(host)s:%(port)s') % (
-            {'host': host, 'port': port}))
+        LOG.info('serving on http://%(host)s:%(port)s',
+                 {'host': host, 'port': port})
 
     serving.run_simple(host, port,
                        app, processes=conf.api.workers)

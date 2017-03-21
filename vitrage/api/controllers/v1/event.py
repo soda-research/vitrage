@@ -19,7 +19,6 @@ from pecan.core import abort
 
 from vitrage.api.controllers.rest import RootRestController
 from vitrage.api.policy import enforce
-from vitrage.i18n import _LI
 
 
 LOG = log.getLogger(__name__)
@@ -29,7 +28,7 @@ class EventController(RootRestController):
 
     @pecan.expose('json')
     def post(self, **kwargs):
-        LOG.info(_LI('Post event called with args: %s') % kwargs)
+        LOG.info('Post event called with args: %s', kwargs)
 
         enforce("event post", pecan.request.headers,
                 pecan.request.enforcer, {})

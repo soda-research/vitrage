@@ -21,9 +21,6 @@ from pecan.core import abort
 from vitrage.api.controllers.rest import RootRestController
 from vitrage.api.policy import enforce
 
-# noinspection PyProtectedMember
-from vitrage.i18n import _LI
-
 
 LOG = log.getLogger(__name__)
 
@@ -42,7 +39,7 @@ class RCAController(RootRestController):
             enforce('get rca', pecan.request.headers,
                     pecan.request.enforcer, {})
 
-        LOG.info(_LI('received show rca with alarm id %s') % alarm_id)
+        LOG.info('received show rca with alarm id %s', alarm_id)
         return self.get_rca(alarm_id, all_tenants)
 
     @staticmethod
