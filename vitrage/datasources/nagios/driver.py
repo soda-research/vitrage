@@ -26,11 +26,6 @@ from vitrage.datasources.nagios.properties import NagiosProperties\
     as NagiosProps
 from vitrage.datasources.nagios.properties import NagiosTestStatus
 
-# noinspection PyProtectedMember
-from vitrage.i18n import _LE
-# noinspection PyProtectedMember
-from vitrage.i18n import _LW
-
 LOG = log.getLogger(__name__)
 
 
@@ -58,11 +53,11 @@ class NagiosDriver(AlarmDriverBase):
             return []
 
         if not nagios_password:
-            LOG.warning(_LW('Nagios password is not defined'))
+            LOG.warning('Nagios password is not defined')
             return []
 
         if not nagios_url:
-            LOG.warning(_LW('Nagios url is not defined'))
+            LOG.warning('Nagios url is not defined')
             return []
 
         session = requests.Session()
@@ -76,7 +71,7 @@ class NagiosDriver(AlarmDriverBase):
             nagios_services = NagiosParser().parse(response.text)
             return nagios_services
         else:
-            LOG.error(_LE('Failed to get nagios data. Response code: %s') %
+            LOG.error('Failed to get nagios data. Response code: %s',
                       response.status_code)
             return []
 

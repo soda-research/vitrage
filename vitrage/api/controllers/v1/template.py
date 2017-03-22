@@ -19,7 +19,6 @@ from pecan.core import abort
 
 from vitrage.api.controllers.rest import RootRestController
 from vitrage.api.policy import enforce
-from vitrage.i18n import _LI
 
 
 LOG = log.getLogger(__name__)
@@ -30,7 +29,7 @@ class TemplateController(RootRestController):
     @pecan.expose('json')
     def get_all(self):
 
-        LOG.info(_LI('returns template list'))
+        LOG.info('returns template list')
 
         enforce("template list",
                 pecan.request.headers,
@@ -45,7 +44,7 @@ class TemplateController(RootRestController):
     @pecan.expose('json')
     def get(self, template_uuid):
 
-        LOG.info(_LI('get template content'))
+        LOG.info('get template content')
 
         enforce("template show",
                 pecan.request.headers,
@@ -61,7 +60,7 @@ class TemplateController(RootRestController):
     @pecan.expose('json')
     def post(self, **kwargs):
 
-        LOG.info(_LI('validate template. args: %s') % kwargs)
+        LOG.info('validate template. args: %s', kwargs)
 
         enforce("template validate",
                 pecan.request.headers,

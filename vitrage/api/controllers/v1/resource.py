@@ -16,8 +16,6 @@ from oslo_log import log
 from pecan.core import abort
 from pecan import rest
 from vitrage.api.policy import enforce
-# noinspection PyProtectedMember
-from vitrage.i18n import _LI
 
 
 LOG = log.getLogger(__name__)
@@ -27,7 +25,7 @@ class ResourcesController(rest.RestController):
 
     @pecan.expose()
     def _lookup(self, id_, *remainder):
-        LOG.info(_LI('got lookup %s') % id_)
+        LOG.info('got lookup %s', id_)
         return ResourceController(id_), remainder
 
     @pecan.expose('json')
@@ -35,7 +33,7 @@ class ResourcesController(rest.RestController):
         enforce('list resources', pecan.request.headers,
                 pecan.request.enforcer, {})
 
-        LOG.info(_LI('received list resources with filter %s') % resource_type)
+        LOG.info('received list resources with filter %s', resource_type)
 
         try:
             return self.get_resources(resource_type)
@@ -59,7 +57,7 @@ class ResourceController(rest.RestController):
         enforce('get resource', pecan.request.headers,
                 pecan.request.enforcer, {})
 
-        LOG.info(_LI('received get resource with id %s') % self.id)
+        LOG.info('received get resource with id %s', self.id)
         try:
             return self.get_resource(self.id)
         except Exception as e:

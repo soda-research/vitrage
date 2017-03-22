@@ -20,8 +20,6 @@ from pecan.core import abort
 
 from vitrage.api.controllers.rest import RootRestController
 from vitrage.api.policy import enforce
-# noinspection PyProtectedMember
-from vitrage.i18n import _LI
 
 
 LOG = log.getLogger(__name__)
@@ -42,8 +40,7 @@ class AlarmsController(RootRestController):
             enforce("list alarms", pecan.request.headers,
                     pecan.request.enforcer, {})
 
-        LOG.info(_LI('returns list alarms with vitrage id %s') %
-                 vitrage_id)
+        LOG.info('returns list alarms with vitrage id %s', vitrage_id)
 
         try:
             return self._get_alarms(vitrage_id, all_tenants)

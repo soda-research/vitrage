@@ -25,7 +25,6 @@ from vitrage.common.constants import VertexProperties as VProps
 
 # noinspection PyProtectedMember
 from vitrage.datasources.transformer_base import CLUSTER_ID
-from vitrage.i18n import _LI
 
 
 LOG = log.getLogger(__name__)
@@ -42,14 +41,14 @@ class TopologyController(RootRestController):
             enforce("get topology", pecan.request.headers,
                     pecan.request.enforcer, {})
 
-        LOG.info(_LI('received get topology: depth->%(depth)s '
-                     'graph_type->%(graph_type)s root->%(root)s') %
+        LOG.info('received get topology: depth->%(depth)s '
+                 'graph_type->%(graph_type)s root->%(root)s',
                  {'depth': depth, 'graph_type': graph_type, 'root': root})
 
         if query:
             query = json.loads(query)
 
-        LOG.info(_LI("query is %s") % query)
+        LOG.info("query is %s", query)
 
         return self.get_graph(graph_type, depth, query, root, all_tenants)
 
