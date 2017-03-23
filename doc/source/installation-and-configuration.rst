@@ -39,6 +39,8 @@ Configuration
 
 * `Nagios Plugin Configuration <http://docs.openstack.org/developer/vitrage/nagios-config.html>`_
 
+* `Static Plugin Configuration <http://docs.openstack.org/developer/vitrage/static-config.html>`_
+
 * `Static Physical Plugin Configuration <http://docs.openstack.org/developer/vitrage/static-physical-config.html>`_
 
 * `Resource State Configuration <http://docs.openstack.org/developer/vitrage/resource-state-config.html>`_
