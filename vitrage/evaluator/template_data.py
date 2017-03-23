@@ -11,6 +11,7 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+
 from collections import namedtuple
 from sympy.logic.boolalg import And
 from sympy.logic.boolalg import Not
@@ -19,14 +20,17 @@ from sympy.logic.boolalg import to_dnf as sympy_to_dfn
 from sympy import Symbol
 
 
+from vitrage.common.constants import EdgeProperties as EProps
+from vitrage.common.constants import VertexProperties as VProps
 from vitrage.evaluator.template_fields import TemplateFields as TFields
+from vitrage.graph.algo_driver.sub_graph_matching import NEG_CONDITION
+from vitrage.graph.driver.networkx_graph import NXGraph
 from vitrage.graph import Edge
 from vitrage.graph import Vertex
 
-
 ConditionVar = namedtuple('ConditionVar', ['variable', 'type', 'positive'])
 ActionSpecs = namedtuple('ActionSpecs', ['type', 'targets', 'properties'])
-Scenario = namedtuple('Scenario', ['id', 'condition', 'actions'])
+Scenario = namedtuple('Scenario', ['id', 'condition', 'actions', 'subgraphs'])
 EdgeDescription = namedtuple('EdgeDescription', ['edge', 'source', 'target'])
 
 
@@ -132,12 +136,13 @@ class TemplateData(object):
 
         scenarios = []
         for counter, scenarios_def in enumerate(scenarios_defs):
-
             scenario_dict = scenarios_def[TFields.SCENARIO]
             condition = self._parse_condition(scenario_dict[TFields.CONDITION])
             action_specs = self._build_actions(scenario_dict[TFields.ACTIONS])
+            subgraphs = self._build_subgraphs(condition)
             scenario_id = "%s-scenario%s" % (self.name, str(counter))
-            scenarios.append(Scenario(scenario_id, condition, action_specs))
+            scenarios.append(Scenario(scenario_id, condition,
+                                      action_specs, subgraphs))
 
         return scenarios
 
@@ -155,6 +160,41 @@ class TemplateData(object):
             actions.append(ActionSpecs(action_type, targets, properties))
 
         return actions
+
+    def _build_subgraphs(self, condition):
+        return [self._build_subgraph(clause) for clause in condition]
+
+    def _build_subgraph(self, clause):
+        condition_g = NXGraph("scenario condition")
+
+        for term in clause:
+            if term.type == ENTITY:
+                term.variable[VProps.IS_DELETED] = False
+                condition_g.add_vertex(term.variable)
+
+            else:  # type = relationship
+                edge_desc = term.variable
+                self._set_edge_relationship_info(edge_desc, term.positive)
+                self._add_edge_relationship(condition_g, edge_desc)
+
+        return condition_g
+
+    @staticmethod
+    def _set_edge_relationship_info(edge_description, is_positive_condition):
+        if not is_positive_condition:
+            edge_description.edge[NEG_CONDITION] = True
+            edge_description.edge[EProps.IS_DELETED] = True
+        else:
+            edge_description.edge[EProps.IS_DELETED] = False
+
+        edge_description.source[VProps.IS_DELETED] = False
+        edge_description.target[VProps.IS_DELETED] = False
+
+    @staticmethod
+    def _add_edge_relationship(condition_graph, edge_description):
+        condition_graph.add_vertex(edge_description.source)
+        condition_graph.add_vertex(edge_description.target)
+        condition_graph.add_edge(edge_description.edge)
 
     def _parse_condition(self, condition_str):
         """Parse condition string into an object
@@ -181,7 +221,7 @@ class TemplateData(object):
             return [self._extract_and_condition(condition_dnf)]
 
         if isinstance(condition_dnf, Not):
-            return [[(self._extract_condition_var(condition_dnf, False))]]
+            return [(self._extract_not_condition_var(condition_dnf))]
 
         if isinstance(condition_dnf, Symbol):
             return [[(self._extract_condition_var(condition_dnf, True))]]
@@ -213,9 +253,15 @@ class TemplateData(object):
         return [self._extract_condition_var(arg, isinstance(arg, Symbol))
                 for arg in and_condition.args]
 
-    def _extract_condition_var(self, symbol, positive):
+    def _extract_not_condition_var(self, not_condition):
+        return [self._extract_condition_var(arg, False)
+                for arg in not_condition.args]
 
-        var, var_type = self._extract_var(str(symbol))
+    def _extract_condition_var(self, symbol, positive):
+        if isinstance(symbol, Not):
+            return self._extract_not_condition_var(symbol)[0]
+        else:
+            var, var_type = self._extract_var(str(symbol))
         return ConditionVar(var, var_type, positive)
 
     def _extract_var(self, template_id):

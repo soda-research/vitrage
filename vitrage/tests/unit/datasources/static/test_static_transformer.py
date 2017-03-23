@@ -19,12 +19,12 @@ from oslo_config import cfg
 from vitrage.common.constants import DatasourceOpts as DSOpts
 from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import EntityCategory
-from vitrage.common.constants import TopologyFields
 from vitrage.common.constants import UpdateMethod
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.datasources.nova.host import NOVA_HOST_DATASOURCE
 from vitrage.datasources.nova.host.transformer import HostTransformer
 from vitrage.datasources.static import STATIC_DATASOURCE
+from vitrage.datasources.static import StaticFields
 from vitrage.datasources.static.transformer import StaticTransformer
 from vitrage.tests import base
 from vitrage.tests.mocks import mock_driver
@@ -109,7 +109,7 @@ class TestStaticTransformer(base.BaseTest):
         self.assertEqual(vertex[VProps.SAMPLE_TIMESTAMP],
                          event[DSProps.SAMPLE_DATE])
 
-        for k, v in event.get(TopologyFields.METADATA, {}):
+        for k, v in event.get(StaticFields.METADATA, {}):
             self.assertEqual(vertex[k], v)
 
     def _validate_common_props(self, vertex, event):
@@ -120,19 +120,22 @@ class TestStaticTransformer(base.BaseTest):
 
     def _validate_neighbors(self, neighbors, vertex_id, event):
         for i in range(len(neighbors)):
-            self._validate_neighbor(neighbors[i],
-                                    event[TopologyFields.RELATIONSHIPS][i],
-                                    vertex_id)
+            self._validate_neighbor(
+                neighbors[i],
+                event[StaticFields.RELATIONSHIPS][i],
+                vertex_id)
 
     def _validate_neighbor(self, neighbor, rel, vertex_id):
         vertex = neighbor.vertex
-        self._validate_neighbor_vertex_props(vertex,
-                                             rel[TopologyFields.TARGET])
+        self._validate_neighbor_vertex_props(
+            vertex,
+            rel[StaticFields.TARGET])
 
         edge = neighbor.edge
         self.assertEqual(edge.source_id, vertex_id)
         self.assertEqual(edge.target_id, neighbor.vertex.vertex_id)
-        self.assertEqual(edge.label, rel[TopologyFields.RELATIONSHIP_TYPE])
+        self.assertEqual(edge.label,
+                         rel[StaticFields.RELATIONSHIP_TYPE])
 
     def _validate_neighbor_vertex_props(self, vertex, event):
         self._validate_common_props(vertex, event)

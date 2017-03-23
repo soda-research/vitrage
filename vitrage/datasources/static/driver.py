@@ -18,8 +18,6 @@ from six.moves import reduce
 
 from oslo_log import log
 
-from vitrage.common.constants import TopologyFields
-from vitrage.common.constants import VertexProperties as VProps
 from vitrage.datasources.driver_base import DriverBase
 from vitrage.datasources.static import STATIC_DATASOURCE
 from vitrage.datasources.static import StaticFields
@@ -30,7 +28,7 @@ LOG = log.getLogger(__name__)
 
 class StaticDriver(DriverBase):
     # base fields are required for all entities, others are treated as metadata
-    BASE_FIELDS = {StaticFields.STATIC_ID, StaticFields.TYPE, VProps.ID}
+    BASE_FIELDS = {StaticFields.STATIC_ID, StaticFields.TYPE, StaticFields.ID}
 
     def __init__(self, conf):
         super(StaticDriver, self).__init__()
@@ -40,7 +38,7 @@ class StaticDriver(DriverBase):
     def _is_valid_config(config):
         """check for validity of configuration"""
         # TODO(yujunz) check with yaml schema or reuse template validation
-        return TopologyFields.DEFINITIONS in config
+        return StaticFields.DEFINITIONS in config
 
     @staticmethod
     def get_event_types():
@@ -77,10 +75,10 @@ class StaticDriver(DriverBase):
                         .format(path))
             return []
 
-        definitions = config[TopologyFields.DEFINITIONS]
+        definitions = config[StaticFields.DEFINITIONS]
 
-        entities = definitions[TopologyFields.ENTITIES]
-        relationships = definitions[TopologyFields.RELATIONSHIPS]
+        entities = definitions[StaticFields.ENTITIES]
+        relationships = definitions[StaticFields.RELATIONSHIPS]
 
         return cls._pack(entities, relationships)
 
@@ -100,22 +98,23 @@ class StaticDriver(DriverBase):
             metadata = {key: value for key, value in iteritems(entity)
                         if key not in cls.BASE_FIELDS}
             entities_dict[static_id] = entity
-            entity[TopologyFields.RELATIONSHIPS] = []
-            entity[TopologyFields.METADATA] = metadata
+            entity[StaticFields.RELATIONSHIPS] = []
+            entity[StaticFields.METADATA] = metadata
         else:
             LOG.warning("Skipped duplicated entity: {}".format(entity))
 
     @classmethod
     def _pack_rel(cls, entities_dict, rel):
-        source_id = rel[TopologyFields.SOURCE]
-        target_id = rel[TopologyFields.TARGET]
+        source_id = rel[StaticFields.SOURCE]
+        target_id = rel[StaticFields.TARGET]
 
         if source_id == target_id:
             # self pointing relationship
-            entities_dict[source_id][TopologyFields.RELATIONSHIPS].append(rel)
+            entities_dict[source_id]
+            [StaticFields.RELATIONSHIPS].append(rel)
         else:
             source, target = entities_dict[source_id], entities_dict[target_id]
-            source[TopologyFields.RELATIONSHIPS].append(
+            source[StaticFields.RELATIONSHIPS].append(
                 cls._expand_neighbor(rel, target))
 
     @staticmethod

@@ -18,7 +18,6 @@ from oslo_log import log as logging
 
 from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import EntityCategory
-from vitrage.common.constants import TopologyFields
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.datasources.resource_transformer_base import \
     ResourceTransformerBase
@@ -58,7 +57,7 @@ class StaticTransformer(ResourceTransformerBase):
         return STATIC_DATASOURCE
 
     def _create_vertex(self, entity_event):
-        metadata = entity_event.get(TopologyFields.METADATA, {})
+        metadata = entity_event.get(StaticFields.METADATA, {})
 
         entity_type = entity_event[VProps.TYPE]
         entity_id = entity_event[VProps.ID]
@@ -101,13 +100,15 @@ class StaticTransformer(ResourceTransformerBase):
             return None
         if rel[StaticFields.SOURCE] == rel[StaticFields.TARGET]:
             neighbor = entity_event
-        return self._create_neighbor(entity_event,
-                                     neighbor[VProps.ID],
-                                     neighbor[VProps.TYPE],
-                                     rel[TopologyFields.RELATIONSHIP_TYPE],
-                                     is_entity_source=is_entity_source)
+        return self._create_neighbor(
+            entity_event,
+            neighbor[VProps.ID],
+            neighbor[VProps.TYPE],
+            rel[StaticFields.RELATIONSHIP_TYPE],
+            is_entity_source=is_entity_source)
 
     def _create_static_neighbors(self, entity_event):
-        relationships = entity_event.get(TopologyFields.RELATIONSHIPS, [])
+        relationships = entity_event.get(StaticFields.RELATIONSHIPS,
+                                         [])
         return [self._create_static_neighbor(entity_event, rel)
                 for rel in relationships]

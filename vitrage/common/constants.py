@@ -111,7 +111,7 @@ class NotifierEventTypes(object):
     DEACTIVATE_MARK_DOWN_EVENT = 'vitrage.mark_down.deactivate'
 
 
-class TopologyFields(object):
+class TemplateTopologyFields(object):
     """yaml fields for topology definitions"""
     METADATA = 'metadata'
     DESCRIPTION = 'description'

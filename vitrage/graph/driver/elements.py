@@ -158,3 +158,6 @@ class Edge(PropertiesElement):
         :return: the other vertex id
         """
         return self.source_id if self.target_id == v_id else self.target_id
+
+    def has_vertex(self, v_id):
+        return self.source_id == v_id or self.target_id == v_id

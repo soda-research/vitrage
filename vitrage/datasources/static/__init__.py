@@ -14,7 +14,6 @@
 
 from oslo_config import cfg
 from vitrage.common.constants import DatasourceOpts as DSOpts
-from vitrage.common.constants import TopologyFields
 from vitrage.common.constants import UpdateMethod
 
 STATIC_DATASOURCE = 'static'
@@ -48,5 +47,16 @@ OPTS = [
                help='static data sources configuration directory')]
 
 
-class StaticFields(TopologyFields):
+class StaticFields(object):
+    """yaml fields for static definitions"""
+    METADATA = 'metadata'
+    DEFINITIONS = 'definitions'
+    RELATIONSHIPS = 'relationships'
+    ENTITIES = 'entities'
+    RELATIONSHIP_TYPE = 'relationship_type'
+    SOURCE = 'source'
+    TARGET = 'target'
     STATIC_ID = 'static_id'
+    TYPE = 'type'
+    ID = 'id'
+    NAME = 'name'

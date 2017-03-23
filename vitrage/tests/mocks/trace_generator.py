@@ -27,7 +27,6 @@ from random import randint
 
 # noinspection PyPep8Naming
 from vitrage.common.constants import EdgeLabel
-from vitrage.common.constants import TopologyFields
 from vitrage.datasources.nova.host import NOVA_HOST_DATASOURCE
 from vitrage.datasources.static import StaticFields
 from vitrage.tests.mocks.entity_model import BasicEntityModel as Bem
@@ -569,12 +568,12 @@ def _get_static_snapshot_driver_values(spec):
         switch_id = "s{}".format(switch_index)
 
         relationship = {
-            TopologyFields.SOURCE: switch_id,
-            TopologyFields.TARGET: host_id,
-            TopologyFields.RELATIONSHIP_TYPE: EdgeLabel.ATTACHED
+            StaticFields.SOURCE: switch_id,
+            StaticFields.TARGET: host_id,
+            StaticFields.RELATIONSHIP_TYPE: EdgeLabel.ATTACHED
         }
         rel = relationship.copy()
-        rel[TopologyFields.TARGET] = entities[host_id]
+        rel[StaticFields.TARGET] = entities[host_id]
         relationships[switch_id].append(rel)
 
     for host_index, switch_index in host_switch_mapping:

@@ -26,9 +26,9 @@ from vitrage.evaluator.actions.base import ActionType
 import vitrage.evaluator.actions.priority_tools as pt
 from vitrage.evaluator.template_data import ActionSpecs
 from vitrage.evaluator.template_data import EdgeDescription
-from vitrage.evaluator.template_data import ENTITY
 from vitrage.graph.algo_driver.algorithm import Mapping
-from vitrage.graph.driver.networkx_graph import NXGraph
+from vitrage.graph.algo_driver.sub_graph_matching import \
+    NEG_CONDITION
 from vitrage.graph.driver import Vertex
 
 LOG = log.getLogger(__name__)
@@ -87,7 +87,6 @@ class ScenarioEvaluator(object):
                   str(before),
                   str(current))
 
-        # todo (erosensw): support for NOT conditions - reverse logic
         before_scenarios = self._get_element_scenarios(before, is_vertex)
         current_scenarios = self._get_element_scenarios(current, is_vertex)
         before_scenarios, current_scenarios = \
@@ -157,15 +156,52 @@ class ScenarioEvaluator(object):
         actions = {}
         for action in scenario.actions:
             for scenario_element in scenario_elements:
-                matches = self._evaluate_full_condition(scenario.condition,
-                                                        element,
-                                                        scenario_element)
-                if matches:
-                    for match in matches:
-                        spec, action_id = self._get_action_spec(action, match)
-                        match_hash = hash(tuple(sorted(match.items())))
-                        actions[action_id] = \
-                            ActionInfo(spec, mode, scenario.id, match_hash)
+                matches = self._evaluate_subgraphs(scenario.subgraphs,
+                                                   element,
+                                                   scenario_element,
+                                                   action.targets['target'])
+
+                actions.update(self._get_actions_from_matches(matches,
+                                                              mode,
+                                                              action,
+                                                              scenario))
+
+        return actions
+
+    def _evaluate_subgraphs(self,
+                            subgraphs,
+                            element,
+                            scenario_element,
+                            action_target):
+        if isinstance(element, Vertex):
+            return self._find_vertex_subgraph_matching(subgraphs,
+                                                       action_target,
+                                                       element,
+                                                       scenario_element)
+        else:
+            return self._find_edge_subgraph_matching(subgraphs,
+                                                     action_target,
+                                                     element,
+                                                     scenario_element)
+
+    def _get_actions_from_matches(self,
+                                  combined_matches,
+                                  mode,
+                                  action_spec,
+                                  scenario):
+        actions = {}
+        for is_switch_mode, matches in combined_matches:
+            new_mode = mode
+            if is_switch_mode:
+                new_mode = ActionMode.UNDO \
+                    if mode == ActionMode.DO else ActionMode.DO
+
+            for match in matches:
+                spec, action_id = self._get_action_spec(action_spec, match)
+                match_hash = hash(tuple(sorted(match.items())))
+                actions[action_id] = ActionInfo(spec, new_mode,
+                                                scenario.id, match_hash)
+
         return actions
 
     @staticmethod
@@ -190,53 +226,6 @@ class ScenarioEvaluator(object):
              tuple(sorted(action_spec.properties.items())))
         )
 
-    def _evaluate_full_condition(self, condition, element, scenario_element):
-        condition_matches = []
-        for clause in condition:
-            # OR condition means aggregation of matches, without duplicates
-            and_condition_matches = \
-                self._evaluate_and_condition(clause, element, scenario_element)
-            condition_matches += and_condition_matches
-
-        return condition_matches
-
-    def _evaluate_and_condition(self, condition, element, scenario_element):
-
-        condition_g = NXGraph("scenario condition")
-        for term in condition:
-            if not term.positive:
-                # todo(erosensw): add support for NOT clauses
-                LOG.error('Template with NOT operator current not supported')
-                return []
-
-            if term.type == ENTITY:
-                term.variable[VProps.IS_DELETED] = False
-                condition_g.add_vertex(term.variable)
-
-            else:  # type = relationship
-                edge_desc = term.variable
-                self._set_relationship_not_deleted(edge_desc)
-                self._add_relationship(condition_g, edge_desc)
-
-        if isinstance(element, Vertex):
-            initial_map = Mapping(scenario_element, element, True)
-        else:
-            initial_map = Mapping(scenario_element.edge, element, False)
-        return self._entity_graph.algo.sub_graph_matching(condition_g,
-                                                          [initial_map])
-
-    @staticmethod
-    def _set_relationship_not_deleted(edge_description):
-        edge_description.source[VProps.IS_DELETED] = False
-        edge_description.target[VProps.IS_DELETED] = False
-        edge_description.edge[EProps.IS_DELETED] = False
-
-    @staticmethod
-    def _add_relationship(condition_graph, edge_description):
-        condition_graph.add_vertex(edge_description.source)
-        condition_graph.add_vertex(edge_description.target)
-        condition_graph.add_edge(edge_description.edge)
-
     def _analyze_and_filter_actions(self, actions):
 
         actions_to_perform = {}
@@ -259,6 +248,102 @@ class ScenarioEvaluator(object):
             elif new_dominant != prev_dominant:
                 actions_to_perform[key] = new_dominant
         return actions_to_perform.values()
+
+    def _find_vertex_subgraph_matching(self,
+                                       subgraphs,
+                                       action_target,
+                                       vertex,
+                                       scenario_vertex):
+        """calculates subgraph matching for vertex
+
+        iterates over all the subgraphs, and checks if the triggered vertex is
+        in the same connected component as the action then run subgraph
+        matching on the vertex and return its result, otherwise return an
+        empty list of matches.
+        """
+
+        matches = []
+        for subgraph in subgraphs:
+            connected_component = subgraph.algo.graph_query_vertices(
+                root_id=action_target,
+                edge_query_dict={'!=': {NEG_CONDITION: True}})
+
+            is_switch_mode = \
+                connected_component.get_vertex(scenario_vertex.vertex_id)
+
+            if is_switch_mode:
+                initial_map = Mapping(scenario_vertex, vertex, True)
+                mat = self._entity_graph.algo.sub_graph_matching(subgraph,
+                                                                 initial_map)
+                matches.append((False, mat))
+            else:
+                matches.append((True, []))
+        return matches
+
+    def _find_edge_subgraph_matching(self,
+                                     subgraphs,
+                                     action_target,
+                                     vertex,
+                                     scenario_edge):
+        """calculates subgraph matching for edge
+
+        iterates over all the subgraphs, and checks if the triggered edge is a
+        negative edge then mark it as deleted=false and negative=false so that
+        subgraph matching on that edge will work correctly. after running
+        subgraph matching, we need to remove the negative vertices that were
+        added due to the change above.
+        """
+
+        matches = []
+        for subgraph in subgraphs:
+            is_switch_mode = \
+                subgraph.get_edge(scenario_edge.source.vertex_id,
+                                  scenario_edge.target.vertex_id,
+                                  scenario_edge.edge.label).get(NEG_CONDITION,
+                                                                False)
+
+            connected_component = subgraph.algo.graph_query_vertices(
+                root_id=action_target,
+                edge_query_dict={'!=': {NEG_CONDITION: True}})
+
+            # change the is_deleted and negative_condition props to false when
+            # is_switch_mode=true so that when we have an event on a
+            # negative_condition=true edge it will find the correct subgraph
+            self._switch_edge_negative_props(is_switch_mode, scenario_edge,
+                                             subgraph, False)
+
+            initial_map = Mapping(scenario_edge.edge, vertex, False)
+            curr_matches = \
+                self._entity_graph.algo.sub_graph_matching(subgraph,
+                                                           initial_map)
+
+            # switch back to the original values
+            self._switch_edge_negative_props(is_switch_mode, scenario_edge,
+                                             subgraph, True)
+
+            self._remove_negative_vertices_from_matches(curr_matches,
+                                                        connected_component)
+
+            matches.append((is_switch_mode, curr_matches))
+        return matches
+
+    @staticmethod
+    def _switch_edge_negative_props(is_switch_mode,
+                                    scenario_edge,
+                                    subgraph,
+                                    status):
+        if is_switch_mode:
+            scenario_edge.edge[NEG_CONDITION] = status
+            scenario_edge.edge[EProps.IS_DELETED] = status
+            subgraph.update_edge(scenario_edge.edge)
+
+    @staticmethod
+    def _remove_negative_vertices_from_matches(matches, connected_component):
+        for match in matches:
+            ver_ids = [v.vertex_id for v in connected_component.get_vertices()]
+            ver_to_remove = [id for id in match.keys() if id not in ver_ids]
+            for v_id in ver_to_remove:
+                del match[v_id]
 
 
 class ActionTracker(object):

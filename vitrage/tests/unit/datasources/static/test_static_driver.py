@@ -17,7 +17,6 @@ from oslo_config import cfg
 from vitrage.common.constants import DatasourceAction
 from vitrage.common.constants import DatasourceOpts as DSOpts
 from vitrage.common.constants import GraphAction
-from vitrage.common.constants import TopologyFields
 from vitrage.datasources.static import driver
 from vitrage.datasources.static import STATIC_DATASOURCE
 from vitrage.datasources.static import StaticFields
@@ -99,8 +98,9 @@ class TestStaticDriver(base.BaseTest):
             self._validate_static_entity(entity)
 
     def _validate_static_entity(self, entity):
-        self.assertTrue(isinstance(entity[TopologyFields.METADATA], dict))
-        for rel in entity[TopologyFields.RELATIONSHIPS]:
+        self.assertTrue(isinstance(entity[StaticFields.METADATA],
+                                   dict))
+        for rel in entity[StaticFields.RELATIONSHIPS]:
             self._validate_static_rel(entity, rel)
 
     def _validate_static_rel(self, entity, rel):

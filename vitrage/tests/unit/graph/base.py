@@ -38,10 +38,11 @@ from vitrage.tests import base
 
 LOG = logging.getLogger(__name__)
 
+# number of vms and alarms on vms needs 7 or more
 ENTITY_GRAPH_HOSTS_PER_CLUSTER = 8
 ENTITY_GRAPH_VMS_PER_HOST = 8
 ENTITY_GRAPH_ALARMS_PER_HOST = 8
-ENTITY_GRAPH_TESTS_PER_HOST = 20
+ENTITY_GRAPH_TESTS_PER_HOST = 8
 ENTITY_GRAPH_ALARMS_PER_VM = 8
 
 RESOURCE = EntityCategory.RESOURCE
