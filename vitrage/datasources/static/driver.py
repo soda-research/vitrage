@@ -110,8 +110,7 @@ class StaticDriver(DriverBase):
 
         if source_id == target_id:
             # self pointing relationship
-            entities_dict[source_id]
-            [StaticFields.RELATIONSHIPS].append(rel)
+            entities_dict[source_id][StaticFields.RELATIONSHIPS].append(rel)
         else:
             source, target = entities_dict[source_id], entities_dict[target_id]
             source[StaticFields.RELATIONSHIPS].append(
