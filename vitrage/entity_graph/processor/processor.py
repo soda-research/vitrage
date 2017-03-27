@@ -157,7 +157,7 @@ class Processor(processor.ProcessorBase):
             if updated_vertex is not None:
                 self.entity_graph.update_vertex(updated_vertex)
             if graph_edge:
-                self.entity_graph.remove_edge(graph_edge)
+                PUtils.mark_deleted(self.entity_graph, graph_edge)
 
     def remove_deleted_entity(self, vertex, neighbors):
         """Removes the deleted vertex from the entity graph

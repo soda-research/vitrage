@@ -155,9 +155,7 @@ class NXAlgorithm(GraphAlgorithm):
 
         # delete non matching edges
         if edge_attr_filter:
-            for source, target, edge_data in graph._g.edges_iter(data=True):
-                if not check_filter(edge_data, edge_attr_filter):
-                    graph.remove_edge(u=source, v=target)
+            self._apply_edge_attr_filter(graph, edge_attr_filter)
 
         LOG.debug('match query, find graph: nodes %s, edges %s',
                   str(graph._g.nodes(data=True)),
@@ -165,6 +163,7 @@ class NXAlgorithm(GraphAlgorithm):
         LOG.debug('match query, real graph: nodes %s, edges %s',
                   str(self.graph._g.nodes(data=True)),
                   str(self.graph._g.edges(data=True)))
+
         return graph
 
     def subgraph(self, entities):
@@ -230,3 +229,9 @@ class NXAlgorithm(GraphAlgorithm):
                 list_1.append(target_item)
 
         return list_1
+
+    @staticmethod
+    def _apply_edge_attr_filter(graph, edge_attr_filter):
+        for source, target, edge_data in graph._g.edges_iter(data=True):
+            if not check_filter(edge_data, edge_attr_filter):
+                graph._g.remove_edge(u=source, v=target)

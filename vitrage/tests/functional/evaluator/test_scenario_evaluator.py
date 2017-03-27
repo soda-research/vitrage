@@ -35,6 +35,7 @@ from vitrage.tests.functional.base import \
     TestFunctionalBase
 import vitrage.tests.mocks.mock_driver as mock_driver
 from vitrage.tests.mocks import utils
+from vitrage.utils.datetime import utcnow
 
 _TARGET_HOST = 'host-2'
 _TARGET_ZONE = 'zone-1'
@@ -211,6 +212,26 @@ class TestScenarioEvaluator(TestFunctionalBase):
             self._get_deduced_alarms_on_host(host_v, processor.entity_graph)
         self.assertEqual(0, len(alarms))
 
+        # recreate the nagios alarm
+        warning_test['status'] = 'WARNING'
+        warning_test[DSProps.SAMPLE_DATE] = str(utcnow())
+        host_v = self.get_host_after_event(event_queue, warning_test,
+                                           processor, _TARGET_HOST)
+        alarms = \
+            self._get_deduced_alarms_on_host(host_v, processor.entity_graph)
+        self.assertEqual(1, len(alarms))
+        self.assertEqual('WARNING', alarms[0]['severity'])
+        causes = self._get_alarm_causes(alarms[0], processor.entity_graph)
+        self.assertEqual(1, len(causes))
+
+        # next disable the alarm
+        warning_test['status'] = 'OK'
+        host_v = self.get_host_after_event(event_queue, warning_test,
+                                           processor, _TARGET_HOST)
+        alarms = \
+            self._get_deduced_alarms_on_host(host_v, processor.entity_graph)
+        self.assertEqual(0, len(alarms))
+
     def test_overlapping_deduced_alarm_1(self):
 
         event_queue, processor, evaluator = self._init_system()
@@ -312,14 +333,20 @@ class TestScenarioEvaluator(TestFunctionalBase):
         We have created the following template: if there is a neutron.port that
         doesn't have a nagios alarm of type PORT_PROBLEM on it, then raise a
         deduced alarm on the port called simple_port_deduced_alarm.
-        The test has 3 steps in it:
+        The test has 5 steps in it:
         1. create neutron.network and neutron.port and check that the
            simple_port_deduced_alarm is raised on the neutron.port because it
            doesn't have a nagios alarm on it.
         2. create a nagios alarm called PORT_PROBLEM on the port and check
            that the alarm simple_port_deduced_alarm doesn't appear on the
            neutron.port.
-        3. delete the nagios alarm called PORT_PROBLEM from the port, and
+        3. delete the edge between nagios alarm called PORT_PROBLEM and the
+           neutron.port. check that the alarm simple_port_deduced_alarm appear
+           on the neutron.port.
+        4. create the edge between nagios alarm called PORT_PROBLEM and the
+           neutron.port.check that the alarm simple_port_deduced_alarm doesn't
+           appear on the neutron.port.
+        5. delete the nagios alarm called PORT_PROBLEM from the port, and
            check that the alarm alarm simple_port_deduced_alarm appear on the
            neutron.port.
         """
@@ -437,6 +464,85 @@ class TestScenarioEvaluator(TestFunctionalBase):
         self.assertEqual(port_neighbors[0][VProps.IS_DELETED], False)
         self.assertEqual(port_neighbors[0][VProps.IS_PLACEHOLDER], False)
 
+        # ###################   STEP 3   ###################
+        # disable connection between port and alarm
+        query = {VProps.CATEGORY: 'ALARM', VProps.TYPE: 'nagios'}
+        nagios_vertex = \
+            processor.entity_graph.get_vertices(vertex_attr_filter=query)[0]
+        nagios_edge = [e for e in processor.entity_graph.get_edges(
+            nagios_vertex.vertex_id)][0]
+        nagios_edge[EProps.IS_DELETED] = True
+        processor.entity_graph.update_edge(nagios_edge)
+        while not event_queue.empty():
+            processor.process_event(event_queue.get())
+
+        # test asserts
+        self.assertEqual(num_orig_vertices + num_added_vertices +
+                         num_deduced_vertices + num_nagios_alarm_vertices,
+                         entity_graph.num_vertices())
+        self.assertEqual(num_orig_edges + num_added_edges + num_deduced_edges +
+                         num_nagios_alarm_edges, entity_graph.num_edges())
+
+        query = {VProps.CATEGORY: EntityCategory.ALARM, VProps.TYPE: 'vitrage'}
+        port_neighbors = entity_graph.neighbors(port_vertex.vertex_id,
+                                                vertex_attr_filter=query)
+        self.assertEqual(1, len(port_neighbors))
+        self.assertEqual(port_neighbors[0][VProps.CATEGORY],
+                         EntityCategory.ALARM)
+        self.assertEqual(port_neighbors[0][VProps.TYPE], 'vitrage')
+        self.assertEqual(port_neighbors[0][VProps.NAME],
+                         'simple_port_deduced_alarm')
+        self.assertEqual(port_neighbors[0][VProps.IS_DELETED], False)
+
+        query = {VProps.CATEGORY: EntityCategory.ALARM, VProps.TYPE: 'nagios'}
+        port_neighbors = entity_graph.neighbors(port_vertex.vertex_id,
+                                                vertex_attr_filter=query)
+        self.assertEqual(port_neighbors[0][VProps.CATEGORY],
+                         EntityCategory.ALARM)
+        self.assertEqual(port_neighbors[0][VProps.TYPE], 'nagios')
+        self.assertEqual(port_neighbors[0][VProps.NAME], 'PORT_PROBLEM')
+        self.assertEqual(port_neighbors[0][VProps.IS_DELETED], False)
+
+        # ###################   STEP 4   ###################
+        # enable connection between port and alarm
+        query = {VProps.CATEGORY: 'ALARM', VProps.TYPE: 'nagios'}
+        nagios_vertex = \
+            processor.entity_graph.get_vertices(vertex_attr_filter=query)[0]
+        nagios_edge = [e for e in processor.entity_graph.get_edges(
+            nagios_vertex.vertex_id)][0]
+        nagios_edge[EProps.IS_DELETED] = False
+        processor.entity_graph.update_edge(nagios_edge)
+        while not event_queue.empty():
+            processor.process_event(event_queue.get())
+
+        # test asserts
+        self.assertEqual(num_orig_vertices + num_added_vertices +
+                         num_deduced_vertices + num_nagios_alarm_vertices,
+                         entity_graph.num_vertices())
+        self.assertEqual(num_orig_edges + num_added_edges + num_deduced_edges +
+                         num_nagios_alarm_edges, entity_graph.num_edges())
+
+        query = {VProps.CATEGORY: EntityCategory.ALARM, VProps.TYPE: 'vitrage'}
+        port_neighbors = entity_graph.neighbors(port_vertex.vertex_id,
+                                                vertex_attr_filter=query)
+        self.assertEqual(1, len(port_neighbors))
+        self.assertEqual(port_neighbors[0][VProps.CATEGORY],
+                         EntityCategory.ALARM)
+        self.assertEqual(port_neighbors[0][VProps.TYPE], 'vitrage')
+        self.assertEqual(port_neighbors[0][VProps.NAME],
+                         'simple_port_deduced_alarm')
+        self.assertEqual(port_neighbors[0][VProps.IS_DELETED], True)
+
+        query = {VProps.CATEGORY: EntityCategory.ALARM, VProps.TYPE: 'nagios'}
+        port_neighbors = entity_graph.neighbors(port_vertex.vertex_id,
+                                                vertex_attr_filter=query)
+        self.assertEqual(port_neighbors[0][VProps.CATEGORY],
+                         EntityCategory.ALARM)
+        self.assertEqual(port_neighbors[0][VProps.TYPE], 'nagios')
+        self.assertEqual(port_neighbors[0][VProps.NAME], 'PORT_PROBLEM')
+        self.assertEqual(port_neighbors[0][VProps.IS_DELETED], False)
+
+        # ###################   STEP 5   ###################
         # disable PORT_PROBLEM alarm
         nagios_event[NagiosProperties.STATUS] = NagiosTestStatus.OK
         processor.process_event(nagios_event)
@@ -504,6 +610,7 @@ class TestScenarioEvaluator(TestFunctionalBase):
         num_network_alarm_vertices = 1
         num_network_alarm_edges = 1
 
+        # ###################   STEP 1   ###################
         # update zone
         generator = mock_driver.simple_zone_generators(1, 1, snapshot_events=1)
         zone_event = mock_driver.generate_random_events_list(generator)[0]
@@ -552,6 +659,7 @@ class TestScenarioEvaluator(TestFunctionalBase):
         self.assertEqual(zone_neighbors[0][VProps.NAME],
                          'complex_zone_deduced_alarm')
 
+        # ###################   STEP 2   ###################
         # Add NETWORK_PROBLEM alarm
         test_vals = {'status': 'WARNING',
                      'service': 'NETWORK_PROBLEM',
@@ -594,6 +702,7 @@ class TestScenarioEvaluator(TestFunctionalBase):
                          'complex_zone_deduced_alarm')
         self.assertEqual(zone_neighbors[0][VProps.IS_DELETED], True)
 
+        # ###################   STEP 3   ###################
         # delete NETWORK_PROBLEM alarm
         nagios_event[NagiosProperties.STATUS] = NagiosTestStatus.OK
         processor.process_event(nagios_event)
@@ -656,6 +765,7 @@ class TestScenarioEvaluator(TestFunctionalBase):
     def _get_deduced_alarms_on_host(host_v, entity_graph):
         v_id = host_v.vertex_id
         vertex_attrs = {VProps.NAME: 'deduced_alarm',
+                        VProps.TYPE: 'vitrage',
                         VProps.IS_DELETED: False, }
         return entity_graph.neighbors(v_id=v_id,
                                       vertex_attr_filter=vertex_attrs)

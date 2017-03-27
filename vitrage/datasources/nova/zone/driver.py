@@ -32,4 +32,5 @@ class ZoneDriver(NovaDriverBase):
             self.client.availability_zones.list()),
             NOVA_ZONE_DATASOURCE,
             datasource_action,
-            'manager')
+            'manager',
+            '_info')

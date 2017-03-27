@@ -18,6 +18,7 @@ from vitrage.api_handler.apis.base import ALARMS_ALL_QUERY
 from vitrage.api_handler.apis.base import EDGE_QUERY
 from vitrage.api_handler.apis.base import EntityGraphApisBase
 from vitrage.api_handler.apis.base import TOPOLOGY_AND_ALARMS_QUERY
+from vitrage.common.constants import EdgeProperties as EProps
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.datasources.nova.instance import NOVA_INSTANCE_DATASOURCE
@@ -114,17 +115,29 @@ class TopologyApis(EntityGraphApisBase):
             default_query = {'or': [resource_query, alarm_query]}
             q = default_query
 
-        tmp_graph = ga.create_graph_from_matching_vertices(
-            query_dict=q,
-            edge_attr_filter={VProps.IS_DELETED: False})
-        graph = ga.subgraph(self._topology_for_unrooted_graph(ga,
-                                                              tmp_graph,
-                                                              root))
+        tmp_graph = ga.create_graph_from_matching_vertices(query_dict=q)
+        graph = self._create_graph_of_connected_components(ga, tmp_graph, root)
+        edge_query = {EProps.IS_DELETED: False}
+        self._remove_unnecessary_elements(ga,
+                                          graph,
+                                          project_id,
+                                          is_admin_project,
+                                          edge_attr_filter=edge_query)
+
+        return graph
+
+    def _remove_unnecessary_elements(self,
+                                     ga,
+                                     graph,
+                                     project_id,
+                                     is_admin_project,
+                                     edge_attr_filter):
+        # delete non matching edges
+        ga._apply_edge_attr_filter(graph, edge_attr_filter)
+
         self._remove_alarms_of_other_projects(graph,
                                               project_id,
                                               is_admin_project)
-
-        return graph
 
     def _remove_alarms_of_other_projects(self,
                                          graph,
@@ -156,6 +169,11 @@ class TopologyApis(EntityGraphApisBase):
                          resource_proj_id != current_project_id)
                     if cond1 or cond2:
                         graph.remove_vertex(alarm)
+
+    def _create_graph_of_connected_components(self, ga, tmp_graph, root):
+        return ga.subgraph(self._topology_for_unrooted_graph(ga,
+                                                             tmp_graph,
+                                                             root))
 
     def _topology_for_unrooted_graph(self, ga, subgraph, root):
         """Finds topology for unrooted subgraph

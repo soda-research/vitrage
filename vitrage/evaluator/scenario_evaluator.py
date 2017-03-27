@@ -283,7 +283,7 @@ class ScenarioEvaluator(object):
     def _find_edge_subgraph_matching(self,
                                      subgraphs,
                                      action_target,
-                                     vertex,
+                                     edge,
                                      scenario_edge):
         """calculates subgraph matching for edge
 
@@ -312,7 +312,7 @@ class ScenarioEvaluator(object):
             self._switch_edge_negative_props(is_switch_mode, scenario_edge,
                                              subgraph, False)
 
-            initial_map = Mapping(scenario_edge.edge, vertex, False)
+            initial_map = Mapping(scenario_edge.edge, edge, False)
             curr_matches = \
                 self._entity_graph.algo.sub_graph_matching(subgraph,
                                                            initial_map)

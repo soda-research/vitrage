@@ -170,6 +170,7 @@ class TemplateData(object):
         for term in clause:
             if term.type == ENTITY:
                 term.variable[VProps.IS_DELETED] = False
+                term.variable[VProps.IS_PLACEHOLDER] = False
                 condition_g.add_vertex(term.variable)
 
             else:  # type = relationship
@@ -188,7 +189,9 @@ class TemplateData(object):
             edge_description.edge[EProps.IS_DELETED] = False
 
         edge_description.source[VProps.IS_DELETED] = False
+        edge_description.source[VProps.IS_PLACEHOLDER] = False
         edge_description.target[VProps.IS_DELETED] = False
+        edge_description.target[VProps.IS_PLACEHOLDER] = False
 
     @staticmethod
     def _add_edge_relationship(condition_graph, edge_description):

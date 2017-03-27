@@ -175,7 +175,11 @@ class TestProcessor(TestEntityGraphUnitBase):
         processor.delete_relationship(None, new_neighbors)
 
         # test assertions
-        self.assertEqual(2, processor.entity_graph.num_edges())
+        edge_from_graph = processor.entity_graph.get_edge(vertex1.vertex_id,
+                                                          vertex2.vertex_id,
+                                                          'backup')
+        self.assertEqual(3, processor.entity_graph.num_edges())
+        self.assertEqual(True, edge_from_graph[EProps.IS_DELETED])
 
     def test_remove_deleted_entity(self):
         # setup
