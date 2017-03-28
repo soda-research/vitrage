@@ -57,16 +57,10 @@ class StaticTransformer(ResourceTransformerBase):
         return STATIC_DATASOURCE
 
     def _create_vertex(self, entity_event):
-        metadata = entity_event.get(StaticFields.METADATA, {})
 
         entity_type = entity_event[VProps.TYPE]
         entity_id = entity_event[VProps.ID]
         sample_timestamp = entity_event[DSProps.SAMPLE_DATE]
-        update_timestamp = self._format_update_timestamp(
-            update_timestamp=None,
-            sample_timestamp=sample_timestamp)
-        state = entity_event[VProps.STATE]
-        entity_key = self._create_entity_key(entity_event)
 
         # create placeholder for non-static datasource entity
         if entity_type in self.transformers:
@@ -77,6 +71,13 @@ class StaticTransformer(ResourceTransformerBase):
                 VProps.SAMPLE_TIMESTAMP: sample_timestamp}
             return self.create_neighbor_placeholder_vertex(**properties)
         else:
+            entity_key = self._create_entity_key(entity_event)
+            state = entity_event[VProps.STATE]
+            update_timestamp = self._format_update_timestamp(
+                update_timestamp=None,
+                sample_timestamp=sample_timestamp)
+            metadata = entity_event.get(StaticFields.METADATA, {})
+
             return graph_utils.create_vertex(
                 entity_key,
                 entity_id=entity_id,
