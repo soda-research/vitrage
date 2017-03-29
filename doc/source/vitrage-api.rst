@@ -135,7 +135,7 @@ Consists of a topology request definition which has the following properties:
 * depth - (int, optional) the depth of the topology graph. defaults to max depth
 * graph_type-(string, optional) can be either tree or graph. defaults to graph
 * query - (string, optional) a json query filter to filter the graph components. defaults to return all the graph
-* all_tenants - shows the entities of all the tenants in the graph (in case the user has the permissions).
+* all_tenants - (boolean, optional) shows the entities of all the tenants in the graph (in case the user has the permissions).
 
 query expression
 ================
@@ -649,7 +649,7 @@ alarm id - (string(255)) get rca on this alarm.
 Request Body
 ============
 
-None.
+* all_tenants - (boolean, optional) shows the rca of all tenants (in case the user has the permissions).
 
 Request Examples
 ================
@@ -769,7 +769,7 @@ vitrage_id - (string(255)) get alarm on this resource can be 'all' for all alarm
 Request Body
 ============
 
-None.
+* all_tenants - (boolean, optional) shows the alarms of all tenants (in case the user has the permissions).
 
 Request Examples
 ================
@@ -1163,3 +1163,93 @@ Response Examples
       "metadata": {
         "name": "first_deduced_alarm_ever"
     }
+
+Event Post
+^^^^^^^^^^
+Post an event to Vitrage message queue, to be consumed by a datasource driver.
+
+POST /v1/event/
+~~~~~~~~~~~~~~~
+
+Headers
+=======
+
+-  X-Auth-Token (string, required) - Keystone auth token
+-  Accept (string) - application/json
+-  User-Agent (String)
+-  Content-Type (String): application/json
+
+Path Parameters
+===============
+
+None.
+
+Query Parameters
+================
+
+None.
+
+Request Body
+============
+
+An event to be posted. Will contain the following fields:
+
+- time: a timestamp of the event. In case of a monitor event, should specify when the fault has occurred.
+- type: the type of the event.
+- details: a key-value map of metadata.
+
+A dict of some potential details, copied from the Doctor SB API reference:
+
+- hostname: the hostname on which the event occurred.
+- source: the display name of reporter of this event. This is not limited to monitor, other entity can be specified such as ‘KVM’.
+- cause: description of the cause of this event which could be different from the type of this event.
+- severity: the severity of this event set by the monitor.
+- status: the status of target object in which error occurred.
+- monitorID: the ID of the monitor sending this event.
+- monitorEventID: the ID of the event in the monitor. This can be used by operator while tracking the monitor log.
+- relatedTo: the array of IDs which related to this event.
+
+Request Examples
+================
+
+::
+
+    POST /v1/event/
+    Host: 135.248.18.122:8999
+    User-Agent: keystoneauth1/2.3.0 python-requests/2.9.1 CPython/2.7.6
+    Content-Type: application/json
+    Accept: application/json
+    X-Auth-Token: 2b8882ba2ec44295bf300aecb2caa4f7
+
+
+::
+
+    {
+        'event': {
+            'time': '2016-04-12T08:00:00',
+            'type': 'compute.host.down',
+            'details': {
+                'hostname': 'compute-1',
+                'source': 'sample_monitor',
+                'cause': 'link-down',
+                'severity': 'critical',
+                'status': 'down',
+                'monitor_id': 'monitor-1',
+                'monitor_event_id': '123',
+            }
+        }
+    }
+
+
+
+Response Status code
+====================
+
+-  200 - OK
+-  400 - Bad request
+
+Response Body
+=============
+
+Returns an empty response body if the request was OK.
+Otherwise returns a detailed error message (e.g. 'missing time parameter').
