@@ -16,6 +16,7 @@ import json
 import pecan
 
 from oslo_log import log
+from oslo_utils.strutils import bool_from_string
 from pecan.core import abort
 
 from vitrage.api.controllers.rest import RootRestController
@@ -29,10 +30,11 @@ class AlarmsController(RootRestController):
 
     @pecan.expose('json')
     def index(self, vitrage_id, all_tenants=False):
-        return self.post(vitrage_id, all_tenants)
+        return self.get(vitrage_id, all_tenants)
 
     @pecan.expose('json')
-    def post(self, vitrage_id, all_tenants=False):
+    def get(self, vitrage_id, all_tenants=False):
+        all_tenants = bool_from_string(all_tenants)
         if all_tenants:
             enforce("list alarms:all_tenants", pecan.request.headers,
                     pecan.request.enforcer, {})
