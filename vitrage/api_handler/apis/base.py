@@ -80,6 +80,14 @@ ALARM_QUERY = {
 
 EDGE_QUERY = {'==': {EProps.IS_DELETED: False}}
 
+RESOURCES_ALL_QUERY = {
+    'and': [
+        {'==': {VProps.CATEGORY: EntityCategory.RESOURCE}},
+        {'==': {VProps.IS_DELETED: False}},
+        {'==': {VProps.IS_PLACEHOLDER: False}}
+    ]
+}
+
 
 class EntityGraphApisBase(object):
     TENANT_PROPERTY = 'tenant'

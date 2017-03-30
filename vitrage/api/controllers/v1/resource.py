@@ -9,62 +9,56 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-
+import json
 import pecan
 
 from oslo_log import log
+from oslo_utils.strutils import bool_from_string
 from pecan.core import abort
-from pecan import rest
+
+from vitrage.api.controllers.rest import RootRestController
 from vitrage.api.policy import enforce
 
 
 LOG = log.getLogger(__name__)
 
 
-class ResourcesController(rest.RestController):
-
-    @pecan.expose()
-    def _lookup(self, id_, *remainder):
-        LOG.info('got lookup %s', id_)
-        return ResourceController(id_), remainder
-
+class ResourcesController(RootRestController):
     @pecan.expose('json')
-    def index(self, resource_type=None):
-        enforce('list resources', pecan.request.headers,
-                pecan.request.enforcer, {})
+    def get(self, **kwargs):
+        LOG.info('get list resource with args: %s', kwargs)
 
-        LOG.info('received list resources with filter %s', resource_type)
+        resource_type = kwargs.get('resource_type', None)
+        all_tenants = kwargs.get('all_tenants', False)
+        all_tenants = bool_from_string(all_tenants)
+        if all_tenants:
+            enforce('list resources:all_tenants', pecan.request.headers,
+                    pecan.request.enforcer, {})
+        else:
+            enforce('list resources', pecan.request.headers,
+                    pecan.request.enforcer, {})
+
+        LOG.info('received resources list with filter %s', resource_type)
 
         try:
-            return self.get_resources(resource_type)
+            return self._get_resources(resource_type, all_tenants)
         except Exception as e:
             LOG.exception('failed to get resources %s', e)
             abort(404, str(e))
 
     @staticmethod
-    def get_resources(resource_type):
-        # todo(eyalb1) need a mock for this
-        return [{'None': None}]
-
-
-class ResourceController(rest.RestController):
-
-    def __init__(self, id_):
-        self.id = id_
-
-    @pecan.expose('json')
-    def get(self):
-        enforce('get resource', pecan.request.headers,
-                pecan.request.enforcer, {})
-
-        LOG.info('received get resource with id %s', self.id)
+    def _get_resources(resource_type=None, all_tenants=False):
+        LOG.info('get_resources with type: %s, all_tenants: %s',
+                 resource_type, all_tenants)
         try:
-            return self.get_resource(self.id)
+            resources_json = \
+                pecan.request.client.call(pecan.request.context,
+                                          'get_resources',
+                                          resource_type=resource_type,
+                                          all_tenants=all_tenants)
+            LOG.info(resources_json)
+            resources = json.loads(resources_json)['resources']
+            return resources
         except Exception as e:
-            LOG.exception('failed to get resource %s', e)
+            LOG.exception('failed to get resources %s ', e)
             abort(404, str(e))
-
-    @staticmethod
-    def get_resource(id_):
-        # todo(eyalb1) need a mock for this
-        return {'None': None}

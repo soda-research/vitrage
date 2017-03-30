@@ -20,6 +20,7 @@ from oslo_service import service as os_service
 from vitrage.api_handler.apis.alarm import AlarmApis
 from vitrage.api_handler.apis.event import EventApis
 from vitrage.api_handler.apis.rca import RcaApis
+from vitrage.api_handler.apis.resource import ResourceApis
 from vitrage.api_handler.apis.template import TemplateApis
 from vitrage.api_handler.apis.topology import TopologyApis
 from vitrage import messaging
@@ -52,7 +53,8 @@ class VitrageApiHandlerService(os_service.Service):
                      AlarmApis(self.entity_graph, self.conf),
                      RcaApis(self.entity_graph, self.conf),
                      TemplateApis(self.scenario_repo.templates),
-                     EventApis(self.conf)]
+                     EventApis(self.conf),
+                     ResourceApis(self.entity_graph, self.conf)]
 
         server = vitrage_rpc.get_server(target, endpoints, transport)
 
