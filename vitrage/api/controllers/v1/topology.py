@@ -16,6 +16,7 @@
 import json
 
 from oslo_log import log
+from oslo_utils.strutils import bool_from_string
 import pecan
 from pecan.core import abort
 
@@ -34,6 +35,7 @@ class TopologyController(RootRestController):
 
     @pecan.expose('json')
     def post(self, depth, graph_type, query, root, all_tenants=False):
+        all_tenants = bool_from_string(all_tenants)
         if all_tenants:
             enforce('get topology:all_tenants', pecan.request.headers,
                     pecan.request.enforcer, {})

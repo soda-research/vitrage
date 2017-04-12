@@ -17,6 +17,7 @@ import json
 import pecan
 
 from oslo_log import log
+from oslo_utils.strutils import bool_from_string
 from pecan.core import abort
 from vitrage.api.controllers.rest import RootRestController
 from vitrage.api.policy import enforce
@@ -32,6 +33,7 @@ class RCAController(RootRestController):
 
     @pecan.expose('json')
     def get(self, alarm_id, all_tenants=False):
+        all_tenants = bool_from_string(all_tenants)
         if all_tenants:
             enforce('get rca:all_tenants', pecan.request.headers,
                     pecan.request.enforcer, {})
