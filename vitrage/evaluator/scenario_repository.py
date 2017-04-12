@@ -130,12 +130,11 @@ class ScenarioRepository(object):
         key = self._create_edge_scenario_key(edge_desc)
         scenarios = self.relationship_scenarios[key]
 
-        if not self.contains(scenarios, scenario):
+        if not self._edge_contains(scenarios, scenario, edge_desc):
             self.relationship_scenarios[key].append((edge_desc, scenario))
 
     @staticmethod
     def _create_edge_scenario_key(edge_desc):
-
         return EdgeKeyScenario(edge_desc.edge.label,
                                frozenset(edge_desc.source.properties.items()),
                                frozenset(edge_desc.target.properties.items()))
@@ -145,9 +144,17 @@ class ScenarioRepository(object):
         key = frozenset(list(entity.properties.items()))
         scenarios = self.entity_scenarios[key]
 
-        if not self.contains(scenarios, scenario):
+        if not self._entity_contains(scenarios, scenario, entity):
             self.entity_scenarios[key].append((entity, scenario))
 
     @staticmethod
-    def contains(scenarios, scenario):
-        return any(s[1].id == scenario.id for s in scenarios)
+    def _edge_contains(scenarios, scenario, edge):
+        return any(e.edge.source_id == edge.edge.source_id and
+                   e.edge.target_id == edge.edge.target_id and
+                   e.edge.label == edge.edge.label and s.id == scenario.id
+                   for e, s in scenarios)
+
+    @staticmethod
+    def _entity_contains(scenarios, scenario, entity):
+        return any(e.vertex_id == entity.vertex_id and s.id == scenario.id
+                   for e, s in scenarios)

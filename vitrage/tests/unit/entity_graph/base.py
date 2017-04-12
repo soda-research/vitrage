@@ -13,6 +13,7 @@
 # under the License.
 
 from oslo_config import cfg
+from vitrage.datasources.cinder.volume.driver import CINDER_VOLUME_DATASOURCE
 
 from vitrage.common.constants import DatasourceAction
 from vitrage.common.constants import DatasourceProperties as DSProps
@@ -46,7 +47,8 @@ class TestEntityGraphUnitBase(base.BaseTest):
                              NOVA_INSTANCE_DATASOURCE,
                              NOVA_ZONE_DATASOURCE,
                              NEUTRON_NETWORK_DATASOURCE,
-                             NEUTRON_PORT_DATASOURCE],
+                             NEUTRON_PORT_DATASOURCE,
+                             CINDER_VOLUME_DATASOURCE],
                     help='Names of supported data sources'),
 
         cfg.ListOpt('path',

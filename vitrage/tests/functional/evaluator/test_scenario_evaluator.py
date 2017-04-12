@@ -21,6 +21,8 @@ from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import EdgeProperties as EProps
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import VertexProperties as VProps
+from vitrage.datasources.cinder.volume.transformer import \
+    CINDER_VOLUME_DATASOURCE
 from vitrage.datasources.nagios.properties import NagiosProperties
 from vitrage.datasources.nagios.properties import NagiosTestStatus
 from vitrage.datasources.neutron.network import NEUTRON_NETWORK_DATASOURCE
@@ -793,6 +795,299 @@ class TestScenarioEvaluator(TestFunctionalBase):
             query = {VProps.CATEGORY: EntityCategory.ALARM,
                      VProps.IS_DELETED: False}
             is_deleted = False
+
+    def test_ha(self):
+        event_queue, processor, evaluator = self._init_system()
+        entity_graph = processor.entity_graph
+
+        # find host
+        query = {
+            VProps.CATEGORY: 'RESOURCE',
+            VProps.TYPE: NOVA_HOST_DATASOURCE
+        }
+        hosts = entity_graph.get_vertices(vertex_attr_filter=query)
+
+        # find instances on host
+        query = {
+            VProps.CATEGORY: 'RESOURCE',
+            VProps.TYPE: NOVA_INSTANCE_DATASOURCE
+        }
+        instances = entity_graph.neighbors(hosts[0].vertex_id,
+                                           vertex_attr_filter=query)
+        entity_graph.remove_vertex(instances[2])
+        entity_graph.remove_vertex(instances[3])
+
+        # constants
+        num_orig_vertices = entity_graph.num_vertices()
+        num_orig_edges = entity_graph.num_edges()
+
+        # ###################   STEP 1   ###################
+        # Add cinder volume 1
+        generator = mock_driver.simple_volume_generators(volume_num=1,
+                                                         instance_num=1,
+                                                         snapshot_events=1)
+        volume_event1 = mock_driver.generate_random_events_list(generator)[0]
+        volume_event1['display_name'] = 'volume-1'
+        volume_event1[VProps.ID] = 'volume-1'
+        volume_event1['attachments'][0]['server_id'] = instances[0][VProps.ID]
+
+        processor.process_event(volume_event1)
+        while not event_queue.empty():
+            processor.process_event(event_queue.get())
+
+        # test asserts
+        num_volumes = 1
+        num_deduced_alarms = 1
+        self.assertEqual(num_orig_vertices + num_volumes + num_deduced_alarms,
+                         entity_graph.num_vertices())
+        self.assertEqual(num_orig_edges + num_volumes + num_deduced_alarms,
+                         entity_graph.num_edges())
+
+        query = {VProps.CATEGORY: EntityCategory.RESOURCE,
+                 VProps.TYPE: CINDER_VOLUME_DATASOURCE}
+        instance_neighbors = entity_graph.neighbors(instances[0].vertex_id,
+                                                    vertex_attr_filter=query)
+        self.assertEqual(1, len(instance_neighbors))
+        self.assertEqual(instance_neighbors[0][VProps.CATEGORY],
+                         EntityCategory.RESOURCE)
+        self.assertEqual(instance_neighbors[0][VProps.TYPE],
+                         CINDER_VOLUME_DATASOURCE)
+        self.assertEqual(instance_neighbors[0][VProps.NAME], 'volume-1')
+        self.assertEqual(instance_neighbors[0][VProps.IS_DELETED], False)
+        self.assertEqual(instance_neighbors[0][VProps.IS_PLACEHOLDER], False)
+
+        query = {VProps.CATEGORY: EntityCategory.ALARM, VProps.TYPE: 'vitrage'}
+        host_neighbors = entity_graph.neighbors(hosts[0].vertex_id,
+                                                vertex_attr_filter=query)
+        self.assertEqual(host_neighbors[0][VProps.CATEGORY],
+                         EntityCategory.ALARM)
+        self.assertEqual(host_neighbors[0][VProps.TYPE], 'vitrage')
+        self.assertEqual(host_neighbors[0][VProps.NAME],
+                         'ha_warning_deduced_alarm')
+        self.assertEqual(host_neighbors[0][VProps.IS_DELETED], False)
+        self.assertEqual(host_neighbors[0][VProps.IS_PLACEHOLDER], False)
+
+        # ###################   STEP 2   ###################
+        # Add cinder volume 2
+        generator = mock_driver.simple_volume_generators(volume_num=1,
+                                                         instance_num=1,
+                                                         snapshot_events=1)
+        volume_event2 = mock_driver.generate_random_events_list(generator)[0]
+        volume_event2['display_name'] = 'volume-2'
+        volume_event2[VProps.ID] = 'volume-2'
+        volume_event2['attachments'][0]['server_id'] = instances[1][VProps.ID]
+
+        processor.process_event(volume_event2)
+        while not event_queue.empty():
+            processor.process_event(event_queue.get())
+
+        # test asserts
+        num_volumes = 2
+        num_deduced_alarms = 2
+        self.assertEqual(num_orig_vertices + num_volumes + num_deduced_alarms,
+                         entity_graph.num_vertices())
+        self.assertEqual(num_orig_edges + num_volumes + num_deduced_alarms,
+                         entity_graph.num_edges())
+
+        # check instance neighbors
+        query = {VProps.CATEGORY: EntityCategory.RESOURCE,
+                 VProps.TYPE: CINDER_VOLUME_DATASOURCE}
+        instance_neighbors = entity_graph.neighbors(instances[1].vertex_id,
+                                                    vertex_attr_filter=query)
+        self.assertEqual(1, len(instance_neighbors))
+        self.assertEqual(instance_neighbors[0][VProps.CATEGORY],
+                         EntityCategory.RESOURCE)
+        self.assertEqual(instance_neighbors[0][VProps.TYPE],
+                         CINDER_VOLUME_DATASOURCE)
+        self.assertEqual(instance_neighbors[0][VProps.NAME], 'volume-2')
+        self.assertEqual(instance_neighbors[0][VProps.IS_DELETED], False)
+        self.assertEqual(instance_neighbors[0][VProps.IS_PLACEHOLDER], False)
+
+        # check ha_error_deduced_alarm
+        query = {VProps.CATEGORY: EntityCategory.ALARM,
+                 VProps.TYPE: 'vitrage',
+                 VProps.NAME: 'ha_error_deduced_alarm'}
+        host_neighbors = entity_graph.neighbors(hosts[0].vertex_id,
+                                                vertex_attr_filter=query)
+        self.assertEqual(1, len(host_neighbors))
+        self.assertEqual(host_neighbors[0][VProps.CATEGORY],
+                         EntityCategory.ALARM)
+        self.assertEqual(host_neighbors[0][VProps.TYPE], 'vitrage')
+        self.assertEqual(host_neighbors[0][VProps.NAME],
+                         'ha_error_deduced_alarm')
+        self.assertEqual(host_neighbors[0][VProps.IS_DELETED], False)
+        self.assertEqual(host_neighbors[0][VProps.IS_PLACEHOLDER], False)
+
+        # check ha_warning_deduced_alarm
+        query = {VProps.CATEGORY: EntityCategory.ALARM,
+                 VProps.TYPE: 'vitrage',
+                 VProps.NAME: 'ha_warning_deduced_alarm'}
+        host_neighbors = entity_graph.neighbors(hosts[0].vertex_id,
+                                                vertex_attr_filter=query)
+        self.assertEqual(1, len(host_neighbors))
+        self.assertEqual(host_neighbors[0][VProps.CATEGORY],
+                         EntityCategory.ALARM)
+        self.assertEqual(host_neighbors[0][VProps.TYPE], 'vitrage')
+        self.assertEqual(host_neighbors[0][VProps.NAME],
+                         'ha_warning_deduced_alarm')
+        self.assertEqual(host_neighbors[0][VProps.IS_DELETED], True)
+        self.assertEqual(host_neighbors[0][VProps.IS_PLACEHOLDER], False)
+
+        # ###################   STEP 3   ###################
+        #  Remove Cinder Volume 2
+        volume_event2[DSProps.DATASOURCE_ACTION] = DatasourceAction.UPDATE
+        volume_event2[DSProps.EVENT_TYPE] = 'volume.detach.start'
+        volume_event2['volume_id'] = volume_event2['id']
+        volume_event2['volume_attachment'] = volume_event2['attachments']
+        volume_event2['volume_attachment'][0]['instance_uuid'] = \
+            volume_event2['attachments'][0]['server_id']
+        processor.process_event(volume_event2)
+        while not event_queue.empty():
+            processor.process_event(event_queue.get())
+
+        # test asserts
+        self.assertEqual(num_orig_vertices + num_volumes + num_deduced_alarms +
+                         # This is due to keeping alarm history :
+                         # new alarm doesn't update same deleted alarm.
+                         # Instead, it keeps the old one and creates a new one
+                         1,
+                         entity_graph.num_vertices())
+        self.assertEqual(num_orig_edges + num_volumes + num_deduced_alarms + 1,
+                         entity_graph.num_edges())
+
+        query = {VProps.CATEGORY: EntityCategory.RESOURCE,
+                 VProps.TYPE: CINDER_VOLUME_DATASOURCE}
+        instance_neighbors = entity_graph.neighbors(instances[1].vertex_id,
+                                                    vertex_attr_filter=query)
+        self.assertEqual(1, len(instance_neighbors))
+        self.assertEqual(instance_neighbors[0][VProps.CATEGORY],
+                         EntityCategory.RESOURCE)
+        self.assertEqual(instance_neighbors[0][VProps.TYPE],
+                         CINDER_VOLUME_DATASOURCE)
+        self.assertEqual(instance_neighbors[0][VProps.NAME], 'volume-2')
+        self.assertEqual(instance_neighbors[0][VProps.IS_DELETED], False)
+        self.assertEqual(instance_neighbors[0][VProps.IS_PLACEHOLDER], False)
+
+        # check ha_error_deduced_alarm
+        query = {VProps.CATEGORY: EntityCategory.ALARM,
+                 VProps.TYPE: 'vitrage',
+                 VProps.NAME: 'ha_error_deduced_alarm'}
+        host_neighbors = entity_graph.neighbors(hosts[0].vertex_id,
+                                                vertex_attr_filter=query)
+        self.assertEqual(1, len(host_neighbors))
+        self.assertEqual(host_neighbors[0][VProps.CATEGORY],
+                         EntityCategory.ALARM)
+        self.assertEqual(host_neighbors[0][VProps.TYPE], 'vitrage')
+        self.assertEqual(host_neighbors[0][VProps.NAME],
+                         'ha_error_deduced_alarm')
+        self.assertEqual(host_neighbors[0][VProps.IS_DELETED], True)
+        self.assertEqual(host_neighbors[0][VProps.IS_PLACEHOLDER], False)
+
+        # check new ha_warning_deduced_alarm
+        query = {VProps.CATEGORY: EntityCategory.ALARM,
+                 VProps.TYPE: 'vitrage',
+                 VProps.NAME: 'ha_warning_deduced_alarm',
+                 VProps.IS_DELETED: False}
+        host_neighbors = entity_graph.neighbors(hosts[0].vertex_id,
+                                                vertex_attr_filter=query)
+        self.assertEqual(1, len(host_neighbors))
+        self.assertEqual(host_neighbors[0][VProps.CATEGORY],
+                         EntityCategory.ALARM)
+        self.assertEqual(host_neighbors[0][VProps.TYPE], 'vitrage')
+        self.assertEqual(host_neighbors[0][VProps.NAME],
+                         'ha_warning_deduced_alarm')
+        self.assertEqual(host_neighbors[0][VProps.IS_DELETED], False)
+        self.assertEqual(host_neighbors[0][VProps.IS_PLACEHOLDER], False)
+
+        # check old deleted ha_warning_deduced_alarm
+        query = {VProps.CATEGORY: EntityCategory.ALARM,
+                 VProps.TYPE: 'vitrage',
+                 VProps.NAME: 'ha_warning_deduced_alarm',
+                 VProps.IS_DELETED: True}
+        host_neighbors = entity_graph.neighbors(hosts[0].vertex_id,
+                                                vertex_attr_filter=query)
+        self.assertEqual(1, len(host_neighbors))
+        self.assertEqual(host_neighbors[0][VProps.CATEGORY],
+                         EntityCategory.ALARM)
+        self.assertEqual(host_neighbors[0][VProps.TYPE], 'vitrage')
+        self.assertEqual(host_neighbors[0][VProps.NAME],
+                         'ha_warning_deduced_alarm')
+        self.assertEqual(host_neighbors[0][VProps.IS_DELETED], True)
+        self.assertEqual(host_neighbors[0][VProps.IS_PLACEHOLDER], False)
+
+        # ###################   STEP 4   ###################
+        #  Remove Cinder Volume 1
+        volume_event1[DSProps.DATASOURCE_ACTION] = DatasourceAction.UPDATE
+        volume_event1[DSProps.EVENT_TYPE] = 'volume.detach.start'
+        volume_event1['volume_id'] = volume_event1['id']
+        volume_event1['volume_attachment'] = volume_event1['attachments']
+        volume_event1['volume_attachment'][0]['instance_uuid'] = \
+            volume_event1['attachments'][0]['server_id']
+        processor.process_event(volume_event1)
+        while not event_queue.empty():
+            processor.process_event(event_queue.get())
+
+        # test asserts
+        self.assertEqual(num_orig_vertices + num_volumes + num_deduced_alarms +
+                         # This is due to keeping alarm history :
+                         # new alarm doesn't update same deleted alarm.
+                         # Instead, it keeps the old one and creates a new one
+                         1,
+                         entity_graph.num_vertices())
+        self.assertEqual(num_orig_edges + num_volumes + num_deduced_alarms + 1,
+                         entity_graph.num_edges())
+
+        query = {VProps.CATEGORY: EntityCategory.RESOURCE,
+                 VProps.TYPE: CINDER_VOLUME_DATASOURCE}
+        instance_neighbors = entity_graph.neighbors(instances[0].vertex_id,
+                                                    vertex_attr_filter=query)
+        self.assertEqual(1, len(instance_neighbors))
+        self.assertEqual(instance_neighbors[0][VProps.CATEGORY],
+                         EntityCategory.RESOURCE)
+        self.assertEqual(instance_neighbors[0][VProps.TYPE],
+                         CINDER_VOLUME_DATASOURCE)
+        self.assertEqual(instance_neighbors[0][VProps.NAME], 'volume-1')
+        self.assertEqual(instance_neighbors[0][VProps.IS_DELETED], False)
+        self.assertEqual(instance_neighbors[0][VProps.IS_PLACEHOLDER], False)
+
+        # check ha_error_deduced_alarm
+        query = {VProps.CATEGORY: EntityCategory.ALARM,
+                 VProps.TYPE: 'vitrage',
+                 VProps.NAME: 'ha_error_deduced_alarm'}
+        host_neighbors = entity_graph.neighbors(hosts[0].vertex_id,
+                                                vertex_attr_filter=query)
+        self.assertEqual(1, len(host_neighbors))
+        self.assertEqual(host_neighbors[0][VProps.CATEGORY],
+                         EntityCategory.ALARM)
+        self.assertEqual(host_neighbors[0][VProps.TYPE], 'vitrage')
+        self.assertEqual(host_neighbors[0][VProps.NAME],
+                         'ha_error_deduced_alarm')
+        self.assertEqual(host_neighbors[0][VProps.IS_DELETED], True)
+        self.assertEqual(host_neighbors[0][VProps.IS_PLACEHOLDER], False)
+
+        # check old ha_warning_deduced_alarm
+        query = {VProps.CATEGORY: EntityCategory.ALARM,
+                 VProps.TYPE: 'vitrage',
+                 VProps.NAME: 'ha_warning_deduced_alarm'}
+        host_neighbors = entity_graph.neighbors(hosts[0].vertex_id,
+                                                vertex_attr_filter=query)
+        self.assertEqual(2, len(host_neighbors))
+
+        self.assertEqual(host_neighbors[0][VProps.CATEGORY],
+                         EntityCategory.ALARM)
+        self.assertEqual(host_neighbors[0][VProps.TYPE], 'vitrage')
+        self.assertEqual(host_neighbors[0][VProps.NAME],
+                         'ha_warning_deduced_alarm')
+        self.assertEqual(host_neighbors[0][VProps.IS_DELETED], True)
+        self.assertEqual(host_neighbors[0][VProps.IS_PLACEHOLDER], False)
+
+        self.assertEqual(host_neighbors[1][VProps.CATEGORY],
+                         EntityCategory.ALARM)
+        self.assertEqual(host_neighbors[1][VProps.TYPE], 'vitrage')
+        self.assertEqual(host_neighbors[1][VProps.NAME],
+                         'ha_warning_deduced_alarm')
+        self.assertEqual(host_neighbors[1][VProps.IS_DELETED], True)
+        self.assertEqual(host_neighbors[1][VProps.IS_PLACEHOLDER], False)
 
     def get_host_after_event(self, event_queue, nagios_event,
                              processor, target_host):

@@ -198,7 +198,8 @@ class ScenarioEvaluator(object):
 
             for match in matches:
                 spec, action_id = self._get_action_spec(action_spec, match)
-                match_hash = hash(tuple(sorted(match.items())))
+                items_ids = [match[1].vertex_id for match in match.items()]
+                match_hash = hash(tuple(sorted(items_ids)))
                 actions[action_id] = ActionInfo(spec, new_mode,
                                                 scenario.id, match_hash)
 

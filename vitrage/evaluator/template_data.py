@@ -187,6 +187,7 @@ class TemplateData(object):
             edge_description.edge[EProps.IS_DELETED] = True
         else:
             edge_description.edge[EProps.IS_DELETED] = False
+            edge_description.edge[NEG_CONDITION] = False
 
         edge_description.source[VProps.IS_DELETED] = False
         edge_description.source[VProps.IS_PLACEHOLDER] = False

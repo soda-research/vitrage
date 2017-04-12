@@ -160,7 +160,7 @@ class NovaInstanceTransformerTest(base.BaseTest):
 
     def _validate_vertex_props(self, vertex, event):
 
-        self.assertEqual(11, len(vertex.properties))
+        self.assertEqual(12, len(vertex.properties))
 
         is_update_event = tbase.is_update_event(event)
 

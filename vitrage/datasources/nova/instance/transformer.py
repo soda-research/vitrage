@@ -41,22 +41,25 @@ class InstanceTransformer(ResourceTransformerBase):
         name = extract_field_value(entity_event, 'name')
         entity_id = extract_field_value(entity_event, 'id')
         state = extract_field_value(entity_event, 'status')
+        host = extract_field_value(entity_event, 'OS-EXT-SRV-ATTR:host')
 
-        return self._create_vertex(entity_event, name, entity_id, state)
+        return self._create_vertex(entity_event, name, entity_id, state, host)
 
     def _create_update_entity_vertex(self, entity_event):
 
         name = extract_field_value(entity_event, 'hostname')
         entity_id = extract_field_value(entity_event, 'instance_id')
         state = extract_field_value(entity_event, 'state')
+        host = extract_field_value(entity_event, 'host')
 
-        return self._create_vertex(entity_event, name, entity_id, state)
+        return self._create_vertex(entity_event, name, entity_id, state, host)
 
-    def _create_vertex(self, entity_event, name, entity_id, state):
+    def _create_vertex(self, entity_event, name, entity_id, state, host):
 
         metadata = {
             VProps.NAME: name,
             VProps.PROJECT_ID: entity_event.get('tenant_id', None),
+            'host_id': host
         }
 
         sample_timestamp = entity_event[DSProps.SAMPLE_DATE]

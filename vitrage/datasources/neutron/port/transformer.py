@@ -102,6 +102,7 @@ class PortTransformer(ResourceTransformerBase):
             VProps.NAME: name,
             VProps.PROJECT_ID: project_id,
             'ip_addresses': tuple(ip_addresses),
+            'host_id': entity_event.get('binding:host_id'),
         }
 
         sample_timestamp = entity_event[DSProps.SAMPLE_DATE]
