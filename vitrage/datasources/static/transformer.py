@@ -12,8 +12,6 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-# TODO(yujunz) - skeleton only, methods to be implemented
-
 from oslo_log import log as logging
 
 from vitrage.common.constants import DatasourceProperties as DSProps
