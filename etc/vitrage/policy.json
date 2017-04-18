@@ -3,6 +3,7 @@
   "get topology:all_tenants": "role:admin",
   "get resource": "",
   "list resources": "",
+  "list resources:all_tenants": "role:admin",
   "list alarms": "",
   "list alarms:all_tenants": "role:admin",
   "get rca": "",

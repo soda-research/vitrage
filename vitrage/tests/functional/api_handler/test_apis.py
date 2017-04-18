@@ -16,6 +16,7 @@ import json
 
 from vitrage.api_handler.apis.alarm import AlarmApis
 from vitrage.api_handler.apis.rca import RcaApis
+from vitrage.api_handler.apis.resource import ResourceApis
 from vitrage.api_handler.apis.topology import TopologyApis
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import VertexProperties as VProps
@@ -192,6 +193,86 @@ class TestApis(TestEntityGraphUnitBase):
 
         # Test assertions
         self.assertEqual(12, len(graph_topology['nodes']))
+
+    def test_resource_list_with_admin_project(self):
+        # Setup
+        graph = self._create_graph()
+        apis = ResourceApis(graph, None)
+        ctx = {'tenant': 'project_2', 'is_admin': True}
+
+        # Action
+        resources = apis.get_resources(
+            ctx,
+            resource_type=None,
+            all_tenants=False)
+        resources = json.loads(resources)['resources']
+
+        # Test assertions
+        self.assertEqual(5, len(resources))
+
+    def test_resource_list_with_not_admin_project(self):
+        # Setup
+        graph = self._create_graph()
+        apis = ResourceApis(graph, None)
+        ctx = {'tenant': 'project_2', 'is_admin': False}
+
+        # Action
+        resources = apis.get_resources(
+            ctx,
+            resource_type=None,
+            all_tenants=False)
+        resources = json.loads(resources)['resources']
+
+        # Test assertions
+        self.assertEqual(2, len(resources))
+
+    def test_resource_list_with_not_admin_project_and_no_existing_type(self):
+        # Setup
+        graph = self._create_graph()
+        apis = ResourceApis(graph, None)
+        ctx = {'tenant': 'project_2', 'is_admin': False}
+
+        # Action
+        resources = apis.get_resources(
+            ctx,
+            resource_type=NOVA_HOST_DATASOURCE,
+            all_tenants=False)
+        resources = json.loads(resources)['resources']
+
+        # Test assertions
+        self.assertEqual(0, len(resources))
+
+    def test_resource_list_with_not_admin_project_and_existing_type(self):
+        # Setup
+        graph = self._create_graph()
+        apis = ResourceApis(graph, None)
+        ctx = {'tenant': 'project_2', 'is_admin': False}
+
+        # Action
+        resources = apis.get_resources(
+            ctx,
+            resource_type=NOVA_INSTANCE_DATASOURCE,
+            all_tenants=False)
+        resources = json.loads(resources)['resources']
+
+        # Test assertions
+        self.assertEqual(2, len(resources))
+
+    def test_resource_list_with_all_tenants(self):
+        # Setup
+        graph = self._create_graph()
+        apis = ResourceApis(graph, None)
+        ctx = {'tenant': 'project_1', 'is_admin': False}
+
+        # Action
+        resources = apis.get_resources(
+            ctx,
+            resource_type=None,
+            all_tenants=True)
+        resources = json.loads(resources)['resources']
+
+        # Test assertions
+        self.assertEqual(7, len(resources))
 
     def _check_projects_entities(self,
                                  alarms,
