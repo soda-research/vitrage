@@ -53,7 +53,8 @@ class SetState(base.Recipe):
 
         update_vertex_params = {
             VProps.VITRAGE_ID: target_id,
-            VProps.VITRAGE_STATE: vitrage_state
+            VProps.VITRAGE_STATE: vitrage_state,
+            VProps.IS_REAL_VITRAGE_ID: True
         }
         update_vertex_step = ActionStepWrapper(UPDATE_VERTEX,
                                                update_vertex_params)

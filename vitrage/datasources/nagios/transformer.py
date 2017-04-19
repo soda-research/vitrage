@@ -48,6 +48,7 @@ class NagiosTransformer(AlarmTransformerBase):
 
         metadata = {
             VProps.NAME: entity_event[NagiosProperties.SERVICE],
+            VProps.RESOURCE_ID: entity_event[NagiosProperties.RESOURCE_NAME],
             VProps.SEVERITY: entity_event[NagiosProperties.STATUS],
             VProps.INFO: entity_event[NagiosProperties.STATUS_INFO]
         }

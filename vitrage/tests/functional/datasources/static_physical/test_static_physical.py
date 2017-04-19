@@ -55,7 +55,7 @@ class TestStaticPhysical(TestDataSourcesBase):
 
     def test_static_physical_validity(self):
         # Setup
-        processor = self._create_processor_with_graph(self.conf)
+        processor = self._create_processor_with_graph(self.conf, uuid=True)
         transformers = processor.transformer_manager.transformers
         transformers[SWITCH] = transformers[STATIC_PHYSICAL_DATASOURCE]
         self.assertEqual(self._num_total_expected_vertices(),

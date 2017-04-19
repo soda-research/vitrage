@@ -69,7 +69,8 @@ def init(conf):
     evaluator_q = queue.Queue()
     e_graph = entity_graph.get_graph_driver(conf)(
         'Entity Graph',
-        '%s:%s:%s' % (EntityCategory.RESOURCE, OPENSTACK_CLUSTER, CLUSTER_ID))
+        '%s:%s:%s' % (EntityCategory.RESOURCE, OPENSTACK_CLUSTER, CLUSTER_ID),
+        uuid=True)
     scenario_repo = ScenarioRepository(conf)
 
     evaluator = ScenarioEvaluator(conf, e_graph, scenario_repo, evaluator_q)

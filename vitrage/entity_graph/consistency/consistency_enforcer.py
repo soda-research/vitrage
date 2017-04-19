@@ -157,7 +157,11 @@ class ConsistencyEnforcer(object):
                 DSProps.DATASOURCE_ACTION: DatasourceAction.UPDATE,
                 DSProps.SAMPLE_DATE: str(utcnow()),
                 DSProps.EVENT_TYPE: action,
-                VProps.VITRAGE_ID: vertex[VProps.VITRAGE_ID]
+                VProps.VITRAGE_ID: vertex[VProps.VITRAGE_ID],
+                VProps.ID: vertex.get(VProps.ID, None),
+                VProps.TYPE: vertex[VProps.TYPE],
+                VProps.CATEGORY: vertex[VProps.CATEGORY],
+                VProps.IS_REAL_VITRAGE_ID: True
             }
             self.evaluator_queue.put(event)
 

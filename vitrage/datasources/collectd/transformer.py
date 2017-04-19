@@ -53,7 +53,8 @@ class CollectdTransformer(AlarmTransformerBase):
         metadata = {
             VProps.NAME: entity_event[CProps.MESSAGE],
             VProps.SEVERITY: entity_event[CProps.SEVERITY],
-            VProps.RAWTEXT: self.generate_raw_text(entity_event)
+            VProps.RAWTEXT: self.generate_raw_text(entity_event),
+            VProps.RESOURCE_ID: entity_event[CProps.RESOURCE_NAME]
         }
 
         return graph_utils.create_vertex(

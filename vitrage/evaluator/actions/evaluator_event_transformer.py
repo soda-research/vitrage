@@ -67,6 +67,9 @@ class EvaluatorEventTransformer(transformer_base.TransformerBase):
                 VProps.IS_PLACEHOLDER: False,
                 VProps.RESOURCE_ID: event.get(TFields.TARGET)
             }
+            if VProps.IS_REAL_VITRAGE_ID in event:
+                properties[VProps.IS_REAL_VITRAGE_ID] = \
+                    event.get(VProps.IS_REAL_VITRAGE_ID)
             if VProps.VITRAGE_STATE in event:
                 properties[VProps.VITRAGE_STATE] = \
                     event.get(VProps.VITRAGE_STATE)
@@ -129,7 +132,8 @@ class EvaluatorEventTransformer(transformer_base.TransformerBase):
             neighbor_props = {
                 VProps.IS_PLACEHOLDER: True,
                 VProps.UPDATE_TIMESTAMP: timestamp,
-                VProps.SAMPLE_TIMESTAMP: event[VProps.SAMPLE_TIMESTAMP]
+                VProps.SAMPLE_TIMESTAMP: event[VProps.SAMPLE_TIMESTAMP],
+                VProps.IS_REAL_VITRAGE_ID: True
             }
             neighbor = Vertex(event[TFields.TARGET], neighbor_props)
             return [Neighbor(neighbor, relation_edge)]

@@ -103,7 +103,9 @@ class TestGraph(GraphTestBase):
             vitrage_id='123',
             entity_id='456',
             entity_category=NOVA_INSTANCE_DATASOURCE,
-            metadata={'some_meta': 'DATA'}
+            metadata={'some_meta': 'DATA',
+                      'type': 'nova.instance',
+                      'resource_id': 'sdg7849ythksjdg'}
         )
         g.add_vertex(another_vertex)
         v = g.get_vertex(another_vertex.vertex_id)
@@ -254,7 +256,8 @@ class TestGraph(GraphTestBase):
         v4 = v_alarm
         v5 = utils.create_vertex(
             vitrage_id='kuku',
-            entity_category=NOVA_HOST_DATASOURCE)
+            entity_type=NOVA_HOST_DATASOURCE,
+            entity_category=EntityCategory.RESOURCE)
 
         g = NXGraph('test_neighbors')
         g.add_vertex(v1)

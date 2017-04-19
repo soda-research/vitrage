@@ -64,7 +64,8 @@ class ZabbixTransformer(AlarmTransformerBase):
             VProps.NAME: entity_event[ZProps.DESCRIPTION],
             VProps.SEVERITY: TriggerSeverity.str(
                 entity_event[ZProps.PRIORITY]),
-            VProps.RAWTEXT: entity_event[ZProps.RAWTEXT]
+            VProps.RAWTEXT: entity_event[ZProps.RAWTEXT],
+            VProps.RESOURCE_ID: entity_event[ZProps.RESOURCE_NAME]
         }
 
         return graph_utils.create_vertex(

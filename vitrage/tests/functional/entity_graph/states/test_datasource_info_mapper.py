@@ -17,7 +17,6 @@ from oslo_config import cfg
 from vitrage.common.constants import DatasourceAction as DSAction
 from vitrage.common.constants import GraphAction
 from vitrage.common.constants import VertexProperties as VProps
-from vitrage.datasources.nova.instance.transformer import InstanceTransformer
 from vitrage.entity_graph.initialization_status import InitializationStatus
 from vitrage.entity_graph.mappings.operational_resource_state import \
     OperationalResourceState
@@ -38,7 +37,8 @@ class TestDatasourceInfoMapperFunctional(TestFunctionalBase):
 
     def test_state_on_update(self):
         # setup
-        processor = proc.Processor(self.conf, InitializationStatus())
+        processor = proc.Processor(self.conf, InitializationStatus(),
+                                   uuid=True)
         event = self._create_event(spec_type='INSTANCE_SPEC',
                                    datasource_action=DSAction.INIT_SNAPSHOT)
 
@@ -46,9 +46,9 @@ class TestDatasourceInfoMapperFunctional(TestFunctionalBase):
         processor.process_event(event)
 
         # test assertions
-        instance_transformer = InstanceTransformer({}, self.conf)
-        vitrage_id = instance_transformer._create_entity_key(event)
-        vertex = processor.entity_graph.get_vertex(vitrage_id)
+        entity = processor.transformer_manager.transform(event)
+        processor._find_and_fix_graph_vertex(entity.vertex, [])
+        vertex = processor.entity_graph.get_vertex(entity.vertex.vertex_id)
         self.assertEqual('ACTIVE', vertex[VProps.AGGREGATED_STATE])
         self.assertEqual(OperationalResourceState.OK,
                          vertex[VProps.OPERATIONAL_STATE])

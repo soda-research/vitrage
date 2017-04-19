@@ -11,6 +11,7 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+from collections import defaultdict
 
 import copy
 import json
@@ -21,6 +22,7 @@ from networkx.readwrite import json_graph
 from oslo_log import log as logging
 
 from vitrage.common.constants import VertexProperties as VProps
+from vitrage.entity_graph.processor import processor_utils as PUtils
 from vitrage.graph.algo_driver.networkx_algorithm import NXAlgorithm
 from vitrage.graph.driver.elements import Edge
 from vitrage.graph.driver.elements import Vertex
@@ -50,9 +52,12 @@ class NXGraph(Graph):
                  name='networkx_graph',
                  root_id=None,
                  vertices=None,
-                 edges=None):
-        super(NXGraph, self).__init__(name, NXGraph.GRAPH_TYPE)
+                 edges=None,
+                 uuid=False):
+        super(NXGraph, self).__init__(name, NXGraph.GRAPH_TYPE, uuid=uuid)
         self._g = nx.MultiDiGraph()
+        if uuid:
+            self.key_to_vertex_ids = defaultdict(list)
         self.root_id = root_id
         self.add_vertices(vertices)
         self.add_edges(edges)
@@ -81,6 +86,13 @@ class NXGraph(Graph):
     def _add_vertex(self, v):
         properties_copy = copy.copy(v.properties)
         self._g.add_node(n=v.vertex_id, attr_dict=properties_copy)
+        if self.uuid:
+            self._update_keys_map(v)
+
+    def _update_keys_map(self, v):
+        key_hash = PUtils.get_defining_properties(v)
+        if v.vertex_id not in self.key_to_vertex_ids[key_hash]:
+            self.key_to_vertex_ids[key_hash].append(v.vertex_id)
 
     @Notifier.update_notify
     def add_edge(self, e):
@@ -197,6 +209,16 @@ class NXGraph(Graph):
 
         :type v: Vertex
         """
+        if self.uuid:
+            vertex = self.get_vertex(v.vertex_id)
+            if vertex:
+                key_hash = PUtils.get_defining_properties(vertex)
+                if key_hash in self.key_to_vertex_ids and\
+                        v.vertex_id in self.key_to_vertex_ids[key_hash]:
+                    self.key_to_vertex_ids[key_hash].remove(v.vertex_id)
+                    if len(self.key_to_vertex_ids[key_hash]) == 0:
+                        del self.key_to_vertex_ids[key_hash]
+
         self._g.remove_node(n=v.vertex_id)
 
     def remove_edge(self, e):
@@ -207,7 +229,7 @@ class NXGraph(Graph):
         self._g.remove_edge(u=e.source_id, v=e.target_id, key=e.label)
 
     def get_vertices(self,
-                     vertex_attr_filter=None,
+                     vertex_attr_filter=None,  # Dictionary of key value
                      query_dict=None):
         def check_vertex(vertex_data):
             return check_filter(vertex_data[1], vertex_attr_filter)
@@ -225,6 +247,15 @@ class NXGraph(Graph):
             return vertices
         else:
             return []
+
+    def get_vertices_by_key(self, key_values_hash):
+
+        if key_values_hash in self.key_to_vertex_ids:
+            vertices = []
+            for vertex_id in self.key_to_vertex_ids[key_values_hash]:
+                vertices.append(self.get_vertex(vertex_id))
+            return vertices
+        return []
 
     def neighbors(self, v_id, vertex_attr_filter=None, edge_attr_filter=None,
                   direction=Direction.BOTH):

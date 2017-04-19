@@ -51,7 +51,7 @@ class TestNagios(TestDataSourcesBase):
 
     def test_nagios_validity(self):
         # Setup
-        processor = self._create_processor_with_graph(self.conf)
+        processor = self._create_processor_with_graph(self.conf, uuid=True)
         self.assertEqual(self._num_total_expected_vertices(),
                          len(processor.entity_graph))
 

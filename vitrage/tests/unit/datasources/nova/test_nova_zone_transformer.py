@@ -208,8 +208,6 @@ class NovaZoneTransformerTest(base.BaseTest):
 
         self.assertEqual(cluster_neighbor.vertex[VProps.VITRAGE_ID],
                          cluster_neighbor.vertex.vertex_id)
-        self.assertEqual('RESOURCE:openstack.cluster:OpenStack Cluster',
-                         cluster_neighbor.vertex[VProps.VITRAGE_ID])
         self.assertEqual(False,
                          cluster_neighbor.vertex[VProps.IS_DELETED])
         self.assertEqual(EntityCategory.RESOURCE,

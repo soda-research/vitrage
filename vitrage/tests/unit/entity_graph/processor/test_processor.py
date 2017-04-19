@@ -51,7 +51,8 @@ class TestProcessor(TestEntityGraphUnitBase):
 
     def test_process_event(self):
         # check create instance event
-        processor = proc.Processor(self.conf, InitializationStatus())
+        processor = proc.Processor(self.conf, InitializationStatus(),
+                                   uuid=True)
         event = self._create_event(spec_type=self.INSTANCE_SPEC,
                                    datasource_action=DSAction.INIT_SNAPSHOT)
         processor.process_event(event)
@@ -145,10 +146,17 @@ class TestProcessor(TestEntityGraphUnitBase):
         new_edge = graph_utils.create_edge(vertex1.vertex_id,
                                            vertex2.vertex_id,
                                            'backup')
-        new_neighbors = [Neighbor(None, new_edge)]
+        mock_neighbor = graph_utils.create_vertex(
+            "asdjashdkahsdashdalksjhd",
+            entity_id="wtw64768476",
+            entity_category="RESOURCE",
+            entity_type="nova.instance",
+            entity_state="AVAILABLE",
+        )
+        new_neighbors = [Neighbor(mock_neighbor, new_edge)]
 
         # action
-        processor.update_relationship(None, new_neighbors)
+        processor.update_relationship(vertex1, new_neighbors)
 
         # test assertions
         self.assertEqual(3, processor.entity_graph.num_edges())
@@ -169,10 +177,10 @@ class TestProcessor(TestEntityGraphUnitBase):
                                            'backup')
         processor.entity_graph.add_edge(new_edge)
         self.assertEqual(3, processor.entity_graph.num_edges())
-        new_neighbors = [Neighbor(None, new_edge)]
+        new_neighbors = [Neighbor(vertex1, new_edge)]
 
         # action
-        processor.delete_relationship(None, new_neighbors)
+        processor.delete_relationship(vertex2, new_neighbors)
 
         # test assertions
         edge_from_graph = processor.entity_graph.get_edge(vertex1.vertex_id,

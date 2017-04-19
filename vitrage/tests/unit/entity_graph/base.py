@@ -114,7 +114,8 @@ class TestEntityGraphUnitBase(base.BaseTest):
 
         # add instance entity with host
         if processor is None:
-            processor = proc.Processor(self.conf, InitializationStatus())
+            processor = proc.Processor(self.conf, InitializationStatus(),
+                                       uuid=True)
 
         vertex, neighbors, event_type = processor.transformer_manager\
             .transform(event)
@@ -146,7 +147,7 @@ class TestEntityGraphUnitBase(base.BaseTest):
         return events_list[0]
 
     @staticmethod
-    def _create_alarm(vitrage_id, alarm_type, project_id=None):
+    def _create_alarm(vitrage_id, alarm_type, project_id=None, metadata=None):
         return graph_utils.create_vertex(
             vitrage_id,
             entity_id=vitrage_id,
@@ -156,7 +157,8 @@ class TestEntityGraphUnitBase(base.BaseTest):
             is_deleted=False,
             sample_timestamp=None,
             is_placeholder=False,
-            project_id=project_id
+            project_id=project_id,
+            metadata=metadata
         )
 
     @staticmethod

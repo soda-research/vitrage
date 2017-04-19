@@ -56,6 +56,7 @@ class AodhTransformer(AlarmTransformerBase):
             AodhProps.ENABLED: entity_event[AodhProps.ENABLED],
             VProps.PROJECT_ID: entity_event.get(AodhProps.PROJECT_ID, None),
             AodhProps.REPEAT_ACTIONS: entity_event[AodhProps.REPEAT_ACTIONS],
+            VProps.RESOURCE_ID: entity_event[AodhProps.RESOURCE_ID],
             'alarm_type': entity_event[AodhProps.TYPE]
         }
 

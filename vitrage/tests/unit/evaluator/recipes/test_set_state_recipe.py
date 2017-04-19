@@ -21,6 +21,8 @@ from vitrage.evaluator.template_fields import TemplateFields as TFields
 from vitrage.graph import Vertex
 from vitrage.tests import base
 
+_SET_STATES_PARAM_LEN = 3
+
 
 class SetStateRecipeTest(base.BaseTest):
 
@@ -47,7 +49,7 @@ class SetStateRecipeTest(base.BaseTest):
 
         self.assertEqual(UPDATE_VERTEX, action_steps[0].type)
         update_vertex_step_params = action_steps[0].params
-        self.assertEqual(2, len(update_vertex_step_params))
+        self.assertEqual(_SET_STATES_PARAM_LEN, len(update_vertex_step_params))
 
         vitrage_state = update_vertex_step_params[VProps.VITRAGE_STATE]
         self.assertEqual(self.props[TFields.STATE], vitrage_state)
@@ -67,7 +69,7 @@ class SetStateRecipeTest(base.BaseTest):
 
         self.assertEqual(UPDATE_VERTEX, action_steps[0].type)
         update_vertex_step_params = action_steps[0].params
-        self.assertEqual(2, len(update_vertex_step_params))
+        self.assertEqual(_SET_STATES_PARAM_LEN, len(update_vertex_step_params))
 
         vitrage_state = update_vertex_step_params[VProps.VITRAGE_STATE]
         self.assertIsNone(vitrage_state)
