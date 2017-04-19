@@ -274,6 +274,93 @@ class TestApis(TestEntityGraphUnitBase):
         # Test assertions
         self.assertEqual(7, len(resources))
 
+    def test_resource_show_with_admin_and_no_project_resource(self):
+        # Setup
+        graph = self._create_graph()
+        apis = ResourceApis(graph, None)
+        ctx = {'tenant': 'project_1', 'is_admin': True}
+
+        # Action
+        resource = apis.show_resource(ctx, 'zone_1')
+        resource = json.loads(resource)
+
+        # Test assertions
+        self.assertIsNotNone(resource)
+        self._check_resource_propeties(resource, 'zone_1',
+                                       NOVA_ZONE_DATASOURCE)
+
+    def test_resource_show_with_not_admin_and_no_project_resource(self):
+        # Setup
+        graph = self._create_graph()
+        apis = ResourceApis(graph, None)
+        ctx = {'tenant': 'project_1', 'is_admin': False}
+
+        # Action
+        resource = apis.show_resource(ctx, 'zone_1')
+
+        # Test assertions
+        self.assertIsNone(resource)
+
+    def test_resource_show_with_not_admin_and_resource_in_project(self):
+        # Setup
+        graph = self._create_graph()
+        apis = ResourceApis(graph, None)
+        ctx = {'tenant': 'project_1', 'is_admin': False}
+
+        # Action
+        resource = apis.show_resource(ctx, 'instance_2')
+        resource = json.loads(resource)
+
+        # Test assertions
+        self.assertIsNotNone(resource)
+        self._check_resource_propeties(resource, 'instance_2',
+                                       NOVA_INSTANCE_DATASOURCE,
+                                       project_id='project_1')
+
+    def test_resource_show_with_not_admin_and_resource_in_other_project(self):
+        # Setup
+        graph = self._create_graph()
+        apis = ResourceApis(graph, None)
+        ctx = {'tenant': 'project_2', 'is_admin': False}
+
+        # Action
+        resource = apis.show_resource(ctx, 'instance_2')
+
+        # Test assertions
+        self.assertIsNone(resource)
+
+    def test_resource_show_with_admin_and_resource_in_project(self):
+        # Setup
+        graph = self._create_graph()
+        apis = ResourceApis(graph, None)
+        ctx = {'tenant': 'project_1', 'is_admin': True}
+
+        # Action
+        resource = apis.show_resource(ctx, 'instance_2')
+        resource = json.loads(resource)
+
+        # Test assertions
+        self.assertIsNotNone(resource)
+        self._check_resource_propeties(resource, 'instance_2',
+                                       NOVA_INSTANCE_DATASOURCE,
+                                       project_id='project_1')
+
+    def test_resource_show_with_admin_and_resource_in_other_project(self):
+        # Setup
+        graph = self._create_graph()
+        apis = ResourceApis(graph, None)
+        ctx = {'tenant': 'project_2', 'is_admin': True}
+
+        # Action
+        resource = apis.show_resource(ctx, 'instance_2')
+        resource = json.loads(resource)
+
+        # Test assertions
+        self.assertIsNotNone(resource)
+        self._check_resource_propeties(resource, 'instance_2',
+                                       NOVA_INSTANCE_DATASOURCE,
+                                       project_id='project_1')
+
     def _check_projects_entities(self,
                                  alarms,
                                  project_id,
@@ -288,6 +375,18 @@ class TestApis(TestEntityGraphUnitBase):
                     (not tmp_project_id or
                      (tmp_project_id and tmp_project_id == project_id))
             self.assertEqual(True, condition)
+
+    def _check_resource_propeties(self, resource, vitrage_id,
+                                  resource_type, project_id=None):
+        self.assertEqual(resource[VProps.VITRAGE_ID], vitrage_id)
+        self.assertEqual(resource[VProps.ID], vitrage_id)
+        self.assertEqual(resource[VProps.CATEGORY], EntityCategory.RESOURCE)
+        self.assertEqual(resource[VProps.TYPE], resource_type)
+        self.assertEqual(resource[VProps.STATE], 'active')
+        self.assertFalse(resource[VProps.IS_DELETED])
+        self.assertFalse(resource[VProps.IS_PLACEHOLDER])
+        if project_id:
+            self.assertEqual(resource[VProps.PROJECT_ID], project_id)
 
     def _create_graph(self):
         graph = NXGraph('Multi tenancy graph')

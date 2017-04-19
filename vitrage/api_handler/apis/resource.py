@@ -53,3 +53,24 @@ class ResourceApis(EntityGraphApisBase):
         resources = self.entity_graph.get_vertices(query_dict=query)
         return json.dumps({'resources': [resource.properties
                                          for resource in resources]})
+
+    def show_resource(self, ctx, vitrage_id):
+        LOG.debug('Show resource with vitrage_id: %s', str(vitrage_id))
+
+        project_id = ctx.get(self.TENANT_PROPERTY, None)
+        is_admin_project = ctx.get(self.IS_ADMIN_PROJECT_PROPERTY, False)
+
+        resource = self.entity_graph.get_vertex(vitrage_id)
+        if resource:
+            project = resource.get(VProps.PROJECT_ID)
+            if is_admin_project:
+                return json.dumps(resource.properties)
+            else:
+                if project and project_id == project:
+                    return json.dumps(resource.properties)
+            LOG.warn('Have no authority to get resource with vitrage_id(%s)',
+                     str(vitrage_id))
+        else:
+            LOG.warn('Can not find the resource with vitrage_id(%s)',
+                     str(vitrage_id))
+        return None

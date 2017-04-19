@@ -25,7 +25,7 @@ LOG = log.getLogger(__name__)
 
 class ResourcesController(RootRestController):
     @pecan.expose('json')
-    def get(self, **kwargs):
+    def get_all(self, **kwargs):
         LOG.info('get list resource with args: %s', kwargs)
 
         resource_type = kwargs.get('resource_type', None)
@@ -43,7 +43,7 @@ class ResourcesController(RootRestController):
         try:
             return self._get_resources(resource_type, all_tenants)
         except Exception as e:
-            LOG.exception('failed to get resources %s', e)
+            LOG.exception('failed to list resources %s', e)
             abort(404, str(e))
 
     @staticmethod
@@ -61,4 +61,35 @@ class ResourcesController(RootRestController):
             return resources
         except Exception as e:
             LOG.exception('failed to get resources %s ', e)
+            abort(404, str(e))
+
+    @pecan.expose('json')
+    def get(self, vitrage_id):
+
+        LOG.info('get resource show with vitrage_id: %s', vitrage_id)
+
+        enforce("get resource",
+                pecan.request.headers,
+                pecan.request.enforcer,
+                {})
+
+        try:
+            return self._show_resource(vitrage_id)
+        except Exception as e:
+            LOG.exception('failed to show resource %s, %s' % vitrage_id, e)
+            abort(404, str(e))
+
+    @staticmethod
+    def _show_resource(vitrage_id):
+        try:
+            resource = pecan.request.client.call(
+                pecan.request.context,
+                'show_resource',
+                vitrage_id=vitrage_id)
+            LOG.info(resource)
+            return json.loads(resource)
+        except Exception as e:
+            LOG.exception('failed to show resource with vitrage_id(%s),'
+                          'Exception: %s',
+                          vitrage_id, e)
             abort(404, str(e))
