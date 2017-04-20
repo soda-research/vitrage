@@ -49,7 +49,7 @@ class TestActionExecutor(TestFunctionalBase):
     def test_execute_update_vertex(self):
 
         # Test Setup
-        processor = self._create_processor_with_graph(self.conf)
+        processor = self._create_processor_with_graph(self.conf, uuid=True)
 
         vertex_attrs = {VProps.TYPE: NOVA_HOST_DATASOURCE}
         host_vertices = processor.entity_graph.get_vertices(
@@ -97,7 +97,7 @@ class TestActionExecutor(TestFunctionalBase):
     def test_execute_add_edge(self):
 
         # Test Setup
-        processor = self._create_processor_with_graph(self.conf)
+        processor = self._create_processor_with_graph(self.conf, uuid=True)
 
         vertex_attrs = {VProps.TYPE: NOVA_HOST_DATASOURCE}
         host_vertices = processor.entity_graph.get_vertices(
@@ -147,7 +147,7 @@ class TestActionExecutor(TestFunctionalBase):
     def test_execute_add_vertex(self):
 
         # Test Setup
-        processor = self._create_processor_with_graph(self.conf)
+        processor = self._create_processor_with_graph(self.conf, uuid=True)
 
         vertex_attrs = {VProps.TYPE: NOVA_HOST_DATASOURCE}
         host_vertices = processor.entity_graph.get_vertices(
@@ -159,7 +159,9 @@ class TestActionExecutor(TestFunctionalBase):
         props = {
             TFields.ALARM_NAME: 'VM_CPU_SUBOPTIMAL_PERFORMANCE',
             TFields.SEVERITY: 'CRITICAL',
-            VProps.STATE: AlarmProps.ACTIVE_STATE
+            VProps.STATE: AlarmProps.ACTIVE_STATE,
+            VProps.RESOURCE_ID: host[VProps.ID],
+            VProps.VITRAGE_ID: 'DUMMY_ID'
         }
 
         # Raise alarm action adds new vertex with type vitrage to the graph
@@ -171,8 +173,6 @@ class TestActionExecutor(TestFunctionalBase):
         event_queue = queue.Queue()
         action_executor = ActionExecutor(event_queue)
 
-        expected_alarm_id = 'ALARM:vitrage:%s:%s' % (props[TFields.ALARM_NAME],
-                                                     host.vertex_id)
         # Test Action
         action_executor.execute(action_spec, ActionMode.DO)
         processor.process_event(event_queue.get())
@@ -184,12 +184,7 @@ class TestActionExecutor(TestFunctionalBase):
         self.assertEqual(len(before_alarms) + 1, len(after_alarms))
         self.assert_is_not_empty(after_alarms)
 
-        alarms = [alarm for alarm in after_alarms
-                  if alarm.vertex_id == expected_alarm_id]
-
-        # Expected exactly one alarm with expected  id
-        self.assertEqual(1, len(alarms))
-        alarm = alarms[0]
+        alarm = after_alarms[0]
 
         self.assertEqual(alarm.properties[VProps.CATEGORY],
                          EntityCategory.ALARM)
@@ -205,7 +200,7 @@ class TestActionExecutor(TestFunctionalBase):
     def test_execute_add_and_remove_vertex(self):
 
         # Test Setup
-        processor = self._create_processor_with_graph(self.conf)
+        processor = self._create_processor_with_graph(self.conf, uuid=True)
 
         vertex_attrs = {VProps.TYPE: NOVA_HOST_DATASOURCE}
         host_vertices = processor.entity_graph.get_vertices(
@@ -217,7 +212,8 @@ class TestActionExecutor(TestFunctionalBase):
         props = {
             TFields.ALARM_NAME: 'VM_CPU_SUBOPTIMAL_PERFORMANCE',
             TFields.SEVERITY: 'CRITICAL',
-            VProps.STATE: AlarmProps.ACTIVE_STATE
+            VProps.STATE: AlarmProps.ACTIVE_STATE,
+            VProps.RESOURCE_ID: host[VProps.ID]
         }
         action_spec = ActionSpecs(ActionType.RAISE_ALARM, targets, props)
 
@@ -271,4 +267,6 @@ class TestActionExecutor(TestFunctionalBase):
                 'type': 'add_vertex',
                 'vitrage_entity_type': 'vitrage',
                 'severity': 'CRITICAL',
+                'vitrage_id': 'mock_vitrage_id',
+                'category': 'RESOURCE',
                 'sample_timestamp': '2016-03-17 11:33:32.443002+00:00'}

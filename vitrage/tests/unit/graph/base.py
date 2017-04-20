@@ -26,6 +26,7 @@ from oslo_log import log as logging
 
 from vitrage.common.constants import EdgeLabel as ELabel
 from vitrage.common.constants import EntityCategory
+from vitrage.common.constants import VertexProperties as VProps
 from vitrage.common.exception import VitrageError
 from vitrage.datasources.nova.host import NOVA_HOST_DATASOURCE
 from vitrage.datasources.nova.instance import NOVA_INSTANCE_DATASOURCE
@@ -75,7 +76,9 @@ v_alarm = graph_utils.create_vertex(
     vitrage_id=ALARM + '444444444444',
     entity_id='444444444444',
     entity_type=ALARM_ON_VM,
-    entity_category=ALARM)
+    entity_category=ALARM,
+    metadata={VProps.RESOURCE_ID: '333333333333',
+              VProps.NAME: 'anotheralarm'})
 v_switch = graph_utils.create_vertex(
     vitrage_id=SWITCH + '1212121212',
     entity_id='1212121212',
@@ -95,12 +98,14 @@ e_node_to_switch = graph_utils.create_edge(
 
 
 def add_connected_vertex(graph, entity_type, entity_subtype, entity_id,
-                         edge_type, other_vertex, reverse=False):
+                         edge_type, other_vertex, reverse=False,
+                         metadata=None):
     vertex = graph_utils.create_vertex(
         vitrage_id=entity_subtype + str(entity_id),
         entity_id=entity_id,
         entity_category=entity_type,
-        entity_type=entity_subtype)
+        entity_type=entity_subtype,
+        metadata=metadata)
     edge = graph_utils.create_edge(
         source_id=other_vertex.vertex_id if reverse else vertex.vertex_id,
         target_id=vertex.vertex_id if reverse else other_vertex.vertex_id,
@@ -136,7 +141,8 @@ class GraphTestBase(base.BaseTest):
         start = time.time()
         g = NXGraph(name, EntityCategory.RESOURCE + ':' +
                     OPENSTACK_CLUSTER + ':' +
-                    CLUSTER_ID)
+                    CLUSTER_ID,
+                    uuid=True)
         g.add_vertex(v_node)
         g.add_vertex(v_switch)
         g.add_edge(e_node_to_switch)
@@ -158,7 +164,9 @@ class GraphTestBase(base.BaseTest):
             for j in range(num_of_alarms_per_host):
                 add_connected_vertex(g, ALARM, ALARM_ON_HOST,
                                      cls.host_alarm_id, ELabel.ON,
-                                     host_to_add)
+                                     host_to_add, False,
+                                     {VProps.RESOURCE_ID: host_id,
+                                      VProps.NAME: host_id})
                 cls.host_alarm_id += 1
 
             # Add Host Tests
@@ -183,7 +191,9 @@ class GraphTestBase(base.BaseTest):
                 for k in range(num_of_alarms_per_vm):
                     add_connected_vertex(g, ALARM, ALARM_ON_VM,
                                          cls.vm_alarm_id, ELabel.ON,
-                                         vm_to_add)
+                                         vm_to_add, False,
+                                         {VProps.RESOURCE_ID: cls.vm_id - 1,
+                                          VProps.NAME: cls.vm_id - 1})
                     cls.vm_alarm_id += 1
 
         end = time.time()

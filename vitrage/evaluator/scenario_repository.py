@@ -13,9 +13,10 @@
 # under the License.
 from collections import defaultdict
 from collections import namedtuple
-from hashlib import md5
 
 from oslo_log import log
+
+from oslo_utils import uuidutils
 
 from vitrage.evaluator.base import Template
 from vitrage.evaluator.template_data import RELATIONSHIP
@@ -85,7 +86,7 @@ class ScenarioRepository(object):
             if not result.is_valid_config:
                 LOG.info('Unable to load template: %s' % result.comment)
 
-        template_uuid = md5(str(template_def).encode()).hexdigest()
+        template_uuid = uuidutils.generate_uuid()
         self.templates[str(template_uuid)] = Template(template_uuid,
                                                       template_def,
                                                       current_time,

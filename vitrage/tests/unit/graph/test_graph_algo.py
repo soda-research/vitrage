@@ -21,7 +21,6 @@ Tests for `vitrage` graph driver algorithms
 
 from vitrage.common.constants import EdgeLabel
 from vitrage.common.constants import EdgeProperties as EProps
-from vitrage.common.constants import VertexProperties as VProps
 from vitrage.datasources.heat.stack import HEAT_STACK_DATASOURCE
 from vitrage.datasources.neutron.network import NEUTRON_NETWORK_DATASOURCE
 from vitrage.graph.algo_driver.algorithm import Mapping

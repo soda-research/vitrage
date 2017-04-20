@@ -16,7 +16,12 @@ from dateutil import parser
 
 from oslo_log import log
 
+from pprint import pformat
+
+import six
+
 from vitrage.common.constants import EdgeProperties as EProps
+from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.graph import Edge
 from vitrage.graph import Vertex
@@ -81,6 +86,21 @@ def get_vertex_types(vertex):
     category = vertex[VProps.CATEGORY]
     type_ = vertex[VProps.TYPE]
     return category, type_
+
+
+def get_defining_properties(vertex):
+    defining_props = {VProps.TYPE: six.text_type(vertex[VProps.TYPE])}
+
+    if VProps.ID in vertex.properties:
+        defining_props[VProps.ID] = vertex[VProps.ID]
+
+    # In case the entity is an Alarm
+    if vertex[VProps.CATEGORY] == EntityCategory.ALARM:
+        if VProps.RESOURCE_ID in vertex.properties:
+            defining_props[VProps.RESOURCE_ID] = vertex[VProps.RESOURCE_ID]
+        defining_props[VProps.NAME] = vertex[VProps.NAME]
+
+    return hash(pformat(defining_props))
 
 
 def can_update_vertex(graph_vertex, new_vertex):

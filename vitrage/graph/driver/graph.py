@@ -36,7 +36,8 @@ class Direction(object):
 
 @six.add_metaclass(abc.ABCMeta)
 class Graph(object):
-    def __init__(self, name, graph_type, vertices=None, edges=None):
+    def __init__(self, name, graph_type, vertices=None, edges=None,
+                 uuid=False):
         """Create a Graph instance
 
         :type name: str
@@ -48,6 +49,7 @@ class Graph(object):
         self.name = name
         self.graph_type = graph_type
         self.root_id = None
+        self.uuid = uuid
         self.notifier = Notifier()
 
     def subscribe(self, function):
@@ -335,6 +337,20 @@ class Graph(object):
         :type query_dict dict
         :return: A list of vertices that match the requested query
         :rtype: list of Vertex
+        """
+        pass
+
+    @abc.abstractmethod
+    def get_vertices_by_key(self,
+                            key_values_hash):
+        """Get vertices list according to their hash key
+
+        The hash key is derived from their properties :
+        See processor_utils - get_defining_properties
+
+
+        :param key_values_hash: hash key
+        :type key_values_hash str
         """
         pass
 

@@ -22,10 +22,9 @@ from vitrage.common.constants import EdgeProperties as EProps
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.datasources.nova.instance import NOVA_INSTANCE_DATASOURCE
-from vitrage.datasources import OPENSTACK_CLUSTER
-from vitrage.datasources.transformer_base import build_key
-from vitrage.datasources.transformer_base import CLUSTER_ID
-
+from vitrage.datasources.transformer_base\
+    import create_cluster_placeholder_vertex
+from vitrage.entity_graph.processor import processor_utils
 
 LOG = log.getLogger(__name__)
 
@@ -191,13 +190,19 @@ class TopologyApis(EntityGraphApisBase):
 
         entities = []
 
-        if not root:
-            root = build_key([EntityCategory.RESOURCE,
-                              OPENSTACK_CLUSTER,
-                              CLUSTER_ID])
+        if root:
+            root_vertex = \
+                self.entity_graph.get_vertex(root)
+        else:
+            key_values_hash = processor_utils.get_defining_properties(
+                create_cluster_placeholder_vertex())
+            tmp_vertices = self.entity_graph.get_vertices_by_key(
+                key_values_hash)
+            if not tmp_vertices:
+                LOG.debug("No root vertex found")
+                return set(entities)
+            root_vertex = tmp_vertices[0]
 
-        root_vertex = \
-            self.entity_graph.get_vertex(root)
         local_connected_component_subgraphs = \
             ga.connected_component_subgraphs(subgraph)
 

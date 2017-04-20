@@ -40,9 +40,16 @@ class ConsistencyTransformer(ResourceTransformerBase):
 
     @staticmethod
     def _create_vertex(entity_event):
+        metadata = {
+            VProps.IS_REAL_VITRAGE_ID:
+                entity_event.get(VProps.IS_REAL_VITRAGE_ID, False)
+        }
+
         return graph_utils.create_vertex(
             entity_event[VProps.VITRAGE_ID],
-            sample_timestamp=entity_event[DSProps.SAMPLE_DATE])
+            sample_timestamp=entity_event[DSProps.SAMPLE_DATE],
+            metadata=metadata
+        )
 
     def _create_entity_key(self, entity_event):
         return None

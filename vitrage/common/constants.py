@@ -38,6 +38,7 @@ class VertexProperties(object):
     RAWTEXT = 'rawtext'
     RESOURCE_ID = 'resource_id'
     RESOURCE = 'resource'
+    IS_REAL_VITRAGE_ID = 'is_real_vitrage_id'
 
 
 class EdgeProperties(object):

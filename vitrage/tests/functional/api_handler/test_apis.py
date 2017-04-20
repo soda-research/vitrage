@@ -23,7 +23,8 @@ from vitrage.common.constants import VertexProperties as VProps
 from vitrage.datasources import NOVA_HOST_DATASOURCE
 from vitrage.datasources import NOVA_INSTANCE_DATASOURCE
 from vitrage.datasources import NOVA_ZONE_DATASOURCE
-from vitrage.datasources import OPENSTACK_CLUSTER
+from vitrage.datasources.transformer_base \
+    import create_cluster_placeholder_vertex
 from vitrage.graph.driver.networkx_graph import NXGraph
 import vitrage.graph.utils as graph_utils
 from vitrage.tests.unit.entity_graph.base import TestEntityGraphUnitBase
@@ -143,7 +144,7 @@ class TestApis(TestEntityGraphUnitBase):
             graph_type='graph',
             depth=10,
             query=None,
-            root='RESOURCE:openstack.cluster:OpenStack Cluster',
+            root=None,
             all_tenants=False)
         graph_topology = json.loads(graph_topology)
 
@@ -165,7 +166,7 @@ class TestApis(TestEntityGraphUnitBase):
             graph_type='graph',
             depth=10,
             query=None,
-            root='RESOURCE:openstack.cluster:OpenStack Cluster',
+            root=None,
             all_tenants=False)
         graph_topology = json.loads(graph_topology)
 
@@ -187,7 +188,7 @@ class TestApis(TestEntityGraphUnitBase):
             graph_type='graph',
             depth=10,
             query=None,
-            root='RESOURCE:openstack.cluster:OpenStack Cluster',
+            root=None,
             all_tenants=True)
         graph_topology = json.loads(graph_topology)
 
@@ -389,12 +390,10 @@ class TestApis(TestEntityGraphUnitBase):
             self.assertEqual(resource[VProps.PROJECT_ID], project_id)
 
     def _create_graph(self):
-        graph = NXGraph('Multi tenancy graph')
+        graph = NXGraph('Multi tenancy graph', uuid=True)
 
         # create vertices
-        cluster_vertex = self._create_resource(
-            'RESOURCE:openstack.cluster:OpenStack Cluster',
-            OPENSTACK_CLUSTER)
+        cluster_vertex = create_cluster_placeholder_vertex()
         zone_vertex = self._create_resource('zone_1',
                                             NOVA_ZONE_DATASOURCE)
         host_vertex = self._create_resource('host_1',
@@ -411,18 +410,38 @@ class TestApis(TestEntityGraphUnitBase):
         instance_4_vertex = self._create_resource('instance_4',
                                                   NOVA_INSTANCE_DATASOURCE,
                                                   project_id='project_2')
-        alarm_on_host_vertex = self._create_alarm('alarm_on_host',
-                                                  'alarm_on_host')
-        alarm_on_instance_1_vertex = self._create_alarm('alarm_on_instance_1',
-                                                        'deduced_alarm',
-                                                        project_id='project_1')
-        alarm_on_instance_2_vertex = self._create_alarm('alarm_on_instance_2',
-                                                        'deduced_alarm')
-        alarm_on_instance_3_vertex = self._create_alarm('alarm_on_instance_3',
-                                                        'deduced_alarm',
-                                                        project_id='project_2')
-        alarm_on_instance_4_vertex = self._create_alarm('alarm_on_instance_4',
-                                                        'deduced_alarm')
+        alarm_on_host_vertex = self._create_alarm(
+            'alarm_on_host',
+            'alarm_on_host',
+            metadata={'type': 'nova.host',
+                      'name': 'host_1',
+                      'resource_id': 'host_1'})
+        alarm_on_instance_1_vertex = self._create_alarm(
+            'alarm_on_instance_1',
+            'deduced_alarm',
+            project_id='project_1',
+            metadata={'type': 'nova.instance',
+                      'name': 'instance_1',
+                      'resource_id': 'sdg7849ythksjdg'})
+        alarm_on_instance_2_vertex = self._create_alarm(
+            'alarm_on_instance_2',
+            'deduced_alarm',
+            metadata={'type': 'nova.instance',
+                      'name': 'instance_2',
+                      'resource_id': 'nbfhsdugf'})
+        alarm_on_instance_3_vertex = self._create_alarm(
+            'alarm_on_instance_3',
+            'deduced_alarm',
+            project_id='project_2',
+            metadata={'type': 'nova.instance',
+                      'name': 'instance_3',
+                      'resource_id': 'nbffhsdasdugf'})
+        alarm_on_instance_4_vertex = self._create_alarm(
+            'alarm_on_instance_4',
+            'deduced_alarm',
+            metadata={'type': 'nova.instance',
+                      'name': 'instance_4',
+                      'resource_id': 'ngsuy76hgd87f'})
 
         # create links
         edges = list()

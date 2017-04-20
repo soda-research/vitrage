@@ -40,6 +40,7 @@ from vitrage.utils.datetime import utcnow
 _TARGET_HOST = 'host-2'
 _TARGET_ZONE = 'zone-1'
 _NAGIOS_TEST_INFO = {'resource_name': _TARGET_HOST,
+                     'resource_id': _TARGET_HOST,
                      DSProps.DATASOURCE_ACTION: DatasourceAction.SNAPSHOT}
 
 
@@ -71,6 +72,7 @@ class TestScenarioEvaluator(TestFunctionalBase):
 
         host_v = self._get_entity_from_graph(NOVA_HOST_DATASOURCE,
                                              _TARGET_HOST,
+                                             _TARGET_HOST,
                                              processor.entity_graph)
         self.assertEqual('AVAILABLE', host_v[VProps.AGGREGATED_STATE],
                          'host should be AVAILABLE when starting')
@@ -98,6 +100,7 @@ class TestScenarioEvaluator(TestFunctionalBase):
         event_queue, processor, evaluator = self._init_system()
 
         host_v = self._get_entity_from_graph(NOVA_HOST_DATASOURCE,
+                                             _TARGET_HOST,
                                              _TARGET_HOST,
                                              processor.entity_graph)
         self.assertEqual('AVAILABLE', host_v[VProps.AGGREGATED_STATE],
@@ -145,6 +148,7 @@ class TestScenarioEvaluator(TestFunctionalBase):
 
         host_v = self._get_entity_from_graph(NOVA_HOST_DATASOURCE,
                                              _TARGET_HOST,
+                                             _TARGET_HOST,
                                              processor.entity_graph)
         self.assertEqual('AVAILABLE', host_v[VProps.AGGREGATED_STATE],
                          'host should be AVAILABLE when starting')
@@ -183,6 +187,7 @@ class TestScenarioEvaluator(TestFunctionalBase):
         event_queue, processor, evaluator = self._init_system()
 
         host_v = self._get_entity_from_graph(NOVA_HOST_DATASOURCE,
+                                             _TARGET_HOST,
                                              _TARGET_HOST,
                                              processor.entity_graph)
         self.assertEqual('AVAILABLE', host_v[VProps.AGGREGATED_STATE],
@@ -478,21 +483,31 @@ class TestScenarioEvaluator(TestFunctionalBase):
 
         # test asserts
         self.assertEqual(num_orig_vertices + num_added_vertices +
-                         num_deduced_vertices + num_nagios_alarm_vertices,
+                         num_deduced_vertices + num_nagios_alarm_vertices +
+                         # This is due to keeping alarm history :
+                         # new alarm doesn't update same deleted alarm.
+                         # Instead, it keeps the old one and creates a new one
+                         1,
                          entity_graph.num_vertices())
         self.assertEqual(num_orig_edges + num_added_edges + num_deduced_edges +
-                         num_nagios_alarm_edges, entity_graph.num_edges())
+                         num_nagios_alarm_edges + 1, entity_graph.num_edges())
 
-        query = {VProps.CATEGORY: EntityCategory.ALARM, VProps.TYPE: 'vitrage'}
-        port_neighbors = entity_graph.neighbors(port_vertex.vertex_id,
-                                                vertex_attr_filter=query)
-        self.assertEqual(1, len(port_neighbors))
-        self.assertEqual(port_neighbors[0][VProps.CATEGORY],
-                         EntityCategory.ALARM)
-        self.assertEqual(port_neighbors[0][VProps.TYPE], 'vitrage')
-        self.assertEqual(port_neighbors[0][VProps.NAME],
-                         'simple_port_deduced_alarm')
-        self.assertEqual(port_neighbors[0][VProps.IS_DELETED], False)
+        query = {VProps.CATEGORY: EntityCategory.ALARM, VProps.TYPE: 'vitrage',
+                 VProps.IS_DELETED: True}
+        is_deleted = True
+        for counter in range(0, 1):
+            port_neighbors = entity_graph.neighbors(port_vertex.vertex_id,
+                                                    vertex_attr_filter=query)
+            self.assertEqual(1, len(port_neighbors))
+            self.assertEqual(port_neighbors[0][VProps.CATEGORY],
+                             EntityCategory.ALARM)
+            self.assertEqual(port_neighbors[0][VProps.TYPE], 'vitrage')
+            self.assertEqual(port_neighbors[0][VProps.NAME],
+                             'simple_port_deduced_alarm')
+            self.assertEqual(port_neighbors[0][VProps.IS_DELETED], is_deleted)
+            query = {VProps.CATEGORY: EntityCategory.ALARM,
+                     VProps.TYPE: 'vitrage', VProps.IS_DELETED: False}
+            is_deleted = False
 
         query = {VProps.CATEGORY: EntityCategory.ALARM, VProps.TYPE: 'nagios'}
         port_neighbors = entity_graph.neighbors(port_vertex.vertex_id,
@@ -517,21 +532,35 @@ class TestScenarioEvaluator(TestFunctionalBase):
 
         # test asserts
         self.assertEqual(num_orig_vertices + num_added_vertices +
-                         num_deduced_vertices + num_nagios_alarm_vertices,
+                         num_deduced_vertices + num_nagios_alarm_vertices +
+                         # This is due to keeping alarm history :
+                         # new alarm doesn't update same deleted alarm.
+                         # Instead, it keeps the old one and creates a new one
+                         1,
                          entity_graph.num_vertices())
         self.assertEqual(num_orig_edges + num_added_edges + num_deduced_edges +
-                         num_nagios_alarm_edges, entity_graph.num_edges())
+                         num_nagios_alarm_edges + 1, entity_graph.num_edges())
 
-        query = {VProps.CATEGORY: EntityCategory.ALARM, VProps.TYPE: 'vitrage'}
-        port_neighbors = entity_graph.neighbors(port_vertex.vertex_id,
-                                                vertex_attr_filter=query)
-        self.assertEqual(1, len(port_neighbors))
-        self.assertEqual(port_neighbors[0][VProps.CATEGORY],
-                         EntityCategory.ALARM)
-        self.assertEqual(port_neighbors[0][VProps.TYPE], 'vitrage')
-        self.assertEqual(port_neighbors[0][VProps.NAME],
-                         'simple_port_deduced_alarm')
-        self.assertEqual(port_neighbors[0][VProps.IS_DELETED], True)
+        query = {VProps.CATEGORY: EntityCategory.ALARM, VProps.TYPE: 'vitrage',
+                 VProps.IS_DELETED: True}
+        is_deleted = True
+        for counter in range(0, 1):
+            port_neighbors = entity_graph.neighbors(port_vertex.vertex_id,
+                                                    vertex_attr_filter=query)
+            self.assertEqual(2, len(port_neighbors))
+            for in_counter in range(0, 1):
+                self.assertEqual(port_neighbors[in_counter][VProps.CATEGORY],
+                                 EntityCategory.ALARM)
+                self.assertEqual(port_neighbors[in_counter][VProps.TYPE],
+                                 'vitrage')
+                self.assertEqual(port_neighbors[in_counter][VProps.NAME],
+                                 'simple_port_deduced_alarm')
+                self.assertEqual(
+                    port_neighbors[in_counter][VProps.IS_DELETED], is_deleted)
+
+            query = {VProps.CATEGORY: EntityCategory.ALARM,
+                     VProps.TYPE: 'vitrage', VProps.IS_DELETED: False}
+            is_deleted = False
 
         query = {VProps.CATEGORY: EntityCategory.ALARM, VProps.TYPE: 'nagios'}
         port_neighbors = entity_graph.neighbors(port_vertex.vertex_id,
@@ -551,21 +580,37 @@ class TestScenarioEvaluator(TestFunctionalBase):
 
         # test asserts
         self.assertEqual(num_orig_vertices + num_added_vertices +
-                         num_deduced_vertices + num_nagios_alarm_vertices,
+                         num_deduced_vertices + num_nagios_alarm_vertices +
+                         # This is due to keeping alarm history :
+                         # new alarm doesn't update same deleted alarm.
+                         # Instead, it keeps the old one and creates a new one
+                         # Since this is the second test, there are already two
+                         # alarms of this type
+                         2,
                          entity_graph.num_vertices())
         self.assertEqual(num_orig_edges + num_added_edges + num_deduced_edges +
-                         num_nagios_alarm_edges, entity_graph.num_edges())
+                         num_nagios_alarm_edges + 2, entity_graph.num_edges())
 
-        query = {VProps.CATEGORY: EntityCategory.ALARM, VProps.TYPE: 'vitrage'}
-        port_neighbors = entity_graph.neighbors(port_vertex.vertex_id,
-                                                vertex_attr_filter=query)
-        self.assertEqual(1, len(port_neighbors))
-        self.assertEqual(port_neighbors[0][VProps.CATEGORY],
-                         EntityCategory.ALARM)
-        self.assertEqual(port_neighbors[0][VProps.TYPE], 'vitrage')
-        self.assertEqual(port_neighbors[0][VProps.NAME],
-                         'simple_port_deduced_alarm')
-        self.assertEqual(port_neighbors[0][VProps.IS_DELETED], False)
+        query = {VProps.CATEGORY: EntityCategory.ALARM,
+                 VProps.TYPE: 'vitrage', VProps.IS_DELETED: True}
+        is_deleted = True
+        for counter in range(0, 1):
+            port_neighbors = entity_graph.neighbors(port_vertex.vertex_id,
+                                                    vertex_attr_filter=query)
+            self.assertEqual(2, len(port_neighbors))
+            for in_counter in range(0, 1):
+                self.assertEqual(port_neighbors[in_counter][VProps.CATEGORY],
+                                 EntityCategory.ALARM)
+                self.assertEqual(port_neighbors[in_counter][VProps.TYPE],
+                                 'vitrage')
+                self.assertEqual(port_neighbors[in_counter][VProps.NAME],
+                                 'simple_port_deduced_alarm')
+                self.assertEqual(
+                    port_neighbors[in_counter][VProps.IS_DELETED], is_deleted)
+
+            query = {VProps.CATEGORY: EntityCategory.ALARM,
+                     VProps.TYPE: 'vitrage', VProps.IS_DELETED: False}
+            is_deleted = False
 
         query = {VProps.CATEGORY: EntityCategory.ALARM, VProps.TYPE: 'nagios'}
         port_neighbors = entity_graph.neighbors(port_vertex.vertex_id,
@@ -710,10 +755,14 @@ class TestScenarioEvaluator(TestFunctionalBase):
             processor.process_event(event_queue.get())
 
         self.assertEqual(num_orig_vertices + num_added_vertices +
-                         num_deduced_vertices + num_network_alarm_vertices,
+                         num_deduced_vertices + num_network_alarm_vertices +
+                         # This is due to keeping alarm history :
+                         # new alarm doesn't update same deleted alarm.
+                         # Instead, it keeps the old one and creates a new one
+                         1,
                          entity_graph.num_vertices())
         self.assertEqual(num_orig_edges + num_added_edges + num_deduced_edges +
-                         num_network_alarm_edges, entity_graph.num_edges())
+                         num_network_alarm_edges + 1, entity_graph.num_edges())
 
         query = {VProps.CATEGORY: EntityCategory.ALARM}
         network_neighbors = entity_graph.neighbors(network_vertex.vertex_id,
@@ -725,15 +774,25 @@ class TestScenarioEvaluator(TestFunctionalBase):
         self.assertEqual(network_neighbors[0][VProps.NAME], 'NETWORK_PROBLEM')
         self.assertEqual(network_neighbors[0][VProps.IS_DELETED], True)
 
-        zone_neighbors = entity_graph.neighbors(zone_vertex.vertex_id,
-                                                vertex_attr_filter=query)
-        self.assertEqual(1, len(zone_neighbors))
-        self.assertEqual(zone_neighbors[0][VProps.CATEGORY],
-                         EntityCategory.ALARM)
-        self.assertEqual(zone_neighbors[0][VProps.TYPE], 'vitrage')
-        self.assertEqual(zone_neighbors[0][VProps.NAME],
-                         'complex_zone_deduced_alarm')
-        self.assertEqual(zone_neighbors[0][VProps.IS_DELETED], False)
+        query = {VProps.CATEGORY: EntityCategory.ALARM,
+                 VProps.IS_DELETED: True}
+        is_deleted = True
+        # Alarm History is saved. We are testing the deleted alarm and
+        # then we are testing the live alarm
+        for counter in range(0, 1):
+            zone_neighbors = entity_graph.neighbors(zone_vertex.vertex_id,
+                                                    vertex_attr_filter=query)
+            self.assertEqual(1, len(zone_neighbors))
+            self.assertEqual(zone_neighbors[0][VProps.CATEGORY],
+                             EntityCategory.ALARM)
+            self.assertEqual(zone_neighbors[0][VProps.TYPE], 'vitrage')
+            self.assertEqual(zone_neighbors[0][VProps.NAME],
+                             'complex_zone_deduced_alarm')
+            self.assertEqual(zone_neighbors[0][VProps.IS_DELETED], is_deleted)
+
+            query = {VProps.CATEGORY: EntityCategory.ALARM,
+                     VProps.IS_DELETED: False}
+            is_deleted = False
 
     def get_host_after_event(self, event_queue, nagios_event,
                              processor, target_host):
@@ -742,11 +801,12 @@ class TestScenarioEvaluator(TestFunctionalBase):
             processor.process_event(event_queue.get())
         host_v = self._get_entity_from_graph(NOVA_HOST_DATASOURCE,
                                              target_host,
+                                             target_host,
                                              processor.entity_graph)
         return host_v
 
     def _init_system(self):
-        processor = self._create_processor_with_graph(self.conf)
+        processor = self._create_processor_with_graph(self.conf, uuid=True)
         event_queue = queue.Queue()
         evaluator = ScenarioEvaluator(self.conf, processor.entity_graph,
                                       self.scenario_repository, event_queue,
@@ -754,8 +814,11 @@ class TestScenarioEvaluator(TestFunctionalBase):
         return event_queue, processor, evaluator
 
     @staticmethod
-    def _get_entity_from_graph(entity_type, entity_name, entity_graph):
+    def _get_entity_from_graph(entity_type, entity_name,
+                               entity_id,
+                               entity_graph):
         vertex_attrs = {VProps.TYPE: entity_type,
+                        VProps.ID: entity_id,
                         VProps.NAME: entity_name}
         vertices = entity_graph.get_vertices(vertex_attr_filter=vertex_attrs)
         # assert len(vertices) == 1, "incorrect number of vertices"
