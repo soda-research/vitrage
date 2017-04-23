@@ -57,7 +57,7 @@ class ReScheduler(object):
                  times=-1,
                  ttl=None,
                  fault_callback=None,
-                 fault_callback_kwargs={}):
+                 fault_callback_kwargs=None):
         """Schedule a new task
 
         :param func: function to run
@@ -86,6 +86,8 @@ class ReScheduler(object):
         :return: None
         """
 
+        if fault_callback_kwargs is None:
+            fault_callback_kwargs = {}
         if times == 0:
             return None
 
@@ -140,8 +142,10 @@ class ReScheduler(object):
                      times=-1,
                      ttl=None,
                      fault_callback=None,
-                     fault_callback_kwargs={}):
+                     fault_callback_kwargs=None):
 
+            if fault_callback_kwargs is None:
+                fault_callback_kwargs = {}
             self.scheduler = scheduler
             self.func = func
             self.args = args
