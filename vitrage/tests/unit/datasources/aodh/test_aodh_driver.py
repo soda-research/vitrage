@@ -184,9 +184,10 @@ class AodhDriverTest(base.BaseTest):
     def _extract_alarm_data(self,
                             state="ok",
                             type="event",
-                            rule={"query": [],
-                                  "event_type": "*"}):
+                            rule=None):
 
+        if rule is None:
+            rule = {"query": [], "event_type": "*"}
         return {AodhProps.DESCRIPTION: "test",
                 AodhProps.TIMESTAMP: "2016-11-09T01:39:13.839584",
                 AodhProps.ENABLED: True,
