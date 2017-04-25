@@ -1253,3 +1253,148 @@ Response Body
 
 Returns an empty response body if the request was OK.
 Otherwise returns a detailed error message (e.g. 'missing time parameter').
+
+Resource list
+^^^^^^^^^^^^^
+List the resources with specified type or all the resources.
+
+GET /v1/resources/
+~~~~~~~~~~~~~~~~~~
+
+Headers
+=======
+
+-  X-Auth-Token (string, required) - Keystone auth token
+-  Accept (string) - application/json
+-  User-Agent (String)
+-  Content-Type (String): application/json
+
+Path Parameters
+===============
+
+None.
+
+Query Parameters
+================
+
+* resource_type - (string, optional) the type of resource, defaults to return all resources.
+* all_tenants - (boolean, optional) shows the resources of all tenants (in case the user has the permissions).
+
+Request Body
+============
+
+None.
+
+Request Examples
+================
+
+::
+
+    GET /v1/resources/?all_tenants=False&resource_type=nova.host
+    Host: 135.248.18.122:8999
+    User-Agent: keystoneauth1/2.3.0 python-requests/2.9.1 CPython/2.7.6
+    Content-Type: application/json
+    Accept: application/json
+    X-Auth-Token: 2b8882ba2ec44295bf300aecb2caa4f7
+
+
+Response Status code
+====================
+
+-  200 - OK
+-  404 - Bad request
+
+Response Body
+=============
+
+Returns a list with all the resources requested.
+
+Response Examples
+=================
+
+::
+
+  [
+    {
+      "vitrage_id": "RESOURCE:nova.host:cloud",
+      "aggregated_state": "AVAILABLE",
+      "state": "available",
+      "type": "nova.host",
+      "id": "cloud",
+      "metadata": {
+        "name": "cloud",
+        "update_timestamp": "2017-04-24 04:27:47.501777+00:00"
+      }
+    }
+  ]
+
+
+Resource show
+^^^^^^^^^^^^^
+Show the details of specified resource.
+
+GET /v1/resources/[vitrage_id]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Headers
+=======
+
+-  X-Auth-Token (string, required) - Keystone auth token
+-  Accept (string) - application/json
+-  User-Agent (String)
+-  Content-Type (String): application/json
+
+Path Parameters
+===============
+
+- vitrage_id.
+
+Query Parameters
+================
+
+None.
+
+Request Body
+============
+
+None.
+
+Request Examples
+================
+
+::
+
+    GET /v1/resources/`<vitrage_id>`
+    Host: 127.0.0.1:8999
+    User-Agent: keystoneauth1/2.3.0 python-requests/2.9.1 CPython/2.7.6
+    Accept: application/json
+    X-Auth-Token: 2b8882ba2ec44295bf300aecb2caa4f7
+
+Response Status code
+====================
+
+-  200 - OK
+-  404 - Bad request
+
+Response Body
+=============
+
+Returns details of the requested resource.
+
+Response Examples
+=================
+
+::
+
+    {
+      "category": "RESOURCE",
+      "is_placeholder": false,
+      "is_deleted": false,
+      "name": "vm-1",
+      "update_timestamp": "2015-12-01T12:46:41Z",
+      "state": "ACTIVE",
+      "project_id": "0683517e1e354d2ba25cba6937f44e79",
+      "type": "nova.instance",
+      "id": "dc35fa2f-4515-1653-ef6b-03b471bb395b",
+      "vitrage_id": "RESOURCE:nova.instance:dc35fa2f-4515-1653-ef6b-03b471bb395b"
+    }
