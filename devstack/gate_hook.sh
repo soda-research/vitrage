@@ -15,7 +15,7 @@
 
 export DEVSTACK_GATE_NEUTRON=1
 export DEVSTACK_GATE_HEAT=1
-export DEVSTACK_GATE_INSTALL_TESTONLY=1
+#export DEVSTACK_GATE_INSTALL_TESTONLY=1
 export DEVSTACK_GATE_TEMPEST=1
 export DEVSTACK_GATE_TEMPEST_NOTESTS=1
 export KEEP_LOCALRC=1
@@ -32,9 +32,9 @@ DEVSTACK_LOCAL_CONFIG+=$'\ndisable_service n-net'
 
 export DEVSTACK_LOCAL_CONFIG
 
-if [ -z ${ENABLED_SERVICES+x} ]; then
-    ENABLED_SERVICES=tempest
-fi
+#if [ -z ${ENABLED_SERVICES+x} ]; then
+#    ENABLED_SERVICES=tempest
+#fi
 ENABLED_SERVICES+=,q-svc,q-dhcp,q-meta,q-agt,q-l3
 ENABLED_SERVICES+=,h-eng h-api h-api-cfn h-api-cw
 ENABLED_SERVICES+=,vitrage-api,vitrage-graph

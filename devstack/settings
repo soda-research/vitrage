@@ -36,3 +36,5 @@ LIBS_FROM_GIT=python-vitrageclient
 # admin details
 admin_project_name=${ADMIN_TENANT_NAME:-admin}
 admin_domain_name=${ADMIN_DOMAIN_NAME:-Default}
+
+VITRAGECLIENT_BRANCH=stable/ocata

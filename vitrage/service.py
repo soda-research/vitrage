@@ -44,6 +44,9 @@ def prepare_service(args=None, conf=None, config_files=None):
 
     keystone_client.setup_keystoneauth(conf)
     log.setup(conf, 'vitrage')
+    log_levels = [level.replace('keystoneauth=WARN', 'keystoneauth=DEBUG')
+                  for level in log.get_default_log_levels()]
+    log.set_defaults(default_log_levels=log_levels)
     conf.log_opt_values(LOG, logging.DEBUG)
     messaging.setup()
 
