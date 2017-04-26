@@ -264,7 +264,7 @@ class TransformerBase(object):
             entity_category=kwargs[VProps.CATEGORY],
             entity_type=kwargs[VProps.TYPE],
             sample_timestamp=kwargs[VProps.SAMPLE_TIMESTAMP],
-            is_placeholder=True,
+            is_placeholder=kwargs.get(VProps.IS_PLACEHOLDER, True),
             metadata=metadata)
 
     def _extract_graph_action(self, entity_event):

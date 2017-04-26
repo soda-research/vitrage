@@ -79,6 +79,9 @@ class Processor(processor.ProcessorBase):
         """
 
         LOG.debug('Add entity to entity graph:\n%s', new_vertex)
+        # TODO(doffek): check if it's possible to move the
+        # _find_and_fix_graph_vertex method call to the process_event method
+        # so it will be done in one central place
         self._find_and_fix_graph_vertex(new_vertex, neighbors)
         self.entity_graph.add_vertex(new_vertex)
         self._connect_neighbors(neighbors, [], GraphAction.CREATE_ENTITY)
@@ -155,6 +158,8 @@ class Processor(processor.ProcessorBase):
                 self.entity_graph.update_edge(neighbor.edge)
             return
 
+        # TODO(doffek): check if we need here the update_vertex because the
+        # purpose of this method is to update the relationship
         self._find_and_fix_graph_vertex(entity_vertex, [])
         self.entity_graph.update_vertex(entity_vertex)
         for neighbor in neighbors:
@@ -175,6 +180,8 @@ class Processor(processor.ProcessorBase):
 
             return
 
+        # TODO(doffek): check if we need here the update_vertex because the
+        # purpose of this method is to update the relationship
         self._find_and_fix_graph_vertex(updated_vertex, [])
         self.entity_graph.update_vertex(updated_vertex)
         for neighbor in neighbors:

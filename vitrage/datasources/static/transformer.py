@@ -68,7 +68,9 @@ class StaticTransformer(ResourceTransformerBase):
                 VProps.TYPE: entity_type,
                 VProps.ID: entity_id,
                 VProps.CATEGORY: EntityCategory.RESOURCE,
-                VProps.SAMPLE_TIMESTAMP: sample_timestamp}
+                VProps.SAMPLE_TIMESTAMP: sample_timestamp,
+                VProps.IS_PLACEHOLDER: False
+            }
             return self.create_neighbor_placeholder_vertex(**properties)
         else:
             entity_key = self._create_entity_key(entity_event)
