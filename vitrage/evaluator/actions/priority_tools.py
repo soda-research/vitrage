@@ -13,6 +13,8 @@
 # under the License.
 
 from vitrage.common.constants import VertexProperties as VProps
+from vitrage.entity_graph.mappings.datasource_info_mapper \
+    import DEFAULT_INFO_MAPPER
 from vitrage.evaluator.template_fields import TemplateFields
 
 
@@ -51,7 +53,10 @@ class SetStateTools(object):
     def get_score(self, action_info):
         state = action_info.specs.properties[TemplateFields.STATE].upper()
         target_resource = action_info.specs.targets[TemplateFields.TARGET]
-        return self.scores[target_resource[VProps.TYPE]].get(state, 0)
+        target_type = target_resource[VProps.TYPE]
+        score_name = \
+            target_type if target_type in self.scores else DEFAULT_INFO_MAPPER
+        return self.scores[score_name].get(state, 0)
 
     @staticmethod
     def get_key(action_specs):

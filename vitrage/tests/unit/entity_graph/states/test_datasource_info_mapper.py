@@ -16,6 +16,7 @@ from oslo_config import cfg
 
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import VertexProperties as VProps
+from vitrage.datasources.aodh import AODH_DATASOURCE
 from vitrage.datasources.nagios import NAGIOS_DATASOURCE
 from vitrage.datasources.nova.host import NOVA_HOST_DATASOURCE
 from vitrage.datasources.nova.instance import NOVA_INSTANCE_DATASOURCE
@@ -42,7 +43,8 @@ class TestDatasourceInfoMapper(base.BaseTest):
                     default=[NAGIOS_DATASOURCE,
                              NOVA_HOST_DATASOURCE,
                              NOVA_INSTANCE_DATASOURCE,
-                             NOVA_ZONE_DATASOURCE],
+                             NOVA_ZONE_DATASOURCE,
+                             AODH_DATASOURCE],
                     help='Names of supported data sources'),
 
         cfg.ListOpt('path',
@@ -121,7 +123,7 @@ class TestDatasourceInfoMapper(base.BaseTest):
         # test assertions
         self.assertEqual(OperationalResourceState.NA, operational_state)
 
-    def test_operational_state_datasource_not_exists(self):
+    def test_operational_state_datasource_not_exists_and_state_not_exist(self):
         # setup
         state_manager = DatasourceInfoMapper(self.conf)
 
@@ -131,7 +133,20 @@ class TestDatasourceInfoMapper(base.BaseTest):
                                             'BUILDING')
 
         # test assertions
-        self.assertEqual(DatasourceInfoMapper.UNDEFINED_DATASOURCE,
+        self.assertEqual(OperationalResourceState.NA,
+                         operational_state)
+
+    def test_operational_state_datasource_not_exists_and_state_exist(self):
+        # setup
+        state_manager = DatasourceInfoMapper(self.conf)
+
+        # action
+        operational_state = \
+            state_manager.operational_state('NON EXISTING DATASOURCE',
+                                            'AVAILABLE')
+
+        # test assertions
+        self.assertEqual(OperationalResourceState.OK,
                          operational_state)
 
     def test_state_priority(self):
@@ -168,7 +183,7 @@ class TestDatasourceInfoMapper(base.BaseTest):
                                          'ACTIVE')
 
         # test assertions
-        self.assertEqual(DatasourceInfoMapper.UNDEFINED_DATASOURCE,
+        self.assertEqual(10,
                          state_priority)
 
     def test_aggregated_state(self):
@@ -255,7 +270,26 @@ class TestDatasourceInfoMapper(base.BaseTest):
         state_manager.aggregated_state(new_vertex, None)
 
         # test assertions
-        self.assertEqual(DatasourceInfoMapper.UNDEFINED_DATASOURCE,
+        self.assertEqual('ACTIVE',
                          new_vertex[VProps.AGGREGATED_STATE])
-        self.assertEqual(DatasourceInfoMapper.UNDEFINED_DATASOURCE,
+        self.assertEqual(OperationalResourceState.OK,
+                         new_vertex[VProps.OPERATIONAL_STATE])
+
+    def test_aggregated_state_datasource_not_exists_and_wrong_state(self):
+        # setup
+        state_manager = DatasourceInfoMapper(self.conf)
+        metadata = {VProps.VITRAGE_STATE: 'SUSPENDED'}
+        new_vertex = create_vertex('12345',
+                                   entity_state='NON EXISTING STATE',
+                                   entity_category=EntityCategory.RESOURCE,
+                                   entity_type='NON EXISTING DATASOURCE',
+                                   metadata=metadata)
+
+        # action
+        state_manager.aggregated_state(new_vertex, None)
+
+        # test assertions
+        self.assertEqual('NON EXISTING STATE',
+                         new_vertex[VProps.AGGREGATED_STATE])
+        self.assertEqual(OperationalResourceState.NA,
                          new_vertex[VProps.OPERATIONAL_STATE])
