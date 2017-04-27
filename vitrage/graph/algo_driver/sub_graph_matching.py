@@ -111,6 +111,10 @@ def subgraph_matching(base_graph, subgraph, matches, validate=False):
             v_id=v_with_unmapped_neighbors[MAPPED_V_ID],
             vertex_attr_filter=subgraph_vertex_to_map)
 
+        graph_candidate_vertices = \
+            _remove_used_graph_candidates(graph_candidate_vertices,
+                                          curr_subgraph)
+
         # STEP 5: STRUCTURE CHECK
         edges = _get_edges_to_mapped_vertices(curr_subgraph,
                                               subgraph_vertex_to_map.vertex_id)
@@ -239,3 +243,13 @@ def _update_mapping_for_edge(known_match, mapping, graph, validate):
     t_id = known_match.graph_element.target_id
     sub_t_id = known_match.subgraph_element.target_id
     return _update_mapping(mapping, graph, sub_t_id, t_id, validate)
+
+
+def _remove_used_graph_candidates(graph_candidate_vertices, curr_subgraph):
+    ver_to_remove = []
+    for candidate in graph_candidate_vertices:
+        for sub_ver in curr_subgraph.get_vertices():
+            if sub_ver.get(GRAPH_VERTEX, False) and \
+                    sub_ver[GRAPH_VERTEX].vertex_id == candidate.vertex_id:
+                ver_to_remove.append(candidate)
+    return [v for v in graph_candidate_vertices if v not in ver_to_remove]
