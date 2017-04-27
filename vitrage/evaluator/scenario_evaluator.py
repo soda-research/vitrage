@@ -163,7 +163,9 @@ class ScenarioEvaluator(object):
                 if matches:
                     for match in matches:
                         spec, action_id = self._get_action_spec(action, match)
-                        match_hash = hash(tuple(sorted(match.items())))
+                        items_ids = \
+                            [match[1].vertex_id for match in match.items()]
+                        match_hash = hash(tuple(sorted(items_ids)))
                         actions[action_id] = \
                             ActionInfo(spec, mode, scenario.id, match_hash)
         return actions
@@ -211,6 +213,7 @@ class ScenarioEvaluator(object):
 
             if term.type == ENTITY:
                 term.variable[VProps.IS_DELETED] = False
+                term.variable[VProps.IS_PLACEHOLDER] = False
                 condition_g.add_vertex(term.variable)
 
             else:  # type = relationship
@@ -228,7 +231,9 @@ class ScenarioEvaluator(object):
     @staticmethod
     def _set_relationship_not_deleted(edge_description):
         edge_description.source[VProps.IS_DELETED] = False
+        edge_description.source[VProps.IS_PLACEHOLDER] = False
         edge_description.target[VProps.IS_DELETED] = False
+        edge_description.target[VProps.IS_PLACEHOLDER] = False
         edge_description.edge[EProps.IS_DELETED] = False
 
     @staticmethod
