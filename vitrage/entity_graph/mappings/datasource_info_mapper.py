@@ -26,6 +26,9 @@ from vitrage.utils import file as file_utils
 LOG = log.getLogger(__name__)
 
 
+DEFAULT_INFO_MAPPER = 'default'
+
+
 class DatasourceInfoMapper(object):
     OPERATIONAL_VALUES = 'operational_values'
     PRIORITY_VALUES = 'priority_values'
@@ -55,7 +58,8 @@ class DatasourceInfoMapper(object):
             VProps.CATEGORY in new_vertex.properties else \
             graph_vertex[VProps.CATEGORY]
 
-        if datasource_name in self.datasources_state_confs:
+        if datasource_name in self.datasources_state_confs or \
+                datasource_name not in self.conf.datasources.types:
             value_properties = \
                 self.category_normalizer[category].value_properties()
             operational_state, aggregated_state, state_priority = \
@@ -184,7 +188,11 @@ class DatasourceInfoMapper(object):
                 return values_conf[upper_state] if upper_state in values_conf \
                     else values_conf[None]
             else:
-                return self.UNDEFINED_DATASOURCE
+                values_conf = self.datasources_state_confs[
+                    DEFAULT_INFO_MAPPER][data_type]
+
+                return values_conf[upper_state] if upper_state in values_conf \
+                    else values_conf[None]
         except Exception:
             LOG.error('Exception in datasource: %s', datasource_name)
             raise
