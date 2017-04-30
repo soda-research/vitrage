@@ -30,6 +30,10 @@ class ScenarioRepositoryTest(base.BaseTest):
         cfg.StrOpt('templates_dir',
                    default=utils.get_resources_dir() + '/templates/general',
                    ),
+        cfg.StrOpt('equivalences_dir',
+                   default=utils.get_resources_dir() +
+                   '/equivalences',
+                   ),
     ]
 
     # noinspection PyPep8Naming
