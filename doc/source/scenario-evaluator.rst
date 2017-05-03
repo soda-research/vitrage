@@ -95,7 +95,10 @@ Templates should all be located in the *<vitrage folder>/templates* folder.
 When Vitrage is started up, all the templates are loaded into a *Scenario*
 *Repository*. During this loading, template verification is done to
 ensure the correct format is used, references are valid, and more. Errors in
-each template should be written to the log. Invalid templates are skipped.
+each template should be written to the log. Invalid templates are skipped. See
+details_.
+
+.. _details: templates-loading.html
 
 The Scenario Repository supports querying for scenarios based on a vertex or
 edge in the Entity Graph. Given such a graph element, the Scenario Repository

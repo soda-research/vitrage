@@ -203,17 +203,19 @@ class TemplateData(object):
     def _parse_condition(self, condition_str):
         """Parse condition string into an object
 
-        The condition object will be converted here into DNF (Disjunctive
+        The condition string will be converted here into DNF (Disjunctive
         Normal Form), e.g., (X and Y) or (X and Z) or (X and V and not W)...
         where X, Y, Z, V, W are either entities or relationships
         more details: https://en.wikipedia.org/wiki/Disjunctive_normal_form
 
-        The condition object itself is a list of tuples. each tuple represents
-        an AND expression compound ConditionElements. The list presents the
-        OR expression e.g. [(condition_element1, condition_element2)]
+        The condition variable lists is then extracted from the DNF object. It
+        is a list of lists. Each inner list represents an AND expression
+        compound condition variables. The outer list presents the OR expression
+
+          [[and_var1, and_var2, ...], or_list_2, ...]
 
         :param condition_str: the string as it written in the template itself
-        :return: Condition object
+        :return: condition_vars_lists
         """
 
         condition_dnf = self.convert_to_dnf_format(condition_str)

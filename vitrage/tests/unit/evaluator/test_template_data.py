@@ -13,10 +13,13 @@
 # under the License.
 
 from vitrage.common.constants import EdgeLabel
+from vitrage.evaluator.template_data import ActionSpecs
 from vitrage.evaluator.template_data import ConditionVar
 from vitrage.evaluator.template_data import EdgeDescription
+from vitrage.evaluator.template_data import Scenario
 from vitrage.evaluator.template_data import TemplateData
 from vitrage.evaluator.template_fields import TemplateFields as TFields
+from vitrage.graph import Edge
 from vitrage.graph import Vertex
 from vitrage.tests import base
 from vitrage.tests.mocks import utils
@@ -47,6 +50,70 @@ class BasicTemplateTest(base.BaseTest):
         relate_def = definitions[TFields.RELATIONSHIPS]
         self._validate_relationships(relationships, relate_def, entities)
         self._validate_scenarios(scenarios, entities)
+
+        expected_entities = {
+            'alarm': Vertex(vertex_id='alarm',
+                            properties={'category': 'ALARM',
+                                        'type': 'nagios',
+                                        'name': 'HOST_HIGH_CPU_LOAD',
+                                        'is_deleted': False,
+                                        'is_placeholder': False
+                                        }),
+            'resource': Vertex(vertex_id='resource',
+                               properties={'category': 'RESOURCE',
+                                           'type': 'nova.host',
+                                           'is_deleted': False,
+                                           'is_placeholder': False
+                                           })
+        }
+
+        expected_relationships = {
+            'alarm_on_host': EdgeDescription(
+                edge=Edge(source_id='alarm',
+                          target_id='resource',
+                          label='on',
+                          properties={'relationship_type': 'on',
+                                      'is_deleted': False,
+                                      'negative_condition': False}),
+                source=expected_entities['alarm'],
+                target=expected_entities['resource']
+            )
+        }
+
+        expected_scenario = Scenario(
+            id='basic_template-scenario0',
+            condition=[
+                [ConditionVar(variable=expected_relationships['alarm_on_host'],
+                              type='relationship',
+                              positive=True)]],
+            actions=[
+                ActionSpecs(
+                    type='set_state',
+                    targets={'target': 'resource'},
+                    properties={'state': 'SUBOPTIMAL'})],
+            subgraphs=template_data.scenarios[0].subgraphs
+        )
+
+        self._validate_strict_equal(template_data,
+                                    expected_entities,
+                                    expected_relationships,
+                                    expected_scenario)
+
+    def _validate_strict_equal(self,
+                               template_data,
+                               expected_entities,
+                               expected_relationships,
+                               expected_scenario
+                               ):
+        self.assert_dict_equal(expected_entities, template_data.entities,
+                               'entities not equal')
+
+        self.assert_dict_equal(expected_relationships,
+                               template_data.relationships,
+                               'relationship not equal')
+
+        self.assertEqual(expected_scenario, template_data.scenarios[0],
+                         'scenario not equal')
 
     def _validate_entities(self, entities, entities_def):
 
