@@ -156,16 +156,6 @@ class TemplateSyntaxValidatorTest(base.BaseTest):
 
         self._test_execution_with_fault_result(template, expected_comment)
 
-    def test_validate_relationship_with_invalid_relationship_type_field(self):
-
-        template = self.clone_template
-        definitions = template[TemplateFields.DEFINITIONS]
-        relationship = definitions[TemplateFields.RELATIONSHIPS][0]
-        relationship_dict = relationship[TemplateFields.RELATIONSHIP]
-        relationship_dict[TemplateFields.RELATIONSHIP_TYPE] = 'unknown'
-
-        self._test_execution_with_fault_result(template, 100)
-
     def test_validate_template_without_scenarios_section(self):
 
         template = self.clone_template

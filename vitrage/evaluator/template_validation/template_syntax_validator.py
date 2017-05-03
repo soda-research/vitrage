@@ -22,7 +22,6 @@ from voluptuous import Invalid
 from voluptuous import Required
 from voluptuous import Schema
 
-from vitrage.common.constants import EdgeLabel
 from vitrage.common.constants import EntityCategory
 from vitrage.evaluator.actions.base import action_types
 from vitrage.evaluator.template_fields import TemplateFields
@@ -159,7 +158,7 @@ def _validate_relationship_dict(relationship_dict):
     schema = Schema({
         Required(TemplateFields.SOURCE, msg=102): any_str,
         Required(TemplateFields.TARGET, msg=103): any_str,
-        TemplateFields.RELATIONSHIP_TYPE: _validate_relationship_type_field(),
+        Required(TemplateFields.RELATIONSHIP_TYPE, msg=100): any_str,
         Required(TemplateFields.TEMPLATE_ID, msg=104):
             All(_validate_template_id_value())
     })
@@ -278,15 +277,6 @@ def _validate_category_field(msg=None):
             return str(v)
         else:
             raise Invalid(msg or 45)
-    return f
-
-
-def _validate_relationship_type_field(msg=None):
-    def f(v):
-        if str(v) in EdgeLabel.labels():
-            return str(v)
-        else:
-            raise Invalid(msg or 100)
     return f
 
 
