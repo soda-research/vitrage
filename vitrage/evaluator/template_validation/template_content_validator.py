@@ -142,7 +142,7 @@ def _validate_scenarios(scenarios, definitions_index):
 
 def _validate_scenario_condition(condition, definitions_index):
     try:
-        dnf_result = TemplateData.convert_to_dnf_format(condition)
+        dnf_result = TemplateData.ScenarioData.convert_to_dnf_format(condition)
     except Exception:
         LOG.error('%s status code: %s' % (status_msgs[85], 85))
         return get_fault_result(RESULT_DESCRIPTION, 85)

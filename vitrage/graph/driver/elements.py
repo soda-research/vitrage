@@ -42,6 +42,9 @@ class PropertiesElement(object):
     def items(self):
         return self.properties.items()
 
+    def copy(self):
+        return PropertiesElement(self.properties.copy())
+
 
 class Vertex(PropertiesElement):
     """Class Vertex
@@ -84,6 +87,10 @@ class Vertex(PropertiesElement):
         """
         return self.__dict__ == other.__dict__ and \
             self.properties == other.properties
+
+    def copy(self):
+        return Vertex(vertex_id=self.vertex_id,
+                      properties=self.properties.copy())
 
 
 class Edge(PropertiesElement):
@@ -161,3 +168,9 @@ class Edge(PropertiesElement):
 
     def has_vertex(self, v_id):
         return self.source_id == v_id or self.target_id == v_id
+
+    def copy(self):
+        return Edge(source_id=self.source_id,
+                    target_id=self.target_id,
+                    label=self.label,
+                    properties=self.properties.copy())

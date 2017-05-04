@@ -62,28 +62,20 @@ Let's take a basic template as example
     'alarm': Vertex(vertex_id='alarm',
                     properties={'category': 'ALARM',
                                 'type': 'nagios',
-                                'name': 'HOST_HIGH_CPU_LOAD',
-                                'is_deleted': False,
-                                'is_placeholder': False
+                                'name': 'HOST_HIGH_CPU_LOAD'
                                 }),
     'resource': Vertex(vertex_id='resource',
                        properties={'category': 'RESOURCE',
-                                   'type': 'nova.host',
-                                   'is_deleted': False,
-                                   'is_placeholder': False
+                                   'type': 'nova.host'
                                    })
   }
 
   expected_relationships = {
     'alarm_on_host': EdgeDescription(
-      edge=Edge(
-        source_id='alarm',
-        target_id='resource',
-        label='on',
-        properties={
-          'relationship_type': 'on',
-          'is_deleted': False,
-          'negative_condition': False}),
+      edge=Edge(source_id='alarm',
+                target_id='resource',
+                label='on',
+                properties={'relationship_type': 'on'}),
       source=expected_entities['alarm'],
       target=expected_entities['resource']
     )
@@ -92,19 +84,16 @@ Let's take a basic template as example
   expected_scenario = Scenario(
     id='basic_template-scenario0',
     condition=[
-      [ConditionVar(
-        variable=expected_relationships['alarm_on_host'],
-        type='relationship',
-        positive=True)]
-    ],
+      [ConditionVar(symbol_name='alarm_on_host',
+                    positive=True)]],
     actions=[
       ActionSpecs(
         type='set_state',
-        targets={
-          'target': 'resource'},
-        properties={
-          'state': 'SUBOPTIMAL'})],
-    subgraphs=[object] # [<vitrage.graph.driver.networkx_graph.NXGraph object>]
+        targets={'target': 'resource'},
+        properties={'state': 'SUBOPTIMAL'})],
+    subgraphs=template_data.scenarios[0].subgraphs,  # ignore subgraphs
+    entities=expected_entities,
+    relationships=expected_relationships
   )
 
 Entities and relationships
@@ -170,26 +159,34 @@ operators. As explained in embedded comment:
     :param condition_str: the string as it written in the template itself
     :return: condition_vars_lists
 
-Each condition variable refers either an entity or relationship by ``variable``.
-The same variable in different conditions share an identical object. It is not
-duplicated.
-
 actions
 -------
 
 ``actions`` is a list of ``ActionSpecs``.
 
-Note that the values of action ``targets`` are **string**. It is different from
-how relationships and entities are referred in ``condition``, which are object
-references.
+The action targets in the spec must be referenced in the condition definition.
+They are either linked to ``vertex_id`` of entity condition variables or
+``source_id`` and ``target_id`` in relationship condition variable extracted.
 
-The targets values are linked to ``vertex_id`` of entity condition variables or
-``source_id`` and ``target_id`` in a relationship condition variable. It will
-be resolved to real targets from matched sub-graph in entity graph.
+In each matched subgraph in the entity graph, the targets will be resolved as
+concrete vertices or edges.
 
 subgraphs
 ---------
 
-Sub graphs are compiled from conditions for pattern matching in the entity
-graph. Each sub-list in condition variables list is compiled into one sub
-graph. The actions will be triggered if any of the subgraph is matched.
+Sub graphs are built from conditions for pattern matching in the entity graph.
+Each sub-list in condition variables list is compiled into one sub graph. The
+actions will be triggered if any of the subgraph is matched.
+
+entities & relationships
+------------------------
+
+Dicts of **touched** entities and relationships during subgraph building are
+saved in scenario.
+
+This makes creation of the scenarios repository index on related entities and
+relationships easier and more efficient. You don't need to traverse the
+condition object again, which is already done once during subgraphs building.
+It also eliminate the necessity of duplication check because there is no
+duplicate entities or relationships in these dicts compared to the condition
+variables lists.

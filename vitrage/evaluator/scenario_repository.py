@@ -19,7 +19,7 @@ from oslo_log import log
 from oslo_utils import uuidutils
 
 from vitrage.evaluator.base import Template
-from vitrage.evaluator.template_data import RELATIONSHIP
+from vitrage.evaluator.equivalence_repository import EquivalenceRepository
 from vitrage.evaluator.template_data import TemplateData
 from vitrage.evaluator.template_validation.template_content_validator import \
     content_validation
@@ -36,6 +36,8 @@ EdgeKeyScenario = namedtuple('EdgeKeyScenario', ['label', 'source', 'target'])
 class ScenarioRepository(object):
     def __init__(self, conf):
         self._templates = {}
+        self.entity_equivalences = \
+            EquivalenceRepository().load_files(conf.evaluator.equivalences_dir)
         self.relationship_scenarios = defaultdict(list)
         self.entity_scenarios = defaultdict(list)
         self._load_templates_files(conf)
@@ -93,7 +95,39 @@ class ScenarioRepository(object):
                                                       result)
         if result.is_valid_config:
             template_data = TemplateData(template_def)
-            self._add_template_scenarios(template_data)
+            for scenario in template_data.scenarios:
+                for equivalent_scenario in self._expand_equivalence(scenario):
+                    self._add_scenario(equivalent_scenario)
+
+    def _expand_equivalence(self, scenario):
+        equivalent_scenarios = [scenario]
+        for symbol_name, entity in scenario.entities.items():
+            entity_key = frozenset(entity.properties.items())
+            if entity_key not in self.entity_equivalences:
+                continue
+            equivalent_scenarios = self._expand_on_symbol(
+                equivalent_scenarios,
+                symbol_name,
+                self.entity_equivalences[entity_key] - {entity_key})
+        return equivalent_scenarios
+
+    @staticmethod
+    def _expand_on_symbol(scenarios_in, symbol_name, entity_keys):
+        scenarios_out = list(scenarios_in)
+        for entity_key in entity_keys:
+            for scenario in scenarios_in:
+                equivalent_scenario = TemplateData.ScenarioData.\
+                    build_equivalent_scenario(scenario,
+                                              symbol_name,
+                                              entity_key)
+                scenarios_out.append(equivalent_scenario)
+        return scenarios_out
+
+    def _add_scenario(self, scenario):
+        for entity in scenario.entities.values():
+            self._add_entity_scenario(scenario, entity)
+        for relationship in scenario.relationships.values():
+            self._add_relationship_scenario(scenario, relationship)
 
     def _load_templates_files(self, conf):
 
@@ -103,35 +137,14 @@ class ScenarioRepository(object):
         for template_def in template_defs:
             self.add_template(template_def)
 
-    def _add_template_scenarios(self, template):
-        for scenario in template.scenarios:
-            self._handle_condition(scenario)
-
-    def _handle_condition(self, scenario):
-        for clause in scenario.condition:
-            self._handle_clause(clause, scenario)
-
-    def _handle_clause(self, clause, scenario):
-        for condition_var in clause:
-            if condition_var.type == RELATIONSHIP:
-                edge_desc = condition_var.variable
-                self._add_relationship(scenario, edge_desc)
-                self._add_entity(scenario, edge_desc.source)
-                self._add_entity(scenario, edge_desc.target)
-            else:  # Entity
-                self._add_entity(scenario, condition_var.variable)
-
     @staticmethod
     def _create_scenario_key(properties):
         return frozenset(properties)
 
-    def _add_relationship(self, scenario, edge_desc):
+    def _add_relationship_scenario(self, scenario, edge_desc):
 
         key = self._create_edge_scenario_key(edge_desc)
-        scenarios = self.relationship_scenarios[key]
-
-        if not self._edge_contains(scenarios, scenario, edge_desc):
-            self.relationship_scenarios[key].append((edge_desc, scenario))
+        self.relationship_scenarios[key].append((edge_desc, scenario))
 
     @staticmethod
     def _create_edge_scenario_key(edge_desc):
@@ -139,22 +152,7 @@ class ScenarioRepository(object):
                                frozenset(edge_desc.source.properties.items()),
                                frozenset(edge_desc.target.properties.items()))
 
-    def _add_entity(self, scenario, entity):
+    def _add_entity_scenario(self, scenario, entity):
 
         key = frozenset(list(entity.properties.items()))
-        scenarios = self.entity_scenarios[key]
-
-        if not self._entity_contains(scenarios, scenario, entity):
-            self.entity_scenarios[key].append((entity, scenario))
-
-    @staticmethod
-    def _edge_contains(scenarios, scenario, edge):
-        return any(e.edge.source_id == edge.edge.source_id and
-                   e.edge.target_id == edge.edge.target_id and
-                   e.edge.label == edge.edge.label and s.id == scenario.id
-                   for e, s in scenarios)
-
-    @staticmethod
-    def _entity_contains(scenarios, scenario, entity):
-        return any(e.vertex_id == entity.vertex_id and s.id == scenario.id
-                   for e, s in scenarios)
+        self.entity_scenarios[key].append((entity, scenario))

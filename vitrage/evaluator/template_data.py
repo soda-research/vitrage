@@ -19,23 +19,34 @@ from sympy.logic.boolalg import Or
 from sympy.logic.boolalg import to_dnf as sympy_to_dfn
 from sympy import Symbol
 
-
 from vitrage.common.constants import EdgeProperties as EProps
 from vitrage.common.constants import VertexProperties as VProps
+from vitrage.common.exception import VitrageError
 from vitrage.evaluator.template_fields import TemplateFields as TFields
 from vitrage.graph.algo_driver.sub_graph_matching import NEG_CONDITION
 from vitrage.graph.driver.networkx_graph import NXGraph
 from vitrage.graph import Edge
 from vitrage.graph import Vertex
 
-ConditionVar = namedtuple('ConditionVar', ['variable', 'type', 'positive'])
+ConditionVar = namedtuple('ConditionVar', ['symbol_name', 'positive'])
 ActionSpecs = namedtuple('ActionSpecs', ['type', 'targets', 'properties'])
-Scenario = namedtuple('Scenario', ['id', 'condition', 'actions', 'subgraphs'])
+Scenario = namedtuple('Scenario', ['id',
+                                   'condition',
+                                   'actions',
+                                   'subgraphs',
+                                   'entities',
+                                   'relationships'
+                                   ])
 EdgeDescription = namedtuple('EdgeDescription', ['edge', 'source', 'target'])
-
 
 ENTITY = 'entity'
 RELATIONSHIP = 'relationship'
+
+
+def copy_edge_desc(edge_desc):
+    return EdgeDescription(edge=edge_desc.edge.copy(),
+                           source=edge_desc.source.copy(),
+                           target=edge_desc.target.copy())
 
 
 # noinspection PyAttributeOutsideInit
@@ -135,144 +146,238 @@ class TemplateData(object):
     def _build_scenarios(self, scenarios_defs):
 
         scenarios = []
-        for counter, scenarios_def in enumerate(scenarios_defs):
-            scenario_dict = scenarios_def[TFields.SCENARIO]
-            condition = self._parse_condition(scenario_dict[TFields.CONDITION])
-            action_specs = self._build_actions(scenario_dict[TFields.ACTIONS])
-            subgraphs = self._build_subgraphs(condition)
+        for counter, scenario_def in enumerate(scenarios_defs):
             scenario_id = "%s-scenario%s" % (self.name, str(counter))
-            scenarios.append(Scenario(scenario_id, condition,
-                                      action_specs, subgraphs))
-
+            scenario_dict = scenario_def[TFields.SCENARIO]
+            scenarios.append(TemplateData.ScenarioData(
+                scenario_id,
+                scenario_dict, self).to_tuple())
         return scenarios
 
-    @staticmethod
-    def _build_actions(actions_def):
+    class ScenarioData(object):
+        def __init__(self, scenario_id, scenario_dict, template_data):
+            self._template_entities = template_data.entities
+            self._template_relationships = template_data.relationships
 
-        actions = []
-        for action_def in actions_def:
+            self._entities = {}
+            self._relationships = {}
 
-            action_dict = action_def[TFields.ACTION]
-            action_type = action_dict[TFields.ACTION_TYPE]
-            targets = action_dict[TFields.ACTION_TARGET]
-            properties = action_dict.get(TFields.PROPERTIES, {})
+            self.scenario_id = scenario_id
+            self.condition = self._parse_condition(
+                scenario_dict[TFields.CONDITION])
+            self.actions = self._build_actions(scenario_dict[TFields.ACTIONS])
+            self.subgraphs = TemplateData.SubGraph.from_condition(
+                self.condition,
+                self._extract_var_and_update_index)
 
-            actions.append(ActionSpecs(action_type, targets, properties))
+        def __eq__(self, other):
+            return self.scenario_id == other.scenario_id \
+                and self.condition == other.condition \
+                and self.actions == other.actions
 
-        return actions
+        def to_tuple(self):
+            return Scenario(id=self.scenario_id,
+                            condition=self.condition,
+                            actions=self.actions,
+                            subgraphs=self.subgraphs,
+                            entities=self._entities,
+                            relationships=self._relationships)
 
-    def _build_subgraphs(self, condition):
-        return [self._build_subgraph(clause) for clause in condition]
+        @classmethod
+        def build_equivalent_scenario(cls,
+                                      scenario,
+                                      template_id,
+                                      entity_props):
+            entities = scenario.entities.copy()
+            entities[template_id] = Vertex(
+                vertex_id=entities[template_id].vertex_id,
+                properties={k: v for k, v in entity_props})
+            relationships = {
+                rel_id: cls.build_equivalent_relationship(rel,
+                                                          template_id,
+                                                          entity_props)
+                for rel_id, rel in scenario.relationships.items()}
 
-    def _build_subgraph(self, clause):
-        condition_g = NXGraph("scenario condition")
+            def extract_var(symbol_name):
+                if symbol_name in entities:
+                    return entities[symbol_name], ENTITY
+                elif symbol_name in relationships:
+                    return relationships[symbol_name], RELATIONSHIP
+                else:
+                    raise VitrageError('invalid symbol name: {}'
+                                       .format(symbol_name))
 
-        for term in clause:
-            if term.type == ENTITY:
-                term.variable[VProps.IS_DELETED] = False
-                term.variable[VProps.IS_PLACEHOLDER] = False
-                condition_g.add_vertex(term.variable)
+            subgraphs = TemplateData.SubGraph.from_condition(
+                scenario.condition, extract_var)
 
-            else:  # type = relationship
-                edge_desc = term.variable
-                self._set_edge_relationship_info(edge_desc, term.positive)
-                self._add_edge_relationship(condition_g, edge_desc)
+            return Scenario(id=scenario.id + '_equivalence',
+                            condition=scenario.condition,
+                            actions=scenario.actions,
+                            subgraphs=subgraphs,
+                            entities=entities,
+                            relationships=relationships)
 
-        return condition_g
+        @classmethod
+        def build_equivalent_relationship(cls,
+                                          relationship,
+                                          template_id,
+                                          entity_props):
+            source = relationship.source
+            target = relationship.target
+            if relationship.edge.source_id == template_id:
+                source = Vertex(vertex_id=source.vertex_id,
+                                properties={k: v for k, v in entity_props})
+            elif relationship.edge.target_id == template_id:
+                target = Vertex(vertex_id=target.vertex_id,
+                                properties={k: v for k, v in entity_props})
+            return EdgeDescription(source=source,
+                                   target=target,
+                                   edge=relationship.edge)
 
-    @staticmethod
-    def _set_edge_relationship_info(edge_description, is_positive_condition):
-        if not is_positive_condition:
-            edge_description.edge[NEG_CONDITION] = True
-            edge_description.edge[EProps.IS_DELETED] = True
-        else:
-            edge_description.edge[EProps.IS_DELETED] = False
-            edge_description.edge[NEG_CONDITION] = False
+        @staticmethod
+        def _build_actions(actions_def):
 
-        edge_description.source[VProps.IS_DELETED] = False
-        edge_description.source[VProps.IS_PLACEHOLDER] = False
-        edge_description.target[VProps.IS_DELETED] = False
-        edge_description.target[VProps.IS_PLACEHOLDER] = False
+            actions = []
+            for action_def in actions_def:
 
-    @staticmethod
-    def _add_edge_relationship(condition_graph, edge_description):
-        condition_graph.add_vertex(edge_description.source)
-        condition_graph.add_vertex(edge_description.target)
-        condition_graph.add_edge(edge_description.edge)
+                action_dict = action_def[TFields.ACTION]
+                action_type = action_dict[TFields.ACTION_TYPE]
+                targets = action_dict[TFields.ACTION_TARGET]
+                properties = action_dict.get(TFields.PROPERTIES, {})
 
-    def _parse_condition(self, condition_str):
-        """Parse condition string into an object
+                actions.append(ActionSpecs(action_type, targets, properties))
 
-        The condition string will be converted here into DNF (Disjunctive
-        Normal Form), e.g., (X and Y) or (X and Z) or (X and V and not W)...
-        where X, Y, Z, V, W are either entities or relationships
-        more details: https://en.wikipedia.org/wiki/Disjunctive_normal_form
+            return actions
 
-        The condition variable lists is then extracted from the DNF object. It
-        is a list of lists. Each inner list represents an AND expression
-        compound condition variables. The outer list presents the OR expression
+        def _parse_condition(self, condition_str):
+            """Parse condition string into an object
 
-          [[and_var1, and_var2, ...], or_list_2, ...]
+            The condition string will be converted here into DNF (Disjunctive
+            Normal Form), e.g., (X and Y) or (X and Z) or (X and V and not W)
+            ... where X, Y, Z, V, W are either entities or relationships
+            more details: https://en.wikipedia.org/wiki/Disjunctive_normal_form
 
-        :param condition_str: the string as it written in the template itself
-        :return: condition_vars_lists
-        """
+            The condition variable lists is then extracted from the DNF object.
+            It is a list of lists. Each inner list represents an AND expression
+            compound condition variables. The outer list presents the OR
+            expression
 
-        condition_dnf = self.convert_to_dnf_format(condition_str)
+              [[and_var1, and_var2, ...], or_list_2, ...]
 
-        if isinstance(condition_dnf, Or):
-            return self._extract_or_condition(condition_dnf)
+            :param condition_str: the string as it written in the template
+            :return: condition_vars_lists
+            """
 
-        if isinstance(condition_dnf, And):
-            return [self._extract_and_condition(condition_dnf)]
+            condition_dnf = self.convert_to_dnf_format(condition_str)
 
-        if isinstance(condition_dnf, Not):
-            return [(self._extract_not_condition_var(condition_dnf))]
+            if isinstance(condition_dnf, Or):
+                return self._extract_or_condition(condition_dnf)
 
-        if isinstance(condition_dnf, Symbol):
-            return [[(self._extract_condition_var(condition_dnf, True))]]
+            if isinstance(condition_dnf, And):
+                return [self._extract_and_condition(condition_dnf)]
 
-    @staticmethod
-    def convert_to_dnf_format(condition_str):
+            if isinstance(condition_dnf, Not):
+                return [(self._extract_not_condition_var(condition_dnf))]
 
-        condition_str = condition_str.replace(' and ', '&')
-        condition_str = condition_str.replace(' or ', '|')
-        condition_str = condition_str.replace(' not ', '~')
-        condition_str = condition_str.replace('not ', '~')
+            if isinstance(condition_dnf, Symbol):
+                return [[(self._extract_condition_var(condition_dnf, True))]]
 
-        return sympy_to_dfn(condition_str)
+        @staticmethod
+        def convert_to_dnf_format(condition_str):
 
-    def _extract_or_condition(self, or_condition):
+            condition_str = condition_str.replace(' and ', '&')
+            condition_str = condition_str.replace(' or ', '|')
+            condition_str = condition_str.replace(' not ', '~')
+            condition_str = condition_str.replace('not ', '~')
 
-        vars_ = []
-        for var in or_condition.args:
+            return sympy_to_dfn(condition_str)
 
-            if isinstance(var, And):
-                vars_.append(self._extract_and_condition(var))
+        def _extract_or_condition(self, or_condition):
+
+            vars_ = []
+            for var in or_condition.args:
+
+                if isinstance(var, And):
+                    vars_.append(self._extract_and_condition(var))
+                else:
+                    is_symbol = isinstance(var, Symbol)
+                    vars_.append([self._extract_condition_var(var, is_symbol)])
+
+            return vars_
+
+        def _extract_and_condition(self, and_condition):
+            return [self._extract_condition_var(arg, isinstance(arg, Symbol))
+                    for arg in and_condition.args]
+
+        def _extract_not_condition_var(self, not_condition):
+            return [self._extract_condition_var(arg, False)
+                    for arg in not_condition.args]
+
+        def _extract_condition_var(self, symbol, positive):
+            if isinstance(symbol, Not):
+                return self._extract_not_condition_var(symbol)[0]
+            return ConditionVar(symbol.name, positive)
+
+        def _extract_var_and_update_index(self, symbol_name):
+
+            if symbol_name in self._template_relationships:
+                relationship = self._template_relationships[symbol_name]
+                self._relationships[symbol_name] = relationship
+                self._entities.update({
+                    relationship.edge.source_id: relationship.source,
+                    relationship.edge.target_id: relationship.target
+                })
+                return relationship, RELATIONSHIP
+
+            entity = self._template_entities[symbol_name]
+            self._entities[symbol_name] = entity
+            return entity, ENTITY
+
+    class SubGraph(object):
+        @classmethod
+        def from_condition(cls, condition, extract_var):
+            return [cls.from_clause(clause, extract_var)
+                    for clause in condition]
+
+        @classmethod
+        def from_clause(cls, clause, extract_var):
+            condition_g = NXGraph("scenario condition")
+
+            for term in clause:
+                variable, var_type = extract_var(term.symbol_name)
+                if var_type == ENTITY:
+                    vertex = variable.copy()
+                    vertex[VProps.IS_DELETED] = False
+                    vertex[VProps.IS_PLACEHOLDER] = False
+                    condition_g.add_vertex(vertex)
+
+                else:  # type = relationship
+                    # prevent overwritten of NEG_CONDITION and IS_DELETED
+                    # property when there are both "not A" and "A" in same
+                    # template
+                    edge_desc = copy_edge_desc(variable)
+                    cls._set_edge_relationship_info(edge_desc, term.positive)
+                    cls._add_edge_relationship(condition_g, edge_desc)
+
+            return condition_g
+
+        @staticmethod
+        def _set_edge_relationship_info(edge_description,
+                                        is_positive_condition):
+            if not is_positive_condition:
+                edge_description.edge[NEG_CONDITION] = True
+                edge_description.edge[EProps.IS_DELETED] = True
             else:
-                is_symbol = isinstance(var, Symbol)
-                vars_.append([self._extract_condition_var(var, is_symbol)])
+                edge_description.edge[EProps.IS_DELETED] = False
+                edge_description.edge[NEG_CONDITION] = False
 
-        return vars_
+            edge_description.source[VProps.IS_DELETED] = False
+            edge_description.source[VProps.IS_PLACEHOLDER] = False
+            edge_description.target[VProps.IS_DELETED] = False
+            edge_description.target[VProps.IS_PLACEHOLDER] = False
 
-    def _extract_and_condition(self, and_condition):
-        return [self._extract_condition_var(arg, isinstance(arg, Symbol))
-                for arg in and_condition.args]
-
-    def _extract_not_condition_var(self, not_condition):
-        return [self._extract_condition_var(arg, False)
-                for arg in not_condition.args]
-
-    def _extract_condition_var(self, symbol, positive):
-        if isinstance(symbol, Not):
-            return self._extract_not_condition_var(symbol)[0]
-        else:
-            var, var_type = self._extract_var(str(symbol))
-        return ConditionVar(var, var_type, positive)
-
-    def _extract_var(self, template_id):
-
-        if template_id in self.relationships:
-            return self.relationships[template_id], RELATIONSHIP
-
-        return self.entities[template_id], ENTITY
+        @staticmethod
+        def _add_edge_relationship(condition_graph, edge_description):
+            condition_graph.add_vertex(edge_description.source)
+            condition_graph.add_vertex(edge_description.target)
+            condition_graph.add_edge(edge_description.edge)

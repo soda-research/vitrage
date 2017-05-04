@@ -13,6 +13,7 @@
 # under the License.
 
 from vitrage.common.constants import TemplateTopologyFields
+from vitrage.common.exception import VitrageError
 
 
 class Fields(TemplateTopologyFields):
@@ -37,18 +38,23 @@ class EquivalenceData(object):
 
     @staticmethod
     def _build_equivalences(equivalence_defs):
-        """equivalence stored as arrays of frozen entity sets
+        """equivalence stored as arrays of frozen entity props sets
 
         equivalences:: [equivalence, ...]
-        equivalence:: {entity, ...}
-        entity:: {(k,v), ...}
+        equivalence:: {entity_props, ...}
+        entity_props:: {(k,v), ...}
         """
         equivalences = []
         for equivalence_def in equivalence_defs:
             equivalent_entities = equivalence_def[Fields.EQUIVALENCE]
-            equivalence = []
+            equivalence = set()
             for entity_def in equivalent_entities:
-                equivalence.append(frozenset(entity_def[Fields.ENTITY]
-                                             .items()))
+                entity_props = {(k, v)
+                                for k, v in entity_def[Fields.ENTITY].items()}
+                entity_key = frozenset(entity_props)
+                if entity_key in equivalence:
+                    raise VitrageError('duplicated entities found in '
+                                       'equivalence')
+                equivalence.add(entity_key)
             equivalences.append(frozenset(equivalence))
         return equivalences

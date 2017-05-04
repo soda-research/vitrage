@@ -73,6 +73,20 @@ class ScenarioRepositoryTest(base.BaseTest):
         scenario_templates = self.scenario_repository.templates
         self.assertEqual(valid_template_counter, len(scenario_templates))
 
+        entity_equivalences = self.scenario_repository.entity_equivalences
+        for entity_props, equivalence in entity_equivalences.items():
+            # Example structure of entity_equivalences
+            #   { A: (A, B, C),
+            #     B: (A, B, C),
+            #     C: (A, B, C)}
+            # Verify entity itself is also included. It is not required, but
+            # worth noting when handling equivalence
+            self.assertTrue(entity_props in equivalence)
+            for equivalent_props in equivalence:
+                # Verify equivalent scenarios are present in repository
+                self.assertTrue(equivalent_props in
+                                self.scenario_repository.entity_scenarios)
+
     def test_get_scenario_by_edge(self):
         pass
 
@@ -81,3 +95,37 @@ class ScenarioRepositoryTest(base.BaseTest):
 
     def test_add_template(self):
         pass
+
+
+class ScenarioExpansionTest(base.BaseTest):
+    BASE_DIR = utils.get_resources_dir() + '/scenario_expansion/'
+    OPTS = [
+        cfg.StrOpt('templates_dir',
+                   default=BASE_DIR + 'templates'),
+        cfg.StrOpt('equivalences_dir',
+                   default=BASE_DIR + '/equivalences')]
+
+    @classmethod
+    def setUpClass(cls):
+
+        cls.conf = cfg.ConfigOpts()
+        cls.conf.register_opts(cls.OPTS, group='evaluator')
+
+        templates_dir_path = cls.conf.evaluator.templates_dir
+        cls.template_defs = file_utils.load_yaml_files(templates_dir_path)
+
+        cls.scenario_repository = ScenarioRepository(cls.conf)
+
+    def test_expansion(self):
+        entity_scenarios = self.scenario_repository.entity_scenarios
+        for entity_key, scenarios in entity_scenarios.items():
+            if ('category', 'ALARM') in entity_key:
+                # scenarios expanded on the other alarm
+                self.assertEqual(len(scenarios), 2)
+            if ('category', 'RESOURCE') in entity_key:
+                # Scenarios expanded on the two alarms. Each alarm is expanded
+                # to two equivalent alarms. Thus 2 x 2 = 4 in total
+                self.assertEqual(len(scenarios), 4)
+        # each relationship is expand to two. Thus 2 x 2 = 4 in total
+        relationships = self.scenario_repository.relationship_scenarios.keys()
+        self.assertEqual(len(relationships), 4)

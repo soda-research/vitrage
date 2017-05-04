@@ -4,9 +4,11 @@ metadata:
 definitions:
  entities:
   - entity:
+     # an equivalence of this entity is defined in equivalences/basic.yaml
+     # be sure keep them sync when modifying test cases
      category: ALARM
      type: nagios
-     name: HOST_HIGH_CPU_LOAD
+     name: host_problem
      template_id: alarm
   - entity:
      category: RESOURCE

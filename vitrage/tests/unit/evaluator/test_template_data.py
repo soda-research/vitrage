@@ -12,7 +12,6 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from vitrage.common.constants import EdgeLabel
 from vitrage.evaluator.template_data import ActionSpecs
 from vitrage.evaluator.template_data import ConditionVar
 from vitrage.evaluator.template_data import EdgeDescription
@@ -55,15 +54,11 @@ class BasicTemplateTest(base.BaseTest):
             'alarm': Vertex(vertex_id='alarm',
                             properties={'category': 'ALARM',
                                         'type': 'nagios',
-                                        'name': 'HOST_HIGH_CPU_LOAD',
-                                        'is_deleted': False,
-                                        'is_placeholder': False
+                                        'name': 'host_problem'
                                         }),
             'resource': Vertex(vertex_id='resource',
                                properties={'category': 'RESOURCE',
-                                           'type': 'nova.host',
-                                           'is_deleted': False,
-                                           'is_placeholder': False
+                                           'type': 'nova.host'
                                            })
         }
 
@@ -72,9 +67,7 @@ class BasicTemplateTest(base.BaseTest):
                 edge=Edge(source_id='alarm',
                           target_id='resource',
                           label='on',
-                          properties={'relationship_type': 'on',
-                                      'is_deleted': False,
-                                      'negative_condition': False}),
+                          properties={'relationship_type': 'on'}),
                 source=expected_entities['alarm'],
                 target=expected_entities['resource']
             )
@@ -83,15 +76,19 @@ class BasicTemplateTest(base.BaseTest):
         expected_scenario = Scenario(
             id='basic_template-scenario0',
             condition=[
-                [ConditionVar(variable=expected_relationships['alarm_on_host'],
-                              type='relationship',
+                [ConditionVar(symbol_name='alarm_on_host',
                               positive=True)]],
             actions=[
                 ActionSpecs(
                     type='set_state',
                     targets={'target': 'resource'},
                     properties={'state': 'SUBOPTIMAL'})],
-            subgraphs=template_data.scenarios[0].subgraphs
+            # TODO(yujunz): verify the built subgraph is consistent with
+            #               scenario definition. For now the observed value is
+            #               assigned to make test passing
+            subgraphs=template_data.scenarios[0].subgraphs,
+            entities=expected_entities,
+            relationships=expected_relationships
         )
 
         self._validate_strict_equal(template_data,
@@ -186,19 +183,8 @@ class BasicTemplateTest(base.BaseTest):
         condition_var = condition[0][0]
         self.assertIsInstance(condition_var, ConditionVar)
 
-        variable = condition_var.variable
-        self.assertIsInstance(variable, EdgeDescription)
-
-        edge = variable[0]
-        self.assertEqual(edge.source_id, 'alarm')
-        self.assertEqual(edge.target_id, 'resource')
-        self.assertEqual(edge.label, EdgeLabel.ON)
-
-        source = variable[1]
-        self.assertEqual(source, entities[source.vertex_id])
-
-        target = variable[2]
-        self.assertEqual(target, entities[target.vertex_id])
+        symbol_name = condition_var.symbol_name
+        self.assertIsInstance(symbol_name, str)
 
         actions = scenario.actions
         self.assert_is_not_empty(scenario.actions)
