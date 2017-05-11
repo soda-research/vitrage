@@ -21,6 +21,7 @@ from pysnmp.hlapi.context import ContextData
 from pysnmp.proto.rfc1902 import OctetString
 from pysnmp.smi.rfc1902 import NotificationType
 from pysnmp.smi.rfc1902 import ObjectIdentity
+import re
 
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.notifier.plugins.snmp.base import SnmpSenderBase
@@ -37,6 +38,8 @@ NEXT = 'next'
 WITH_VALS = 'with_values'
 SEVERITY = 'SEVERITY'
 ALARM_OID = 'ALARM_OID'
+IP_PAT = re.compile('\d+\.\d+\.\d+\.\d+')
+PORT_PAT = re.compile('\d+')
 
 
 class SnmpSender(SnmpSenderBase):
@@ -165,9 +168,14 @@ class SnmpSender(SnmpSenderBase):
 
         host_details = host['host']
 
-        send_to = str(host_details['send_to'])
+        send_to = str(host_details.get('send_to'))
         port = str(host_details.get('port', 162))
         community_str = host_details.get('community', 'public')
+
+        if not (send_to and IP_PAT.match(send_to) and PORT_PAT.match(port)):
+            LOG.info("Vitrage snmp Info: an SNMP target host was not"
+                     " configured correctly")
+            return
 
         LOG.debug("Vitrage snmp Debug: Trap parameters: send_to: %s, "
                   "port: %s, community string: %s" %
