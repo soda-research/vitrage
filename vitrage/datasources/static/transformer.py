@@ -62,7 +62,6 @@ class StaticTransformer(ResourceTransformerBase):
         entity_id = entity_event[VProps.ID]
         sample_timestamp = entity_event[DSProps.SAMPLE_DATE]
 
-        # create placeholder for non-static datasource entity
         if entity_type in self.transformers:
             properties = {
                 VProps.TYPE: entity_type,
