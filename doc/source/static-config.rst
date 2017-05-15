@@ -64,10 +64,12 @@ Example
           type: switch      # resource type, could be any string, not limited to the type from existing datasource.
           id: 12345         # resource ID, used together with ``type`` to refer a resource in real world
           name: switch-1    # name, state and other properties are considered as metadata of the resource
+          state: active     # the state of the resource
           ...
         - static_id: h1
           type: nova.host   # resource type could be from existing datasource
           id: 1             # resource ID, used together with ``type`` to refer a resource in corresponding datasource
+          state: active     # the state of the resource
           purpose: CI       # additional properties could be defined - if from existing datasource, it could be updated
           ...
       relationships:
