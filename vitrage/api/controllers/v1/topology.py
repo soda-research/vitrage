@@ -49,8 +49,7 @@ class TopologyController(RootRestController):
 
         if query:
             query = json.loads(query)
-
-        LOG.info("query is %s", query)
+            LOG.info("query is %s", query)
 
         return self.get_graph(graph_type, depth, query, root, all_tenants)
 
@@ -70,7 +69,7 @@ class TopologyController(RootRestController):
                                                    query=query,
                                                    root=root,
                                                    all_tenants=all_tenants)
-            LOG.info(graph_data)
+            LOG.debug(graph_data)
             graph = json.loads(graph_data)
             if graph_type == 'graph':
                 return graph
