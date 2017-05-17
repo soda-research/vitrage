@@ -26,6 +26,7 @@ OPTS = [
     cfg.StrOpt('aodh_version', default='2', help='Aodh version'),
     cfg.FloatOpt('nova_version', default='2.11', help='Nova version'),
     cfg.StrOpt('cinder_version', default='2', help='Cinder version'),
+    cfg.StrOpt('glance_version', default='2', help='Glance version'),
     cfg.StrOpt('heat_version', default='1', help='Heat version'),
 ]
 
@@ -33,6 +34,7 @@ _client_modules = {
     'ceilometer': 'ceilometerclient.client',
     'nova': 'novaclient.client',
     'cinder': 'cinderclient.client',
+    'glance': 'glanceclient.client',
     'neutron': 'neutronclient.v2_0.client',
     'heat': 'heatclient.v1.client',
 }
@@ -93,6 +95,23 @@ def cinder_client(conf):
         return client
     except Exception as e:
         LOG.exception('Create Cinder client - Got Exception: %s', e)
+
+
+def glance_client(conf):
+    """Get an instance of glance client"""
+    auth_config = conf.service_credentials
+    try:
+        glan_client = driver_module('glance')
+        client = glan_client.Client(
+            version=conf.glance_version,
+            session=keystone_client.get_session(conf),
+            region_name=auth_config.region_name,
+            interface=auth_config.interface,
+        )
+        LOG.info('Glance client created')
+        return client
+    except Exception as e:
+        LOG.exception('Create Glance client - Got Exception: %s', e)
 
 
 def neutron_client(conf):
