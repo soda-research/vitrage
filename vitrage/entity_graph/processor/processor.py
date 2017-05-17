@@ -84,7 +84,7 @@ class Processor(processor.ProcessorBase):
         # so it will be done in one central place
         self._find_and_fix_graph_vertex(new_vertex, neighbors)
         self.entity_graph.add_vertex(new_vertex)
-        self._connect_neighbors(neighbors, [], GraphAction.CREATE_ENTITY)
+        self._connect_neighbors(neighbors, set(), GraphAction.CREATE_ENTITY)
 
     def update_entity(self, updated_vertex, neighbors):
         """Updates the vertex in the entity graph
@@ -235,8 +235,8 @@ class Processor(processor.ProcessorBase):
         2. connects the new neighbors.
         """
 
-        (valid_edges, obsolete_edges) = self._find_edges_status(
-            vertex, neighbors)
+        (valid_edges, obsolete_edges) = self._find_edges_status(vertex,
+                                                                neighbors)
         self._delete_old_connections(vertex, obsolete_edges)
         self._connect_neighbors(neighbors,
                                 valid_edges,
@@ -293,15 +293,15 @@ class Processor(processor.ProcessorBase):
         longer connected to those entities), and which are valid connections.
         """
 
-        valid_edges = []
-        obsolete_edges = []
+        valid_edges = set()
+        obsolete_edges = set()
 
         graph_neighbor_types = \
             PUtils.find_neighbor_types(neighbors)
 
-        for curr_edge in self.entity_graph.get_edges(
-                vertex.vertex_id,
-                direction=Direction.BOTH):
+        neighbor_edges = set(e for v, e in neighbors)
+        for curr_edge in self.entity_graph.get_edges(vertex.vertex_id,
+                                                     direction=Direction.BOTH):
             # check if the edge in the graph has a a connection to the
             # same type of resources in the new neighbors list
             neighbor_vertex = self.entity_graph.get_vertex(
@@ -311,14 +311,13 @@ class Processor(processor.ProcessorBase):
                 neighbor_vertex) in graph_neighbor_types
 
             if not is_connection_type_exist:
-                valid_edges.append(curr_edge)
+                valid_edges.add(curr_edge)
                 continue
 
-            neighbor_edges = [e for v, e in neighbors]
             if curr_edge in neighbor_edges:
-                valid_edges.append(curr_edge)
+                valid_edges.add(curr_edge)
             else:
-                obsolete_edges.append(curr_edge)
+                obsolete_edges.add(curr_edge)
 
         return valid_edges, obsolete_edges
 
@@ -457,7 +456,6 @@ class Processor(processor.ProcessorBase):
             raise VitrageError(
                 'found too many vertices with same properties: %s ',
                 vertex)
-        graph_vertex = None if not graph_vertices \
-            else graph_vertices[0]
+        graph_vertex = None if not graph_vertices else graph_vertices[0]
 
         return graph_vertex

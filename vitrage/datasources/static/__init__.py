@@ -38,6 +38,7 @@ OPTS = [
                required=True),
     cfg.IntOpt(DSOpts.CHANGES_INTERVAL,
                default=30,
+               min=10,
                help='interval in seconds between checking changes in the'
                     'static configuration files'),
     # NOTE: This folder is already used by static_physical datasource. Legacy

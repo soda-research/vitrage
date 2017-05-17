@@ -36,7 +36,7 @@ OPTS = [
                     ' datasource itself.',
                required=True),
     cfg.IntOpt(DSOpts.CHANGES_INTERVAL,
-               default=20,
-               min=20,
+               default=10,
+               min=10,
                help='interval between checking changes in aodh data source'),
 ]

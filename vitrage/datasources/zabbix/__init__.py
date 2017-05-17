@@ -36,7 +36,7 @@ OPTS = [
                     ' datasource itself.',
                required=True),
     cfg.IntOpt(DSOpts.CHANGES_INTERVAL,
-               default=30,
+               default=20,
                min=10,
                help='interval between checking changes in zabbix data source'),
     cfg.StrOpt('user', default='admin',
