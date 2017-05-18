@@ -297,11 +297,13 @@ class ScenarioEvaluator(object):
 
         matches = []
         for subgraph in subgraphs:
-            is_switch_mode = \
-                subgraph.get_edge(scenario_edge.source.vertex_id,
-                                  scenario_edge.target.vertex_id,
-                                  scenario_edge.edge.label).get(NEG_CONDITION,
-                                                                False)
+            subgraph_edge = subgraph.get_edge(scenario_edge.source.vertex_id,
+                                              scenario_edge.target.vertex_id,
+                                              scenario_edge.edge.label)
+            if not subgraph_edge:
+                continue
+
+            is_switch_mode = subgraph_edge.get(NEG_CONDITION, False)
 
             connected_component = subgraph.algo.graph_query_vertices(
                 root_id=action_target,

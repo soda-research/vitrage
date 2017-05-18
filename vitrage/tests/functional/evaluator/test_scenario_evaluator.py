@@ -1089,6 +1089,62 @@ class TestScenarioEvaluator(TestFunctionalBase):
         self.assertEqual(host_neighbors[1][VProps.IS_DELETED], True)
         self.assertEqual(host_neighbors[1][VProps.IS_PLACEHOLDER], False)
 
+    def test_simple_or_operator_deduced_alarm(self):
+        """Handles a simple not operator use case
+
+        We have created the following template:
+        alarm1 or alarm2 cause alarm3
+
+        """
+
+        event_queue, processor, evaluator = self._init_system()
+
+        host_v = self._get_entity_from_graph(NOVA_HOST_DATASOURCE,
+                                             _TARGET_HOST,
+                                             _TARGET_HOST,
+                                             processor.entity_graph)
+        self.assertEqual('AVAILABLE', host_v[VProps.AGGREGATED_STATE],
+                         'host should be AVAILABLE when starting')
+
+        # generate nagios alarm1 to trigger, raise alarm3
+        test_vals = {'status': 'WARNING',
+                     'service': 'alarm1'}
+        test_vals.update(_NAGIOS_TEST_INFO)
+        generator = mock_driver.simple_nagios_alarm_generators(1, 1, test_vals)
+        alarm1_test = mock_driver.generate_random_events_list(generator)[0]
+
+        host_v = self.get_host_after_event(event_queue, alarm1_test,
+                                           processor, _TARGET_HOST)
+        alarms = self._get_alarms_on_host(host_v, processor.entity_graph)
+        self.assertEqual(2, len(alarms))
+
+        # generate nagios alarm2 to trigger
+        test_vals = {'status': 'WARNING',
+                     'service': 'alarm2'}
+        test_vals.update(_NAGIOS_TEST_INFO)
+        generator = mock_driver.simple_nagios_alarm_generators(1, 1, test_vals)
+        alarm2_test = mock_driver.generate_random_events_list(generator)[0]
+
+        host_v = self.get_host_after_event(event_queue, alarm2_test,
+                                           processor, _TARGET_HOST)
+        alarms = self._get_alarms_on_host(host_v, processor.entity_graph)
+        self.assertEqual(3, len(alarms))
+
+        # disable alarm1, alarm3 is not deleted
+        alarm1_test['status'] = 'OK'
+        host_v = self.get_host_after_event(event_queue, alarm1_test,
+                                           processor, _TARGET_HOST)
+        alarms = self._get_alarms_on_host(host_v, processor.entity_graph)
+        self.assertEqual(2, len(alarms))
+
+        # disable alarm2, alarm3 is deleted
+        alarm2_test['status'] = 'OK'
+        alarm2_test[DSProps.SAMPLE_DATE] = str(utcnow())
+        host_v = self.get_host_after_event(event_queue, alarm2_test,
+                                           processor, _TARGET_HOST)
+        alarms = self._get_alarms_on_host(host_v, processor.entity_graph)
+        self.assertEqual(0, len(alarms))
+
     def get_host_after_event(self, event_queue, nagios_event,
                              processor, target_host):
         processor.process_event(nagios_event)
@@ -1124,6 +1180,14 @@ class TestScenarioEvaluator(TestFunctionalBase):
         v_id = host_v.vertex_id
         vertex_attrs = {VProps.NAME: 'deduced_alarm',
                         VProps.TYPE: 'vitrage',
+                        VProps.IS_DELETED: False, }
+        return entity_graph.neighbors(v_id=v_id,
+                                      vertex_attr_filter=vertex_attrs)
+
+    @staticmethod
+    def _get_alarms_on_host(host_v, entity_graph):
+        v_id = host_v.vertex_id
+        vertex_attrs = {VProps.CATEGORY: EntityCategory.ALARM,
                         VProps.IS_DELETED: False, }
         return entity_graph.neighbors(v_id=v_id,
                                       vertex_attr_filter=vertex_attrs)
