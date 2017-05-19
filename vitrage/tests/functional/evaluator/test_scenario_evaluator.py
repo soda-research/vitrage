@@ -1145,6 +1145,126 @@ class TestScenarioEvaluator(TestFunctionalBase):
         alarms = self._get_alarms_on_host(host_v, processor.entity_graph)
         self.assertEqual(0, len(alarms))
 
+    def test_both_and_or_operator_for_tracker(self):
+        """(alarm_a or alarm_b) and alarm_c use case
+
+        We have created the following template:
+        (alarm_a or alarm_b) and alarm_c cause alarm_d
+
+        1. alarm_a is reported
+        2. alarm_b is reported
+        3. alarm_c is reported  --> alarm_d is raised
+        4. alarm_b is removed   --> alarm_d should not be removed
+        5. alarm_a is removed   --> alarm_d should be removed
+
+        """
+
+        event_queue, processor, evaluator = self._init_system()
+        entity_graph = processor.entity_graph
+
+        # constants
+        num_orig_vertices = entity_graph.num_vertices()
+        num_orig_edges = entity_graph.num_edges()
+
+        host_v = self._get_entity_from_graph(NOVA_HOST_DATASOURCE,
+                                             _TARGET_HOST,
+                                             _TARGET_HOST,
+                                             entity_graph)
+        self.assertEqual('AVAILABLE', host_v[VProps.AGGREGATED_STATE],
+                         'host should be AVAILABLE when starting')
+
+        # generate nagios alarm_a to trigger
+        test_vals = {'status': 'WARNING',
+                     'service': 'alarm_a'}
+        test_vals.update(_NAGIOS_TEST_INFO)
+        generator = mock_driver.simple_nagios_alarm_generators(1, 1, test_vals)
+        alarm_a_test = mock_driver.generate_random_events_list(generator)[0]
+
+        host_v = self.get_host_after_event(event_queue, alarm_a_test,
+                                           processor, _TARGET_HOST)
+        alarms = self._get_alarms_on_host(host_v, entity_graph)
+        self.assertEqual(1, len(alarms))
+        self.assertEqual(num_orig_vertices + 1, entity_graph.num_vertices())
+        self.assertEqual(num_orig_edges + 1, entity_graph.num_edges())
+
+        # generate nagios alarm_b to trigger
+        test_vals = {'status': 'WARNING',
+                     'service': 'alarm_b'}
+        test_vals.update(_NAGIOS_TEST_INFO)
+        generator = mock_driver.simple_nagios_alarm_generators(1, 1, test_vals)
+        alarm_b_test = mock_driver.generate_random_events_list(generator)[0]
+
+        host_v = self.get_host_after_event(event_queue, alarm_b_test,
+                                           processor, _TARGET_HOST)
+        alarms = self._get_alarms_on_host(host_v, entity_graph)
+        self.assertEqual(2, len(alarms))
+        self.assertEqual(num_orig_vertices + 2, entity_graph.num_vertices())
+        self.assertEqual(num_orig_edges + 2, entity_graph.num_edges())
+
+        # generate nagios alarm_c to trigger, alarm_d is raised
+        test_vals = {'status': 'WARNING',
+                     'service': 'alarm_c'}
+        test_vals.update(_NAGIOS_TEST_INFO)
+        generator = mock_driver.simple_nagios_alarm_generators(1, 1, test_vals)
+        alarm_c_test = mock_driver.generate_random_events_list(generator)[0]
+
+        host_v = self.get_host_after_event(event_queue, alarm_c_test,
+                                           processor, _TARGET_HOST)
+        alarms = self._get_alarms_on_host(host_v, entity_graph)
+        self.assertEqual(4, len(alarms))
+        self.assertEqual(num_orig_vertices + 4, entity_graph.num_vertices())
+        self.assertEqual(num_orig_edges + 4, entity_graph.num_edges())
+
+        # remove nagios alarm_b, alarm_d should not be removed
+        test_vals = {'status': 'OK',
+                     'service': 'alarm_b'}
+        test_vals.update(_NAGIOS_TEST_INFO)
+        generator = mock_driver.simple_nagios_alarm_generators(1, 1, test_vals)
+        alarm_b_ok = mock_driver.generate_random_events_list(generator)[0]
+
+        host_v = self.get_host_after_event(event_queue, alarm_b_ok,
+                                           processor, _TARGET_HOST)
+        alarms = self._get_alarms_on_host(host_v, entity_graph)
+        self.assertEqual(3, len(alarms))
+
+        query = {VProps.CATEGORY: EntityCategory.ALARM,
+                 VProps.IS_DELETED: True}
+        deleted_alarms = entity_graph.neighbors(host_v.vertex_id,
+                                                vertex_attr_filter=query)
+        self.assertEqual(num_orig_vertices + len(deleted_alarms) + 3,
+                         entity_graph.num_vertices())
+
+        query = {VProps.IS_DELETED: True}
+        deleted_edges = entity_graph.neighbors(host_v.vertex_id,
+                                               edge_attr_filter=query)
+        self.assertEqual(num_orig_edges + len(deleted_edges) + 3,
+                         entity_graph.num_edges())
+
+        # remove nagios alarm_a, alarm_d should be removed
+        test_vals = {'status': 'OK',
+                     'service': 'alarm_a'}
+        test_vals.update(_NAGIOS_TEST_INFO)
+        generator = mock_driver.simple_nagios_alarm_generators(1, 1, test_vals)
+        alarm_a_ok = mock_driver.generate_random_events_list(generator)[0]
+
+        host_v = self.get_host_after_event(event_queue, alarm_a_ok,
+                                           processor, _TARGET_HOST)
+        alarms = self._get_alarms_on_host(host_v, entity_graph)
+        self.assertEqual(1, len(alarms))
+
+        query = {VProps.CATEGORY: EntityCategory.ALARM,
+                 VProps.IS_DELETED: True}
+        deleted_alarms = entity_graph.neighbors(host_v.vertex_id,
+                                                vertex_attr_filter=query)
+        self.assertEqual(num_orig_vertices + len(deleted_alarms) + 1,
+                         entity_graph.num_vertices())
+
+        query = {VProps.IS_DELETED: True}
+        deleted_edges = entity_graph.neighbors(host_v.vertex_id,
+                                               edge_attr_filter=query)
+        self.assertEqual(num_orig_edges + len(deleted_edges) + 1,
+                         entity_graph.num_edges())
+
     def get_host_after_event(self, event_queue, nagios_event,
                              processor, target_host):
         processor.process_event(nagios_event)
