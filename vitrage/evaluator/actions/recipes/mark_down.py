@@ -53,6 +53,7 @@ class MarkDown(base.Recipe):
 
         update_vertex_params = {
             VProps.VITRAGE_ID: target_id,
+            VProps.IS_REAL_VITRAGE_ID: True,
             VProps.IS_MARKED_DOWN: is_marked_down
         }
         update_vertex_step = ActionStepWrapper(UPDATE_VERTEX,
