@@ -24,7 +24,7 @@ LOG = log.getLogger(__name__)
 
 OPTS = [
     cfg.StrOpt('aodh_version', default='2', help='Aodh version'),
-    cfg.FloatOpt('nova_version', default='2.11', help='Nova version'),
+    cfg.StrOpt('nova_version', default='2.11', help='Nova version'),
     cfg.StrOpt('cinder_version', default='2', help='Cinder version'),
     cfg.StrOpt('glance_version', default='2', help='Glance version'),
     cfg.StrOpt('heat_version', default='1', help='Heat version'),
