@@ -45,13 +45,17 @@ class MarkDownRecipeTest(base.BaseTest):
 
         self.assertEqual(UPDATE_VERTEX, action_steps[0].type)
         update_vertex_step_params = action_steps[0].params
-        self.assertEqual(2, len(update_vertex_step_params))
+        self.assertEqual(3, len(update_vertex_step_params))
 
         is_marked_down = update_vertex_step_params[VProps.IS_MARKED_DOWN]
         self.assertTrue(is_marked_down)
 
         vitrage_id = update_vertex_step_params[VProps.VITRAGE_ID]
         self.assertEqual(self.target_vertex.vertex_id, vitrage_id)
+
+        is_real_vitrage_id = \
+            update_vertex_step_params[VProps.IS_REAL_VITRAGE_ID]
+        self.assertTrue(is_real_vitrage_id)
 
     def test_get_undo_recipe(self):
 
@@ -65,10 +69,14 @@ class MarkDownRecipeTest(base.BaseTest):
 
         self.assertEqual(UPDATE_VERTEX, action_steps[0].type)
         update_vertex_step_params = action_steps[0].params
-        self.assertEqual(2, len(update_vertex_step_params))
+        self.assertEqual(3, len(update_vertex_step_params))
 
         is_marked_down = update_vertex_step_params[VProps.IS_MARKED_DOWN]
         self.assertFalse(is_marked_down)
 
         vitrage_id = update_vertex_step_params[VProps.VITRAGE_ID]
         self.assertEqual(self.target_vertex.vertex_id, vitrage_id)
+
+        is_real_vitrage_id = \
+            update_vertex_step_params[VProps.IS_REAL_VITRAGE_ID]
+        self.assertTrue(is_real_vitrage_id)

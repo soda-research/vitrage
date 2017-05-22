@@ -46,7 +46,7 @@ class TestActionExecutor(TestFunctionalBase):
         for datasource_name in cls.conf.datasources.types:
             register_opts(cls.conf, datasource_name, cls.conf.datasources.path)
 
-    def test_execute_update_vertex(self):
+    def test_execute_set_state(self):
 
         # Test Setup
         processor = self._create_processor_with_graph(self.conf, uuid=True)
@@ -93,6 +93,43 @@ class TestActionExecutor(TestFunctionalBase):
         self.assertEqual(agg_state_after_undo, agg_state_before)
         self.assertNotIn(
             VProps.VITRAGE_STATE, host_vertex_after_undo.properties)
+
+    def test_execute_mark_down(self):
+
+        # Test Setup
+        processor = self._create_processor_with_graph(self.conf, uuid=True)
+
+        vertex_attrs = {VProps.TYPE: NOVA_HOST_DATASOURCE}
+        host_vertices = processor.entity_graph.get_vertices(
+            vertex_attr_filter=vertex_attrs)
+        host_vertex_before = host_vertices[0]
+
+        targets = {TFields.TARGET: host_vertex_before}
+        props = {}
+        action_spec = ActionSpecs(ActionType.MARK_DOWN, targets, props)
+
+        event_queue = queue.Queue()
+        action_executor = ActionExecutor(event_queue)
+
+        # Test Action - do
+        action_executor.execute(action_spec, ActionMode.DO)
+        processor.process_event(event_queue.get())
+
+        host_vertex_after = processor.entity_graph.get_vertex(
+            host_vertex_before.vertex_id)
+
+        # Test Assertions
+        self.assertTrue(host_vertex_after.get(VProps.IS_MARKED_DOWN))
+
+        # Test Action - undo
+        action_executor.execute(action_spec, ActionMode.UNDO)
+        processor.process_event(event_queue.get())
+
+        host_vertex_after_undo = processor.entity_graph.get_vertex(
+            host_vertex_before.vertex_id)
+
+        # Test Assertions
+        self.assertFalse(host_vertex_after_undo.get(VProps.IS_MARKED_DOWN))
 
     def test_execute_add_edge(self):
 
