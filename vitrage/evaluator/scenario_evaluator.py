@@ -100,14 +100,14 @@ class ScenarioEvaluator(object):
         actions = self._process_and_get_actions(before,
                                                 before_scenarios,
                                                 ActionMode.UNDO)
-        actions.update(self._process_and_get_actions(current,
+        actions.extend(self._process_and_get_actions(current,
                                                      current_scenarios,
                                                      ActionMode.DO))
 
         if actions:
-            LOG.debug("Actions to perform: %s", actions.values())
+            LOG.debug("Actions to perform: %s", actions)
             filtered_actions = \
-                self._analyze_and_filter_actions(actions.values())
+                self._analyze_and_filter_actions(actions)
             LOG.debug("Actions filtered: %s", filtered_actions)
             for action in filtered_actions:
                 self._action_executor.execute(action.specs, action.mode)
@@ -139,12 +139,12 @@ class ScenarioEvaluator(object):
         return before, current
 
     def _process_and_get_actions(self, element, triggered_scenarios, mode):
-        actions = {}
+        actions = []
         for triggered_scenario in triggered_scenarios:
             LOG.debug("Processing: %s", str(triggered_scenario))
             scenario_element = triggered_scenario[0]
             scenario = triggered_scenario[1]
-            actions.update(self._process_scenario(element,
+            actions.extend(self._process_scenario(element,
                                                   scenario,
                                                   scenario_element,
                                                   mode))
@@ -153,7 +153,7 @@ class ScenarioEvaluator(object):
     def _process_scenario(self, element, scenario, scenario_elements, mode):
         if not isinstance(scenario_elements, list):
             scenario_elements = [scenario_elements]
-        actions = {}
+        actions = []
         for action in scenario.actions:
             for scenario_element in scenario_elements:
                 matches = self._evaluate_subgraphs(scenario.subgraphs,
@@ -161,7 +161,7 @@ class ScenarioEvaluator(object):
                                                    scenario_element,
                                                    action.targets['target'])
 
-                actions.update(self._get_actions_from_matches(matches,
+                actions.extend(self._get_actions_from_matches(matches,
                                                               mode,
                                                               action,
                                                               scenario))
@@ -189,7 +189,7 @@ class ScenarioEvaluator(object):
                                   mode,
                                   action_spec,
                                   scenario):
-        actions = {}
+        actions = []
         for is_switch_mode, matches in combined_matches:
             new_mode = mode
             if is_switch_mode:
@@ -197,11 +197,11 @@ class ScenarioEvaluator(object):
                     if mode == ActionMode.DO else ActionMode.DO
 
             for match in matches:
-                spec, action_id = self._get_action_spec(action_spec, match)
+                spec = self._get_action_spec(action_spec, match)
                 items_ids = [match[1].vertex_id for match in match.items()]
                 match_hash = hash(tuple(sorted(items_ids)))
-                actions[action_id] = ActionInfo(spec, new_mode,
-                                                scenario.id, match_hash)
+                actions.append(ActionInfo(spec, new_mode,
+                                          scenario.id, match_hash))
 
         return actions
 
@@ -211,12 +211,9 @@ class ScenarioEvaluator(object):
         real_items = {
             target: match[target_id] for target, target_id in targets.items()
         }
-        revised_spec = ActionSpecs(action_spec.type,
-                                   real_items,
-                                   action_spec.properties)
-        # noinspection PyTypeChecker
-        action_id = ScenarioEvaluator._generate_action_id(revised_spec)
-        return revised_spec, action_id
+        return ActionSpecs(action_spec.type,
+                           real_items,
+                           action_spec.properties)
 
     @staticmethod
     def _generate_action_id(action_spec):
@@ -248,7 +245,12 @@ class ScenarioEvaluator(object):
                 actions_to_perform[key] = undo_action
             elif new_dominant != prev_dominant:
                 actions_to_perform[key] = new_dominant
-        return actions_to_perform.values()
+
+        # filter the same action
+        final_actions = {ScenarioEvaluator._generate_action_id(action.specs):
+                         action for action in actions_to_perform.values()}
+
+        return final_actions.values()
 
     def _find_vertex_subgraph_matching(self,
                                        subgraphs,
