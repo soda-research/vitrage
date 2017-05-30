@@ -28,8 +28,8 @@ class TestEquivalenceRepository(base.BaseTest):
         self.equivalence_repository = EquivalenceRepository()
 
     def test_duplicate_entities_in_equivalence(self):
-        equivalences_dup_dir = utils.get_resources_dir() + '/equivalences_dup'
-        for directory in os.listdir(equivalences_dup_dir):
+        base_dir = utils.get_resources_dir() + '/templates/equivalences_dup'
+        for directory in os.listdir(base_dir):
             self.assertRaises(VitrageError,
                               self.equivalence_repository.load_files,
-                              os.path.join(equivalences_dup_dir, directory))
+                              os.path.join(base_dir, directory))

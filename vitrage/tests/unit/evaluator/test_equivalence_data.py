@@ -24,8 +24,9 @@ class EquivalenceTemplateTest(base.BaseTest):
 
     def test_equivalence_template(self):
 
-        equivalence_path = '%s/equivalences/%s' % (utils.get_resources_dir(),
-                                                   self.BASIC_TEMPLATE)
+        equivalence_path = '%s/templates/general/equivalences/%s' % (
+            utils.get_resources_dir(),
+            self.BASIC_TEMPLATE)
         equivalence_definition = file_utils.load_yaml_file(equivalence_path,
                                                            True)
         equivalence_data = EquivalenceData(equivalence_definition)

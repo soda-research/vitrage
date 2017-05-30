@@ -36,8 +36,8 @@ EdgeKeyScenario = namedtuple('EdgeKeyScenario', ['label', 'source', 'target'])
 class ScenarioRepository(object):
     def __init__(self, conf):
         self._templates = {}
-        self.entity_equivalences = \
-            EquivalenceRepository().load_files(conf.evaluator.equivalences_dir)
+        self.entity_equivalences = EquivalenceRepository().load_files(
+            conf.evaluator.equivalences_dir)
         self.relationship_scenarios = defaultdict(list)
         self.entity_scenarios = defaultdict(list)
         self._load_templates_files(conf)

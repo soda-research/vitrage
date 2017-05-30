@@ -24,15 +24,14 @@ from vitrage.utils import file as file_utils
 
 
 class ScenarioRepositoryTest(base.BaseTest):
-
+    BASE_DIR = utils.get_resources_dir() + '/templates/general'
     HOST_HIGH_CPU = 'host_high_cpu_load_to_instance_cpu_suboptimal'
     OPTS = [
         cfg.StrOpt('templates_dir',
-                   default=utils.get_resources_dir() + '/templates/general',
+                   default=BASE_DIR,
                    ),
         cfg.StrOpt('equivalences_dir',
-                   default=utils.get_resources_dir() +
-                   '/equivalences',
+                   default='equivalences',
                    ),
     ]
 
@@ -97,11 +96,11 @@ class ScenarioRepositoryTest(base.BaseTest):
         pass
 
 
-class ScenarioExpansionTest(base.BaseTest):
-    BASE_DIR = utils.get_resources_dir() + '/scenario_expansion/'
+class EquivalentScenarioTest(base.BaseTest):
+    BASE_DIR = utils.get_resources_dir() + '/templates/equivalent_scenarios/'
     OPTS = [
         cfg.StrOpt('templates_dir',
-                   default=BASE_DIR + 'templates'),
+                   default=BASE_DIR),
         cfg.StrOpt('equivalences_dir',
                    default=BASE_DIR + '/equivalences')]
 
