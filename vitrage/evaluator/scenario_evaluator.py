@@ -15,6 +15,7 @@
 from collections import namedtuple
 
 from oslo_log import log
+from vitrage.datasources.listener_service import defaultdict
 
 from vitrage.common.constants import EdgeProperties as EProps
 from vitrage.common.constants import VertexProperties as VProps
@@ -58,6 +59,7 @@ class ScenarioEvaluator(object):
         self._entity_graph.subscribe(self.process_event)
         self._action_tracker = ActionTracker(DatasourceInfoMapper(self.conf))
         self.enabled = enabled
+        self.connected_component_cache = defaultdict(dict)
 
     @property
     def scenario_repo(self):
@@ -265,9 +267,8 @@ class ScenarioEvaluator(object):
 
         matches = []
         for subgraph in subgraphs:
-            connected_component = subgraph.algo.graph_query_vertices(
-                root_id=action_target,
-                edge_query_dict={'!=': {NEG_CONDITION: True}})
+            connected_component = self.get_connected_component(subgraph,
+                                                               action_target)
 
             is_switch_mode = \
                 connected_component.get_vertex(scenario_vertex.vertex_id)
@@ -305,10 +306,8 @@ class ScenarioEvaluator(object):
 
             is_switch_mode = subgraph_edge.get(NEG_CONDITION, False)
 
-            connected_component = subgraph.algo.graph_query_vertices(
-                root_id=action_target,
-                edge_query_dict={'!=': {NEG_CONDITION: True}})
-
+            connected_component = self.get_connected_component(subgraph,
+                                                               action_target)
             # change the is_deleted and negative_condition props to false when
             # is_switch_mode=true so that when we have an event on a
             # negative_condition=true edge it will find the correct subgraph
@@ -329,6 +328,17 @@ class ScenarioEvaluator(object):
 
             matches.append((is_switch_mode, curr_matches))
         return matches
+
+    def get_connected_component(self, subgraph, target):
+        connected_component = self.connected_component_cache.get(
+            id(subgraph), {}).get(id(target))
+        if not connected_component:
+            connected_component = subgraph.algo.graph_query_vertices(
+                root_id=target,
+                edge_query_dict={'!=': {NEG_CONDITION: True}})
+            self.connected_component_cache[id(subgraph)][id(target)] = \
+                connected_component
+        return connected_component
 
     @staticmethod
     def _switch_edge_negative_props(is_switch_mode,
