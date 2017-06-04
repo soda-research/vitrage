@@ -21,9 +21,9 @@ export DEVSTACK_GATE_TEMPEST_NOTESTS=1
 export KEEP_LOCALRC=1
 
 
-if [ -z ${DEVSTACK_LOCAL_CONFIG+x} ]; then
-    DEVSTACK_LOCAL_CONFIG="enable_plugin vitrage git://git.openstack.org/openstack/vitrage"
-fi
+# if [ -z ${DEVSTACK_LOCAL_CONFIG+x} ]; then
+#     DEVSTACK_LOCAL_CONFIG="enable_plugin vitrage git://git.openstack.org/openstack/vitrage"
+# fi
 DEVSTACK_LOCAL_CONFIG+=$'\nenable_plugin heat git://git.openstack.org/openstack/heat'
 DEVSTACK_LOCAL_CONFIG+=$'\nenable_plugin ceilometer git://git.openstack.org/openstack/ceilometer'
 DEVSTACK_LOCAL_CONFIG+=$'\nenable_plugin aodh git://git.openstack.org/openstack/aodh'
