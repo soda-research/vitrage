@@ -53,6 +53,10 @@ class TestScenarioEvaluator(TestFunctionalBase):
                    default=utils.get_resources_dir() +
                    '/templates/evaluator',
                    ),
+        cfg.StrOpt('equivalences_dir',
+                   default=utils.get_resources_dir() +
+                   '/equivalences',
+                   ),
         cfg.StrOpt('notifier_topic',
                    default='vitrage.evaluator',
                    ),

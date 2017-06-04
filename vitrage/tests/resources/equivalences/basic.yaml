@@ -1,0 +1,16 @@
+metadata:
+ name: entity equivalence example
+equivalences:
+ - equivalence:
+    - entity:
+       category: ALARM
+       type: nagios
+       name: host_problem
+    - entity:
+       category: ALARM
+       type: zabbix
+       name: host_fail  # equivalence should work for unequal property values
+    - entity:
+       category: ALARM
+       type: vitrage
+       name: host_down

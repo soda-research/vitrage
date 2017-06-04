@@ -57,6 +57,9 @@ class TestConsistencyFunctional(TestFunctionalBase):
                    default=utils.get_resources_dir() +
                    '/templates/consistency',
                    ),
+        cfg.StrOpt('equivalences_dir',
+                   default='equivalences',
+                   ),
         cfg.StrOpt('notifier_topic',
                    default='vitrage.evaluator',
                    ),
