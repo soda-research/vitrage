@@ -132,10 +132,11 @@ def subgraph_matching(base_graph, subgraph, matches, validate=False):
         if not graph_candidate_vertices and neg_edges and not pos_edges:
             subgraph_vertex_to_map[MAPPED_V_ID] = NEG_VERTEX
             curr_subgraph.update_vertex(subgraph_vertex_to_map)
-            queue.append(curr_subgraph.copy())
+            queue.append(curr_subgraph)
             continue
 
         found_subgraphs = []
+        remaining_items = len(graph_candidate_vertices)
         for graph_vertex in graph_candidate_vertices:
             subgraph_vertex_to_map[MAPPED_V_ID] = graph_vertex.vertex_id
             subgraph_vertex_to_map[GRAPH_VERTEX] = graph_vertex
@@ -152,7 +153,10 @@ def subgraph_matching(base_graph, subgraph, matches, validate=False):
             if neg_edges and not pos_edges:
                 subgraph_vertex_to_map[MAPPED_V_ID] = NEG_VERTEX
                 curr_subgraph.update_vertex(subgraph_vertex_to_map)
-            found_subgraphs.append(curr_subgraph.copy())
+
+            remaining_items -= 1  # no need to copy the last one
+            found_subgraphs.append(
+                curr_subgraph.copy() if remaining_items else curr_subgraph)
 
         queue.extend(found_subgraphs)
 
