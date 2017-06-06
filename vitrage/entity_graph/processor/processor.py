@@ -17,6 +17,7 @@ from oslo_log import log
 
 from oslo_utils import uuidutils
 
+from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import GraphAction
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.common.exception import VitrageError
@@ -83,6 +84,7 @@ class Processor(processor.ProcessorBase):
         # _find_and_fix_graph_vertex method call to the process_event method
         # so it will be done in one central place
         self._find_and_fix_graph_vertex(new_vertex, neighbors)
+        self._add_resource_details_to_alarm(new_vertex, neighbors)
         self.entity_graph.add_vertex(new_vertex)
         self._connect_neighbors(neighbors, set(), GraphAction.CREATE_ENTITY)
 
@@ -107,6 +109,7 @@ class Processor(processor.ProcessorBase):
 
         if (not graph_vertex) or \
                 PUtils.is_newer_vertex(graph_vertex, updated_vertex):
+            self._add_resource_details_to_alarm(updated_vertex, neighbors)
             PUtils.update_entity_graph_vertex(self.entity_graph,
                                               graph_vertex,
                                               updated_vertex)
@@ -425,6 +428,24 @@ class Processor(processor.ProcessorBase):
             else:
                 edge.source_id = vitrage_id
                 edge.target_id = neighbor_vertex.vertex_id
+
+    def _add_resource_details_to_alarm(self, vertex, neighbors):
+
+        if not vertex.get(VProps.CATEGORY) == EntityCategory.ALARM \
+                or not neighbors:
+            return
+
+        # for the possibility that alarm doesn't have resource
+        vertex.properties[VProps.VITRAGE_RESOURCE_ID] = None
+        vertex.properties[VProps.VITRAGE_RESOURCE_TYPE] = None
+
+        for neighbor in neighbors:
+
+            if neighbor.vertex.get(VProps.CATEGORY) == EntityCategory.RESOURCE:
+                vertex.properties[VProps.VITRAGE_RESOURCE_ID] = \
+                    neighbor.vertex.vertex_id
+                vertex.properties[VProps.VITRAGE_RESOURCE_TYPE] = \
+                    neighbor.vertex.get(VProps.TYPE)
 
     def _get_single_graph_vertex_by_props(self, vertex, include_deleted=False):
         """Returns a single vertex by it's defining properties

@@ -60,7 +60,6 @@ class RcaApis(EntityGraphApisBase):
                                                    is_admin_project)
 
         alarms = unified_graph.get_vertices(query_dict=ALARMS_ALL_QUERY)
-        self._add_resource_details_to_alarms(alarms)
         unified_graph.update_vertices(alarms)
 
         json_graph = unified_graph.json_output_graph(
