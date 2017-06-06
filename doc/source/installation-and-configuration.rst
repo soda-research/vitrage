@@ -21,7 +21,7 @@ Manual Installation of Vitrage (not using Devstack)
 
 * `Vitrage manual installation <https://github.com/openstack/vitrage/blob/master/doc/source/vitrage-manual-installation.rst>`_
 
-* `Vitrage-dashboard manual installation <https://github.com/openstack/vitrage-dashboard/blob/master/doc/source/vitrage-dashboard-manual-installation.rst>`_
+* `Vitrage-dashboard manual installation <https://github.com/openstack/vitrage-dashboard/blob/master/doc/source/installation.rst>`_
 
 
 External Monitor Installation
