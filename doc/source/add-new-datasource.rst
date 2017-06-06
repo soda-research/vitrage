@@ -20,7 +20,7 @@ In order to add a new datasource to Vitrage do the following steps:
 
     a. Driver and transformer with the path to your driver and transformer
        classes respectively.
-    b. ``update_method`` property that describes the type of update mechanism for
+    b. ``update_method`` property that describes the vitrage_type of update mechanism for
        this datasource. The options are (string): push, pull or none.
     c. In addition to those three, you may add any other configuration options
        you may need for your datasource.

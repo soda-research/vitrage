@@ -12,12 +12,11 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import VertexProperties as VProps
-
 
 false_ = 'False'
 name_ = 'VM network problem'
-category_ = 'ALARM'
 critical_ = 'CRITICAL'
 
 GENERAL_OID = '1.3.6.1.4.1'
@@ -30,14 +29,14 @@ SEVERITY_OID = '3'
 
 ALERT_OID = '.100000'
 
-alarm_data = {VProps.CATEGORY: category_,
+alarm_data = {VProps.VITRAGE_CATEGORY: EntityCategory.ALARM,
               VProps.NAME: name_,
-              VProps.RESOURCE + '_' + VProps.IS_DELETED: false_,
-              VProps.RESOURCE + '_' + VProps.IS_PLACEHOLDER: false_,
-              VProps.IS_DELETED: false_,
-              VProps.OPERATIONAL_SEVERITY: critical_,
+              VProps.RESOURCE + '_' + VProps.VITRAGE_IS_DELETED: false_,
+              VProps.RESOURCE + '_' + VProps.VITRAGE_IS_PLACEHOLDER: false_,
+              VProps.VITRAGE_IS_DELETED: false_,
+              VProps.VITRAGE_OPERATIONAL_SEVERITY: critical_,
               VProps.RESOURCE:
-                  {VProps.IS_PLACEHOLDER: false_,
-                   VProps.IS_DELETED: false_}}
+                  {VProps.VITRAGE_IS_PLACEHOLDER: false_,
+                   VProps.VITRAGE_IS_DELETED: false_}}
 
 alert_details = {'oid': ALERT_OID, 'alarm_name': 'vitrageDeducedTest'}

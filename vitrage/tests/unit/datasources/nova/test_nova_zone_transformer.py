@@ -68,9 +68,9 @@ class NovaZoneTransformerTest(base.BaseTest):
         # Test action
         properties = {
             VProps.ID: zone_name,
-            VProps.TYPE: NOVA_ZONE_DATASOURCE,
-            VProps.CATEGORY: EntityCategory.RESOURCE,
-            VProps.SAMPLE_TIMESTAMP: timestamp
+            VProps.VITRAGE_TYPE: NOVA_ZONE_DATASOURCE,
+            VProps.VITRAGE_CATEGORY: EntityCategory.RESOURCE,
+            VProps.VITRAGE_SAMPLE_TIMESTAMP: timestamp
         }
         placeholder = \
             zone_transformer.create_neighbor_placeholder_vertex(**properties)
@@ -82,20 +82,20 @@ class NovaZoneTransformerTest(base.BaseTest):
             _key_values(NOVA_ZONE_DATASOURCE, zone_name)
         self.assertEqual(tuple(observed_id_values), expected_id_values)
 
-        observed_time = placeholder.get(VProps.SAMPLE_TIMESTAMP)
+        observed_time = placeholder.get(VProps.VITRAGE_SAMPLE_TIMESTAMP)
         self.assertEqual(observed_time, timestamp)
 
-        observed_subtype = placeholder.get(VProps.TYPE)
+        observed_subtype = placeholder.get(VProps.VITRAGE_TYPE)
         self.assertEqual(observed_subtype, NOVA_ZONE_DATASOURCE)
 
         observed_entity_id = placeholder.get(VProps.ID)
         self.assertEqual(observed_entity_id, zone_name)
 
-        observed_category = placeholder.get(VProps.CATEGORY)
-        self.assertEqual(observed_category, EntityCategory.RESOURCE)
+        observed_vitrage_category = placeholder.get(VProps.VITRAGE_CATEGORY)
+        self.assertEqual(observed_vitrage_category, EntityCategory.RESOURCE)
 
-        is_placeholder = placeholder.get(VProps.IS_PLACEHOLDER)
-        self.assertEqual(is_placeholder, True)
+        vitrage_is_placeholder = placeholder.get(VProps.VITRAGE_IS_PLACEHOLDER)
+        self.assertEqual(vitrage_is_placeholder, True)
 
     def test_key_values(self):
         LOG.debug('Zone transformer test: get key values')
@@ -146,7 +146,7 @@ class NovaZoneTransformerTest(base.BaseTest):
         cluster_neighbors_counter = 0
 
         for neighbor in neighbors:
-            vertex_type = neighbor.vertex.get(VProps.TYPE)
+            vertex_type = neighbor.vertex.get(VProps.VITRAGE_TYPE)
 
             if OPENSTACK_CLUSTER == vertex_type:
                 cluster_neighbors_counter += 1
@@ -192,11 +192,11 @@ class NovaZoneTransformerTest(base.BaseTest):
             host_vertex.get(VProps.STATE)
         )
 
-        is_placeholder = host_vertex[VProps.IS_PLACEHOLDER]
-        self.assertFalse(is_placeholder)
+        vitrage_is_placeholder = host_vertex[VProps.VITRAGE_IS_PLACEHOLDER]
+        self.assertFalse(vitrage_is_placeholder)
 
-        is_deleted = host_vertex[VProps.IS_DELETED]
-        self.assertFalse(is_deleted)
+        vitrage_is_deleted = host_vertex[VProps.VITRAGE_IS_DELETED]
+        self.assertFalse(vitrage_is_deleted)
 
         # Validate neighbor edge
         edge = host_neighbor.edge
@@ -209,15 +209,15 @@ class NovaZoneTransformerTest(base.BaseTest):
         self.assertEqual(cluster_neighbor.vertex[VProps.VITRAGE_ID],
                          cluster_neighbor.vertex.vertex_id)
         self.assertEqual(False,
-                         cluster_neighbor.vertex[VProps.IS_DELETED])
+                         cluster_neighbor.vertex[VProps.VITRAGE_IS_DELETED])
         self.assertEqual(EntityCategory.RESOURCE,
-                         cluster_neighbor.vertex[VProps.CATEGORY])
+                         cluster_neighbor.vertex[VProps.VITRAGE_CATEGORY])
         self.assertEqual(CLUSTER_ID,
                          cluster_neighbor.vertex[VProps.ID])
-        self.assertEqual(False,
-                         cluster_neighbor.vertex[VProps.IS_PLACEHOLDER])
+        self.assertEqual(False, cluster_neighbor.vertex[
+            VProps.VITRAGE_IS_PLACEHOLDER])
         self.assertEqual(OPENSTACK_CLUSTER,
-                         cluster_neighbor.vertex[VProps.TYPE])
+                         cluster_neighbor.vertex[VProps.VITRAGE_TYPE])
 
         # Validate neighbor edge
         edge = cluster_neighbor.edge
@@ -236,13 +236,13 @@ class NovaZoneTransformerTest(base.BaseTest):
         self.assertEqual(expected_id, observed_id)
 
         self.assertEqual(EntityCategory.RESOURCE,
-                         vertex[VProps.CATEGORY])
+                         vertex[VProps.VITRAGE_CATEGORY])
 
         self.assertEqual(NOVA_ZONE_DATASOURCE,
-                         vertex[VProps.TYPE])
+                         vertex[VProps.VITRAGE_TYPE])
 
         expected_timestamp = event[DSProps.SAMPLE_DATE]
-        observed_timestamp = vertex[VProps.SAMPLE_TIMESTAMP]
+        observed_timestamp = vertex[VProps.VITRAGE_SAMPLE_TIMESTAMP]
         self.assertEqual(expected_timestamp, observed_timestamp)
 
         expected_name = extract_value(event, 'zoneName')
@@ -259,8 +259,8 @@ class NovaZoneTransformerTest(base.BaseTest):
         observed_state = vertex[VProps.STATE]
         self.assertEqual(expected_state, observed_state)
 
-        is_placeholder = vertex[VProps.IS_PLACEHOLDER]
-        self.assertFalse(is_placeholder)
+        vitrage_is_placeholder = vertex[VProps.VITRAGE_IS_PLACEHOLDER]
+        self.assertFalse(vitrage_is_placeholder)
 
-        is_deleted = vertex[VProps.IS_DELETED]
-        self.assertFalse(is_deleted)
+        vitrage_is_deleted = vertex[VProps.VITRAGE_IS_DELETED]
+        self.assertFalse(vitrage_is_deleted)

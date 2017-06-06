@@ -46,10 +46,11 @@ class ZabbixTransformer(AlarmTransformerBase):
 
         update_timestamp = entity_event[ZProps.TIMESTAMP]
 
-        sample_timestamp = entity_event[DSProps.SAMPLE_DATE]
+        vitrage_sample_timestamp = entity_event[DSProps.SAMPLE_DATE]
 
-        update_timestamp = self._format_update_timestamp(update_timestamp,
-                                                         sample_timestamp)
+        update_timestamp = \
+            self._format_update_timestamp(update_timestamp,
+                                          vitrage_sample_timestamp)
 
         zabbix_hostname = entity_event[ZProps.ZABBIX_RESOURCE_NAME]
         vitrage_hostname = entity_event[ZProps.RESOURCE_NAME]
@@ -70,10 +71,10 @@ class ZabbixTransformer(AlarmTransformerBase):
 
         return graph_utils.create_vertex(
             self._create_entity_key(entity_event),
-            entity_category=EntityCategory.ALARM,
-            entity_type=entity_event[DSProps.ENTITY_TYPE],
+            vitrage_category=EntityCategory.ALARM,
+            vitrage_type=entity_event[DSProps.ENTITY_TYPE],
+            vitrage_sample_timestamp=vitrage_sample_timestamp,
             entity_state=entity_state,
-            sample_timestamp=sample_timestamp,
             update_timestamp=update_timestamp,
             metadata=metadata)
 
@@ -121,5 +122,5 @@ class ZabbixTransformer(AlarmTransformerBase):
                 ZProps.ZABBIX_TIMESTAMP_FORMAT,
                 tbase.TIMESTAMP_FORMAT)
 
-    def get_type(self):
+    def get_vitrage_type(self):
         return ZABBIX_DATASOURCE

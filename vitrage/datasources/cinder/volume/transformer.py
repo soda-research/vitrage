@@ -112,15 +112,15 @@ class CinderVolumeTransformer(ResourceTransformerBase):
 
         entity_key = self._create_entity_key(entity_event)
 
-        sample_timestamp = entity_event[DSProps.SAMPLE_DATE]
+        vitrage_sample_timestamp = entity_event[DSProps.SAMPLE_DATE]
 
         return graph_utils.create_vertex(
             entity_key,
+            vitrage_category=EntityCategory.RESOURCE,
+            vitrage_type=CINDER_VOLUME_DATASOURCE,
+            vitrage_sample_timestamp=vitrage_sample_timestamp,
             entity_id=volume_id,
-            entity_category=EntityCategory.RESOURCE,
-            entity_type=CINDER_VOLUME_DATASOURCE,
             entity_state=volume_state,
-            sample_timestamp=sample_timestamp,
             update_timestamp=update_timestamp,
             metadata=metadata)
 
@@ -159,5 +159,5 @@ class CinderVolumeTransformer(ResourceTransformerBase):
 
         return neighbors
 
-    def get_type(self):
+    def get_vitrage_type(self):
         return CINDER_VOLUME_DATASOURCE

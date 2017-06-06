@@ -48,10 +48,10 @@ class AlarmApis(EntityGraphApisBase):
                                                         is_admin_project)
                 alarms = set(alarms)
         else:
-            alarms = self.entity_graph.neighbors(
-                vitrage_id,
-                vertex_attr_filter={VProps.CATEGORY: EntityCategory.ALARM,
-                                    VProps.IS_DELETED: False})
+            query = {VProps.VITRAGE_CATEGORY: EntityCategory.ALARM,
+                     VProps.VITRAGE_IS_DELETED: False}
+            alarms = self.entity_graph.neighbors(vitrage_id,
+                                                 vertex_attr_filter=query)
 
         return json.dumps({'alarms': [v.properties for v in alarms]})
 

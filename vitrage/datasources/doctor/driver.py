@@ -37,7 +37,7 @@ class DoctorDriver(AlarmDriverBase):
         self.conf = conf
         self._client = None
 
-    def _entity_type(self):
+    def _vitrage_type(self):
         return DOCTOR_DATASOURCE
 
     def _alarm_key(self, alarm):

@@ -191,7 +191,8 @@ class NXAlgorithm(GraphAlgorithm):
         has real neighbors in the entity graph.
         """
         if self.graph.neighbors(ge_v_id,
-                                edge_attr_filter={EProps.IS_DELETED: False}):
+                                edge_attr_filter={EProps.VITRAGE_IS_DELETED:
+                                                  False}):
             template_vertex = subgraph.get_vertex(sge_v_id)
             graph_vertex = self.graph.get_vertex(ge_v_id)
             match = Mapping(template_vertex, graph_vertex, True)

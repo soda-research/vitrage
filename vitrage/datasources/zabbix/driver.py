@@ -64,7 +64,7 @@ class ZabbixDriver(AlarmDriverBase):
             LOG.exception('pyzabbix.ZabbixAPI %s', e)
             self._client = None
 
-    def _entity_type(self):
+    def _vitrage_type(self):
         return ZABBIX_DATASOURCE
 
     def _alarm_key(self, alarm):

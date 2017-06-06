@@ -64,9 +64,9 @@ class NovaInstanceTransformerTest(base.BaseTest):
         timestamp = datetime.datetime.utcnow()
         properties = {
             VProps.ID: instance_id,
-            VProps.TYPE: NOVA_INSTANCE_DATASOURCE,
-            VProps.CATEGORY: EntityCategory.RESOURCE,
-            VProps.SAMPLE_TIMESTAMP: timestamp
+            VProps.VITRAGE_TYPE: NOVA_INSTANCE_DATASOURCE,
+            VProps.VITRAGE_CATEGORY: EntityCategory.RESOURCE,
+            VProps.VITRAGE_SAMPLE_TIMESTAMP: timestamp
         }
         transformer = self.transformers[NOVA_INSTANCE_DATASOURCE]
 
@@ -81,20 +81,20 @@ class NovaInstanceTransformerTest(base.BaseTest):
                                                      instance_id)
         self.assertEqual(tuple(observed_id_values), expected_id_values)
 
-        observed_time = placeholder.get(VProps.SAMPLE_TIMESTAMP)
+        observed_time = placeholder.get(VProps.VITRAGE_SAMPLE_TIMESTAMP)
         self.assertEqual(observed_time, timestamp)
 
-        observed_type = placeholder.get(VProps.TYPE)
+        observed_type = placeholder.get(VProps.VITRAGE_TYPE)
         self.assertEqual(observed_type, NOVA_INSTANCE_DATASOURCE)
 
         observed_entity_id = placeholder.get(VProps.ID)
         self.assertEqual(observed_entity_id, instance_id)
 
-        observed_category = placeholder.get(VProps.CATEGORY)
-        self.assertEqual(observed_category, EntityCategory.RESOURCE)
+        observed_vitrage_category = placeholder.get(VProps.VITRAGE_CATEGORY)
+        self.assertEqual(observed_vitrage_category, EntityCategory.RESOURCE)
 
-        is_placeholder = placeholder.get(VProps.IS_PLACEHOLDER)
-        self.assertEqual(is_placeholder, True)
+        vitrage_is_placeholder = placeholder.get(VProps.VITRAGE_IS_PLACEHOLDER)
+        self.assertEqual(vitrage_is_placeholder, True)
 
     def test_snapshot_event_transform(self):
         LOG.debug('Test tactual transform action for '
@@ -173,10 +173,10 @@ class NovaInstanceTransformerTest(base.BaseTest):
 
         self.assertEqual(
             EntityCategory.RESOURCE,
-            vertex[VProps.CATEGORY]
+            vertex[VProps.VITRAGE_CATEGORY]
         )
         self.assertEqual(NOVA_INSTANCE_DATASOURCE,
-                         vertex[VProps.TYPE])
+                         vertex[VProps.VITRAGE_TYPE])
 
         expected_project = extract_value(event, 'tenant_id')
         observed_project = vertex[VProps.PROJECT_ID]
@@ -188,7 +188,7 @@ class NovaInstanceTransformerTest(base.BaseTest):
         self.assertEqual(expected_state, observed_state)
 
         expected_timestamp = event[DSProps.SAMPLE_DATE]
-        observed_timestamp = vertex[VProps.SAMPLE_TIMESTAMP]
+        observed_timestamp = vertex[VProps.VITRAGE_SAMPLE_TIMESTAMP]
         self.assertEqual(expected_timestamp, observed_timestamp)
 
         name = 'hostname' if is_update_event else 'name'
@@ -196,11 +196,11 @@ class NovaInstanceTransformerTest(base.BaseTest):
         observed_name = vertex[VProps.NAME]
         self.assertEqual(expected_name, observed_name)
 
-        is_placeholder = vertex[VProps.IS_PLACEHOLDER]
-        self.assertFalse(is_placeholder)
+        vitrage_is_placeholder = vertex[VProps.VITRAGE_IS_PLACEHOLDER]
+        self.assertFalse(vitrage_is_placeholder)
 
-        is_deleted = vertex[VProps.IS_DELETED]
-        self.assertFalse(is_deleted)
+        vitrage_is_deleted = vertex[VProps.VITRAGE_IS_DELETED]
+        self.assertFalse(vitrage_is_deleted)
 
     def _validate_host_neighbor(self, h_neighbor, event):
 
@@ -214,9 +214,9 @@ class NovaInstanceTransformerTest(base.BaseTest):
         ht = self.transformers[NOVA_HOST_DATASOURCE]
         properties = {
             VProps.ID: host_name,
-            VProps.TYPE: NOVA_HOST_DATASOURCE,
-            VProps.CATEGORY: EntityCategory.RESOURCE,
-            VProps.SAMPLE_TIMESTAMP: time
+            VProps.VITRAGE_TYPE: NOVA_HOST_DATASOURCE,
+            VProps.VITRAGE_CATEGORY: EntityCategory.RESOURCE,
+            VProps.VITRAGE_SAMPLE_TIMESTAMP: time
         }
         expected_neighbor = \
             ht.create_neighbor_placeholder_vertex(**properties)
@@ -313,7 +313,7 @@ class NovaInstanceTransformerTest(base.BaseTest):
         self.assertEqual(host_vertex_id, neighbor.vertex.vertex_id)
         self.assertEqual(
             time,
-            neighbor.vertex.get(VProps.SAMPLE_TIMESTAMP)
+            neighbor.vertex.get(VProps.VITRAGE_SAMPLE_TIMESTAMP)
         )
 
         # test relation edge

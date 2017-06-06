@@ -57,10 +57,10 @@ class TestStaticTransformer(base.BaseTest):
 
     def test_create_placeholder_vertex(self):
         properties = {
-            VProps.TYPE: self.entity_type,
+            VProps.VITRAGE_TYPE: self.entity_type,
             VProps.ID: self.entity_id,
-            VProps.CATEGORY: EntityCategory.RESOURCE,
-            VProps.SAMPLE_TIMESTAMP: self.timestamp
+            VProps.VITRAGE_CATEGORY: EntityCategory.RESOURCE,
+            VProps.VITRAGE_SAMPLE_TIMESTAMP: self.timestamp
         }
         placeholder = self.transformer.create_neighbor_placeholder_vertex(
             **properties)
@@ -69,20 +69,20 @@ class TestStaticTransformer(base.BaseTest):
         expected_entity_id = 'RESOURCE:static:12345'
         self.assertEqual(observed_entity_id, expected_entity_id)
 
-        observed_time = placeholder.get(VProps.SAMPLE_TIMESTAMP)
+        observed_time = placeholder.get(VProps.VITRAGE_SAMPLE_TIMESTAMP)
         self.assertEqual(observed_time, self.timestamp)
 
-        observed_subtype = placeholder.get(VProps.TYPE)
+        observed_subtype = placeholder.get(VProps.VITRAGE_TYPE)
         self.assertEqual(observed_subtype, self.entity_type)
 
         observed_entity_id = placeholder.get(VProps.ID)
         self.assertEqual(observed_entity_id, self.entity_id)
 
-        observed_category = placeholder.get(VProps.CATEGORY)
-        self.assertEqual(observed_category, EntityCategory.RESOURCE)
+        observed_vitrage_category = placeholder.get(VProps.VITRAGE_CATEGORY)
+        self.assertEqual(observed_vitrage_category, EntityCategory.RESOURCE)
 
-        is_placeholder = placeholder.get(VProps.IS_PLACEHOLDER)
-        self.assertEqual(is_placeholder, True)
+        vitrage_is_placeholder = placeholder.get(VProps.VITRAGE_IS_PLACEHOLDER)
+        self.assertEqual(vitrage_is_placeholder, True)
 
     def test_snapshot_transform(self):
         vals_list = mock_driver.simple_static_generators(snapshot_events=1)
@@ -106,17 +106,19 @@ class TestStaticTransformer(base.BaseTest):
 
     def _validate_vertex(self, vertex, event):
         self._validate_common_props(vertex, event)
-        self.assertEqual(vertex[VProps.SAMPLE_TIMESTAMP],
+        self.assertEqual(vertex[VProps.VITRAGE_SAMPLE_TIMESTAMP],
                          event[DSProps.SAMPLE_DATE])
 
         for k, v in event.get(StaticFields.METADATA, {}):
             self.assertEqual(vertex[k], v)
 
     def _validate_common_props(self, vertex, event):
-        self.assertEqual(vertex[VProps.CATEGORY], EntityCategory.RESOURCE)
-        self.assertEqual(vertex[VProps.TYPE], event[VProps.TYPE])
-        self.assertEqual(vertex[VProps.ID], event[VProps.ID])
-        self.assertFalse(vertex[VProps.IS_DELETED])
+        self.assertEqual(vertex[VProps.VITRAGE_CATEGORY],
+                         EntityCategory.RESOURCE)
+        self.assertEqual(vertex[VProps.VITRAGE_TYPE],
+                         event[StaticFields.TYPE])
+        self.assertEqual(vertex[VProps.ID], event[StaticFields.ID])
+        self.assertFalse(vertex[VProps.VITRAGE_IS_DELETED])
 
     def _validate_neighbors(self, neighbors, vertex_id, event):
         for i in range(len(neighbors)):
@@ -139,4 +141,4 @@ class TestStaticTransformer(base.BaseTest):
 
     def _validate_neighbor_vertex_props(self, vertex, event):
         self._validate_common_props(vertex, event)
-        self.assertTrue(vertex[VProps.IS_PLACEHOLDER])
+        self.assertTrue(vertex[VProps.VITRAGE_IS_PLACEHOLDER])

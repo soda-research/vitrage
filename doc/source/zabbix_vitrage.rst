@@ -104,8 +104,8 @@ Vitrage configuration
 
     zabbix:
     - zabbix_host: Zabbix server
-        type: nova.host
-        name: Zabbix server
+      type: nova.host
+      name: Zabbix server
 
 4. Restart vitrage service in devstack/openstack
 

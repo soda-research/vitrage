@@ -37,7 +37,7 @@ class NagiosDriver(AlarmDriverBase):
         self.conf = conf
         self.config = NagiosConfig(conf)
 
-    def _entity_type(self):
+    def _vitrage_type(self):
         return NAGIOS_DATASOURCE
 
     def _alarm_key(self, alarm):

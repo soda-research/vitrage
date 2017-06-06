@@ -18,11 +18,13 @@ from oslo_config import cfg
 
 from vitrage.common.constants import DatasourceAction
 from vitrage.common.constants import DatasourceProperties as DSProps
+from vitrage.common.constants import EdgeLabel
 from vitrage.common.constants import EdgeProperties as EProps
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.datasources.cinder.volume.transformer import \
     CINDER_VOLUME_DATASOURCE
+from vitrage.datasources.nagios import NAGIOS_DATASOURCE
 from vitrage.datasources.nagios.properties import NagiosProperties
 from vitrage.datasources.nagios.properties import NagiosTestStatus
 from vitrage.datasources.neutron.network import NEUTRON_NETWORK_DATASOURCE
@@ -30,6 +32,8 @@ from vitrage.datasources.neutron.port import NEUTRON_PORT_DATASOURCE
 from vitrage.datasources.nova.host import NOVA_HOST_DATASOURCE
 from vitrage.datasources.nova.instance import NOVA_INSTANCE_DATASOURCE
 from vitrage.datasources.nova.zone import NOVA_ZONE_DATASOURCE
+from vitrage.evaluator.actions.evaluator_event_transformer \
+    import VITRAGE_DATASOURCE
 from vitrage.evaluator.scenario_evaluator import ScenarioEvaluator
 from vitrage.evaluator.scenario_repository import ScenarioRepository
 from vitrage.graph import create_edge
@@ -80,7 +84,7 @@ class TestScenarioEvaluator(TestFunctionalBase):
                                              _TARGET_HOST,
                                              _TARGET_HOST,
                                              processor.entity_graph)
-        self.assertEqual('AVAILABLE', host_v[VProps.AGGREGATED_STATE],
+        self.assertEqual('AVAILABLE', host_v[VProps.VITRAGE_AGGREGATED_STATE],
                          'host should be AVAILABLE when starting')
 
         # generate nagios alarm to trigger template scenario
@@ -91,14 +95,14 @@ class TestScenarioEvaluator(TestFunctionalBase):
 
         host_v = self.get_host_after_event(event_queue, warning_test,
                                            processor, _TARGET_HOST)
-        self.assertEqual('SUBOPTIMAL', host_v[VProps.AGGREGATED_STATE],
+        self.assertEqual('SUBOPTIMAL', host_v[VProps.VITRAGE_AGGREGATED_STATE],
                          'host should be SUBOPTIMAL with warning alarm')
 
         # next disable the alarm
         warning_test['status'] = 'OK'
         host_v = self.get_host_after_event(event_queue, warning_test,
                                            processor, _TARGET_HOST)
-        self.assertEqual('AVAILABLE', host_v[VProps.AGGREGATED_STATE],
+        self.assertEqual('AVAILABLE', host_v[VProps.VITRAGE_AGGREGATED_STATE],
                          'host should be AVAILABLE when alarm disabled')
 
     def test_overlapping_deduced_state_1(self):
@@ -109,7 +113,7 @@ class TestScenarioEvaluator(TestFunctionalBase):
                                              _TARGET_HOST,
                                              _TARGET_HOST,
                                              processor.entity_graph)
-        self.assertEqual('AVAILABLE', host_v[VProps.AGGREGATED_STATE],
+        self.assertEqual('AVAILABLE', host_v[VProps.VITRAGE_AGGREGATED_STATE],
                          'host should be AVAILABLE when starting')
 
         # generate nagios alarm to trigger
@@ -120,7 +124,7 @@ class TestScenarioEvaluator(TestFunctionalBase):
 
         host_v = self.get_host_after_event(event_queue, warning_test,
                                            processor, _TARGET_HOST)
-        self.assertEqual('SUBOPTIMAL', host_v[VProps.AGGREGATED_STATE],
+        self.assertEqual('SUBOPTIMAL', host_v[VProps.VITRAGE_AGGREGATED_STATE],
                          'host should be SUBOPTIMAL with warning alarm')
 
         # generate CRITICAL nagios alarm to trigger
@@ -131,21 +135,21 @@ class TestScenarioEvaluator(TestFunctionalBase):
 
         host_v = self.get_host_after_event(event_queue, critical_test,
                                            processor, _TARGET_HOST)
-        self.assertEqual('ERROR', host_v[VProps.AGGREGATED_STATE],
+        self.assertEqual('ERROR', host_v[VProps.VITRAGE_AGGREGATED_STATE],
                          'host should be ERROR with critical alarm')
 
         # next disable the critical alarm
         critical_test['status'] = 'OK'
         host_v = self.get_host_after_event(event_queue, critical_test,
                                            processor, _TARGET_HOST)
-        self.assertEqual('SUBOPTIMAL', host_v[VProps.AGGREGATED_STATE],
+        self.assertEqual('SUBOPTIMAL', host_v[VProps.VITRAGE_AGGREGATED_STATE],
                          'host should be SUBOPTIMAL with only warning alarm')
 
         # next disable the alarm
         warning_test['status'] = 'OK'
         host_v = self.get_host_after_event(event_queue, warning_test,
                                            processor, _TARGET_HOST)
-        self.assertEqual('AVAILABLE', host_v[VProps.AGGREGATED_STATE],
+        self.assertEqual('AVAILABLE', host_v[VProps.VITRAGE_AGGREGATED_STATE],
                          'host should be AVAILABLE after alarm disabled')
 
     def test_overlapping_deduced_state_2(self):
@@ -156,7 +160,7 @@ class TestScenarioEvaluator(TestFunctionalBase):
                                              _TARGET_HOST,
                                              _TARGET_HOST,
                                              processor.entity_graph)
-        self.assertEqual('AVAILABLE', host_v[VProps.AGGREGATED_STATE],
+        self.assertEqual('AVAILABLE', host_v[VProps.VITRAGE_AGGREGATED_STATE],
                          'host should be AVAILABLE when starting')
 
         # generate CRITICAL nagios alarm to trigger
@@ -167,7 +171,7 @@ class TestScenarioEvaluator(TestFunctionalBase):
 
         host_v = self.get_host_after_event(event_queue, critical_test,
                                            processor, _TARGET_HOST)
-        self.assertEqual('ERROR', host_v[VProps.AGGREGATED_STATE],
+        self.assertEqual('ERROR', host_v[VProps.VITRAGE_AGGREGATED_STATE],
                          'host should be ERROR with critical alarm')
 
         # generate WARNING nagios alarm to trigger
@@ -178,14 +182,14 @@ class TestScenarioEvaluator(TestFunctionalBase):
 
         host_v = self.get_host_after_event(event_queue, warning_test,
                                            processor, _TARGET_HOST)
-        self.assertEqual('ERROR', host_v[VProps.AGGREGATED_STATE],
+        self.assertEqual('ERROR', host_v[VProps.VITRAGE_AGGREGATED_STATE],
                          'host should be ERROR with critical alarm')
 
         # next disable the critical alarm
         critical_test['status'] = 'OK'
         host_v = self.get_host_after_event(event_queue, critical_test,
                                            processor, _TARGET_HOST)
-        self.assertEqual('SUBOPTIMAL', host_v[VProps.AGGREGATED_STATE],
+        self.assertEqual('SUBOPTIMAL', host_v[VProps.VITRAGE_AGGREGATED_STATE],
                          'host should be SUBOPTIMAL with only warning alarm')
 
     def test_deduced_alarm(self):
@@ -196,7 +200,7 @@ class TestScenarioEvaluator(TestFunctionalBase):
                                              _TARGET_HOST,
                                              _TARGET_HOST,
                                              processor.entity_graph)
-        self.assertEqual('AVAILABLE', host_v[VProps.AGGREGATED_STATE],
+        self.assertEqual('AVAILABLE', host_v[VProps.VITRAGE_AGGREGATED_STATE],
                          'host should be AVAILABLE when starting')
 
         # generate CRITICAL nagios alarm to trigger
@@ -342,8 +346,8 @@ class TestScenarioEvaluator(TestFunctionalBase):
         """Handles a simple not operator use case
 
         We have created the following template: if there is a neutron.port that
-        doesn't have a nagios alarm of type PORT_PROBLEM on it, then raise a
-        deduced alarm on the port called simple_port_deduced_alarm.
+        doesn't have a nagios alarm of vitrage_type PORT_PROBLEM on it, then
+        raise a deduced alarm on the port called simple_port_deduced_alarm.
         The test has 5 steps in it:
         1. create neutron.network and neutron.port and check that the
            simple_port_deduced_alarm is raised on the neutron.port because it
@@ -377,8 +381,8 @@ class TestScenarioEvaluator(TestFunctionalBase):
 
         # find instances
         query = {
-            VProps.CATEGORY: 'RESOURCE',
-            VProps.TYPE: NOVA_INSTANCE_DATASOURCE
+            VProps.VITRAGE_CATEGORY: EntityCategory.RESOURCE,
+            VProps.VITRAGE_TYPE: NOVA_INSTANCE_DATASOURCE
         }
         instance_ver = entity_graph.get_vertices(vertex_attr_filter=query)[0]
 
@@ -389,9 +393,9 @@ class TestScenarioEvaluator(TestFunctionalBase):
             'updated_at': '2015-12-01T12:46:41Z',
             'status': 'active',
             'id': '12345',
-            'vitrage_entity_type': 'neutron.network',
-            'vitrage_datasource_action': 'snapshot',
-            'vitrage_sample_date': '2015-12-01T12:46:41Z',
+            DSProps.ENTITY_TYPE: NEUTRON_NETWORK_DATASOURCE,
+            DSProps.DATASOURCE_ACTION: DatasourceAction.SNAPSHOT,
+            DSProps.SAMPLE_DATE: '2015-12-01T12:46:41Z',
         }
 
         # update port
@@ -401,9 +405,9 @@ class TestScenarioEvaluator(TestFunctionalBase):
             'updated_at': '2015-12-01T12:46:41Z',
             'status': 'active',
             'id': '54321',
-            'vitrage_entity_type': 'neutron.port',
-            'vitrage_datasource_action': 'snapshot',
-            'vitrage_sample_date': '2015-12-01T12:46:41Z',
+            DSProps.ENTITY_TYPE: NEUTRON_PORT_DATASOURCE,
+            DSProps.DATASOURCE_ACTION: DatasourceAction.SNAPSHOT,
+            DSProps.SAMPLE_DATE: '2015-12-01T12:46:41Z',
             'network_id': '12345',
             'device_id': instance_ver.get(VProps.ID),
             'device_owner': 'compute:nova',
@@ -413,12 +417,13 @@ class TestScenarioEvaluator(TestFunctionalBase):
         processor.process_event(network_event)
         processor.process_event(port_event)
         port_vertex = entity_graph.get_vertices(
-            vertex_attr_filter={VProps.TYPE: NEUTRON_PORT_DATASOURCE})[0]
+            vertex_attr_filter={VProps.VITRAGE_TYPE:
+                                NEUTRON_PORT_DATASOURCE})[0]
         while not event_queue.empty():
             processor.process_event(event_queue.get())
 
         # test asserts
-        query = {VProps.CATEGORY: EntityCategory.ALARM}
+        query = {VProps.VITRAGE_CATEGORY: EntityCategory.ALARM}
         port_neighbors = entity_graph.neighbors(port_vertex.vertex_id,
                                                 vertex_attr_filter=query)
         self.assertEqual(num_orig_vertices + num_added_vertices +
@@ -426,9 +431,10 @@ class TestScenarioEvaluator(TestFunctionalBase):
         self.assertEqual(num_orig_edges + num_added_edges + num_deduced_edges,
                          entity_graph.num_edges())
         self.assertEqual(1, len(port_neighbors))
-        self.assertEqual(port_neighbors[0][VProps.CATEGORY],
+        self.assertEqual(port_neighbors[0][VProps.VITRAGE_CATEGORY],
                          EntityCategory.ALARM)
-        self.assertEqual(port_neighbors[0][VProps.TYPE], 'vitrage')
+        self.assertEqual(port_neighbors[0][VProps.VITRAGE_TYPE],
+                         VITRAGE_DATASOURCE)
         self.assertEqual(port_neighbors[0][VProps.NAME],
                          'simple_port_deduced_alarm')
 
@@ -454,35 +460,41 @@ class TestScenarioEvaluator(TestFunctionalBase):
         self.assertEqual(num_orig_edges + num_added_edges + num_deduced_edges +
                          num_nagios_alarm_edges, entity_graph.num_edges())
 
-        query = {VProps.CATEGORY: EntityCategory.ALARM, VProps.TYPE: 'vitrage'}
+        query = {VProps.VITRAGE_CATEGORY: EntityCategory.ALARM,
+                 VProps.VITRAGE_TYPE: VITRAGE_DATASOURCE}
         port_neighbors = entity_graph.neighbors(port_vertex.vertex_id,
                                                 vertex_attr_filter=query)
         self.assertEqual(1, len(port_neighbors))
-        self.assertEqual(port_neighbors[0][VProps.CATEGORY],
+        self.assertEqual(port_neighbors[0][VProps.VITRAGE_CATEGORY],
                          EntityCategory.ALARM)
-        self.assertEqual(port_neighbors[0][VProps.TYPE], 'vitrage')
+        self.assertEqual(port_neighbors[0][VProps.VITRAGE_TYPE],
+                         VITRAGE_DATASOURCE)
         self.assertEqual(port_neighbors[0][VProps.NAME],
                          'simple_port_deduced_alarm')
-        self.assertEqual(port_neighbors[0][VProps.IS_DELETED], True)
+        self.assertEqual(port_neighbors[0][VProps.VITRAGE_IS_DELETED], True)
 
-        query = {VProps.CATEGORY: EntityCategory.ALARM, VProps.TYPE: 'nagios'}
+        query = {VProps.VITRAGE_CATEGORY: EntityCategory.ALARM,
+                 VProps.VITRAGE_TYPE: NAGIOS_DATASOURCE}
         port_neighbors = entity_graph.neighbors(port_vertex.vertex_id,
                                                 vertex_attr_filter=query)
-        self.assertEqual(port_neighbors[0][VProps.CATEGORY],
+        self.assertEqual(port_neighbors[0][VProps.VITRAGE_CATEGORY],
                          EntityCategory.ALARM)
-        self.assertEqual(port_neighbors[0][VProps.TYPE], 'nagios')
+        self.assertEqual(port_neighbors[0][VProps.VITRAGE_TYPE],
+                         NAGIOS_DATASOURCE)
         self.assertEqual(port_neighbors[0][VProps.NAME], 'PORT_PROBLEM')
-        self.assertEqual(port_neighbors[0][VProps.IS_DELETED], False)
-        self.assertEqual(port_neighbors[0][VProps.IS_PLACEHOLDER], False)
+        self.assertEqual(port_neighbors[0][VProps.VITRAGE_IS_DELETED], False)
+        self.assertEqual(port_neighbors[0][VProps.VITRAGE_IS_PLACEHOLDER],
+                         False)
 
         # ###################   STEP 3   ###################
         # disable connection between port and alarm
-        query = {VProps.CATEGORY: 'ALARM', VProps.TYPE: 'nagios'}
+        query = {VProps.VITRAGE_CATEGORY: EntityCategory.ALARM,
+                 VProps.VITRAGE_TYPE: NAGIOS_DATASOURCE}
         nagios_vertex = \
             processor.entity_graph.get_vertices(vertex_attr_filter=query)[0]
         nagios_edge = [e for e in processor.entity_graph.get_edges(
             nagios_vertex.vertex_id)][0]
-        nagios_edge[EProps.IS_DELETED] = True
+        nagios_edge[EProps.VITRAGE_IS_DELETED] = True
         processor.entity_graph.update_edge(nagios_edge)
         while not event_queue.empty():
             processor.process_event(event_queue.get())
@@ -498,40 +510,47 @@ class TestScenarioEvaluator(TestFunctionalBase):
         self.assertEqual(num_orig_edges + num_added_edges + num_deduced_edges +
                          num_nagios_alarm_edges + 1, entity_graph.num_edges())
 
-        query = {VProps.CATEGORY: EntityCategory.ALARM, VProps.TYPE: 'vitrage',
-                 VProps.IS_DELETED: True}
-        is_deleted = True
+        query = {VProps.VITRAGE_CATEGORY: EntityCategory.ALARM,
+                 VProps.VITRAGE_TYPE: VITRAGE_DATASOURCE,
+                 VProps.VITRAGE_IS_DELETED: True}
+        vitrage_is_deleted = True
         for counter in range(0, 1):
             port_neighbors = entity_graph.neighbors(port_vertex.vertex_id,
                                                     vertex_attr_filter=query)
             self.assertEqual(1, len(port_neighbors))
-            self.assertEqual(port_neighbors[0][VProps.CATEGORY],
+            self.assertEqual(port_neighbors[0][VProps.VITRAGE_CATEGORY],
                              EntityCategory.ALARM)
-            self.assertEqual(port_neighbors[0][VProps.TYPE], 'vitrage')
+            self.assertEqual(port_neighbors[0][VProps.VITRAGE_TYPE],
+                             VITRAGE_DATASOURCE)
             self.assertEqual(port_neighbors[0][VProps.NAME],
                              'simple_port_deduced_alarm')
-            self.assertEqual(port_neighbors[0][VProps.IS_DELETED], is_deleted)
-            query = {VProps.CATEGORY: EntityCategory.ALARM,
-                     VProps.TYPE: 'vitrage', VProps.IS_DELETED: False}
-            is_deleted = False
+            self.assertEqual(port_neighbors[0][VProps.VITRAGE_IS_DELETED],
+                             vitrage_is_deleted)
+            query = {VProps.VITRAGE_CATEGORY: EntityCategory.ALARM,
+                     VProps.VITRAGE_TYPE: VITRAGE_DATASOURCE,
+                     VProps.VITRAGE_IS_DELETED: False}
+            vitrage_is_deleted = False
 
-        query = {VProps.CATEGORY: EntityCategory.ALARM, VProps.TYPE: 'nagios'}
+        query = {VProps.VITRAGE_CATEGORY: EntityCategory.ALARM,
+                 VProps.VITRAGE_TYPE: NAGIOS_DATASOURCE}
         port_neighbors = entity_graph.neighbors(port_vertex.vertex_id,
                                                 vertex_attr_filter=query)
-        self.assertEqual(port_neighbors[0][VProps.CATEGORY],
+        self.assertEqual(port_neighbors[0][VProps.VITRAGE_CATEGORY],
                          EntityCategory.ALARM)
-        self.assertEqual(port_neighbors[0][VProps.TYPE], 'nagios')
+        self.assertEqual(port_neighbors[0][VProps.VITRAGE_TYPE],
+                         NAGIOS_DATASOURCE)
         self.assertEqual(port_neighbors[0][VProps.NAME], 'PORT_PROBLEM')
-        self.assertEqual(port_neighbors[0][VProps.IS_DELETED], False)
+        self.assertEqual(port_neighbors[0][VProps.VITRAGE_IS_DELETED], False)
 
         # ###################   STEP 4   ###################
         # enable connection between port and alarm
-        query = {VProps.CATEGORY: 'ALARM', VProps.TYPE: 'nagios'}
+        query = {VProps.VITRAGE_CATEGORY: EntityCategory.ALARM,
+                 VProps.VITRAGE_TYPE: NAGIOS_DATASOURCE}
         nagios_vertex = \
             processor.entity_graph.get_vertices(vertex_attr_filter=query)[0]
         nagios_edge = [e for e in processor.entity_graph.get_edges(
             nagios_vertex.vertex_id)][0]
-        nagios_edge[EProps.IS_DELETED] = False
+        nagios_edge[EProps.VITRAGE_IS_DELETED] = False
         processor.entity_graph.update_edge(nagios_edge)
         while not event_queue.empty():
             processor.process_event(event_queue.get())
@@ -547,35 +566,41 @@ class TestScenarioEvaluator(TestFunctionalBase):
         self.assertEqual(num_orig_edges + num_added_edges + num_deduced_edges +
                          num_nagios_alarm_edges + 1, entity_graph.num_edges())
 
-        query = {VProps.CATEGORY: EntityCategory.ALARM, VProps.TYPE: 'vitrage',
-                 VProps.IS_DELETED: True}
-        is_deleted = True
+        query = {VProps.VITRAGE_CATEGORY: EntityCategory.ALARM,
+                 VProps.VITRAGE_TYPE: VITRAGE_DATASOURCE,
+                 VProps.VITRAGE_IS_DELETED: True}
+        vitrage_is_deleted = True
         for counter in range(0, 1):
             port_neighbors = entity_graph.neighbors(port_vertex.vertex_id,
                                                     vertex_attr_filter=query)
             self.assertEqual(2, len(port_neighbors))
             for in_counter in range(0, 1):
-                self.assertEqual(port_neighbors[in_counter][VProps.CATEGORY],
-                                 EntityCategory.ALARM)
-                self.assertEqual(port_neighbors[in_counter][VProps.TYPE],
-                                 'vitrage')
+                self.assertEqual(
+                    port_neighbors[in_counter][VProps.VITRAGE_CATEGORY],
+                    EntityCategory.ALARM)
+                self.assertEqual(port_neighbors[in_counter]
+                                 [VProps.VITRAGE_TYPE], VITRAGE_DATASOURCE)
                 self.assertEqual(port_neighbors[in_counter][VProps.NAME],
                                  'simple_port_deduced_alarm')
                 self.assertEqual(
-                    port_neighbors[in_counter][VProps.IS_DELETED], is_deleted)
+                    port_neighbors[in_counter][VProps.VITRAGE_IS_DELETED],
+                    vitrage_is_deleted)
 
-            query = {VProps.CATEGORY: EntityCategory.ALARM,
-                     VProps.TYPE: 'vitrage', VProps.IS_DELETED: False}
-            is_deleted = False
+            query = {VProps.VITRAGE_CATEGORY: EntityCategory.ALARM,
+                     VProps.VITRAGE_TYPE: VITRAGE_DATASOURCE,
+                     VProps.VITRAGE_IS_DELETED: False}
+            vitrage_is_deleted = False
 
-        query = {VProps.CATEGORY: EntityCategory.ALARM, VProps.TYPE: 'nagios'}
+        query = {VProps.VITRAGE_CATEGORY: EntityCategory.ALARM,
+                 VProps.VITRAGE_TYPE: NAGIOS_DATASOURCE}
         port_neighbors = entity_graph.neighbors(port_vertex.vertex_id,
                                                 vertex_attr_filter=query)
-        self.assertEqual(port_neighbors[0][VProps.CATEGORY],
+        self.assertEqual(port_neighbors[0][VProps.VITRAGE_CATEGORY],
                          EntityCategory.ALARM)
-        self.assertEqual(port_neighbors[0][VProps.TYPE], 'nagios')
+        self.assertEqual(port_neighbors[0][VProps.VITRAGE_TYPE],
+                         NAGIOS_DATASOURCE)
         self.assertEqual(port_neighbors[0][VProps.NAME], 'PORT_PROBLEM')
-        self.assertEqual(port_neighbors[0][VProps.IS_DELETED], False)
+        self.assertEqual(port_neighbors[0][VProps.VITRAGE_IS_DELETED], False)
 
         # ###################   STEP 5   ###################
         # disable PORT_PROBLEM alarm
@@ -591,50 +616,57 @@ class TestScenarioEvaluator(TestFunctionalBase):
                          # new alarm doesn't update same deleted alarm.
                          # Instead, it keeps the old one and creates a new one
                          # Since this is the second test, there are already two
-                         # alarms of this type
+                         # alarms of this vitrage_type
                          2,
                          entity_graph.num_vertices())
         self.assertEqual(num_orig_edges + num_added_edges + num_deduced_edges +
                          num_nagios_alarm_edges + 2, entity_graph.num_edges())
 
-        query = {VProps.CATEGORY: EntityCategory.ALARM,
-                 VProps.TYPE: 'vitrage', VProps.IS_DELETED: True}
-        is_deleted = True
+        query = {VProps.VITRAGE_CATEGORY: EntityCategory.ALARM,
+                 VProps.VITRAGE_TYPE: VITRAGE_DATASOURCE,
+                 VProps.VITRAGE_IS_DELETED: True}
+        vitrage_is_deleted = True
         for counter in range(0, 1):
             port_neighbors = entity_graph.neighbors(port_vertex.vertex_id,
                                                     vertex_attr_filter=query)
             self.assertEqual(2, len(port_neighbors))
             for in_counter in range(0, 1):
-                self.assertEqual(port_neighbors[in_counter][VProps.CATEGORY],
-                                 EntityCategory.ALARM)
-                self.assertEqual(port_neighbors[in_counter][VProps.TYPE],
-                                 'vitrage')
+                self.assertEqual(
+                    port_neighbors[in_counter][VProps.VITRAGE_CATEGORY],
+                    EntityCategory.ALARM)
+                self.assertEqual(port_neighbors[in_counter]
+                                 [VProps.VITRAGE_TYPE], VITRAGE_DATASOURCE)
                 self.assertEqual(port_neighbors[in_counter][VProps.NAME],
                                  'simple_port_deduced_alarm')
                 self.assertEqual(
-                    port_neighbors[in_counter][VProps.IS_DELETED], is_deleted)
+                    port_neighbors[in_counter][VProps.VITRAGE_IS_DELETED],
+                    vitrage_is_deleted)
 
-            query = {VProps.CATEGORY: EntityCategory.ALARM,
-                     VProps.TYPE: 'vitrage', VProps.IS_DELETED: False}
-            is_deleted = False
+            query = {VProps.VITRAGE_CATEGORY: EntityCategory.ALARM,
+                     VProps.VITRAGE_TYPE: VITRAGE_DATASOURCE,
+                     VProps.VITRAGE_IS_DELETED: False}
+            vitrage_is_deleted = False
 
-        query = {VProps.CATEGORY: EntityCategory.ALARM, VProps.TYPE: 'nagios'}
+        query = {VProps.VITRAGE_CATEGORY: EntityCategory.ALARM,
+                 VProps.VITRAGE_TYPE: NAGIOS_DATASOURCE}
         port_neighbors = entity_graph.neighbors(port_vertex.vertex_id,
                                                 vertex_attr_filter=query)
-        self.assertEqual(port_neighbors[0][VProps.CATEGORY],
+        self.assertEqual(port_neighbors[0][VProps.VITRAGE_CATEGORY],
                          EntityCategory.ALARM)
-        self.assertEqual(port_neighbors[0][VProps.TYPE], 'nagios')
+        self.assertEqual(port_neighbors[0][VProps.VITRAGE_TYPE],
+                         NAGIOS_DATASOURCE)
         self.assertEqual(port_neighbors[0][VProps.NAME], 'PORT_PROBLEM')
-        self.assertEqual(port_neighbors[0][VProps.IS_DELETED], True)
+        self.assertEqual(port_neighbors[0][VProps.VITRAGE_IS_DELETED], True)
 
     def test_complex_not_operator_deduced_alarm(self):
         """Handles a complex not operator use case
 
         We have created the following template: if there is a openstack.cluster
         that has a nova.zone which is connected to a neutron.network and also
-        there is no nagios alarm of type CLUSTER_PROBLEM on the cluster and no
-        nagios alarm of type NETWORK_PROBLEM on the neutron.network, then raise
-        a deduced alarm on the nova.zone called complex_zone_deduced_alarm.
+        there is no nagios alarm of vitrage_type CLUSTER_PROBLEM on the cluster
+        and no nagios alarm of vitrage_type NETWORK_PROBLEM on the
+        neutron.network, then raise a deduced alarm on the nova.zone called
+        complex_zone_deduced_alarm.
         The test has 3 steps in it:
         1. create a neutron.network and connect it to a zone, and check that
            the complex_zone_deduced_alarm is raised on the nova.zone because it
@@ -674,17 +706,18 @@ class TestScenarioEvaluator(TestFunctionalBase):
             'updated_at': '2015-12-01T12:46:41Z',
             'status': 'active',
             'id': '12345',
-            'vitrage_entity_type': 'neutron.network',
-            'vitrage_datasource_action': 'snapshot',
-            'vitrage_sample_date': '2015-12-01T12:46:41Z',
+            DSProps.ENTITY_TYPE: NEUTRON_NETWORK_DATASOURCE,
+            DSProps.DATASOURCE_ACTION: DatasourceAction.SNAPSHOT,
+            DSProps.SAMPLE_DATE: '2015-12-01T12:46:41Z',
         }
 
         # process events
         processor.process_event(zone_event)
-        query = {VProps.TYPE: NOVA_ZONE_DATASOURCE, VProps.ID: 'zone-7'}
+        query = {VProps.VITRAGE_TYPE: NOVA_ZONE_DATASOURCE,
+                 VProps.ID: 'zone-7'}
         zone_vertex = entity_graph.get_vertices(vertex_attr_filter=query)[0]
         processor.process_event(network_event)
-        query = {VProps.TYPE: NEUTRON_NETWORK_DATASOURCE}
+        query = {VProps.VITRAGE_TYPE: NEUTRON_NETWORK_DATASOURCE}
         network_vertex = entity_graph.get_vertices(vertex_attr_filter=query)[0]
 
         # add edge between network and zone
@@ -696,7 +729,7 @@ class TestScenarioEvaluator(TestFunctionalBase):
             processor.process_event(event_queue.get())
 
         # test asserts
-        query = {VProps.CATEGORY: EntityCategory.ALARM}
+        query = {VProps.VITRAGE_CATEGORY: EntityCategory.ALARM}
         zone_neighbors = entity_graph.neighbors(zone_vertex.vertex_id,
                                                 vertex_attr_filter=query)
         self.assertEqual(num_orig_vertices + num_added_vertices +
@@ -704,9 +737,10 @@ class TestScenarioEvaluator(TestFunctionalBase):
         self.assertEqual(num_orig_edges + num_added_edges + num_deduced_edges,
                          entity_graph.num_edges())
         self.assertEqual(1, len(zone_neighbors))
-        self.assertEqual(zone_neighbors[0][VProps.CATEGORY],
+        self.assertEqual(zone_neighbors[0][VProps.VITRAGE_CATEGORY],
                          EntityCategory.ALARM)
-        self.assertEqual(zone_neighbors[0][VProps.TYPE], 'vitrage')
+        self.assertEqual(zone_neighbors[0][VProps.VITRAGE_TYPE],
+                         VITRAGE_DATASOURCE)
         self.assertEqual(zone_neighbors[0][VProps.NAME],
                          'complex_zone_deduced_alarm')
 
@@ -732,26 +766,30 @@ class TestScenarioEvaluator(TestFunctionalBase):
         self.assertEqual(num_orig_edges + num_added_edges + num_deduced_edges +
                          num_network_alarm_edges, entity_graph.num_edges())
 
-        query = {VProps.CATEGORY: EntityCategory.ALARM}
+        query = {VProps.VITRAGE_CATEGORY: EntityCategory.ALARM}
         network_neighbors = entity_graph.neighbors(network_vertex.vertex_id,
                                                    vertex_attr_filter=query)
         self.assertEqual(1, len(network_neighbors))
-        self.assertEqual(network_neighbors[0][VProps.CATEGORY],
+        self.assertEqual(network_neighbors[0][VProps.VITRAGE_CATEGORY],
                          EntityCategory.ALARM)
-        self.assertEqual(network_neighbors[0][VProps.TYPE], 'nagios')
+        self.assertEqual(network_neighbors[0][VProps.VITRAGE_TYPE],
+                         NAGIOS_DATASOURCE)
         self.assertEqual(network_neighbors[0][VProps.NAME], 'NETWORK_PROBLEM')
-        self.assertEqual(network_neighbors[0][VProps.IS_DELETED], False)
-        self.assertEqual(network_neighbors[0][VProps.IS_PLACEHOLDER], False)
+        self.assertEqual(network_neighbors[0][VProps.VITRAGE_IS_DELETED],
+                         False)
+        self.assertEqual(network_neighbors[0][VProps.VITRAGE_IS_PLACEHOLDER],
+                         False)
 
         zone_neighbors = entity_graph.neighbors(zone_vertex.vertex_id,
                                                 vertex_attr_filter=query)
         self.assertEqual(1, len(zone_neighbors))
-        self.assertEqual(zone_neighbors[0][VProps.CATEGORY],
+        self.assertEqual(zone_neighbors[0][VProps.VITRAGE_CATEGORY],
                          EntityCategory.ALARM)
-        self.assertEqual(zone_neighbors[0][VProps.TYPE], 'vitrage')
+        self.assertEqual(zone_neighbors[0][VProps.VITRAGE_TYPE],
+                         VITRAGE_DATASOURCE)
         self.assertEqual(zone_neighbors[0][VProps.NAME],
                          'complex_zone_deduced_alarm')
-        self.assertEqual(zone_neighbors[0][VProps.IS_DELETED], True)
+        self.assertEqual(zone_neighbors[0][VProps.VITRAGE_IS_DELETED], True)
 
         # ###################   STEP 3   ###################
         # delete NETWORK_PROBLEM alarm
@@ -770,35 +808,38 @@ class TestScenarioEvaluator(TestFunctionalBase):
         self.assertEqual(num_orig_edges + num_added_edges + num_deduced_edges +
                          num_network_alarm_edges + 1, entity_graph.num_edges())
 
-        query = {VProps.CATEGORY: EntityCategory.ALARM}
+        query = {VProps.VITRAGE_CATEGORY: EntityCategory.ALARM}
         network_neighbors = entity_graph.neighbors(network_vertex.vertex_id,
                                                    vertex_attr_filter=query)
         self.assertEqual(1, len(network_neighbors))
-        self.assertEqual(network_neighbors[0][VProps.CATEGORY],
+        self.assertEqual(network_neighbors[0][VProps.VITRAGE_CATEGORY],
                          EntityCategory.ALARM)
-        self.assertEqual(network_neighbors[0][VProps.TYPE], 'nagios')
+        self.assertEqual(network_neighbors[0][VProps.VITRAGE_TYPE],
+                         NAGIOS_DATASOURCE)
         self.assertEqual(network_neighbors[0][VProps.NAME], 'NETWORK_PROBLEM')
-        self.assertEqual(network_neighbors[0][VProps.IS_DELETED], True)
+        self.assertEqual(network_neighbors[0][VProps.VITRAGE_IS_DELETED], True)
 
-        query = {VProps.CATEGORY: EntityCategory.ALARM,
-                 VProps.IS_DELETED: True}
-        is_deleted = True
+        query = {VProps.VITRAGE_CATEGORY: EntityCategory.ALARM,
+                 VProps.VITRAGE_IS_DELETED: True}
+        vitrage_is_deleted = True
         # Alarm History is saved. We are testing the deleted alarm and
         # then we are testing the live alarm
         for counter in range(0, 1):
             zone_neighbors = entity_graph.neighbors(zone_vertex.vertex_id,
                                                     vertex_attr_filter=query)
             self.assertEqual(1, len(zone_neighbors))
-            self.assertEqual(zone_neighbors[0][VProps.CATEGORY],
+            self.assertEqual(zone_neighbors[0][VProps.VITRAGE_CATEGORY],
                              EntityCategory.ALARM)
-            self.assertEqual(zone_neighbors[0][VProps.TYPE], 'vitrage')
+            self.assertEqual(zone_neighbors[0][VProps.VITRAGE_TYPE],
+                             VITRAGE_DATASOURCE)
             self.assertEqual(zone_neighbors[0][VProps.NAME],
                              'complex_zone_deduced_alarm')
-            self.assertEqual(zone_neighbors[0][VProps.IS_DELETED], is_deleted)
+            self.assertEqual(zone_neighbors[0][VProps.VITRAGE_IS_DELETED],
+                             vitrage_is_deleted)
 
-            query = {VProps.CATEGORY: EntityCategory.ALARM,
-                     VProps.IS_DELETED: False}
-            is_deleted = False
+            query = {VProps.VITRAGE_CATEGORY: EntityCategory.ALARM,
+                     VProps.VITRAGE_IS_DELETED: False}
+            vitrage_is_deleted = False
 
     def test_ha(self):
         event_queue, processor, evaluator = self._init_system()
@@ -806,15 +847,15 @@ class TestScenarioEvaluator(TestFunctionalBase):
 
         # find host
         query = {
-            VProps.CATEGORY: 'RESOURCE',
-            VProps.TYPE: NOVA_HOST_DATASOURCE
+            VProps.VITRAGE_CATEGORY: EntityCategory.RESOURCE,
+            VProps.VITRAGE_TYPE: NOVA_HOST_DATASOURCE
         }
         hosts = entity_graph.get_vertices(vertex_attr_filter=query)
 
         # find instances on host
         query = {
-            VProps.CATEGORY: 'RESOURCE',
-            VProps.TYPE: NOVA_INSTANCE_DATASOURCE
+            VProps.VITRAGE_CATEGORY: EntityCategory.RESOURCE,
+            VProps.VITRAGE_TYPE: NOVA_INSTANCE_DATASOURCE
         }
         instances = entity_graph.neighbors(hosts[0].vertex_id,
                                            vertex_attr_filter=query)
@@ -847,29 +888,34 @@ class TestScenarioEvaluator(TestFunctionalBase):
         self.assertEqual(num_orig_edges + num_volumes + num_deduced_alarms,
                          entity_graph.num_edges())
 
-        query = {VProps.CATEGORY: EntityCategory.RESOURCE,
-                 VProps.TYPE: CINDER_VOLUME_DATASOURCE}
+        query = {VProps.VITRAGE_CATEGORY: EntityCategory.RESOURCE,
+                 VProps.VITRAGE_TYPE: CINDER_VOLUME_DATASOURCE}
         instance_neighbors = entity_graph.neighbors(instances[0].vertex_id,
                                                     vertex_attr_filter=query)
         self.assertEqual(1, len(instance_neighbors))
-        self.assertEqual(instance_neighbors[0][VProps.CATEGORY],
+        self.assertEqual(instance_neighbors[0][VProps.VITRAGE_CATEGORY],
                          EntityCategory.RESOURCE)
-        self.assertEqual(instance_neighbors[0][VProps.TYPE],
+        self.assertEqual(instance_neighbors[0][VProps.VITRAGE_TYPE],
                          CINDER_VOLUME_DATASOURCE)
         self.assertEqual(instance_neighbors[0][VProps.NAME], 'volume-1')
-        self.assertEqual(instance_neighbors[0][VProps.IS_DELETED], False)
-        self.assertEqual(instance_neighbors[0][VProps.IS_PLACEHOLDER], False)
+        self.assertEqual(instance_neighbors[0][VProps.VITRAGE_IS_DELETED],
+                         False)
+        self.assertEqual(instance_neighbors[0][VProps.VITRAGE_IS_PLACEHOLDER],
+                         False)
 
-        query = {VProps.CATEGORY: EntityCategory.ALARM, VProps.TYPE: 'vitrage'}
+        query = {VProps.VITRAGE_CATEGORY: EntityCategory.ALARM,
+                 VProps.VITRAGE_TYPE: VITRAGE_DATASOURCE}
         host_neighbors = entity_graph.neighbors(hosts[0].vertex_id,
                                                 vertex_attr_filter=query)
-        self.assertEqual(host_neighbors[0][VProps.CATEGORY],
+        self.assertEqual(host_neighbors[0][VProps.VITRAGE_CATEGORY],
                          EntityCategory.ALARM)
-        self.assertEqual(host_neighbors[0][VProps.TYPE], 'vitrage')
+        self.assertEqual(host_neighbors[0][VProps.VITRAGE_TYPE],
+                         VITRAGE_DATASOURCE)
         self.assertEqual(host_neighbors[0][VProps.NAME],
                          'ha_warning_deduced_alarm')
-        self.assertEqual(host_neighbors[0][VProps.IS_DELETED], False)
-        self.assertEqual(host_neighbors[0][VProps.IS_PLACEHOLDER], False)
+        self.assertEqual(host_neighbors[0][VProps.VITRAGE_IS_DELETED], False)
+        self.assertEqual(host_neighbors[0][VProps.VITRAGE_IS_PLACEHOLDER],
+                         False)
 
         # ###################   STEP 2   ###################
         # Add cinder volume 2
@@ -894,48 +940,54 @@ class TestScenarioEvaluator(TestFunctionalBase):
                          entity_graph.num_edges())
 
         # check instance neighbors
-        query = {VProps.CATEGORY: EntityCategory.RESOURCE,
-                 VProps.TYPE: CINDER_VOLUME_DATASOURCE}
+        query = {VProps.VITRAGE_CATEGORY: EntityCategory.RESOURCE,
+                 VProps.VITRAGE_TYPE: CINDER_VOLUME_DATASOURCE}
         instance_neighbors = entity_graph.neighbors(instances[1].vertex_id,
                                                     vertex_attr_filter=query)
         self.assertEqual(1, len(instance_neighbors))
-        self.assertEqual(instance_neighbors[0][VProps.CATEGORY],
+        self.assertEqual(instance_neighbors[0][VProps.VITRAGE_CATEGORY],
                          EntityCategory.RESOURCE)
-        self.assertEqual(instance_neighbors[0][VProps.TYPE],
+        self.assertEqual(instance_neighbors[0][VProps.VITRAGE_TYPE],
                          CINDER_VOLUME_DATASOURCE)
         self.assertEqual(instance_neighbors[0][VProps.NAME], 'volume-2')
-        self.assertEqual(instance_neighbors[0][VProps.IS_DELETED], False)
-        self.assertEqual(instance_neighbors[0][VProps.IS_PLACEHOLDER], False)
+        self.assertEqual(instance_neighbors[0][VProps.VITRAGE_IS_DELETED],
+                         False)
+        self.assertEqual(instance_neighbors[0][VProps.VITRAGE_IS_PLACEHOLDER],
+                         False)
 
         # check ha_error_deduced_alarm
-        query = {VProps.CATEGORY: EntityCategory.ALARM,
-                 VProps.TYPE: 'vitrage',
+        query = {VProps.VITRAGE_CATEGORY: EntityCategory.ALARM,
+                 VProps.VITRAGE_TYPE: VITRAGE_DATASOURCE,
                  VProps.NAME: 'ha_error_deduced_alarm'}
         host_neighbors = entity_graph.neighbors(hosts[0].vertex_id,
                                                 vertex_attr_filter=query)
         self.assertEqual(1, len(host_neighbors))
-        self.assertEqual(host_neighbors[0][VProps.CATEGORY],
+        self.assertEqual(host_neighbors[0][VProps.VITRAGE_CATEGORY],
                          EntityCategory.ALARM)
-        self.assertEqual(host_neighbors[0][VProps.TYPE], 'vitrage')
+        self.assertEqual(host_neighbors[0][VProps.VITRAGE_TYPE],
+                         VITRAGE_DATASOURCE)
         self.assertEqual(host_neighbors[0][VProps.NAME],
                          'ha_error_deduced_alarm')
-        self.assertEqual(host_neighbors[0][VProps.IS_DELETED], False)
-        self.assertEqual(host_neighbors[0][VProps.IS_PLACEHOLDER], False)
+        self.assertEqual(host_neighbors[0][VProps.VITRAGE_IS_DELETED], False)
+        self.assertEqual(host_neighbors[0][VProps.VITRAGE_IS_PLACEHOLDER],
+                         False)
 
         # check ha_warning_deduced_alarm
-        query = {VProps.CATEGORY: EntityCategory.ALARM,
-                 VProps.TYPE: 'vitrage',
+        query = {VProps.VITRAGE_CATEGORY: EntityCategory.ALARM,
+                 VProps.VITRAGE_TYPE: VITRAGE_DATASOURCE,
                  VProps.NAME: 'ha_warning_deduced_alarm'}
         host_neighbors = entity_graph.neighbors(hosts[0].vertex_id,
                                                 vertex_attr_filter=query)
         self.assertEqual(1, len(host_neighbors))
-        self.assertEqual(host_neighbors[0][VProps.CATEGORY],
+        self.assertEqual(host_neighbors[0][VProps.VITRAGE_CATEGORY],
                          EntityCategory.ALARM)
-        self.assertEqual(host_neighbors[0][VProps.TYPE], 'vitrage')
+        self.assertEqual(host_neighbors[0][VProps.VITRAGE_TYPE],
+                         VITRAGE_DATASOURCE)
         self.assertEqual(host_neighbors[0][VProps.NAME],
                          'ha_warning_deduced_alarm')
-        self.assertEqual(host_neighbors[0][VProps.IS_DELETED], True)
-        self.assertEqual(host_neighbors[0][VProps.IS_PLACEHOLDER], False)
+        self.assertEqual(host_neighbors[0][VProps.VITRAGE_IS_DELETED], True)
+        self.assertEqual(host_neighbors[0][VProps.VITRAGE_IS_PLACEHOLDER],
+                         False)
 
         # ###################   STEP 3   ###################
         #  Remove Cinder Volume 2
@@ -959,65 +1011,73 @@ class TestScenarioEvaluator(TestFunctionalBase):
         self.assertEqual(num_orig_edges + num_volumes + num_deduced_alarms + 1,
                          entity_graph.num_edges())
 
-        query = {VProps.CATEGORY: EntityCategory.RESOURCE,
-                 VProps.TYPE: CINDER_VOLUME_DATASOURCE}
+        query = {VProps.VITRAGE_CATEGORY: EntityCategory.RESOURCE,
+                 VProps.VITRAGE_TYPE: CINDER_VOLUME_DATASOURCE}
         instance_neighbors = entity_graph.neighbors(instances[1].vertex_id,
                                                     vertex_attr_filter=query)
         self.assertEqual(1, len(instance_neighbors))
-        self.assertEqual(instance_neighbors[0][VProps.CATEGORY],
+        self.assertEqual(instance_neighbors[0][VProps.VITRAGE_CATEGORY],
                          EntityCategory.RESOURCE)
-        self.assertEqual(instance_neighbors[0][VProps.TYPE],
+        self.assertEqual(instance_neighbors[0][VProps.VITRAGE_TYPE],
                          CINDER_VOLUME_DATASOURCE)
         self.assertEqual(instance_neighbors[0][VProps.NAME], 'volume-2')
-        self.assertEqual(instance_neighbors[0][VProps.IS_DELETED], False)
-        self.assertEqual(instance_neighbors[0][VProps.IS_PLACEHOLDER], False)
+        self.assertEqual(instance_neighbors[0][VProps.VITRAGE_IS_DELETED],
+                         False)
+        self.assertEqual(instance_neighbors[0][VProps.VITRAGE_IS_PLACEHOLDER],
+                         False)
 
         # check ha_error_deduced_alarm
-        query = {VProps.CATEGORY: EntityCategory.ALARM,
-                 VProps.TYPE: 'vitrage',
+        query = {VProps.VITRAGE_CATEGORY: EntityCategory.ALARM,
+                 VProps.VITRAGE_TYPE: VITRAGE_DATASOURCE,
                  VProps.NAME: 'ha_error_deduced_alarm'}
         host_neighbors = entity_graph.neighbors(hosts[0].vertex_id,
                                                 vertex_attr_filter=query)
         self.assertEqual(1, len(host_neighbors))
-        self.assertEqual(host_neighbors[0][VProps.CATEGORY],
+        self.assertEqual(host_neighbors[0][VProps.VITRAGE_CATEGORY],
                          EntityCategory.ALARM)
-        self.assertEqual(host_neighbors[0][VProps.TYPE], 'vitrage')
+        self.assertEqual(host_neighbors[0][VProps.VITRAGE_TYPE],
+                         VITRAGE_DATASOURCE)
         self.assertEqual(host_neighbors[0][VProps.NAME],
                          'ha_error_deduced_alarm')
-        self.assertEqual(host_neighbors[0][VProps.IS_DELETED], True)
-        self.assertEqual(host_neighbors[0][VProps.IS_PLACEHOLDER], False)
+        self.assertEqual(host_neighbors[0][VProps.VITRAGE_IS_DELETED], True)
+        self.assertEqual(host_neighbors[0][VProps.VITRAGE_IS_PLACEHOLDER],
+                         False)
 
         # check new ha_warning_deduced_alarm
-        query = {VProps.CATEGORY: EntityCategory.ALARM,
-                 VProps.TYPE: 'vitrage',
+        query = {VProps.VITRAGE_CATEGORY: EntityCategory.ALARM,
+                 VProps.VITRAGE_TYPE: VITRAGE_DATASOURCE,
                  VProps.NAME: 'ha_warning_deduced_alarm',
-                 VProps.IS_DELETED: False}
+                 VProps.VITRAGE_IS_DELETED: False}
         host_neighbors = entity_graph.neighbors(hosts[0].vertex_id,
                                                 vertex_attr_filter=query)
         self.assertEqual(1, len(host_neighbors))
-        self.assertEqual(host_neighbors[0][VProps.CATEGORY],
+        self.assertEqual(host_neighbors[0][VProps.VITRAGE_CATEGORY],
                          EntityCategory.ALARM)
-        self.assertEqual(host_neighbors[0][VProps.TYPE], 'vitrage')
+        self.assertEqual(host_neighbors[0][VProps.VITRAGE_TYPE],
+                         VITRAGE_DATASOURCE)
         self.assertEqual(host_neighbors[0][VProps.NAME],
                          'ha_warning_deduced_alarm')
-        self.assertEqual(host_neighbors[0][VProps.IS_DELETED], False)
-        self.assertEqual(host_neighbors[0][VProps.IS_PLACEHOLDER], False)
+        self.assertEqual(host_neighbors[0][VProps.VITRAGE_IS_DELETED], False)
+        self.assertEqual(host_neighbors[0][VProps.VITRAGE_IS_PLACEHOLDER],
+                         False)
 
         # check old deleted ha_warning_deduced_alarm
-        query = {VProps.CATEGORY: EntityCategory.ALARM,
-                 VProps.TYPE: 'vitrage',
+        query = {VProps.VITRAGE_CATEGORY: EntityCategory.ALARM,
+                 VProps.VITRAGE_TYPE: VITRAGE_DATASOURCE,
                  VProps.NAME: 'ha_warning_deduced_alarm',
-                 VProps.IS_DELETED: True}
+                 VProps.VITRAGE_IS_DELETED: True}
         host_neighbors = entity_graph.neighbors(hosts[0].vertex_id,
                                                 vertex_attr_filter=query)
         self.assertEqual(1, len(host_neighbors))
-        self.assertEqual(host_neighbors[0][VProps.CATEGORY],
+        self.assertEqual(host_neighbors[0][VProps.VITRAGE_CATEGORY],
                          EntityCategory.ALARM)
-        self.assertEqual(host_neighbors[0][VProps.TYPE], 'vitrage')
+        self.assertEqual(host_neighbors[0][VProps.VITRAGE_TYPE],
+                         VITRAGE_DATASOURCE)
         self.assertEqual(host_neighbors[0][VProps.NAME],
                          'ha_warning_deduced_alarm')
-        self.assertEqual(host_neighbors[0][VProps.IS_DELETED], True)
-        self.assertEqual(host_neighbors[0][VProps.IS_PLACEHOLDER], False)
+        self.assertEqual(host_neighbors[0][VProps.VITRAGE_IS_DELETED], True)
+        self.assertEqual(host_neighbors[0][VProps.VITRAGE_IS_PLACEHOLDER],
+                         False)
 
         # ###################   STEP 4   ###################
         #  Remove Cinder Volume 1
@@ -1041,57 +1101,65 @@ class TestScenarioEvaluator(TestFunctionalBase):
         self.assertEqual(num_orig_edges + num_volumes + num_deduced_alarms + 1,
                          entity_graph.num_edges())
 
-        query = {VProps.CATEGORY: EntityCategory.RESOURCE,
-                 VProps.TYPE: CINDER_VOLUME_DATASOURCE}
+        query = {VProps.VITRAGE_CATEGORY: EntityCategory.RESOURCE,
+                 VProps.VITRAGE_TYPE: CINDER_VOLUME_DATASOURCE}
         instance_neighbors = entity_graph.neighbors(instances[0].vertex_id,
                                                     vertex_attr_filter=query)
         self.assertEqual(1, len(instance_neighbors))
-        self.assertEqual(instance_neighbors[0][VProps.CATEGORY],
+        self.assertEqual(instance_neighbors[0][VProps.VITRAGE_CATEGORY],
                          EntityCategory.RESOURCE)
-        self.assertEqual(instance_neighbors[0][VProps.TYPE],
+        self.assertEqual(instance_neighbors[0][VProps.VITRAGE_TYPE],
                          CINDER_VOLUME_DATASOURCE)
         self.assertEqual(instance_neighbors[0][VProps.NAME], 'volume-1')
-        self.assertEqual(instance_neighbors[0][VProps.IS_DELETED], False)
-        self.assertEqual(instance_neighbors[0][VProps.IS_PLACEHOLDER], False)
+        self.assertEqual(instance_neighbors[0][VProps.VITRAGE_IS_DELETED],
+                         False)
+        self.assertEqual(instance_neighbors[0][VProps.VITRAGE_IS_PLACEHOLDER],
+                         False)
 
         # check ha_error_deduced_alarm
-        query = {VProps.CATEGORY: EntityCategory.ALARM,
-                 VProps.TYPE: 'vitrage',
+        query = {VProps.VITRAGE_CATEGORY: EntityCategory.ALARM,
+                 VProps.VITRAGE_TYPE: VITRAGE_DATASOURCE,
                  VProps.NAME: 'ha_error_deduced_alarm'}
         host_neighbors = entity_graph.neighbors(hosts[0].vertex_id,
                                                 vertex_attr_filter=query)
         self.assertEqual(1, len(host_neighbors))
-        self.assertEqual(host_neighbors[0][VProps.CATEGORY],
+        self.assertEqual(host_neighbors[0][VProps.VITRAGE_CATEGORY],
                          EntityCategory.ALARM)
-        self.assertEqual(host_neighbors[0][VProps.TYPE], 'vitrage')
+        self.assertEqual(host_neighbors[0][VProps.VITRAGE_TYPE],
+                         VITRAGE_DATASOURCE)
         self.assertEqual(host_neighbors[0][VProps.NAME],
                          'ha_error_deduced_alarm')
-        self.assertEqual(host_neighbors[0][VProps.IS_DELETED], True)
-        self.assertEqual(host_neighbors[0][VProps.IS_PLACEHOLDER], False)
+        self.assertEqual(host_neighbors[0][VProps.VITRAGE_IS_DELETED], True)
+        self.assertEqual(host_neighbors[0][VProps.VITRAGE_IS_PLACEHOLDER],
+                         False)
 
         # check old ha_warning_deduced_alarm
-        query = {VProps.CATEGORY: EntityCategory.ALARM,
-                 VProps.TYPE: 'vitrage',
+        query = {VProps.VITRAGE_CATEGORY: EntityCategory.ALARM,
+                 VProps.VITRAGE_TYPE: VITRAGE_DATASOURCE,
                  VProps.NAME: 'ha_warning_deduced_alarm'}
         host_neighbors = entity_graph.neighbors(hosts[0].vertex_id,
                                                 vertex_attr_filter=query)
         self.assertEqual(2, len(host_neighbors))
 
-        self.assertEqual(host_neighbors[0][VProps.CATEGORY],
+        self.assertEqual(host_neighbors[0][VProps.VITRAGE_CATEGORY],
                          EntityCategory.ALARM)
-        self.assertEqual(host_neighbors[0][VProps.TYPE], 'vitrage')
+        self.assertEqual(host_neighbors[0][VProps.VITRAGE_TYPE],
+                         VITRAGE_DATASOURCE)
         self.assertEqual(host_neighbors[0][VProps.NAME],
                          'ha_warning_deduced_alarm')
-        self.assertEqual(host_neighbors[0][VProps.IS_DELETED], True)
-        self.assertEqual(host_neighbors[0][VProps.IS_PLACEHOLDER], False)
+        self.assertEqual(host_neighbors[0][VProps.VITRAGE_IS_DELETED], True)
+        self.assertEqual(host_neighbors[0][VProps.VITRAGE_IS_PLACEHOLDER],
+                         False)
 
-        self.assertEqual(host_neighbors[1][VProps.CATEGORY],
+        self.assertEqual(host_neighbors[1][VProps.VITRAGE_CATEGORY],
                          EntityCategory.ALARM)
-        self.assertEqual(host_neighbors[1][VProps.TYPE], 'vitrage')
+        self.assertEqual(host_neighbors[1][VProps.VITRAGE_TYPE],
+                         VITRAGE_DATASOURCE)
         self.assertEqual(host_neighbors[1][VProps.NAME],
                          'ha_warning_deduced_alarm')
-        self.assertEqual(host_neighbors[1][VProps.IS_DELETED], True)
-        self.assertEqual(host_neighbors[1][VProps.IS_PLACEHOLDER], False)
+        self.assertEqual(host_neighbors[1][VProps.VITRAGE_IS_DELETED], True)
+        self.assertEqual(host_neighbors[1][VProps.VITRAGE_IS_PLACEHOLDER],
+                         False)
 
     def test_simple_or_operator_deduced_alarm(self):
         """Handles a simple not operator use case
@@ -1107,7 +1175,7 @@ class TestScenarioEvaluator(TestFunctionalBase):
                                              _TARGET_HOST,
                                              _TARGET_HOST,
                                              processor.entity_graph)
-        self.assertEqual('AVAILABLE', host_v[VProps.AGGREGATED_STATE],
+        self.assertEqual('AVAILABLE', host_v[VProps.VITRAGE_AGGREGATED_STATE],
                          'host should be AVAILABLE when starting')
 
         # generate nagios alarm1 to trigger, raise alarm3
@@ -1174,7 +1242,7 @@ class TestScenarioEvaluator(TestFunctionalBase):
                                              _TARGET_HOST,
                                              _TARGET_HOST,
                                              entity_graph)
-        self.assertEqual('AVAILABLE', host_v[VProps.AGGREGATED_STATE],
+        self.assertEqual('AVAILABLE', host_v[VProps.VITRAGE_AGGREGATED_STATE],
                          'host should be AVAILABLE when starting')
 
         # generate nagios alarm_a to trigger
@@ -1231,14 +1299,14 @@ class TestScenarioEvaluator(TestFunctionalBase):
         alarms = self._get_alarms_on_host(host_v, entity_graph)
         self.assertEqual(3, len(alarms))
 
-        query = {VProps.CATEGORY: EntityCategory.ALARM,
-                 VProps.IS_DELETED: True}
+        query = {VProps.VITRAGE_CATEGORY: EntityCategory.ALARM,
+                 VProps.VITRAGE_IS_DELETED: True}
         deleted_alarms = entity_graph.neighbors(host_v.vertex_id,
                                                 vertex_attr_filter=query)
         self.assertEqual(num_orig_vertices + len(deleted_alarms) + 3,
                          entity_graph.num_vertices())
 
-        query = {VProps.IS_DELETED: True}
+        query = {VProps.VITRAGE_IS_DELETED: True}
         deleted_edges = entity_graph.neighbors(host_v.vertex_id,
                                                edge_attr_filter=query)
         self.assertEqual(num_orig_edges + len(deleted_edges) + 3,
@@ -1256,14 +1324,14 @@ class TestScenarioEvaluator(TestFunctionalBase):
         alarms = self._get_alarms_on_host(host_v, entity_graph)
         self.assertEqual(1, len(alarms))
 
-        query = {VProps.CATEGORY: EntityCategory.ALARM,
-                 VProps.IS_DELETED: True}
+        query = {VProps.VITRAGE_CATEGORY: EntityCategory.ALARM,
+                 VProps.VITRAGE_IS_DELETED: True}
         deleted_alarms = entity_graph.neighbors(host_v.vertex_id,
                                                 vertex_attr_filter=query)
         self.assertEqual(num_orig_vertices + len(deleted_alarms) + 1,
                          entity_graph.num_vertices())
 
-        query = {VProps.IS_DELETED: True}
+        query = {VProps.VITRAGE_IS_DELETED: True}
         deleted_edges = entity_graph.neighbors(host_v.vertex_id,
                                                edge_attr_filter=query)
         self.assertEqual(num_orig_edges + len(deleted_edges) + 1,
@@ -1292,7 +1360,7 @@ class TestScenarioEvaluator(TestFunctionalBase):
     def _get_entity_from_graph(entity_type, entity_name,
                                entity_id,
                                entity_graph):
-        vertex_attrs = {VProps.TYPE: entity_type,
+        vertex_attrs = {VProps.VITRAGE_TYPE: entity_type,
                         VProps.ID: entity_id,
                         VProps.NAME: entity_name}
         vertices = entity_graph.get_vertices(vertex_attr_filter=vertex_attrs)
@@ -1303,22 +1371,22 @@ class TestScenarioEvaluator(TestFunctionalBase):
     def _get_deduced_alarms_on_host(host_v, entity_graph):
         v_id = host_v.vertex_id
         vertex_attrs = {VProps.NAME: 'deduced_alarm',
-                        VProps.TYPE: 'vitrage',
-                        VProps.IS_DELETED: False, }
+                        VProps.VITRAGE_TYPE: VITRAGE_DATASOURCE,
+                        VProps.VITRAGE_IS_DELETED: False, }
         return entity_graph.neighbors(v_id=v_id,
                                       vertex_attr_filter=vertex_attrs)
 
     @staticmethod
     def _get_alarms_on_host(host_v, entity_graph):
         v_id = host_v.vertex_id
-        vertex_attrs = {VProps.CATEGORY: EntityCategory.ALARM,
-                        VProps.IS_DELETED: False, }
+        vertex_attrs = {VProps.VITRAGE_CATEGORY: EntityCategory.ALARM,
+                        VProps.VITRAGE_IS_DELETED: False, }
         return entity_graph.neighbors(v_id=v_id,
                                       vertex_attr_filter=vertex_attrs)
 
     @staticmethod
     def _get_alarm_causes(alarm_v, entity_graph):
         v_id = alarm_v.vertex_id
-        edge_attrs = {EProps.RELATIONSHIP_TYPE: "causes",
-                      EProps.IS_DELETED: False, }
+        edge_attrs = {EProps.RELATIONSHIP_TYPE: EdgeLabel.CAUSES,
+                      EProps.VITRAGE_IS_DELETED: False, }
         return entity_graph.neighbors(v_id=v_id, edge_attr_filter=edge_attrs)

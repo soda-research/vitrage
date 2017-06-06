@@ -12,6 +12,10 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from vitrage.common.constants import EntityCategory
+from vitrage.common.constants import VertexProperties as VProps
+from vitrage.datasources.nagios import NAGIOS_DATASOURCE
+from vitrage.datasources.nova.host import NOVA_HOST_DATASOURCE
 from vitrage.evaluator.template_data import ActionSpecs
 from vitrage.evaluator.template_data import ConditionVar
 from vitrage.evaluator.template_data import EdgeDescription
@@ -43,23 +47,30 @@ class BasicTemplateTest(base.BaseTest):
         definitions = template_definition[TFields.DEFINITIONS]
 
         # Assertions
-        entities_definition = definitions[TFields.ENTITIES]
-        self._validate_entities(entities, entities_definition)
+        for definition in definitions[TFields.ENTITIES]:
+            for key, value in definition['entity'].items():
+                new_key = TemplateData.PROPS_CONVERSION[key] if key in \
+                    TemplateData.PROPS_CONVERSION else key
+                del definition['entity'][key]
+                definition['entity'][new_key] = value
+        self._validate_entities(entities, definitions[TFields.ENTITIES])
 
         relate_def = definitions[TFields.RELATIONSHIPS]
         self._validate_relationships(relationships, relate_def, entities)
         self._validate_scenarios(scenarios, entities)
 
         expected_entities = {
-            'alarm': Vertex(vertex_id='alarm',
-                            properties={'category': 'ALARM',
-                                        'type': 'nagios',
-                                        'name': 'host_problem'
-                                        }),
-            'resource': Vertex(vertex_id='resource',
-                               properties={'category': 'RESOURCE',
-                                           'type': 'nova.host'
-                                           })
+            'alarm': Vertex(
+                vertex_id='alarm',
+                properties={VProps.VITRAGE_CATEGORY: EntityCategory.ALARM,
+                            VProps.VITRAGE_TYPE: NAGIOS_DATASOURCE,
+                            VProps.NAME: 'host_problem'
+                            }),
+            'resource': Vertex(
+                vertex_id='resource',
+                properties={VProps.VITRAGE_CATEGORY: EntityCategory.RESOURCE,
+                            VProps.VITRAGE_TYPE: NOVA_HOST_DATASOURCE
+                            })
         }
 
         expected_relationships = {
@@ -120,7 +131,7 @@ class BasicTemplateTest(base.BaseTest):
             self.assertIsInstance(entity, Vertex)
             self.assertEqual(entity_id, entity.vertex_id)
             self.assertIsNotNone(entity.properties)
-            self.assertIn(TFields.CATEGORY, entity.properties)
+            self.assertIn(VProps.VITRAGE_CATEGORY, entity.properties)
 
         self.assertEqual(len(entities), len(entities_def))
 

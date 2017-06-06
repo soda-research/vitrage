@@ -92,7 +92,7 @@ class TestProcessor(TestEntityGraphUnitBase):
 
         # update instance event with state running
         vertex.properties[VProps.STATE] = 'RUNNING'
-        vertex.properties[VProps.SAMPLE_TIMESTAMP] = str(utcnow())
+        vertex.properties[VProps.VITRAGE_SAMPLE_TIMESTAMP] = str(utcnow())
         processor.update_entity(vertex, neighbors)
 
         # check state
@@ -148,9 +148,9 @@ class TestProcessor(TestEntityGraphUnitBase):
                                            'backup')
         mock_neighbor = graph_utils.create_vertex(
             "asdjashdkahsdashdalksjhd",
+            vitrage_category="RESOURCE",
+            vitrage_type="nova.instance",
             entity_id="wtw64768476",
-            entity_category="RESOURCE",
-            entity_type="nova.instance",
             entity_state="AVAILABLE",
         )
         new_neighbors = [Neighbor(mock_neighbor, new_edge)]
@@ -187,7 +187,7 @@ class TestProcessor(TestEntityGraphUnitBase):
                                                           vertex2.vertex_id,
                                                           'backup')
         self.assertEqual(3, processor.entity_graph.num_edges())
-        self.assertEqual(True, edge_from_graph[EProps.IS_DELETED])
+        self.assertEqual(True, edge_from_graph[EProps.VITRAGE_IS_DELETED])
 
     def test_remove_deleted_entity(self):
         # setup
@@ -195,7 +195,7 @@ class TestProcessor(TestEntityGraphUnitBase):
             spec_type=self.INSTANCE_SPEC,
             datasource_action=DSAction.INIT_SNAPSHOT)
         self.assertEqual(1, processor.entity_graph.num_edges())
-        vertex[VProps.IS_DELETED] = True
+        vertex[VProps.VITRAGE_IS_DELETED] = True
         processor.entity_graph.update_vertex(vertex)
 
         # action
@@ -235,9 +235,9 @@ class TestProcessor(TestEntityGraphUnitBase):
         # update instance event with state running
         (neighbor_vertex, neighbor_edge) = neighbors[0]
         old_label = neighbor_edge.label
-        neighbor_vertex[VProps.IS_PLACEHOLDER] = False
+        neighbor_vertex[VProps.VITRAGE_IS_PLACEHOLDER] = False
         processor.entity_graph.update_vertex(neighbor_vertex)
-        neighbor_vertex[VProps.IS_PLACEHOLDER] = True
+        neighbor_vertex[VProps.VITRAGE_IS_PLACEHOLDER] = True
         neighbor_edge.label = 'new label'
 
         processor._update_neighbors(vertex, neighbors)
@@ -254,9 +254,9 @@ class TestProcessor(TestEntityGraphUnitBase):
                                                    vertex.vertex_id,
                                                    neighbor_edge.label)
         self.assertIsNotNone(old_edge)
-        self.assertEqual(old_edge[EProps.IS_DELETED], True)
+        self.assertEqual(old_edge[EProps.VITRAGE_IS_DELETED], True)
         self.assertIsNotNone(new_edge)
-        self.assertEqual(new_edge[EProps.IS_DELETED], False)
+        self.assertEqual(new_edge[EProps.VITRAGE_IS_DELETED], False)
 
         # update instance with the same neighbor
         processor._update_neighbors(vertex, neighbors)
@@ -291,7 +291,7 @@ class TestProcessor(TestEntityGraphUnitBase):
                                                    neighbor_edge.label)
         self.assertIsNone(old_edge)
         self.assertIsNotNone(new_edge)
-        self.assertEqual(new_edge[EProps.IS_DELETED], False)
+        self.assertEqual(new_edge[EProps.VITRAGE_IS_DELETED], False)
 
         # update instance with the same neighbor
         processor._update_neighbors(vertex, neighbors)
@@ -314,7 +314,7 @@ class TestProcessor(TestEntityGraphUnitBase):
                           self.NUM_VERTICES_AFTER_DELETION,
                           self.NUM_EDGES_AFTER_DELETION)
 
-    def test_calculate_aggregated_state(self):
+    def test_calculate_vitrage_aggregated_state(self):
         # setup
         instances = []
         for i in range(6):
@@ -324,67 +324,67 @@ class TestProcessor(TestEntityGraphUnitBase):
         # action
         # state already exists and its updated
         instances[0][0][VProps.STATE] = 'SUSPENDED'
-        instances[0][1]._calculate_aggregated_state(instances[0][0],
-                                                    GraphAction.UPDATE_ENTITY)
+        instances[0][1]._calculate_vitrage_aggregated_state(
+            instances[0][0], GraphAction.UPDATE_ENTITY)
 
         # vitrage state doesn't exist and its updated
         instances[1][0][VProps.STATE] = None
         instances[1][1].entity_graph.update_vertex(instances[1][0])
         instances[1][0][VProps.VITRAGE_STATE] = 'SUBOPTIMAL'
-        instances[1][1]._calculate_aggregated_state(instances[1][0],
-                                                    GraphAction.UPDATE_ENTITY)
+        instances[1][1]._calculate_vitrage_aggregated_state(
+            instances[1][0], GraphAction.UPDATE_ENTITY)
 
         # state exists and vitrage state changes
         instances[2][0][VProps.VITRAGE_STATE] = 'SUBOPTIMAL'
-        instances[2][1]._calculate_aggregated_state(instances[2][0],
-                                                    GraphAction.UPDATE_ENTITY)
+        instances[2][1]._calculate_vitrage_aggregated_state(
+            instances[2][0], GraphAction.UPDATE_ENTITY)
 
         # vitrage state exists and state changes
         instances[3][0][VProps.STATE] = None
         instances[3][0][VProps.VITRAGE_STATE] = 'SUBOPTIMAL'
         instances[3][1].entity_graph.update_vertex(instances[3][0])
         instances[3][0][VProps.STATE] = 'SUSPENDED'
-        instances[3][1]._calculate_aggregated_state(instances[3][0],
-                                                    GraphAction.UPDATE_ENTITY)
+        instances[3][1]._calculate_vitrage_aggregated_state(
+            instances[3][0], GraphAction.UPDATE_ENTITY)
 
         # state and vitrage state exists and state changes
         instances[4][0][VProps.VITRAGE_STATE] = 'SUBOPTIMAL'
         instances[4][1].entity_graph.update_vertex(instances[4][0])
         instances[4][0][VProps.STATE] = 'SUSPENDED'
-        instances[4][1]._calculate_aggregated_state(instances[4][0],
-                                                    GraphAction.UPDATE_ENTITY)
+        instances[4][1]._calculate_vitrage_aggregated_state(
+            instances[4][0], GraphAction.UPDATE_ENTITY)
 
         # state and vitrage state exists and vitrage state changes
         instances[5][0][VProps.VITRAGE_STATE] = 'SUBOPTIMAL'
         instances[5][1].entity_graph.update_vertex(instances[5][0])
-        instances[5][1]._calculate_aggregated_state(instances[5][0],
-                                                    GraphAction.UPDATE_ENTITY)
+        instances[5][1]._calculate_vitrage_aggregated_state(
+            instances[5][0], GraphAction.UPDATE_ENTITY)
 
         # test assertions
         self.assertEqual('SUSPENDED',
-                         instances[0][0][VProps.AGGREGATED_STATE])
+                         instances[0][0][VProps.VITRAGE_AGGREGATED_STATE])
         self.assertEqual(OperationalResourceState.SUBOPTIMAL,
-                         instances[0][0][VProps.OPERATIONAL_STATE])
+                         instances[0][0][VProps.VITRAGE_OPERATIONAL_STATE])
         self.assertEqual('SUBOPTIMAL',
-                         instances[1][0][VProps.AGGREGATED_STATE])
+                         instances[1][0][VProps.VITRAGE_AGGREGATED_STATE])
         self.assertEqual(OperationalResourceState.SUBOPTIMAL,
-                         instances[1][0][VProps.OPERATIONAL_STATE])
+                         instances[1][0][VProps.VITRAGE_OPERATIONAL_STATE])
         self.assertEqual('SUBOPTIMAL',
-                         instances[2][0][VProps.AGGREGATED_STATE])
+                         instances[2][0][VProps.VITRAGE_AGGREGATED_STATE])
         self.assertEqual(OperationalResourceState.SUBOPTIMAL,
-                         instances[2][0][VProps.OPERATIONAL_STATE])
+                         instances[2][0][VProps.VITRAGE_OPERATIONAL_STATE])
         self.assertEqual('SUSPENDED',
-                         instances[3][0][VProps.AGGREGATED_STATE])
+                         instances[3][0][VProps.VITRAGE_AGGREGATED_STATE])
         self.assertEqual(OperationalResourceState.SUBOPTIMAL,
-                         instances[3][0][VProps.OPERATIONAL_STATE])
+                         instances[3][0][VProps.VITRAGE_OPERATIONAL_STATE])
         self.assertEqual('SUSPENDED',
-                         instances[4][0][VProps.AGGREGATED_STATE])
+                         instances[4][0][VProps.VITRAGE_AGGREGATED_STATE])
         self.assertEqual(OperationalResourceState.SUBOPTIMAL,
-                         instances[4][0][VProps.OPERATIONAL_STATE])
+                         instances[4][0][VProps.VITRAGE_OPERATIONAL_STATE])
         self.assertEqual('SUBOPTIMAL',
-                         instances[5][0][VProps.AGGREGATED_STATE])
+                         instances[5][0][VProps.VITRAGE_AGGREGATED_STATE])
         self.assertEqual(OperationalResourceState.SUBOPTIMAL,
-                         instances[5][0][VProps.OPERATIONAL_STATE])
+                         instances[5][0][VProps.VITRAGE_OPERATIONAL_STATE])
 
     def _create_and_check_entity(self, processor=None, **kwargs):
         # create instance event with host neighbor
@@ -413,6 +413,6 @@ class TestProcessor(TestEntityGraphUnitBase):
         else:
             deleted_edges = processor.entity_graph.get_edges(
                 vertex_id,
-                attr_filter={VProps.IS_DELETED: True})
+                attr_filter={VProps.VITRAGE_IS_DELETED: True})
             self.assertEqual(num_edges + len(deleted_edges),
                              processor.entity_graph.num_edges())

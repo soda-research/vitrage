@@ -42,9 +42,10 @@ class NagiosTransformer(AlarmTransformerBase):
             entity_event[NagiosProperties.LAST_CHECK],
             '%Y-%m-%d %H:%M:%S',
             tbase.TIMESTAMP_FORMAT)
-        sample_timestamp = entity_event[DSProps.SAMPLE_DATE]
-        update_timestamp = self._format_update_timestamp(update_timestamp,
-                                                         sample_timestamp)
+        vitrage_sample_timestamp = entity_event[DSProps.SAMPLE_DATE]
+        update_timestamp = \
+            self._format_update_timestamp(update_timestamp,
+                                          vitrage_sample_timestamp)
 
         metadata = {
             VProps.NAME: entity_event[NagiosProperties.SERVICE],
@@ -55,10 +56,10 @@ class NagiosTransformer(AlarmTransformerBase):
 
         return graph_utils.create_vertex(
             self._create_entity_key(entity_event),
-            entity_category=EntityCategory.ALARM,
-            entity_type=entity_event[DSProps.ENTITY_TYPE],
+            vitrage_category=EntityCategory.ALARM,
+            vitrage_type=entity_event[DSProps.ENTITY_TYPE],
+            vitrage_sample_timestamp=vitrage_sample_timestamp,
             entity_state=self._get_alarm_state(entity_event),
-            sample_timestamp=sample_timestamp,
             update_timestamp=update_timestamp,
             metadata=metadata)
 
@@ -93,5 +94,5 @@ class NagiosTransformer(AlarmTransformerBase):
                                 resource_name,
                                 alarm_name))
 
-    def get_type(self):
+    def get_vitrage_type(self):
         return NAGIOS_DATASOURCE

@@ -15,8 +15,9 @@
 
 """Methods for generating driver events
 
-For each type of entity, need to supply configuration files that specify (a
-regex of) what can be returned, which will be used to generate driver events
+For each vitrage_type of entity, need to supply configuration files that
+specify (a regex of) what can be returned, which will be used to generate
+driver events
 
 usage example:
     test_entity_spec_list = [

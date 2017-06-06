@@ -72,7 +72,7 @@
   "key_name": null,
   "OS-EXT-SRV-ATTR:hypervisor_hostname": "nyakar-devstack",
   "name": "vm2",
-  "category": "RESOURCE",
+  "vitrage_category": "RESOURCE",
   "created": "2015-11-25T14:18:07Z",
   "tenant_id": "0683517e1e354d2ba25cba6937f44e79",
   "os-extended-volumes:volumes_attached": [],

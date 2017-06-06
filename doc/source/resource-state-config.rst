@@ -16,7 +16,7 @@ Since each data-source might represent state differently, for each
 data-source we can supply it's own mapping to the aggregated state supported
 in Vitrage. This way we can know which state is more important.
 In addition we also normalize the states for the horizon UI (called
-operational_state) in order for the UI to know what color to show in Horizon.
+vitrage_operational_state) in order for the UI to know what color to show in Horizon.
 This page explains how to handle this mapping for a given
 data-source.
 

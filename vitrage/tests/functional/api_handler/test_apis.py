@@ -18,6 +18,7 @@ from vitrage.api_handler.apis.alarm import AlarmApis
 from vitrage.api_handler.apis.rca import RcaApis
 from vitrage.api_handler.apis.resource import ResourceApis
 from vitrage.api_handler.apis.topology import TopologyApis
+from vitrage.common.constants import EdgeLabel
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.datasources import NOVA_HOST_DATASOURCE
@@ -370,7 +371,8 @@ class TestApis(TestEntityGraphUnitBase):
             tmp_project_id = alarm.get(VProps.PROJECT_ID, None)
             condition = True
             if check_alarm_category:
-                condition = alarm[VProps.CATEGORY] == EntityCategory.ALARM
+                condition = \
+                    alarm[VProps.VITRAGE_CATEGORY] == EntityCategory.ALARM
             if project_id:
                 condition = condition and \
                     (not tmp_project_id or
@@ -381,11 +383,12 @@ class TestApis(TestEntityGraphUnitBase):
                                   resource_type, project_id=None):
         self.assertEqual(resource[VProps.VITRAGE_ID], vitrage_id)
         self.assertEqual(resource[VProps.ID], vitrage_id)
-        self.assertEqual(resource[VProps.CATEGORY], EntityCategory.RESOURCE)
-        self.assertEqual(resource[VProps.TYPE], resource_type)
+        self.assertEqual(resource[VProps.VITRAGE_CATEGORY],
+                         EntityCategory.RESOURCE)
+        self.assertEqual(resource[VProps.VITRAGE_TYPE], resource_type)
         self.assertEqual(resource[VProps.STATE], 'active')
-        self.assertFalse(resource[VProps.IS_DELETED])
-        self.assertFalse(resource[VProps.IS_PLACEHOLDER])
+        self.assertFalse(resource[VProps.VITRAGE_IS_DELETED])
+        self.assertFalse(resource[VProps.VITRAGE_IS_PLACEHOLDER])
         if project_id:
             self.assertEqual(resource[VProps.PROJECT_ID], project_id)
 
@@ -413,98 +416,98 @@ class TestApis(TestEntityGraphUnitBase):
         alarm_on_host_vertex = self._create_alarm(
             'alarm_on_host',
             'alarm_on_host',
-            metadata={'type': 'nova.host',
-                      'name': 'host_1',
-                      'resource_id': 'host_1'})
+            metadata={VProps.VITRAGE_TYPE: NOVA_HOST_DATASOURCE,
+                      VProps.NAME: 'host_1',
+                      VProps.RESOURCE_ID: 'host_1'})
         alarm_on_instance_1_vertex = self._create_alarm(
             'alarm_on_instance_1',
             'deduced_alarm',
             project_id='project_1',
-            metadata={'type': 'nova.instance',
-                      'name': 'instance_1',
-                      'resource_id': 'sdg7849ythksjdg'})
+            metadata={VProps.VITRAGE_TYPE: NOVA_INSTANCE_DATASOURCE,
+                      VProps.NAME: 'instance_1',
+                      VProps.RESOURCE_ID: 'sdg7849ythksjdg'})
         alarm_on_instance_2_vertex = self._create_alarm(
             'alarm_on_instance_2',
             'deduced_alarm',
-            metadata={'type': 'nova.instance',
-                      'name': 'instance_2',
-                      'resource_id': 'nbfhsdugf'})
+            metadata={VProps.VITRAGE_TYPE: NOVA_INSTANCE_DATASOURCE,
+                      VProps.NAME: 'instance_2',
+                      VProps.RESOURCE_ID: 'nbfhsdugf'})
         alarm_on_instance_3_vertex = self._create_alarm(
             'alarm_on_instance_3',
             'deduced_alarm',
             project_id='project_2',
-            metadata={'type': 'nova.instance',
-                      'name': 'instance_3',
-                      'resource_id': 'nbffhsdasdugf'})
+            metadata={VProps.VITRAGE_TYPE: NOVA_INSTANCE_DATASOURCE,
+                      VProps.NAME: 'instance_3',
+                      VProps.RESOURCE_ID: 'nbffhsdasdugf'})
         alarm_on_instance_4_vertex = self._create_alarm(
             'alarm_on_instance_4',
             'deduced_alarm',
-            metadata={'type': 'nova.instance',
-                      'name': 'instance_4',
-                      'resource_id': 'ngsuy76hgd87f'})
+            metadata={VProps.VITRAGE_TYPE: NOVA_INSTANCE_DATASOURCE,
+                      VProps.NAME: 'instance_4',
+                      VProps.RESOURCE_ID: 'ngsuy76hgd87f'})
 
         # create links
         edges = list()
         edges.append(graph_utils.create_edge(
             cluster_vertex.vertex_id,
             zone_vertex.vertex_id,
-            'contains'))
+            EdgeLabel.CONTAINS))
         edges.append(graph_utils.create_edge(
             zone_vertex.vertex_id,
             host_vertex.vertex_id,
-            'contains'))
+            EdgeLabel.CONTAINS))
         edges.append(graph_utils.create_edge(
             host_vertex.vertex_id,
             instance_1_vertex.vertex_id,
-            'contains'))
+            EdgeLabel.CONTAINS))
         edges.append(graph_utils.create_edge(
             host_vertex.vertex_id,
             instance_2_vertex.vertex_id,
-            'contains'))
+            EdgeLabel.CONTAINS))
         edges.append(graph_utils.create_edge(
             host_vertex.vertex_id,
             instance_3_vertex.vertex_id,
-            'contains'))
+            EdgeLabel.CONTAINS))
         edges.append(graph_utils.create_edge(
             host_vertex.vertex_id,
             instance_4_vertex.vertex_id,
-            'contains'))
+            EdgeLabel.CONTAINS))
         edges.append(graph_utils.create_edge(
             alarm_on_host_vertex.vertex_id,
             host_vertex.vertex_id,
-            'on'))
+            EdgeLabel.ON))
         edges.append(graph_utils.create_edge(
             alarm_on_instance_1_vertex.vertex_id,
             instance_1_vertex.vertex_id,
-            'on'))
+            EdgeLabel.ON))
         edges.append(graph_utils.create_edge(
             alarm_on_instance_2_vertex.vertex_id,
             instance_2_vertex.vertex_id,
-            'on'))
+            EdgeLabel.ON))
         edges.append(graph_utils.create_edge(
             alarm_on_instance_3_vertex.vertex_id,
             instance_3_vertex.vertex_id,
-            'on'))
+            EdgeLabel.ON))
         edges.append(graph_utils.create_edge(
             alarm_on_instance_4_vertex.vertex_id,
             instance_4_vertex.vertex_id,
-            'on'))
+            EdgeLabel.ON))
         edges.append(graph_utils.create_edge(
             alarm_on_host_vertex.vertex_id,
             alarm_on_instance_1_vertex.vertex_id,
-            'causes'))
+            EdgeLabel.CAUSES))
         edges.append(graph_utils.create_edge(
             alarm_on_host_vertex.vertex_id,
             alarm_on_instance_2_vertex.vertex_id,
-            'causes'))
+            EdgeLabel.CAUSES))
         edges.append(graph_utils.create_edge(
             alarm_on_host_vertex.vertex_id,
             alarm_on_instance_3_vertex.vertex_id,
-            'causes'))
+            EdgeLabel.CAUSES))
         edges.append(graph_utils.create_edge(
             alarm_on_host_vertex.vertex_id,
             alarm_on_instance_4_vertex.vertex_id,
-            'causes'))
+            EdgeLabel.CAUSES))
 
         # add vertices to graph
         graph.add_vertex(cluster_vertex)

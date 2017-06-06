@@ -316,12 +316,12 @@ def _validate_template_id(definitions_index, id_to_check):
     return get_correct_result(RESULT_DESCRIPTION)
 
 
-def _validate_entity_category(entity_to_check, category):
+def _validate_entity_category(entity_to_check, vitrage_category):
 
     if TemplateFields.CATEGORY not in entity_to_check \
-            or entity_to_check[TemplateFields.CATEGORY] != category:
+            or entity_to_check[TemplateFields.CATEGORY] != vitrage_category:
         msg = status_msgs[132] + ' expect %s to be %s' \
-                                 % (entity_to_check, category)
+                                 % (entity_to_check, vitrage_category)
         LOG.error('%s status code: %s' % (msg, 132))
         return get_fault_result(RESULT_DESCRIPTION, 132, msg)
 

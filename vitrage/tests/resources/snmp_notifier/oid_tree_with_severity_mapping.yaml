@@ -15,9 +15,9 @@ snmp_tree:
             next:
               name:
                 oid: 1
-              is_deleted:
+              vitrage_is_deleted:
                 oid: 2
-              operational_severity:
+              vitrage_operational_severity:
                 oid: 3
           ALARM_PREFIX:
             oid: 2

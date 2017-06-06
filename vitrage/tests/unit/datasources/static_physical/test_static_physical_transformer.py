@@ -25,6 +25,7 @@ from vitrage.common.constants import UpdateMethod
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.datasources.nova.host import NOVA_HOST_DATASOURCE
 from vitrage.datasources.nova.host.transformer import HostTransformer
+from vitrage.datasources.static import StaticFields
 from vitrage.datasources.static_physical import STATIC_PHYSICAL_DATASOURCE
 from vitrage.datasources.static_physical.transformer \
     import StaticPhysicalTransformer
@@ -66,10 +67,10 @@ class TestStaticPhysicalTransformer(base.BaseTest):
 
         # Test action
         properties = {
-            VProps.TYPE: switch_type,
+            VProps.VITRAGE_TYPE: switch_type,
             VProps.ID: switch_name,
-            VProps.CATEGORY: EntityCategory.RESOURCE,
-            VProps.SAMPLE_TIMESTAMP: timestamp
+            VProps.VITRAGE_CATEGORY: EntityCategory.RESOURCE,
+            VProps.VITRAGE_SAMPLE_TIMESTAMP: timestamp
         }
         placeholder = \
             static_transformer.create_neighbor_placeholder_vertex(**properties)
@@ -82,20 +83,20 @@ class TestStaticPhysicalTransformer(base.BaseTest):
                 switch_type, switch_name)
         self.assertEqual(tuple(observed_id_values), expected_id_values)
 
-        observed_time = placeholder.get(VProps.SAMPLE_TIMESTAMP)
+        observed_time = placeholder.get(VProps.VITRAGE_SAMPLE_TIMESTAMP)
         self.assertEqual(observed_time, timestamp)
 
-        observed_subtype = placeholder.get(VProps.TYPE)
+        observed_subtype = placeholder.get(VProps.VITRAGE_TYPE)
         self.assertEqual(observed_subtype, switch_type)
 
         observed_entity_id = placeholder.get(VProps.ID)
         self.assertEqual(observed_entity_id, switch_name)
 
-        observed_category = placeholder.get(VProps.CATEGORY)
-        self.assertEqual(observed_category, EntityCategory.RESOURCE)
+        observed_vitrage_category = placeholder.get(VProps.VITRAGE_CATEGORY)
+        self.assertEqual(observed_vitrage_category, EntityCategory.RESOURCE)
 
-        is_placeholder = placeholder.get(VProps.IS_PLACEHOLDER)
-        self.assertEqual(is_placeholder, True)
+        vitrage_is_placeholder = placeholder.get(VProps.VITRAGE_IS_PLACEHOLDER)
+        self.assertEqual(vitrage_is_placeholder, True)
 
     def test_key_values(self):
         LOG.debug('Static Physical transformer test: get key values')
@@ -171,20 +172,22 @@ class TestStaticPhysicalTransformer(base.BaseTest):
         self.assertEqual(edge.label, EdgeLabel.CONTAINS)
 
     def _validate_common_vertex_props(self, vertex, event):
-        self.assertEqual(EntityCategory.RESOURCE, vertex[VProps.CATEGORY])
-        self.assertEqual(event[VProps.TYPE], vertex[VProps.TYPE])
-        self.assertEqual(event[VProps.ID], vertex[VProps.ID])
+        self.assertEqual(EntityCategory.RESOURCE,
+                         vertex[VProps.VITRAGE_CATEGORY])
+        self.assertEqual(event[StaticFields.TYPE],
+                         vertex[VProps.VITRAGE_TYPE])
+        self.assertEqual(event[StaticFields.ID], vertex[VProps.ID])
 
     def _validate_switch_vertex_props(self, vertex, event):
         self._validate_common_vertex_props(vertex, event)
         self.assertEqual(event[DSProps.SAMPLE_DATE],
-                         vertex[VProps.SAMPLE_TIMESTAMP])
+                         vertex[VProps.VITRAGE_SAMPLE_TIMESTAMP])
         self.assertEqual(event[VProps.NAME], vertex[VProps.NAME])
         self.assertEqual(event[VProps.STATE], vertex[VProps.STATE])
-        self.assertFalse(vertex[VProps.IS_PLACEHOLDER])
-        self.assertFalse(vertex[VProps.IS_DELETED])
+        self.assertFalse(vertex[VProps.VITRAGE_IS_PLACEHOLDER])
+        self.assertFalse(vertex[VProps.VITRAGE_IS_DELETED])
 
     def _validate_host_vertex_props(self, vertex, event):
         self._validate_common_vertex_props(vertex, event)
-        self.assertTrue(vertex[VProps.IS_PLACEHOLDER])
-        self.assertFalse(vertex[VProps.IS_DELETED])
+        self.assertTrue(vertex[VProps.VITRAGE_IS_PLACEHOLDER])
+        self.assertFalse(vertex[VProps.VITRAGE_IS_DELETED])

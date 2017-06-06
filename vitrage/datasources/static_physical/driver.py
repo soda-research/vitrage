@@ -18,9 +18,9 @@ from oslo_log import log
 
 from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import GraphAction
-from vitrage.common.constants import VertexProperties as VProps
 from vitrage.datasources.driver_base import DriverBase
 from vitrage.datasources.static.driver import StaticDriver
+from vitrage.datasources.static import StaticFields
 from vitrage.datasources.static_physical import STATIC_PHYSICAL_DATASOURCE
 from vitrage.utils import file as file_utils
 
@@ -149,8 +149,8 @@ class StaticPhysicalDriver(DriverBase):
     @staticmethod
     def _find_entity(new_entity, entities):
         for entity in entities:
-            if entity[VProps.TYPE] == new_entity[VProps.TYPE] \
-                    and entity[VProps.ID] == new_entity[VProps.ID]:
+            if entity[StaticFields.TYPE] == new_entity[StaticFields.TYPE] \
+                    and entity[StaticFields.ID] == new_entity[StaticFields.ID]:
                 return entity
         return None
 

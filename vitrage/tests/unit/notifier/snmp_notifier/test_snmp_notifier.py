@@ -13,6 +13,7 @@
 # under the License.
 
 
+from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.graph import Vertex
 from vitrage.notifier.plugins.snmp.snmp_notifier import SnmpNotifier
@@ -24,13 +25,13 @@ class SnmpNotifierTest(base.BaseTest):
 
     @classmethod
     def setUpClass(cls):
-        cls.resource_props = {VProps.IS_DELETED: common.false_,
-                              VProps.IS_PLACEHOLDER: common.false_}
-        cls.props = {VProps.IS_DELETED: common.false_,
+        cls.resource_props = {VProps.VITRAGE_IS_DELETED: common.false_,
+                              VProps.VITRAGE_IS_PLACEHOLDER: common.false_}
+        cls.props = {VProps.VITRAGE_IS_DELETED: common.false_,
                      VProps.NAME: common.name_,
                      VProps.RESOURCE: cls.resource_props,
-                     VProps.CATEGORY: common.category_,
-                     VProps.OPERATIONAL_SEVERITY: common.critical_}
+                     VProps.VITRAGE_CATEGORY: EntityCategory.ALARM,
+                     VProps.VITRAGE_OPERATIONAL_SEVERITY: common.critical_}
         cls.alarm_vertex = Vertex('RESOURCE:nova.instance:test1', cls.props)
 
     def test_parse_alarm(self):
@@ -38,13 +39,17 @@ class SnmpNotifierTest(base.BaseTest):
 
         self.assert_is_not_empty(alarm_data)
 
-        self.assertEqual(alarm_data.get(VProps.IS_DELETED), common.false_)
+        self.assertEqual(alarm_data.get(VProps.VITRAGE_IS_DELETED),
+                         common.false_)
         self.assertEqual(alarm_data.get(VProps.NAME), common.name_)
-        self.assertEqual(alarm_data.get(VProps.CATEGORY), common.category_)
-        self.assertEqual(alarm_data.get(VProps.OPERATIONAL_SEVERITY),
+        self.assertEqual(alarm_data.get(VProps.VITRAGE_CATEGORY),
+                         EntityCategory.ALARM)
+        self.assertEqual(alarm_data.get(VProps.VITRAGE_OPERATIONAL_SEVERITY),
                          common.critical_)
 
         self.assertEqual(alarm_data.get(VProps.RESOURCE + '_' +
-                                        VProps.IS_DELETED), common.false_)
+                                        VProps.VITRAGE_IS_DELETED),
+                         common.false_)
         self.assertEqual(alarm_data.get(VProps.RESOURCE + '_' +
-                                        VProps.IS_PLACEHOLDER), common.false_)
+                                        VProps.VITRAGE_IS_PLACEHOLDER),
+                         common.false_)

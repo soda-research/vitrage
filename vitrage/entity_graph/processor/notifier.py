@@ -55,7 +55,7 @@ class GraphNotifier(object):
         change that happened. None if the element was just created.
         :param current: The graph element (vertex or edge) after the
         change that happened. Deleted elements should arrive with the
-        is_deleted property set to True
+        vitrage_is_deleted property set to True
         :param graph: The graph
         """
         notification_types = _get_notification_type(before, current, is_vertex)
@@ -109,8 +109,8 @@ def _get_notification_type(before, current, is_vertex):
 def _is_active_deduced_alarm(vertex):
     if not vertex:
         return False
-    if vertex.get(VProps.CATEGORY) == EntityCategory.ALARM and \
-            vertex.get(VProps.TYPE) == evaluator.VITRAGE_TYPE:
+    if vertex.get(VProps.VITRAGE_CATEGORY) == EntityCategory.ALARM and \
+            vertex.get(VProps.VITRAGE_TYPE) == evaluator.VITRAGE_DATASOURCE:
         return _is_relevant_vertex(vertex)
     return False
 
@@ -118,14 +118,14 @@ def _is_active_deduced_alarm(vertex):
 def _is_marked_down(vertex):
     if not vertex:
         return False
-    if vertex.get(VProps.CATEGORY) == EntityCategory.RESOURCE and \
+    if vertex.get(VProps.VITRAGE_CATEGORY) == EntityCategory.RESOURCE and \
             vertex.get(VProps.IS_MARKED_DOWN) is True:
         return _is_relevant_vertex(vertex)
     return False
 
 
 def _is_relevant_vertex(vertex):
-    if vertex.get(VProps.IS_DELETED, False) or \
-            vertex.get(VProps.IS_PLACEHOLDER, False):
+    if vertex.get(VProps.VITRAGE_IS_DELETED, False) or \
+            vertex.get(VProps.VITRAGE_IS_PLACEHOLDER, False):
         return False
     return True

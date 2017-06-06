@@ -15,23 +15,24 @@
 
 
 class VertexProperties(object):
-    CATEGORY = 'category'
-    TYPE = 'type'
-    ID = 'id'
-    IS_DELETED = 'is_deleted'
-    STATE = 'state'
+    VITRAGE_CATEGORY = 'vitrage_category'
+    VITRAGE_TYPE = 'vitrage_type'
+    VITRAGE_ID = 'vitrage_id'
     VITRAGE_STATE = 'vitrage_state'
-    AGGREGATED_STATE = 'aggregated_state'
-    OPERATIONAL_STATE = 'operational_state'
+    VITRAGE_IS_DELETED = 'vitrage_is_deleted'
+    VITRAGE_IS_PLACEHOLDER = 'vitrage_is_placeholder'
+    VITRAGE_SAMPLE_TIMESTAMP = 'vitrage_sample_timestamp'
+    VITRAGE_AGGREGATED_STATE = 'vitrage_aggregated_state'
+    VITRAGE_OPERATIONAL_STATE = 'vitrage_operational_state'
+    VITRAGE_AGGREGATED_SEVERITY = 'vitrage_aggregated_severity'
+    VITRAGE_OPERATIONAL_SEVERITY = 'vitrage_operational_severity'
+    VITRAGE_RESOURCE_ID = 'vitrage_resource_id'
+    ID = 'id'
+    STATE = 'state'
     PROJECT_ID = 'project_id'
     UPDATE_TIMESTAMP = 'update_timestamp'
-    SAMPLE_TIMESTAMP = 'sample_timestamp'
     NAME = 'name'
-    IS_PLACEHOLDER = 'is_placeholder'
     SEVERITY = 'severity'
-    AGGREGATED_SEVERITY = 'aggregated_severity'
-    OPERATIONAL_SEVERITY = 'operational_severity'
-    VITRAGE_ID = 'vitrage_id'
     IS_MARKED_DOWN = 'is_marked_down'
     INFO = 'info'
     GRAPH_INDEX = 'graph_index'
@@ -45,7 +46,7 @@ class VertexProperties(object):
 
 class EdgeProperties(object):
     RELATIONSHIP_TYPE = 'relationship_type'
-    IS_DELETED = 'is_deleted'
+    VITRAGE_IS_DELETED = 'vitrage_is_deleted'
     UPDATE_TIMESTAMP = 'update_timestamp'
 
 

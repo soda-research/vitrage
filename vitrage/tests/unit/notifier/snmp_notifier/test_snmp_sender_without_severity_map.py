@@ -59,13 +59,13 @@ class SnmpNotifierTest(base.BaseTest):
         self.assertEqual(len(var_lst), 3)
 
         self.assertIn(VProps.NAME, oids)
-        self.assertIn(VProps.IS_DELETED, oids)
-        self.assertIn(VProps.OPERATIONAL_SEVERITY, oids)
+        self.assertIn(VProps.VITRAGE_IS_DELETED, oids)
+        self.assertIn(VProps.VITRAGE_OPERATIONAL_SEVERITY, oids)
         self.assertIn(sender.ALARM_OID, oids)
 
         self.assertIn(VProps.NAME, var_lst)
-        self.assertIn(VProps.IS_DELETED, var_lst)
-        self.assertIn(VProps.OPERATIONAL_SEVERITY, var_lst)
+        self.assertIn(VProps.VITRAGE_IS_DELETED, var_lst)
+        self.assertIn(VProps.VITRAGE_OPERATIONAL_SEVERITY, var_lst)
 
     def test_get_severity_oid(self):
 

@@ -72,22 +72,22 @@ class TestHeatStack(TestDataSourcesBase):
 
         stack_vertices = processor.entity_graph.get_vertices(
             vertex_attr_filter={
-                VProps.CATEGORY: EntityCategory.RESOURCE,
-                VProps.TYPE: HEAT_STACK_DATASOURCE
+                VProps.VITRAGE_CATEGORY: EntityCategory.RESOURCE,
+                VProps.VITRAGE_TYPE: HEAT_STACK_DATASOURCE
             })
         self.assertEqual(1, len(stack_vertices))
 
         instance_vertices = processor.entity_graph.get_vertices(
             vertex_attr_filter={
-                VProps.CATEGORY: EntityCategory.RESOURCE,
-                VProps.TYPE: NOVA_INSTANCE_DATASOURCE
+                VProps.VITRAGE_CATEGORY: EntityCategory.RESOURCE,
+                VProps.VITRAGE_TYPE: NOVA_INSTANCE_DATASOURCE
             })
         self.assertEqual(self.NUM_INSTANCES + 1, len(instance_vertices))
 
         cinder_vertices = processor.entity_graph.get_vertices(
             vertex_attr_filter={
-                VProps.CATEGORY: EntityCategory.RESOURCE,
-                VProps.TYPE: CINDER_VOLUME_DATASOURCE
+                VProps.VITRAGE_CATEGORY: EntityCategory.RESOURCE,
+                VProps.VITRAGE_TYPE: CINDER_VOLUME_DATASOURCE
             })
         self.assertEqual(1, len(cinder_vertices))
 

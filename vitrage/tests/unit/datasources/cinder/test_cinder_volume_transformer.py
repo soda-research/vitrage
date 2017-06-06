@@ -65,9 +65,9 @@ class TestCinderVolumeTransformer(base.BaseTest):
         timestamp = datetime.datetime.utcnow()
         properties = {
             VProps.ID: volume_id,
-            VProps.TYPE: CINDER_VOLUME_DATASOURCE,
-            VProps.CATEGORY: EntityCategory.RESOURCE,
-            VProps.SAMPLE_TIMESTAMP: timestamp
+            VProps.VITRAGE_TYPE: CINDER_VOLUME_DATASOURCE,
+            VProps.VITRAGE_CATEGORY: EntityCategory.RESOURCE,
+            VProps.VITRAGE_SAMPLE_TIMESTAMP: timestamp
         }
         transformer = self.transformers[CINDER_VOLUME_DATASOURCE]
 
@@ -82,20 +82,20 @@ class TestCinderVolumeTransformer(base.BaseTest):
                                                      volume_id)
         self.assertEqual(tuple(observed_id_values), expected_id_values)
 
-        observed_time = placeholder.get(VProps.SAMPLE_TIMESTAMP)
+        observed_time = placeholder.get(VProps.VITRAGE_SAMPLE_TIMESTAMP)
         self.assertEqual(observed_time, timestamp)
 
-        observed_type = placeholder.get(VProps.TYPE)
+        observed_type = placeholder.get(VProps.VITRAGE_TYPE)
         self.assertEqual(observed_type, CINDER_VOLUME_DATASOURCE)
 
         observed_entity_id = placeholder.get(VProps.ID)
         self.assertEqual(observed_entity_id, volume_id)
 
-        observed_category = placeholder.get(VProps.CATEGORY)
-        self.assertEqual(observed_category, EntityCategory.RESOURCE)
+        observed_vitrage_category = placeholder.get(VProps.VITRAGE_CATEGORY)
+        self.assertEqual(observed_vitrage_category, EntityCategory.RESOURCE)
 
-        is_placeholder = placeholder.get(VProps.IS_PLACEHOLDER)
-        self.assertEqual(is_placeholder, True)
+        vitrage_is_placeholder = placeholder.get(VProps.VITRAGE_IS_PLACEHOLDER)
+        self.assertEqual(vitrage_is_placeholder, True)
 
     def test_key_values(self):
         LOG.debug('Cinder Volume transformer test: get key values')
@@ -164,8 +164,10 @@ class TestCinderVolumeTransformer(base.BaseTest):
 
         is_update_event = tbase.is_update_event(event)
 
-        self.assertEqual(EntityCategory.RESOURCE, vertex[VProps.CATEGORY])
-        self.assertEqual(event[DSProps.ENTITY_TYPE], vertex[VProps.TYPE])
+        self.assertEqual(EntityCategory.RESOURCE,
+                         vertex[VProps.VITRAGE_CATEGORY])
+        self.assertEqual(event[DSProps.ENTITY_TYPE],
+                         vertex[VProps.VITRAGE_TYPE])
 
         id_field_path = 'volume_id' if is_update_event else 'id'
         self.assertEqual(
@@ -173,7 +175,7 @@ class TestCinderVolumeTransformer(base.BaseTest):
             vertex[VProps.ID])
 
         self.assertEqual(event[DSProps.SAMPLE_DATE],
-                         vertex[VProps.SAMPLE_TIMESTAMP])
+                         vertex[VProps.VITRAGE_SAMPLE_TIMESTAMP])
 
         name_field_path = 'display_name'
         self.assertEqual(
@@ -195,8 +197,8 @@ class TestCinderVolumeTransformer(base.BaseTest):
             tbase.extract_field_value(event, volume_type_field_path),
             vertex[CinderProps.VOLUME_TYPE])
 
-        self.assertFalse(vertex[VProps.IS_PLACEHOLDER])
-        self.assertFalse(vertex[VProps.IS_DELETED])
+        self.assertFalse(vertex[VProps.VITRAGE_IS_PLACEHOLDER])
+        self.assertFalse(vertex[VProps.VITRAGE_IS_DELETED])
 
     def _validate_neighbors(self, neighbors, volume_vertex_id, event):
         instance_counter = 0
@@ -220,12 +222,13 @@ class TestCinderVolumeTransformer(base.BaseTest):
                                     volume_vertex_id):
         # validate neighbor vertex
         self.assertEqual(EntityCategory.RESOURCE,
-                         instance_neighbor.vertex[VProps.CATEGORY])
+                         instance_neighbor.vertex[VProps.VITRAGE_CATEGORY])
         self.assertEqual(NOVA_INSTANCE_DATASOURCE,
-                         instance_neighbor.vertex[VProps.TYPE])
+                         instance_neighbor.vertex[VProps.VITRAGE_TYPE])
         self.assertEqual(instance_id, instance_neighbor.vertex[VProps.ID])
-        self.assertTrue(instance_neighbor.vertex[VProps.IS_PLACEHOLDER])
-        self.assertFalse(instance_neighbor.vertex[VProps.IS_DELETED])
+        self.assertTrue(
+            instance_neighbor.vertex[VProps.VITRAGE_IS_PLACEHOLDER])
+        self.assertFalse(instance_neighbor.vertex[VProps.VITRAGE_IS_DELETED])
 
         # Validate neighbor edge
         edge = instance_neighbor.edge

@@ -126,7 +126,7 @@ class TemplateSyntaxValidatorTest(base.BaseTest):
         entity[TemplateFields.ENTITY][TemplateFields.TEMPLATE_ID] = '_a123'
         self._test_execution_with_correct_result(template)
 
-    def test_validate_entity_with_invalid_category_value(self):
+    def test_validate_entity_with_invalid_vitrage_category_value(self):
 
         template = self.clone_template
         definitions = template[TemplateFields.DEFINITIONS]

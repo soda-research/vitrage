@@ -152,13 +152,13 @@ class TestEntityGraphUnitBase(base.BaseTest):
     def _create_alarm(vitrage_id, alarm_type, project_id=None, metadata=None):
         return graph_utils.create_vertex(
             vitrage_id,
+            vitrage_category=EntityCategory.ALARM,
+            vitrage_type=alarm_type,
+            vitrage_sample_timestamp=None,
+            vitrage_is_deleted=False,
+            vitrage_is_placeholder=False,
             entity_id=vitrage_id,
-            entity_category=EntityCategory.ALARM,
-            entity_type=alarm_type,
             entity_state='active',
-            is_deleted=False,
-            sample_timestamp=None,
-            is_placeholder=False,
             project_id=project_id,
             metadata=metadata
         )
@@ -167,13 +167,13 @@ class TestEntityGraphUnitBase(base.BaseTest):
     def _create_resource(vitrage_id, resource_type, project_id=None):
         return graph_utils.create_vertex(
             vitrage_id,
+            vitrage_category=EntityCategory.RESOURCE,
+            vitrage_type=resource_type,
+            vitrage_sample_timestamp=None,
+            vitrage_is_deleted=False,
+            vitrage_is_placeholder=False,
             entity_id=vitrage_id,
-            entity_category=EntityCategory.RESOURCE,
-            entity_type=resource_type,
             entity_state='active',
-            is_deleted=False,
-            sample_timestamp=None,
-            is_placeholder=False,
             project_id=project_id
         )
 

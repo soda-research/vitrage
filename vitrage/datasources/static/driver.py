@@ -28,7 +28,9 @@ LOG = log.getLogger(__name__)
 
 class StaticDriver(DriverBase):
     # base fields are required for all entities, others are treated as metadata
-    BASE_FIELDS = {StaticFields.STATIC_ID, StaticFields.TYPE, StaticFields.ID}
+    BASE_FIELDS = {StaticFields.STATIC_ID,
+                   StaticFields.TYPE,
+                   StaticFields.ID}
 
     def __init__(self, conf):
         super(StaticDriver, self).__init__()
@@ -121,9 +123,11 @@ class StaticDriver(DriverBase):
         """Expand config id to neighbor entity
 
         rel={'source': 's1', 'target': 'r1', 'relationship_type': 'attached'}
-        neighbor={'static_id': 'h1', 'type': 'host.nova', 'id': 1}
+        neighbor={'static_id': 'h1', 'vitrage_type': 'host.nova', 'id': 1}
         result={'relationship_type': 'attached', 'source': 's1',
-                'target': {'static_id': 'h1', 'type': 'host.nova', 'id': 1}}
+                'target': {'static_id': 'h1',
+                           'vitrage_type': 'host.nova',
+                           'id': 1}}
         """
 
         rel = rel.copy()

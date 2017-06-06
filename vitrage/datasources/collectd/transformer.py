@@ -45,7 +45,7 @@ class CollectdTransformer(AlarmTransformerBase):
 
         update_timestamp = entity_event['timestamp']
 
-        sample_timestamp = entity_event[DSProps.SAMPLE_DATE]
+        vitrage_sample_timestamp = entity_event[DSProps.SAMPLE_DATE]
 
         entity_state = AlarmProps.INACTIVE_STATE \
             if self._ok_status(entity_event) else AlarmProps.ACTIVE_STATE
@@ -59,10 +59,10 @@ class CollectdTransformer(AlarmTransformerBase):
 
         return graph_utils.create_vertex(
             self._create_entity_key(entity_event),
-            entity_category=EntityCategory.ALARM,
-            entity_type=entity_event[DSProps.ENTITY_TYPE],
+            vitrage_category=EntityCategory.ALARM,
+            vitrage_type=entity_event[DSProps.ENTITY_TYPE],
+            vitrage_sample_timestamp=vitrage_sample_timestamp,
             entity_state=entity_state,
-            sample_timestamp=sample_timestamp,
             update_timestamp=update_timestamp,
             metadata=metadata)
 
@@ -97,7 +97,7 @@ class CollectdTransformer(AlarmTransformerBase):
                                                 resource_name,
                                                 alarm_id))
 
-    def get_type(self):
+    def get_vitrage_type(self):
         return COLLECTD_DATASOURCE
 
     @staticmethod

@@ -49,13 +49,14 @@ class TestGraph(GraphTestBase):
         self.assertEqual(2, len(graph_copy), 'graph copy __len__')
 
         updated_vertex = g.get_vertex(v_host.vertex_id)
-        updated_vertex[VProps.CATEGORY] = ALARM
+        updated_vertex[VProps.VITRAGE_CATEGORY] = ALARM
         g.update_vertex(updated_vertex)
         v_from_g = g.get_vertex(v_host.vertex_id)
         v_from_graph_copy = graph_copy.get_vertex(v_host.vertex_id)
-        self.assertEqual(ALARM, v_from_g[VProps.CATEGORY],
+        self.assertEqual(ALARM, v_from_g[VProps.VITRAGE_CATEGORY],
                          'graph vertex changed after update')
-        self.assertEqual(NOVA_HOST_DATASOURCE, v_from_graph_copy[VProps.TYPE],
+        self.assertEqual(NOVA_HOST_DATASOURCE,
+                         v_from_graph_copy[VProps.VITRAGE_TYPE],
                          'graph copy vertex unchanged after update')
 
     def test_vertex_crud(self):
@@ -64,7 +65,8 @@ class TestGraph(GraphTestBase):
         v = g.get_vertex(v_node.vertex_id)
         self.assertEqual(v_node[VProps.ID], v[VProps.ID],
                          'vertex properties are saved')
-        self.assertEqual(v_node[VProps.CATEGORY], v[VProps.CATEGORY],
+        self.assertEqual(v_node[VProps.VITRAGE_CATEGORY],
+                         v[VProps.VITRAGE_CATEGORY],
                          'vertex properties are saved')
         self.assertEqual(v_node.vertex_id, v.vertex_id,
                          'vertex vertex_id is saved')
@@ -72,14 +74,15 @@ class TestGraph(GraphTestBase):
         # Changing the referenced item
         updated_v = v
         updated_v['KUKU'] = 'KUKU'
-        updated_v[VProps.CATEGORY] = 'CHANGED'
+        updated_v[VProps.VITRAGE_CATEGORY] = 'CHANGED'
         # Get it again
         v = g.get_vertex(v_node.vertex_id)
         self.assertIsNone(v.get('KUKU', None),
                           'Change should not affect graph item')
-        self.assertFalse(v.get(EProps.IS_DELETED, None),
+        self.assertFalse(v.get(EProps.VITRAGE_IS_DELETED, None),
                          'Change should not affect graph item')
-        self.assertEqual(v_node[VProps.CATEGORY], v[VProps.CATEGORY],
+        self.assertEqual(v_node[VProps.VITRAGE_CATEGORY],
+                         v[VProps.VITRAGE_CATEGORY],
                          'Change should not affect graph item')
         # Update the graph item and see changes take place
         g.update_vertex(updated_v)
@@ -87,7 +90,8 @@ class TestGraph(GraphTestBase):
         v = g.get_vertex(v_node.vertex_id)
         self.assertEqual(updated_v['KUKU'], v['KUKU'],
                          'Graph item should change after update')
-        self.assertEqual(updated_v[VProps.CATEGORY], v[VProps.CATEGORY],
+        self.assertEqual(updated_v[VProps.VITRAGE_CATEGORY],
+                         v[VProps.VITRAGE_CATEGORY],
                          'Graph item should change after update')
 
         # Update the graph item and see changes take place
@@ -101,17 +105,18 @@ class TestGraph(GraphTestBase):
         # check metadata
         another_vertex = utils.create_vertex(
             vitrage_id='123',
+            vitrage_category=NOVA_INSTANCE_DATASOURCE,
             entity_id='456',
-            entity_category=NOVA_INSTANCE_DATASOURCE,
             metadata={'some_meta': 'DATA',
-                      'type': 'nova.instance',
-                      'resource_id': 'sdg7849ythksjdg'}
+                      VProps.VITRAGE_TYPE: NOVA_INSTANCE_DATASOURCE,
+                      VProps.RESOURCE_ID: 'sdg7849ythksjdg'}
         )
         g.add_vertex(another_vertex)
         v = g.get_vertex(another_vertex.vertex_id)
         self.assertEqual(another_vertex[VProps.ID], v[VProps.ID],
                          'vertex properties are saved')
-        self.assertEqual(another_vertex[VProps.CATEGORY], v[VProps.CATEGORY],
+        self.assertEqual(another_vertex[VProps.VITRAGE_CATEGORY],
+                         v[VProps.VITRAGE_CATEGORY],
                          'vertex properties are saved')
         self.assertEqual('DATA', v['some_meta'],
                          'vertex properties are saved')
@@ -131,7 +136,7 @@ class TestGraph(GraphTestBase):
         g.add_vertex(v_node)
         v_node_copy = g.get_vertex(v_node.vertex_id)
         v_node_copy[VProps.NAME] = 'test_node'
-        v_node_copy[VProps.CATEGORY] = 'super_node'
+        v_node_copy[VProps.VITRAGE_CATEGORY] = 'super_node'
 
         g.add_vertex(v_host)
         v_host_copy = g.get_vertex(v_host.vertex_id)
@@ -143,7 +148,7 @@ class TestGraph(GraphTestBase):
         # Test Assertions
         updated_v_node = g.get_vertex(v_node.vertex_id)
         self.assertEqual('test_node', updated_v_node[VProps.NAME])
-        self.assertEqual('super_node', updated_v_node[VProps.CATEGORY])
+        self.assertEqual('super_node', updated_v_node[VProps.VITRAGE_CATEGORY])
 
         updated_v_host = g.get_vertex(v_host.vertex_id)
         self.assertEqual('test_host', updated_v_host[VProps.NAME])
@@ -184,12 +189,12 @@ class TestGraph(GraphTestBase):
 
         # Changing the referenced item
         updated_e = e
-        updated_e[EProps.IS_DELETED] = 'KUKU'
+        updated_e[EProps.VITRAGE_IS_DELETED] = 'KUKU'
         updated_e[EProps.UPDATE_TIMESTAMP] = 'CHANGED'
 
         # Get it again
         e = g.get_edge(v_node.vertex_id, v_host.vertex_id, label)
-        self.assertFalse(e.get(EProps.IS_DELETED, None),
+        self.assertFalse(e.get(EProps.VITRAGE_IS_DELETED, None),
                          'Change should not affect graph item')
         self.assertEqual(e_node_to_host[EProps.UPDATE_TIMESTAMP],
                          e[EProps.UPDATE_TIMESTAMP],
@@ -198,19 +203,19 @@ class TestGraph(GraphTestBase):
         g.update_edge(updated_e)
         # Get it again
         e = g.get_edge(v_node.vertex_id, v_host.vertex_id, label)
-        self.assertEqual(updated_e[EProps.IS_DELETED],
-                         e[EProps.IS_DELETED],
+        self.assertEqual(updated_e[EProps.VITRAGE_IS_DELETED],
+                         e[EProps.VITRAGE_IS_DELETED],
                          'Graph item should change after update')
         self.assertEqual(updated_e[EProps.UPDATE_TIMESTAMP],
                          e[EProps.UPDATE_TIMESTAMP],
                          'Graph item should change after update')
 
         # Update the graph item and see changes take place
-        updated_e[EProps.IS_DELETED] = None
+        updated_e[EProps.VITRAGE_IS_DELETED] = None
         g.update_edge(updated_e)
         # Get it again
         e = g.get_edge(v_node.vertex_id, v_host.vertex_id, label)
-        self.assertNotIn(EProps.IS_DELETED, e.properties,
+        self.assertNotIn(EProps.VITRAGE_IS_DELETED, e.properties,
                          'Update value to None should entirely remove the key')
 
         # check metadata
@@ -256,8 +261,8 @@ class TestGraph(GraphTestBase):
         v4 = v_alarm
         v5 = utils.create_vertex(
             vitrage_id='kuku',
-            entity_type=NOVA_HOST_DATASOURCE,
-            entity_category=EntityCategory.RESOURCE)
+            vitrage_category=EntityCategory.RESOURCE,
+            vitrage_type=NOVA_HOST_DATASOURCE)
 
         g = NXGraph('test_neighbors')
         g.add_vertex(v1)
@@ -301,7 +306,7 @@ class TestGraph(GraphTestBase):
 
         v1_neighbors = g.neighbors(
             v_id=v1.vertex_id,
-            vertex_attr_filter={VProps.TYPE: NOVA_HOST_DATASOURCE})
+            vertex_attr_filter={VProps.VITRAGE_TYPE: NOVA_HOST_DATASOURCE})
         self._assert_set_equal({v2}, v1_neighbors,
                                'Check V1 neighbors, vertex property filter')
 
@@ -330,7 +335,7 @@ class TestGraph(GraphTestBase):
             v_id=v1.vertex_id,
             direction=Direction.IN,
             edge_attr_filter={EProps.RELATIONSHIP_TYPE: relationship_c},
-            vertex_attr_filter={VProps.TYPE: NOVA_HOST_DATASOURCE})
+            vertex_attr_filter={VProps.VITRAGE_TYPE: NOVA_HOST_DATASOURCE})
         self._assert_set_equal(
             {v2}, v1_neighbors,
             'Check V1 neighbors, vertex/edge property filter and direction')
@@ -343,14 +348,14 @@ class TestGraph(GraphTestBase):
 
         v2_neighbors = g.neighbors(
             v_id=v2.vertex_id,
-            vertex_attr_filter={VProps.CATEGORY: NOVA_HOST_DATASOURCE})
+            vertex_attr_filter={VProps.VITRAGE_CATEGORY: NOVA_HOST_DATASOURCE})
         self._assert_set_equal({}, v2_neighbors,
                                'Check v2 neighbors, vertex property filter')
 
         v2_neighbors = g.neighbors(
             v_id=v2.vertex_id,
-            vertex_attr_filter={VProps.CATEGORY: [NOVA_HOST_DATASOURCE,
-                                                  ALARM]})
+            vertex_attr_filter={VProps.VITRAGE_CATEGORY: [NOVA_HOST_DATASOURCE,
+                                                          ALARM]})
         self._assert_set_equal({v4}, v2_neighbors,
                                'Check v2 neighbors, vertex property filter')
 
@@ -360,11 +365,11 @@ class TestGraph(GraphTestBase):
                 EProps.RELATIONSHIP_TYPE: [relationship_a, relationship_b]
             },
             vertex_attr_filter={
-                VProps.CATEGORY: [RESOURCE, ALARM],
-                VProps.TYPE: [NOVA_HOST_DATASOURCE,
-                              NOVA_INSTANCE_DATASOURCE,
-                              ALARM_ON_VM,
-                              ALARM_ON_HOST]
+                VProps.VITRAGE_CATEGORY: [RESOURCE, ALARM],
+                VProps.VITRAGE_TYPE: [NOVA_HOST_DATASOURCE,
+                                      NOVA_INSTANCE_DATASOURCE,
+                                      ALARM_ON_VM,
+                                      ALARM_ON_HOST]
             }
         )
         self._assert_set_equal({v3, v4}, v2_neighbors,
@@ -378,13 +383,13 @@ class TestGraph(GraphTestBase):
 
         v3_neighbors = g.neighbors(
             v_id=v3.vertex_id,
-            vertex_attr_filter={VProps.CATEGORY: NOVA_HOST_DATASOURCE},
+            vertex_attr_filter={VProps.VITRAGE_CATEGORY: NOVA_HOST_DATASOURCE},
             direction=Direction.OUT)
         self._assert_set_equal({}, v3_neighbors,
                                'Check neighbors for vertex without any')
         v5_neighbors = g.neighbors(
             v_id=v5.vertex_id,
-            vertex_attr_filter={VProps.CATEGORY: NOVA_HOST_DATASOURCE})
+            vertex_attr_filter={VProps.VITRAGE_CATEGORY: NOVA_HOST_DATASOURCE})
         self._assert_set_equal({}, v5_neighbors,
                                'Check neighbors for not connected vertex')
 
@@ -399,20 +404,20 @@ class TestGraph(GraphTestBase):
                          'get_vertices __len__ all vertices')
 
         node_vertices = g.get_vertices(
-            vertex_attr_filter={VProps.TYPE: OPENSTACK_CLUSTER})
+            vertex_attr_filter={VProps.VITRAGE_TYPE: OPENSTACK_CLUSTER})
         self.assertEqual(1, len(node_vertices),
                          'get_vertices __len__ node vertices')
         found_vertex = node_vertices.pop()
-        self.assertEqual(OPENSTACK_CLUSTER, found_vertex[VProps.TYPE],
+        self.assertEqual(OPENSTACK_CLUSTER, found_vertex[VProps.VITRAGE_TYPE],
                          'get_vertices check node vertex')
 
         node_vertices = g.get_vertices(
-            vertex_attr_filter={VProps.TYPE: OPENSTACK_CLUSTER,
-                                VProps.CATEGORY: RESOURCE})
+            vertex_attr_filter={VProps.VITRAGE_TYPE: OPENSTACK_CLUSTER,
+                                VProps.VITRAGE_CATEGORY: RESOURCE})
         self.assertEqual(1, len(node_vertices),
                          'get_vertices __len__ node vertices')
         found_vertex = node_vertices.pop()
-        self.assertEqual(OPENSTACK_CLUSTER, found_vertex[VProps.TYPE],
+        self.assertEqual(OPENSTACK_CLUSTER, found_vertex[VProps.VITRAGE_TYPE],
                          'get_vertices check node vertex')
 
     def _check_callback_result(self, result, msg, exp_prev, exp_curr):
@@ -472,7 +477,7 @@ class TestGraph(GraphTestBase):
                                     e_node_to_host)
 
         updated_vertex = g.get_vertex(v_host.vertex_id)
-        updated_vertex[VProps.CATEGORY] = ALARM
+        updated_vertex[VProps.VITRAGE_CATEGORY] = ALARM
         g.update_vertex(updated_vertex)
         self._check_callback_result(self.result, 'update vertex',
                                     v_host, updated_vertex)

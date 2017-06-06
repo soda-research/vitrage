@@ -77,7 +77,7 @@ class ScenarioEvaluator(object):
         change that happened. None if the element was just created.
         :param current: The graph element (vertex or edge) after the
         change that happened. Deleted elements should arrive with the
-        is_deleted property set to True
+        vitrage_is_deleted property set to True
         """
 
         if not self.enabled:
@@ -118,8 +118,8 @@ class ScenarioEvaluator(object):
 
     def _get_element_scenarios(self, element, is_vertex):
         if not element \
-                or element.get(VProps.IS_DELETED) \
-                or element.get(EProps.IS_DELETED):
+                or element.get(VProps.VITRAGE_IS_DELETED) \
+                or element.get(EProps.VITRAGE_IS_DELETED):
             return []
         elif is_vertex:
             return self._scenario_repo.get_scenarios_by_vertex(element)
@@ -310,8 +310,8 @@ class ScenarioEvaluator(object):
 
             connected_component = self.get_connected_component(subgraph,
                                                                action_target)
-            # change the is_deleted and negative_condition props to false when
-            # is_switch_mode=true so that when we have an event on a
+            # change the vitrage_is_deleted and negative_condition props to
+            # false when is_switch_mode=true so that when we have an event on a
             # negative_condition=true edge it will find the correct subgraph
             self._switch_edge_negative_props(is_switch_mode, scenario_edge,
                                              subgraph, False)
@@ -349,7 +349,7 @@ class ScenarioEvaluator(object):
                                     status):
         if is_switch_mode:
             scenario_edge.edge[NEG_CONDITION] = status
-            scenario_edge.edge[EProps.IS_DELETED] = status
+            scenario_edge.edge[EProps.VITRAGE_IS_DELETED] = status
             subgraph.update_edge(scenario_edge.edge)
 
     @staticmethod

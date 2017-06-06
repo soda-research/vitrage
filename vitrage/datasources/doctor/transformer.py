@@ -54,10 +54,10 @@ class DoctorTransformer(AlarmTransformerBase):
 
         return graph_utils.create_vertex(
             self._create_entity_key(entity_event),
-            entity_category=EntityCategory.ALARM,
-            entity_type=entity_event[DSProps.ENTITY_TYPE],
+            vitrage_category=EntityCategory.ALARM,
+            vitrage_type=entity_event[DSProps.ENTITY_TYPE],
+            vitrage_sample_timestamp=entity_event[DSProps.SAMPLE_DATE],
             entity_state=self._get_alarm_state(entity_event),
-            sample_timestamp=entity_event[DSProps.SAMPLE_DATE],
             update_timestamp=entity_event[DoctorProps.UPDATE_TIME],
             metadata=details)
 
@@ -76,7 +76,7 @@ class DoctorTransformer(AlarmTransformerBase):
             entity_event[EventProps.TYPE],
             get_detail(entity_event, DoctorDetails.HOSTNAME)))
 
-    def get_type(self):
+    def get_vitrage_type(self):
         return DOCTOR_DATASOURCE
 
     def _ok_status(self, entity_event):

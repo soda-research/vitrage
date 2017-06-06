@@ -22,7 +22,8 @@ from vitrage.datasources.consistency import CONSISTENCY_DATASOURCE
 from vitrage.datasources.consistency.transformer import ConsistencyTransformer
 from vitrage.evaluator.actions.evaluator_event_transformer import \
     EvaluatorEventTransformer
-from vitrage.evaluator.actions.evaluator_event_transformer import VITRAGE_TYPE
+from vitrage.evaluator.actions.evaluator_event_transformer \
+    import VITRAGE_DATASOURCE
 from vitrage.utils import opt_exists
 
 LOG = logging.getLogger(__name__)
@@ -53,7 +54,7 @@ class TransformerManager(object):
                 LOG.exception('Failed to register transformer %s. '
                               'Exception: %s', datasource_type, e)
 
-        transformers[VITRAGE_TYPE] = importutils.import_object(
+        transformers[VITRAGE_DATASOURCE] = importutils.import_object(
             "%s.%s" % (EvaluatorEventTransformer.__module__,
                        EvaluatorEventTransformer.__name__), transformers, conf)
 

@@ -27,8 +27,8 @@ class AlarmDriverBase(DriverBase):
         super(DriverBase, self).__init__()
         self.cache = dict()
 
-    def _entity_type(self):
-        """Return the type of the datasource """
+    def _vitrage_type(self):
+        """Return the vitrage_type of the datasource """
         pass
 
     def _alarm_key(self, alarm):
@@ -74,12 +74,12 @@ class AlarmDriverBase(DriverBase):
 
     def get_all(self, datasource_action):
         return self.make_pickleable(self._get_all_alarms(),
-                                    self._entity_type(),
+                                    self._vitrage_type(),
                                     datasource_action)
 
     def get_changes(self, datasource_action):
         return self.make_pickleable(self._get_changed_alarms(),
-                                    self._entity_type(),
+                                    self._vitrage_type(),
                                     datasource_action)
 
     def _get_all_alarms(self):

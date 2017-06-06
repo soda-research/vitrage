@@ -42,18 +42,18 @@ def create_predicate(query_dict):
     --------------
     query_dict = {
         'and': [
-            {'==': {'TYPE': 'ALARM'}},
+            {'==': {'CATEGORY': 'ALARM'}},
             {'or': [
                 {'>': {'TIME': 150}},
-                {'==': {'IS_DELETED': True}}
+                {'==': {'VITRAGE_IS_DELETED': True}}
             ]}
         ]
     }
 
     Example Output:
     --------------
-    lambda item: ((item['TYPE']== 'ALARM') and
-                  ((item['TIME']> 150) or (item['IS_DELETED']== True)))
+    lambda item: ((item['CATEGORY']== 'ALARM') and
+                  ((item['TIME']> 150) or (item['VITRAGE_IS_DELETED']== True)))
 
     Example Usage:
     --------------

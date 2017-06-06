@@ -36,7 +36,7 @@ from vitrage.graph import Vertex
 LOG = logging.getLogger(__name__)
 
 
-VITRAGE_TYPE = 'vitrage'
+VITRAGE_DATASOURCE = 'vitrage'
 
 
 class EvaluatorEventTransformer(transformer_base.TransformerBase):
@@ -63,8 +63,9 @@ class EvaluatorEventTransformer(transformer_base.TransformerBase):
         if event_type == UPDATE_VERTEX:
             properties = {
                 VProps.UPDATE_TIMESTAMP: update_timestamp,
-                VProps.SAMPLE_TIMESTAMP: event[VProps.SAMPLE_TIMESTAMP],
-                VProps.IS_PLACEHOLDER: False,
+                VProps.VITRAGE_SAMPLE_TIMESTAMP:
+                    event[VProps.VITRAGE_SAMPLE_TIMESTAMP],
+                VProps.VITRAGE_IS_PLACEHOLDER: False,
                 VProps.RESOURCE_ID: event.get(TFields.TARGET)
             }
             if VProps.IS_REAL_VITRAGE_ID in event:
@@ -89,9 +90,10 @@ class EvaluatorEventTransformer(transformer_base.TransformerBase):
             }
             return graph_utils.create_vertex(
                 self._create_entity_key(event),
-                entity_category=EntityCategory.ALARM,
-                entity_type=VITRAGE_TYPE,
-                sample_timestamp=event[VProps.SAMPLE_TIMESTAMP],
+                vitrage_category=EntityCategory.ALARM,
+                vitrage_type=VITRAGE_DATASOURCE,
+                vitrage_sample_timestamp=event[
+                    VProps.VITRAGE_SAMPLE_TIMESTAMP],
                 update_timestamp=update_timestamp,
                 metadata=metadata)
 
@@ -104,7 +106,6 @@ class EvaluatorEventTransformer(transformer_base.TransformerBase):
         return self._create_vitrage_neighbors(event)
 
     def _create_vitrage_neighbors(self, event):
-
         event_type = event[EVALUATOR_EVENT_TYPE]
 
         timestamp = transformer_base.convert_timestamp_format(
@@ -113,6 +114,7 @@ class EvaluatorEventTransformer(transformer_base.TransformerBase):
         )
 
         if event_type in [ADD_EDGE, REMOVE_EDGE]:
+
             relation_edge = graph_utils.create_edge(
                 source_id=event[TFields.SOURCE],
                 target_id=event[TFields.TARGET],
@@ -122,6 +124,7 @@ class EvaluatorEventTransformer(transformer_base.TransformerBase):
             return [Neighbor(None, relation_edge)]
 
         if event_type == ADD_VERTEX:
+
             relation_edge = graph_utils.create_edge(
                 source_id=self._create_entity_key(event),
                 target_id=event[TFields.TARGET],
@@ -129,12 +132,13 @@ class EvaluatorEventTransformer(transformer_base.TransformerBase):
                 update_timestamp=timestamp)
 
             neighbor_props = {
-                VProps.IS_PLACEHOLDER: True,
+                VProps.VITRAGE_IS_PLACEHOLDER: True,
                 VProps.UPDATE_TIMESTAMP: timestamp,
-                VProps.SAMPLE_TIMESTAMP: event[VProps.SAMPLE_TIMESTAMP],
+                VProps.VITRAGE_SAMPLE_TIMESTAMP:
+                    event[VProps.VITRAGE_SAMPLE_TIMESTAMP],
                 VProps.IS_REAL_VITRAGE_ID: True,
-                VProps.TYPE: event[VProps.VITRAGE_RESOURCE_TYPE],
-                VProps.CATEGORY: EntityCategory.RESOURCE,
+                VProps.VITRAGE_TYPE: event[VProps.VITRAGE_RESOURCE_TYPE],
+                VProps.VITRAGE_CATEGORY: EntityCategory.RESOURCE,
             }
             neighbor = Vertex(event[TFields.TARGET], neighbor_props)
             return [Neighbor(neighbor, relation_edge)]
@@ -166,10 +170,10 @@ class EvaluatorEventTransformer(transformer_base.TransformerBase):
         return transformer_base.build_key(key_fields)
 
     def _key_values(self, *args):
-        return (EntityCategory.ALARM, VITRAGE_TYPE) + args
+        return (EntityCategory.ALARM, VITRAGE_DATASOURCE) + args
 
     def create_neighbor_placeholder_vertex(self, **kwargs):
         LOG.info('Evaluator does not create placeholders')
 
-    def get_type(self):
-        return VITRAGE_TYPE
+    def get_vitrage_type(self):
+        return VITRAGE_DATASOURCE

@@ -60,13 +60,13 @@ Let's take a basic template as example
 
   expected_entities = {
     'alarm': Vertex(vertex_id='alarm',
-                    properties={'category': 'ALARM',
-                                'type': 'nagios',
-                                'name': 'HOST_HIGH_CPU_LOAD'
+                    properties={'vitrage_category': 'ALARM',
+                                'vitrage_type': 'nagios',
+                                'name': 'HOST_HIGH_CPU_LOAD',
                                 }),
     'resource': Vertex(vertex_id='resource',
-                       properties={'category': 'RESOURCE',
-                                   'type': 'nova.host'
+                       properties={'vitrage_category': 'RESOURCE',
+                                   'vitrage_type': 'nova.host',
                                    })
   }
 

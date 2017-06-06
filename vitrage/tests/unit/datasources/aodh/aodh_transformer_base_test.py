@@ -31,8 +31,9 @@ class AodhTransformerBaseTest(base.BaseTest):
 
     def _validate_aodh_vertex_props(self, vertex, event):
 
-        self.assertEqual(EntityCategory.ALARM, vertex[VProps.CATEGORY])
-        self.assertEqual(event[DSProps.ENTITY_TYPE], vertex[VProps.TYPE])
+        self.assertEqual(EntityCategory.ALARM, vertex[VProps.VITRAGE_CATEGORY])
+        self.assertEqual(event[DSProps.ENTITY_TYPE],
+                         vertex[VProps.VITRAGE_TYPE])
         self.assertEqual(event[AodhProps.NAME], vertex[VProps.NAME])
         self.assertEqual(event[AodhProps.SEVERITY], vertex[VProps.SEVERITY])
         self.assertEqual(event[AodhProps.DESCRIPTION],
@@ -50,7 +51,7 @@ class AodhTransformerBaseTest(base.BaseTest):
             self.assertEqual(event[AodhProps.STATE_TIMESTAMP],
                              vertex[AodhProps.STATE_TIMESTAMP])
         self.assertEqual(event[DSProps.SAMPLE_DATE],
-                         vertex[VProps.SAMPLE_TIMESTAMP])
+                         vertex[VProps.VITRAGE_SAMPLE_TIMESTAMP])
 
         event_status = event[AodhProps.STATE]
         if event_status == AodhState.OK:
@@ -59,8 +60,8 @@ class AodhTransformerBaseTest(base.BaseTest):
         else:
             self.assertEqual(AlarmProps.ACTIVE_STATE,
                              vertex[VProps.STATE])
-        self.assertFalse(vertex[VProps.IS_PLACEHOLDER])
-        self.assertFalse(vertex[VProps.IS_DELETED])
+        self.assertFalse(vertex[VProps.VITRAGE_IS_PLACEHOLDER])
+        self.assertFalse(vertex[VProps.VITRAGE_IS_DELETED])
 
     def _validate_action(self, alarm, wrapper):
         if DSProps.EVENT_TYPE in alarm \
@@ -94,12 +95,12 @@ class AodhTransformerBaseTest(base.BaseTest):
                                     alarm_vertex_id):
         # validate neighbor vertex
         self.assertEqual(EntityCategory.RESOURCE,
-                         alarm_neighbor.vertex[VProps.CATEGORY])
+                         alarm_neighbor.vertex[VProps.VITRAGE_CATEGORY])
         self.assertEqual(NOVA_INSTANCE_DATASOURCE,
-                         alarm_neighbor.vertex[VProps.TYPE])
+                         alarm_neighbor.vertex[VProps.VITRAGE_TYPE])
         self.assertEqual(resource_id, alarm_neighbor.vertex[VProps.ID])
-        self.assertFalse(alarm_neighbor.vertex[VProps.IS_PLACEHOLDER])
-        self.assertFalse(alarm_neighbor.vertex[VProps.IS_DELETED])
+        self.assertFalse(alarm_neighbor.vertex[VProps.VITRAGE_IS_PLACEHOLDER])
+        self.assertFalse(alarm_neighbor.vertex[VProps.VITRAGE_IS_DELETED])
 
         # Validate neighbor edge
         edge = alarm_neighbor.edge
@@ -108,7 +109,7 @@ class AodhTransformerBaseTest(base.BaseTest):
         self.assertEqual(edge.label, EdgeLabel.ON)
 
     def _convert_dist_to_vertex(self, neighbor):
-        ver_id = neighbor[VProps.CATEGORY] + \
-            TransformerBase.KEY_SEPARATOR + neighbor[VProps.TYPE] + \
+        ver_id = neighbor[VProps.VITRAGE_CATEGORY] + \
+            TransformerBase.KEY_SEPARATOR + neighbor[VProps.VITRAGE_TYPE] + \
             TransformerBase.KEY_SEPARATOR + neighbor[VProps.ID]
         return Vertex(vertex_id=ver_id, properties=neighbor)

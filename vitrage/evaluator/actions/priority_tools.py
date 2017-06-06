@@ -53,9 +53,9 @@ class SetStateTools(object):
     def get_score(self, action_info):
         state = action_info.specs.properties[TemplateFields.STATE].upper()
         target_resource = action_info.specs.targets[TemplateFields.TARGET]
-        target_type = target_resource[VProps.TYPE]
-        score_name = \
-            target_type if target_type in self.scores else DEFAULT_INFO_MAPPER
+        target_vitrage_type = target_resource[VProps.VITRAGE_TYPE]
+        score_name = target_vitrage_type \
+            if target_vitrage_type in self.scores else DEFAULT_INFO_MAPPER
         return self.scores[score_name].get(state, 0)
 
     @staticmethod

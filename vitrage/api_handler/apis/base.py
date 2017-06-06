@@ -30,15 +30,15 @@ LOG = log.getLogger(__name__)
 # Used for Sunburst to show only specific resources
 TREE_TOPOLOGY_QUERY = {
     'and': [
-        {'==': {VProps.CATEGORY: EntityCategory.RESOURCE}},
-        {'==': {VProps.IS_DELETED: False}},
-        {'==': {VProps.IS_PLACEHOLDER: False}},
+        {'==': {VProps.VITRAGE_CATEGORY: EntityCategory.RESOURCE}},
+        {'==': {VProps.VITRAGE_IS_DELETED: False}},
+        {'==': {VProps.VITRAGE_IS_PLACEHOLDER: False}},
         {
             'or': [
-                {'==': {VProps.TYPE: OPENSTACK_CLUSTER}},
-                {'==': {VProps.TYPE: NOVA_INSTANCE_DATASOURCE}},
-                {'==': {VProps.TYPE: NOVA_HOST_DATASOURCE}},
-                {'==': {VProps.TYPE: NOVA_ZONE_DATASOURCE}}
+                {'==': {VProps.VITRAGE_TYPE: OPENSTACK_CLUSTER}},
+                {'==': {VProps.VITRAGE_TYPE: NOVA_INSTANCE_DATASOURCE}},
+                {'==': {VProps.VITRAGE_TYPE: NOVA_HOST_DATASOURCE}},
+                {'==': {VProps.VITRAGE_TYPE: NOVA_ZONE_DATASOURCE}}
             ]
         }
     ]
@@ -46,12 +46,12 @@ TREE_TOPOLOGY_QUERY = {
 
 TOPOLOGY_AND_ALARMS_QUERY = {
     'and': [
-        {'==': {VProps.IS_DELETED: False}},
-        {'==': {VProps.IS_PLACEHOLDER: False}},
+        {'==': {VProps.VITRAGE_IS_DELETED: False}},
+        {'==': {VProps.VITRAGE_IS_PLACEHOLDER: False}},
         {
             'or': [
-                {'==': {VProps.CATEGORY: EntityCategory.ALARM}},
-                {'==': {VProps.CATEGORY: EntityCategory.RESOURCE}}
+                {'==': {VProps.VITRAGE_CATEGORY: EntityCategory.ALARM}},
+                {'==': {VProps.VITRAGE_CATEGORY: EntityCategory.RESOURCE}}
             ]
         }
     ]
@@ -59,31 +59,31 @@ TOPOLOGY_AND_ALARMS_QUERY = {
 
 RCA_QUERY = {
     'and': [
-        {'==': {VProps.CATEGORY: EntityCategory.ALARM}},
-        {'==': {VProps.IS_DELETED: False}}
+        {'==': {VProps.VITRAGE_CATEGORY: EntityCategory.ALARM}},
+        {'==': {VProps.VITRAGE_IS_DELETED: False}}
     ]
 }
 
 ALARMS_ALL_QUERY = {
     'and': [
-        {'==': {VProps.CATEGORY: EntityCategory.ALARM}},
-        {'==': {VProps.IS_DELETED: False}}
+        {'==': {VProps.VITRAGE_CATEGORY: EntityCategory.ALARM}},
+        {'==': {VProps.VITRAGE_IS_DELETED: False}}
     ]
 }
 
 ALARM_QUERY = {
-    VProps.CATEGORY: EntityCategory.ALARM,
-    VProps.IS_DELETED: False,
-    VProps.IS_PLACEHOLDER: False
+    VProps.VITRAGE_CATEGORY: EntityCategory.ALARM,
+    VProps.VITRAGE_IS_DELETED: False,
+    VProps.VITRAGE_IS_PLACEHOLDER: False
 }
 
-EDGE_QUERY = {'==': {EProps.IS_DELETED: False}}
+EDGE_QUERY = {'==': {EProps.VITRAGE_IS_DELETED: False}}
 
 RESOURCES_ALL_QUERY = {
     'and': [
-        {'==': {VProps.CATEGORY: EntityCategory.RESOURCE}},
-        {'==': {VProps.IS_DELETED: False}},
-        {'==': {VProps.IS_PLACEHOLDER: False}}
+        {'==': {VProps.VITRAGE_CATEGORY: EntityCategory.RESOURCE}},
+        {'==': {VProps.VITRAGE_IS_DELETED: False}},
+        {'==': {VProps.VITRAGE_IS_PLACEHOLDER: False}}
     ]
 }
 
@@ -93,13 +93,13 @@ class EntityGraphApisBase(object):
     IS_ADMIN_PROJECT_PROPERTY = 'is_admin'
 
     @staticmethod
-    def _get_query_with_project(category, project_id, is_admin):
+    def _get_query_with_project(vitrage_category, project_id, is_admin):
         """Generate query with tenant data
 
         Creates query for entity graph which takes into consideration the
-        category, project_id and if the tenant is admin
+        vitrage_category, project_id and if the tenant is admin
 
-        :type category: string
+        :type vitrage_category: string
         :type project_id: string
         :type is_admin: boolean
         :rtype: dictionary
@@ -107,9 +107,9 @@ class EntityGraphApisBase(object):
 
         query = {
             'and': [
-                {'==': {VProps.IS_DELETED: False}},
-                {'==': {VProps.IS_PLACEHOLDER: False}},
-                {'==': {VProps.CATEGORY: category}}
+                {'==': {VProps.VITRAGE_IS_DELETED: False}},
+                {'==': {VProps.VITRAGE_IS_PLACEHOLDER: False}},
+                {'==': {VProps.VITRAGE_CATEGORY: vitrage_category}}
             ]
         }
 
@@ -141,7 +141,7 @@ class EntityGraphApisBase(object):
         for alarm in alarms:
             alarm_project_id = alarm.get(VProps.PROJECT_ID, None)
             if not alarm_project_id:
-                cat_filter = {VProps.CATEGORY: EntityCategory.RESOURCE}
+                cat_filter = {VProps.VITRAGE_CATEGORY: EntityCategory.RESOURCE}
                 alarms_resource = \
                     self.entity_graph.neighbors(alarm.vertex_id,
                                                 vertex_attr_filter=cat_filter)
@@ -183,7 +183,7 @@ class EntityGraphApisBase(object):
             entities = self.entity_graph.neighbors(entity.vertex_id,
                                                    direction=Direction.OUT)
             for entity in entities:
-                if entity[VProps.CATEGORY] == EntityCategory.RESOURCE:
+                if entity[VProps.VITRAGE_CATEGORY] == EntityCategory.RESOURCE:
                     resource_project_id = entity.get(VProps.PROJECT_ID)
                     if resource_project_id == project_id or \
                             (not resource_project_id and is_admin_project):

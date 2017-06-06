@@ -47,7 +47,7 @@ class ResourceApis(EntityGraphApisBase):
         query = copy.deepcopy(resource_query)
 
         if resource_type:
-            type_query = {'==': {VProps.TYPE: resource_type}}
+            type_query = {'==': {VProps.VITRAGE_TYPE: resource_type}}
             query['and'].append(type_query)
 
         resources = self.entity_graph.get_vertices(query_dict=query)

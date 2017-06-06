@@ -14,7 +14,7 @@
 
 from oslo_config import cfg
 
-from vitrage.common.constants import VertexProperties
+from vitrage.common.constants import VertexProperties as VProps
 from vitrage.entity_graph import transformer_manager
 from vitrage.graph import driver as graph
 from vitrage.tests.unit.entity_graph.base import TestEntityGraphUnitBase
@@ -32,20 +32,24 @@ class TestBaseProcessor(TestEntityGraphUnitBase):
         cls.transform = transformer_manager.TransformerManager(cls.conf)
 
     @staticmethod
-    def _update_vertex_to_graph(entity_graph, category, type_, id_,
-                                is_deleted, is_placeholder_data,
+    def _update_vertex_to_graph(entity_graph,
+                                vitrage_category,
+                                vitrage_type,
+                                id_,
+                                vitrage_is_deleted,
+                                vitrage_is_placeholder,
                                 additional_prop):
         # create vertex properties
         prop = {key: value for key, value in additional_prop.items()}
-        prop[VertexProperties.CATEGORY] = category
-        prop[VertexProperties.TYPE] = type_
-        prop[VertexProperties.ID] = id_
-        prop[VertexProperties.IS_DELETED] = is_deleted
-        prop[VertexProperties.IS_PLACEHOLDER] = is_placeholder_data
+        prop[VProps.VITRAGE_CATEGORY] = vitrage_category
+        prop[VProps.VITRAGE_TYPE] = vitrage_type
+        prop[VProps.ID] = id_
+        prop[VProps.VITRAGE_IS_DELETED] = vitrage_is_deleted
+        prop[VProps.VITRAGE_IS_PLACEHOLDER] = vitrage_is_placeholder
 
         # TODO(Alexey): change back to original method
         # vertex_id = self.transform.get_key(prop)
-        vertex_id = category + "_" + type_ + "_" + id_
+        vertex_id = vitrage_category + "_" + vitrage_type + "_" + id_
         vertex = graph.Vertex(vertex_id, prop)
         entity_graph.add_vertex(vertex)
 

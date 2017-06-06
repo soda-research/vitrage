@@ -151,7 +151,7 @@ class SnmpSender(SnmpSenderBase):
         if not severity_mapping:
             return None
 
-        alarm_severity = alert_values.get(VProps.OPERATIONAL_SEVERITY)
+        alarm_severity = alert_values.get(VProps.VITRAGE_OPERATIONAL_SEVERITY)
         state = alert_values.get(VProps.STATE)
 
         if state in severity_mapping:

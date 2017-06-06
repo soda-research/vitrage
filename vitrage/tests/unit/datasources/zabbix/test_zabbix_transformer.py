@@ -103,7 +103,7 @@ class ZabbixTransformerTest(base.BaseTest):
             neighbor = neighbors[0]
 
             # Right now we are support only host as a resource
-            if neighbor.vertex[VProps.TYPE] == NOVA_HOST_DATASOURCE:
+            if neighbor.vertex[VProps.VITRAGE_TYPE] == NOVA_HOST_DATASOURCE:
                 self._validate_host_neighbor(neighbors[0], alarm)
 
             self._validate_action(alarm, wrapper)
@@ -120,8 +120,9 @@ class ZabbixTransformerTest(base.BaseTest):
 
     def _validate_vertex(self, vertex, event):
 
-        self.assertEqual(EntityCategory.ALARM, vertex[VProps.CATEGORY])
-        self.assertEqual(event[DSProps.ENTITY_TYPE], vertex[VProps.TYPE])
+        self.assertEqual(EntityCategory.ALARM, vertex[VProps.VITRAGE_CATEGORY])
+        self.assertEqual(event[DSProps.ENTITY_TYPE],
+                         vertex[VProps.VITRAGE_TYPE])
         self.assertEqual(event[ZabbixProps.DESCRIPTION],
                          vertex[VProps.NAME])
 
@@ -138,8 +139,8 @@ class ZabbixTransformerTest(base.BaseTest):
             event[ZabbixProps.PRIORITY])
         self.assertEqual(event_severity, vertex[VProps.SEVERITY])
 
-        self.assertFalse(vertex[VProps.IS_DELETED])
-        self.assertFalse(vertex[VProps.IS_PLACEHOLDER])
+        self.assertFalse(vertex[VProps.VITRAGE_IS_DELETED])
+        self.assertFalse(vertex[VProps.VITRAGE_IS_PLACEHOLDER])
 
     def _validate_host_neighbor(self, neighbor, event):
 
@@ -151,13 +152,15 @@ class ZabbixTransformerTest(base.BaseTest):
         self.assertEqual(NOVA_HOST_DATASOURCE, key_fields[1])
         self.assertEqual(event[ZabbixProps.RESOURCE_NAME], key_fields[2])
 
-        self.assertFalse(host_vertex[VProps.IS_DELETED])
-        self.assertTrue(host_vertex[VProps.IS_PLACEHOLDER])
+        self.assertFalse(host_vertex[VProps.VITRAGE_IS_DELETED])
+        self.assertTrue(host_vertex[VProps.VITRAGE_IS_PLACEHOLDER])
 
-        self.assertEqual(EntityCategory.RESOURCE, host_vertex[VProps.CATEGORY])
+        self.assertEqual(EntityCategory.RESOURCE,
+                         host_vertex[VProps.VITRAGE_CATEGORY])
         self.assertEqual(event[ZabbixProps.RESOURCE_NAME],
                          host_vertex[VProps.ID])
-        self.assertEqual(NOVA_HOST_DATASOURCE, host_vertex[VProps.TYPE])
+        self.assertEqual(NOVA_HOST_DATASOURCE,
+                         host_vertex[VProps.VITRAGE_TYPE])
 
         edge = neighbor.edge
         self.assertEqual(EdgeLabel.ON, edge.label)
