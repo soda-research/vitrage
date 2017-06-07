@@ -1,6 +1,7 @@
 ====================================
 Root Cause Analysis service overview
 ====================================
+
 Vitrage provides a root cause analysis service, which is used for analyzing the topology and alarms of the cloud, and providing insights about it.
 
 The Root Cause Analysis service consists of the following components:

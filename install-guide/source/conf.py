@@ -55,7 +55,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'Installation Guide for Root Cause Analyzis Service'
+project = u'Installation Guide for Root Cause Analysis Service'
 bug_tag = u'install-guide'
 copyright = u'2016, OpenStack contributors'
 
