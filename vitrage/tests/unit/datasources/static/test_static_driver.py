@@ -98,8 +98,7 @@ class TestStaticDriver(base.BaseTest):
             self._validate_static_entity(entity)
 
     def _validate_static_entity(self, entity):
-        self.assertTrue(isinstance(entity[StaticFields.METADATA],
-                                   dict))
+        self.assertIsInstance(entity[StaticFields.METADATA], dict)
         for rel in entity[StaticFields.RELATIONSHIPS]:
             self._validate_static_rel(entity, rel)
 
