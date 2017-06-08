@@ -44,7 +44,7 @@ class FunctionalTest(base.BaseTest):
 
         self.conf.set_override('policy_file',
                                os.path.abspath('etc/vitrage/policy.json'),
-                               group='oslo_policy', enforce_type=True)
+                               group='oslo_policy')
         self.app = self._make_app()
 
     def _make_app(self):
