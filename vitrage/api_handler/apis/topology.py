@@ -75,7 +75,6 @@ class TopologyApis(EntityGraphApisBase):
                     root)
 
             alarms = graph.get_vertices(query_dict=ALARMS_ALL_QUERY)
-            self._add_resource_details_to_alarms(alarms)
             graph.update_vertices(alarms)
 
         return graph.json_output_graph()

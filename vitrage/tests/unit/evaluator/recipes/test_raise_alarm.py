@@ -12,7 +12,9 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from vitrage.common.constants import VertexProperties as VProps
 from vitrage.datasources.alarm_properties import AlarmProperties
+from vitrage.datasources.nova.host import NOVA_HOST_DATASOURCE
 from vitrage.evaluator.actions.base import ActionType
 from vitrage.evaluator.actions.recipes.action_steps import ADD_VERTEX
 from vitrage.evaluator.actions.recipes.action_steps import REMOVE_VERTEX
@@ -29,7 +31,9 @@ class RaiseAlarmRecipeTest(base.BaseTest):
     @classmethod
     def setUpClass(cls):
 
-        cls.target_vertex = Vertex('RESOURCE:nova.host:test1')
+        cls.target_props = {VProps.TYPE: NOVA_HOST_DATASOURCE}
+        cls.target_vertex = Vertex('RESOURCE:nova.host:test1',
+                                   cls.target_props)
         cls.targets = {TFields.TARGET: cls.target_vertex}
         cls.props = {TFields.ALARM_NAME: 'VM_CPU_SUBOPTIMAL_PERFORMANCE'}
 
@@ -49,7 +53,7 @@ class RaiseAlarmRecipeTest(base.BaseTest):
 
         self.assertEqual(ADD_VERTEX, action_steps[0].type)
         add_vertex_step_params = action_steps[0].params
-        self.assertEqual(3, len(add_vertex_step_params))
+        self.assertEqual(4, len(add_vertex_step_params))
 
         alarm_name = add_vertex_step_params[TFields.ALARM_NAME]
         self.assertEqual(self.props[TFields.ALARM_NAME], alarm_name)
@@ -59,6 +63,11 @@ class RaiseAlarmRecipeTest(base.BaseTest):
 
         alarm_state = add_vertex_step_params[TFields.STATE]
         self.assertEqual(alarm_state, AlarmProperties.ACTIVE_STATE)
+
+        alarm_vitrage_resource_type = \
+            add_vertex_step_params[VProps.VITRAGE_RESOURCE_TYPE]
+        self.assertEqual(self.target_vertex.properties[VProps.TYPE],
+                         alarm_vitrage_resource_type)
 
     def test_get_undo_recipe(self):
 
@@ -73,8 +82,9 @@ class RaiseAlarmRecipeTest(base.BaseTest):
         self.assertEqual(REMOVE_VERTEX, action_steps[0].type)
         remove_vertex_step_params = action_steps[0].params
 
-        # remove_vertex expects three params: alarm name, state and target
-        self.assertEqual(3, len(remove_vertex_step_params))
+        # remove_vertex expects four params: alarm name, state, target,
+        # and type
+        self.assertEqual(4, len(remove_vertex_step_params))
 
         alarm_name = remove_vertex_step_params[TFields.ALARM_NAME]
         self.assertEqual(self.props[TFields.ALARM_NAME], alarm_name)
@@ -84,3 +94,8 @@ class RaiseAlarmRecipeTest(base.BaseTest):
 
         alarm_state = remove_vertex_step_params[TFields.STATE]
         self.assertEqual(alarm_state, AlarmProperties.INACTIVE_STATE)
+
+        alarm_vitrage_resource_type = \
+            remove_vertex_step_params[VProps.VITRAGE_RESOURCE_TYPE]
+        self.assertEqual(self.target_vertex.properties[VProps.TYPE],
+                         alarm_vitrage_resource_type)

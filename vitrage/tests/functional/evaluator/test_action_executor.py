@@ -16,11 +16,14 @@
 from oslo_config import cfg
 
 from six.moves import queue
+from vitrage.common.constants import DatasourceProperties as DSProp
 from vitrage.common.constants import EdgeLabel
 from vitrage.common.constants import EntityCategory
+from vitrage.common.constants import TemplateTopologyFields as TTFields
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.datasources.alarm_properties import AlarmProperties as AlarmProps
 from vitrage.datasources.nagios import NAGIOS_DATASOURCE
+from vitrage.datasources.nagios.properties import NagiosProperties as NProps
 from vitrage.datasources.nova.host import NOVA_HOST_DATASOURCE
 from vitrage.entity_graph.mappings.operational_resource_state import \
     OperationalResourceState
@@ -233,6 +236,11 @@ class TestActionExecutor(TestFunctionalBase):
                          props[TFields.SEVERITY])
         self.assertEqual(alarm.properties[VProps.STATE],
                          AlarmProps.ACTIVE_STATE)
+        self.assertEqual(alarm.properties[VProps.VITRAGE_RESOURCE_ID],
+                         action_spec.targets
+                         [TTFields.TARGET][VProps.VITRAGE_ID]),
+        self.assertEqual(alarm.properties[VProps.VITRAGE_RESOURCE_TYPE],
+                         NOVA_HOST_DATASOURCE)
 
     def test_execute_add_and_remove_vertex(self):
 
@@ -283,27 +291,28 @@ class TestActionExecutor(TestFunctionalBase):
     @staticmethod
     def _get_nagios_event(resource_name, resource_type):
 
-        return {'last_check': '2016-02-07 15:26:04',
-                'resource_name': resource_name,
-                'resource_type': resource_type,
-                'service': 'Check_MK',
-                'status': 'CRITICAL',
-                'status_info': 'test test test',
-                'vitrage_datasource_action': 'snapshot',
-                'vitrage_entity_type': 'nagios',
-                'vitrage_sample_date': '2016-02-07 15:26:04'}
+        return {NProps.LAST_CHECK: '2016-02-07 15:26:04',
+                NProps.RESOURCE_NAME: resource_name,
+                NProps.RESOURCE_TYPE: resource_type,
+                NProps.SERVICE: 'Check_MK',
+                NProps.STATUS: 'CRITICAL',
+                NProps.STATUS_INFO: 'test test test',
+                DSProp.DATASOURCE_ACTION: 'snapshot',
+                DSProp.ENTITY_TYPE: 'nagios',
+                DSProp.SAMPLE_DATE: '2016-02-07 15:26:04'}
 
     @staticmethod
     def _get_vitrage_add_vertex_event(target_vertex, alarm_name, severity):
 
-        return {'target': target_vertex.vertex_id,
-                'update_timestamp': '2016-03-17 11:33:32.443002',
-                'vitrage_datasource_action': 'update',
-                'alarm_name': alarm_name,
-                'state': 'Active',
-                'type': 'add_vertex',
-                'vitrage_entity_type': 'vitrage',
-                'severity': 'CRITICAL',
-                'vitrage_id': 'mock_vitrage_id',
-                'category': 'RESOURCE',
-                'sample_timestamp': '2016-03-17 11:33:32.443002+00:00'}
+        return {TTFields.TARGET: target_vertex.vertex_id,
+                VProps.UPDATE_TIMESTAMP: '2016-03-17 11:33:32.443002',
+                DSProp.DATASOURCE_ACTION: 'update',
+                TFields.ALARM_NAME: alarm_name,
+                VProps.STATE: 'Active',
+                VProps.TYPE: 'add_vertex',
+                DSProp.ENTITY_TYPE: 'vitrage',
+                VProps.SEVERITY: 'CRITICAL',
+                VProps.VITRAGE_ID: 'mock_vitrage_id',
+                VProps.VITRAGE_RESOURCE_TYPE: 'nova.host',
+                VProps.CATEGORY: 'ALARM',
+                VProps.SAMPLE_TIMESTAMP: '2016-03-17 11:33:32.443002+00:00'}

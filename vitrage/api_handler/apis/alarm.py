@@ -53,8 +53,6 @@ class AlarmApis(EntityGraphApisBase):
                 vertex_attr_filter={VProps.CATEGORY: EntityCategory.ALARM,
                                     VProps.IS_DELETED: False})
 
-        self._add_resource_details_to_alarms(alarms)
-
         return json.dumps({'alarms': [v.properties for v in alarms]})
 
     def _get_alarms(self, project_id, is_admin_project):

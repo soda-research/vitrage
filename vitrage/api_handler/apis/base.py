@@ -14,7 +14,6 @@
 
 from oslo_log import log
 
-from vitrage.common.constants import EdgeLabel
 from vitrage.common.constants import EdgeProperties as EProps
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import VertexProperties as VProps
@@ -198,25 +197,6 @@ class EntityGraphApisBase(object):
             return lst[0]
         else:
             return None
-
-    def _add_resource_details_to_alarms(self, alarms):
-        for alarm in alarms:
-            try:
-                resources = self.entity_graph.neighbors(
-                    v_id=alarm.vertex_id,
-                    edge_attr_filter={EProps.RELATIONSHIP_TYPE: EdgeLabel.ON},
-                    direction=Direction.OUT)
-
-                resource = self._get_first(resources)
-                if resource:
-                    alarm["resource_id"] = resource.get(VProps.ID, '')
-                    alarm["resource_type"] = resource.get(VProps.TYPE, '')
-                else:
-                    alarm["resource_id"] = ''
-                    alarm["resource_type"] = ''
-
-            except ValueError as ve:
-                LOG.error('Alarm %s\nException %s', alarm, ve)
 
     def _is_project_admin(self, project_id):
         keystone_client = ks_client(self.conf)
