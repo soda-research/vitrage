@@ -73,4 +73,5 @@ Design Documents
    scenario-evaluator
    vitrage-use-cases
    add-new-datasource
-
+   not_operator_support
+   template-loading
