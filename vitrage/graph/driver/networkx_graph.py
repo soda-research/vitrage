@@ -70,9 +70,13 @@ class NXGraph(Graph):
         return NXAlgorithm(self)
 
     def copy(self):
-        self_copy = NXGraph(self.name, self.root_id)
-        self_copy._g = self._g.copy()
-        return self_copy
+        # Networkx graph copy is very slow, so we implement
+        nodes = self._g.nodes_iter(data=True)
+        vertices = [Vertex(vertex_id=n, properties=data) for n, data in nodes]
+        edges_iter = self._g.edges_iter(data=True, keys=True)
+        edges = [Edge(source_id=u, target_id=v, label=l, properties=data)
+                 for u, v, l, data in edges_iter]
+        return NXGraph(self.name, self.root_id, vertices, edges)
 
     @Notifier.update_notify
     def add_vertex(self, v):
