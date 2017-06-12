@@ -17,6 +17,7 @@ from oslo_config import cfg
 
 from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import EventProperties as EventProps
+from vitrage.datasources.doctor import DOCTOR_DATASOURCE
 from vitrage.datasources.doctor.driver import DoctorDriver
 from vitrage.datasources.doctor.properties import DoctorDetails
 from vitrage.datasources.doctor.properties import DoctorProperties \
@@ -34,7 +35,7 @@ class DoctorDriverTest(base.BaseTest):
     @classmethod
     def setUpClass(cls):
         cls.conf = cfg.ConfigOpts()
-        cls.conf.register_opts(cls.OPTS, group='doctor')
+        cls.conf.register_opts(cls.OPTS, group=DOCTOR_DATASOURCE)
 
     def test_enrich_event(self):
         # Test setup

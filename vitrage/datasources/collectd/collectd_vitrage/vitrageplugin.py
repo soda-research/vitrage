@@ -20,6 +20,7 @@ Collectd plugin for sending notifications to vitrage
 import collectd
 import hashlib
 import six
+from vitrage.datasources.collectd import COLLECTD_DATASOURCE
 
 from vitrage.datasources.collectd.collectd_vitrage.plugin import CollectDPlugin
 from vitrage.datasources.collectd.collectd_vitrage.plugin import PluginError
@@ -53,7 +54,7 @@ class VitrageNotifier(CollectDPlugin):
         transport = messaging.get_transport(cfg.CONF, url)
         self.notifier = messaging.Notifier(transport,
                                            driver='messagingv2',
-                                           publisher_id='collectd',
+                                           publisher_id=COLLECTD_DATASOURCE,
                                            topics=['vitrage_notifications'])
         self.add_notification_callback(self.notify)
 
@@ -72,7 +73,7 @@ class VitrageNotifier(CollectDPlugin):
         notification_id = str(uuid.uuid4())
 
         self.notifier.info(ctxt={'message_id': notification_id,
-                                 'publisher_id': 'collectd',
+                                 'publisher_id': COLLECTD_DATASOURCE,
                                  'timestamp': datetime.utcnow()},
                            event_type='collectd.alarm.' + severity.lower(),
                            payload=payload)

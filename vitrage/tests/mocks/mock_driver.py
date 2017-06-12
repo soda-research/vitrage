@@ -354,7 +354,8 @@ def simple_switch_generators(switch_num, host_num,
         )
     if update_events:
         update_vals = {} if not update_vals else update_vals
-        update_vals['vitrage_datasource_action'] = 'update'
+        update_vals[DSProps.DATASOURCE_ACTION] = \
+            DatasourceAction.UPDATE
         test_entity_spec_list.append(
             {tg.DYNAMIC_INFO_FKEY: tg.DRIVER_SWITCH_SNAPSHOT_D,
              tg.STATIC_INFO_FKEY: None,

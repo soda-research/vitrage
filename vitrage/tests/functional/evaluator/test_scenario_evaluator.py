@@ -32,6 +32,8 @@ from vitrage.datasources.neutron.port import NEUTRON_PORT_DATASOURCE
 from vitrage.datasources.nova.host import NOVA_HOST_DATASOURCE
 from vitrage.datasources.nova.instance import NOVA_INSTANCE_DATASOURCE
 from vitrage.datasources.nova.zone import NOVA_ZONE_DATASOURCE
+from vitrage.entity_graph.mappings.operational_resource_state import \
+    OperationalResourceState
 from vitrage.evaluator.actions.evaluator_event_transformer \
     import VITRAGE_DATASOURCE
 from vitrage.evaluator.scenario_evaluator import ScenarioEvaluator
@@ -45,7 +47,7 @@ from vitrage.utils.datetime import utcnow
 
 _TARGET_HOST = 'host-2'
 _TARGET_ZONE = 'zone-1'
-_NAGIOS_TEST_INFO = {'resource_name': _TARGET_HOST,
+_NAGIOS_TEST_INFO = {NagiosProperties.RESOURCE_NAME: _TARGET_HOST,
                      'resource_id': _TARGET_HOST,
                      DSProps.DATASOURCE_ACTION: DatasourceAction.SNAPSHOT}
 
@@ -88,18 +90,20 @@ class TestScenarioEvaluator(TestFunctionalBase):
                          'host should be AVAILABLE when starting')
 
         # generate nagios alarm to trigger template scenario
-        test_vals = {'status': 'WARNING', 'service': 'cause_suboptimal_state'}
+        test_vals = {NagiosProperties.STATUS: NagiosTestStatus.WARNING,
+                     NagiosProperties.SERVICE: 'cause_suboptimal_state'}
         test_vals.update(_NAGIOS_TEST_INFO)
         generator = mock_driver.simple_nagios_alarm_generators(1, 1, test_vals)
         warning_test = mock_driver.generate_random_events_list(generator)[0]
 
         host_v = self.get_host_after_event(event_queue, warning_test,
                                            processor, _TARGET_HOST)
-        self.assertEqual('SUBOPTIMAL', host_v[VProps.VITRAGE_AGGREGATED_STATE],
+        self.assertEqual(OperationalResourceState.SUBOPTIMAL,
+                         host_v[VProps.VITRAGE_AGGREGATED_STATE],
                          'host should be SUBOPTIMAL with warning alarm')
 
         # next disable the alarm
-        warning_test['status'] = 'OK'
+        warning_test[NagiosProperties.STATUS] = NagiosTestStatus.OK
         host_v = self.get_host_after_event(event_queue, warning_test,
                                            processor, _TARGET_HOST)
         self.assertEqual('AVAILABLE', host_v[VProps.VITRAGE_AGGREGATED_STATE],
@@ -117,36 +121,42 @@ class TestScenarioEvaluator(TestFunctionalBase):
                          'host should be AVAILABLE when starting')
 
         # generate nagios alarm to trigger
-        test_vals = {'status': 'WARNING', 'service': 'cause_suboptimal_state'}
+        test_vals = {NagiosProperties.STATUS: NagiosTestStatus.WARNING,
+                     NagiosProperties.SERVICE: 'cause_suboptimal_state'}
         test_vals.update(_NAGIOS_TEST_INFO)
         generator = mock_driver.simple_nagios_alarm_generators(1, 1, test_vals)
         warning_test = mock_driver.generate_random_events_list(generator)[0]
 
         host_v = self.get_host_after_event(event_queue, warning_test,
                                            processor, _TARGET_HOST)
-        self.assertEqual('SUBOPTIMAL', host_v[VProps.VITRAGE_AGGREGATED_STATE],
+        self.assertEqual(OperationalResourceState.SUBOPTIMAL,
+                         host_v[VProps.VITRAGE_AGGREGATED_STATE],
                          'host should be SUBOPTIMAL with warning alarm')
 
         # generate CRITICAL nagios alarm to trigger
-        test_vals = {'status': 'CRITICAL', 'service': 'cause_error_state'}
+        test_vals = \
+            {NagiosProperties.STATUS: NagiosTestStatus.CRITICAL,
+             NagiosProperties.SERVICE: 'cause_error_state'}
         test_vals.update(_NAGIOS_TEST_INFO)
         generator = mock_driver.simple_nagios_alarm_generators(1, 1, test_vals)
         critical_test = mock_driver.generate_random_events_list(generator)[0]
 
         host_v = self.get_host_after_event(event_queue, critical_test,
                                            processor, _TARGET_HOST)
-        self.assertEqual('ERROR', host_v[VProps.VITRAGE_AGGREGATED_STATE],
+        self.assertEqual(OperationalResourceState.ERROR,
+                         host_v[VProps.VITRAGE_AGGREGATED_STATE],
                          'host should be ERROR with critical alarm')
 
         # next disable the critical alarm
-        critical_test['status'] = 'OK'
+        critical_test[NagiosProperties.STATUS] = NagiosTestStatus.OK
         host_v = self.get_host_after_event(event_queue, critical_test,
                                            processor, _TARGET_HOST)
-        self.assertEqual('SUBOPTIMAL', host_v[VProps.VITRAGE_AGGREGATED_STATE],
+        self.assertEqual(OperationalResourceState.SUBOPTIMAL,
+                         host_v[VProps.VITRAGE_AGGREGATED_STATE],
                          'host should be SUBOPTIMAL with only warning alarm')
 
         # next disable the alarm
-        warning_test['status'] = 'OK'
+        warning_test[NagiosProperties.STATUS] = NagiosTestStatus.OK
         host_v = self.get_host_after_event(event_queue, warning_test,
                                            processor, _TARGET_HOST)
         self.assertEqual('AVAILABLE', host_v[VProps.VITRAGE_AGGREGATED_STATE],
@@ -164,32 +174,38 @@ class TestScenarioEvaluator(TestFunctionalBase):
                          'host should be AVAILABLE when starting')
 
         # generate CRITICAL nagios alarm to trigger
-        test_vals = {'status': 'CRITICAL', 'service': 'cause_error_state'}
+        test_vals = \
+            {NagiosProperties.STATUS: NagiosTestStatus.CRITICAL,
+             NagiosProperties.SERVICE: 'cause_error_state'}
         test_vals.update(_NAGIOS_TEST_INFO)
         generator = mock_driver.simple_nagios_alarm_generators(1, 1, test_vals)
         critical_test = mock_driver.generate_random_events_list(generator)[0]
 
         host_v = self.get_host_after_event(event_queue, critical_test,
                                            processor, _TARGET_HOST)
-        self.assertEqual('ERROR', host_v[VProps.VITRAGE_AGGREGATED_STATE],
+        self.assertEqual(OperationalResourceState.ERROR,
+                         host_v[VProps.VITRAGE_AGGREGATED_STATE],
                          'host should be ERROR with critical alarm')
 
         # generate WARNING nagios alarm to trigger
-        test_vals = {'status': 'WARNING', 'service': 'cause_suboptimal_state'}
+        test_vals = {NagiosProperties.STATUS: NagiosTestStatus.WARNING,
+                     NagiosProperties.SERVICE: 'cause_suboptimal_state'}
         test_vals.update(_NAGIOS_TEST_INFO)
         generator = mock_driver.simple_nagios_alarm_generators(1, 1, test_vals)
         warning_test = mock_driver.generate_random_events_list(generator)[0]
 
         host_v = self.get_host_after_event(event_queue, warning_test,
                                            processor, _TARGET_HOST)
-        self.assertEqual('ERROR', host_v[VProps.VITRAGE_AGGREGATED_STATE],
+        self.assertEqual(OperationalResourceState.ERROR,
+                         host_v[VProps.VITRAGE_AGGREGATED_STATE],
                          'host should be ERROR with critical alarm')
 
         # next disable the critical alarm
-        critical_test['status'] = 'OK'
+        critical_test[NagiosProperties.STATUS] = NagiosTestStatus.OK
         host_v = self.get_host_after_event(event_queue, critical_test,
                                            processor, _TARGET_HOST)
-        self.assertEqual('SUBOPTIMAL', host_v[VProps.VITRAGE_AGGREGATED_STATE],
+        self.assertEqual(OperationalResourceState.SUBOPTIMAL,
+                         host_v[VProps.VITRAGE_AGGREGATED_STATE],
                          'host should be SUBOPTIMAL with only warning alarm')
 
     def test_deduced_alarm(self):
@@ -204,8 +220,8 @@ class TestScenarioEvaluator(TestFunctionalBase):
                          'host should be AVAILABLE when starting')
 
         # generate CRITICAL nagios alarm to trigger
-        test_vals = {'status': 'WARNING',
-                     'service': 'cause_warning_deduced_alarm'}
+        test_vals = {NagiosProperties.STATUS: NagiosTestStatus.WARNING,
+                     NagiosProperties.SERVICE: 'cause_warning_deduced_alarm'}
         test_vals.update(_NAGIOS_TEST_INFO)
         generator = mock_driver.simple_nagios_alarm_generators(1, 1, test_vals)
         warning_test = mock_driver.generate_random_events_list(generator)[0]
@@ -215,12 +231,13 @@ class TestScenarioEvaluator(TestFunctionalBase):
         alarms = \
             self._get_deduced_alarms_on_host(host_v, processor.entity_graph)
         self.assertEqual(1, len(alarms))
-        self.assertEqual('WARNING', alarms[0]['severity'])
+        self.assertEqual(NagiosTestStatus.WARNING,
+                         alarms[0][VProps.SEVERITY])
         causes = self._get_alarm_causes(alarms[0], processor.entity_graph)
         self.assertEqual(1, len(causes))
 
         # next disable the alarm
-        warning_test['status'] = 'OK'
+        warning_test[NagiosProperties.STATUS] = NagiosTestStatus.OK
         host_v = self.get_host_after_event(event_queue, warning_test,
                                            processor, _TARGET_HOST)
         alarms = \
@@ -228,19 +245,20 @@ class TestScenarioEvaluator(TestFunctionalBase):
         self.assertEqual(0, len(alarms))
 
         # recreate the nagios alarm
-        warning_test['status'] = 'WARNING'
+        warning_test[NagiosProperties.STATUS] = NagiosTestStatus.WARNING
         warning_test[DSProps.SAMPLE_DATE] = str(utcnow())
         host_v = self.get_host_after_event(event_queue, warning_test,
                                            processor, _TARGET_HOST)
         alarms = \
             self._get_deduced_alarms_on_host(host_v, processor.entity_graph)
         self.assertEqual(1, len(alarms))
-        self.assertEqual('WARNING', alarms[0]['severity'])
+        self.assertEqual(NagiosTestStatus.WARNING,
+                         alarms[0][VProps.SEVERITY])
         causes = self._get_alarm_causes(alarms[0], processor.entity_graph)
         self.assertEqual(1, len(causes))
 
         # next disable the alarm
-        warning_test['status'] = 'OK'
+        warning_test[NagiosProperties.STATUS] = NagiosTestStatus.OK
         host_v = self.get_host_after_event(event_queue, warning_test,
                                            processor, _TARGET_HOST)
         alarms = \
@@ -252,7 +270,8 @@ class TestScenarioEvaluator(TestFunctionalBase):
         event_queue, processor, evaluator = self._init_system()
 
         # generate WARNING nagios alarm
-        vals = {'status': 'WARNING', 'service': 'cause_warning_deduced_alarm'}
+        vals = {NagiosProperties.STATUS: NagiosTestStatus.WARNING,
+                NagiosProperties.SERVICE: 'cause_warning_deduced_alarm'}
         vals.update(_NAGIOS_TEST_INFO)
         generator = mock_driver.simple_nagios_alarm_generators(1, 1, vals)
         warning_test = mock_driver.generate_random_events_list(generator)[0]
@@ -262,13 +281,14 @@ class TestScenarioEvaluator(TestFunctionalBase):
         alarms = \
             self._get_deduced_alarms_on_host(host_v, processor.entity_graph)
         self.assertEqual(1, len(alarms))
-        self.assertEqual('WARNING', alarms[0]['severity'])
+        self.assertEqual(NagiosTestStatus.WARNING,
+                         alarms[0][VProps.SEVERITY])
         causes = self._get_alarm_causes(alarms[0], processor.entity_graph)
         self.assertEqual(1, len(causes))
 
         # generate CRITICAL nagios alarm to trigger
-        vals = {'status': 'CRITICAL',
-                'service': 'cause_critical_deduced_alarm'}
+        vals = {NagiosProperties.STATUS: NagiosTestStatus.CRITICAL,
+                NagiosProperties.SERVICE: 'cause_critical_deduced_alarm'}
         vals.update(_NAGIOS_TEST_INFO)
         generator = mock_driver.simple_nagios_alarm_generators(1, 1, vals)
         critical_test = mock_driver.generate_random_events_list(generator)[0]
@@ -278,23 +298,24 @@ class TestScenarioEvaluator(TestFunctionalBase):
         alarms = \
             self._get_deduced_alarms_on_host(host_v, processor.entity_graph)
         self.assertEqual(1, len(alarms))
-        self.assertEqual('CRITICAL', alarms[0]['severity'])
+        self.assertEqual(NagiosTestStatus.CRITICAL,
+                         alarms[0][VProps.SEVERITY])
         causes = self._get_alarm_causes(alarms[0], processor.entity_graph)
         self.assertEqual(2, len(causes))
 
         # remove WARNING nagios alarm, leaving only CRITICAL one
-        warning_test['status'] = 'OK'
+        warning_test[NagiosProperties.STATUS] = NagiosTestStatus.OK
         host_v = self.get_host_after_event(event_queue, warning_test,
                                            processor, _TARGET_HOST)
         alarms = \
             self._get_deduced_alarms_on_host(host_v, processor.entity_graph)
         self.assertEqual(1, len(alarms))
-        self.assertEqual('CRITICAL', alarms[0]['severity'])
+        self.assertEqual(NagiosTestStatus.CRITICAL, alarms[0][VProps.SEVERITY])
         causes = self._get_alarm_causes(alarms[0], processor.entity_graph)
         self.assertEqual(1, len(causes))
 
         # next disable the alarm
-        critical_test['status'] = 'OK'
+        critical_test[NagiosProperties.STATUS] = NagiosTestStatus.OK
         host_v = self.get_host_after_event(event_queue, critical_test,
                                            processor, _TARGET_HOST)
         alarms = \
@@ -306,8 +327,9 @@ class TestScenarioEvaluator(TestFunctionalBase):
         event_queue, processor, evaluator = self._init_system()
 
         # generate CRITICAL nagios alarm to trigger
-        test_vals = {'status': 'CRITICAL',
-                     'service': 'cause_critical_deduced_alarm'}
+        test_vals = \
+            {NagiosProperties.STATUS: NagiosTestStatus.CRITICAL,
+             NagiosProperties.SERVICE: 'cause_critical_deduced_alarm'}
         test_vals.update(_NAGIOS_TEST_INFO)
         generator = mock_driver.simple_nagios_alarm_generators(1, 1, test_vals)
         critical_test = mock_driver.generate_random_events_list(generator)[0]
@@ -317,11 +339,12 @@ class TestScenarioEvaluator(TestFunctionalBase):
         alarms = \
             self._get_deduced_alarms_on_host(host_v, processor.entity_graph)
         self.assertEqual(1, len(alarms))
-        self.assertEqual('CRITICAL', alarms[0]['severity'])
+        self.assertEqual(NagiosTestStatus.CRITICAL,
+                         alarms[0][VProps.SEVERITY])
 
         # generate WARNING nagios alarm to trigger
-        test_vals = {'status': 'WARNING',
-                     'service': 'cause_warning_deduced_alarm'}
+        test_vals = {NagiosProperties.STATUS: NagiosTestStatus.WARNING,
+                     NagiosProperties.SERVICE: 'cause_warning_deduced_alarm'}
         test_vals.update(_NAGIOS_TEST_INFO)
         generator = mock_driver.simple_nagios_alarm_generators(1, 1, test_vals)
         warning_test = mock_driver.generate_random_events_list(generator)[0]
@@ -331,16 +354,18 @@ class TestScenarioEvaluator(TestFunctionalBase):
         alarms = \
             self._get_deduced_alarms_on_host(host_v, processor.entity_graph)
         self.assertEqual(1, len(alarms))
-        self.assertEqual('CRITICAL', alarms[0]['severity'])
+        self.assertEqual(NagiosTestStatus.CRITICAL,
+                         alarms[0][VProps.SEVERITY])
 
         # remove CRITICAL nagios alarm, leaving only WARNING one
-        critical_test['status'] = 'OK'
+        critical_test[NagiosProperties.STATUS] = NagiosTestStatus.OK
         host_v = self.get_host_after_event(event_queue, critical_test,
                                            processor, _TARGET_HOST)
         alarms = \
             self._get_deduced_alarms_on_host(host_v, processor.entity_graph)
         self.assertEqual(1, len(alarms))
-        self.assertEqual('WARNING', alarms[0]['severity'])
+        self.assertEqual(NagiosTestStatus.WARNING,
+                         alarms[0][VProps.SEVERITY])
 
     def test_simple_not_operator_deduced_alarm(self):
         """Handles a simple not operator use case
@@ -439,13 +464,14 @@ class TestScenarioEvaluator(TestFunctionalBase):
                          'simple_port_deduced_alarm')
 
         # Add PORT_PROBLEM alarm
-        test_vals = {'status': 'WARNING',
+        test_vals = {'status': NagiosTestStatus.WARNING,
                      'service': 'PORT_PROBLEM',
                      'name': 'PORT_PROBLEM',
                      DSProps.DATASOURCE_ACTION: DatasourceAction.SNAPSHOT,
                      VProps.RESOURCE_ID: port_vertex.get(VProps.ID),
-                     'resource_name': port_vertex.get(VProps.ID),
-                     'resource_type': NEUTRON_PORT_DATASOURCE}
+                     NagiosProperties.RESOURCE_NAME:
+                         port_vertex.get(VProps.ID),
+                     NagiosProperties.RESOURCE_TYPE: NEUTRON_PORT_DATASOURCE}
         generator = mock_driver.simple_nagios_alarm_generators(1, 1, test_vals)
         nagios_event = mock_driver.generate_random_events_list(generator)[0]
 
@@ -722,7 +748,7 @@ class TestScenarioEvaluator(TestFunctionalBase):
 
         # add edge between network and zone
         edge = create_edge(network_vertex.vertex_id, zone_vertex.vertex_id,
-                           'attached')
+                           EdgeLabel.ATTACHED)
         entity_graph.add_edge(edge)
 
         while not event_queue.empty():
@@ -746,13 +772,14 @@ class TestScenarioEvaluator(TestFunctionalBase):
 
         # ###################   STEP 2   ###################
         # Add NETWORK_PROBLEM alarm
-        test_vals = {'status': 'WARNING',
+        test_vals = {'status': NagiosTestStatus.WARNING,
                      'service': 'NETWORK_PROBLEM',
                      'name': 'NETWORK_PROBLEM',
                      DSProps.DATASOURCE_ACTION: DatasourceAction.SNAPSHOT,
                      VProps.RESOURCE_ID: network_vertex[VProps.ID],
-                     'resource_name': network_vertex[VProps.ID],
-                     'resource_type': NEUTRON_NETWORK_DATASOURCE}
+                     NagiosProperties.RESOURCE_NAME: network_vertex[VProps.ID],
+                     NagiosProperties.RESOURCE_TYPE:
+                         NEUTRON_NETWORK_DATASOURCE}
         generator = mock_driver.simple_nagios_alarm_generators(1, 1, test_vals)
         nagios_event = mock_driver.generate_random_events_list(generator)[0]
 
@@ -1179,8 +1206,8 @@ class TestScenarioEvaluator(TestFunctionalBase):
                          'host should be AVAILABLE when starting')
 
         # generate nagios alarm1 to trigger, raise alarm3
-        test_vals = {'status': 'WARNING',
-                     'service': 'alarm1'}
+        test_vals = {NagiosProperties.STATUS: NagiosTestStatus.WARNING,
+                     NagiosProperties.SERVICE: 'alarm1'}
         test_vals.update(_NAGIOS_TEST_INFO)
         generator = mock_driver.simple_nagios_alarm_generators(1, 1, test_vals)
         alarm1_test = mock_driver.generate_random_events_list(generator)[0]
@@ -1191,8 +1218,8 @@ class TestScenarioEvaluator(TestFunctionalBase):
         self.assertEqual(2, len(alarms))
 
         # generate nagios alarm2 to trigger
-        test_vals = {'status': 'WARNING',
-                     'service': 'alarm2'}
+        test_vals = {NagiosProperties.STATUS: NagiosTestStatus.WARNING,
+                     NagiosProperties.SERVICE: 'alarm2'}
         test_vals.update(_NAGIOS_TEST_INFO)
         generator = mock_driver.simple_nagios_alarm_generators(1, 1, test_vals)
         alarm2_test = mock_driver.generate_random_events_list(generator)[0]
@@ -1203,14 +1230,14 @@ class TestScenarioEvaluator(TestFunctionalBase):
         self.assertEqual(3, len(alarms))
 
         # disable alarm1, alarm3 is not deleted
-        alarm1_test['status'] = 'OK'
+        alarm1_test[NagiosProperties.STATUS] = NagiosTestStatus.OK
         host_v = self.get_host_after_event(event_queue, alarm1_test,
                                            processor, _TARGET_HOST)
         alarms = self._get_alarms_on_host(host_v, processor.entity_graph)
         self.assertEqual(2, len(alarms))
 
         # disable alarm2, alarm3 is deleted
-        alarm2_test['status'] = 'OK'
+        alarm2_test[NagiosProperties.STATUS] = NagiosTestStatus.OK
         alarm2_test[DSProps.SAMPLE_DATE] = str(utcnow())
         host_v = self.get_host_after_event(event_queue, alarm2_test,
                                            processor, _TARGET_HOST)
@@ -1246,8 +1273,8 @@ class TestScenarioEvaluator(TestFunctionalBase):
                          'host should be AVAILABLE when starting')
 
         # generate nagios alarm_a to trigger
-        test_vals = {'status': 'WARNING',
-                     'service': 'alarm_a'}
+        test_vals = {NagiosProperties.STATUS: NagiosTestStatus.WARNING,
+                     NagiosProperties.SERVICE: 'alarm_a'}
         test_vals.update(_NAGIOS_TEST_INFO)
         generator = mock_driver.simple_nagios_alarm_generators(1, 1, test_vals)
         alarm_a_test = mock_driver.generate_random_events_list(generator)[0]
@@ -1260,8 +1287,8 @@ class TestScenarioEvaluator(TestFunctionalBase):
         self.assertEqual(num_orig_edges + 1, entity_graph.num_edges())
 
         # generate nagios alarm_b to trigger
-        test_vals = {'status': 'WARNING',
-                     'service': 'alarm_b'}
+        test_vals = {NagiosProperties.STATUS: NagiosTestStatus.WARNING,
+                     NagiosProperties.SERVICE: 'alarm_b'}
         test_vals.update(_NAGIOS_TEST_INFO)
         generator = mock_driver.simple_nagios_alarm_generators(1, 1, test_vals)
         alarm_b_test = mock_driver.generate_random_events_list(generator)[0]
@@ -1274,8 +1301,8 @@ class TestScenarioEvaluator(TestFunctionalBase):
         self.assertEqual(num_orig_edges + 2, entity_graph.num_edges())
 
         # generate nagios alarm_c to trigger, alarm_d is raised
-        test_vals = {'status': 'WARNING',
-                     'service': 'alarm_c'}
+        test_vals = {NagiosProperties.STATUS: NagiosTestStatus.WARNING,
+                     NagiosProperties.SERVICE: 'alarm_c'}
         test_vals.update(_NAGIOS_TEST_INFO)
         generator = mock_driver.simple_nagios_alarm_generators(1, 1, test_vals)
         alarm_c_test = mock_driver.generate_random_events_list(generator)[0]
@@ -1288,8 +1315,8 @@ class TestScenarioEvaluator(TestFunctionalBase):
         self.assertEqual(num_orig_edges + 4, entity_graph.num_edges())
 
         # remove nagios alarm_b, alarm_d should not be removed
-        test_vals = {'status': 'OK',
-                     'service': 'alarm_b'}
+        test_vals = {NagiosProperties.STATUS: NagiosTestStatus.OK,
+                     NagiosProperties.SERVICE: 'alarm_b'}
         test_vals.update(_NAGIOS_TEST_INFO)
         generator = mock_driver.simple_nagios_alarm_generators(1, 1, test_vals)
         alarm_b_ok = mock_driver.generate_random_events_list(generator)[0]
@@ -1313,8 +1340,8 @@ class TestScenarioEvaluator(TestFunctionalBase):
                          entity_graph.num_edges())
 
         # remove nagios alarm_a, alarm_d should be removed
-        test_vals = {'status': 'OK',
-                     'service': 'alarm_a'}
+        test_vals = {NagiosProperties.STATUS: NagiosTestStatus.OK,
+                     NagiosProperties.SERVICE: 'alarm_a'}
         test_vals.update(_NAGIOS_TEST_INFO)
         generator = mock_driver.simple_nagios_alarm_generators(1, 1, test_vals)
         alarm_a_ok = mock_driver.generate_random_events_list(generator)[0]

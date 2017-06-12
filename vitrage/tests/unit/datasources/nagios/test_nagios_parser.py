@@ -14,6 +14,7 @@
 
 from vitrage.datasources.nagios.parser import NagiosParser
 from vitrage.datasources.nagios.properties import NagiosProperties
+from vitrage.datasources.nagios.properties import NagiosTestStatus
 from vitrage.tests.mocks import utils
 from vitrage.tests.unit.datasources.nagios.nagios_base_test \
     import NagiosBaseTest
@@ -23,7 +24,7 @@ class NagiosParserTest(NagiosBaseTest):
 
     expected_service1 = {NagiosProperties.RESOURCE_NAME: 'compute-0-0.local',
                          NagiosProperties.SERVICE: 'CPU load',
-                         NagiosProperties.STATUS: 'WARNING',
+                         NagiosProperties.STATUS: NagiosTestStatus.WARNING,
                          NagiosProperties.LAST_CHECK: '2016-02-09 13:05:32',
                          NagiosProperties.DURATION: ' 8d  2h 16m 33s',
                          NagiosProperties.ATTEMPT: '1/1',
@@ -32,7 +33,7 @@ class NagiosParserTest(NagiosBaseTest):
 
     expected_service2 = {NagiosProperties.RESOURCE_NAME: 'compute-0-1.local',
                          NagiosProperties.SERVICE: 'check_load',
-                         NagiosProperties.STATUS: 'CRITICAL',
+                         NagiosProperties.STATUS: NagiosTestStatus.CRITICAL,
                          NagiosProperties.LAST_CHECK: '2016-02-16 14:27:06',
                          NagiosProperties.DURATION: ' 1d  0h 54m 59s',
                          NagiosProperties.ATTEMPT: '1/1',
@@ -41,7 +42,7 @@ class NagiosParserTest(NagiosBaseTest):
 
     expected_service3 = {NagiosProperties.RESOURCE_NAME: 'compute-0-0.local',
                          NagiosProperties.SERVICE: 'Disk IO SUMMARY',
-                         NagiosProperties.STATUS: 'OK',
+                         NagiosProperties.STATUS: NagiosTestStatus.OK,
                          NagiosProperties.LAST_CHECK: '2016-02-17 15:21:22',
                          NagiosProperties.DURATION: '14d  1h 28m 34s',
                          NagiosProperties.ATTEMPT: '1/1',

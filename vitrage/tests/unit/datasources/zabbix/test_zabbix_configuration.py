@@ -19,6 +19,7 @@ from vitrage.datasources.nova.host import NOVA_HOST_DATASOURCE
 from vitrage.datasources.zabbix.driver import ZabbixDriver
 from vitrage.datasources.zabbix.properties import ZabbixProperties \
     as ZabbixProps
+from vitrage.datasources.zabbix import ZABBIX_DATASOURCE
 from vitrage.tests import base
 from vitrage.tests.mocks import utils
 
@@ -70,7 +71,7 @@ class TestZabbixConfig(base.BaseTest):
     @classmethod
     def setUpClass(cls):
         cls.conf = cfg.ConfigOpts()
-        cls.conf.register_opts(cls.OPTS, group='zabbix')
+        cls.conf.register_opts(cls.OPTS, group=ZABBIX_DATASOURCE)
 
     def test_zabbix_configuration_loading(self):
         # Action

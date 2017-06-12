@@ -20,6 +20,7 @@ from vitrage.common.constants import DatasourceOpts as DSOpts
 from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import GraphAction
 from vitrage.datasources.zabbix.properties import ZabbixProperties as ZProps
+from vitrage.datasources.zabbix import ZABBIX_DATASOURCE
 from vitrage.tests.mocks import utils
 from vitrage.tests.unit.datasources.zabbix.mock_driver import MockZabbixDriver
 from vitrage.tests.unit.datasources.zabbix.zabbix_base_test import \
@@ -40,7 +41,7 @@ class ZabbixDriverTest(ZabbixBaseTest):
     @classmethod
     def setUpClass(cls):
         cls.conf = cfg.ConfigOpts()
-        cls.conf.register_opts(cls.OPTS, group='zabbix')
+        cls.conf.register_opts(cls.OPTS, group=ZABBIX_DATASOURCE)
 
     def test_get_all(self):
         # Test Setup

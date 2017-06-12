@@ -11,13 +11,15 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+from vitrage.entity_graph.mappings.operational_alarm_severity import \
+    OperationalAlarmSeverity
 
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import VertexProperties as VProps
 
+
 false_ = 'False'
 name_ = 'VM network problem'
-critical_ = 'CRITICAL'
 
 GENERAL_OID = '1.3.6.1.4.1'
 COMPANY_OID = '1.1.1'
@@ -34,7 +36,8 @@ alarm_data = {VProps.VITRAGE_CATEGORY: EntityCategory.ALARM,
               VProps.RESOURCE + '_' + VProps.VITRAGE_IS_DELETED: false_,
               VProps.RESOURCE + '_' + VProps.VITRAGE_IS_PLACEHOLDER: false_,
               VProps.VITRAGE_IS_DELETED: false_,
-              VProps.VITRAGE_OPERATIONAL_SEVERITY: critical_,
+              VProps.VITRAGE_OPERATIONAL_SEVERITY:
+                  OperationalAlarmSeverity.CRITICAL,
               VProps.RESOURCE:
                   {VProps.VITRAGE_IS_PLACEHOLDER: false_,
                    VProps.VITRAGE_IS_DELETED: false_}}

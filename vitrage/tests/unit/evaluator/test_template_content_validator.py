@@ -14,6 +14,8 @@
 
 import copy
 import logging
+from vitrage.entity_graph.mappings.operational_resource_state import \
+    OperationalResourceState
 
 from vitrage.common.constants import EntityCategory
 from vitrage.evaluator.actions.base import ActionType
@@ -480,7 +482,7 @@ class TemplateContentValidatorTest(base.BaseTest):
             TemplateFields.TARGET: target
         }
         properties = {
-            TemplateFields.STATE: 'SUBOPTIMAL'
+            TemplateFields.STATE: OperationalResourceState.SUBOPTIMAL
         }
         action = {
             TemplateFields.ACTION_TYPE: ActionType.SET_STATE,

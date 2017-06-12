@@ -17,6 +17,7 @@ from oslo_config import cfg
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.datasources.nagios import NAGIOS_DATASOURCE
+from vitrage.datasources.nagios.properties import NagiosTestStatus
 from vitrage.datasources import NOVA_HOST_DATASOURCE
 from vitrage.datasources import NOVA_INSTANCE_DATASOURCE
 from vitrage.datasources import NOVA_ZONE_DATASOURCE
@@ -63,7 +64,7 @@ class TestNagios(TestDataSourcesBase):
         nagios_event['resource_name'] = \
             self._find_entity_id_by_type(processor.entity_graph,
                                          NOVA_HOST_DATASOURCE)
-        nagios_event['status'] = 'critical'
+        nagios_event['status'] = NagiosTestStatus.CRITICAL
 
         # Action
         processor.process_event(nagios_event)

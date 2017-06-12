@@ -13,11 +13,12 @@
 # under the License.
 
 from vitrage.common.constants import EventProperties as EventProps
+from vitrage.datasources.nova.host import NOVA_HOST_DATASOURCE
 
 
 class DoctorProperties(object):
     HOST_DOWN = 'compute.host.down'
-    HOST_TYPE = 'nova.host'
+    HOST_TYPE = NOVA_HOST_DATASOURCE
     UPDATE_TIME = 'update_time'
 
 

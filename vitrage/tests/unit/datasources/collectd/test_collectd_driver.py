@@ -16,6 +16,7 @@ from datetime import datetime
 from oslo_config import cfg
 
 from vitrage.common.constants import DatasourceProperties as DSProps
+from vitrage.datasources.collectd import COLLECTD_DATASOURCE
 from vitrage.datasources.collectd.driver import CollectdDriver
 from vitrage.datasources.collectd.properties \
     import CollectdProperties as CProps
@@ -36,7 +37,7 @@ class TestCollectdDriver(base.BaseTest):
     @classmethod
     def setUpClass(cls):
         cls.conf = cfg.ConfigOpts()
-        cls.conf.register_opts(cls.OPTS, group='collectd')
+        cls.conf.register_opts(cls.OPTS, group=COLLECTD_DATASOURCE)
 
     # noinspection PyAttributeOutsideInit
     def setUp(self):

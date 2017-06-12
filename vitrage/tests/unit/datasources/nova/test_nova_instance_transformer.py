@@ -296,7 +296,7 @@ class NovaInstanceTransformerTest(base.BaseTest):
             },
             DSProps.DATASOURCE_ACTION: 'SNAPSHOT',
             'id': 'instance321',
-            'vitrage_sample_date': time
+            DSProps.SAMPLE_DATE: time
         }
 
         # Test action

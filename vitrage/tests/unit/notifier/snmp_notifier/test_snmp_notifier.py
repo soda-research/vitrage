@@ -11,7 +11,8 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-
+from vitrage.entity_graph.mappings.operational_alarm_severity import \
+    OperationalAlarmSeverity
 
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import VertexProperties as VProps
@@ -31,7 +32,8 @@ class SnmpNotifierTest(base.BaseTest):
                      VProps.NAME: common.name_,
                      VProps.RESOURCE: cls.resource_props,
                      VProps.VITRAGE_CATEGORY: EntityCategory.ALARM,
-                     VProps.VITRAGE_OPERATIONAL_SEVERITY: common.critical_}
+                     VProps.VITRAGE_OPERATIONAL_SEVERITY:
+                         OperationalAlarmSeverity.CRITICAL}
         cls.alarm_vertex = Vertex('RESOURCE:nova.instance:test1', cls.props)
 
     def test_parse_alarm(self):
@@ -45,7 +47,7 @@ class SnmpNotifierTest(base.BaseTest):
         self.assertEqual(alarm_data.get(VProps.VITRAGE_CATEGORY),
                          EntityCategory.ALARM)
         self.assertEqual(alarm_data.get(VProps.VITRAGE_OPERATIONAL_SEVERITY),
-                         common.critical_)
+                         OperationalAlarmSeverity.CRITICAL)
 
         self.assertEqual(alarm_data.get(VProps.RESOURCE + '_' +
                                         VProps.VITRAGE_IS_DELETED),

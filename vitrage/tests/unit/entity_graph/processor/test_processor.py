@@ -330,32 +330,37 @@ class TestProcessor(TestEntityGraphUnitBase):
         # vitrage state doesn't exist and its updated
         instances[1][0][VProps.STATE] = None
         instances[1][1].entity_graph.update_vertex(instances[1][0])
-        instances[1][0][VProps.VITRAGE_STATE] = 'SUBOPTIMAL'
+        instances[1][0][VProps.VITRAGE_STATE] = \
+            OperationalResourceState.SUBOPTIMAL
         instances[1][1]._calculate_vitrage_aggregated_state(
             instances[1][0], GraphAction.UPDATE_ENTITY)
 
         # state exists and vitrage state changes
-        instances[2][0][VProps.VITRAGE_STATE] = 'SUBOPTIMAL'
+        instances[2][0][VProps.VITRAGE_STATE] = \
+            OperationalResourceState.SUBOPTIMAL
         instances[2][1]._calculate_vitrage_aggregated_state(
             instances[2][0], GraphAction.UPDATE_ENTITY)
 
         # vitrage state exists and state changes
         instances[3][0][VProps.STATE] = None
-        instances[3][0][VProps.VITRAGE_STATE] = 'SUBOPTIMAL'
+        instances[3][0][VProps.VITRAGE_STATE] = \
+            OperationalResourceState.SUBOPTIMAL
         instances[3][1].entity_graph.update_vertex(instances[3][0])
         instances[3][0][VProps.STATE] = 'SUSPENDED'
         instances[3][1]._calculate_vitrage_aggregated_state(
             instances[3][0], GraphAction.UPDATE_ENTITY)
 
         # state and vitrage state exists and state changes
-        instances[4][0][VProps.VITRAGE_STATE] = 'SUBOPTIMAL'
+        instances[4][0][VProps.VITRAGE_STATE] = \
+            OperationalResourceState.SUBOPTIMAL
         instances[4][1].entity_graph.update_vertex(instances[4][0])
         instances[4][0][VProps.STATE] = 'SUSPENDED'
         instances[4][1]._calculate_vitrage_aggregated_state(
             instances[4][0], GraphAction.UPDATE_ENTITY)
 
         # state and vitrage state exists and vitrage state changes
-        instances[5][0][VProps.VITRAGE_STATE] = 'SUBOPTIMAL'
+        instances[5][0][VProps.VITRAGE_STATE] = \
+            OperationalResourceState.SUBOPTIMAL
         instances[5][1].entity_graph.update_vertex(instances[5][0])
         instances[5][1]._calculate_vitrage_aggregated_state(
             instances[5][0], GraphAction.UPDATE_ENTITY)
@@ -365,11 +370,11 @@ class TestProcessor(TestEntityGraphUnitBase):
                          instances[0][0][VProps.VITRAGE_AGGREGATED_STATE])
         self.assertEqual(OperationalResourceState.SUBOPTIMAL,
                          instances[0][0][VProps.VITRAGE_OPERATIONAL_STATE])
-        self.assertEqual('SUBOPTIMAL',
+        self.assertEqual(OperationalResourceState.SUBOPTIMAL,
                          instances[1][0][VProps.VITRAGE_AGGREGATED_STATE])
         self.assertEqual(OperationalResourceState.SUBOPTIMAL,
                          instances[1][0][VProps.VITRAGE_OPERATIONAL_STATE])
-        self.assertEqual('SUBOPTIMAL',
+        self.assertEqual(OperationalResourceState.SUBOPTIMAL,
                          instances[2][0][VProps.VITRAGE_AGGREGATED_STATE])
         self.assertEqual(OperationalResourceState.SUBOPTIMAL,
                          instances[2][0][VProps.VITRAGE_OPERATIONAL_STATE])
@@ -381,7 +386,7 @@ class TestProcessor(TestEntityGraphUnitBase):
                          instances[4][0][VProps.VITRAGE_AGGREGATED_STATE])
         self.assertEqual(OperationalResourceState.SUBOPTIMAL,
                          instances[4][0][VProps.VITRAGE_OPERATIONAL_STATE])
-        self.assertEqual('SUBOPTIMAL',
+        self.assertEqual(OperationalResourceState.SUBOPTIMAL,
                          instances[5][0][VProps.VITRAGE_AGGREGATED_STATE])
         self.assertEqual(OperationalResourceState.SUBOPTIMAL,
                          instances[5][0][VProps.VITRAGE_OPERATIONAL_STATE])

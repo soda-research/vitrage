@@ -15,6 +15,7 @@ from oslo_log import log as logging
 
 from vitrage.common.constants import NotifierEventTypes
 from vitrage.common.constants import VertexProperties as VProps
+from vitrage.datasources.aodh import AODH_DATASOURCE
 from vitrage.datasources.aodh.properties import AodhState
 from vitrage.entity_graph.mappings.operational_alarm_severity import \
     OperationalAlarmSeverity
@@ -36,7 +37,7 @@ class AodhNotifier(NotifierBase):
 
     @staticmethod
     def get_notifier_name():
-        return 'aodh'
+        return AODH_DATASOURCE
 
     def __init__(self, conf):
         super(AodhNotifier, self).__init__(conf)

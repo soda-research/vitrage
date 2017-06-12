@@ -17,6 +17,7 @@ from oslo_config import cfg
 from vitrage.common.constants import DatasourceOpts as DSOpts
 from vitrage.datasources.nagios.config import NagiosConfig
 from vitrage.datasources.nagios.config import NagiosHostMapping
+from vitrage.datasources.nagios import NAGIOS_DATASOURCE
 from vitrage.datasources.nova.host import NOVA_HOST_DATASOURCE
 from vitrage.datasources.nova.instance import NOVA_INSTANCE_DATASOURCE
 from vitrage.tests import base
@@ -81,7 +82,7 @@ class TestNagiosConfig(base.BaseTest):
     @classmethod
     def setUpClass(cls):
         cls.conf = cfg.ConfigOpts()
-        cls.conf.register_opts(cls.OPTS, group='nagios')
+        cls.conf.register_opts(cls.OPTS, group=NAGIOS_DATASOURCE)
 
     def test_nagios_configuration_loading(self):
         # Action

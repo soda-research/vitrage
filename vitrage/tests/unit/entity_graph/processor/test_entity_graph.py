@@ -12,6 +12,8 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from vitrage.common.constants import EdgeLabel
+from vitrage.common.constants import EntityCategory
 from vitrage.entity_graph.processor import processor_utils as PUtils
 from vitrage.graph.driver.networkx_graph import NXGraph
 from vitrage.tests.unit.entity_graph.processor import base
@@ -27,8 +29,10 @@ class TestEntityGraphManager(base.TestBaseProcessor):
         entity_graph = NXGraph("Entity Graph")
 
         # create vertex properties
-        vertex = self._update_vertex_to_graph(entity_graph, 'RESOURCE',
-                                              'INSTANCE', '12345',
+        vertex = self._update_vertex_to_graph(entity_graph,
+                                              EntityCategory.RESOURCE,
+                                              'INSTANCE',
+                                              '12345',
                                               False, True, {})
 
         # deal with placeholder vertex
@@ -37,8 +41,10 @@ class TestEntityGraphManager(base.TestBaseProcessor):
         self.assertTrue(vertex is None)
 
         # create vertex properties
-        vertex = self._update_vertex_to_graph(entity_graph, 'RESOURCE',
-                                              'INSTANCE', '12345',
+        vertex = self._update_vertex_to_graph(entity_graph,
+                                              EntityCategory.RESOURCE,
+                                              'INSTANCE',
+                                              '12345',
                                               False, False, {})
 
         # deal with non placeholder vertex
@@ -50,8 +56,10 @@ class TestEntityGraphManager(base.TestBaseProcessor):
         entity_graph = NXGraph("Entity Graph")
 
         # create vertex properties
-        vertex = self._update_vertex_to_graph(entity_graph, 'RESOURCE',
-                                              'INSTANCE', '12345',
+        vertex = self._update_vertex_to_graph(entity_graph,
+                                              EntityCategory.RESOURCE,
+                                              'INSTANCE',
+                                              '12345',
                                               False, True, {})
 
         # check vitrage deleted
@@ -63,14 +71,20 @@ class TestEntityGraphManager(base.TestBaseProcessor):
         entity_graph = NXGraph("Entity Graph")
 
         # create vertex properties
-        vertex1 = self._update_vertex_to_graph(entity_graph, 'RESOURCE',
-                                               'INSTANCE', '12345',
+        vertex1 = self._update_vertex_to_graph(entity_graph,
+                                               EntityCategory.RESOURCE,
+                                               'INSTANCE',
+                                               '12345',
                                                False, True, {})
-        vertex2 = self._update_vertex_to_graph(entity_graph, 'RESOURCE',
-                                               'HOST', '54321',
+        vertex2 = self._update_vertex_to_graph(entity_graph,
+                                               EntityCategory.RESOURCE,
+                                               'HOST',
+                                               '54321',
                                                False, True, {})
-        edge = self._update_edge_to_graph(entity_graph, vertex1.vertex_id,
-                                          vertex2.vertex_id, 'contains')
+        edge = self._update_edge_to_graph(entity_graph,
+                                          vertex1.vertex_id,
+                                          vertex2.vertex_id,
+                                          EdgeLabel.CONTAINS)
 
         # check vitrage deleted
         self.assertFalse(PUtils.is_deleted(edge))
@@ -80,11 +94,12 @@ class TestEntityGraphManager(base.TestBaseProcessor):
     def test_find_neighbor_types(self):
         neighbors = []
         entity_graph = NXGraph("Entity Graph")
-        entities_details = [('RESOURCE', 'HOST', '1', False, True),
-                            ('RESOURCE', 'STORAGE', '2', False, True),
-                            ('RESOURCE', 'APPLICATION', '3', False, True),
-                            ('RESOURCE', 'STORAGE', '4', False, True),
-                            ('ALARM', 'INSTANCE_AT_RISK', '5', False, True)]
+        entities_details = \
+            [(EntityCategory.RESOURCE, 'HOST', '1', False, True),
+             (EntityCategory.RESOURCE, 'STORAGE', '2', False, True),
+             (EntityCategory.RESOURCE, 'APPLICATION', '3', False, True),
+             (EntityCategory.RESOURCE, 'STORAGE', '4', False, True),
+             (EntityCategory.ALARM, 'INSTANCE_AT_RISK', '5', False, True)]
 
         # add neighbors
         for details in entities_details:

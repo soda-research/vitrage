@@ -17,8 +17,10 @@ from oslo_config import cfg
 from vitrage.common.constants import DatasourceOpts as DSOpts
 from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import GraphAction
+from vitrage.datasources.nagios import NAGIOS_DATASOURCE
 from vitrage.datasources.nagios.properties import NagiosProperties as \
     NagiosProps
+from vitrage.datasources.nagios.properties import NagiosTestStatus
 from vitrage.tests.mocks import utils
 from vitrage.tests.unit.datasources.nagios.mock_driver import MockNagiosDriver
 from vitrage.tests.unit.datasources.nagios.nagios_base_test import \
@@ -40,7 +42,7 @@ class NagiosDriverTest(NagiosBaseTest):
     @classmethod
     def setUpClass(cls):
         cls.conf = cfg.ConfigOpts()
-        cls.conf.register_opts(cls.OPTS, group='nagios')
+        cls.conf.register_opts(cls.OPTS, group=NAGIOS_DATASOURCE)
 
     def test_get_all(self):
         """Check get_all functionality.
@@ -55,13 +57,13 @@ class NagiosDriverTest(NagiosBaseTest):
         # Action
         service_data1 = {NagiosProps.RESOURCE_NAME: 'compute-0',
                          NagiosProps.SERVICE: 'CPU utilization',
-                         NagiosProps.STATUS: 'OK'}
+                         NagiosProps.STATUS: NagiosTestStatus.OK}
         service_data2 = {NagiosProps.RESOURCE_NAME: 'compute-1',
                          NagiosProps.SERVICE: 'CPU utilization',
-                         NagiosProps.STATUS: 'OK'}
+                         NagiosProps.STATUS: NagiosTestStatus.OK}
         service_data3 = {NagiosProps.RESOURCE_NAME: 'compute-1',
                          NagiosProps.SERVICE: 'Uptime',
-                         NagiosProps.STATUS: 'OK'}
+                         NagiosProps.STATUS: NagiosTestStatus.OK}
 
         nagios_driver.set_service_datas([service_data1,
                                          service_data2,
@@ -77,13 +79,13 @@ class NagiosDriverTest(NagiosBaseTest):
         # Action
         service_data1 = {NagiosProps.RESOURCE_NAME: 'compute-0',
                          NagiosProps.SERVICE: 'CPU utilization',
-                         NagiosProps.STATUS: 'WARNING'}
+                         NagiosProps.STATUS: NagiosTestStatus.WARNING}
         service_data2 = {NagiosProps.RESOURCE_NAME: 'compute-1',
                          NagiosProps.SERVICE: 'CPU utilization',
-                         NagiosProps.STATUS: 'OK'}
+                         NagiosProps.STATUS: NagiosTestStatus.OK}
         service_data3 = {NagiosProps.RESOURCE_NAME: 'compute-1',
                          NagiosProps.SERVICE: 'Uptime',
-                         NagiosProps.STATUS: 'OK'}
+                         NagiosProps.STATUS: NagiosTestStatus.OK}
 
         nagios_driver.set_service_datas([service_data1,
                                          service_data2,
@@ -99,13 +101,13 @@ class NagiosDriverTest(NagiosBaseTest):
         # Action
         service_data1 = {NagiosProps.RESOURCE_NAME: 'compute-0',
                          NagiosProps.SERVICE: 'CPU utilization',
-                         NagiosProps.STATUS: 'CRITICAL'}
+                         NagiosProps.STATUS: NagiosTestStatus.CRITICAL}
         service_data2 = {NagiosProps.RESOURCE_NAME: 'compute-1',
                          NagiosProps.SERVICE: 'CPU utilization',
-                         NagiosProps.STATUS: 'WARNING'}
+                         NagiosProps.STATUS: NagiosTestStatus.WARNING}
         service_data3 = {NagiosProps.RESOURCE_NAME: 'compute-1',
                          NagiosProps.SERVICE: 'Uptime',
-                         NagiosProps.STATUS: 'OK'}
+                         NagiosProps.STATUS: NagiosTestStatus.OK}
 
         nagios_driver.set_service_datas([service_data1,
                                          service_data2,
@@ -122,13 +124,13 @@ class NagiosDriverTest(NagiosBaseTest):
         # Action
         service_data1 = {NagiosProps.RESOURCE_NAME: 'compute-0',
                          NagiosProps.SERVICE: 'CPU utilization',
-                         NagiosProps.STATUS: 'OK'}
+                         NagiosProps.STATUS: NagiosTestStatus.OK}
         service_data2 = {NagiosProps.RESOURCE_NAME: 'compute-1',
                          NagiosProps.SERVICE: 'CPU utilization',
-                         NagiosProps.STATUS: 'OK'}
+                         NagiosProps.STATUS: NagiosTestStatus.OK}
         service_data3 = {NagiosProps.RESOURCE_NAME: 'compute-1',
                          NagiosProps.SERVICE: 'Uptime',
-                         NagiosProps.STATUS: 'OK'}
+                         NagiosProps.STATUS: NagiosTestStatus.OK}
 
         nagios_driver.set_service_datas([service_data1,
                                          service_data2,
@@ -166,13 +168,13 @@ class NagiosDriverTest(NagiosBaseTest):
         # Action
         service_data1 = {NagiosProps.RESOURCE_NAME: 'compute-0',
                          NagiosProps.SERVICE: 'CPU utilization',
-                         NagiosProps.STATUS: 'OK'}
+                         NagiosProps.STATUS: NagiosTestStatus.OK}
         service_data2 = {NagiosProps.RESOURCE_NAME: 'compute-1',
                          NagiosProps.SERVICE: 'CPU utilization',
-                         NagiosProps.STATUS: 'OK'}
+                         NagiosProps.STATUS: NagiosTestStatus.OK}
         service_data3 = {NagiosProps.RESOURCE_NAME: 'compute-1',
                          NagiosProps.SERVICE: 'Uptime',
-                         NagiosProps.STATUS: 'OK'}
+                         NagiosProps.STATUS: NagiosTestStatus.OK}
 
         nagios_driver.set_service_datas([service_data1,
                                          service_data2,
@@ -188,13 +190,13 @@ class NagiosDriverTest(NagiosBaseTest):
         # Action
         service_data1 = {NagiosProps.RESOURCE_NAME: 'compute-0',
                          NagiosProps.SERVICE: 'CPU utilization',
-                         NagiosProps.STATUS: 'WARNING'}
+                         NagiosProps.STATUS: NagiosTestStatus.WARNING}
         service_data2 = {NagiosProps.RESOURCE_NAME: 'compute-1',
                          NagiosProps.SERVICE: 'CPU utilization',
-                         NagiosProps.STATUS: 'OK'}
+                         NagiosProps.STATUS: NagiosTestStatus.OK}
         service_data3 = {NagiosProps.RESOURCE_NAME: 'compute-1',
                          NagiosProps.SERVICE: 'Uptime',
-                         NagiosProps.STATUS: 'OK'}
+                         NagiosProps.STATUS: NagiosTestStatus.OK}
 
         nagios_driver.set_service_datas([service_data1,
                                          service_data2,
@@ -210,13 +212,13 @@ class NagiosDriverTest(NagiosBaseTest):
         # Action
         service_data1 = {NagiosProps.RESOURCE_NAME: 'compute-0',
                          NagiosProps.SERVICE: 'CPU utilization',
-                         NagiosProps.STATUS: 'CRITICAL'}
+                         NagiosProps.STATUS: NagiosTestStatus.CRITICAL}
         service_data2 = {NagiosProps.RESOURCE_NAME: 'compute-1',
                          NagiosProps.SERVICE: 'CPU utilization',
-                         NagiosProps.STATUS: 'WARNING'}
+                         NagiosProps.STATUS: NagiosTestStatus.WARNING}
         service_data3 = {NagiosProps.RESOURCE_NAME: 'compute-1',
                          NagiosProps.SERVICE: 'Uptime',
-                         NagiosProps.STATUS: 'OK'}
+                         NagiosProps.STATUS: NagiosTestStatus.OK}
 
         nagios_driver.set_service_datas([service_data1,
                                          service_data2,
@@ -233,13 +235,13 @@ class NagiosDriverTest(NagiosBaseTest):
         # Action
         service_data1 = {NagiosProps.RESOURCE_NAME: 'compute-0',
                          NagiosProps.SERVICE: 'CPU utilization',
-                         NagiosProps.STATUS: 'CRITICAL'}
+                         NagiosProps.STATUS: NagiosTestStatus.CRITICAL}
         service_data2 = {NagiosProps.RESOURCE_NAME: 'compute-1',
                          NagiosProps.SERVICE: 'CPU utilization',
-                         NagiosProps.STATUS: 'CRITICAL'}
+                         NagiosProps.STATUS: NagiosTestStatus.CRITICAL}
         service_data3 = {NagiosProps.RESOURCE_NAME: 'compute-1',
                          NagiosProps.SERVICE: 'Uptime',
-                         NagiosProps.STATUS: 'OK'}
+                         NagiosProps.STATUS: NagiosTestStatus.OK}
 
         nagios_driver.set_service_datas([service_data1,
                                          service_data2,
@@ -255,13 +257,13 @@ class NagiosDriverTest(NagiosBaseTest):
         # Action
         service_data1 = {NagiosProps.RESOURCE_NAME: 'compute-0',
                          NagiosProps.SERVICE: 'CPU utilization',
-                         NagiosProps.STATUS: 'OK'}
+                         NagiosProps.STATUS: NagiosTestStatus.OK}
         service_data2 = {NagiosProps.RESOURCE_NAME: 'compute-1',
                          NagiosProps.SERVICE: 'CPU utilization',
-                         NagiosProps.STATUS: 'OK'}
+                         NagiosProps.STATUS: NagiosTestStatus.OK}
         service_data3 = {NagiosProps.RESOURCE_NAME: 'compute-1',
                          NagiosProps.SERVICE: 'Uptime',
-                         NagiosProps.STATUS: 'OK'}
+                         NagiosProps.STATUS: NagiosTestStatus.OK}
 
         nagios_driver.set_service_datas([service_data1,
                                          service_data2,
@@ -291,13 +293,13 @@ class NagiosDriverTest(NagiosBaseTest):
         # Action
         service_data1 = {NagiosProps.RESOURCE_NAME: 'compute-0',
                          NagiosProps.SERVICE: 'CPU utilization',
-                         NagiosProps.STATUS: 'WARNING'}
+                         NagiosProps.STATUS: NagiosTestStatus.WARNING}
         service_data2 = {NagiosProps.RESOURCE_NAME: 'compute-1',
                          NagiosProps.SERVICE: 'CPU utilization',
-                         NagiosProps.STATUS: 'OK'}
+                         NagiosProps.STATUS: NagiosTestStatus.OK}
         service_data3 = {NagiosProps.RESOURCE_NAME: 'compute-1',
                          NagiosProps.SERVICE: 'Uptime',
-                         NagiosProps.STATUS: 'OK'}
+                         NagiosProps.STATUS: NagiosTestStatus.OK}
 
         nagios_driver.set_service_datas([service_data1,
                                          service_data2,
@@ -338,13 +340,13 @@ class NagiosDriverTest(NagiosBaseTest):
         # Action
         service_data1 = {NagiosProps.RESOURCE_NAME: 'compute-0',
                          NagiosProps.SERVICE: 'CPU utilization',
-                         NagiosProps.STATUS: 'CRITICAL'}
+                         NagiosProps.STATUS: NagiosTestStatus.CRITICAL}
         service_data2 = {NagiosProps.RESOURCE_NAME: 'compute-1',
                          NagiosProps.SERVICE: 'CPU utilization',
-                         NagiosProps.STATUS: 'WARNING'}
+                         NagiosProps.STATUS: NagiosTestStatus.WARNING}
         service_data3 = {NagiosProps.RESOURCE_NAME: 'compute-1',
                          NagiosProps.SERVICE: 'Uptime',
-                         NagiosProps.STATUS: 'OK'}
+                         NagiosProps.STATUS: NagiosTestStatus.OK}
 
         nagios_driver.set_service_datas([service_data1,
                                          service_data2,
@@ -379,13 +381,13 @@ class NagiosDriverTest(NagiosBaseTest):
         # Action
         service_data1 = {NagiosProps.RESOURCE_NAME: 'compute-0',
                          NagiosProps.SERVICE: 'CPU utilization',
-                         NagiosProps.STATUS: 'CRITICAL'}
+                         NagiosProps.STATUS: NagiosTestStatus.CRITICAL}
         service_data2 = {NagiosProps.RESOURCE_NAME: 'compute-1',
                          NagiosProps.SERVICE: 'CPU utilization',
-                         NagiosProps.STATUS: 'CRITICAL'}
+                         NagiosProps.STATUS: NagiosTestStatus.CRITICAL}
         service_data3 = {NagiosProps.RESOURCE_NAME: 'compute-1',
                          NagiosProps.SERVICE: 'Uptime',
-                         NagiosProps.STATUS: 'CRITICAL'}
+                         NagiosProps.STATUS: NagiosTestStatus.CRITICAL}
 
         nagios_driver.set_service_datas([service_data1,
                                          service_data2,
@@ -402,13 +404,13 @@ class NagiosDriverTest(NagiosBaseTest):
         # Action
         service_data1 = {NagiosProps.RESOURCE_NAME: 'compute-0',
                          NagiosProps.SERVICE: 'CPU utilization',
-                         NagiosProps.STATUS: 'WARNING'}
+                         NagiosProps.STATUS: NagiosTestStatus.WARNING}
         service_data2 = {NagiosProps.RESOURCE_NAME: 'compute-1',
                          NagiosProps.SERVICE: 'CPU utilization',
-                         NagiosProps.STATUS: 'CRITICAL'}
+                         NagiosProps.STATUS: NagiosTestStatus.CRITICAL}
         service_data3 = {NagiosProps.RESOURCE_NAME: 'compute-1',
                          NagiosProps.SERVICE: 'Uptime',
-                         NagiosProps.STATUS: 'CRITICAL'}
+                         NagiosProps.STATUS: NagiosTestStatus.CRITICAL}
 
         nagios_driver.set_service_datas([service_data1,
                                          service_data2,
@@ -448,13 +450,13 @@ class NagiosDriverTest(NagiosBaseTest):
         # Action
         service_data1 = {NagiosProps.RESOURCE_NAME: 'compute-0',
                          NagiosProps.SERVICE: 'CPU utilization',
-                         NagiosProps.STATUS: 'WARNING'}
+                         NagiosProps.STATUS: NagiosTestStatus.WARNING}
         service_data2 = {NagiosProps.RESOURCE_NAME: 'compute-1',
                          NagiosProps.SERVICE: 'CPU utilization',
-                         NagiosProps.STATUS: 'OK'}
+                         NagiosProps.STATUS: NagiosTestStatus.OK}
         service_data3 = {NagiosProps.RESOURCE_NAME: 'compute-1',
                          NagiosProps.SERVICE: 'Uptime',
-                         NagiosProps.STATUS: 'OK'}
+                         NagiosProps.STATUS: NagiosTestStatus.OK}
 
         nagios_driver.set_service_datas([service_data1,
                                          service_data2,
@@ -470,10 +472,10 @@ class NagiosDriverTest(NagiosBaseTest):
         # Action - delete a service that was OK
         service_data1 = {NagiosProps.RESOURCE_NAME: 'compute-0',
                          NagiosProps.SERVICE: 'CPU utilization',
-                         NagiosProps.STATUS: 'WARNING'}
+                         NagiosProps.STATUS: NagiosTestStatus.WARNING}
         service_data2 = {NagiosProps.RESOURCE_NAME: 'compute-1',
                          NagiosProps.SERVICE: 'CPU utilization',
-                         NagiosProps.STATUS: 'OK'}
+                         NagiosProps.STATUS: NagiosTestStatus.OK}
 
         nagios_driver.set_service_datas([service_data1, service_data2])
 
@@ -487,7 +489,7 @@ class NagiosDriverTest(NagiosBaseTest):
         # Action - delete a service that was not OK
         service_data2 = {NagiosProps.RESOURCE_NAME: 'compute-1',
                          NagiosProps.SERVICE: 'CPU utilization',
-                         NagiosProps.STATUS: 'OK'}
+                         NagiosProps.STATUS: NagiosTestStatus.OK}
 
         nagios_driver.set_service_datas([service_data2])
 
@@ -510,10 +512,10 @@ class NagiosDriverTest(NagiosBaseTest):
         # Action - "undelete" the service that was OK
         service_data1 = {NagiosProps.RESOURCE_NAME: 'compute-0',
                          NagiosProps.SERVICE: 'CPU utilization',
-                         NagiosProps.STATUS: 'WARNING'}
+                         NagiosProps.STATUS: NagiosTestStatus.WARNING}
         service_data2 = {NagiosProps.RESOURCE_NAME: 'compute-1',
                          NagiosProps.SERVICE: 'CPU utilization',
-                         NagiosProps.STATUS: 'OK'}
+                         NagiosProps.STATUS: NagiosTestStatus.OK}
 
         nagios_driver.set_service_datas([service_data1, service_data2])
 
@@ -528,7 +530,7 @@ class NagiosDriverTest(NagiosBaseTest):
         # Action - delete a service that was not OK and call get_changes
         service_data2 = {NagiosProps.RESOURCE_NAME: 'compute-1',
                          NagiosProps.SERVICE: 'CPU utilization',
-                         NagiosProps.STATUS: 'OK'}
+                         NagiosProps.STATUS: NagiosTestStatus.OK}
 
         nagios_driver.set_service_datas([service_data2])
 

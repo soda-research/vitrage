@@ -225,12 +225,12 @@ class TestDatasourceInfoMapper(base.BaseTest):
                                     vitrage_category=EntityCategory.RESOURCE,
                                     vitrage_type=NOVA_INSTANCE_DATASOURCE,
                                     entity_state='ACTIVE')
-        metadata2 = {VProps.VITRAGE_STATE: 'SUBOPTIMAL'}
+        metadata2 = {VProps.VITRAGE_STATE: OperationalResourceState.SUBOPTIMAL}
         new_vertex2 = create_vertex('23456',
                                     vitrage_category=EntityCategory.RESOURCE,
                                     vitrage_type=NOVA_INSTANCE_DATASOURCE,
                                     metadata=metadata2)
-        metadata3 = {VProps.VITRAGE_STATE: 'SUBOPTIMAL'}
+        metadata3 = {VProps.VITRAGE_STATE: OperationalResourceState.SUBOPTIMAL}
         new_vertex3 = create_vertex('34567',
                                     vitrage_category=EntityCategory.RESOURCE,
                                     vitrage_type=NOVA_INSTANCE_DATASOURCE,
@@ -254,11 +254,11 @@ class TestDatasourceInfoMapper(base.BaseTest):
                          new_vertex1[VProps.VITRAGE_AGGREGATED_STATE])
         self.assertEqual(OperationalResourceState.OK,
                          new_vertex1[VProps.VITRAGE_OPERATIONAL_STATE])
-        self.assertEqual('SUBOPTIMAL',
+        self.assertEqual(OperationalResourceState.SUBOPTIMAL,
                          new_vertex2[VProps.VITRAGE_AGGREGATED_STATE])
         self.assertEqual(OperationalResourceState.SUBOPTIMAL,
                          new_vertex2[VProps.VITRAGE_OPERATIONAL_STATE])
-        self.assertEqual('SUBOPTIMAL',
+        self.assertEqual(OperationalResourceState.SUBOPTIMAL,
                          new_vertex3[VProps.VITRAGE_AGGREGATED_STATE])
         self.assertEqual(OperationalResourceState.SUBOPTIMAL,
                          new_vertex3[VProps.VITRAGE_OPERATIONAL_STATE])

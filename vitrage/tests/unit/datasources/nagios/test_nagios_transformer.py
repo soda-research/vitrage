@@ -108,7 +108,7 @@ class NagiosTransformerTest(base.BaseTest):
     def _validate_action(self, alarm, wrapper):
         ds_action = alarm[DSProps.DATASOURCE_ACTION]
         if ds_action in (DatasourceAction.SNAPSHOT, DatasourceAction.UPDATE):
-            if alarm[NagiosProperties.STATUS] == 'OK':
+            if alarm[NagiosProperties.STATUS] == NagiosTestStatus.OK:
                 self.assertEqual(GraphAction.DELETE_ENTITY, wrapper.action)
             else:
                 self.assertEqual(GraphAction.UPDATE_ENTITY, wrapper.action)

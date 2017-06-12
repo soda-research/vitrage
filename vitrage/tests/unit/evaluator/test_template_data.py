@@ -12,10 +12,15 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from vitrage.common.constants import EdgeLabel
+from vitrage.common.constants import EdgeProperties
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.datasources.nagios import NAGIOS_DATASOURCE
 from vitrage.datasources.nova.host import NOVA_HOST_DATASOURCE
+from vitrage.entity_graph.mappings.operational_resource_state import \
+    OperationalResourceState
+from vitrage.evaluator.scenario_evaluator import ActionType
 from vitrage.evaluator.template_data import ActionSpecs
 from vitrage.evaluator.template_data import ConditionVar
 from vitrage.evaluator.template_data import EdgeDescription
@@ -77,8 +82,9 @@ class BasicTemplateTest(base.BaseTest):
             'alarm_on_host': EdgeDescription(
                 edge=Edge(source_id='alarm',
                           target_id='resource',
-                          label='on',
-                          properties={'relationship_type': 'on'}),
+                          label=EdgeLabel.ON,
+                          properties={EdgeProperties.RELATIONSHIP_TYPE:
+                                      EdgeLabel.ON}),
                 source=expected_entities['alarm'],
                 target=expected_entities['resource']
             )
@@ -91,9 +97,10 @@ class BasicTemplateTest(base.BaseTest):
                               positive=True)]],
             actions=[
                 ActionSpecs(
-                    type='set_state',
+                    type=ActionType.SET_STATE,
                     targets={'target': 'resource'},
-                    properties={'state': 'SUBOPTIMAL'})],
+                    properties={'state':
+                                OperationalResourceState.SUBOPTIMAL})],
             # TODO(yujunz): verify the built subgraph is consistent with
             #               scenario definition. For now the observed value is
             #               assigned to make test passing
@@ -202,7 +209,7 @@ class BasicTemplateTest(base.BaseTest):
         self.assertEqual(len(actions), 1)
 
         action = actions[0]
-        self.assertEqual(action.type, 'set_state')
+        self.assertEqual(action.type, ActionType.SET_STATE)
 
         targets = action.targets
         self.assertEqual(len(targets), 1)
@@ -210,4 +217,5 @@ class BasicTemplateTest(base.BaseTest):
 
         properties = action.properties
         self.assertEqual(len(properties), 1)
-        self.assertEqual(properties['state'], 'SUBOPTIMAL')
+        self.assertEqual(properties['state'],
+                         OperationalResourceState.SUBOPTIMAL)

@@ -208,7 +208,7 @@ class TestActionExecutor(TestFunctionalBase):
         targets = {TFields.TARGET: host}
         props = {
             TFields.ALARM_NAME: 'VM_CPU_SUBOPTIMAL_PERFORMANCE',
-            TFields.SEVERITY: 'CRITICAL',
+            TFields.SEVERITY: OperationalAlarmSeverity.CRITICAL,
             VProps.STATE: AlarmProps.ACTIVE_STATE,
             VProps.RESOURCE_ID: host[VProps.ID],
             VProps.VITRAGE_ID: 'DUMMY_ID'
@@ -266,7 +266,7 @@ class TestActionExecutor(TestFunctionalBase):
         targets = {TFields.TARGET: host}
         props = {
             TFields.ALARM_NAME: 'VM_CPU_SUBOPTIMAL_PERFORMANCE',
-            TFields.SEVERITY: 'CRITICAL',
+            TFields.SEVERITY: OperationalAlarmSeverity.CRITICAL,
             VProps.STATE: AlarmProps.ACTIVE_STATE,
             VProps.RESOURCE_ID: host[VProps.ID]
         }

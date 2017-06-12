@@ -11,6 +11,8 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+from vitrage.entity_graph.mappings.operational_resource_state import \
+    OperationalResourceState
 
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.evaluator.actions.base import ActionType
@@ -33,7 +35,7 @@ class SetStateRecipeTest(base.BaseTest):
         cls.target_vertex = Vertex('RESOURCE:nova.host:test1')
 
         targets = {TFields.TARGET: cls.target_vertex}
-        cls.props = {TFields.STATE: 'SUBOPTIMAL'}
+        cls.props = {TFields.STATE: OperationalResourceState.SUBOPTIMAL}
 
         cls.action_spec = ActionSpecs(ActionType.SET_STATE, targets, cls.props)
 
