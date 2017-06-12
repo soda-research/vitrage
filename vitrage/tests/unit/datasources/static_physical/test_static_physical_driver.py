@@ -20,7 +20,7 @@ from vitrage.common.constants import DatasourceAction
 from vitrage.common.constants import DatasourceOpts as DSOpts
 from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import GraphAction
-from vitrage.common.constants import VertexProperties as VProps
+from vitrage.datasources.static import StaticFields
 from vitrage.datasources.static_physical import driver
 from vitrage.datasources.static_physical import STATIC_PHYSICAL_DATASOURCE
 from vitrage.datasources.static_physical import SWITCH
@@ -111,25 +111,25 @@ class TestStaticPhysicalDriver(base.BaseTest):
             GraphAction.UPDATE_ENTITY)
 
         # Test Assertions
-        status = any(change[VProps.TYPE] == SWITCH and
-                     change[VProps.ID] == '12345' for change in changes)
+        status = any(change[StaticFields.TYPE] == SWITCH and
+                     change[StaticFields.ID] == '12345' for change in changes)
         self.assertEqual(False, status)
 
-        status = any(change[VProps.TYPE] == SWITCH and
-                     change[VProps.ID] == '23456' and
+        status = any(change[StaticFields.TYPE] == SWITCH and
+                     change[StaticFields.ID] == '23456' and
                      change[DSProps.EVENT_TYPE] == GraphAction.DELETE_ENTITY
                      for change in changes)
         self.assertEqual(True, status)
 
-        status = any(change[VProps.TYPE] == SWITCH and
-                     change[VProps.ID] == '34567' for change in changes)
+        status = any(change[StaticFields.TYPE] == SWITCH and
+                     change[StaticFields.ID] == '34567' for change in changes)
         self.assertEqual(True, status)
 
-        status = any(change[VProps.TYPE] == SWITCH and
-                     change[VProps.ID] == '45678' for change in changes)
+        status = any(change[StaticFields.TYPE] == SWITCH and
+                     change[StaticFields.ID] == '45678' for change in changes)
         self.assertEqual(True, status)
-        status = any(change[VProps.TYPE] == SWITCH and
-                     change[VProps.ID] == '56789' for change in changes)
+        status = any(change[StaticFields.TYPE] == SWITCH and
+                     change[StaticFields.ID] == '56789' for change in changes)
         self.assertEqual(True, status)
 
         self.assertEqual(4, len(changes))

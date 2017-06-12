@@ -19,6 +19,7 @@ from vitrage.common.constants import VertexProperties as VProps
 from vitrage.datasources.nova.host import NOVA_HOST_DATASOURCE
 from vitrage.datasources.resource_transformer_base import \
     ResourceTransformerBase
+from vitrage.datasources.static import StaticFields
 from vitrage.datasources.static_physical import STATIC_PHYSICAL_DATASOURCE
 from vitrage.datasources.static_physical import SWITCH
 from vitrage.datasources import transformer_base
@@ -47,22 +48,22 @@ class StaticPhysicalTransformer(ResourceTransformerBase):
 
     def _create_vertex(self, entity_event):
 
-        entity_type = entity_event[VProps.TYPE]
+        entity_type = entity_event[StaticFields.TYPE]
         entity_id = entity_event[VProps.ID]
-        sample_timestamp = entity_event[DSProps.SAMPLE_DATE]
+        vitrage_sample_timestamp = entity_event[DSProps.SAMPLE_DATE]
         update_timestamp = self._format_update_timestamp(
             update_timestamp=None,
-            sample_timestamp=sample_timestamp)
+            sample_timestamp=vitrage_sample_timestamp)
         state = entity_event[VProps.STATE]
         entity_key = self._create_entity_key(entity_event)
         metadata = self._extract_metadata(entity_event)
 
         return graph_utils.create_vertex(
             entity_key,
+            vitrage_category=EntityCategory.RESOURCE,
+            vitrage_type=entity_type,
+            vitrage_sample_timestamp=vitrage_sample_timestamp,
             entity_id=entity_id,
-            entity_category=EntityCategory.RESOURCE,
-            entity_type=entity_type,
-            sample_timestamp=sample_timestamp,
             update_timestamp=update_timestamp,
             entity_state=state,
             metadata=metadata)
@@ -75,14 +76,14 @@ class StaticPhysicalTransformer(ResourceTransformerBase):
 
     def _create_static_physical_neighbors(self, entity_event):
         neighbors = []
-        entity_type = entity_event[VProps.TYPE]
+        entity_type = entity_event[StaticFields.TYPE]
 
         for neighbor_details in entity_event.get(
                 self.RELATIONSHIPS_SECTION, {}):
             # TODO(alexey): need to decide what to do if one of the entities
             #               fails
             neighbor_id = neighbor_details[VProps.ID]
-            neighbor_type = neighbor_details[VProps.TYPE]
+            neighbor_type = neighbor_details[StaticFields.TYPE]
             relation_type = neighbor_details[self.RELATION_TYPE]
             is_entity_source = not self._find_relation_direction_source(
                 entity_type, neighbor_type)
@@ -98,7 +99,7 @@ class StaticPhysicalTransformer(ResourceTransformerBase):
 
     def _create_entity_key(self, entity_event):
         entity_id = entity_event[VProps.ID]
-        entity_type = entity_event[VProps.TYPE]
+        entity_type = entity_event[StaticFields.TYPE]
         key_fields = self._key_values(entity_type, entity_id)
         return transformer_base.build_key(key_fields)
 
@@ -121,5 +122,5 @@ class StaticPhysicalTransformer(ResourceTransformerBase):
         relationship = (SWITCH, SWITCH)
         self.relation_direction[relationship] = True
 
-    def get_type(self):
+    def get_vitrage_type(self):
         return STATIC_PHYSICAL_DATASOURCE

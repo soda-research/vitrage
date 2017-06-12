@@ -294,26 +294,26 @@ Adding/removing a template
 Common parameters and their acceptable values - for writing templates
 ---------------------------------------------------------------------
 
-+-------------------+---------------+-------------------------+------------------------------------+
-| block             | key           | supported values        | comments                           |
-+===================+===============+=========================+====================================+
-| entity            | category      | ALARM                   |                                    |
-|                   |               | RESOURCE                |                                    |
-+-------------------+---------------+-------------------------+------------------------------------+
-| entity (ALARM)    | type          | any string              |                                    |
-+-------------------+---------------+-------------------------+------------------------------------+
-| entity (RESOURCE) | type          | openstack.cluster,      | These are for the datasources that |
-|                   |               | nova.zone,              | come with vitrage by default.      |
-|                   |               | nova.host,              | Adding datasources will add more   |
-|                   |               | nova.instance,          | supported types, as defined in the |
-|                   |               | cinder.volume,          | datasource transformer             |
-|                   |               | switch                  |                                    |
-+-------------------+---------------+-------------------------+------------------------------------+
-| action            | action_type   | raise_alarm,            |                                    |
-|                   |               | set_state,              |                                    |
-|                   |               | add_causal_relationship |                                    |
-|                   |               | mark_down               |                                    |
-+-------------------+---------------+-------------------------+------------------------------------+
++-------------------+-----------------------+-------------------------+------------------------------------+
+| block             | key                   | supported values        | comments                           |
++===================+=======================+=========================+====================================+
+| entity            | category              | ALARM                   |                                    |
+|                   |                       | RESOURCE                |                                    |
++-------------------+-----------------------+-------------------------+------------------------------------+
+| entity (ALARM)    | type                  | any string              |                                    |
++-------------------+-----------------------+-------------------------+------------------------------------+
+| entity (RESOURCE) | type                  | openstack.cluster,      | These are for the datasources that |
+|                   |                       | nova.zone,              | come with vitrage by default.      |
+|                   |                       | nova.host,              | Adding datasources will add more   |
+|                   |                       | nova.instance,          | supported types, as defined in the |
+|                   |                       | cinder.volume,          | datasource transformer             |
+|                   |                       | switch                  |                                    |
++-------------------+-----------------------+-------------------------+------------------------------------+
+| action            | action_type           | raise_alarm,            |                                    |
+|                   |                       | set_state,              |                                    |
+|                   |                       | add_causal_relationship |                                    |
+|                   |                       | mark_down               |                                    |
++-------------------+-----------------------+-------------------------+------------------------------------+
 
 
 Supported Actions

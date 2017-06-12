@@ -11,10 +11,13 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+
 import os
 
 from oslo_config import cfg
 
+from vitrage.common.constants import EntityCategory
+from vitrage.common.constants import VertexProperties as VProps
 from vitrage.evaluator.scenario_repository import ScenarioRepository
 from vitrage.evaluator.template_validation.template_syntax_validator import \
     syntax_validation
@@ -117,11 +120,11 @@ class EquivalentScenarioTest(base.BaseTest):
 
     def test_expansion(self):
         entity_scenarios = self.scenario_repository.entity_scenarios
-        for entity_key, scenarios in entity_scenarios.items():
-            if ('category', 'ALARM') in entity_key:
+        for key, scenarios in entity_scenarios.items():
+            if (VProps.VITRAGE_CATEGORY, EntityCategory.ALARM) in key:
                 # scenarios expanded on the other alarm
                 self.assertEqual(len(scenarios), 2)
-            if ('category', 'RESOURCE') in entity_key:
+            if (VProps.VITRAGE_CATEGORY, EntityCategory.RESOURCE) in key:
                 # Scenarios expanded on the two alarms. Each alarm is expanded
                 # to two equivalent alarms. Thus 2 x 2 = 4 in total
                 self.assertEqual(len(scenarios), 4)

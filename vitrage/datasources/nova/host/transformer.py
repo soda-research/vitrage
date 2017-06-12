@@ -48,16 +48,17 @@ class HostTransformer(ResourceTransformerBase):
         metadata = {VProps.NAME: host_name}
         entity_key = self._create_entity_key(entity_event)
 
-        sample_timestamp = entity_event[DSProps.SAMPLE_DATE]
-        update_timestamp = self._format_update_timestamp(None,
-                                                         sample_timestamp)
+        vitrage_sample_timestamp = entity_event[DSProps.SAMPLE_DATE]
+        update_timestamp = \
+            self._format_update_timestamp(None,
+                                          vitrage_sample_timestamp)
 
         return graph_utils.create_vertex(
             entity_key,
+            vitrage_category=EntityCategory.RESOURCE,
+            vitrage_type=NOVA_HOST_DATASOURCE,
+            vitrage_sample_timestamp=vitrage_sample_timestamp,
             entity_id=host_name,
-            entity_category=EntityCategory.RESOURCE,
-            entity_type=NOVA_HOST_DATASOURCE,
-            sample_timestamp=sample_timestamp,
             update_timestamp=update_timestamp,
             metadata=metadata)
 
@@ -83,5 +84,5 @@ class HostTransformer(ResourceTransformerBase):
         key_fields = self._key_values(NOVA_HOST_DATASOURCE, host_name)
         return transformer_base.build_key(key_fields)
 
-    def get_type(self):
+    def get_vitrage_type(self):
         return NOVA_HOST_DATASOURCE

@@ -12,6 +12,12 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from vitrage.common.constants import EntityCategory
+from vitrage.common.constants import VertexProperties as VProps
+from vitrage.datasources.nagios import NAGIOS_DATASOURCE
+from vitrage.datasources.zabbix import ZABBIX_DATASOURCE
+from vitrage.evaluator.actions.evaluator_event_transformer \
+    import VITRAGE_DATASOURCE
 from vitrage.evaluator.equivalence_data import EquivalenceData
 from vitrage.tests import base
 from vitrage.tests.mocks import utils
@@ -34,15 +40,15 @@ class EquivalenceTemplateTest(base.BaseTest):
 
         expected = [
             frozenset([
-                frozenset([('category', 'ALARM'),
-                           ('type', 'nagios'),
-                           ('name', 'host_problem')]),
-                frozenset([('category', 'ALARM'),
-                           ('type', 'zabbix'),
-                           ('name', 'host_fail')]),
-                frozenset([('category', 'ALARM'),
-                           ('type', 'vitrage'),
-                           ('name', 'host_down')])
+                frozenset([(VProps.VITRAGE_CATEGORY, EntityCategory.ALARM),
+                           (VProps.VITRAGE_TYPE, NAGIOS_DATASOURCE),
+                           (VProps.NAME, 'host_problem')]),
+                frozenset([(VProps.VITRAGE_CATEGORY, EntityCategory.ALARM),
+                           (VProps.VITRAGE_TYPE, ZABBIX_DATASOURCE),
+                           (VProps.NAME, 'host_fail')]),
+                frozenset([(VProps.VITRAGE_CATEGORY, EntityCategory.ALARM),
+                           (VProps.VITRAGE_TYPE, VITRAGE_DATASOURCE),
+                           (VProps.NAME, 'host_down')])
             ]),
         ]
 

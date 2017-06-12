@@ -33,7 +33,7 @@ class NovaNotifier(NotifierBase):
         self.client = os_clients.nova_client(conf)
 
     def process_event(self, data, event_type):
-        if data and data.get(VProps.TYPE) == NOVA_HOST_DATASOURCE:
+        if data and data.get(VProps.VITRAGE_TYPE) == NOVA_HOST_DATASOURCE:
             if event_type == NotifierEventTypes.ACTIVATE_MARK_DOWN_EVENT:
                 self._mark_host_down(data.get(VProps.ID), True)
             elif event_type == NotifierEventTypes.DEACTIVATE_MARK_DOWN_EVENT:

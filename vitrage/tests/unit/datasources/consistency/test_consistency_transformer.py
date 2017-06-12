@@ -101,5 +101,6 @@ class TestConsistencyTransformer(base.BaseTest):
         vertex_id = vertex.vertex_id
         self.assertIsNotNone(vertex_id)
 
-        sample_timestamp = vertex.get(VProps.SAMPLE_TIMESTAMP, None)
-        self.assertIsNotNone(sample_timestamp)
+        vitrage_sample_timestamp = \
+            vertex.get(VProps.VITRAGE_SAMPLE_TIMESTAMP, None)
+        self.assertIsNotNone(vitrage_sample_timestamp)

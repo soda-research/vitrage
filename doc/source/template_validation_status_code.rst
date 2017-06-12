@@ -34,8 +34,8 @@ The following describes all the possible status code and their messages:
 +------------------+---------------------------------------------------------+-------------------------------+
 | 43               | At least one entity must be defined                     | syntax                        |
 +------------------+---------------------------------------------------------+-------------------------------+
-| 45               | Invalid entity category. Category must be from types:   | syntax                        |
-|                  | [entities_categories]                                   |                               |
+| 45               | Invalid entity category. Category must be from          | syntax                        |
+|                  | types: [entities_categories]                            |                               |
 +------------------+---------------------------------------------------------+-------------------------------+
 | 46               | Entity field is required                                | syntax                        |
 +------------------+---------------------------------------------------------+-------------------------------+

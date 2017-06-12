@@ -81,8 +81,8 @@ class TestStaticPhysical(TestDataSourcesBase):
 
         static_physical_vertices = processor.entity_graph.get_vertices(
             vertex_attr_filter={
-                VProps.CATEGORY: EntityCategory.RESOURCE,
-                VProps.TYPE: SWITCH
+                VProps.VITRAGE_CATEGORY: EntityCategory.RESOURCE,
+                VProps.VITRAGE_TYPE: SWITCH
             })
         self.assertEqual(1, len(static_physical_vertices))
 
@@ -91,4 +91,4 @@ class TestStaticPhysical(TestDataSourcesBase):
         self.assertEqual(1, len(static_physical_neighbors))
 
         self.assertEqual(NOVA_HOST_DATASOURCE,
-                         static_physical_neighbors[0][VProps.TYPE])
+                         static_physical_neighbors[0][VProps.VITRAGE_TYPE])

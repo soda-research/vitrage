@@ -30,10 +30,10 @@ class AlarmHandler(HandlerBase):
         return [VProps.SEVERITY]
 
     def set_operational_value(self, new_vertex, operational_value):
-        new_vertex[VProps.OPERATIONAL_SEVERITY] = operational_value
+        new_vertex[VProps.VITRAGE_OPERATIONAL_SEVERITY] = operational_value
 
     def set_aggregated_value(self, new_vertex, aggregated_value):
-        new_vertex[VProps.AGGREGATED_SEVERITY] = aggregated_value
+        new_vertex[VProps.VITRAGE_AGGREGATED_SEVERITY] = aggregated_value
 
     def default_values(self):
         return [(None, OperationalAlarmSeverity.NA, 0)]

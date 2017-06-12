@@ -61,17 +61,18 @@ class ZoneTransformer(ResourceTransformerBase):
         }
         entity_key = self._create_entity_key(entity_event)
 
-        sample_timestamp = entity_event[DSProps.SAMPLE_DATE]
-        update_timestamp = self._format_update_timestamp(None,
-                                                         sample_timestamp)
+        vitrage_sample_timestamp = entity_event[DSProps.SAMPLE_DATE]
+        update_timestamp = \
+            self._format_update_timestamp(None,
+                                          vitrage_sample_timestamp)
 
         return graph_utils.create_vertex(
             entity_key,
+            vitrage_category=EntityCategory.RESOURCE,
+            vitrage_type=NOVA_ZONE_DATASOURCE,
+            vitrage_sample_timestamp=vitrage_sample_timestamp,
             entity_id=zone_name,
-            entity_category=EntityCategory.RESOURCE,
-            entity_type=NOVA_ZONE_DATASOURCE,
             entity_state=state,
-            sample_timestamp=sample_timestamp,
             update_timestamp=update_timestamp,
             metadata=metadata)
 
@@ -84,7 +85,7 @@ class ZoneTransformer(ResourceTransformerBase):
     def _create_zone_neighbors(self, entity_event):
         neighbors = []
         metadata = {
-            VProps.IS_PLACEHOLDER: False,
+            VProps.VITRAGE_IS_PLACEHOLDER: False,
             VProps.STATE: 'available',
             VProps.NAME: OPENSTACK_CLUSTER
         }
@@ -113,7 +114,7 @@ class ZoneTransformer(ResourceTransformerBase):
 
             metadata = {
                 VProps.STATE: host_state,
-                VProps.IS_PLACEHOLDER: False
+                VProps.VITRAGE_IS_PLACEHOLDER: False
             }
 
             host_neighbor = self._create_neighbor(entity_event,
@@ -133,5 +134,5 @@ class ZoneTransformer(ResourceTransformerBase):
         key_fields = self._key_values(NOVA_ZONE_DATASOURCE, zone_name)
         return tbase.build_key(key_fields)
 
-    def get_type(self):
+    def get_vitrage_type(self):
         return NOVA_ZONE_DATASOURCE

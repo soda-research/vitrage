@@ -23,6 +23,6 @@ class BaseTransformerTest(base.BaseTest):
                                     vertex,
                                     expected_name,
                                     expected_datasource_name):
-        self.assertFalse(vertex[VProps.IS_PLACEHOLDER])
-        self.assertEqual(expected_datasource_name, vertex[VProps.TYPE])
+        self.assertFalse(vertex[VProps.VITRAGE_IS_PLACEHOLDER])
+        self.assertEqual(expected_datasource_name, vertex[VProps.VITRAGE_TYPE])
         self.assertEqual(expected_name, vertex[VProps.NAME])

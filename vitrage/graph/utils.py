@@ -19,14 +19,14 @@ from vitrage.graph.driver.elements import Vertex
 
 
 def create_vertex(vitrage_id,
+                  vitrage_category=None,
+                  vitrage_type=None,
+                  vitrage_sample_timestamp=None,
+                  vitrage_is_deleted=False,
+                  vitrage_is_placeholder=False,
                   entity_id=None,
-                  entity_category=None,
-                  entity_type=None,
                   entity_state=None,
-                  is_deleted=False,
-                  sample_timestamp=None,
                   update_timestamp=None,
-                  is_placeholder=False,
                   project_id=None,
                   metadata=None):
     """A builder to create a vertex
@@ -35,22 +35,22 @@ def create_vertex(vitrage_id,
     :type vitrage_id: str
     :param entity_id:
     :type entity_id: str
-    :param entity_category:
-    :type entity_category: str
-    :param entity_type:
-    :type entity_type: str
+    :param vitrage_category:
+    :type vitrage_category: str
+    :param vitrage_type:
+    :type vitrage_type: str
     :param entity_state:
     :type entity_state: str
-    :param is_deleted:
-    :type is_deleted: boolean
+    :param vitrage_is_deleted:
+    :type vitrage_is_deleted: boolean
     :param update_timestamp:
     :type update_timestamp: str
-    :param sample_timestamp:
-    :type sample_timestamp: str
+    :param vitrage_sample_timestamp:
+    :type vitrage_sample_timestamp: str
     :param metadata:
     :type metadata: dict
-    :param is_placeholder:
-    :type is_placeholder: boolean
+    :param vitrage_is_placeholder:
+    :type vitrage_is_placeholder: boolean
     :param project_id:
     :type project_id: str
     :return:
@@ -60,12 +60,12 @@ def create_vertex(vitrage_id,
     properties = {
         VConst.ID: entity_id,
         VConst.STATE: entity_state,
-        VConst.TYPE: entity_type,
-        VConst.CATEGORY: entity_category,
-        VConst.IS_DELETED: is_deleted,
+        VConst.VITRAGE_TYPE: vitrage_type,
+        VConst.VITRAGE_CATEGORY: vitrage_category,
+        VConst.VITRAGE_IS_DELETED: vitrage_is_deleted,
         VConst.UPDATE_TIMESTAMP: update_timestamp,
-        VConst.SAMPLE_TIMESTAMP: sample_timestamp,
-        VConst.IS_PLACEHOLDER: is_placeholder,
+        VConst.VITRAGE_SAMPLE_TIMESTAMP: vitrage_sample_timestamp,
+        VConst.VITRAGE_IS_PLACEHOLDER: vitrage_is_placeholder,
         VConst.VITRAGE_ID: vitrage_id,
         VConst.PROJECT_ID: project_id
     }
@@ -80,7 +80,7 @@ def create_vertex(vitrage_id,
 def create_edge(source_id,
                 target_id,
                 relationship_type,
-                is_deleted=False,
+                vitrage_is_deleted=False,
                 update_timestamp=None,
                 metadata=None):
     """A builder to create an edge
@@ -92,8 +92,8 @@ def create_edge(source_id,
     :type target_id: str
     :param relationship_type:
     :type relationship_type: str
-    :param is_deleted:
-    :type is_deleted: str
+    :param vitrage_is_deleted:
+    :type vitrage_is_deleted: str
     :param metadata:
     :type metadata: dict
     :return:
@@ -101,7 +101,7 @@ def create_edge(source_id,
     """
     properties = {
         EConst.UPDATE_TIMESTAMP: update_timestamp,
-        EConst.IS_DELETED: is_deleted,
+        EConst.VITRAGE_IS_DELETED: vitrage_is_deleted,
         EConst.RELATIONSHIP_TYPE: relationship_type,
     }
     if metadata:

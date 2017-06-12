@@ -46,27 +46,27 @@ class StaticTransformer(ResourceTransformerBase):
 
     def _create_entity_key(self, entity_event):
         entity_id = entity_event[VProps.ID]
-        entity_type = entity_event[VProps.TYPE]
+        entity_type = entity_event[StaticFields.TYPE]
         key_fields = self._key_values(entity_type, entity_id)
         return transformer_base.build_key(key_fields)
 
     @staticmethod
-    def get_type():
+    def get_vitrage_type():
         return STATIC_DATASOURCE
 
     def _create_vertex(self, entity_event):
 
-        entity_type = entity_event[VProps.TYPE]
+        entity_type = entity_event[StaticFields.TYPE]
         entity_id = entity_event[VProps.ID]
-        sample_timestamp = entity_event[DSProps.SAMPLE_DATE]
+        vitrage_sample_timestamp = entity_event[DSProps.SAMPLE_DATE]
 
         if entity_type in self.transformers:
             properties = {
-                VProps.TYPE: entity_type,
+                VProps.VITRAGE_TYPE: entity_type,
                 VProps.ID: entity_id,
-                VProps.CATEGORY: EntityCategory.RESOURCE,
-                VProps.SAMPLE_TIMESTAMP: sample_timestamp,
-                VProps.IS_PLACEHOLDER: False
+                VProps.VITRAGE_CATEGORY: EntityCategory.RESOURCE,
+                VProps.VITRAGE_SAMPLE_TIMESTAMP: vitrage_sample_timestamp,
+                VProps.VITRAGE_IS_PLACEHOLDER: False
             }
             return self.create_neighbor_placeholder_vertex(**properties)
         else:
@@ -74,15 +74,15 @@ class StaticTransformer(ResourceTransformerBase):
             state = entity_event[VProps.STATE]
             update_timestamp = self._format_update_timestamp(
                 update_timestamp=None,
-                sample_timestamp=sample_timestamp)
+                sample_timestamp=vitrage_sample_timestamp)
             metadata = entity_event.get(StaticFields.METADATA, {})
 
             return graph_utils.create_vertex(
                 entity_key,
+                vitrage_category=EntityCategory.RESOURCE,
+                vitrage_type=entity_type,
+                vitrage_sample_timestamp=vitrage_sample_timestamp,
                 entity_id=entity_id,
-                entity_category=EntityCategory.RESOURCE,
-                entity_type=entity_type,
-                sample_timestamp=sample_timestamp,
                 update_timestamp=update_timestamp,
                 entity_state=state,
                 metadata=metadata)
@@ -103,7 +103,7 @@ class StaticTransformer(ResourceTransformerBase):
         return self._create_neighbor(
             entity_event,
             neighbor[VProps.ID],
-            neighbor[VProps.TYPE],
+            neighbor[StaticFields.TYPE],
             rel[StaticFields.RELATIONSHIP_TYPE],
             is_entity_source=is_entity_source)
 

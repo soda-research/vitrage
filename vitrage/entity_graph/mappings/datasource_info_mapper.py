@@ -39,7 +39,7 @@ class DatasourceInfoMapper(object):
         self.category_normalizer = self._init_category_normalizer()
         self.datasources_state_confs = self._load_state_configurations()
 
-    def operational_state(self, datasource_name, state):
+    def vitrage_operational_state(self, datasource_name, state):
         return self._get_state_data(datasource_name,
                                     state,
                                     self.OPERATIONAL_VALUES)
@@ -49,20 +49,20 @@ class DatasourceInfoMapper(object):
                                     state,
                                     self.PRIORITY_VALUES)
 
-    def aggregated_state(self, new_vertex, graph_vertex):
-        datasource_name = new_vertex[VProps.TYPE] if \
-            VProps.TYPE in new_vertex.properties else \
-            graph_vertex[VProps.TYPE]
+    def vitrage_aggregated_state(self, new_vertex, graph_vertex):
+        datasource_name = new_vertex[VProps.VITRAGE_TYPE] if \
+            VProps.VITRAGE_TYPE in new_vertex.properties else \
+            graph_vertex[VProps.VITRAGE_TYPE]
 
-        category = new_vertex[VProps.CATEGORY] if \
-            VProps.CATEGORY in new_vertex.properties else \
-            graph_vertex[VProps.CATEGORY]
+        vitrage_category = new_vertex[VProps.VITRAGE_CATEGORY] if \
+            VProps.VITRAGE_CATEGORY in new_vertex.properties else \
+            graph_vertex[VProps.VITRAGE_CATEGORY]
 
         if datasource_name in self.datasources_state_confs or \
                 datasource_name not in self.conf.datasources.types:
             value_properties = \
-                self.category_normalizer[category].value_properties()
-            operational_state, aggregated_state, state_priority = \
+                self.category_normalizer[vitrage_category].value_properties()
+            vitrage_operational_state, vitrage_aggregated_state, state_priority = \
                 self._find_operational_state_and_priority(new_vertex,
                                                           graph_vertex,
                                                           value_properties[0],
@@ -76,18 +76,18 @@ class DatasourceInfoMapper(object):
                                                               property_,
                                                               datasource_name)
                 if t_state_priority > state_priority:
-                    operational_state = t_operational_state
-                    aggregated_state = t_aggregated_state
+                    vitrage_operational_state = t_operational_state
+                    vitrage_aggregated_state = t_aggregated_state
                     state_priority = t_state_priority
 
-            self.category_normalizer[category].set_aggregated_value(
-                new_vertex, aggregated_state)
-            self.category_normalizer[category].set_operational_value(
-                new_vertex, operational_state)
+            self.category_normalizer[vitrage_category].set_aggregated_value(
+                new_vertex, vitrage_aggregated_state)
+            self.category_normalizer[vitrage_category].set_operational_value(
+                new_vertex, vitrage_operational_state)
         else:
-            self.category_normalizer[category].set_aggregated_value(
+            self.category_normalizer[vitrage_category].set_aggregated_value(
                 new_vertex, self.UNDEFINED_DATASOURCE)
-            self.category_normalizer[category].set_operational_value(
+            self.category_normalizer[vitrage_category].set_operational_value(
                 new_vertex, self.UNDEFINED_DATASOURCE)
 
     def get_datasource_priorities(self, datasource_name=None):
@@ -140,7 +140,7 @@ class DatasourceInfoMapper(object):
         states = {}
         priorities = {}
         config = file_utils.load_yaml_file(full_path, with_exception=True)
-        category = config['category']
+        vitrage_category = config['category']
 
         for item in config['values']:
             aggregated_values = item['aggregated values']
@@ -153,9 +153,9 @@ class DatasourceInfoMapper(object):
                 states[original_value.upper()] = operational_value
                 priorities[original_value.upper()] = priority_value
 
-        self._check_validity(category, states, priorities, full_path)
+        self._check_validity(vitrage_category, states, priorities, full_path)
 
-        self._add_default_states(states, priorities, category)
+        self._add_default_states(states, priorities, vitrage_category)
 
         return states, priorities
 
@@ -208,13 +208,13 @@ class DatasourceInfoMapper(object):
 
         upper_state = state if not state else state.upper()
 
-        operational_state = self.operational_state(datasource_name,
-                                                   upper_state)
+        vitrage_operational_state = self.vitrage_operational_state(
+            datasource_name, upper_state)
 
         state_priority = self.state_priority(datasource_name,
                                              upper_state)
 
-        return operational_state, upper_state, state_priority
+        return vitrage_operational_state, upper_state, state_priority
 
     @staticmethod
     def _get_all_local_variables_of_class(class_instance):

@@ -36,8 +36,9 @@ class BaseAlarmTransformerTest(BaseTransformerTest):
                                          expected_name,
                                          expected_datasource_name)
 
-        self.assertEqual(EntityCategory.ALARM, vertex[VProps.CATEGORY])
-        self.assertEqual(expected_sample_time, vertex[VProps.SAMPLE_TIMESTAMP])
+        self.assertEqual(EntityCategory.ALARM, vertex[VProps.VITRAGE_CATEGORY])
+        self.assertEqual(expected_sample_time,
+                         vertex[VProps.VITRAGE_SAMPLE_TIMESTAMP])
 
         if self._is_erroneous(vertex):
             self.assertEqual(AlarmProps.ACTIVE_STATE, vertex[VProps.STATE])
@@ -55,9 +56,10 @@ class BaseAlarmTransformerTest(BaseTransformerTest):
         host_transformer = self.transformers[NOVA_HOST_DATASOURCE]
         properties = {
             VProps.ID: host_name,
-            VProps.TYPE: NOVA_HOST_DATASOURCE,
-            VProps.CATEGORY: EntityCategory.RESOURCE,
-            VProps.SAMPLE_TIMESTAMP: wrapper.vertex[VProps.SAMPLE_TIMESTAMP],
+            VProps.VITRAGE_TYPE: NOVA_HOST_DATASOURCE,
+            VProps.VITRAGE_CATEGORY: EntityCategory.RESOURCE,
+            VProps.VITRAGE_SAMPLE_TIMESTAMP:
+                wrapper.vertex[VProps.VITRAGE_SAMPLE_TIMESTAMP],
         }
         expected_neighbor = host_transformer.\
             create_neighbor_placeholder_vertex(**properties)

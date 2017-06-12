@@ -21,7 +21,8 @@ from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.evaluator.actions.base import ActionMode
 from vitrage.evaluator.actions.base import ActionType
-from vitrage.evaluator.actions.evaluator_event_transformer import VITRAGE_TYPE
+from vitrage.evaluator.actions.evaluator_event_transformer \
+    import VITRAGE_DATASOURCE
 from vitrage.evaluator.actions.recipes.action_steps import ADD_EDGE
 from vitrage.evaluator.actions.recipes.action_steps import ADD_VERTEX
 from vitrage.evaluator.actions.recipes.action_steps import REMOVE_EDGE
@@ -104,9 +105,9 @@ class ActionExecutor(object):
     def _add_default_properties(event):
 
         event[DSProps.DATASOURCE_ACTION] = AType.UPDATE
-        event[DSProps.ENTITY_TYPE] = VITRAGE_TYPE
+        event[DSProps.ENTITY_TYPE] = VITRAGE_DATASOURCE
         event[VProps.UPDATE_TIMESTAMP] = str(datetime_utils.utcnow(False))
-        event[VProps.SAMPLE_TIMESTAMP] = str(datetime_utils.utcnow())
+        event[VProps.VITRAGE_SAMPLE_TIMESTAMP] = str(datetime_utils.utcnow())
 
     @staticmethod
     def _register_action_recipes():

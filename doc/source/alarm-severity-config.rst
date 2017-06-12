@@ -16,7 +16,7 @@ Since each data-source might represent severity differently, for each
 data-source we can supply it's own mapping to the aggregated severity supported
 in Vitrage. This way we can know which severity is more important.
 In addition we also normalize the severities for the horizon UI (called
-``operational_severity``) in order for the UI to know what color to show in
+``vitrage_operational_severity``) in order for the UI to know what color to show in
 Horizon.
 
 This page explains how to handle this mapping for a given

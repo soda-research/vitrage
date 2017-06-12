@@ -60,13 +60,13 @@ class SnmpNotifierTest(base.BaseTest):
         self.assertEqual(len(var_lst), 3)
 
         self.assertIn(VProps.NAME, oids)
-        self.assertIn(VProps.IS_DELETED, oids)
-        self.assertIn(VProps.OPERATIONAL_SEVERITY, oids)
+        self.assertIn(VProps.VITRAGE_IS_DELETED, oids)
+        self.assertIn(VProps.VITRAGE_OPERATIONAL_SEVERITY, oids)
         self.assertIn(sender.SEVERITY, oids)
 
         self.assertIn(VProps.NAME, var_lst)
-        self.assertIn(VProps.IS_DELETED, var_lst)
-        self.assertIn(VProps.OPERATIONAL_SEVERITY, var_lst)
+        self.assertIn(VProps.VITRAGE_IS_DELETED, var_lst)
+        self.assertIn(VProps.VITRAGE_OPERATIONAL_SEVERITY, var_lst)
 
     def test_var_binds(self):
 
@@ -84,10 +84,12 @@ class SnmpNotifierTest(base.BaseTest):
                       var_binds)
         self.assertIn((oid_with_alarm_objects + '.' + common.IS_DELETED_OID,
                        OctetString(common.alarm_data.get
-                                   (VProps.IS_DELETED, sender.NA))), var_binds)
+                                   (VProps.VITRAGE_IS_DELETED, sender.NA))),
+                      var_binds)
         self.assertIn((oid_with_alarm_objects + '.' + common.SEVERITY_OID,
                        OctetString(common.alarm_data.get
-                                   (VProps.OPERATIONAL_SEVERITY, sender.NA))),
+                                   (VProps.VITRAGE_OPERATIONAL_SEVERITY,
+                                    sender.NA))),
                       var_binds)
 
     def test_get_severity_oid(self):

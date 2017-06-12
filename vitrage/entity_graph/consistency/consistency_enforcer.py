@@ -24,7 +24,8 @@ from vitrage.common.constants import GraphAction
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.datasources.consistency import CONSISTENCY_DATASOURCE
 from vitrage.datasources import OPENSTACK_CLUSTER
-from vitrage.evaluator.actions.evaluator_event_transformer import VITRAGE_TYPE
+from vitrage.evaluator.actions.evaluator_event_transformer \
+    import VITRAGE_DATASOURCE
 from vitrage.utils.datetime import utcnow
 
 LOG = log.getLogger(__name__)
@@ -77,14 +78,14 @@ class ConsistencyEnforcer(object):
         try:
             LOG.debug('Consistency Periodic Process - Started')
 
-            # remove is_deleted=True entities
+            # remove vitrage_is_deleted=True entities
             old_deleted_entities = self._find_old_deleted_entities()
             LOG.debug('Found %s vertices to be deleted by consistency service'
                       ': %s', len(old_deleted_entities), old_deleted_entities)
             self._push_events_to_queue(old_deleted_entities,
                                        GraphAction.REMOVE_DELETED_ENTITY)
 
-            # mark stale entities as is_deleted=True
+            # mark stale entities as vitrage_is_deleted=True
             stale_entities = self._find_stale_entities()
             LOG.debug('Found %s vertices to be marked as deleted by '
                       'consistency service: %s', len(stale_entities),
@@ -96,12 +97,13 @@ class ConsistencyEnforcer(object):
                 'Error in deleting vertices from entity_graph: %s', e)
 
     def _find_stale_entities(self):
+        vitrage_sample_tstmp = str(utcnow() - timedelta(
+            seconds=2 * self.conf.datasources.snapshots_interval))
         query = {
             'and': [
-                {'!=': {VProps.TYPE: VITRAGE_TYPE}},
-                {'<': {VProps.SAMPLE_TIMESTAMP: str(utcnow() - timedelta(
-                    seconds=2 * self.conf.datasources.snapshots_interval))}},
-                {'==': {VProps.IS_DELETED: False}}
+                {'!=': {VProps.VITRAGE_TYPE: VITRAGE_DATASOURCE}},
+                {'<': {VProps.VITRAGE_SAMPLE_TIMESTAMP: vitrage_sample_tstmp}},
+                {'==': {VProps.VITRAGE_IS_DELETED: False}}
             ]
         }
 
@@ -110,11 +112,12 @@ class ConsistencyEnforcer(object):
         return set(self._filter_vertices_to_be_deleted(vertices))
 
     def _find_old_deleted_entities(self):
+        vitrage_sample_tstmp = str(utcnow() - timedelta(
+            seconds=self.conf.consistency.min_time_to_delete))
         query = {
             'and': [
-                {'==': {VProps.IS_DELETED: True}},
-                {'<': {VProps.SAMPLE_TIMESTAMP: str(utcnow() - timedelta(
-                    seconds=self.conf.consistency.min_time_to_delete))}}
+                {'==': {VProps.VITRAGE_IS_DELETED: True}},
+                {'<': {VProps.VITRAGE_SAMPLE_TIMESTAMP: vitrage_sample_tstmp}}
             ]
         }
 
@@ -125,9 +128,9 @@ class ConsistencyEnforcer(object):
     def _find_old_deduced_alarms(self, timestamp):
         query = {
             'and': [
-                {'==': {VProps.CATEGORY: EntityCategory.ALARM}},
-                {'==': {VProps.TYPE: VITRAGE_TYPE}},
-                {'<': {VProps.SAMPLE_TIMESTAMP: timestamp}}
+                {'==': {VProps.VITRAGE_CATEGORY: EntityCategory.ALARM}},
+                {'==': {VProps.VITRAGE_TYPE: VITRAGE_DATASOURCE}},
+                {'<': {VProps.VITRAGE_SAMPLE_TIMESTAMP: timestamp}}
             ]
         }
         return self.graph.get_vertices(query_dict=query)
@@ -159,8 +162,8 @@ class ConsistencyEnforcer(object):
                 DSProps.EVENT_TYPE: action,
                 VProps.VITRAGE_ID: vertex[VProps.VITRAGE_ID],
                 VProps.ID: vertex.get(VProps.ID, None),
-                VProps.TYPE: vertex[VProps.TYPE],
-                VProps.CATEGORY: vertex[VProps.CATEGORY],
+                VProps.VITRAGE_TYPE: vertex[VProps.VITRAGE_TYPE],
+                VProps.VITRAGE_CATEGORY: vertex[VProps.VITRAGE_CATEGORY],
                 VProps.IS_REAL_VITRAGE_ID: True
             }
             self.evaluator_queue.put(event)
@@ -169,8 +172,8 @@ class ConsistencyEnforcer(object):
     def _filter_vertices_to_be_deleted(vertices):
         return list(filter(
             lambda ver:
-            not (ver[VProps.CATEGORY] == EntityCategory.RESOURCE and
-                 ver[VProps.TYPE] == OPENSTACK_CLUSTER), vertices))
+            not (ver[VProps.VITRAGE_CATEGORY] == EntityCategory.RESOURCE and
+                 ver[VProps.VITRAGE_TYPE] == OPENSTACK_CLUSTER), vertices))
 
     def _wait_for_action(self, function):
         count_retries = 0

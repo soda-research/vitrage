@@ -46,7 +46,7 @@ class NagiosConfig(object):
                                  config[NAME])
 
     def get_vitrage_resource(self, nagios_host):
-        """Get Vitrage resource type and name for the given nagios host name
+        """Get Resource type and name for the given nagios host name
 
         Go over the configuration mappings one by one, and return the resource
         by the first mapping that applies to nagios host name.

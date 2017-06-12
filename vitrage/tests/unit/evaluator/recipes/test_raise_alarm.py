@@ -31,7 +31,7 @@ class RaiseAlarmRecipeTest(base.BaseTest):
     @classmethod
     def setUpClass(cls):
 
-        cls.target_props = {VProps.TYPE: NOVA_HOST_DATASOURCE}
+        cls.target_props = {VProps.VITRAGE_TYPE: NOVA_HOST_DATASOURCE}
         cls.target_vertex = Vertex('RESOURCE:nova.host:test1',
                                    cls.target_props)
         cls.targets = {TFields.TARGET: cls.target_vertex}
@@ -66,7 +66,7 @@ class RaiseAlarmRecipeTest(base.BaseTest):
 
         alarm_vitrage_resource_type = \
             add_vertex_step_params[VProps.VITRAGE_RESOURCE_TYPE]
-        self.assertEqual(self.target_vertex.properties[VProps.TYPE],
+        self.assertEqual(self.target_vertex.properties[VProps.VITRAGE_TYPE],
                          alarm_vitrage_resource_type)
 
     def test_get_undo_recipe(self):
@@ -97,5 +97,5 @@ class RaiseAlarmRecipeTest(base.BaseTest):
 
         alarm_vitrage_resource_type = \
             remove_vertex_step_params[VProps.VITRAGE_RESOURCE_TYPE]
-        self.assertEqual(self.target_vertex.properties[VProps.TYPE],
+        self.assertEqual(self.target_vertex.properties[VProps.VITRAGE_TYPE],
                          alarm_vitrage_resource_type)

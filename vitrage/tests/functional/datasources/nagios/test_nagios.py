@@ -74,8 +74,8 @@ class TestNagios(TestDataSourcesBase):
 
         nagios_vertices = processor.entity_graph.get_vertices(
             vertex_attr_filter={
-                VProps.CATEGORY: EntityCategory.ALARM,
-                VProps.TYPE: NAGIOS_DATASOURCE
+                VProps.VITRAGE_CATEGORY: EntityCategory.ALARM,
+                VProps.VITRAGE_TYPE: NAGIOS_DATASOURCE
             })
         self.assertEqual(1, len(nagios_vertices))
 
@@ -84,4 +84,4 @@ class TestNagios(TestDataSourcesBase):
         self.assertEqual(1, len(nagios_neighbors))
 
         self.assertEqual(NOVA_HOST_DATASOURCE,
-                         nagios_neighbors[0][VProps.TYPE])
+                         nagios_neighbors[0][VProps.VITRAGE_TYPE])

@@ -78,8 +78,8 @@ class TestAodhAlarms(TestDataSourcesBase):
 
         aodh_vertices = processor.entity_graph.get_vertices(
             vertex_attr_filter={
-                VProps.CATEGORY: EntityCategory.ALARM,
-                VProps.TYPE: AODH_DATASOURCE
+                VProps.VITRAGE_CATEGORY: EntityCategory.ALARM,
+                VProps.VITRAGE_TYPE: AODH_DATASOURCE
             })
         self.assertEqual(1, len(aodh_vertices))
 
@@ -88,4 +88,4 @@ class TestAodhAlarms(TestDataSourcesBase):
         self.assertEqual(1, len(aodh_neighbors))
 
         self.assertEqual(NOVA_HOST_DATASOURCE,
-                         aodh_neighbors[0][VProps.TYPE])
+                         aodh_neighbors[0][VProps.VITRAGE_TYPE])

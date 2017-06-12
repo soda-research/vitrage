@@ -49,9 +49,9 @@ class TestDatasourceInfoMapperFunctional(TestFunctionalBase):
         entity = processor.transformer_manager.transform(event)
         processor._find_and_fix_graph_vertex(entity.vertex, [])
         vertex = processor.entity_graph.get_vertex(entity.vertex.vertex_id)
-        self.assertEqual('ACTIVE', vertex[VProps.AGGREGATED_STATE])
+        self.assertEqual('ACTIVE', vertex[VProps.VITRAGE_AGGREGATED_STATE])
         self.assertEqual(OperationalResourceState.OK,
-                         vertex[VProps.OPERATIONAL_STATE])
+                         vertex[VProps.VITRAGE_OPERATIONAL_STATE])
 
     def test_state_on_neighbor_update(self):
         # setup
@@ -61,7 +61,7 @@ class TestDatasourceInfoMapperFunctional(TestFunctionalBase):
         self.assertEqual(2, processor.entity_graph.num_vertices())
 
         neighbors[0].vertex[VProps.STATE] = 'available'
-        neighbors[0].vertex[VProps.IS_PLACEHOLDER] = False
+        neighbors[0].vertex[VProps.VITRAGE_IS_PLACEHOLDER] = False
 
         # action
         processor._connect_neighbors(neighbors, [], GraphAction.UPDATE_ENTITY)
@@ -69,6 +69,7 @@ class TestDatasourceInfoMapperFunctional(TestFunctionalBase):
         # test assertions
         neighbor_vertex = processor.entity_graph.get_vertex(
             neighbors[0].vertex.vertex_id)
-        self.assertEqual('AVAILABLE', neighbor_vertex[VProps.AGGREGATED_STATE])
+        self.assertEqual('AVAILABLE',
+                         neighbor_vertex[VProps.VITRAGE_AGGREGATED_STATE])
         self.assertEqual(OperationalResourceState.OK,
-                         neighbor_vertex[VProps.OPERATIONAL_STATE])
+                         neighbor_vertex[VProps.VITRAGE_OPERATIONAL_STATE])

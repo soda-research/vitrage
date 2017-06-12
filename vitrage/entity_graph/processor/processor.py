@@ -64,7 +64,7 @@ class Processor(processor.ProcessorBase):
 
         self._enrich_event(event)
         entity = self.transformer_manager.transform(event)
-        self._calculate_aggregated_state(entity.vertex, entity.action)
+        self._calculate_vitrage_aggregated_state(entity.vertex, entity.action)
         self.actions[entity.action](entity.vertex, entity.neighbors)
 
     def create_entity(self, new_vertex, neighbors):
@@ -198,7 +198,7 @@ class Processor(processor.ProcessorBase):
     def remove_deleted_entity(self, vertex, neighbors):
         """Removes the deleted vertex from the entity graph
 
-        Removes vertex that it's is_deleted value is True
+        Removes vertex that it's vitrage_is_deleted value is True
 
         :param vertex: The vertex to be removed from the graph
         :type vertex: Vertex
@@ -218,7 +218,8 @@ class Processor(processor.ProcessorBase):
             LOG.warning("Delete event arrived on invalid resource: %s", vertex)
 
     def handle_end_message(self, vertex, neighbors):
-        self.initialization_status.end_messages[vertex[VProps.TYPE]] = True
+        self.initialization_status.end_messages[vertex[VProps.VITRAGE_TYPE]] \
+            = True
 
         if len(self.initialization_status.end_messages) == \
                 len(self.conf.datasources.types):
@@ -258,7 +259,7 @@ class Processor(processor.ProcessorBase):
             if not graph_vertex or not PUtils.is_deleted(graph_vertex):
                 if PUtils.can_update_vertex(graph_vertex, vertex):
                     LOG.debug("Updates vertex: %s", vertex)
-                    self._calculate_aggregated_state(vertex, action)
+                    self._calculate_vitrage_aggregated_state(vertex, action)
                     PUtils.update_entity_graph_vertex(self.entity_graph,
                                                       graph_vertex,
                                                       vertex)
@@ -336,7 +337,7 @@ class Processor(processor.ProcessorBase):
             GraphAction.END_MESSAGE: self.handle_end_message
         }
 
-    def _calculate_aggregated_state(self, vertex, action):
+    def _calculate_vitrage_aggregated_state(self, vertex, action):
         LOG.debug("calculate event state")
 
         try:
@@ -359,7 +360,7 @@ class Processor(processor.ProcessorBase):
                           action, vertex)
                 return None
 
-            self.state_manager.aggregated_state(vertex, graph_vertex)
+            self.state_manager.vitrage_aggregated_state(vertex, graph_vertex)
         except Exception as e:
             LOG.exception("Calculate aggregated state failed - %s", e)
 
@@ -408,7 +409,7 @@ class Processor(processor.ProcessorBase):
                                 and not include_deleted):
 
             vitrage_id = uuidutils.generate_uuid()
-            if vertex[VProps.TYPE] == OPENSTACK_CLUSTER:
+            if vertex[VProps.VITRAGE_TYPE] == OPENSTACK_CLUSTER:
                 self.entity_graph.root_id = vitrage_id
         else:
             vitrage_id = graph_vertex[VProps.VITRAGE_ID]
@@ -429,9 +430,10 @@ class Processor(processor.ProcessorBase):
                 edge.source_id = vitrage_id
                 edge.target_id = neighbor_vertex.vertex_id
 
-    def _add_resource_details_to_alarm(self, vertex, neighbors):
+    @staticmethod
+    def _add_resource_details_to_alarm(vertex, neighbors):
 
-        if not vertex.get(VProps.CATEGORY) == EntityCategory.ALARM \
+        if not vertex.get(VProps.VITRAGE_CATEGORY) == EntityCategory.ALARM \
                 or not neighbors:
             return
 
@@ -441,11 +443,12 @@ class Processor(processor.ProcessorBase):
 
         for neighbor in neighbors:
 
-            if neighbor.vertex.get(VProps.CATEGORY) == EntityCategory.RESOURCE:
+            if neighbor.vertex.get(VProps.VITRAGE_CATEGORY) == \
+                    EntityCategory.RESOURCE:
                 vertex.properties[VProps.VITRAGE_RESOURCE_ID] = \
                     neighbor.vertex.vertex_id
                 vertex.properties[VProps.VITRAGE_RESOURCE_TYPE] = \
-                    neighbor.vertex.get(VProps.TYPE)
+                    neighbor.vertex.get(VProps.VITRAGE_TYPE)
 
     def _get_single_graph_vertex_by_props(self, vertex, include_deleted=False):
         """Returns a single vertex by it's defining properties
@@ -470,7 +473,7 @@ class Processor(processor.ProcessorBase):
                 graph_vertices.append(tmp_vertex)
         else:
             for tmp_vertex in received_graph_vertices:
-                if not tmp_vertex.get(VProps.IS_DELETED, False):
+                if not tmp_vertex.get(VProps.VITRAGE_IS_DELETED, False):
                     graph_vertices.append(tmp_vertex)
 
         if len(graph_vertices) > 1:

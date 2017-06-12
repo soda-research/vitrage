@@ -74,9 +74,9 @@ def create_cluster_placeholder_vertex():
 
     return graph_utils.create_vertex(
         key,
+        vitrage_category=cons.EntityCategory.RESOURCE,
+        vitrage_type=OPENSTACK_CLUSTER,
         entity_id=CLUSTER_ID,
-        entity_category=cons.EntityCategory.RESOURCE,
-        entity_type=OPENSTACK_CLUSTER,
         entity_state=AVAILABLE,
         metadata=metadata
     )
@@ -136,9 +136,11 @@ class TransformerBase(object):
 
     def _create_entity_vertex(self, entity_event):
         if is_update_event(entity_event) and \
-                opt_exists(self.conf, self.get_type()) and \
-                opt_exists(self.conf[self.get_type()], DSOpts.UPDATE_METHOD):
-            update_method = self.conf[self.get_type()].update_method.lower()
+                opt_exists(self.conf, self.get_vitrage_type()) and \
+                opt_exists(self.conf[self.get_vitrage_type()],
+                           DSOpts.UPDATE_METHOD):
+            update_method = \
+                self.conf[self.get_vitrage_type()].update_method.lower()
             if update_method == UpdateMethod.PUSH:
                 return self._create_update_entity_vertex(entity_event)
             elif update_method == UpdateMethod.PULL:
@@ -205,12 +207,12 @@ class TransformerBase(object):
         metadata = {} if metadata is None else metadata
         # create placeholder vertex
         entity_vitrage_id = self._create_entity_key(entity_event)
-        sample_timestamp = entity_event[DSProps.SAMPLE_DATE]
+        vitrage_sample_timestamp = entity_event[DSProps.SAMPLE_DATE]
         properties = {
             VProps.ID: neighbor_id,
-            VProps.TYPE: neighbor_datasource_type,
-            VProps.CATEGORY: neighbor_category,
-            VProps.SAMPLE_TIMESTAMP: sample_timestamp,
+            VProps.VITRAGE_TYPE: neighbor_datasource_type,
+            VProps.VITRAGE_CATEGORY: neighbor_category,
+            VProps.VITRAGE_SAMPLE_TIMESTAMP: vitrage_sample_timestamp,
             self.METADATA: metadata
         }
         neighbor_vertex = \
@@ -244,7 +246,7 @@ class TransformerBase(object):
         return (EntityCategory.RESOURCE,) + args
 
     def create_neighbor_placeholder_vertex(self, **kwargs):
-        if VProps.TYPE not in kwargs:
+        if VProps.VITRAGE_TYPE not in kwargs:
             LOG.error("Can't create placeholder vertex. Missing property TYPE")
             raise ValueError('Missing property TYPE')
 
@@ -256,15 +258,17 @@ class TransformerBase(object):
         if self.METADATA in kwargs:
             metadata = kwargs[self.METADATA]
 
-        key_fields = self._key_values(kwargs[VProps.TYPE], kwargs[VProps.ID])
+        key_fields = self._key_values(kwargs[VProps.VITRAGE_TYPE],
+                                      kwargs[VProps.ID])
 
         return graph_utils.create_vertex(
             build_key(key_fields),
+            vitrage_category=kwargs[VProps.VITRAGE_CATEGORY],
+            vitrage_type=kwargs[VProps.VITRAGE_TYPE],
+            vitrage_sample_timestamp=kwargs[VProps.VITRAGE_SAMPLE_TIMESTAMP],
+            vitrage_is_placeholder=kwargs.get(VProps.VITRAGE_IS_PLACEHOLDER,
+                                              True),
             entity_id=kwargs[VProps.ID],
-            entity_category=kwargs[VProps.CATEGORY],
-            entity_type=kwargs[VProps.TYPE],
-            sample_timestamp=kwargs[VProps.SAMPLE_TIMESTAMP],
-            is_placeholder=kwargs.get(VProps.IS_PLACEHOLDER, True),
             metadata=metadata)
 
     def _extract_graph_action(self, entity_event):
@@ -300,9 +304,8 @@ class TransformerBase(object):
     @staticmethod
     def _create_end_vertex(entity_event):
         entity_type = entity_event[DSProps.ENTITY_TYPE]
-        return graph_utils.create_vertex(
-            'END_MESSAGE:' + entity_type,
-            entity_type=entity_type)
+        return graph_utils.create_vertex('END_MESSAGE:' + entity_type,
+                                         vitrage_type=entity_type)
 
     @staticmethod
     def _is_end_message(entity_event):
@@ -325,16 +328,17 @@ class TransformerBase(object):
 
          Example:
          -------
-          query = {'type': 'nova.instance'}
+          query = {'vitrage_type': 'nova.instance'}
           Before transform is called the result of running the query against
           the topology graph will be updated to event[QUERY_RESULT]
-          To contain the list of all the vertices with type=nova.instance
+          To contain the list of all the vertices with
+          vitrage_type=nova.instance
         """
         return None
 
     @abc.abstractmethod
-    def get_type(self):
-        """Returns the type of the datasource
+    def get_vitrage_type(self):
+        """Returns the vitrage_type of the datasource
 
         :return: datasource type
         :rtype: String

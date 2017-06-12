@@ -28,12 +28,12 @@ LOG = log.getLogger(__name__)
 
 
 def is_newer_vertex(prev_vertex, new_vertex):
-    prev_timestamp = prev_vertex.get(VProps.SAMPLE_TIMESTAMP)
+    prev_timestamp = prev_vertex.get(VProps.VITRAGE_SAMPLE_TIMESTAMP)
     if not prev_timestamp:
         return True
     prev_time = parser.parse(prev_timestamp)
 
-    new_timestamp = new_vertex[VProps.SAMPLE_TIMESTAMP]
+    new_timestamp = new_vertex[VProps.VITRAGE_SAMPLE_TIMESTAMP]
     if not new_timestamp:
         return False
     new_time = parser.parse(new_timestamp)
@@ -43,17 +43,19 @@ def is_newer_vertex(prev_vertex, new_vertex):
 
 def is_deleted(item):
     return item and \
-        (isinstance(item, Vertex) and item.get(VProps.IS_DELETED, False)) or\
-        (isinstance(item, Edge) and item.get(EProps.IS_DELETED, False))
+        (isinstance(item, Vertex) and
+         item.get(VProps.VITRAGE_IS_DELETED, False)) or \
+        (isinstance(item, Edge) and
+         item.get(EProps.VITRAGE_IS_DELETED, False))
 
 
 def mark_deleted(g, item):
     if isinstance(item, Vertex):
-        item[VProps.IS_DELETED] = True
-        item[VProps.SAMPLE_TIMESTAMP] = str(utcnow())
+        item[VProps.VITRAGE_IS_DELETED] = True
+        item[VProps.VITRAGE_SAMPLE_TIMESTAMP] = str(utcnow())
         g.update_vertex(item)
     elif isinstance(item, Edge):
-        item[EProps.IS_DELETED] = True
+        item[EProps.VITRAGE_IS_DELETED] = True
         item[EProps.UPDATE_TIMESTAMP] = str(utcnow())
         g.update_edge(item)
 
@@ -61,7 +63,7 @@ def mark_deleted(g, item):
 def delete_placeholder_vertex(g, vertex):
     """Checks if it is a placeholder vertex, and if so deletes it """
 
-    if not vertex[VProps.IS_PLACEHOLDER]:
+    if not vertex[VProps.VITRAGE_IS_PLACEHOLDER]:
         return
     if not any(True for neighbor_edge in g.get_edges(vertex.vertex_id)
                if not is_deleted(neighbor_edge)):
@@ -79,29 +81,31 @@ def find_neighbor_types(neighbors):
 
 
 def get_vertex_types(vertex):
-    category = vertex[VProps.CATEGORY]
-    type_ = vertex[VProps.TYPE]
-    return category, type_
+    vitrage_category = vertex[VProps.VITRAGE_CATEGORY]
+    vitrage_type = vertex[VProps.VITRAGE_TYPE]
+    return vitrage_category, vitrage_type
 
 
 def get_defining_properties(vertex):
-    if vertex.get(VProps.CATEGORY) == EntityCategory.ALARM:
-        dp = (vertex.get(VProps.TYPE), vertex.get(VProps.ID),
+    if vertex.get(VProps.VITRAGE_CATEGORY) == EntityCategory.ALARM:
+        dp = (vertex.get(VProps.VITRAGE_TYPE), vertex.get(VProps.ID),
               vertex.get(VProps.RESOURCE_ID), vertex.get(VProps.NAME))
     else:
-        dp = (vertex.get(VProps.TYPE), vertex.get(VProps.ID))
+        dp = (vertex.get(VProps.VITRAGE_TYPE), vertex.get(VProps.ID))
     return hash(dp)
 
 
 def can_update_vertex(graph_vertex, new_vertex):
-    return (not graph_vertex) or (not new_vertex[VProps.IS_PLACEHOLDER])
+    return (not graph_vertex) or \
+           (not new_vertex[VProps.VITRAGE_IS_PLACEHOLDER])
 
 
 def update_entity_graph_vertex(g, graph_vertex, updated_vertex):
-    if updated_vertex[VProps.IS_PLACEHOLDER] and \
-            graph_vertex and not graph_vertex[VProps.IS_PLACEHOLDER]:
+    if updated_vertex[VProps.VITRAGE_IS_PLACEHOLDER] and \
+            graph_vertex and not graph_vertex[VProps.VITRAGE_IS_PLACEHOLDER]:
 
-        updated_vertex[VProps.IS_PLACEHOLDER] = False
-        updated_vertex[VProps.IS_DELETED] = graph_vertex[VProps.IS_DELETED]
+        updated_vertex[VProps.VITRAGE_IS_PLACEHOLDER] = False
+        updated_vertex[VProps.VITRAGE_IS_DELETED] = \
+            graph_vertex[VProps.VITRAGE_IS_DELETED]
 
     g.update_vertex(updated_vertex)

@@ -67,9 +67,9 @@ class NovaHostTransformerTest(base.BaseTest):
         # Test action
         properties = {
             VProps.ID: host_name,
-            VProps.TYPE: NOVA_HOST_DATASOURCE,
-            VProps.CATEGORY: EntityCategory.RESOURCE,
-            VProps.SAMPLE_TIMESTAMP: timestamp
+            VProps.VITRAGE_TYPE: NOVA_HOST_DATASOURCE,
+            VProps.VITRAGE_CATEGORY: EntityCategory.RESOURCE,
+            VProps.VITRAGE_SAMPLE_TIMESTAMP: timestamp
         }
         placeholder = \
             host_transformer.create_neighbor_placeholder_vertex(**properties)
@@ -82,20 +82,20 @@ class NovaHostTransformerTest(base.BaseTest):
             host_name)
         self.assertEqual(tuple(observed_id_values), expected_id_values)
 
-        observed_time = placeholder.get(VProps.SAMPLE_TIMESTAMP)
+        observed_time = placeholder.get(VProps.VITRAGE_SAMPLE_TIMESTAMP)
         self.assertEqual(observed_time, timestamp)
 
-        observed_subtype = placeholder.get(VProps.TYPE)
+        observed_subtype = placeholder.get(VProps.VITRAGE_TYPE)
         self.assertEqual(observed_subtype, NOVA_HOST_DATASOURCE)
 
         observed_entity_id = placeholder.get(VProps.ID)
         self.assertEqual(observed_entity_id, host_name)
 
-        observed_category = placeholder.get(VProps.CATEGORY)
-        self.assertEqual(observed_category, EntityCategory.RESOURCE)
+        observed_vitrage_category = placeholder.get(VProps.VITRAGE_CATEGORY)
+        self.assertEqual(observed_vitrage_category, EntityCategory.RESOURCE)
 
-        is_placeholder = placeholder.get(VProps.IS_PLACEHOLDER)
-        self.assertEqual(is_placeholder, True)
+        vitrage_is_placeholder = placeholder.get(VProps.VITRAGE_IS_PLACEHOLDER)
+        self.assertEqual(vitrage_is_placeholder, True)
 
     def test_key_values(self):
 
@@ -149,9 +149,9 @@ class NovaHostTransformerTest(base.BaseTest):
         zt = self.transformers[NOVA_ZONE_DATASOURCE]
         properties = {
             VProps.ID: zone_name,
-            VProps.TYPE: NOVA_ZONE_DATASOURCE,
-            VProps.CATEGORY: EntityCategory.RESOURCE,
-            VProps.SAMPLE_TIMESTAMP: time
+            VProps.VITRAGE_TYPE: NOVA_ZONE_DATASOURCE,
+            VProps.VITRAGE_CATEGORY: EntityCategory.RESOURCE,
+            VProps.VITRAGE_SAMPLE_TIMESTAMP: time
         }
         expected_neighbor = \
             zt.create_neighbor_placeholder_vertex(**properties)
@@ -175,27 +175,27 @@ class NovaHostTransformerTest(base.BaseTest):
         self.assertEqual(expected_id, observed_id)
         self.assertEqual(
             EntityCategory.RESOURCE,
-            vertex[VProps.CATEGORY]
+            vertex[VProps.VITRAGE_CATEGORY]
         )
 
         self.assertEqual(
             NOVA_HOST_DATASOURCE,
-            vertex[VProps.TYPE]
+            vertex[VProps.VITRAGE_TYPE]
         )
 
         expected_timestamp = event[DSProps.SAMPLE_DATE]
-        observed_timestamp = vertex[VProps.SAMPLE_TIMESTAMP]
+        observed_timestamp = vertex[VProps.VITRAGE_SAMPLE_TIMESTAMP]
         self.assertEqual(expected_timestamp, observed_timestamp)
 
         expected_name = extract_value(event, '_info', 'host_name')
         observed_name = vertex[VProps.NAME]
         self.assertEqual(expected_name, observed_name)
 
-        is_placeholder = vertex[VProps.IS_PLACEHOLDER]
-        self.assertFalse(is_placeholder)
+        vitrage_is_placeholder = vertex[VProps.VITRAGE_IS_PLACEHOLDER]
+        self.assertFalse(vitrage_is_placeholder)
 
-        is_deleted = vertex[VProps.IS_DELETED]
-        self.assertFalse(is_deleted)
+        vitrage_is_deleted = vertex[VProps.VITRAGE_IS_DELETED]
+        self.assertFalse(vitrage_is_deleted)
 
     def test_extract_event_action(self):
         LOG.debug('Test extract event action')

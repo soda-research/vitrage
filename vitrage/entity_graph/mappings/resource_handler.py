@@ -29,11 +29,12 @@ class ResourceHandler(HandlerBase):
     def value_properties(self):
         return [VProps.STATE, VProps.VITRAGE_STATE]
 
-    def set_operational_value(self, new_vertex, operational_value):
-        new_vertex[VProps.OPERATIONAL_STATE] = operational_value
+    def set_operational_value(self, new_vertex, vitrage_operational_value):
+        new_vertex[VProps.VITRAGE_OPERATIONAL_STATE] = \
+            vitrage_operational_value
 
-    def set_aggregated_value(self, new_vertex, aggregated_value):
-        new_vertex[VProps.AGGREGATED_STATE] = aggregated_value
+    def set_aggregated_value(self, new_vertex, vitrage_aggregated_value):
+        new_vertex[VProps.VITRAGE_AGGREGATED_STATE] = vitrage_aggregated_value
 
     def default_values(self):
         return [(None, OperationalResourceState.NA, 0)]

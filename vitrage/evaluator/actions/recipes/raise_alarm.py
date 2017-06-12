@@ -58,7 +58,7 @@ class RaiseAlarm(base.Recipe):
         target_resource = action_spec.targets[TFields.TARGET]
         add_vertex_params = {
             TFields.TARGET: target_resource.vertex_id,
-            VProps.VITRAGE_RESOURCE_TYPE: target_resource[VProps.TYPE],
+            VProps.VITRAGE_RESOURCE_TYPE: target_resource[VProps.VITRAGE_TYPE],
         }
         add_vertex_params.update(action_spec.properties)
 

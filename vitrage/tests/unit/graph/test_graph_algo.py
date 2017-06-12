@@ -53,7 +53,7 @@ class GraphAlgorithmTest(GraphTestBase):
     def test_graph_query_vertices(self):
         ga = self.entity_graph.algo
 
-        query = {'==': {VProps.TYPE: OPENSTACK_CLUSTER}}
+        query = {'==': {VProps.VITRAGE_TYPE: OPENSTACK_CLUSTER}}
         subgraph = ga.graph_query_vertices(query)
         self.assertEqual(
             1,  # For Cluster
@@ -61,8 +61,8 @@ class GraphAlgorithmTest(GraphTestBase):
 
         query = {
             'or': [
-                {'==': {VProps.TYPE: NOVA_HOST_DATASOURCE}},
-                {'==': {VProps.TYPE: OPENSTACK_CLUSTER}}
+                {'==': {VProps.VITRAGE_TYPE: NOVA_HOST_DATASOURCE}},
+                {'==': {VProps.VITRAGE_TYPE: OPENSTACK_CLUSTER}}
             ]
         }
 
@@ -73,10 +73,10 @@ class GraphAlgorithmTest(GraphTestBase):
 
         query = {
             'or': [
-                {'==': {VProps.TYPE: NOVA_INSTANCE_DATASOURCE}},
-                {'==': {VProps.CATEGORY: ALARM}},
-                {'==': {VProps.TYPE: NOVA_HOST_DATASOURCE}},
-                {'==': {VProps.TYPE: OPENSTACK_CLUSTER}}
+                {'==': {VProps.VITRAGE_TYPE: NOVA_INSTANCE_DATASOURCE}},
+                {'==': {VProps.VITRAGE_CATEGORY: ALARM}},
+                {'==': {VProps.VITRAGE_TYPE: NOVA_HOST_DATASOURCE}},
+                {'==': {VProps.VITRAGE_TYPE: OPENSTACK_CLUSTER}}
             ]
         }
         subgraph = ga.graph_query_vertices(query)
@@ -90,7 +90,7 @@ class GraphAlgorithmTest(GraphTestBase):
 
         # Get first host ID
         neighboring_hosts = self.entity_graph.neighbors(
-            v_node.vertex_id, {VProps.TYPE: NOVA_HOST_DATASOURCE})
+            v_node.vertex_id, {VProps.VITRAGE_TYPE: NOVA_HOST_DATASOURCE})
         first_host_id = neighboring_hosts.pop().vertex_id
 
         query = {'!=': {'NOTHING': 'IS EVERYTHING'}}
@@ -106,8 +106,8 @@ class GraphAlgorithmTest(GraphTestBase):
 
         query = {
             'or': [
-                {'==': {VProps.TYPE: SWITCH}},
-                {'==': {VProps.TYPE: NOVA_HOST_DATASOURCE}},
+                {'==': {VProps.VITRAGE_TYPE: SWITCH}},
+                {'==': {VProps.VITRAGE_TYPE: NOVA_HOST_DATASOURCE}},
             ]
         }
         subgraph = ga.graph_query_vertices(
@@ -135,9 +135,9 @@ class GraphAlgorithmTest(GraphTestBase):
 
         query = {
             'and': [
-                {'!=': {VProps.TYPE: ALARM_ON_VM}},
-                {'!=': {VProps.TYPE: ALARM_ON_HOST}},
-                {'!=': {VProps.CATEGORY: ALARM}}
+                {'!=': {VProps.VITRAGE_TYPE: ALARM_ON_VM}},
+                {'!=': {VProps.VITRAGE_TYPE: ALARM_ON_HOST}},
+                {'!=': {VProps.VITRAGE_CATEGORY: ALARM}}
             ]
         }
         subgraph = ga.graph_query_vertices(query_dict=query, depth=3)
@@ -150,8 +150,8 @@ class GraphAlgorithmTest(GraphTestBase):
 
         query = {
             'or': [
-                {'==': {VProps.TYPE: OPENSTACK_CLUSTER}},
-                {'==': {VProps.CATEGORY: ALARM}},
+                {'==': {VProps.VITRAGE_TYPE: OPENSTACK_CLUSTER}},
+                {'==': {VProps.VITRAGE_CATEGORY: ALARM}},
             ]
         }
         subgraph = ga.graph_query_vertices(query_dict=query, depth=3)
@@ -166,28 +166,30 @@ class GraphAlgorithmTest(GraphTestBase):
         subgraph = ga.graph_query_vertices(
             query_dict=query, depth=5, edge_query_dict=edge_query)
         alarms = subgraph.get_vertices(
-            vertex_attr_filter={VProps.CATEGORY: ALARM})
+            vertex_attr_filter={VProps.VITRAGE_CATEGORY: ALARM})
         self.assertEqual(len(alarms), 0, 'We filtered the ON relationship,'
                                          ' so no alarms should exist')
 
-        # check that the is_deleted=True edges are deleted from the graph
-        hosts_query = {VProps.CATEGORY: 'RESOURCE',
-                       VProps.TYPE: NOVA_HOST_DATASOURCE}
+        # check that the vitrage_is_deleted=True edges are deleted from the
+        # graph
+        hosts_query = {VProps.VITRAGE_CATEGORY: RESOURCE,
+                       VProps.VITRAGE_TYPE: NOVA_HOST_DATASOURCE}
         hosts = self.entity_graph.get_vertices(
             vertex_attr_filter=hosts_query)
-        instances_query = {VProps.CATEGORY: 'RESOURCE',
-                           VProps.TYPE: NOVA_INSTANCE_DATASOURCE}
+        instances_query = {VProps.VITRAGE_CATEGORY: RESOURCE,
+                           VProps.VITRAGE_TYPE: NOVA_INSTANCE_DATASOURCE}
         instances = self.entity_graph.get_vertices(
             vertex_attr_filter=instances_query)
         instance_edges = self.entity_graph.get_edges(instances[0].vertex_id)
 
         for edge in instance_edges:
-            if 'nova.host' in edge.source_id:
+            if NOVA_HOST_DATASOURCE in edge.source_id:
                 host_instance_edge = edge
-        host_instance_edge[VProps.IS_DELETED] = True
+        host_instance_edge[VProps.VITRAGE_IS_DELETED] = True
         self.entity_graph.update_edge(host_instance_edge)
 
-        edges_query = {'relationship_type': 'contains', 'is_deleted': False}
+        edges_query = {EProps.RELATIONSHIP_TYPE: EdgeLabel.CONTAINS,
+                       VProps.VITRAGE_IS_DELETED: False}
         if host_instance_edge.source_id != hosts[0].vertex_id:
             new_edge = Edge(hosts[0].vertex_id, instances[0].vertex_id,
                             EdgeLabel.CONTAINS, properties=edges_query)
@@ -198,7 +200,7 @@ class GraphAlgorithmTest(GraphTestBase):
             self.entity_graph.update_edge(new_edge)
 
         query = {'!=': {'NOTHING': 'IS EVERYTHING'}}
-        edge_query = {'==': {EProps.IS_DELETED: False}}
+        edge_query = {'==': {EProps.VITRAGE_IS_DELETED: False}}
         subgraph = ga.graph_query_vertices(
             query_dict=query, depth=5, edge_query_dict=edge_query)
         self.assertEqual(self.entity_graph.num_edges() - 1,
@@ -207,12 +209,12 @@ class GraphAlgorithmTest(GraphTestBase):
                          'should exist')
 
         # Undo changes made by this test
-        host_instance_edge[VProps.IS_DELETED] = False
+        host_instance_edge[VProps.VITRAGE_IS_DELETED] = False
         self.entity_graph.update_edge(host_instance_edge)
         self.entity_graph.remove_edge(new_edge)
 
     def test_no_match_graph_query_vertices(self):
-        query = {'==': {VProps.TYPE: 'test'}}
+        query = {'==': {VProps.VITRAGE_TYPE: 'test'}}
         subgraph = self.entity_graph.algo.graph_query_vertices(query)
         self.assertEqual(
             0,
@@ -235,28 +237,29 @@ class GraphAlgorithmTest(GraphTestBase):
         # Create a template for template matching
         template_graph = NXGraph('template_graph')
         t_v_host_alarm = graph_utils.create_vertex(
-            vitrage_id='1', entity_category=ALARM, entity_type=ALARM_ON_HOST)
+            vitrage_id='1', vitrage_category=ALARM, vitrage_type=ALARM_ON_HOST)
         t_v_alarm_fail = graph_utils.create_vertex(
-            vitrage_id='1', entity_category=ALARM, entity_type='fail')
+            vitrage_id='1', vitrage_category=ALARM, vitrage_type='fail')
         t_v_host = graph_utils.create_vertex(
             vitrage_id='2',
-            entity_category=RESOURCE,
-            entity_type=NOVA_HOST_DATASOURCE)
+            vitrage_category=RESOURCE,
+            vitrage_type=NOVA_HOST_DATASOURCE)
         t_v_vm = graph_utils.create_vertex(
             vitrage_id='3',
-            entity_category=RESOURCE,
-            entity_type=NOVA_INSTANCE_DATASOURCE)
+            vitrage_category=RESOURCE,
+            vitrage_type=NOVA_INSTANCE_DATASOURCE)
         t_v_vm_alarm = graph_utils.create_vertex(
-            vitrage_id='4', entity_category=ALARM, entity_type=ALARM_ON_VM)
+            vitrage_id='4', vitrage_category=ALARM, vitrage_type=ALARM_ON_VM)
         t_v_switch = graph_utils.create_vertex(
-            vitrage_id='5', entity_category=RESOURCE, entity_type=SWITCH)
+            vitrage_id='5', vitrage_category=RESOURCE, vitrage_type=SWITCH)
         t_v_node = graph_utils.create_vertex(
             vitrage_id='6',
-            entity_category=RESOURCE,
-            entity_type=OPENSTACK_CLUSTER)
+            vitrage_category=RESOURCE,
+            vitrage_type=OPENSTACK_CLUSTER)
         t_v_node_not_in_graph = graph_utils.create_vertex(
-            vitrage_id='7', entity_category=RESOURCE,
-            entity_type=OPENSTACK_CLUSTER + ' not in graph')
+            vitrage_id='7',
+            vitrage_category=RESOURCE,
+            vitrage_type=OPENSTACK_CLUSTER + ' not in graph')
 
         e_alarm_on_host = graph_utils.create_edge(
             t_v_host_alarm.vertex_id, t_v_host.vertex_id, ELabel.ON)
@@ -563,28 +566,28 @@ class GraphAlgorithmTest(GraphTestBase):
         # Create a template for template matching
         template_graph = NXGraph('template_graph')
         t_v_alarm_fail = graph_utils.create_vertex(
-            vitrage_id='1', entity_category=ALARM, entity_type='fail')
+            vitrage_id='1', vitrage_category=ALARM, vitrage_type='fail')
         t_v_host = graph_utils.create_vertex(
             vitrage_id='2',
-            entity_category=RESOURCE,
-            entity_type=NOVA_HOST_DATASOURCE)
+            vitrage_category=RESOURCE,
+            vitrage_type=NOVA_HOST_DATASOURCE)
         t_v_vm = graph_utils.create_vertex(
             vitrage_id='3',
-            entity_category=RESOURCE,
-            entity_type=NOVA_INSTANCE_DATASOURCE)
+            vitrage_category=RESOURCE,
+            vitrage_type=NOVA_INSTANCE_DATASOURCE)
         t_v_vm_alarm = graph_utils.create_vertex(
-            vitrage_id='4', entity_category=ALARM, entity_type=ALARM_ON_VM)
+            vitrage_id='4', vitrage_category=ALARM, vitrage_type=ALARM_ON_VM)
 
         e_host_contains_vm = graph_utils.create_edge(
             t_v_host.vertex_id, t_v_vm.vertex_id, ELabel.CONTAINS)
         e_alarm_not_on_vm = graph_utils.create_edge(
             t_v_vm_alarm.vertex_id, t_v_vm.vertex_id, ELabel.ON)
         e_alarm_not_on_vm[NEG_CONDITION] = True
-        e_alarm_not_on_vm[EProps.IS_DELETED] = True
+        e_alarm_not_on_vm[EProps.VITRAGE_IS_DELETED] = True
         e_alarm_not_on_host = graph_utils.create_edge(
             t_v_alarm_fail.vertex_id, t_v_host.vertex_id, ELabel.ON)
         e_alarm_not_on_host[NEG_CONDITION] = True
-        e_alarm_not_on_host[EProps.IS_DELETED] = True
+        e_alarm_not_on_host[EProps.VITRAGE_IS_DELETED] = True
 
         for v in [t_v_alarm_fail, t_v_host, t_v_vm, t_v_vm_alarm]:
             del(v[VProps.VITRAGE_ID])
@@ -626,16 +629,17 @@ class GraphAlgorithmTest(GraphTestBase):
         temp_ga = temp_entity_graph.algo
         vms = temp_entity_graph.neighbors(
             host.vertex_id,
-            vertex_attr_filter={VProps.CATEGORY: EntityCategory.RESOURCE,
-                                VProps.TYPE: NOVA_INSTANCE_DATASOURCE})
+            vertex_attr_filter={
+                VProps.VITRAGE_CATEGORY: EntityCategory.RESOURCE,
+                VProps.VITRAGE_TYPE: NOVA_INSTANCE_DATASOURCE})
 
         ###################################################################
         # Use case 1: remove alarms of specific vm
         ###################################################################
         alarms = temp_entity_graph.neighbors(
             vms[0].vertex_id,
-            vertex_attr_filter={VProps.CATEGORY: EntityCategory.ALARM,
-                                VProps.TYPE: ALARM_ON_VM})
+            vertex_attr_filter={VProps.VITRAGE_CATEGORY: EntityCategory.ALARM,
+                                VProps.VITRAGE_TYPE: ALARM_ON_VM})
         for alarm in alarms:
             temp_entity_graph.remove_vertex(alarm)
 
@@ -664,18 +668,19 @@ class GraphAlgorithmTest(GraphTestBase):
         ###################################################################
         vms = temp_entity_graph.neighbors(
             host.vertex_id,
-            vertex_attr_filter={VProps.CATEGORY: EntityCategory.RESOURCE,
-                                VProps.TYPE: NOVA_INSTANCE_DATASOURCE})
+            vertex_attr_filter={
+                VProps.VITRAGE_CATEGORY: EntityCategory.RESOURCE,
+                VProps.VITRAGE_TYPE: NOVA_INSTANCE_DATASOURCE})
         alarms = temp_entity_graph.neighbors(
             vms[1].vertex_id,
-            vertex_attr_filter={VProps.CATEGORY: EntityCategory.ALARM,
-                                VProps.TYPE: ALARM_ON_VM})
+            vertex_attr_filter={VProps.VITRAGE_CATEGORY: EntityCategory.ALARM,
+                                VProps.VITRAGE_TYPE: ALARM_ON_VM})
         for alarm in alarms:
-            alarm[VProps.IS_DELETED] = True
+            alarm[VProps.VITRAGE_IS_DELETED] = True
             temp_entity_graph.update_vertex(alarm)
             edges = temp_entity_graph.get_edges(alarm.vertex_id)
             for edge in edges:
-                edge[EProps.IS_DELETED] = True
+                edge[EProps.VITRAGE_IS_DELETED] = True
                 temp_entity_graph.update_edge(edge)
 
         mappings = temp_ga.sub_graph_matching(template_graph,
@@ -691,12 +696,12 @@ class GraphAlgorithmTest(GraphTestBase):
         ###################################################################
         alarms = temp_entity_graph.neighbors(
             vms[2].vertex_id,
-            vertex_attr_filter={VProps.CATEGORY: EntityCategory.ALARM,
-                                VProps.TYPE: ALARM_ON_VM})
+            vertex_attr_filter={VProps.VITRAGE_CATEGORY: EntityCategory.ALARM,
+                                VProps.VITRAGE_TYPE: ALARM_ON_VM})
         for alarm in alarms:
             edges = temp_entity_graph.get_edges(alarm.vertex_id)
             for edge in edges:
-                edge[EProps.IS_DELETED] = True
+                edge[EProps.VITRAGE_IS_DELETED] = True
                 temp_entity_graph.update_edge(edge)
 
         mappings = temp_ga.sub_graph_matching(template_graph,
@@ -713,10 +718,10 @@ class GraphAlgorithmTest(GraphTestBase):
         ###################################################################
         alarms = temp_entity_graph.neighbors(
             vms[3].vertex_id,
-            vertex_attr_filter={VProps.CATEGORY: EntityCategory.ALARM,
-                                VProps.TYPE: ALARM_ON_VM})
+            vertex_attr_filter={VProps.VITRAGE_CATEGORY: EntityCategory.ALARM,
+                                VProps.VITRAGE_TYPE: ALARM_ON_VM})
         deleted_vertex = alarms[0]
-        deleted_vertex[VProps.IS_DELETED] = True
+        deleted_vertex[VProps.VITRAGE_IS_DELETED] = True
         temp_entity_graph.update_vertex(deleted_vertex)
         mappings = temp_ga.sub_graph_matching(template_graph,
                                               Mapping(t_v_vm_alarm,
@@ -735,11 +740,11 @@ class GraphAlgorithmTest(GraphTestBase):
         ###################################################################
         alarms = temp_entity_graph.neighbors(
             vms[4].vertex_id,
-            vertex_attr_filter={VProps.CATEGORY: EntityCategory.ALARM,
-                                VProps.TYPE: ALARM_ON_VM})
+            vertex_attr_filter={VProps.VITRAGE_CATEGORY: EntityCategory.ALARM,
+                                VProps.VITRAGE_TYPE: ALARM_ON_VM})
         edges = list(temp_entity_graph.get_edges(alarms[0].vertex_id))
         deleted_edge = edges[0]
-        deleted_edge[EProps.IS_DELETED] = True
+        deleted_edge[EProps.VITRAGE_IS_DELETED] = True
         temp_entity_graph.update_edge(deleted_edge)
         mappings = temp_ga.sub_graph_matching(template_graph,
                                               Mapping(e_alarm_not_on_vm,
@@ -754,16 +759,16 @@ class GraphAlgorithmTest(GraphTestBase):
 
         ###################################################################
         # Use case 6: event arrived on deleted alarm edge on vm, that has
-        #             other is_deleted alarms on it
+        #             other vitrage_is_deleted alarms on it
         ###################################################################
         alarms = temp_entity_graph.neighbors(
             vms[5].vertex_id,
-            vertex_attr_filter={VProps.CATEGORY: EntityCategory.ALARM,
-                                VProps.TYPE: ALARM_ON_VM})
+            vertex_attr_filter={VProps.VITRAGE_CATEGORY: EntityCategory.ALARM,
+                                VProps.VITRAGE_TYPE: ALARM_ON_VM})
         for alarm in alarms:
             edges = temp_entity_graph.get_edges(alarm.vertex_id)
             for edge in edges:
-                edge[EProps.IS_DELETED] = True
+                edge[EProps.VITRAGE_IS_DELETED] = True
                 temp_entity_graph.update_edge(edge)
         deleted_edge = \
             list(temp_entity_graph.get_edges(alarms[0].vertex_id))[0]
@@ -792,15 +797,15 @@ class GraphAlgorithmTest(GraphTestBase):
         template_graph = NXGraph('template_graph')
         t_v_vm = graph_utils.create_vertex(
             vitrage_id='1',
-            entity_category=RESOURCE,
-            entity_type=NOVA_INSTANCE_DATASOURCE)
+            vitrage_category=RESOURCE,
+            vitrage_type=NOVA_INSTANCE_DATASOURCE)
         t_v_vm_alarm = graph_utils.create_vertex(
-            vitrage_id='2', entity_category=ALARM, entity_type=ALARM_ON_VM)
+            vitrage_id='2', vitrage_category=ALARM, vitrage_type=ALARM_ON_VM)
 
         e_alarm_not_on_vm = graph_utils.create_edge(
             t_v_vm_alarm.vertex_id, t_v_vm.vertex_id, ELabel.ON)
         e_alarm_not_on_vm[NEG_CONDITION] = True
-        e_alarm_not_on_vm[EProps.IS_DELETED] = True
+        e_alarm_not_on_vm[EProps.VITRAGE_IS_DELETED] = True
 
         for v in [t_v_vm, t_v_vm_alarm]:
             del(v[VProps.VITRAGE_ID])
@@ -817,8 +822,9 @@ class GraphAlgorithmTest(GraphTestBase):
         temp_ga = temp_entity_graph.algo
         vms = temp_entity_graph.neighbors(
             graph_host.vertex_id,
-            vertex_attr_filter={VProps.CATEGORY: EntityCategory.RESOURCE,
-                                VProps.TYPE: NOVA_INSTANCE_DATASOURCE})
+            vertex_attr_filter={
+                VProps.VITRAGE_CATEGORY: EntityCategory.RESOURCE,
+                VProps.VITRAGE_TYPE: NOVA_INSTANCE_DATASOURCE})
 
         ###################################################################
         # Use case 1: find subgraphs (when edges are deleted) with event on
@@ -826,12 +832,12 @@ class GraphAlgorithmTest(GraphTestBase):
         ###################################################################
         alarms = temp_entity_graph.neighbors(
             vms[0].vertex_id,
-            vertex_attr_filter={VProps.CATEGORY: EntityCategory.ALARM,
-                                VProps.TYPE: ALARM_ON_VM})
+            vertex_attr_filter={VProps.VITRAGE_CATEGORY: EntityCategory.ALARM,
+                                VProps.VITRAGE_TYPE: ALARM_ON_VM})
         for alarm in alarms:
             edges = temp_entity_graph.get_edges(alarm.vertex_id)
             for edge in edges:
-                edge[EProps.IS_DELETED] = True
+                edge[EProps.VITRAGE_IS_DELETED] = True
                 temp_entity_graph.update_edge(edge)
 
         graph_alarm_edge = \
@@ -860,10 +866,10 @@ class GraphAlgorithmTest(GraphTestBase):
         ###################################################################
         alarms = temp_entity_graph.neighbors(
             vms[1].vertex_id,
-            vertex_attr_filter={VProps.CATEGORY: EntityCategory.ALARM,
-                                VProps.TYPE: ALARM_ON_VM})
+            vertex_attr_filter={VProps.VITRAGE_CATEGORY: EntityCategory.ALARM,
+                                VProps.VITRAGE_TYPE: ALARM_ON_VM})
         for alarm in alarms:
-            alarm[VProps.IS_DELETED] = True
+            alarm[VProps.VITRAGE_IS_DELETED] = True
             temp_entity_graph.update_vertex(alarm)
 
         graph_alarm_edge = \
@@ -892,14 +898,14 @@ class GraphAlgorithmTest(GraphTestBase):
         ###################################################################
         alarms = temp_entity_graph.neighbors(
             vms[2].vertex_id,
-            vertex_attr_filter={VProps.CATEGORY: EntityCategory.ALARM,
-                                VProps.TYPE: ALARM_ON_VM})
+            vertex_attr_filter={VProps.VITRAGE_CATEGORY: EntityCategory.ALARM,
+                                VProps.VITRAGE_TYPE: ALARM_ON_VM})
         for alarm in alarms:
-            alarm[VProps.IS_DELETED] = True
+            alarm[VProps.VITRAGE_IS_DELETED] = True
             temp_entity_graph.update_vertex(alarm)
             edges = temp_entity_graph.get_edges(alarm.vertex_id)
             for edge in edges:
-                edge[EProps.IS_DELETED] = True
+                edge[EProps.VITRAGE_IS_DELETED] = True
                 temp_entity_graph.update_edge(edge)
 
         graph_alarm_edge = \
@@ -931,10 +937,10 @@ class GraphAlgorithmTest(GraphTestBase):
         ###################################################################
         alarms = temp_entity_graph.neighbors(
             vms[3].vertex_id,
-            vertex_attr_filter={VProps.CATEGORY: EntityCategory.ALARM,
-                                VProps.TYPE: ALARM_ON_VM})
+            vertex_attr_filter={VProps.VITRAGE_CATEGORY: EntityCategory.ALARM,
+                                VProps.VITRAGE_TYPE: ALARM_ON_VM})
         graph_alarm = alarms[0]
-        graph_alarm[VProps.IS_DELETED] = True
+        graph_alarm[VProps.VITRAGE_IS_DELETED] = True
 
         graph_alarm_edge = \
             list(temp_entity_graph.get_edges(alarms[0].vertex_id))[0]
@@ -963,12 +969,12 @@ class GraphAlgorithmTest(GraphTestBase):
         ###################################################################
         alarms = temp_entity_graph.neighbors(
             vms[4].vertex_id,
-            vertex_attr_filter={VProps.CATEGORY: EntityCategory.ALARM,
-                                VProps.TYPE: ALARM_ON_VM})
+            vertex_attr_filter={VProps.VITRAGE_CATEGORY: EntityCategory.ALARM,
+                                VProps.VITRAGE_TYPE: ALARM_ON_VM})
 
         graph_alarm_edge = \
             list(temp_entity_graph.get_edges(alarms[0].vertex_id))[0]
-        graph_alarm_edge[EProps.IS_DELETED] = True
+        graph_alarm_edge[EProps.VITRAGE_IS_DELETED] = True
         temp_entity_graph.update_edge(graph_alarm_edge)
 
         mappings = temp_ga.sub_graph_matching(
@@ -986,14 +992,14 @@ class GraphAlgorithmTest(GraphTestBase):
         ###################################################################
         alarms = temp_entity_graph.neighbors(
             vms[5].vertex_id,
-            vertex_attr_filter={VProps.CATEGORY: EntityCategory.ALARM,
-                                VProps.TYPE: ALARM_ON_VM})
+            vertex_attr_filter={VProps.VITRAGE_CATEGORY: EntityCategory.ALARM,
+                                VProps.VITRAGE_TYPE: ALARM_ON_VM})
 
-        alarms[0][VProps.IS_DELETED] = True
+        alarms[0][VProps.VITRAGE_IS_DELETED] = True
         temp_entity_graph.update_vertex(alarms[0])
         graph_alarm_edge = \
             list(temp_entity_graph.get_edges(alarms[0].vertex_id))[0]
-        graph_alarm_edge[EProps.IS_DELETED] = True
+        graph_alarm_edge[EProps.VITRAGE_IS_DELETED] = True
         temp_entity_graph.update_edge(graph_alarm_edge)
 
         mappings = temp_ga.sub_graph_matching(
@@ -1020,25 +1026,25 @@ class GraphAlgorithmTest(GraphTestBase):
         template_graph = NXGraph('template_graph')
         t_v_network = graph_utils.create_vertex(
             vitrage_id='1',
-            entity_category=RESOURCE,
-            entity_type=NEUTRON_NETWORK_DATASOURCE)
+            vitrage_category=RESOURCE,
+            vitrage_type=NEUTRON_NETWORK_DATASOURCE)
         t_v_vm = graph_utils.create_vertex(
             vitrage_id='2',
-            entity_category=RESOURCE,
-            entity_type=NOVA_INSTANCE_DATASOURCE)
+            vitrage_category=RESOURCE,
+            vitrage_type=NOVA_INSTANCE_DATASOURCE)
         t_v_alarm = graph_utils.create_vertex(
-            vitrage_id='3', entity_category=ALARM, entity_type=ALARM_ON_VM)
+            vitrage_id='3', vitrage_category=ALARM, vitrage_type=ALARM_ON_VM)
         t_v_stack = graph_utils.create_vertex(
             vitrage_id='4',
-            entity_category=RESOURCE,
-            entity_type=HEAT_STACK_DATASOURCE)
+            vitrage_category=RESOURCE,
+            vitrage_type=HEAT_STACK_DATASOURCE)
 
         e_network_connect_vm = graph_utils.create_edge(
             t_v_network.vertex_id, t_v_vm.vertex_id, ELabel.CONNECT)
         e_alarm_not_on_vm = graph_utils.create_edge(
             t_v_alarm.vertex_id, t_v_vm.vertex_id, ELabel.ON)
         e_alarm_not_on_vm[NEG_CONDITION] = True
-        e_alarm_not_on_vm[EProps.IS_DELETED] = True
+        e_alarm_not_on_vm[EProps.VITRAGE_IS_DELETED] = True
         e_alarm_on_stack = graph_utils.create_edge(
             t_v_alarm.vertex_id, t_v_stack.vertex_id, ELabel.ON)
         e_stack_connect_network = graph_utils.create_edge(
@@ -1070,24 +1076,25 @@ class GraphAlgorithmTest(GraphTestBase):
         temp_ga = temp_entity_graph.algo
         vms = temp_entity_graph.neighbors(
             graph_host.vertex_id,
-            vertex_attr_filter={VProps.CATEGORY: EntityCategory.RESOURCE,
-                                VProps.TYPE: NOVA_INSTANCE_DATASOURCE})
+            vertex_attr_filter={
+                VProps.VITRAGE_CATEGORY: EntityCategory.RESOURCE,
+                VProps.VITRAGE_TYPE: NOVA_INSTANCE_DATASOURCE})
 
         ###################################################################
         # Use case 1: alarm connected to vm
         ###################################################################
         alarms = temp_entity_graph.neighbors(
             vms[0].vertex_id,
-            vertex_attr_filter={VProps.CATEGORY: EntityCategory.ALARM,
-                                VProps.TYPE: ALARM_ON_VM})
+            vertex_attr_filter={VProps.VITRAGE_CATEGORY: EntityCategory.ALARM,
+                                VProps.VITRAGE_TYPE: ALARM_ON_VM})
 
         # Action
         for alarm in alarms[1:len(alarms)]:
-            alarm[VProps.IS_DELETED] = True
+            alarm[VProps.VITRAGE_IS_DELETED] = True
             temp_entity_graph.update_vertex(alarm)
             edges = temp_entity_graph.get_edges(alarm.vertex_id)
             for edge in edges:
-                edge[EProps.IS_DELETED] = True
+                edge[EProps.VITRAGE_IS_DELETED] = True
                 temp_entity_graph.update_edge(edge)
 
         # build problematic subgraph in entity graph
@@ -1122,18 +1129,19 @@ class GraphAlgorithmTest(GraphTestBase):
             'Template - Two not connected vertices (vm <- alarm)')
 
         ###################################################################
-        # Use case 2: alarm not connected to vm (with edge is_deleted=True)
+        # Use case 2: alarm not connected to vm (with edge
+        #             vitrage_is_deleted=True)
         ###################################################################
         alarms = temp_entity_graph.neighbors(
             vms[1].vertex_id,
-            vertex_attr_filter={VProps.CATEGORY: EntityCategory.ALARM,
-                                VProps.TYPE: ALARM_ON_VM})
+            vertex_attr_filter={VProps.VITRAGE_CATEGORY: EntityCategory.ALARM,
+                                VProps.VITRAGE_TYPE: ALARM_ON_VM})
 
         # Action
         for alarm in alarms:
             edges = temp_entity_graph.get_edges(alarm.vertex_id)
             for edge in edges:
-                edge[EProps.IS_DELETED] = True
+                edge[EProps.VITRAGE_IS_DELETED] = True
                 temp_entity_graph.update_edge(edge)
 
         # build problematic subgraph in entity graph
@@ -1172,8 +1180,8 @@ class GraphAlgorithmTest(GraphTestBase):
         ###################################################################
         alarms = temp_entity_graph.neighbors(
             vms[2].vertex_id,
-            vertex_attr_filter={VProps.CATEGORY: EntityCategory.ALARM,
-                                VProps.TYPE: ALARM_ON_VM})
+            vertex_attr_filter={VProps.VITRAGE_CATEGORY: EntityCategory.ALARM,
+                                VProps.VITRAGE_TYPE: ALARM_ON_VM})
 
         # Action
         for alarm in alarms:
@@ -1213,17 +1221,17 @@ class GraphAlgorithmTest(GraphTestBase):
             'Template - Two not connected vertices (vm <- alarm)')
 
         ###################################################################
-        # Use case 4: alarm not connected to vm (with edge is_deleted=True)
-        #             and other connected alarms exist
+        # Use case 4: alarm not connected to vm (with edge
+        #             vitrage_is_deleted=True) and other connected alarms exist
         ###################################################################
         alarms = temp_entity_graph.neighbors(
             vms[3].vertex_id,
-            vertex_attr_filter={VProps.CATEGORY: EntityCategory.ALARM,
-                                VProps.TYPE: ALARM_ON_VM})
+            vertex_attr_filter={VProps.VITRAGE_CATEGORY: EntityCategory.ALARM,
+                                VProps.VITRAGE_TYPE: ALARM_ON_VM})
 
         # Action
         edges = [e for e in temp_entity_graph.get_edges(alarms[0].vertex_id)]
-        edges[0][EProps.IS_DELETED] = True
+        edges[0][EProps.VITRAGE_IS_DELETED] = True
         temp_entity_graph.update_edge(edge)
 
         # build problematic subgraph in entity graph
@@ -1289,8 +1297,8 @@ class GraphAlgorithmTest(GraphTestBase):
         ###################################################################
         alarms = temp_entity_graph.neighbors(
             vms[4].vertex_id,
-            vertex_attr_filter={VProps.CATEGORY: EntityCategory.ALARM,
-                                VProps.TYPE: ALARM_ON_VM})
+            vertex_attr_filter={VProps.VITRAGE_CATEGORY: EntityCategory.ALARM,
+                                VProps.VITRAGE_TYPE: ALARM_ON_VM})
 
         # Action
         edges = [e for e in temp_entity_graph.get_edges(alarms[0].vertex_id)]
@@ -1360,8 +1368,8 @@ class GraphAlgorithmTest(GraphTestBase):
                                                     num):
         stack_vertex = graph_utils.create_vertex(
             vitrage_id='stack' + str(num),
-            entity_category=RESOURCE,
-            entity_type=HEAT_STACK_DATASOURCE)
+            vitrage_category=RESOURCE,
+            vitrage_type=HEAT_STACK_DATASOURCE)
         temp_entity_graph.update_vertex(stack_vertex)
 
         alarm_stack_edge = graph_utils.create_edge(
@@ -1370,8 +1378,8 @@ class GraphAlgorithmTest(GraphTestBase):
 
         network_vertex = graph_utils.create_vertex(
             vitrage_id='network' + str(num),
-            entity_category=RESOURCE,
-            entity_type=NEUTRON_NETWORK_DATASOURCE)
+            vitrage_category=RESOURCE,
+            vitrage_type=NEUTRON_NETWORK_DATASOURCE)
         temp_entity_graph.update_vertex(network_vertex)
 
         network_stack_edge = graph_utils.create_edge(

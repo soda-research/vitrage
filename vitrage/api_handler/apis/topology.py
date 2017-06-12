@@ -65,7 +65,7 @@ class TopologyApis(EntityGraphApisBase):
                 q = query if query else TOPOLOGY_AND_ALARMS_QUERY
                 graph = ga.create_graph_from_matching_vertices(
                     query_dict=q,
-                    edge_attr_filter={VProps.IS_DELETED: False})
+                    edge_attr_filter={VProps.VITRAGE_IS_DELETED: False})
             else:
                 graph = self._get_topology_for_specific_project(
                     ga,
@@ -115,7 +115,7 @@ class TopologyApis(EntityGraphApisBase):
 
         tmp_graph = ga.create_graph_from_matching_vertices(query_dict=q)
         graph = self._create_graph_of_connected_components(ga, tmp_graph, root)
-        edge_query = {EProps.IS_DELETED: False}
+        edge_query = {EProps.VITRAGE_IS_DELETED: False}
         self._remove_unnecessary_elements(ga,
                                           graph,
                                           project_id,
@@ -153,7 +153,7 @@ class TopologyApis(EntityGraphApisBase):
 
         for alarm in graph.get_vertices(query_dict=ALARMS_ALL_QUERY):
             if not alarm.get(VProps.PROJECT_ID, None):
-                cat_filter = {VProps.CATEGORY: EntityCategory.RESOURCE}
+                cat_filter = {VProps.VITRAGE_CATEGORY: EntityCategory.RESOURCE}
                 resource_neighbors = \
                     self.entity_graph.neighbors(alarm.vertex_id,
                                                 vertex_attr_filter=cat_filter)
@@ -220,7 +220,7 @@ class TopologyApis(EntityGraphApisBase):
     @staticmethod
     def _find_instance_in_graph(graph):
         for node, node_data in graph.nodes_iter(data=True):
-            if node_data[VProps.CATEGORY] == EntityCategory.RESOURCE and \
-                    node_data[VProps.TYPE] == NOVA_INSTANCE_DATASOURCE:
+            if node_data[VProps.VITRAGE_CATEGORY] == EntityCategory.RESOURCE and \
+                    node_data[VProps.VITRAGE_TYPE] == NOVA_INSTANCE_DATASOURCE:
                 return node
         return None

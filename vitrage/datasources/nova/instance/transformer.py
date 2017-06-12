@@ -62,21 +62,21 @@ class InstanceTransformer(ResourceTransformerBase):
             'host_id': host
         }
 
-        sample_timestamp = entity_event[DSProps.SAMPLE_DATE]
+        vitrage_sample_timestamp = entity_event[DSProps.SAMPLE_DATE]
 
         # TODO(Alexey): need to check that only the UPDATE datasource_action
         # will update the UPDATE_TIMESTAMP property
         update_timestamp = self._format_update_timestamp(
             extract_field_value(entity_event, DSProps.SAMPLE_DATE),
-            sample_timestamp)
+            vitrage_sample_timestamp)
 
         return graph_utils.create_vertex(
             self._create_entity_key(entity_event),
+            vitrage_category=EntityCategory.RESOURCE,
+            vitrage_type=NOVA_INSTANCE_DATASOURCE,
+            vitrage_sample_timestamp=vitrage_sample_timestamp,
             entity_id=entity_id,
-            entity_category=EntityCategory.RESOURCE,
-            entity_type=NOVA_INSTANCE_DATASOURCE,
             entity_state=state,
-            sample_timestamp=sample_timestamp,
             update_timestamp=update_timestamp,
             metadata=metadata)
 
@@ -106,5 +106,5 @@ class InstanceTransformer(ResourceTransformerBase):
                                                           instance_id))
         return tbase.build_key(key_fields)
 
-    def get_type(self):
+    def get_vitrage_type(self):
         return NOVA_INSTANCE_DATASOURCE

@@ -47,7 +47,7 @@ class ConsistencyTransformer(ResourceTransformerBase):
 
         return graph_utils.create_vertex(
             entity_event[VProps.VITRAGE_ID],
-            sample_timestamp=entity_event[DSProps.SAMPLE_DATE],
+            vitrage_sample_timestamp=entity_event[DSProps.SAMPLE_DATE],
             metadata=metadata
         )
 
@@ -60,5 +60,5 @@ class ConsistencyTransformer(ResourceTransformerBase):
     def _create_update_neighbors(self, entity_event):
         return None
 
-    def get_type(self):
+    def get_vitrage_type(self):
         return CONSISTENCY_DATASOURCE

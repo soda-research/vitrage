@@ -14,6 +14,7 @@
 
 from vitrage.common.constants import TemplateTopologyFields
 from vitrage.common.exception import VitrageError
+from vitrage.evaluator.template_data import TemplateData
 
 
 class Fields(TemplateTopologyFields):
@@ -51,7 +52,9 @@ class EquivalenceData(object):
             for entity_def in equivalent_entities:
                 entity_props = {(k, v)
                                 for k, v in entity_def[Fields.ENTITY].items()}
-                entity_key = frozenset(entity_props)
+
+                entity_key = frozenset(
+                    TemplateData._convert_props_with_set(entity_props))
                 if entity_key in equivalence:
                     raise VitrageError('duplicated entities found in '
                                        'equivalence')

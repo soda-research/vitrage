@@ -87,15 +87,15 @@ class NetworkTransformer(ResourceTransformerBase):
             VProps.PROJECT_ID: project_id,
         }
 
-        sample_timestamp = entity_event[DSProps.SAMPLE_DATE]
+        vitrage_sample_timestamp = entity_event[DSProps.SAMPLE_DATE]
 
         return graph_utils.create_vertex(
             self._create_entity_key(entity_event),
+            vitrage_category=EntityCategory.RESOURCE,
+            vitrage_type=NEUTRON_NETWORK_DATASOURCE,
+            vitrage_sample_timestamp=vitrage_sample_timestamp,
             entity_id=entity_id,
-            entity_category=EntityCategory.RESOURCE,
-            entity_type=NEUTRON_NETWORK_DATASOURCE,
             entity_state=state,
-            sample_timestamp=sample_timestamp,
             update_timestamp=update_timestamp,
             metadata=metadata)
 
@@ -107,5 +107,5 @@ class NetworkTransformer(ResourceTransformerBase):
         key_fields = self._key_values(NEUTRON_NETWORK_DATASOURCE, network_id)
         return tbase.build_key(key_fields)
 
-    def get_type(self):
+    def get_vitrage_type(self):
         return NEUTRON_NETWORK_DATASOURCE

@@ -52,6 +52,19 @@ def copy_edge_desc(edge_desc):
 # noinspection PyAttributeOutsideInit
 class TemplateData(object):
 
+    PROPS_CONVERSION = {
+        'category': VProps.VITRAGE_CATEGORY,
+        'type': VProps.VITRAGE_TYPE,
+        'resource_id': VProps.VITRAGE_RESOURCE_ID,
+        'sample_timestamp': VProps.VITRAGE_SAMPLE_TIMESTAMP,
+        'is_deleted': VProps.VITRAGE_IS_DELETED,
+        'is_placeholder': VProps.VITRAGE_IS_PLACEHOLDER,
+        'aggregated_state': VProps.VITRAGE_AGGREGATED_STATE,
+        'operational_state': VProps.VITRAGE_OPERATIONAL_STATE,
+        'aggregated_severity': VProps.VITRAGE_AGGREGATED_SEVERITY,
+        'operational_severity': VProps.VITRAGE_OPERATIONAL_SEVERITY
+    }
+
     def __init__(self, template_def):
 
         self.name = template_def[TFields.METADATA][TFields.NAME]
@@ -105,7 +118,8 @@ class TemplateData(object):
 
             entity_dict = entity_def[TFields.ENTITY]
             template_id = entity_dict[TFields.TEMPLATE_ID]
-            properties = self._extract_properties(entity_dict)
+            properties = self._convert_properties_with_dictionary(
+                self._extract_properties(entity_dict))
             entities[template_id] = Vertex(template_id, properties)
 
         return entities
@@ -142,6 +156,24 @@ class TemplateData(object):
         ignore_ids = [TFields.TEMPLATE_ID, TFields.SOURCE, TFields.TARGET]
         return dict((key, var_dict[key]) for key in var_dict
                     if key not in ignore_ids)
+
+    @staticmethod
+    def _convert_props_with_set(properties):
+        converted_properties = set()
+        for key, value in properties:
+            new_key = TemplateData.PROPS_CONVERSION[key] if key in \
+                TemplateData.PROPS_CONVERSION else key
+            converted_properties.add((new_key, value))
+        return converted_properties
+
+    @staticmethod
+    def _convert_properties_with_dictionary(properties):
+        converted_properties = {}
+        for key, value in properties.items():
+            new_key = TemplateData.PROPS_CONVERSION[key] if key in \
+                TemplateData.PROPS_CONVERSION else key
+            converted_properties[new_key] = value
+        return converted_properties
 
     def _build_scenarios(self, scenarios_defs):
 
@@ -347,14 +379,14 @@ class TemplateData(object):
                 variable, var_type = extract_var(term.symbol_name)
                 if var_type == ENTITY:
                     vertex = variable.copy()
-                    vertex[VProps.IS_DELETED] = False
-                    vertex[VProps.IS_PLACEHOLDER] = False
+                    vertex[VProps.VITRAGE_IS_DELETED] = False
+                    vertex[VProps.VITRAGE_IS_PLACEHOLDER] = False
                     condition_g.add_vertex(vertex)
 
                 else:  # type = relationship
-                    # prevent overwritten of NEG_CONDITION and IS_DELETED
-                    # property when there are both "not A" and "A" in same
-                    # template
+                    # prevent overwritten of NEG_CONDITION and
+                    # VITRAGE_IS_DELETED property when there are both "not A"
+                    # and "A" in same template
                     edge_desc = copy_edge_desc(variable)
                     cls._set_edge_relationship_info(edge_desc, term.positive)
                     cls._add_edge_relationship(condition_g, edge_desc)
@@ -366,15 +398,15 @@ class TemplateData(object):
                                         is_positive_condition):
             if not is_positive_condition:
                 edge_description.edge[NEG_CONDITION] = True
-                edge_description.edge[EProps.IS_DELETED] = True
+                edge_description.edge[EProps.VITRAGE_IS_DELETED] = True
             else:
-                edge_description.edge[EProps.IS_DELETED] = False
+                edge_description.edge[EProps.VITRAGE_IS_DELETED] = False
                 edge_description.edge[NEG_CONDITION] = False
 
-            edge_description.source[VProps.IS_DELETED] = False
-            edge_description.source[VProps.IS_PLACEHOLDER] = False
-            edge_description.target[VProps.IS_DELETED] = False
-            edge_description.target[VProps.IS_PLACEHOLDER] = False
+            edge_description.source[VProps.VITRAGE_IS_DELETED] = False
+            edge_description.source[VProps.VITRAGE_IS_PLACEHOLDER] = False
+            edge_description.target[VProps.VITRAGE_IS_DELETED] = False
+            edge_description.target[VProps.VITRAGE_IS_PLACEHOLDER] = False
 
         @staticmethod
         def _add_edge_relationship(condition_graph, edge_description):

@@ -12,10 +12,11 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from six.moves import queue
 
 from oslo_config import cfg
 
-from six.moves import queue
+from vitrage.common.constants import DatasourceAction
 from vitrage.common.constants import DatasourceProperties as DSProp
 from vitrage.common.constants import EdgeLabel
 from vitrage.common.constants import EntityCategory
@@ -24,13 +25,19 @@ from vitrage.common.constants import VertexProperties as VProps
 from vitrage.datasources.alarm_properties import AlarmProperties as AlarmProps
 from vitrage.datasources.nagios import NAGIOS_DATASOURCE
 from vitrage.datasources.nagios.properties import NagiosProperties as NProps
+from vitrage.datasources.nagios.properties import NagiosTestStatus
 from vitrage.datasources.nova.host import NOVA_HOST_DATASOURCE
+from vitrage.entity_graph.mappings.operational_alarm_severity import \
+    OperationalAlarmSeverity
 from vitrage.entity_graph.mappings.operational_resource_state import \
     OperationalResourceState
 from vitrage.evaluator.actions.action_executor import ActionExecutor
 from vitrage.evaluator.actions.base import ActionMode
 from vitrage.evaluator.actions.base import ActionType
-from vitrage.evaluator.actions.evaluator_event_transformer import VITRAGE_TYPE
+from vitrage.evaluator.actions.evaluator_event_transformer \
+    import VITRAGE_DATASOURCE
+from vitrage.evaluator.actions.recipes.action_steps import ADD_VERTEX
+from vitrage.evaluator.actions.recipes.base import EVALUATOR_EVENT_TYPE
 from vitrage.evaluator.template_data import ActionSpecs
 from vitrage.evaluator.template_fields import TemplateFields as TFields
 from vitrage.opts import register_opts
@@ -54,7 +61,7 @@ class TestActionExecutor(TestFunctionalBase):
         # Test Setup
         processor = self._create_processor_with_graph(self.conf, uuid=True)
 
-        vertex_attrs = {VProps.TYPE: NOVA_HOST_DATASOURCE}
+        vertex_attrs = {VProps.VITRAGE_TYPE: NOVA_HOST_DATASOURCE}
         host_vertices = processor.entity_graph.get_vertices(
             vertex_attr_filter=vertex_attrs)
         host_vertex_before = host_vertices[0]
@@ -74,12 +81,14 @@ class TestActionExecutor(TestFunctionalBase):
             host_vertex_before.vertex_id)
 
         # Test Assertions
-        agg_state_before = host_vertex_before.get(VProps.AGGREGATED_STATE)
+        agg_state_before = \
+            host_vertex_before.get(VProps.VITRAGE_AGGREGATED_STATE)
         self.assertNotEqual(agg_state_before,
                             OperationalResourceState.SUBOPTIMAL)
         self.assertNotIn(VProps.VITRAGE_STATE, host_vertex_before.properties)
 
-        agg_state_after = host_vertex_after.get(VProps.AGGREGATED_STATE)
+        agg_state_after = \
+            host_vertex_after.get(VProps.VITRAGE_AGGREGATED_STATE)
         self.assertEqual(agg_state_after, OperationalResourceState.SUBOPTIMAL)
         v_state_after = host_vertex_after.get(VProps.VITRAGE_STATE)
         self.assertEqual(v_state_after, OperationalResourceState.SUBOPTIMAL)
@@ -92,7 +101,8 @@ class TestActionExecutor(TestFunctionalBase):
             host_vertex_before.vertex_id)
 
         # Test Assertions
-        agg_state_after_undo = host_vertex_before.get(VProps.AGGREGATED_STATE)
+        agg_state_after_undo = \
+            host_vertex_before.get(VProps.VITRAGE_AGGREGATED_STATE)
         self.assertEqual(agg_state_after_undo, agg_state_before)
         self.assertNotIn(
             VProps.VITRAGE_STATE, host_vertex_after_undo.properties)
@@ -102,7 +112,7 @@ class TestActionExecutor(TestFunctionalBase):
         # Test Setup
         processor = self._create_processor_with_graph(self.conf, uuid=True)
 
-        vertex_attrs = {VProps.TYPE: NOVA_HOST_DATASOURCE}
+        vertex_attrs = {VProps.VITRAGE_TYPE: NOVA_HOST_DATASOURCE}
         host_vertices = processor.entity_graph.get_vertices(
             vertex_attr_filter=vertex_attrs)
         host_vertex_before = host_vertices[0]
@@ -139,7 +149,7 @@ class TestActionExecutor(TestFunctionalBase):
         # Test Setup
         processor = self._create_processor_with_graph(self.conf, uuid=True)
 
-        vertex_attrs = {VProps.TYPE: NOVA_HOST_DATASOURCE}
+        vertex_attrs = {VProps.VITRAGE_TYPE: NOVA_HOST_DATASOURCE}
         host_vertices = processor.entity_graph.get_vertices(
             vertex_attr_filter=vertex_attrs)
 
@@ -153,7 +163,7 @@ class TestActionExecutor(TestFunctionalBase):
             host_2.get(VProps.ID), NOVA_HOST_DATASOURCE)
         processor.process_event(nagios_event2)
 
-        alarms_attrs = {VProps.TYPE: NAGIOS_DATASOURCE}
+        alarms_attrs = {VProps.VITRAGE_TYPE: NAGIOS_DATASOURCE}
         alarms_vertices = processor.entity_graph.get_vertices(
             vertex_attr_filter=alarms_attrs)
 
@@ -189,7 +199,7 @@ class TestActionExecutor(TestFunctionalBase):
         # Test Setup
         processor = self._create_processor_with_graph(self.conf, uuid=True)
 
-        vertex_attrs = {VProps.TYPE: NOVA_HOST_DATASOURCE}
+        vertex_attrs = {VProps.VITRAGE_TYPE: NOVA_HOST_DATASOURCE}
         host_vertices = processor.entity_graph.get_vertices(
             vertex_attr_filter=vertex_attrs)
 
@@ -207,7 +217,7 @@ class TestActionExecutor(TestFunctionalBase):
         # Raise alarm action adds new vertex with type vitrage to the graph
         action_spec = ActionSpecs(ActionType.RAISE_ALARM, targets, props)
 
-        alarm_vertex_attrs = {VProps.TYPE: VITRAGE_TYPE}
+        alarm_vertex_attrs = {VProps.VITRAGE_TYPE: VITRAGE_DATASOURCE}
         before_alarms = processor.entity_graph.get_vertices(
             vertex_attr_filter=alarm_vertex_attrs)
         event_queue = queue.Queue()
@@ -226,13 +236,13 @@ class TestActionExecutor(TestFunctionalBase):
 
         alarm = after_alarms[0]
 
-        self.assertEqual(alarm.properties[VProps.CATEGORY],
+        self.assertEqual(alarm.properties[VProps.VITRAGE_CATEGORY],
                          EntityCategory.ALARM)
-        self.assertEqual(alarm.properties[VProps.TYPE],
-                         VITRAGE_TYPE)
+        self.assertEqual(alarm.properties[VProps.VITRAGE_TYPE],
+                         VITRAGE_DATASOURCE)
         self.assertEqual(alarm.properties[VProps.SEVERITY],
                          props[TFields.SEVERITY])
-        self.assertEqual(alarm.properties[VProps.OPERATIONAL_SEVERITY],
+        self.assertEqual(alarm.properties[VProps.VITRAGE_OPERATIONAL_SEVERITY],
                          props[TFields.SEVERITY])
         self.assertEqual(alarm.properties[VProps.STATE],
                          AlarmProps.ACTIVE_STATE)
@@ -247,7 +257,7 @@ class TestActionExecutor(TestFunctionalBase):
         # Test Setup
         processor = self._create_processor_with_graph(self.conf, uuid=True)
 
-        vertex_attrs = {VProps.TYPE: NOVA_HOST_DATASOURCE}
+        vertex_attrs = {VProps.VITRAGE_TYPE: NOVA_HOST_DATASOURCE}
         host_vertices = processor.entity_graph.get_vertices(
             vertex_attr_filter=vertex_attrs)
 
@@ -269,8 +279,8 @@ class TestActionExecutor(TestFunctionalBase):
 
         processor.process_event(add_vertex_event)
 
-        alarm_vertex_attrs = {VProps.TYPE: VITRAGE_TYPE,
-                              VProps.IS_DELETED: False}
+        alarm_vertex_attrs = {VProps.VITRAGE_TYPE: VITRAGE_DATASOURCE,
+                              VProps.VITRAGE_IS_DELETED: False}
         before_alarms = processor.entity_graph.get_vertices(
             vertex_attr_filter=alarm_vertex_attrs)
 
@@ -295,10 +305,10 @@ class TestActionExecutor(TestFunctionalBase):
                 NProps.RESOURCE_NAME: resource_name,
                 NProps.RESOURCE_TYPE: resource_type,
                 NProps.SERVICE: 'Check_MK',
-                NProps.STATUS: 'CRITICAL',
+                NProps.STATUS: NagiosTestStatus.CRITICAL,
                 NProps.STATUS_INFO: 'test test test',
-                DSProp.DATASOURCE_ACTION: 'snapshot',
-                DSProp.ENTITY_TYPE: 'nagios',
+                DSProp.DATASOURCE_ACTION: DatasourceAction.SNAPSHOT,
+                DSProp.ENTITY_TYPE: NAGIOS_DATASOURCE,
                 DSProp.SAMPLE_DATE: '2016-02-07 15:26:04'}
 
     @staticmethod
@@ -306,13 +316,14 @@ class TestActionExecutor(TestFunctionalBase):
 
         return {TTFields.TARGET: target_vertex.vertex_id,
                 VProps.UPDATE_TIMESTAMP: '2016-03-17 11:33:32.443002',
-                DSProp.DATASOURCE_ACTION: 'update',
+                DSProp.DATASOURCE_ACTION: DatasourceAction.UPDATE,
                 TFields.ALARM_NAME: alarm_name,
                 VProps.STATE: 'Active',
-                VProps.TYPE: 'add_vertex',
-                DSProp.ENTITY_TYPE: 'vitrage',
-                VProps.SEVERITY: 'CRITICAL',
+                EVALUATOR_EVENT_TYPE: ADD_VERTEX,
+                DSProp.ENTITY_TYPE: VITRAGE_DATASOURCE,
+                VProps.SEVERITY: OperationalAlarmSeverity.CRITICAL,
                 VProps.VITRAGE_ID: 'mock_vitrage_id',
-                VProps.VITRAGE_RESOURCE_TYPE: 'nova.host',
-                VProps.CATEGORY: 'ALARM',
-                VProps.SAMPLE_TIMESTAMP: '2016-03-17 11:33:32.443002+00:00'}
+                VProps.VITRAGE_RESOURCE_TYPE: NOVA_HOST_DATASOURCE,
+                VProps.VITRAGE_CATEGORY: EntityCategory.ALARM,
+                VProps.VITRAGE_SAMPLE_TIMESTAMP:
+                    '2016-03-17 11:33:32.443002+00:00'}

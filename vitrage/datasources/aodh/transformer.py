@@ -24,6 +24,8 @@ from vitrage.datasources.aodh.properties import AodhProperties as AodhProps
 from vitrage.datasources.aodh.properties import AodhState
 from vitrage.datasources import transformer_base as tbase
 from vitrage.datasources.transformer_base import Neighbor
+from vitrage.evaluator.actions.evaluator_event_transformer \
+    import VITRAGE_DATASOURCE
 import vitrage.graph.utils as graph_utils
 from vitrage.utils import datetime as datetime_utils
 
@@ -67,18 +69,18 @@ class AodhTransformer(AlarmTransformerBase):
             metadata[AodhProps.STATE_TIMESTAMP] = \
                 entity_event[AodhProps.STATE_TIMESTAMP]
 
-        sample_timestamp = entity_event[DSProps.SAMPLE_DATE]
+        vitrage_sample_timestamp = entity_event[DSProps.SAMPLE_DATE]
 
         update_timestamp = self._format_update_timestamp(
-            AodhTransformer._timestamp(entity_event), sample_timestamp)
+            AodhTransformer._timestamp(entity_event), vitrage_sample_timestamp)
 
         return graph_utils.create_vertex(
             self._create_entity_key(entity_event),
+            vitrage_category=EntityCategory.ALARM,
+            vitrage_type=entity_event[DSProps.ENTITY_TYPE],
+            vitrage_sample_timestamp=vitrage_sample_timestamp,
             entity_id=entity_event[AodhProps.ALARM_ID],
-            entity_category=EntityCategory.ALARM,
-            entity_type=entity_event[DSProps.ENTITY_TYPE],
             entity_state=self._get_alarm_state(entity_event),
-            sample_timestamp=sample_timestamp,
             update_timestamp=update_timestamp,
             metadata=metadata)
 
@@ -110,16 +112,16 @@ class AodhTransformer(AlarmTransformerBase):
             AodhProps.DESCRIPTION: entity_event[AodhProps.DESCRIPTION],
             VProps.PROJECT_ID: entity_event[AodhProps.PROJECT_ID],
         }
-        sample_timestamp = entity_event[DSProps.SAMPLE_DATE]
+        vitrage_sample_timestamp = entity_event[DSProps.SAMPLE_DATE]
         update_timestamp = self._format_update_timestamp(
-            AodhTransformer._timestamp(entity_event), sample_timestamp)
+            AodhTransformer._timestamp(entity_event), vitrage_sample_timestamp)
 
         return graph_utils.create_vertex(
             self._create_entity_key(entity_event),
+            vitrage_category=EntityCategory.ALARM,
+            vitrage_type=VITRAGE_DATASOURCE,
+            vitrage_sample_timestamp=vitrage_sample_timestamp,
             entity_id=entity_event.get(AodhProps.ALARM_ID),
-            entity_category=EntityCategory.ALARM,
-            entity_type='vitrage',
-            sample_timestamp=sample_timestamp,
             update_timestamp=update_timestamp,
             metadata=metadata)
 
@@ -148,7 +150,7 @@ class AodhTransformer(AlarmTransformerBase):
             return None
         return {VProps.ID: affected_resource_id}
 
-    def get_type(self):
+    def get_vitrage_type(self):
         return AODH_DATASOURCE
 
 

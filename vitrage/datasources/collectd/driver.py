@@ -37,7 +37,7 @@ class CollectdDriver(AlarmDriverBase):
             CollectdDriver.conf_map = \
                 CollectdDriver._configuration_mapping(conf)
 
-    def _entity_type(self):
+    def _vitrage_type(self):
         return COLLECTD_DATASOURCE
 
     def _alarm_key(self, alarm):

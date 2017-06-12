@@ -30,7 +30,8 @@ from vitrage.entity_graph.consistency.consistency_enforcer \
     import ConsistencyEnforcer
 from vitrage.entity_graph.initialization_status import InitializationStatus
 from vitrage.entity_graph.processor.processor import Processor
-from vitrage.evaluator.actions.evaluator_event_transformer import VITRAGE_TYPE
+from vitrage.evaluator.actions.evaluator_event_transformer \
+    import VITRAGE_DATASOURCE
 from vitrage.evaluator.scenario_evaluator import ScenarioEvaluator
 from vitrage.evaluator.scenario_repository import ScenarioRepository
 import vitrage.graph.utils as graph_utils
@@ -117,30 +118,30 @@ class TestConsistencyFunctional(TestFunctionalBase):
             num_of_host_alarms * num_instances_per_host
         num_undeleted_vertices_in_graph = \
             len(self.processor.entity_graph.get_vertices(vertex_attr_filter={
-                VProps.IS_DELETED: False
+                VProps.VITRAGE_IS_DELETED: False
             }))
         self.assertEqual(self._num_total_expected_vertices() +
                          num_correct_alarms,
                          num_undeleted_vertices_in_graph)
 
         alarm_vertices_in_graph = self.processor.entity_graph.get_vertices({
-            VProps.CATEGORY: EntityCategory.ALARM,
-            VProps.IS_DELETED: False
+            VProps.VITRAGE_CATEGORY: EntityCategory.ALARM,
+            VProps.VITRAGE_IS_DELETED: False
         })
         self.assertEqual(num_correct_alarms, len(alarm_vertices_in_graph))
 
         is_deleted_alarm_vertices_in_graph = \
             self.processor.entity_graph.get_vertices({
-                VProps.CATEGORY: EntityCategory.ALARM,
-                VProps.IS_DELETED: True
+                VProps.VITRAGE_CATEGORY: EntityCategory.ALARM,
+                VProps.VITRAGE_IS_DELETED: True
             })
         self.assertEqual(num_of_host_alarms * num_instances_per_host,
                          len(is_deleted_alarm_vertices_in_graph))
 
         instance_vertices = self.processor.entity_graph.get_vertices({
-            VProps.CATEGORY: EntityCategory.ALARM,
-            VProps.TYPE: VITRAGE_TYPE,
-            VProps.IS_DELETED: False
+            VProps.VITRAGE_CATEGORY: EntityCategory.ALARM,
+            VProps.VITRAGE_TYPE: VITRAGE_DATASOURCE,
+            VProps.VITRAGE_IS_DELETED: False
         })
         self.assertEqual(num_of_host_alarms * num_instances_per_host,
                          len(instance_vertices))
@@ -157,14 +158,14 @@ class TestConsistencyFunctional(TestFunctionalBase):
 
         # Test Assertions
         instance_vertices = self.processor.entity_graph.get_vertices({
-            VProps.CATEGORY: EntityCategory.RESOURCE,
-            VProps.TYPE: NOVA_INSTANCE_DATASOURCE
+            VProps.VITRAGE_CATEGORY: EntityCategory.RESOURCE,
+            VProps.VITRAGE_TYPE: NOVA_INSTANCE_DATASOURCE
         })
         deleted_instance_vertices = \
             self.processor.entity_graph.get_vertices({
-                VProps.CATEGORY: EntityCategory.RESOURCE,
-                VProps.TYPE: NOVA_INSTANCE_DATASOURCE,
-                VProps.IS_DELETED: True
+                VProps.VITRAGE_CATEGORY: EntityCategory.RESOURCE,
+                VProps.VITRAGE_TYPE: NOVA_INSTANCE_DATASOURCE,
+                VProps.VITRAGE_IS_DELETED: True
             })
         self.assertEqual(self.NUM_INSTANCES - 3, len(instance_vertices))
         self.assertEqual(self._num_total_expected_vertices() - 3,
@@ -183,8 +184,8 @@ class TestConsistencyFunctional(TestFunctionalBase):
 
         # check number of instances in graph
         instance_vertices = self.processor.entity_graph.get_vertices({
-            VProps.CATEGORY: EntityCategory.RESOURCE,
-            VProps.TYPE: NOVA_INSTANCE_DATASOURCE
+            VProps.VITRAGE_CATEGORY: EntityCategory.RESOURCE,
+            VProps.VITRAGE_TYPE: NOVA_INSTANCE_DATASOURCE
         })
         self.assertEqual(self.NUM_INSTANCES, len(instance_vertices))
 
@@ -193,13 +194,13 @@ class TestConsistencyFunctional(TestFunctionalBase):
 
         # set part of the instances as deleted
         for i in range(3, 6):
-            instance_vertices[i][VProps.IS_DELETED] = True
+            instance_vertices[i][VProps.VITRAGE_IS_DELETED] = True
             self.processor.entity_graph.update_vertex(instance_vertices[i])
 
         # set part of the instances as deleted
         for i in range(6, 9):
-            instance_vertices[i][VProps.IS_DELETED] = True
-            instance_vertices[i][VProps.SAMPLE_TIMESTAMP] = str(
+            instance_vertices[i][VProps.VITRAGE_IS_DELETED] = True
+            instance_vertices[i][VProps.VITRAGE_SAMPLE_TIMESTAMP] = str(
                 current_time + timedelta(seconds=2 * consistency_interval + 1))
             self.processor.entity_graph.update_vertex(instance_vertices[i])
 
@@ -215,8 +216,8 @@ class TestConsistencyFunctional(TestFunctionalBase):
     def _add_alarms(self):
         # find hosts and instances
         host_vertices = self.processor.entity_graph.get_vertices({
-            VProps.CATEGORY: EntityCategory.RESOURCE,
-            VProps.TYPE: NOVA_HOST_DATASOURCE
+            VProps.VITRAGE_CATEGORY: EntityCategory.RESOURCE,
+            VProps.VITRAGE_TYPE: NOVA_HOST_DATASOURCE
         })
 
         # add host alarms + deduced alarms
@@ -249,7 +250,7 @@ class TestConsistencyFunctional(TestFunctionalBase):
 
     def _update_timestamp(self, lst, timestamp):
         for vertex in lst:
-            vertex[VProps.SAMPLE_TIMESTAMP] = str(timestamp)
+            vertex[VProps.VITRAGE_SAMPLE_TIMESTAMP] = str(timestamp)
             self.processor.entity_graph.update_vertex(vertex)
 
     def _process_events(self):

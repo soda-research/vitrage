@@ -75,8 +75,8 @@ class TestCinderVolume(TestDataSourcesBase):
 
         cinder_vertices = processor.entity_graph.get_vertices(
             vertex_attr_filter={
-                VProps.CATEGORY: EntityCategory.RESOURCE,
-                VProps.TYPE: CINDER_VOLUME_DATASOURCE
+                VProps.VITRAGE_CATEGORY: EntityCategory.RESOURCE,
+                VProps.VITRAGE_TYPE: CINDER_VOLUME_DATASOURCE
             })
         self.assertEqual(1, len(cinder_vertices))
 
@@ -85,4 +85,4 @@ class TestCinderVolume(TestDataSourcesBase):
         self.assertEqual(1, len(cinder_neighbors))
 
         self.assertEqual(NOVA_INSTANCE_DATASOURCE,
-                         cinder_neighbors[0][VProps.TYPE])
+                         cinder_neighbors[0][VProps.VITRAGE_TYPE])
