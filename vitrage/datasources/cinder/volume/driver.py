@@ -42,7 +42,7 @@ class CinderVolumeDriver(DriverBase):
                 search_opts={'all_tenants': 1})),
             CINDER_VOLUME_DATASOURCE,
             datasource_action,
-            'manager')
+            *self.properties_to_filter_out())
 
     def enrich_event(self, event, event_type):
         event[DSProps.EVENT_TYPE] = event_type
@@ -50,6 +50,10 @@ class CinderVolumeDriver(DriverBase):
         return CinderVolumeDriver.make_pickleable([event],
                                                   CINDER_VOLUME_DATASOURCE,
                                                   DatasourceAction.UPDATE)[0]
+
+    @staticmethod
+    def properties_to_filter_out():
+        return ['manager']
 
     @staticmethod
     def get_event_types():

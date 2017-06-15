@@ -114,3 +114,8 @@ class DriverBase(object):
         """
 
         return []
+
+    @staticmethod
+    def properties_to_filter_out():
+        """Return a list of properties to be removed from the event"""
+        return []

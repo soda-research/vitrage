@@ -15,10 +15,14 @@
 from vitrage.common.constants import DatasourceAction
 from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.datasources.cinder.volume import CINDER_VOLUME_DATASOURCE
+from vitrage.datasources.cinder.volume.driver import CinderVolumeDriver
 from vitrage.datasources.driver_base import DriverBase
 from vitrage.datasources.heat.stack import HEAT_STACK_DATASOURCE
+from vitrage.datasources.neutron.network.driver import NetworkDriver
 from vitrage.datasources.neutron.network import NEUTRON_NETWORK_DATASOURCE
+from vitrage.datasources.neutron.port.driver import PortDriver
 from vitrage.datasources.neutron.port import NEUTRON_PORT_DATASOURCE
+from vitrage.datasources.nova.instance.driver import InstanceDriver
 from vitrage.datasources.nova.instance import NOVA_INSTANCE_DATASOURCE
 from vitrage import os_clients
 
@@ -28,11 +32,18 @@ class HeatStackDriver(DriverBase):
     _client = None
     conf = None
 
-    RESOURCE_TYPE_CONVERSION = {
+    RESOURCE_TYPE = {
         'OS::Nova::Server': NOVA_INSTANCE_DATASOURCE,
         'OS::Cinder::Volume': CINDER_VOLUME_DATASOURCE,
         'OS::Neutron::Net': NEUTRON_NETWORK_DATASOURCE,
         'OS::Neutron::Port': NEUTRON_PORT_DATASOURCE
+    }
+
+    RESOURCE_DRIVERS = {
+        'OS::Nova::Server': InstanceDriver,
+        'OS::Cinder::Volume': CinderVolumeDriver,
+        'OS::Neutron::Net': NetworkDriver,
+        'OS::Neutron::Port': PortDriver
     }
 
     def __init__(self, conf):
@@ -72,19 +83,21 @@ class HeatStackDriver(DriverBase):
         event = HeatStackDriver._retrieve_stack_resources(
             event, event['stack_identity'])
 
-        return HeatStackDriver.make_pickleable([event],
-                                               HEAT_STACK_DATASOURCE,
-                                               DatasourceAction.UPDATE)[0]
+        return HeatStackDriver.make_pickleable(
+            [event],
+            HEAT_STACK_DATASOURCE,
+            DatasourceAction.UPDATE,
+            *self.properties_to_filter_out())[0]
 
     def _filter_resource_types(self):
         types = self.conf.datasources.types
         tmp_dict = {}
 
-        for key, value in HeatStackDriver.RESOURCE_TYPE_CONVERSION.items():
+        for key, value in HeatStackDriver.RESOURCE_TYPE.items():
             if value in types:
                 tmp_dict[key] = value
 
-        HeatStackDriver.RESOURCE_TYPE_CONVERSION = tmp_dict
+        HeatStackDriver.RESOURCE_TYPE = tmp_dict
 
     def _make_stacks_list(self, stacks):
         return [stack.__dict__ for stack in stacks]
@@ -94,12 +107,26 @@ class HeatStackDriver(DriverBase):
                 for stack in stacks]
 
     @staticmethod
+    def properties_to_filter_out():
+        return ['manager', '_info']
+
+    @staticmethod
     def _retrieve_stack_resources(stack, stack_id):
         resources = HeatStackDriver.client().resources.list(stack_id)
         stack['resources'] = [resource.__dict__ for resource in resources
                               if resource.__dict__['resource_type'] in
-                              HeatStackDriver.RESOURCE_TYPE_CONVERSION]
+                              HeatStackDriver.RESOURCE_TYPE]
+        HeatStackDriver._filter_stack_resources(stack)
         return stack
+
+    @staticmethod
+    def _filter_stack_resources(stack):
+        for resource in stack['resources']:
+            props = HeatStackDriver.RESOURCE_DRIVERS[
+                resource['resource_type']].properties_to_filter_out()
+            for prop in props:
+                if prop in resource:
+                    del resource[prop]
 
     def get_all(self, datasource_action):
         stacks = HeatStackDriver.client().stacks.list(global_tenant=True)
@@ -108,4 +135,4 @@ class HeatStackDriver(DriverBase):
         return self.make_pickleable(stacks_with_resources,
                                     HEAT_STACK_DATASOURCE,
                                     datasource_action,
-                                    'manager')
+                                    *self.properties_to_filter_out())

@@ -32,7 +32,7 @@ import vitrage.graph.utils as graph_utils
 
 class HeatStackTransformer(ResourceTransformerBase):
 
-    RESOURCE_TYPE_CONVERSION = {
+    RESOURCE_TYPE = {
         'OS::Nova::Server': NOVA_INSTANCE_DATASOURCE,
         'OS::Cinder::Volume': CINDER_VOLUME_DATASOURCE,
         'OS::Neutron::Net': NEUTRON_NETWORK_DATASOURCE,
@@ -124,7 +124,7 @@ class HeatStackTransformer(ResourceTransformerBase):
         for neighbor in entity_event['resources']:
             neighbor_id = neighbor['physical_resource_id']
             neighbor_datasource_type = \
-                self.RESOURCE_TYPE_CONVERSION[neighbor['resource_type']]
+                self.RESOURCE_TYPE[neighbor['resource_type']]
             neighbors.append(self._create_neighbor(entity_event,
                                                    neighbor_id,
                                                    neighbor_datasource_type,

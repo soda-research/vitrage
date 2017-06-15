@@ -15,9 +15,11 @@
 import datetime
 
 from oslo_log import log
+import oslo_messaging
 from oslo_service import service as os_service
 
 from vitrage.entity_graph.processor import processor as proc
+from vitrage import messaging
 
 LOG = log.getLogger(__name__)
 
@@ -26,31 +28,33 @@ class VitrageGraphService(os_service.Service):
 
     def __init__(self,
                  conf,
-                 event_queue,
                  evaluator_queue,
                  evaluator,
                  entity_graph,
                  initialization_status):
         super(VitrageGraphService, self).__init__()
-        self.queue = event_queue
         self.conf = conf
         self.evaluator = evaluator
         self.processor = proc.Processor(self.conf,
                                         initialization_status,
                                         e_graph=entity_graph)
         self.evaluator_queue = evaluator_queue
+        self.listener = self._create_datasources_event_listener(conf)
 
     def start(self):
         LOG.info("Vitrage Graph Service - Starting...")
 
         super(VitrageGraphService, self).start()
         self.tg.add_timer(0.1, self._process_event_non_blocking)
+        self.listener.start()
 
         LOG.info("Vitrage Graph Service - Started!")
 
     def stop(self, graceful=False):
         LOG.info("Vitrage Graph Service - Stopping...")
 
+        self.listener.stop()
+        self.listener.wait()
         super(VitrageGraphService, self).stop(graceful)
 
         LOG.info("Vitrage Graph Service - Stopped!")
@@ -68,14 +72,12 @@ class VitrageGraphService(os_service.Service):
         the queue they are done when timer returns.
         """
         start_time = datetime.datetime.now()
-        while not self.evaluator_queue.empty() or not self.queue.empty():
+        while not self.evaluator_queue.empty():
             time_delta = datetime.datetime.now() - start_time
             if time_delta.total_seconds() >= 2:
                 break
             if not self.evaluator_queue.empty():
                 self.do_process(self.evaluator_queue)
-            elif not self.queue.empty():
-                self.do_process(self.queue)
 
     def do_process(self, queue):
         try:
@@ -83,3 +85,24 @@ class VitrageGraphService(os_service.Service):
             self.processor.process_event(event)
         except Exception as e:
             LOG.exception("Exception: %s", e)
+
+    def _create_datasources_event_listener(self, conf):
+        topic = conf.datasources.notification_topic_collector
+        transport = messaging.get_transport(conf)
+        targets = [oslo_messaging.Target(topic=topic)]
+        return messaging.get_notification_listener(
+            transport, targets,
+            [PushNotificationsEndpoint(self.processor.process_event)],
+            allow_requeue=True)
+
+
+class PushNotificationsEndpoint(object):
+
+    def __init__(self, process_event_callback):
+        self.process_event_callback = process_event_callback
+
+    def info(self, ctxt, publisher_id, event_type, payload, metadata):
+        try:
+            self.process_event_callback(payload)
+        except Exception as e:
+            LOG.exception(e)

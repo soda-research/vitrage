@@ -17,12 +17,11 @@ from oslo_utils import importutils as utils
 
 from vitrage.common.constants import DatasourceOpts as DSOpts
 from vitrage.common.constants import UpdateMethod
-from vitrage.datasources.launcher import Launcher
-from vitrage.datasources.listener_service import ListenerService
 from vitrage.datasources.nagios import NAGIOS_DATASOURCE
 from vitrage.datasources.nova.host import NOVA_HOST_DATASOURCE
 from vitrage.datasources.nova.instance import NOVA_INSTANCE_DATASOURCE
 from vitrage.datasources.zabbix import ZABBIX_DATASOURCE
+from vitrage.entity_graph import utils as graph_utils
 from vitrage.tests import base
 
 
@@ -174,20 +173,20 @@ class DatasourceUpdateMethod(base.BaseTest):
     def test_datasource_update_method_push(self):
         drivers = {driver: utils.import_class(self.conf[driver].driver)
                    for driver in self.conf.datasources.types}
-        push_drivers = ListenerService._get_push_drivers(
-            drivers=drivers, conf=self.conf)
+        push_drivers = graph_utils.get_push_datasources(drivers=drivers,
+                                                        conf=self.conf)
         self.assertSequenceEqual(set(push_drivers), {utils.import_class(
             self.conf[NOVA_INSTANCE_DATASOURCE].driver), utils.import_class(
             self.conf[ZABBIX_DATASOURCE_PUSH].driver)})
 
     def test_datasource_update_method_pull(self):
-        pull_drivers = tuple(Launcher._get_pull_datasources(self.conf))
+        pull_drivers = tuple(graph_utils.get_pull_datasources(self.conf))
         self.assertSequenceEqual(pull_drivers,
                                  (NAGIOS_DATASOURCE,
                                   ZABBIX_DATASOURCE_PULL))
 
     def test_datasource_update_method_pull_with_no_changes_interval(self):
-        pull_drivers = tuple(Launcher._get_pull_datasources(self.conf))
+        pull_drivers = tuple(graph_utils.get_pull_datasources(self.conf))
         self.assertNotIn(ZABBIX_DATASOURCE_PULL_NO_INTERVAL, pull_drivers)
 
     def test_datasources_notification_topic(self):

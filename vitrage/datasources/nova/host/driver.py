@@ -32,4 +32,8 @@ class HostDriver(NovaDriverBase):
             self.filter_none_compute_hosts(self.client.hosts.list()),
             NOVA_HOST_DATASOURCE,
             datasource_action,
-            'manager')
+            *self.properties_to_filter_out())
+
+    @staticmethod
+    def properties_to_filter_out():
+        return ['manager']

@@ -32,5 +32,8 @@ class ZoneDriver(NovaDriverBase):
             self.client.availability_zones.list()),
             NOVA_ZONE_DATASOURCE,
             datasource_action,
-            'manager',
-            '_info')
+            *self.properties_to_filter_out())
+
+    @staticmethod
+    def properties_to_filter_out():
+        return ['manager', '_info']

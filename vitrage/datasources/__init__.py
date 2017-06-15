@@ -47,5 +47,9 @@ OPTS = [
                     ' in case of fault'),
     cfg.StrOpt('notification_topic',
                default='vitrage_notifications',
-               help='Vitrage configured notifications topic')
+               help='Vitrage configured notifications topic'),
+    cfg.StrOpt('notification_topic_collector',
+               default='collector_event_notification',
+               help='The topic on which event will be sent from the '
+                    'datasources to the graph processor')
 ]
