@@ -26,6 +26,11 @@ VERSIONS_RESPONSE = {u'versions': [{u'id': u'v1.0',
 
 
 class TestVersions(api.FunctionalTest):
+
+    def __init__(self, *args, **kwds):
+        super(TestVersions, self).__init__(*args, **kwds)
+        self.auth = 'keystone'
+
     def test_versions(self):
         data = self.get_json('/')
         self.assertEqual(VERSIONS_RESPONSE, data)

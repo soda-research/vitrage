@@ -11,11 +11,9 @@
 # under the License.
 
 import pecan as pecan
-from vitrage.api.controllers.v1 import root as v1
 
 
-class RootController(object):
-    v1 = v1.V1Controller()
+class VersionsController(object):
 
     @staticmethod
     @pecan.expose('json')

@@ -15,23 +15,15 @@
 # limitations under the License.
 
 # noinspection PyPackageRequirements
-import mock
-import webtest
-
-from vitrage.api import app
 from vitrage.tests.functional.api.v1 import FunctionalTest
 
 
-class TestAuthentications(FunctionalTest):
-    def _make_app(self):
-        file_name = self.path_get('etc/vitrage/api-paste.ini')
-        self.conf.set_override("paste_config", file_name, "api")
-        # We need the other call to prepare_service in app.py to return the
-        # same tweaked conf object.
-        with mock.patch('vitrage.service.prepare_service') as ps:
-            ps.return_value = self.conf
-            return webtest.TestApp(app.load_app(conf=self.conf))
+class AuthTest(FunctionalTest):
 
-    def test_not_authenticated(self):
+    def __init__(self, *args, **kwds):
+        super(AuthTest, self).__init__(*args, **kwds)
+        self.auth = 'keystone'
+
+    def test_in_keystone_mode_not_authenticated(self):
         resp = self.post_json('/topology/', params=None, expect_errors=True)
-        self.assertEqual(401, resp.status_int)
+        self.assertEqual('401 Unauthorized', resp.status)

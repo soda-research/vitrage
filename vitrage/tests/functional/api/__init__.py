@@ -16,12 +16,13 @@
 # under the License.
 """Base classes for API tests.
 """
-
 import os
-import pecan
-import pecan.testing
 
 from oslo_config import fixture as fixture_config
+import sys
+import webtest
+
+from vitrage.api import app
 from vitrage import service
 
 from vitrage.tests import base
@@ -40,29 +41,24 @@ class FunctionalTest(base.BaseTest):
     def setUp(self):
         super(FunctionalTest, self).setUp()
         conf = service.prepare_service(args=[], config_files=[])
-        self.conf = self.useFixture(fixture_config.Config(conf)).conf
+        self.CONF = self.useFixture(fixture_config.Config(conf)).conf
 
-        self.conf.set_override('policy_file',
-                               os.path.abspath('etc/vitrage/policy.json'),
-                               group='oslo_policy')
-        self.app = self._make_app()
+        vitrage_init_file = sys.modules['vitrage'].__file__
+        vitrage_root = os.path.abspath(
+            os.path.join(os.path.dirname(vitrage_init_file), '..', ))
 
-    def _make_app(self):
-        self.config = {
-            'app': {
-                'root': 'vitrage.api.controllers.root.RootController',
-                'modules': ['vitrage.api'],
-            },
-            'wsme': {
-                'debug': True,
-            },
-        }
+        self.CONF.set_override('policy_file', os.path.join(vitrage_root,
+                                                           'etc', 'vitrage',
+                                                           'policy.json'),
+                               group='oslo_policy', enforce_type=True)
 
-        return pecan.testing.load_test_app(self.config, conf=self.conf)
+        self.CONF.set_override('paste_config', os.path.join(vitrage_root,
+                                                            'etc', 'vitrage',
+                                                            'api-paste.ini'),
+                               group='api', enforce_type=True)
 
-    def tearDown(self):
-        super(FunctionalTest, self).tearDown()
-        pecan.set_config({}, overwrite=True)
+        self.CONF.set_override('auth_mode', self.auth, group='api')
+        self.app = webtest.TestApp(app.load_app(self.CONF))
 
     def put_json(self, path, params, expect_errors=False, headers=None,
                  extra_environ=None, status=None):
