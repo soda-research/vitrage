@@ -16,19 +16,15 @@
 import itertools
 
 from oslo_service import service as os_service
-from oslo_utils import importutils as utils
 
-from vitrage.common.constants import DatasourceOpts as DSOpts
-from vitrage.common.constants import UpdateMethod
-from vitrage.datasources.listener_service import ListenerService
 from vitrage.datasources.services import ChangesService
 from vitrage.datasources.services import SnapshotsService
-from vitrage.utils import opt_exists
+from vitrage.entity_graph import utils
 
 
-def create_send_to_queue_callback(queue):
+def create_send_to_queue_callback(rabbitq):
     def send_to_queue_callback(event):
-        queue.put(event)
+        rabbitq.notify_when_applicable(event)
 
     return send_to_queue_callback
 
@@ -37,43 +33,26 @@ class Launcher(object):
     def __init__(self, conf, callback):
         self.conf = conf
         self.callback = callback
-        self.snapshot_datasources = self._register_snapshot_datasources(conf)
+        self.drivers = utils.get_drivers(conf)
         self.services = self._register_services()
 
     def launch(self):
-        # launcher = os_service.ServiceLauncher(self.conf)  # For Debugging
         launcher = os_service.ProcessLauncher(self.conf)
         for service in self.services:
             launcher.launch_service(service, 1)
 
-    @staticmethod
-    def _register_snapshot_datasources(conf):
-        return {datasource: utils.import_object(conf[datasource].driver, conf)
-                for datasource in conf.datasources.types}
-
     def _register_services(self):
-        pull_datasources = self._get_pull_datasources(self.conf)
+        pull_datasources = utils.get_pull_datasources(self.conf)
         changes_services = \
             (ChangesService(self.conf,
-                            [self.snapshot_datasources[datasource]],
+                            [self.drivers[datasource]],
                             self.conf[datasource].changes_interval,
                             self.callback)
              for datasource in pull_datasources)
 
         snapshot_service = (SnapshotsService(self.conf,
-                                             self.snapshot_datasources,
+                                             self.drivers,
                                              self.callback),)
 
-        listener_service = (ListenerService(self.conf,
-                                            self.snapshot_datasources,
-                                            self.callback),)
-
         return itertools.chain(changes_services,
-                               snapshot_service,
-                               listener_service)
-
-    @staticmethod
-    def _get_pull_datasources(conf):
-        return (datasource for datasource in conf.datasources.types
-                if conf[datasource].update_method.lower() == UpdateMethod.PULL
-                and opt_exists(conf[datasource], DSOpts.CHANGES_INTERVAL))
+                               snapshot_service)

@@ -6,6 +6,9 @@ enable_service vitrage-graph
 # Notifier
 enable_service vitrage-notifier
 
+# Notifier
+enable_service vitrage-collector
+
 
 # Default directories
 VITRAGE_DIR=$DEST/vitrage

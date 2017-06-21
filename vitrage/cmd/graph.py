@@ -13,7 +13,6 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import multiprocessing
 from six.moves import queue
 import sys
 
@@ -21,7 +20,6 @@ from oslo_service import service as os_service
 
 from vitrage.api_handler import service as api_handler_svc
 from vitrage.common.constants import EntityCategory
-from vitrage.datasources import launcher as datasource_launcher
 from vitrage.datasources import OPENSTACK_CLUSTER
 from vitrage.datasources.transformer_base import CLUSTER_ID
 from vitrage import entity_graph
@@ -44,19 +42,14 @@ def main():
 
     conf = service.prepare_service()
     init_status = InitializationStatus()
-    mp_queue, evaluator_queue, evaluator, e_graph = init(conf)
+    evaluator_queue, evaluator, e_graph = init(conf)
     launcher = os_service.ServiceLauncher(conf)
-    datasources = datasource_launcher.Launcher(
-        conf,
-        datasource_launcher.create_send_to_queue_callback(mp_queue))
 
     launcher.launch_service(entity_graph_svc.VitrageGraphService(
-        conf, mp_queue, evaluator_queue, evaluator, e_graph, init_status))
+        conf, evaluator_queue, evaluator, e_graph, init_status))
 
     launcher.launch_service(api_handler_svc.VitrageApiHandlerService(
         conf, e_graph, evaluator.scenario_repo))
-
-    datasources.launch()
 
     launcher.launch_service(consistency_svc.VitrageGraphConsistencyService(
         conf, evaluator_queue, evaluator, e_graph, init_status))
@@ -65,7 +58,6 @@ def main():
 
 
 def init(conf):
-    mp_queue = multiprocessing.Queue()
     evaluator_q = queue.Queue()
     e_graph = entity_graph.get_graph_driver(conf)(
         'Entity Graph',
@@ -75,7 +67,7 @@ def init(conf):
 
     evaluator = ScenarioEvaluator(conf, e_graph, scenario_repo, evaluator_q)
 
-    return mp_queue, evaluator_q, evaluator, e_graph
+    return evaluator_q, evaluator, e_graph
 
 
 if __name__ == "__main__":

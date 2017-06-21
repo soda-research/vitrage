@@ -30,9 +30,7 @@ class InstanceDriver(NovaDriverBase):
                 search_opts={'all_tenants': 1})),
             NOVA_INSTANCE_DATASOURCE,
             datasource_action,
-            'manager',
-            'OS-EXT-SRV-ATTR:user_data',
-            '_info')
+            *self.properties_to_filter_out())
 
     def enrich_event(self, event, event_type):
         event[DSProps.EVENT_TYPE] = event_type
@@ -40,6 +38,10 @@ class InstanceDriver(NovaDriverBase):
         return InstanceDriver.make_pickleable([event],
                                               NOVA_INSTANCE_DATASOURCE,
                                               DatasourceAction.UPDATE)[0]
+
+    @staticmethod
+    def properties_to_filter_out():
+        return ['manager', 'OS-EXT-SRV-ATTR:user_data', '_info']
 
     @staticmethod
     def get_event_types():

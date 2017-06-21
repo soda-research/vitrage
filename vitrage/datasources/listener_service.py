@@ -18,7 +18,7 @@ from oslo_log import log
 import oslo_messaging
 from oslo_service import service as os_service
 
-from vitrage.common.constants import UpdateMethod
+from vitrage.entity_graph import utils
 from vitrage import messaging
 
 
@@ -47,6 +47,9 @@ class ListenerService(os_service.Service):
     def stop(self, graceful=False):
         LOG.info("Vitrage data source Listener Service - Stopping...")
 
+        # Should it be here?
+        # self.listener.stop()
+        # self.listener.wait()
         super(ListenerService, self).stop(graceful)
 
         LOG.info("Vitrage data source Listener Service - Stopped!")
@@ -54,18 +57,13 @@ class ListenerService(os_service.Service):
     @classmethod
     def _create_callbacks_by_events_dict(cls, drivers, conf):
         ret = defaultdict(list)
-        push_drivers = cls._get_push_drivers(drivers, conf)
+        push_drivers = utils.get_push_datasources(drivers, conf)
 
         for driver in push_drivers:
             for event in driver.get_event_types():
                 ret[event].append(driver.enrich_event)
 
         return ret
-
-    @staticmethod
-    def _get_push_drivers(drivers, conf):
-        return (driver_cls for datasource, driver_cls in drivers.items()
-                if conf[datasource].update_method.lower() == UpdateMethod.PUSH)
 
     def _get_topic_listener(self, conf, topic, callback):
         # Create a listener for each topic
