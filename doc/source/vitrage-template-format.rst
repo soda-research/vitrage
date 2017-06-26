@@ -66,6 +66,14 @@ relationships:
 - X and not (Y or Z)
 - X and not X
 
+Template validation status codes
+--------------------------------
+
+.. toctree::
+   :maxdepth: 1
+
+   template_validation_status_code
+
 Examples
 ========
 
@@ -346,7 +354,7 @@ Set state of specified entity. This will directly affect the state as seen in vi
 
 
 add_causal_relationship
-^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^
 Add a causal relationship between alarms.
  ::
 
@@ -361,9 +369,9 @@ mark_down
 ^^^^^^^^^
 Set an entity marked_down field.
 This can be used along with nova notifier to call force_down for a host
- ::
+::
 
-    action:
+   action:
         action_type : mark_down
             action_target:
                 target: host # mandatory. entity (from the definitions section, only host) to be marked as down

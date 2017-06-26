@@ -15,7 +15,7 @@ other linux flavours. Links for this purpose are added below.
 
 
 Prerequisites
-------------
+-------------
 Install devstack with vitrage before install Nagios via OMD due to this issue_
 
 .. _issue: https://bugs.launchpad.net/vitrage/+bug/1629811

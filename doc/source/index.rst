@@ -52,6 +52,13 @@ or set a deduced state.
 and states. Currently Vitrage has an Aodh notifier for raising Vitrage alarms
 in Aodh, and a Nova notifier for marking that the host is down.
 
+Installation Guide
+------------------
+.. toctree::
+   :maxdepth: 1
+
+   install/index
+
 Developer Guide
 ---------------
 
@@ -74,4 +81,5 @@ Design Documents
    vitrage-use-cases
    add-new-datasource
    not_operator_support
-   template-loading
+   templates-loading
+   vitrage-ha-and-history-vision
