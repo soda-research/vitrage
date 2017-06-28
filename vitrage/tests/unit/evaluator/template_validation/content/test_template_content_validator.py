@@ -15,7 +15,7 @@
 import copy
 
 from vitrage.evaluator.template_fields import TemplateFields
-from vitrage.evaluator.template_validation import \
+from vitrage.evaluator.template_validation.content import \
     template_content_validator as validator
 from vitrage.tests.mocks import utils
 from vitrage.tests.unit.evaluator.template_validation.content.base import \
