@@ -17,8 +17,8 @@ from oslo_log import log
 
 from vitrage.evaluator.template_fields import TemplateFields
 from vitrage.evaluator.template_validation.status_messages import status_msgs
-from vitrage.evaluator.template_validation.template_content_validator import \
-    content_validation
+from vitrage.evaluator.template_validation.template_content_validator \
+    import content_validation
 from vitrage.evaluator.template_validation.template_syntax_validator import \
     syntax_validation
 

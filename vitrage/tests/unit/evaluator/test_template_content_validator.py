@@ -13,34 +13,17 @@
 # under the License.
 
 import copy
-import logging
-from vitrage.entity_graph.mappings.operational_resource_state import \
-    OperationalResourceState
 
-from vitrage.common.constants import EntityCategory
-from vitrage.evaluator.actions.base import ActionType
 from vitrage.evaluator.template_fields import TemplateFields
-from vitrage.evaluator.template_validation.status_messages import status_msgs
-from vitrage.evaluator.template_validation import template_content_validator \
-    as validator
-from vitrage.tests import base
+from vitrage.evaluator.template_validation import \
+    template_content_validator as validator
 from vitrage.tests.mocks import utils
+from vitrage.tests.unit.evaluator.template_validation.content.base import \
+    ValidatorTest
 from vitrage.utils import file as file_utils
 
-DEFINITIONS_INDEX_MOCK = {
-    '123': {},
-    '456': {},
-    '789': {},
-    'a1': {
-        TemplateFields.CATEGORY: EntityCategory.ALARM
-    },
-    'a2': {
-        TemplateFields.CATEGORY: EntityCategory.ALARM
-    }
-}
 
-
-class TemplateContentValidatorTest(base.BaseTest):
+class TemplateContentValidatorTest(ValidatorTest):
 
     # noinspection PyPep8Naming
     @classmethod
@@ -58,7 +41,7 @@ class TemplateContentValidatorTest(base.BaseTest):
 
     def test_template_validator(self):
         for template in self.templates:
-            self._test_execute_and_assert_with_correct_result(template)
+            self._execute_and_assert_with_correct_result(template)
 
     def test_not_operator(self):
         basic_correct_not_condition_path = \
@@ -66,7 +49,7 @@ class TemplateContentValidatorTest(base.BaseTest):
             utils.get_resources_dir()
         basic_correct_not_condition_template = \
             file_utils.load_yaml_file(basic_correct_not_condition_path)
-        self._test_execute_and_assert_with_correct_result(
+        self._execute_and_assert_with_correct_result(
             basic_correct_not_condition_template)
 
         basic_incorrect_not_condition_path = \
@@ -74,7 +57,7 @@ class TemplateContentValidatorTest(base.BaseTest):
             utils.get_resources_dir()
         basic_incorrect_not_condition_template = \
             file_utils.load_yaml_file(basic_incorrect_not_condition_path)
-        self._test_execute_and_assert_with_fault_result(
+        self._execute_and_assert_with_fault_result(
             basic_incorrect_not_condition_template,
             86)
 
@@ -84,7 +67,7 @@ class TemplateContentValidatorTest(base.BaseTest):
             utils.get_resources_dir()
         complicated_correct_not_condition_template = \
             file_utils.load_yaml_file(complicated_correct_not_condition_path)
-        self._test_execute_and_assert_with_correct_result(
+        self._execute_and_assert_with_correct_result(
             complicated_correct_not_condition_template)
 
         complicated_incorrect_not_condition_path = \
@@ -93,7 +76,7 @@ class TemplateContentValidatorTest(base.BaseTest):
             utils.get_resources_dir()
         complicated_incorrect_not_condition_template = \
             file_utils.load_yaml_file(complicated_incorrect_not_condition_path)
-        self._test_execute_and_assert_with_fault_result(
+        self._execute_and_assert_with_fault_result(
             complicated_incorrect_not_condition_template,
             86)
 
@@ -106,7 +89,7 @@ class TemplateContentValidatorTest(base.BaseTest):
             entity_dict = entity[TemplateFields.ENTITY]
             entity_dict[TemplateFields.TEMPLATE_ID] = 'aaa'
 
-        self._test_execute_and_assert_with_fault_result(template, 2)
+        self._execute_and_assert_with_fault_result(template, 2)
 
     def test_validate_relationship_with_no_unique_template_id(self):
 
@@ -118,7 +101,7 @@ class TemplateContentValidatorTest(base.BaseTest):
         relationship_dict = relationship[TemplateFields.RELATIONSHIP]
         relationship_dict[TemplateFields.TEMPLATE_ID] = entity_id
 
-        self._test_execute_and_assert_with_fault_result(template, 2)
+        self._execute_and_assert_with_fault_result(template, 2)
 
     def test_validate_relationship_with_invalid_target(self):
 
@@ -128,7 +111,7 @@ class TemplateContentValidatorTest(base.BaseTest):
         relationship_dict = relationship[TemplateFields.RELATIONSHIP]
         relationship_dict[TemplateFields.TARGET] = 'unknown'
 
-        self._test_execute_and_assert_with_fault_result(template, 3)
+        self._execute_and_assert_with_fault_result(template, 3)
 
     def test_validate_relationship_with_invalid_source(self):
 
@@ -138,7 +121,7 @@ class TemplateContentValidatorTest(base.BaseTest):
         relationship_dict = relationship[TemplateFields.RELATIONSHIP]
         relationship_dict[TemplateFields.SOURCE] = 'unknown'
 
-        self._test_execute_and_assert_with_fault_result(template, 3)
+        self._execute_and_assert_with_fault_result(template, 3)
 
     def test_validate_scenario_invalid_condition(self):
 
@@ -147,289 +130,33 @@ class TemplateContentValidatorTest(base.BaseTest):
         scenario_dict = scenario[TemplateFields.SCENARIO]
 
         scenario_dict[TemplateFields.CONDITION] = 'and resource'
-        self._test_execute_and_assert_with_fault_result(template, 85)
+        self._execute_and_assert_with_fault_result(template, 85)
 
         scenario_dict[TemplateFields.CONDITION] = 'resource or'
-        self._test_execute_and_assert_with_fault_result(template, 85)
+        self._execute_and_assert_with_fault_result(template, 85)
 
         scenario_dict[TemplateFields.CONDITION] = 'not or resource'
-        self._test_execute_and_assert_with_fault_result(template, 85)
+        self._execute_and_assert_with_fault_result(template, 85)
 
         scenario_dict[TemplateFields.CONDITION] = \
             'alarm_on_host (alarm or resource'
-        self._test_execute_and_assert_with_fault_result(template, 85)
+        self._execute_and_assert_with_fault_result(template, 85)
 
         scenario_dict[TemplateFields.CONDITION] = 'aaa'
-        self._test_execute_and_assert_with_fault_result(template, 3)
+        self._execute_and_assert_with_fault_result(template, 3)
 
         scenario_dict[TemplateFields.CONDITION] = 'resource and aaa'
-        self._test_execute_and_assert_with_fault_result(template, 3)
+        self._execute_and_assert_with_fault_result(template, 3)
 
-    def test_validate_raise_alarm_action(self):
-        # Test setup
-        idx = DEFINITIONS_INDEX_MOCK.copy()
-        action = self._create_raise_alarm_action('123')
-
-        # Test action and assertions
-        result = validator._validate_raise_alarm_action(action, idx)
-
-        # Test Assertions
-        self._test_assert_with_correct_result(result)
-
-    def test_raise_alarm_action_validate_invalid_target_id(self):
-
-        # Test setup
-        idx = DEFINITIONS_INDEX_MOCK.copy()
-        action = self._create_raise_alarm_action('unknown')
-
-        # Test action
-        result = validator._validate_raise_alarm_action(action, idx)
-
-        # Test assertions
-        self._test_assert_with_fault_result(result, 3)
-
-    def test_validate_raise_alarm_action_without_target_id(self):
-
-        # Test setup
-        idx = DEFINITIONS_INDEX_MOCK.copy()
-        action = self._create_raise_alarm_action('123')
-        action[TemplateFields.ACTION_TARGET].pop(TemplateFields.TARGET)
-
-        # Test action
-        result = validator._validate_raise_alarm_action(action, idx)
-
-        # Test assertions
-        self._test_assert_with_fault_result(result, 127)
-
-    def test_validate_raise_alarm_action_without_severity(self):
-
-        # Test setup
-        idx = DEFINITIONS_INDEX_MOCK.copy()
-        action = self._create_raise_alarm_action('abc')
-        action[TemplateFields.PROPERTIES].pop(TemplateFields.SEVERITY)
-
-        # Test action
-        result = validator._validate_raise_alarm_action(action, idx)
-
-        # Test assertions
-        self._test_assert_with_fault_result(result, 126)
-
-    def test_validate_raise_alarm_action_without_alarm_name(self):
-
-        # Test setup
-        idx = DEFINITIONS_INDEX_MOCK.copy()
-        action = self._create_raise_alarm_action('abc')
-        action[TemplateFields.PROPERTIES].pop(TemplateFields.ALARM_NAME)
-
-        # Test action
-        result = validator._validate_raise_alarm_action(action, idx)
-
-        # Test assertions
-        self._test_assert_with_fault_result(result, 125)
-
-    def test_validate_set_state_action(self):
-
-        # Test setup
-        idx = DEFINITIONS_INDEX_MOCK.copy()
-        action = self._create_set_state_action('123')
-
-        # Test action and assertions
-        result = validator._validate_set_state_action(action, idx)
-
-        # Test Assertions
-        self._test_assert_with_correct_result(result)
-
-    def test_validate_set_state_action_with_invalid_target_id(self):
-
-        # Test setup
-        idx = DEFINITIONS_INDEX_MOCK.copy()
-        action = self._create_set_state_action('unknown')
-
-        # Test action
-        result = validator._validate_set_state_action(action, idx)
-
-        # Test assertions
-        self._test_assert_with_fault_result(result, 3)
-
-    def test_validate_set_state_action_without_target_id(self):
-
-        # Test setup
-        idx = DEFINITIONS_INDEX_MOCK.copy()
-        action = self._create_set_state_action('123')
-        action[TemplateFields.ACTION_TARGET].pop(TemplateFields.TARGET)
-
-        # Test action
-        result = validator._validate_set_state_action(action, idx)
-
-        # Test assertions
-        self._test_assert_with_fault_result(result, 129)
-
-    def test_validate_set_state_action_without_state_property(self):
-
-        # Test setup
-        idx = DEFINITIONS_INDEX_MOCK.copy()
-        action = self._create_set_state_action('123')
-        action[TemplateFields.PROPERTIES].pop(TemplateFields.STATE, None)
-
-        # Test action
-        result = validator._validate_set_state_action(action, idx)
-
-        # Test assertions
-        self._test_assert_with_fault_result(result, 128)
-
-    def test_validate_mark_down_action(self):
-
-        # Test setup
-        idx = DEFINITIONS_INDEX_MOCK.copy()
-        action = self._create_mark_down_action('123')
-
-        # Test action and assertions
-        result = validator._validate_mark_down_action(action, idx)
-
-        # Test Assertions
-        self._test_assert_with_correct_result(result)
-
-    def test_validate_mark_down_action_with_invalid_target_id(self):
-
-        # Test setup
-        idx = DEFINITIONS_INDEX_MOCK.copy()
-        action = self._create_mark_down_action('unknown')
-
-        # Test action
-        result = validator._validate_mark_down_action(action, idx)
-
-        # Test assertions
-        self._test_assert_with_fault_result(result, 3)
-
-    def test_validate_mark_down_action_without_target_id(self):
-
-        # Test setup
-        idx = DEFINITIONS_INDEX_MOCK.copy()
-        action = self._create_mark_down_action('123')
-        action[TemplateFields.ACTION_TARGET].pop(TemplateFields.TARGET)
-
-        # Test action
-        result = validator._validate_mark_down_action(action, idx)
-
-        # Test assertions
-        self._test_assert_with_fault_result(result, 131)
-
-    def test_validate_add_causal_relationship_action(self):
-
-        # Test setup
-        idx = DEFINITIONS_INDEX_MOCK.copy()
-        action = self._create_add_causal_relationship_action('a1', 'a2')
-
-        # Test action and assertions
-        result = \
-            validator._validate_add_causal_relationship_action(action, idx)
-
-        # Test action and assertions
-        self._test_assert_with_correct_result(result)
-
-    def test_validate_add_causal_relationship_action_with_invalid_target(self):
-
-        # Test setup
-        idx = DEFINITIONS_INDEX_MOCK.copy()
-        action = self._create_add_causal_relationship_action('unknown', 'a1')
-
-        # Test action
-        result = \
-            validator._validate_add_causal_relationship_action(action, idx)
-
-        # Test assertion
-        self._test_assert_with_fault_result(result, 3)
-
-    def test_validate_add_causal_relationship_action_without_target(self):
-
-        # Test setup
-        idx = DEFINITIONS_INDEX_MOCK.copy()
-        action = self._create_add_causal_relationship_action('a1', 'a2')
-        action[TemplateFields.ACTION_TARGET].pop(TemplateFields.TARGET, None)
-
-        # Test action
-        result = \
-            validator._validate_add_causal_relationship_action(action, idx)
-
-        # Test assertion
-        self._test_assert_with_fault_result(result, 130)
-
-    def test_validate_add_causal_relationship_action_with_invalid_source(self):
-
-        # Test setup
-        idx = DEFINITIONS_INDEX_MOCK.copy()
-        action = self._create_add_causal_relationship_action('a1', 'unknown')
-
-        # Test action
-        result = \
-            validator._validate_add_causal_relationship_action(action, idx)
-
-        # Test assertion
-        self._test_assert_with_fault_result(result, 3)
-
-    def test_validate_add_causal_relationship_action_without_source(self):
-
-        # Test setup
-        idx = DEFINITIONS_INDEX_MOCK.copy()
-        action = self._create_add_causal_relationship_action('a1', 'a2')
-        action[TemplateFields.ACTION_TARGET].pop(TemplateFields.SOURCE, None)
-
-        # Test action
-        result = \
-            validator._validate_add_causal_relationship_action(action, idx)
-
-        # Test assertion
-        self._test_assert_with_fault_result(result, 130)
-
-    def test_validate_add_causal_relationship_action_wrong_src_category(self):
-
-        # Test setup
-        idx = DEFINITIONS_INDEX_MOCK.copy()
-        action = self._create_add_causal_relationship_action('a1', '123')
-
-        # Test action
-        result = \
-            validator._validate_add_causal_relationship_action(action, idx)
-
-        # Test assertion
-        self._test_assert_with_fault_result(result, 132)
-
-    def test_validate_add_causal_relationship_action_wrong_tgt_category(self):
-
-        # Test setup
-        idx = DEFINITIONS_INDEX_MOCK.copy()
-        action = self._create_add_causal_relationship_action('123', 'a1')
-
-        # Test action
-        result = \
-            validator._validate_add_causal_relationship_action(action, idx)
-
-        # Test assertion
-        self._test_assert_with_fault_result(result, 132)
-
-    def _test_execute_and_assert_with_fault_result(self,
-                                                   template,
-                                                   status_code):
+    def _execute_and_assert_with_fault_result(self, template, status_code):
 
         result = validator.content_validation(template)
-        self._test_assert_with_fault_result(result, status_code)
+        self._assert_fault_result(result, status_code)
 
-    def _test_assert_with_fault_result(self, result, status_code):
-
-        self.assertFalse(result.is_valid_config)
-        self.assertTrue(result.comment.startswith(status_msgs[status_code]))
-        self.assertEqual(result.status_code, status_code)
-
-    def _test_execute_and_assert_with_correct_result(self, template):
+    def _execute_and_assert_with_correct_result(self, template):
 
         result = validator.content_validation(template)
-        self._test_assert_with_correct_result(result)
-
-    def _test_assert_with_correct_result(self, result):
-
-        self.assertTrue(result.is_valid_config)
-        self.assertEqual(result.comment, status_msgs[0])
-        self.assertEqual(result.status_code, 0)
+        self._assert_correct_result(result)
 
     def _create_scenario_actions(self, target, source):
 
@@ -448,70 +175,3 @@ class TemplateContentValidatorTest(base.BaseTest):
         actions.append({TemplateFields.ACTION: causal_action})
 
         return actions
-
-    # Static methods:
-    @staticmethod
-    def _create_add_causal_relationship_action(target, source):
-
-        action_target = {
-            TemplateFields.TARGET: target,
-            TemplateFields.SOURCE: source
-        }
-        action = {
-            TemplateFields.ACTION_TYPE: ActionType.ADD_CAUSAL_RELATIONSHIP,
-            TemplateFields.ACTION_TARGET: action_target}
-
-        return action
-
-    @staticmethod
-    def _create_mark_down_action(target):
-
-        action_target = {
-            TemplateFields.TARGET: target
-        }
-        action = {
-            TemplateFields.ACTION_TYPE: ActionType.MARK_DOWN,
-            TemplateFields.ACTION_TARGET: action_target,
-        }
-        return action
-
-    @staticmethod
-    def _create_set_state_action(target):
-
-        action_target = {
-            TemplateFields.TARGET: target
-        }
-        properties = {
-            TemplateFields.STATE: OperationalResourceState.SUBOPTIMAL
-        }
-        action = {
-            TemplateFields.ACTION_TYPE: ActionType.SET_STATE,
-            TemplateFields.ACTION_TARGET: action_target,
-            TemplateFields.PROPERTIES: properties
-        }
-        return action
-
-    @staticmethod
-    def _create_raise_alarm_action(target):
-
-        action_target = {
-            TemplateFields.TARGET: target
-        }
-        properties = {
-            TemplateFields.ALARM_NAME: 'VM_CPU_SUBOPTIMAL_PERFORMANCE',
-            TemplateFields.SEVERITY: 'critical'
-        }
-        action = {
-            TemplateFields.ACTION_TYPE: ActionType.RAISE_ALARM,
-            TemplateFields.ACTION_TARGET: action_target,
-            TemplateFields.PROPERTIES: properties
-        }
-        return action
-
-    @staticmethod
-    def _hide_useless_logging_messages():
-
-        validator_path = 'vitrage.evaluator.template_validation.' \
-                         'template_content_validator'
-        content_validator_log = logging.getLogger(validator_path)
-        content_validator_log.setLevel(logging.FATAL)
