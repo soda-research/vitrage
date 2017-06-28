@@ -150,8 +150,9 @@ class Processor(processor.ProcessorBase):
 
             PUtils.mark_deleted(self.entity_graph, deleted_vertex)
         else:
-            LOG.warning("Delete event arrived on invalid resource: %s",
-                        deleted_vertex)
+            LOG.warning("Delete event arrived on invalid resource: "
+                        "deleted_vertex - %s, graph_vertex - %s",
+                        deleted_vertex, graph_vertex)
 
     def update_relationship(self, entity_vertex, neighbors):
         LOG.debug('Update relationship in entity graph:\n%s', neighbors)
@@ -215,7 +216,9 @@ class Processor(processor.ProcessorBase):
                 PUtils.is_newer_vertex(graph_vertex, vertex):
             self.entity_graph.remove_vertex(vertex)
         else:
-            LOG.warning("Delete event arrived on invalid resource: %s", vertex)
+            LOG.warning("Delete event arrived on invalid resource: "
+                        "deleted_vertex - %s, graph_vertex - %s",
+                        vertex, graph_vertex)
 
     def handle_end_message(self, vertex, neighbors):
         self.initialization_status.end_messages[vertex[VProps.VITRAGE_TYPE]] \
