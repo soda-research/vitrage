@@ -91,9 +91,9 @@ class VitrageGraphService(os_service.Service):
         transport = messaging.get_transport(conf)
         targets = [oslo_messaging.Target(topic=topic)]
         return messaging.get_notification_listener(
-            transport, targets,
-            [PushNotificationsEndpoint(self.processor.process_event)],
-            allow_requeue=True)
+            transport,
+            targets,
+            [PushNotificationsEndpoint(self.processor.process_event)])
 
 
 class PushNotificationsEndpoint(object):
