@@ -230,7 +230,7 @@ def _validate_action_schema(action):
         Required(TemplateFields.ACTION_TYPE, msg=123):
             _validate_action_type_field(),
         TemplateFields.PROPERTIES: dict,
-        Required(TemplateFields.ACTION_TARGET, msg=124): dict
+        TemplateFields.ACTION_TARGET: dict
     })
     return _validate_dict_schema(schema, action)
 

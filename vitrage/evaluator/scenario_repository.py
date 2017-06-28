@@ -21,8 +21,8 @@ from oslo_utils import uuidutils
 from vitrage.evaluator.base import Template
 from vitrage.evaluator.equivalence_repository import EquivalenceRepository
 from vitrage.evaluator.template_data import TemplateData
-from vitrage.evaluator.template_validation.template_content_validator import \
-    content_validation
+from vitrage.evaluator.template_validation.template_content_validator \
+    import content_validation
 from vitrage.evaluator.template_validation.template_syntax_validator import \
     syntax_validation
 from vitrage.utils import datetime as datetime_utils

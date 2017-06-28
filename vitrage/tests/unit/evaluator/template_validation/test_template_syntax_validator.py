@@ -195,10 +195,6 @@ class TemplateSyntaxValidatorTest(base.BaseTest):
             TemplateFields.ACTION_TYPE,
             status_msgs[123])
 
-        self._test_validate_action_without_required_field(
-            TemplateFields.ACTION_TARGET,
-            status_msgs[124])
-
     def _test_validate_action_without_required_field(self,
                                                      field_name,
                                                      expected_comment):
