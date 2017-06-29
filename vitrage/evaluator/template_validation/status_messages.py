@@ -62,8 +62,8 @@ status_msgs = {
          '{actions}'.format(actions=action_types),
     121: 'At least one action must be defined.',
     122: 'Action field is required.',
-    123: 'Relationship definition must contain action_type field.',
-    124: 'Relationship definition must contain action_target field.',
+    123: 'Action definition must contain action_type field.',
+    124: 'Action definition must contain action_target field.',
     125: 'raise_alarm action must contain alarm_name field in properties '
          'block.',
     126: 'raise_alarm action must contain severity field in properties block.',
@@ -74,6 +74,8 @@ status_msgs = {
          'in target_action block.',
     131: 'mark_down action must contain \'target\' field in'
          ' \'target_action\' block.',
-    132: 'add_causal_relationship action requires action_target to be ALARM'
+    132: 'add_causal_relationship action requires action_target to be ALARM',
+    133: 'execute_mistral action must contain workflow field in properties '
+         'block'
 
 }

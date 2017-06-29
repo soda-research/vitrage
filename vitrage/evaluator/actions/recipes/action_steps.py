@@ -17,3 +17,6 @@ REMOVE_VERTEX = 'remove_vertex'
 UPDATE_VERTEX = 'update_vertex'
 ADD_EDGE = 'add_edge'
 REMOVE_EDGE = 'remove_edge'
+EXECUTE_EXTERNAL = 'execute_external'
+
+EXECUTION_ENGINE = 'execution_engine'

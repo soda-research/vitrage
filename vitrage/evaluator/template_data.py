@@ -274,7 +274,7 @@ class TemplateData(object):
 
                 action_dict = action_def[TFields.ACTION]
                 action_type = action_dict[TFields.ACTION_TYPE]
-                targets = action_dict[TFields.ACTION_TARGET]
+                targets = action_dict.get(TFields.ACTION_TARGET, {})
                 properties = action_dict.get(TFields.PROPERTIES, {})
 
                 actions.append(ActionSpecs(action_type, targets, properties))

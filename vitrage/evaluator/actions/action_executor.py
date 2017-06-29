@@ -25,12 +25,14 @@ from vitrage.evaluator.actions.evaluator_event_transformer \
     import VITRAGE_DATASOURCE
 from vitrage.evaluator.actions.recipes.action_steps import ADD_EDGE
 from vitrage.evaluator.actions.recipes.action_steps import ADD_VERTEX
+from vitrage.evaluator.actions.recipes.action_steps import EXECUTE_EXTERNAL
 from vitrage.evaluator.actions.recipes.action_steps import REMOVE_EDGE
 from vitrage.evaluator.actions.recipes.action_steps import REMOVE_VERTEX
 from vitrage.evaluator.actions.recipes.action_steps import UPDATE_VERTEX
 from vitrage.evaluator.actions.recipes.add_causal_relationship import \
     AddCausalRelationship
 from vitrage.evaluator.actions.recipes.base import EVALUATOR_EVENT_TYPE
+from vitrage.evaluator.actions.recipes.execute_mistral import ExecuteMistral
 from vitrage.evaluator.actions.recipes.mark_down import MarkDown
 from vitrage.evaluator.actions.recipes.raise_alarm import RaiseAlarm
 from vitrage.evaluator.actions.recipes.set_state import SetState
@@ -44,11 +46,12 @@ class ActionExecutor(object):
         self.action_recipes = ActionExecutor._register_action_recipes()
 
         self.action_step_defs = {
-            ADD_VERTEX: self.add_vertex,
-            REMOVE_VERTEX: self.remove_vertex,
-            UPDATE_VERTEX: self.update_vertex,
-            ADD_EDGE: self.add_edge,
-            REMOVE_EDGE: self.remove_edge,
+            ADD_VERTEX: self._add_vertex,
+            REMOVE_VERTEX: self._remove_vertex,
+            UPDATE_VERTEX: self._update_vertex,
+            ADD_EDGE: self._add_edge,
+            REMOVE_EDGE: self._remove_edge,
+            EXECUTE_EXTERNAL: self._execute_external,
         }
 
     def execute(self, action_spec, action_mode):
@@ -62,7 +65,7 @@ class ActionExecutor(object):
         for step in steps:
             self.action_step_defs[step.type](step.params)
 
-    def add_vertex(self, params):
+    def _add_vertex(self, params):
 
         event = copy.deepcopy(params)
         ActionExecutor._add_default_properties(event)
@@ -70,7 +73,7 @@ class ActionExecutor(object):
 
         self.event_queue.put(event)
 
-    def update_vertex(self, params):
+    def _update_vertex(self, params):
 
         event = copy.deepcopy(params)
         ActionExecutor._add_default_properties(event)
@@ -78,14 +81,14 @@ class ActionExecutor(object):
 
         self.event_queue.put(event)
 
-    def remove_vertex(self, params):
+    def _remove_vertex(self, params):
         event = copy.deepcopy(params)
         ActionExecutor._add_default_properties(event)
         event[EVALUATOR_EVENT_TYPE] = REMOVE_VERTEX
 
         self.event_queue.put(event)
 
-    def add_edge(self, params):
+    def _add_edge(self, params):
 
         event = copy.deepcopy(params)
         ActionExecutor._add_default_properties(event)
@@ -93,13 +96,19 @@ class ActionExecutor(object):
 
         self.event_queue.put(event)
 
-    def remove_edge(self, params):
+    def _remove_edge(self, params):
 
         event = copy.deepcopy(params)
         ActionExecutor._add_default_properties(event)
         event[EVALUATOR_EVENT_TYPE] = REMOVE_EDGE
 
         self.event_queue.put(event)
+
+    def _execute_external(self, params):
+
+        # TODO(ifat_afek): send to a dedicated queue
+        # external_engine = params[EXECUTION_ENGINE]
+        pass
 
     @staticmethod
     def _add_default_properties(event):
@@ -128,5 +137,8 @@ class ActionExecutor(object):
 
         recipes[ActionType.MARK_DOWN] = importutils.import_object(
             "%s.%s" % (MarkDown.__module__, MarkDown.__name__))
+
+        recipes[ActionType.EXECUTE_MISTRAL] = importutils.import_object(
+            "%s.%s" % (ExecuteMistral.__module__, ExecuteMistral.__name__))
 
         return recipes
