@@ -12,6 +12,8 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import sys
+
 from vitrage.api import app
 from vitrage import service
 
@@ -19,3 +21,6 @@ from vitrage import service
 def main():
     conf = service.prepare_service()
     app.build_server(conf)
+
+if __name__ == "__main__":
+    sys.exit(main())
