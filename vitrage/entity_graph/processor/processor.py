@@ -180,7 +180,7 @@ class Processor(processor.ProcessorBase):
                     neighbor.edge.target_id,
                     neighbor.edge.label)
             if graph_edge:
-                self.entity_graph.remove_edge(graph_edge)
+                PUtils.mark_deleted(self.entity_graph, graph_edge)
 
             return
 
