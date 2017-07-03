@@ -40,7 +40,6 @@ def prepare_service(args=None, conf=None, config_files=None):
 
     keystone_client.register_keystoneauth_opts(conf)
 
-    keystone_client.setup_keystoneauth(conf)
     log.setup(conf, 'vitrage')
     conf.log_opt_values(LOG, log.DEBUG)
     messaging.setup()
