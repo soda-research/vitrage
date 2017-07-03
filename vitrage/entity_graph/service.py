@@ -19,6 +19,7 @@ import oslo_messaging
 from oslo_service import service as os_service
 
 from vitrage.entity_graph.processor import processor as proc
+from vitrage.entity_graph.vitrage_init import VitrageInit
 from vitrage import messaging
 
 LOG = log.getLogger(__name__)
@@ -29,16 +30,18 @@ class VitrageGraphService(os_service.Service):
     def __init__(self,
                  conf,
                  evaluator_queue,
-                 evaluator,
                  entity_graph,
-                 initialization_status):
+                 evaluator):
         super(VitrageGraphService, self).__init__()
         self.conf = conf
-        self.evaluator = evaluator
-        self.processor = proc.Processor(self.conf,
-                                        initialization_status,
-                                        e_graph=entity_graph)
         self.evaluator_queue = evaluator_queue
+        self.graph = entity_graph
+        self.evaluator = evaluator
+        self.init = VitrageInit(conf, entity_graph, evaluator,
+                                evaluator_queue)
+        self.processor = proc.Processor(self.conf,
+                                        self.init,
+                                        e_graph=entity_graph)
         self.listener = self._create_datasources_event_listener(conf)
 
     def start(self):
@@ -46,6 +49,9 @@ class VitrageGraphService(os_service.Service):
 
         super(VitrageGraphService, self).start()
         self.tg.add_timer(0.1, self._process_event_non_blocking)
+        self.tg.add_thread(
+            self.init.initializing_process,
+            on_end_messages_func=self.processor.on_recieved_all_end_messages)
         self.listener.start()
 
         LOG.info("Vitrage Graph Service - Started!")

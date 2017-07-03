@@ -14,8 +14,6 @@
 
 from vitrage.common.constants import DatasourceAction
 from vitrage.common.constants import DatasourceProperties as DSProps
-from vitrage.entity_graph.initialization_status import InitializationStatus
-from vitrage.entity_graph.processor import processor as proc
 from vitrage.tests.mocks import mock_driver
 from vitrage.tests.unit.entity_graph.base import TestEntityGraphUnitBase
 
@@ -27,8 +25,7 @@ class TestFunctionalBase(TestEntityGraphUnitBase):
         events = self._create_mock_events()
 
         if not processor:
-            processor = proc.Processor(conf, InitializationStatus(),
-                                       uuid=uuid)
+            processor = self.create_processor_and_graph(conf, uuid=uuid)
 
         for event in events:
             processor.process_event(event)

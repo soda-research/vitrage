@@ -36,43 +36,10 @@ class ConsistencyEnforcer(object):
     def __init__(self,
                  conf,
                  evaluator_queue,
-                 evaluator,
-                 entity_graph,
-                 initialization_status):
+                 entity_graph):
         self.conf = conf
         self.evaluator_queue = evaluator_queue
-        self.evaluator = evaluator
         self.graph = entity_graph
-        self.initialization_status = initialization_status
-
-    def initializing_process(self):
-        try:
-            LOG.info('Consistency Initializing Process - Started')
-
-            if not self._wait_for_action(
-                    self.initialization_status.is_received_all_end_messages):
-                LOG.error('Maximum retries for consistency initializator '
-                          'were done')
-
-            LOG.info('All end messages were received')
-
-            self.evaluator.enabled = True
-            timestamp = str(utcnow())
-            all_vertices = self.graph.get_vertices()
-
-            self._run_evaluator(all_vertices)
-
-            self._wait_for_processing_evaluator_events()
-
-            self._mark_old_deduced_alarms_as_deleted(timestamp)
-
-            self.initialization_status.status = \
-                self.initialization_status.FINISHED
-
-            LOG.info('Consistency Initializing Process - Finished')
-        except Exception as e:
-            LOG.exception('Error in deleting vertices from entity_graph: %s',
-                          e)
 
     def periodic_process(self):
         try:
@@ -124,34 +91,6 @@ class ConsistencyEnforcer(object):
         vertices = self.graph.get_vertices(query_dict=query)
 
         return self._filter_vertices_to_be_deleted(vertices)
-
-    def _find_old_deduced_alarms(self, timestamp):
-        query = {
-            'and': [
-                {'==': {VProps.VITRAGE_CATEGORY: EntityCategory.ALARM}},
-                {'==': {VProps.VITRAGE_TYPE: VITRAGE_DATASOURCE}},
-                {'<': {VProps.VITRAGE_SAMPLE_TIMESTAMP: timestamp}}
-            ]
-        }
-        return self.graph.get_vertices(query_dict=query)
-
-    def _run_evaluator(self, vertices):
-        start_time = time.time()
-        for vertex in vertices:
-            self.evaluator.process_event(None, vertex, True)
-        LOG.info('Run Evaluator on %s items - took %s', str(len(vertices)),
-                 str(time.time() - start_time))
-
-    def _wait_for_processing_evaluator_events(self):
-        # wait for multiprocessing to put the events in the queue
-        time.sleep(1)
-
-        self._wait_for_action(self.evaluator_queue.empty)
-
-    def _mark_old_deduced_alarms_as_deleted(self, timestamp):
-        old_deduced_alarms = self._find_old_deduced_alarms(timestamp)
-        self._push_events_to_queue(old_deduced_alarms,
-                                   GraphAction.DELETE_ENTITY)
 
     def _push_events_to_queue(self, vertices, action):
         for vertex in vertices:

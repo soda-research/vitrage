@@ -13,12 +13,13 @@
 # under the License.
 
 from collections import namedtuple
+import time
 
 from oslo_log import log
-from vitrage.datasources.listener_service import defaultdict
 
 from vitrage.common.constants import EdgeProperties as EProps
 from vitrage.common.constants import VertexProperties as VProps
+from vitrage.datasources.listener_service import defaultdict
 from vitrage.entity_graph.mappings.datasource_info_mapper \
     import DatasourceInfoMapper
 from vitrage.evaluator.actions.action_executor import ActionExecutor
@@ -68,6 +69,15 @@ class ScenarioEvaluator(object):
     @scenario_repo.setter
     def scenario_repo(self, scenario_repo):
         self._scenario_repo = scenario_repo
+
+    def run_evaluator(self):
+        self.enabled = True
+        vertices = self._entity_graph.get_vertices()
+        start_time = time.time()
+        for vertex in vertices:
+            self.process_event(None, vertex, True)
+        LOG.info('Run Evaluator on %s items - took %s', str(len(vertices)),
+                 str(time.time() - start_time))
 
     def process_event(self, before, current, is_vertex, *args, **kwargs):
         """Notification of a change in the entity graph.

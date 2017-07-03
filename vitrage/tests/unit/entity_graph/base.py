@@ -24,8 +24,9 @@ from vitrage.datasources.neutron.port import NEUTRON_PORT_DATASOURCE
 from vitrage.datasources.nova.host import NOVA_HOST_DATASOURCE
 from vitrage.datasources.nova.instance import NOVA_INSTANCE_DATASOURCE
 from vitrage.datasources.nova.zone import NOVA_ZONE_DATASOURCE
-from vitrage.entity_graph.initialization_status import InitializationStatus
 from vitrage.entity_graph.processor import processor as proc
+from vitrage.entity_graph.vitrage_init import VitrageInit
+from vitrage.graph.driver.networkx_graph import NXGraph
 import vitrage.graph.utils as graph_utils
 from vitrage.opts import register_opts
 from vitrage.tests import base
@@ -74,7 +75,7 @@ class TestEntityGraphUnitBase(base.BaseTest):
         events = self._create_mock_events()
 
         if not processor:
-            processor = proc.Processor(conf, InitializationStatus())
+            processor = self.create_processor_and_graph(conf, uuid=False)
 
         for event in events:
             processor.process_event(event)
@@ -116,14 +117,19 @@ class TestEntityGraphUnitBase(base.BaseTest):
 
         # add instance entity with host
         if processor is None:
-            processor = proc.Processor(self.conf, InitializationStatus(),
-                                       uuid=True)
+            processor = self.create_processor_and_graph(self.conf, True)
 
         vertex, neighbors, event_type = processor.transformer_manager\
             .transform(event)
         processor.create_entity(vertex, neighbors)
 
         return vertex, neighbors, processor
+
+    @staticmethod
+    def create_processor_and_graph(conf, uuid):
+        e_graph = NXGraph("Entity Graph", uuid=uuid)
+        init = VitrageInit(conf)
+        return proc.Processor(conf, init, e_graph)
 
     @staticmethod
     def _create_event(spec_type=None,

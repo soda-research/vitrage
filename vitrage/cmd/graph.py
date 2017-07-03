@@ -18,14 +18,13 @@ import sys
 
 from oslo_service import service as os_service
 
-from vitrage.api_handler import service as api_handler_svc
+from vitrage.api_handler.service import VitrageApiHandlerService
 from vitrage.common.constants import EntityCategory
 from vitrage.datasources import OPENSTACK_CLUSTER
 from vitrage.datasources.transformer_base import CLUSTER_ID
 from vitrage import entity_graph
-from vitrage.entity_graph.consistency import service as consistency_svc
-from vitrage.entity_graph.initialization_status import InitializationStatus
-from vitrage.entity_graph import service as entity_graph_svc
+from vitrage.entity_graph.consistency.service import VitrageConsistencyService
+from vitrage.entity_graph.service import VitrageGraphService
 from vitrage.evaluator.scenario_evaluator import ScenarioEvaluator
 from vitrage.evaluator.scenario_repository import ScenarioRepository
 from vitrage import service
@@ -41,18 +40,17 @@ def main():
     """
 
     conf = service.prepare_service()
-    init_status = InitializationStatus()
     evaluator_queue, evaluator, e_graph = init(conf)
     launcher = os_service.ServiceLauncher(conf)
 
-    launcher.launch_service(entity_graph_svc.VitrageGraphService(
-        conf, evaluator_queue, evaluator, e_graph, init_status))
+    graph_svc = VitrageGraphService(conf, evaluator_queue, e_graph, evaluator)
+    launcher.launch_service(graph_svc)
 
-    launcher.launch_service(api_handler_svc.VitrageApiHandlerService(
-        conf, e_graph, evaluator.scenario_repo))
+    launcher.launch_service(VitrageApiHandlerService(conf, e_graph,
+                                                     evaluator.scenario_repo))
 
-    launcher.launch_service(consistency_svc.VitrageGraphConsistencyService(
-        conf, evaluator_queue, evaluator, e_graph, init_status))
+    launcher.launch_service(VitrageConsistencyService(conf, evaluator_queue,
+                                                      e_graph))
 
     launcher.wait()
 

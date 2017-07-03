@@ -20,10 +20,8 @@ from vitrage.common.constants import EdgeProperties as EProps
 from vitrage.common.constants import GraphAction
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.datasources.transformer_base import Neighbor
-from vitrage.entity_graph.initialization_status import InitializationStatus
 from vitrage.entity_graph.mappings.operational_resource_state import \
     OperationalResourceState
-from vitrage.entity_graph.processor import processor as proc
 from vitrage.entity_graph.processor import processor_utils as PUtils
 import vitrage.graph.utils as graph_utils
 from vitrage.tests.unit.entity_graph.base import TestEntityGraphUnitBase
@@ -51,8 +49,7 @@ class TestProcessor(TestEntityGraphUnitBase):
 
     def test_process_event(self):
         # check create instance event
-        processor = proc.Processor(self.conf, InitializationStatus(),
-                                   uuid=True)
+        processor = self.create_processor_and_graph(self.conf, uuid=True)
         event = self._create_event(spec_type=self.INSTANCE_SPEC,
                                    datasource_action=DSAction.INIT_SNAPSHOT)
         processor.process_event(event)

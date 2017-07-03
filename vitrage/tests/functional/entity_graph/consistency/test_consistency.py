@@ -28,12 +28,13 @@ from vitrage.datasources.nova.instance import NOVA_INSTANCE_DATASOURCE
 from vitrage.datasources.nova.zone import NOVA_ZONE_DATASOURCE
 from vitrage.entity_graph.consistency.consistency_enforcer \
     import ConsistencyEnforcer
-from vitrage.entity_graph.initialization_status import InitializationStatus
 from vitrage.entity_graph.processor.processor import Processor
+from vitrage.entity_graph.vitrage_init import VitrageInit
 from vitrage.evaluator.actions.evaluator_event_transformer \
     import VITRAGE_DATASOURCE
 from vitrage.evaluator.scenario_evaluator import ScenarioEvaluator
 from vitrage.evaluator.scenario_repository import ScenarioRepository
+from vitrage.graph.driver.networkx_graph import NXGraph
 import vitrage.graph.utils as graph_utils
 from vitrage.tests.functional.base import TestFunctionalBase
 from vitrage.tests.mocks import utils
@@ -70,7 +71,6 @@ class TestConsistencyFunctional(TestFunctionalBase):
     @classmethod
     def setUpClass(cls):
         super(TestConsistencyFunctional, cls).setUpClass()
-        cls.initialization_status = InitializationStatus()
         cls.conf = cfg.ConfigOpts()
         cls.conf.register_opts(cls.CONSISTENCY_OPTS, group='consistency')
         cls.conf.register_opts(cls.PROCESSOR_OPTS, group='entity_graph')
@@ -78,8 +78,11 @@ class TestConsistencyFunctional(TestFunctionalBase):
         cls.conf.register_opts(cls.DATASOURCES_OPTS, group='datasources')
         cls.load_datasources(cls.conf)
 
+        cls.graph = NXGraph("Entity Graph", uuid=True)
+        cls.initialization_status = VitrageInit(cls.conf, cls.graph)
         cls.processor = Processor(cls.conf, cls.initialization_status,
-                                  uuid=True)
+                                  cls.graph)
+
         cls.event_queue = queue.Queue()
         scenario_repo = ScenarioRepository(cls.conf)
         cls.evaluator = ScenarioEvaluator(cls.conf,
@@ -89,9 +92,7 @@ class TestConsistencyFunctional(TestFunctionalBase):
         cls.consistency_enforcer = ConsistencyEnforcer(
             cls.conf,
             cls.event_queue,
-            cls.evaluator,
-            cls.processor.entity_graph,
-            cls.initialization_status)
+            cls.processor.entity_graph)
 
     @unittest.skip("test_initializing_process skipping")
     def test_initializing_process(self):
@@ -110,7 +111,8 @@ class TestConsistencyFunctional(TestFunctionalBase):
         # eventlet.spawn(self._process_events)
         # processor_thread = threading.Thread(target=self._process_events)
         # processor_thread.start()
-        self.consistency_enforcer.initializing_process()
+        self.initialization_status.initializing_process(
+            self.processor.on_recieved_all_end_messages)
         self._process_events()
 
         # Test Assertions

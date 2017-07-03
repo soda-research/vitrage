@@ -30,23 +30,20 @@ from vitrage.entity_graph.processor.notifier import GraphNotifier
 from vitrage.entity_graph.processor import processor_utils as PUtils
 from vitrage.entity_graph.transformer_manager import TransformerManager
 from vitrage.graph import Direction
-from vitrage.graph.driver.networkx_graph import NXGraph
 
 LOG = log.getLogger(__name__)
 
 
 class Processor(processor.ProcessorBase):
 
-    def __init__(self, conf, initialization_status, e_graph=None,
-                 uuid=False):
+    def __init__(self, conf, initialization_status, e_graph):
         super(Processor, self).__init__()
         self.conf = conf
         self.transformer_manager = TransformerManager(self.conf)
         self.state_manager = DatasourceInfoMapper(self.conf)
         self._initialize_events_actions()
         self.initialization_status = initialization_status
-        self.entity_graph = e_graph if e_graph is not None\
-            else NXGraph("Entity Graph", uuid=uuid)
+        self.entity_graph = e_graph
         self._notifier = GraphNotifier(conf)
 
     def process_event(self, event):
@@ -221,17 +218,10 @@ class Processor(processor.ProcessorBase):
                         vertex, graph_vertex)
 
     def handle_end_message(self, vertex, neighbors):
-        self.initialization_status.end_messages[vertex[VProps.VITRAGE_TYPE]] \
-            = True
+        self.initialization_status.handle_end_message(vertex)
 
-        if len(self.initialization_status.end_messages) == \
-                len(self.conf.datasources.types):
-            self.initialization_status.status = \
-                self.initialization_status.RECEIVED_ALL_END_MESSAGES
-            self.do_on_initialization_end()
-
-    def do_on_initialization_end(self):
-        if self._notifier.enabled:
+    def on_recieved_all_end_messages(self):
+        if self._notifier and self._notifier.enabled:
             self.entity_graph.subscribe(self._notifier.notify_when_applicable)
             LOG.info('Graph notifications subscription added')
 
