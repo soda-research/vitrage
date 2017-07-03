@@ -49,7 +49,7 @@ OPTS = [
                default='vitrage_notifications',
                help='Vitrage configured notifications topic'),
     cfg.StrOpt('notification_topic_collector',
-               default='collector_event_notification',
+               default='vitrage_collector_notifications',
                help='The topic on which event will be sent from the '
                     'datasources to the graph processor')
 ]
