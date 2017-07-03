@@ -11,6 +11,8 @@
 # under the License.
 
 import os
+import uuid
+
 import pecan
 
 from oslo_config import cfg
@@ -20,36 +22,27 @@ from paste import deploy
 from werkzeug import serving
 
 from vitrage.api import hooks
-from vitrage import service
 
 LOG = log.getLogger(__name__)
 
-PECAN_CONFIG = {
-    'app': {
-        'root': 'vitrage.api.controllers.root.RootController',
-        'modules': ['vitrage.api'],
-    },
-}
+# NOTE(sileht): pastedeploy uses ConfigParser to handle
+# global_conf, since python 3 ConfigParser doesn't
+# allow storing object as config value, only strings are
+# permit, so to be able to pass an object created before paste load
+# the app, we store them into a global var. But the each loaded app
+# store it's configuration in unique key to be concurrency safe.
+global APPCONFIGS
+APPCONFIGS = {}
 
 
-def setup_app(pecan_config=PECAN_CONFIG, conf=None):
-    if conf is None:
-        raise RuntimeError('Config is actually mandatory')
+def setup_app(root, conf=None):
     app_hooks = [hooks.ConfigHook(conf),
                  hooks.TranslationHook(),
                  hooks.RPCHook(conf),
                  hooks.ContextHook()]
 
-    pecan.configuration.set_config(dict(pecan_config), overwrite=True)
-    pecan_debug = conf.api.pecan_debug
-    if conf.api.workers != 1 and pecan_debug:
-        pecan_debug = False
-        LOG.warning('pecan_debug cannot be enabled, if workers is > 1, '
-                    'the value is overridden with False')
-
     app = pecan.make_app(
-        pecan_config['app']['root'],
-        debug=pecan_debug,
+        root,
         hooks=app_hooks,
         guess_content_type_from_ext=False
     )
@@ -58,18 +51,25 @@ def setup_app(pecan_config=PECAN_CONFIG, conf=None):
 
 
 def load_app(conf):
+    global APPCONFIGS
+
     # Build the WSGI app
-    cfg_file = None
     cfg_path = conf.api.paste_config
     if not os.path.isabs(cfg_path):
-        cfg_file = conf.find_file(cfg_path)
-    elif os.path.exists(cfg_path):
-        cfg_file = cfg_path
+        cfg_path = conf.find_file(cfg_path)
 
-    if not cfg_file:
+    if cfg_path is None or not os.path.exists(cfg_path):
         raise cfg.ConfigFilesNotFoundError([conf.api.paste_config])
-    LOG.info('Full WSGI config used: %s', cfg_file)
-    return deploy.loadapp("config:" + cfg_file)
+
+    config = dict(conf=conf)
+    configkey = str(uuid.uuid4())
+    APPCONFIGS[configkey] = config
+
+    LOG.info('Full WSGI config used: %s', cfg_path)
+
+    appname = "vitrage+" + conf.api.auth_mode
+    return deploy.loadapp("config:" + cfg_path, name=appname,
+                          global_conf={'configkey': configkey})
 
 
 def build_server(conf):
@@ -93,10 +93,7 @@ def build_server(conf):
                        app, processes=conf.api.workers)
 
 
-def _app():
-    conf = service.prepare_service()
-    return setup_app(conf=conf)
-
-
 def app_factory(global_config, **local_conf):
-    return _app()
+    global APPCONFIGS
+    appconfig = APPCONFIGS.get(global_config.get('configkey'))
+    return setup_app(root=local_conf.get('root'), **appconfig)
