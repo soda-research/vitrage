@@ -11,12 +11,12 @@
 # under the License.
 
 import os
-import uuid
 
 import pecan
 
 from oslo_config import cfg
 from oslo_log import log
+from oslo_utils import uuidutils
 # noinspection PyPackageRequirements
 from paste import deploy
 from werkzeug import serving
@@ -62,7 +62,7 @@ def load_app(conf):
         raise cfg.ConfigFilesNotFoundError([conf.api.paste_config])
 
     config = dict(conf=conf)
-    configkey = str(uuid.uuid4())
+    configkey = uuidutils.generate_uuid()
     APPCONFIGS[configkey] = config
 
     LOG.info('Full WSGI config used: %s', cfg_path)

@@ -25,10 +25,10 @@ from vitrage.datasources.collectd import COLLECTD_DATASOURCE
 from vitrage.datasources.collectd.collectd_vitrage.plugin import CollectDPlugin
 from vitrage.datasources.collectd.collectd_vitrage.plugin import PluginError
 
-import uuid
 
 from datetime import datetime
 from oslo_config import cfg
+from oslo_utils import uuidutils
 
 import oslo_messaging as messaging
 
@@ -70,7 +70,7 @@ class VitrageNotifier(CollectDPlugin):
 
         alarm_uuid = self._generate_alarm_id(notification)
         payload = self._create_payload(alarm_uuid, notification, severity)
-        notification_id = str(uuid.uuid4())
+        notification_id = uuidutils.generate_uuid()
 
         self.notifier.info(ctxt={'message_id': notification_id,
                                  'publisher_id': COLLECTD_DATASOURCE,
