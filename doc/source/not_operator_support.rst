@@ -160,20 +160,22 @@ The Switch is attached to a Host that contains a Vm.
 The Switch is also comprised to a Network which has a Port.
 There is no edge between the Vm and the Port.
 
-                  +---------+           +---------+
-     +----------- |  Host   | --------> |   Vm    |
-     |            +---------+           +---------+
-     |
-     v                                       |
-+----------+                                   N
-|  Switch  |                                 | o
-+----------+                                   t
-                                             |
-     |                                       v
-     |
-     |            +---------+            +---------+
-     +----------> | Network | <--------- |  Port   |
-                  +---------+            +---------+
+::
+
+                   +---------+           +---------+
+      +----------- |  Host   | --------> |   Vm    |
+      |            +---------+           +---------+
+      |                                       |
+      v                                       |
+ +----------+                                 | N
+ |  Switch  |                                 | o
+ +----------+                                 | t
+      |                                       |
+      |                                       |
+      |                                       v
+      |            +---------+           +---------+
+      +----------> | Network | <-------- |  Port   |
+                   +---------+           +---------+
 
  ::
 

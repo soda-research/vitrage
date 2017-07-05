@@ -42,7 +42,7 @@ Static datasource use the same semantics as Vitrage template, except for the fol
 - All entities configured in static datasource are considered ``RESOURCE``
 - ``scenarios`` section is not applicable
 
-There may be more than one configuration file. All files will be read from``/etc/vitrage/static_datasources/``. See
+There may be more than one configuration file. All files will be read from ``/etc/vitrage/static_datasources/``. See
 previous section on how to configure this location.
 
 Notes:

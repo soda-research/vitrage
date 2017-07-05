@@ -67,7 +67,7 @@ The following describes all the possible status code and their messages:
 | 104              | Relationship definition must contain template_id field  | syntax                        |
 +------------------+---------------------------------------------------------+-------------------------------+
 | 120              | Invalid action type. Action type must be from types:    | content                       |
-                   | [action_types]                                          |                               |
+|                  | [action_types]                                          |                               |
 +------------------+---------------------------------------------------------+-------------------------------+
 | 121              | At least one action must be defined                     | syntax                        |
 +------------------+---------------------------------------------------------+-------------------------------+

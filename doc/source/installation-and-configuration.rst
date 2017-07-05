@@ -1,6 +1,6 @@
-============
-Installation
-============
+==============================
+Installation and configuration
+==============================
 
 Vitrage Installation
 ====================
@@ -18,36 +18,32 @@ Enable Vitrage in Devstack
 ---------------------------------------------------
 Manual Installation of Vitrage (not using Devstack)
 ---------------------------------------------------
+.. toctree::
+   :maxdepth: 1
 
-* `Vitrage manual installation <https://github.com/openstack/vitrage/blob/master/doc/source/vitrage-manual-installation.rst>`_
-
-* `Vitrage-dashboard manual installation <https://github.com/openstack/vitrage-dashboard/blob/master/doc/source/installation.rst>`_
-
+   install/index
 
 External Monitor Installation
 =============================
 
 To install Nagios or Zabbix external monitors:
 
-* `Nagios devstack installation <http://docs.openstack.org/developer/vitrage/nagios-devstack-installation.html>`_
+.. toctree::
+   :maxdepth: 1
 
-* `Zabbix devstack installation <http://docs.openstack.org/developer/vitrage/zabbix_vitrage.html>`_
-
+   nagios-devstack-installation
+   zabbix_vitrage
 
 Configuration
 =============
 
-* `Nagios Plugin Configuration <http://docs.openstack.org/developer/vitrage/nagios-config.html>`_
+.. toctree::
+   :maxdepth: 1
 
-* `Static Plugin Configuration <http://docs.openstack.org/developer/vitrage/static-config.html>`_
-
-* `Static Physical Plugin Configuration <http://docs.openstack.org/developer/vitrage/static-physical-config.html>`_
-
-* `Resource State Configuration <http://docs.openstack.org/developer/vitrage/resource-state-config.html>`_
-
-* `Alarm Severity Configuration <http://docs.openstack.org/developer/vitrage/alarm-severity-config.html>`_
-
-* `Zabbix Configuration <http://docs.openstack.org/developer/vitrage/zabbix_vitrage.html>`_
-
-* `SNMP Sender Configuration <https://github.com/openstack/vitrage/blob/master/doc/source/notifier-snmp-plugin.rst>`_
-
+   nagios-config
+   static-config
+   static-physical-config
+   resource-state-config
+   alarm-severity-config
+   zabbix_vitrage
+   notifier-snmp-plugin
