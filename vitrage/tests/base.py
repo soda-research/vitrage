@@ -17,6 +17,10 @@ from oslo_utils import timeutils
 # noinspection PyPackageRequirements
 from oslotest import base
 import sys
+from testtools.matchers import HasLength
+
+
+IsEmpty = lambda: HasLength(0)
 
 
 class BaseTest(base.BaseTestCase):

@@ -101,3 +101,6 @@ The following describes all the possible status code and their messages:
 | 132              | add_causal_relationship action requires action_target to| content                       |
 |                  | be ALARM                                                |                               |
 +------------------+---------------------------------------------------------+-------------------------------+
+| 133              | execute_mistral action must contain workflow field in   | content                       |
+|                  | properties block                                        |                               |
++------------------+---------------------------------------------------------+-------------------------------+

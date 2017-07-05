@@ -19,11 +19,13 @@ class ActionType(object):
     RAISE_ALARM = 'raise_alarm'
     ADD_CAUSAL_RELATIONSHIP = 'add_causal_relationship'
     MARK_DOWN = 'mark_down'
+    EXECUTE_MISTRAL = 'execute_mistral'
 
 action_types = [ActionType.SET_STATE,
                 ActionType.RAISE_ALARM,
                 ActionType.ADD_CAUSAL_RELATIONSHIP,
-                ActionType.MARK_DOWN]
+                ActionType.MARK_DOWN,
+                ActionType.EXECUTE_MISTRAL]
 
 
 class ActionMode(object):

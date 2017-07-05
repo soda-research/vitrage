@@ -382,7 +382,8 @@ class ActionTracker(object):
             ActionType.SET_STATE: pt.SetStateTools(all_scores),
             ActionType.RAISE_ALARM: pt.RaiseAlarmTools(alarms_score),
             ActionType.ADD_CAUSAL_RELATIONSHIP: pt.BaselineTools,
-            ActionType.MARK_DOWN: pt.BaselineTools
+            ActionType.MARK_DOWN: pt.BaselineTools,
+            ActionType.EXECUTE_MISTRAL: pt.BaselineTools
         }
 
     def get_key(self, action_specs):
