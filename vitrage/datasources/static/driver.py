@@ -13,7 +13,6 @@
 # under the License.
 
 from itertools import chain
-from six import iteritems
 from six.moves import reduce
 
 from oslo_log import log
@@ -97,7 +96,7 @@ class StaticDriver(DriverBase):
     def _pack_entity(cls, entities_dict, entity):
         static_id = entity[StaticFields.STATIC_ID]
         if static_id not in entities_dict:
-            metadata = {key: value for key, value in iteritems(entity)
+            metadata = {key: value for key, value in entity.items()
                         if key not in cls.BASE_FIELDS}
             entities_dict[static_id] = entity
             entity[StaticFields.RELATIONSHIPS] = []
