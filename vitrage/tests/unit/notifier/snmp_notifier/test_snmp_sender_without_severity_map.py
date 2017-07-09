@@ -72,7 +72,7 @@ class SnmpNotifierTest(base.BaseTest):
         alert_severity_oid = \
             self.snmp_sender._get_severity_oid(common.alarm_data)
 
-        self.assertEqual(alert_severity_oid, None)
+        self.assertIsNone(alert_severity_oid)
 
     def test_get_alert_oid(self):
 
@@ -94,4 +94,4 @@ class SnmpNotifierTest(base.BaseTest):
             self.snmp_sender._get_details(common.alarm_data)
 
         self.assertEqual(alert_details, common.alert_details)
-        self.assertEqual(alert_severity_oid, None)
+        self.assertIsNone(alert_severity_oid)
