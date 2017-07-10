@@ -25,8 +25,8 @@ OPTS = [
                help='Configuration file for WSGI definition of API.'),
     cfg.IntOpt('workers', default=1, min=1,
                help='Number of workers for vitrage API server.'),
-    cfg.BoolOpt('pecan_debug', default=False,
-                help='Toggle Pecan Debug Middleware.'),
-    cfg.StrOpt('auth_mode', default='keystone', choices={'keystone', 'noauth'},
+    cfg.StrOpt('auth_mode', default='keystone', choices={'keystone',
+                                                         'noauth',
+                                                         'keycloak'},
                help='Authentication mode to use.'),
 ]
