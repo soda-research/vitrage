@@ -19,12 +19,14 @@ from oslo_config import cfg
 from vitrage.common.constants import DatasourceOpts as DSOpts
 from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import UpdateMethod
+from vitrage.common.constants import VertexProperties as VProps
 from vitrage.datasources.collectd import COLLECTD_DATASOURCE
 from vitrage.datasources.collectd.properties import \
     CollectdProperties as CProps
 from vitrage.datasources.collectd.transformer import CollectdTransformer
 from vitrage.datasources.nova.host import NOVA_HOST_DATASOURCE
 from vitrage.datasources.nova.host.transformer import HostTransformer
+from vitrage.datasources.transformer_base import TransformerBase
 from vitrage.tests.mocks import mock_transformer
 from vitrage.tests.unit.datasources.test_alarm_transformer_base import \
     BaseAlarmTransformerTest
@@ -99,11 +101,17 @@ class TestCollectdTransformer(BaseAlarmTransformerTest):
 
     @staticmethod
     def _generate_event(time, hostname, severity):
+        # fake query result to be used by the transformer for determining
+        # the neighbor
+        query_result = [{VProps.VITRAGE_TYPE: NOVA_HOST_DATASOURCE,
+                         VProps.ID: hostname}]
+
         update_vals = {CProps.HOST: hostname,
                        CProps.SEVERITY: severity,
                        CProps.TIME: time,
                        DSProps.SAMPLE_DATE: format_unix_timestamp(time),
-                       CProps.RESOURCE_NAME: hostname}
+                       CProps.RESOURCE_NAME: hostname,
+                       TransformerBase.QUERY_RESULT: query_result}
 
         generators = mock_transformer.simple_collectd_alarm_generators(
             update_vals=update_vals)
