@@ -14,10 +14,13 @@
 from oslo_config import cfg
 from oslo_log import log
 from oslo_policy import opts as policy_opts
+from osprofiler import initializer as osprofiler_initializer
+from osprofiler import opts as osprofiler_opts
 from vitrage import keystone_client
 from vitrage import messaging
 from vitrage import opts
 from vitrage.opts import register_opts
+
 
 LOG = log.getLogger(__name__)
 
@@ -27,6 +30,7 @@ def prepare_service(args=None, conf=None, config_files=None):
         conf = cfg.ConfigOpts()
     log.register_options(conf)
     policy_opts.set_defaults(conf)
+    osprofiler_opts.set_defaults(conf)
 
     for group, options in opts.list_opts():
         conf.register_opts(list(options),
@@ -34,6 +38,14 @@ def prepare_service(args=None, conf=None, config_files=None):
 
     conf(args, project='vitrage', validate_default_values=True,
          default_config_files=config_files)
+
+    if conf.profiler.enabled:
+        osprofiler_initializer.init_from_conf(
+            conf=conf,
+            context=None,
+            project="vitrage",
+            service="api",
+            host=conf.api.host)
 
     for datasource in conf.datasources.types:
         register_opts(conf, datasource, conf.datasources.path)
