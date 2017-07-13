@@ -38,6 +38,7 @@ class VertexProperties(object):
     GRAPH_INDEX = 'graph_index'
     RAWTEXT = 'rawtext'
     RESOURCE_ID = 'resource_id'
+    RESOURCE_NAME = 'resource_name'
     VITRAGE_RESOURCE_ID = 'vitrage_resource_id'
     VITRAGE_RESOURCE_TYPE = 'vitrage_resource_type'
     RESOURCE = 'resource'

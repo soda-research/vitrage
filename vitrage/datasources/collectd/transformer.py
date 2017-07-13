@@ -14,7 +14,7 @@
 
 from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import EdgeLabel
-from vitrage.common.constants import EntityCategory
+from vitrage.common.constants import EntityCategory as Category
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.datasources.alarm_properties import AlarmProperties as AlarmProps
 from vitrage.datasources.alarm_transformer_base import AlarmTransformerBase
@@ -54,12 +54,12 @@ class CollectdTransformer(AlarmTransformerBase):
             VProps.NAME: entity_event[CProps.MESSAGE],
             VProps.SEVERITY: entity_event[CProps.SEVERITY],
             VProps.RAWTEXT: self.generate_raw_text(entity_event),
-            VProps.RESOURCE_ID: entity_event[CProps.RESOURCE_NAME]
+            VProps.RESOURCE_NAME: entity_event[CProps.RESOURCE_NAME]
         }
 
         return graph_utils.create_vertex(
             self._create_entity_key(entity_event),
-            vitrage_category=EntityCategory.ALARM,
+            vitrage_category=Category.ALARM,
             vitrage_type=entity_event[DSProps.ENTITY_TYPE],
             vitrage_sample_timestamp=vitrage_sample_timestamp,
             entity_state=entity_state,
@@ -73,17 +73,14 @@ class CollectdTransformer(AlarmTransformerBase):
         return self._create_collectd_neighbors(entity_event)
 
     def _create_collectd_neighbors(self, entity_event):
+        graph_neighbors = entity_event.get(self.QUERY_RESULT, [])
 
-        resource_type = entity_event[CProps.RESOURCE_TYPE]
-        if resource_type:
-            return [self._create_neighbor(
-                entity_event,
-                entity_event[CProps.RESOURCE_NAME],
-                resource_type,
-                EdgeLabel.ON,
-                neighbor_category=EntityCategory.RESOURCE)]
-
-        return []
+        return [self._create_neighbor(entity_event,
+                                      graph_neighbor[VProps.ID],
+                                      graph_neighbor[VProps.VITRAGE_TYPE],
+                                      EdgeLabel.ON,
+                                      neighbor_category=Category.RESOURCE)
+                for graph_neighbor in graph_neighbors]
 
     def _ok_status(self, entity_event):
         return entity_event[CProps.SEVERITY] == 'OK'
@@ -106,3 +103,14 @@ class CollectdTransformer(AlarmTransformerBase):
                      entity_event[CProps.PLUGIN],
                      entity_event.get(CProps.PLUGIN_INSTANCE)]
         return '-'.join([resource for resource in resources if resource])
+
+    @staticmethod
+    def get_enrich_query(event):
+        resource_type = event.get(CProps.RESOURCE_TYPE)
+        resource_name = event.get(CProps.RESOURCE_NAME)
+
+        if resource_type and resource_name:
+            return {VProps.NAME: resource_name,
+                    VProps.VITRAGE_TYPE: resource_type}
+
+        return None
