@@ -29,25 +29,24 @@ class VitrageNotifierService(os_service.Service):
         super(VitrageNotifierService, self).__init__()
         self.conf = conf
         self.notifiers = self.get_notifier_plugins(conf)
-        transport = messaging.get_transport(conf)
-        target = oslo_messaging.Target(topic=conf.entity_graph.notifier_topic)
-        self.listener = messaging.get_notification_listener(
-            transport, [target],
-            [VitrageEventEndpoint(self.notifiers)])
+        self._init_listeners(self.conf)
 
     def start(self):
         LOG.info("Vitrage Notifier Service - Starting...")
 
         super(VitrageNotifierService, self).start()
-        self.listener.start()
+        for listener in self.listeners:
+            listener.start()
 
         LOG.info("Vitrage Notifier Service - Started!")
 
     def stop(self, graceful=False):
         LOG.info("Vitrage Notifier Service - Stopping...")
 
-        self.listener.stop()
-        self.listener.wait()
+        for listener in self.listeners:
+            listener.stop()
+            listener.wait()
+
         super(VitrageNotifierService, self).stop(graceful)
 
         LOG.info("Vitrage Notifier Service - Stopped!")
@@ -67,8 +66,29 @@ class VitrageNotifierService(os_service.Service):
                 conf))
         return notifiers
 
+    def _init_listeners(self, conf):
+        self.listeners = []
+        transport = messaging.get_transport(conf)
 
-class VitrageEventEndpoint(object):
+        self._init_notifier(transport=transport,
+                            topic=conf.entity_graph.notifier_topic,
+                            endpoint=VitrageDefaultEventEndpoint(
+                                self.notifiers))
+
+        for notifier in self.notifiers:
+            if notifier.use_private_topic():
+                self._init_notifier(transport=transport,
+                                    topic=notifier.get_notifier_name(),
+                                    endpoint=notifier)
+
+    def _init_notifier(self, transport, topic, endpoint):
+        LOG.debug('Initializing notifier with topic %s', topic)
+
+        self.listeners.append(messaging.get_notification_listener(
+            transport, [oslo_messaging.Target(topic=topic)], [endpoint]))
+
+
+class VitrageDefaultEventEndpoint(object):
 
     def __init__(self, notifiers):
         self.notifiers = notifiers

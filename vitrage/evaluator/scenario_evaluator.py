@@ -55,7 +55,7 @@ class ScenarioEvaluator(object):
         self.conf = conf
         self._scenario_repo = scenario_repo
         self._entity_graph = entity_graph
-        self._action_executor = ActionExecutor(event_queue)
+        self._action_executor = ActionExecutor(conf, event_queue)
         self._entity_graph.subscribe(self.process_event)
         self._action_tracker = ActionTracker(DatasourceInfoMapper(self.conf))
         self.enabled = enabled
