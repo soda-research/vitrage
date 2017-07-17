@@ -16,9 +16,13 @@ from dateutil import parser
 
 from oslo_log import log
 
+from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import EdgeProperties as EProps
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import VertexProperties as VProps
+from vitrage.datasources.collectd import COLLECTD_DATASOURCE
+from vitrage.datasources.collectd.properties import \
+    CollectdProperties as CProps
 from vitrage.graph import Edge
 from vitrage.graph import Vertex
 from vitrage.utils.datetime import utcnow
@@ -88,8 +92,16 @@ def get_vertex_types(vertex):
 
 def get_defining_properties(vertex):
     if vertex.get(VProps.VITRAGE_CATEGORY) == EntityCategory.ALARM:
-        dp = (vertex.get(VProps.VITRAGE_TYPE), vertex.get(VProps.ID),
-              vertex.get(VProps.RESOURCE_ID), vertex.get(VProps.NAME))
+        if vertex.get(VProps.VITRAGE_TYPE) == COLLECTD_DATASOURCE:
+            # TODO(iafek): ugly patch - need to move this logic to the
+            # transformers
+            dp = (vertex.get(DSProps.ENTITY_TYPE), vertex.get(CProps.ID),
+                  vertex.get(CProps.RESOURCE_NAME))
+
+        else:
+            dp = (vertex.get(VProps.VITRAGE_TYPE), vertex.get(VProps.ID),
+                  vertex.get(VProps.RESOURCE_ID), vertex.get(VProps.NAME))
+
     else:
         dp = (vertex.get(VProps.VITRAGE_TYPE), vertex.get(VProps.ID))
     return hash(dp)
