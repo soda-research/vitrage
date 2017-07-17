@@ -39,7 +39,7 @@ class ValidatorTest(base.BaseTest):
 
         self.assertTrue(result.is_valid_config)
         self.assertEqual(result.comment, status_msgs[0])
-        self.assertEqual(result.status_code, 0)
+        self.assertEqual(0, result.status_code)
 
     def _assert_fault_result(self, result, status_code):
 

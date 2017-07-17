@@ -187,7 +187,7 @@ class TestProcessor(TestEntityGraphUnitBase):
                                                           vertex2.vertex_id,
                                                           'backup')
         self.assertEqual(3, processor.entity_graph.num_edges())
-        self.assertEqual(True, edge_from_graph[EProps.VITRAGE_IS_DELETED])
+        self.assertTrue(edge_from_graph[EProps.VITRAGE_IS_DELETED])
 
     def test_remove_deleted_entity(self):
         # setup
@@ -254,9 +254,9 @@ class TestProcessor(TestEntityGraphUnitBase):
                                                    vertex.vertex_id,
                                                    neighbor_edge.label)
         self.assertIsNotNone(old_edge)
-        self.assertEqual(old_edge[EProps.VITRAGE_IS_DELETED], True)
+        self.assertTrue(old_edge[EProps.VITRAGE_IS_DELETED])
         self.assertIsNotNone(new_edge)
-        self.assertEqual(new_edge[EProps.VITRAGE_IS_DELETED], False)
+        self.assertFalse(new_edge[EProps.VITRAGE_IS_DELETED])
 
         # update instance with the same neighbor
         processor._update_neighbors(vertex, neighbors)
@@ -291,7 +291,7 @@ class TestProcessor(TestEntityGraphUnitBase):
                                                    neighbor_edge.label)
         self.assertIsNone(old_edge)
         self.assertIsNotNone(new_edge)
-        self.assertEqual(new_edge[EProps.VITRAGE_IS_DELETED], False)
+        self.assertFalse(new_edge[EProps.VITRAGE_IS_DELETED])
 
         # update instance with the same neighbor
         processor._update_neighbors(vertex, neighbors)

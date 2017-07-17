@@ -80,22 +80,22 @@ class NovaZoneTransformerTest(base.BaseTest):
             TransformerBase.KEY_SEPARATOR)
         expected_id_values = self.transformers[NOVA_ZONE_DATASOURCE].\
             _key_values(NOVA_ZONE_DATASOURCE, zone_name)
-        self.assertEqual(tuple(observed_id_values), expected_id_values)
+        self.assertEqual(expected_id_values, tuple(observed_id_values))
 
         observed_time = placeholder.get(VProps.VITRAGE_SAMPLE_TIMESTAMP)
-        self.assertEqual(observed_time, timestamp)
+        self.assertEqual(timestamp, observed_time)
 
         observed_subtype = placeholder.get(VProps.VITRAGE_TYPE)
-        self.assertEqual(observed_subtype, NOVA_ZONE_DATASOURCE)
+        self.assertEqual(NOVA_ZONE_DATASOURCE, observed_subtype)
 
         observed_entity_id = placeholder.get(VProps.ID)
-        self.assertEqual(observed_entity_id, zone_name)
+        self.assertEqual(zone_name, observed_entity_id)
 
         observed_vitrage_category = placeholder.get(VProps.VITRAGE_CATEGORY)
-        self.assertEqual(observed_vitrage_category, EntityCategory.RESOURCE)
+        self.assertEqual(EntityCategory.RESOURCE, observed_vitrage_category)
 
         vitrage_is_placeholder = placeholder.get(VProps.VITRAGE_IS_PLACEHOLDER)
-        self.assertEqual(vitrage_is_placeholder, True)
+        self.assertTrue(vitrage_is_placeholder)
 
     def test_key_values(self):
         LOG.debug('Zone transformer test: get key values')
@@ -208,13 +208,12 @@ class NovaZoneTransformerTest(base.BaseTest):
 
         self.assertEqual(cluster_neighbor.vertex[VProps.VITRAGE_ID],
                          cluster_neighbor.vertex.vertex_id)
-        self.assertEqual(False,
-                         cluster_neighbor.vertex[VProps.VITRAGE_IS_DELETED])
+        self.assertFalse(cluster_neighbor.vertex[VProps.VITRAGE_IS_DELETED])
         self.assertEqual(EntityCategory.RESOURCE,
                          cluster_neighbor.vertex[VProps.VITRAGE_CATEGORY])
         self.assertEqual(CLUSTER_ID,
                          cluster_neighbor.vertex[VProps.ID])
-        self.assertEqual(False, cluster_neighbor.vertex[
+        self.assertFalse(cluster_neighbor.vertex[
             VProps.VITRAGE_IS_PLACEHOLDER])
         self.assertEqual(OPENSTACK_CLUSTER,
                          cluster_neighbor.vertex[VProps.VITRAGE_TYPE])

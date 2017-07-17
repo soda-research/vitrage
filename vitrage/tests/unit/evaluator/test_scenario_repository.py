@@ -123,11 +123,11 @@ class EquivalentScenarioTest(base.BaseTest):
         for key, scenarios in entity_scenarios.items():
             if (VProps.VITRAGE_CATEGORY, EntityCategory.ALARM) in key:
                 # scenarios expanded on the other alarm
-                self.assertEqual(len(scenarios), 2)
+                self.assertEqual(2, len(scenarios))
             if (VProps.VITRAGE_CATEGORY, EntityCategory.RESOURCE) in key:
                 # Scenarios expanded on the two alarms. Each alarm is expanded
                 # to two equivalent alarms. Thus 2 x 2 = 4 in total
-                self.assertEqual(len(scenarios), 4)
+                self.assertEqual(4, len(scenarios))
         # each relationship is expand to two. Thus 2 x 2 = 4 in total
         relationships = self.scenario_repository.relationship_scenarios.keys()
-        self.assertEqual(len(relationships), 4)
+        self.assertEqual(4, len(relationships))

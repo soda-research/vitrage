@@ -118,7 +118,7 @@ class AodhDriverTest(base.BaseTest):
         self.assertEqual(entity[AodhProps.SEVERITY],
                          alarm[AodhProps.SEVERITY])
         self.assertIsNone(entity[AodhProps.RESOURCE_ID])
-        self.assertEqual(entity[AodhProps.EVENT_TYPE], "*")
+        self.assertEqual("*", entity[AodhProps.EVENT_TYPE])
         self.assertEqual(entity[DSProps.EVENT_TYPE],
                          AodhEventType.CREATION)
 
@@ -148,8 +148,7 @@ class AodhDriverTest(base.BaseTest):
         self.assertEqual(
             entity[AodhProps.EVENT_TYPE],
             alarm[AodhProps.DETAIL][AodhProps.RULE][AodhProps.EVENT_TYPE])
-        self.assertEqual(entity[AodhProps.RESOURCE_ID],
-                         "1")
+        self.assertEqual("1", entity[AodhProps.RESOURCE_ID])
         self.assertEqual(entity[DSProps.EVENT_TYPE],
                          AodhEventType.RULE_CHANGE)
 

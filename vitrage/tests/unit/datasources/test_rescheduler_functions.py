@@ -95,7 +95,7 @@ class ReschedulerTester(base.BaseTest):
                                       fault_interval=FAULT_INTERVAL,
                                       times=RESCHEDULING_TIMES)
         # Test assertions
-        self.assertEqual(len(self.rescheduler.scheduler.queue), TASKS_NUM)
+        self.assertEqual(TASKS_NUM, len(self.rescheduler.scheduler.queue))
         self.reset_test_params()
 
     def test_reset(self):
@@ -111,7 +111,7 @@ class ReschedulerTester(base.BaseTest):
         # Test action
         self.rescheduler.reset()
         # Test assertions
-        self.assertEqual(len(self.rescheduler.scheduler.queue), 0)
+        self.assertEqual(0, len(self.rescheduler.scheduler.queue))
         self.reset_test_params()
 
     def test_rescheduling(self):

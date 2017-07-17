@@ -113,24 +113,24 @@ class TestStaticPhysicalDriver(base.BaseTest):
         # Test Assertions
         status = any(change[StaticFields.TYPE] == SWITCH and
                      change[StaticFields.ID] == '12345' for change in changes)
-        self.assertEqual(False, status)
+        self.assertFalse(status)
 
         status = any(change[StaticFields.TYPE] == SWITCH and
                      change[StaticFields.ID] == '23456' and
                      change[DSProps.EVENT_TYPE] == GraphAction.DELETE_ENTITY
                      for change in changes)
-        self.assertEqual(True, status)
+        self.assertTrue(status)
 
         status = any(change[StaticFields.TYPE] == SWITCH and
                      change[StaticFields.ID] == '34567' for change in changes)
-        self.assertEqual(True, status)
+        self.assertTrue(status)
 
         status = any(change[StaticFields.TYPE] == SWITCH and
                      change[StaticFields.ID] == '45678' for change in changes)
-        self.assertEqual(True, status)
+        self.assertTrue(status)
         status = any(change[StaticFields.TYPE] == SWITCH and
                      change[StaticFields.ID] == '56789' for change in changes)
-        self.assertEqual(True, status)
+        self.assertTrue(status)
 
         self.assertEqual(4, len(changes))
 
