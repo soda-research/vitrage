@@ -63,8 +63,6 @@ class EvaluatorEventTransformer(transformer_base.TransformerBase):
         if event_type == UPDATE_VERTEX:
             properties = {
                 VProps.UPDATE_TIMESTAMP: update_timestamp,
-                VProps.VITRAGE_SAMPLE_TIMESTAMP:
-                    event[VProps.VITRAGE_SAMPLE_TIMESTAMP],
                 VProps.VITRAGE_IS_PLACEHOLDER: False,
                 VProps.RESOURCE_ID: event.get(TFields.TARGET)
             }
