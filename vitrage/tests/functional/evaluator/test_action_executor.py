@@ -71,7 +71,7 @@ class TestActionExecutor(TestFunctionalBase):
         action_spec = ActionSpecs(ActionType.SET_STATE, targets, props)
 
         event_queue = queue.Queue()
-        action_executor = ActionExecutor(event_queue)
+        action_executor = ActionExecutor(self.conf, event_queue)
 
         # Test Action - do
         action_executor.execute(action_spec, ActionMode.DO)
@@ -122,7 +122,7 @@ class TestActionExecutor(TestFunctionalBase):
         action_spec = ActionSpecs(ActionType.MARK_DOWN, targets, props)
 
         event_queue = queue.Queue()
-        action_executor = ActionExecutor(event_queue)
+        action_executor = ActionExecutor(self.conf, event_queue)
 
         # Test Action - do
         action_executor.execute(action_spec, ActionMode.DO)
@@ -178,7 +178,7 @@ class TestActionExecutor(TestFunctionalBase):
                                   {})
 
         event_queue = queue.Queue()
-        action_executor = ActionExecutor(event_queue)
+        action_executor = ActionExecutor(self.conf, event_queue)
 
         before_edge = processor.entity_graph.get_edge(alarm2.vertex_id,
                                                       alarm1.vertex_id,
@@ -221,7 +221,7 @@ class TestActionExecutor(TestFunctionalBase):
         before_alarms = processor.entity_graph.get_vertices(
             vertex_attr_filter=alarm_vertex_attrs)
         event_queue = queue.Queue()
-        action_executor = ActionExecutor(event_queue)
+        action_executor = ActionExecutor(self.conf, event_queue)
 
         # Test Action
         action_executor.execute(action_spec, ActionMode.DO)
@@ -285,7 +285,7 @@ class TestActionExecutor(TestFunctionalBase):
             vertex_attr_filter=alarm_vertex_attrs)
 
         event_queue = queue.Queue()
-        action_executor = ActionExecutor(event_queue)
+        action_executor = ActionExecutor(self.conf, event_queue)
 
         # Test Action - undo
         action_executor.execute(action_spec, ActionMode.UNDO)

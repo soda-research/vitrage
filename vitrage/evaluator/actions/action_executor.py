@@ -14,6 +14,7 @@
 
 import copy
 
+from oslo_log import log
 from oslo_utils import importutils
 
 from vitrage.common.constants import DatasourceAction as AType
@@ -23,9 +24,11 @@ from vitrage.evaluator.actions.base import ActionMode
 from vitrage.evaluator.actions.base import ActionType
 from vitrage.evaluator.actions.evaluator_event_transformer \
     import VITRAGE_DATASOURCE
+from vitrage.evaluator.actions.notifier import EvaluatorNotifier
 from vitrage.evaluator.actions.recipes.action_steps import ADD_EDGE
 from vitrage.evaluator.actions.recipes.action_steps import ADD_VERTEX
 from vitrage.evaluator.actions.recipes.action_steps import EXECUTE_EXTERNAL
+from vitrage.evaluator.actions.recipes.action_steps import EXECUTION_ENGINE
 from vitrage.evaluator.actions.recipes.action_steps import REMOVE_EDGE
 from vitrage.evaluator.actions.recipes.action_steps import REMOVE_VERTEX
 from vitrage.evaluator.actions.recipes.action_steps import UPDATE_VERTEX
@@ -38,11 +41,14 @@ from vitrage.evaluator.actions.recipes.raise_alarm import RaiseAlarm
 from vitrage.evaluator.actions.recipes.set_state import SetState
 from vitrage.utils import datetime as datetime_utils
 
+LOG = log.getLogger(__name__)
+
 
 class ActionExecutor(object):
 
-    def __init__(self, event_queue):
+    def __init__(self, conf, event_queue):
         self.event_queue = event_queue
+        self.notifier = EvaluatorNotifier(conf)
         self.action_recipes = ActionExecutor._register_action_recipes()
 
         self.action_step_defs = {
@@ -106,9 +112,12 @@ class ActionExecutor(object):
 
     def _execute_external(self, params):
 
-        # TODO(ifat_afek): send to a dedicated queue
-        # external_engine = params[EXECUTION_ENGINE]
-        pass
+        # Send a notification to the external engine
+        external_engine = params[EXECUTION_ENGINE]
+        LOG.debug('Notifying external engine %s. Properties: %s',
+                  external_engine,
+                  str(params))
+        self.notifier.notify(external_engine, params)
 
     @staticmethod
     def _add_default_properties(event):

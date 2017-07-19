@@ -30,3 +30,12 @@ class NotifierBase(object):
     @abc.abstractmethod
     def get_notifier_name():
         pass
+
+    @staticmethod
+    def use_private_topic():
+        return False
+
+    @staticmethod
+    def info(self, ctxt, publisher_id, event_type, payload, metadata):
+        """An endpoint for notifiers that use a private topic"""
+        pass

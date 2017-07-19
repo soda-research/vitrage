@@ -114,6 +114,7 @@ class NotifierEventTypes(object):
     DEACTIVATE_DEDUCED_ALARM_EVENT = 'vitrage.deduced_alarm.deactivate'
     ACTIVATE_MARK_DOWN_EVENT = 'vitrage.mark_down.activate'
     DEACTIVATE_MARK_DOWN_EVENT = 'vitrage.mark_down.deactivate'
+    EXECUTE_EXTERNAL_ACTION = 'vitrage.execute_external_action'
 
 
 class TemplateTopologyFields(object):
