@@ -75,15 +75,14 @@ class VitrageGraphService(os_service.Service):
         seconds and goes to sleep for 1 second. if there are more events in
         the queue they are done when timer returns.
         """
-        self.processor_lock.acquire()
-        start_time = datetime.datetime.now()
-        while not self.evaluator_queue.empty():
-            time_delta = datetime.datetime.now() - start_time
-            if time_delta.total_seconds() >= 2:
-                break
-            if not self.evaluator_queue.empty():
-                self.do_process(self.evaluator_queue)
-        self.processor_lock.release()
+        with self.processor_lock:
+            start_time = datetime.datetime.now()
+            while not self.evaluator_queue.empty():
+                time_delta = datetime.datetime.now() - start_time
+                if time_delta.total_seconds() >= 2:
+                    break
+                if not self.evaluator_queue.empty():
+                    self.do_process(self.evaluator_queue)
 
     def do_process(self, queue):
         try:
@@ -111,9 +110,7 @@ class PushNotificationsEndpoint(object):
 
     def info(self, ctxt, publisher_id, event_type, payload, metadata):
         try:
-            self.processor_lock.acquire()
-            self.process_event_callback(payload)
+            with self.processor_lock:
+                self.process_event_callback(payload)
         except Exception as e:
             LOG.exception(e)
-        finally:
-            self.processor_lock.release()
