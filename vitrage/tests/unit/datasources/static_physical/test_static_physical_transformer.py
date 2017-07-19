@@ -81,22 +81,22 @@ class TestStaticPhysicalTransformer(base.BaseTest):
         expected_id_values = \
             self.transformers[STATIC_PHYSICAL_DATASOURCE]._key_values(
                 switch_type, switch_name)
-        self.assertEqual(tuple(observed_id_values), expected_id_values)
+        self.assertEqual(expected_id_values, tuple(observed_id_values))
 
         observed_time = placeholder.get(VProps.VITRAGE_SAMPLE_TIMESTAMP)
-        self.assertEqual(observed_time, timestamp)
+        self.assertEqual(timestamp, observed_time)
 
         observed_subtype = placeholder.get(VProps.VITRAGE_TYPE)
-        self.assertEqual(observed_subtype, switch_type)
+        self.assertEqual(switch_type, observed_subtype)
 
         observed_entity_id = placeholder.get(VProps.ID)
-        self.assertEqual(observed_entity_id, switch_name)
+        self.assertEqual(switch_name, observed_entity_id)
 
         observed_vitrage_category = placeholder.get(VProps.VITRAGE_CATEGORY)
-        self.assertEqual(observed_vitrage_category, EntityCategory.RESOURCE)
+        self.assertEqual(EntityCategory.RESOURCE, observed_vitrage_category)
 
         vitrage_is_placeholder = placeholder.get(VProps.VITRAGE_IS_PLACEHOLDER)
-        self.assertEqual(vitrage_is_placeholder, True)
+        self.assertTrue(vitrage_is_placeholder)
 
     def test_key_values(self):
         LOG.debug('Static Physical transformer test: get key values')

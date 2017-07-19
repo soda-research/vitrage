@@ -190,5 +190,5 @@ class DatasourceUpdateMethod(base.BaseTest):
         self.assertNotIn(ZABBIX_DATASOURCE_PULL_NO_INTERVAL, pull_drivers)
 
     def test_datasources_notification_topic(self):
-        self.assertEqual(self.conf.datasources.notification_topic,
-                         'vitrage_notifications')
+        self.assertEqual('vitrage_notifications',
+                         self.conf.datasources.notification_topic)

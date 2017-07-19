@@ -79,22 +79,22 @@ class NovaInstanceTransformerTest(base.BaseTest):
             TransformerBase.KEY_SEPARATOR)
         expected_id_values = transformer._key_values(NOVA_INSTANCE_DATASOURCE,
                                                      instance_id)
-        self.assertEqual(tuple(observed_id_values), expected_id_values)
+        self.assertEqual(expected_id_values, tuple(observed_id_values))
 
         observed_time = placeholder.get(VProps.VITRAGE_SAMPLE_TIMESTAMP)
-        self.assertEqual(observed_time, timestamp)
+        self.assertEqual(timestamp, observed_time)
 
         observed_type = placeholder.get(VProps.VITRAGE_TYPE)
-        self.assertEqual(observed_type, NOVA_INSTANCE_DATASOURCE)
+        self.assertEqual(NOVA_INSTANCE_DATASOURCE, observed_type)
 
         observed_entity_id = placeholder.get(VProps.ID)
-        self.assertEqual(observed_entity_id, instance_id)
+        self.assertEqual(instance_id, observed_entity_id)
 
         observed_vitrage_category = placeholder.get(VProps.VITRAGE_CATEGORY)
-        self.assertEqual(observed_vitrage_category, EntityCategory.RESOURCE)
+        self.assertEqual(EntityCategory.RESOURCE, observed_vitrage_category)
 
         vitrage_is_placeholder = placeholder.get(VProps.VITRAGE_IS_PLACEHOLDER)
-        self.assertEqual(vitrage_is_placeholder, True)
+        self.assertTrue(vitrage_is_placeholder)
 
     def test_snapshot_event_transform(self):
         LOG.debug('Test tactual transform action for '

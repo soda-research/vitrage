@@ -191,12 +191,12 @@ class BasicTemplateTest(base.BaseTest):
         :param entities
         """
         self.assertIsNotNone(scenarios)
-        self.assertEqual(len(scenarios), 1)
+        self.assertEqual(1, len(scenarios))
 
         scenario = scenarios[0]
 
         condition = scenario.condition
-        self.assertEqual(len(condition), 1)
+        self.assertEqual(1, len(condition))
 
         condition_var = condition[0][0]
         self.assertIsInstance(condition_var, ConditionVar)
@@ -206,16 +206,16 @@ class BasicTemplateTest(base.BaseTest):
 
         actions = scenario.actions
         self.assert_is_not_empty(scenario.actions)
-        self.assertEqual(len(actions), 1)
+        self.assertEqual(1, len(actions))
 
         action = actions[0]
         self.assertEqual(action.type, ActionType.SET_STATE)
 
         targets = action.targets
-        self.assertEqual(len(targets), 1)
-        self.assertEqual(targets['target'], 'resource')
+        self.assertEqual(1, len(targets))
+        self.assertEqual('resource', targets['target'])
 
         properties = action.properties
-        self.assertEqual(len(properties), 1)
+        self.assertEqual(1, len(properties))
         self.assertEqual(properties['state'],
                          OperationalResourceState.SUBOPTIMAL)

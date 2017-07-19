@@ -67,22 +67,22 @@ class TestStaticTransformer(base.BaseTest):
 
         observed_entity_id = placeholder.vertex_id
         expected_entity_id = 'RESOURCE:static:12345'
-        self.assertEqual(observed_entity_id, expected_entity_id)
+        self.assertEqual(expected_entity_id, observed_entity_id)
 
         observed_time = placeholder.get(VProps.VITRAGE_SAMPLE_TIMESTAMP)
-        self.assertEqual(observed_time, self.timestamp)
+        self.assertEqual(self.timestamp, observed_time)
 
         observed_subtype = placeholder.get(VProps.VITRAGE_TYPE)
-        self.assertEqual(observed_subtype, self.entity_type)
+        self.assertEqual(self.entity_type, observed_subtype)
 
         observed_entity_id = placeholder.get(VProps.ID)
-        self.assertEqual(observed_entity_id, self.entity_id)
+        self.assertEqual(self.entity_id, observed_entity_id)
 
         observed_vitrage_category = placeholder.get(VProps.VITRAGE_CATEGORY)
-        self.assertEqual(observed_vitrage_category, EntityCategory.RESOURCE)
+        self.assertEqual(EntityCategory.RESOURCE, observed_vitrage_category)
 
         vitrage_is_placeholder = placeholder.get(VProps.VITRAGE_IS_PLACEHOLDER)
-        self.assertEqual(vitrage_is_placeholder, True)
+        self.assertTrue(vitrage_is_placeholder)
 
     def test_snapshot_transform(self):
         vals_list = mock_driver.simple_static_generators(snapshot_events=1)
@@ -110,7 +110,7 @@ class TestStaticTransformer(base.BaseTest):
                          event[DSProps.SAMPLE_DATE])
 
         for k, v in event.get(StaticFields.METADATA, {}):
-            self.assertEqual(vertex[k], v)
+            self.assertEqual(v, vertex[k])
 
     def _validate_common_props(self, vertex, event):
         self.assertEqual(vertex[VProps.VITRAGE_CATEGORY],

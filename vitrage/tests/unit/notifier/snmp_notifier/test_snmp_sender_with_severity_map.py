@@ -56,8 +56,8 @@ class SnmpNotifierTest(base.BaseTest):
 
         oids, var_lst = self.snmp_sender._build_oids()
 
-        self.assertEqual(len(oids), 4)
-        self.assertEqual(len(var_lst), 3)
+        self.assertEqual(4, len(oids))
+        self.assertEqual(3, len(var_lst))
 
         self.assertIn(VProps.NAME, oids)
         self.assertIn(VProps.VITRAGE_IS_DELETED, oids)
@@ -76,7 +76,7 @@ class SnmpNotifierTest(base.BaseTest):
 
         var_binds = self.snmp_sender._get_var_binds(common.alarm_data)
 
-        self.assertEqual(len(var_binds), 3)
+        self.assertEqual(3, len(var_binds))
 
         self.assertIn((oid_with_alarm_objects + '.' + common.NAME_OID,
                       OctetString(common.alarm_data.get(VProps.NAME,

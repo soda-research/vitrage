@@ -222,7 +222,7 @@ class TemplateSyntaxValidatorTest(base.BaseTest):
         # Test assertions
         self.assertFalse(result.is_valid_config)
         self.assertTrue(result.comment.startswith(status_msgs[expected_code]))
-        self.assertEqual(result.status_code, expected_code)
+        self.assertEqual(expected_code, result.status_code)
 
     def _test_execution_with_correct_result(self, template):
 
@@ -232,7 +232,7 @@ class TemplateSyntaxValidatorTest(base.BaseTest):
         # Test assertions
         self.assertTrue(result.is_valid_config)
         self.assertEqual(result.comment, status_msgs[0])
-        self.assertEqual(result.status_code, 0)
+        self.assertEqual(0, result.status_code)
 
     @staticmethod
     def _hide_useless_logging_messages():
