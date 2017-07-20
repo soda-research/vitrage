@@ -11,20 +11,20 @@ definitions:
   - entity:
      category: RESOURCE
      type: nova.host
-     template_id: resource
+     template_id: host
  relationships:
   - relationship:
      source: alarm
-     target: resource
+     target: host
      relationship_type: on
      template_id : alarm_on_host
 scenarios:
  - scenario:
-    condition: not alarm_on_host
+    condition: host and not alarm_on_host
     actions:
      - action:
         action_type: set_state
         properties:
          state: SUBOPTIMAL
         action_target:
-         target: resource
+         target: host

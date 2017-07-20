@@ -76,6 +76,7 @@ status_msgs = {
          ' \'target_action\' block.',
     132: 'add_causal_relationship action requires action_target to be ALARM',
     133: 'execute_mistral action must contain workflow field in properties '
-         'block'
-
+         'block',
+    134: 'condition can not contain only \'not\' clauses',
+    135: 'condition must contain a common entity for all \'or\' clauses',
 }

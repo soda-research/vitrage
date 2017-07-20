@@ -54,6 +54,8 @@ Expression can be combined using the following logical operators:
   condition to be met.
 - "or" - indicates at least one expression must be satisfied in order for the
   condition to be met (non-exclusive or).
+- "not" - indicates that the expression must not be satisfied in order for the
+  condition to be met.
 - parentheses "()"  - clause indicating the scope of an expression.
 
 The following are examples of valid expressions, where X, Y and Z are
@@ -65,6 +67,29 @@ relationships:
 - X and not Y
 - X and not (Y or Z)
 - X and not X
+
+
+A few restrictions regarding the condition format:
+
+* A condition can not be entirely "negative", i.e. it must have at least one
+  part that does not have a "not" in front of it.
+
+  For example, instead of:
+   not alarm_on_instance
+  use:
+   instance and not alarm_on_instance
+
+* There must be at least one entity that is common to all "or" clauses.
+
+  For example, this condition is illegal:
+   alarm1_on_host or alarm2_on_instance
+  This condition is legal:
+   alarm1_on_instance or alarm2_on_instance
+
+
+For more information, see the 'Calculate the action_target' section in
+`External Actions Spec <https://specs.openstack.org/openstack/vitrage-specs/specs/pike/external-actions.html>`_
+
 
 Template validation status codes
 --------------------------------
@@ -378,17 +403,6 @@ This can be used along with nova notifier to call force_down for a host
 
 Future support & Open Issues
 ============================
-
-Negation
---------
-We need to support a "not" operator, that indicates the following expression
-must not be satisfied in order for the condition to be met. "not" should apply
-to relationships, not entities. Then we could have a condition like
-
- ::
-
-    condition: host_contains_instance and not alarm_on_instance
-
 
 Inequality
 ----------

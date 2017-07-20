@@ -20,9 +20,9 @@ from vitrage.datasources.nagios import NAGIOS_DATASOURCE
 from vitrage.datasources.nova.host import NOVA_HOST_DATASOURCE
 from vitrage.entity_graph.mappings.operational_resource_state import \
     OperationalResourceState
+from vitrage.evaluator.condition import ConditionVar
 from vitrage.evaluator.scenario_evaluator import ActionType
 from vitrage.evaluator.template_data import ActionSpecs
-from vitrage.evaluator.template_data import ConditionVar
 from vitrage.evaluator.template_data import EdgeDescription
 from vitrage.evaluator.template_data import Scenario
 from vitrage.evaluator.template_data import TemplateData

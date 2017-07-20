@@ -23,6 +23,9 @@ from vitrage.tests.unit.evaluator.template_validation.content.base import \
 from vitrage.utils import file as file_utils
 
 
+CONDITION_TEMPLATES_DIR = '%s/templates/evaluator/conditions/%s'
+
+
 class TemplateContentValidatorTest(ValidatorTest):
 
     # noinspection PyPep8Naming
@@ -147,6 +150,72 @@ class TemplateContentValidatorTest(ValidatorTest):
 
         scenario_dict[TemplateFields.CONDITION] = 'resource and aaa'
         self._execute_and_assert_with_fault_result(template, 3)
+
+    def test_validate_scenario_target_one_edge_condition(self):
+        self._execute_condition_template_with_correct_result('one_edge.yaml')
+
+    def test_validate_scenario_target_one_vertex_condition(self):
+        self._execute_condition_template_with_correct_result('one_vertex.yaml')
+
+    def test_validate_scenario_target_simple_or_condition(self):
+        self._execute_condition_template_with_correct_result('simple_or.yaml')
+
+    def test_validate_scenario_target_simple_or2_condition(self):
+        self._execute_condition_template_with_correct_result('simple_or2.yaml')
+
+    def test_validate_scenario_target_simple_or3_condition(self):
+        self._execute_condition_template_with_correct_result('simple_or3.yaml')
+
+    def test_validate_scenario_target_simple_or_unsupported_condition(self):
+        self._execute_condition_template_with_fault_result(
+            'simple_or_unsupported.yaml', 135)
+
+    def test_validate_scenario_target_simple_and_condition(self):
+        self._execute_condition_template_with_correct_result('simple_and.yaml')
+
+    def test_validate_scenario_target_simple_and2_condition(self):
+        self._execute_condition_template_with_correct_result(
+            'simple_and2.yaml')
+
+    def test_validate_scenario_target_complex1_condition(self):
+        self._execute_condition_template_with_correct_result('complex1.yaml')
+
+    def test_validate_scenario_target_complex2_condition(self):
+        self._execute_condition_template_with_correct_result('complex2.yaml')
+
+    def test_validate_scenario_target_not_edge_unsupported_condition(self):
+        self._execute_condition_template_with_fault_result(
+            'not_edge_unsupported.yaml', 134)
+
+    def test_validate_scenario_target_not_or_unsupported__condition(self):
+        self._execute_condition_template_with_fault_result(
+            'not_or_unsupported.yaml', 134)
+
+    def test_validate_scenario_target_not_or_unsupported2_condition(self):
+        self._execute_condition_template_with_fault_result(
+            'not_or_unsupported2.yaml', 135)
+
+    def test_validate_scenario_target_complex_not_condition(self):
+        self._execute_condition_template_with_correct_result(
+            'complex_not.yaml')
+
+    def test_validate_scenario_target_complex_not_unsupported_condition(self):
+        self._execute_condition_template_with_fault_result(
+            'complex_not_unsupported.yaml', 135)
+
+    def _execute_condition_template_with_correct_result(self, template_name):
+        template_path = CONDITION_TEMPLATES_DIR % (utils.get_resources_dir(),
+                                                   template_name)
+        template_definition = file_utils.load_yaml_file(template_path, True)
+        self._execute_and_assert_with_correct_result(template_definition)
+
+    def _execute_condition_template_with_fault_result(
+            self, template_name, status_code):
+        template_path = CONDITION_TEMPLATES_DIR % (utils.get_resources_dir(),
+                                                   template_name)
+        template_definition = file_utils.load_yaml_file(template_path, True)
+        self._execute_and_assert_with_fault_result(
+            template_definition, status_code)
 
     def _execute_and_assert_with_fault_result(self, template, status_code):
 

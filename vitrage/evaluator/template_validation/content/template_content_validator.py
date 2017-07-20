@@ -20,7 +20,11 @@ from six.moves import reduce
 
 from vitrage.common.constants import EdgeProperties as EProps
 from vitrage.evaluator.actions.base import ActionType
-from vitrage.evaluator.template_data import TemplateData
+from vitrage.evaluator.condition import convert_to_dnf_format
+from vitrage.evaluator.condition import get_condition_common_targets
+from vitrage.evaluator.condition import is_condition_include_positive_clause
+from vitrage.evaluator.condition import parse_condition
+from vitrage.evaluator.condition import SymbolResolver
 from vitrage.evaluator.template_fields import TemplateFields
 from vitrage.evaluator.template_validation.content. \
     add_causal_relationship_validator import AddCausalRelationshipValidator
@@ -30,6 +34,8 @@ from vitrage.evaluator.template_validation.content.base import \
     get_content_fault_result
 from vitrage.evaluator.template_validation.content.base import \
     validate_template_id
+from vitrage.evaluator.template_validation.content.execute_mistral_validator \
+    import ExecuteMistralValidator
 from vitrage.evaluator.template_validation.content.mark_down_validator \
     import MarkDownValidator
 from vitrage.evaluator.template_validation.content.raise_alarm_validator \
@@ -150,7 +156,7 @@ def _validate_scenarios(scenarios, definitions_index):
 
 def _validate_scenario_condition(condition, definitions_index):
     try:
-        dnf_result = TemplateData.ScenarioData.convert_to_dnf_format(condition)
+        dnf_result = convert_to_dnf_format(condition)
     except Exception:
         LOG.error('%s status code: %s' % (status_msgs[85], 85))
         return get_content_fault_result(85)
@@ -163,11 +169,11 @@ def _validate_scenario_condition(condition, definitions_index):
 
     # template id validation
     values_to_replace = ' and ', ' or ', ' not ', 'not ', '(', ')'
-    condition = reduce(lambda cond, v: cond.replace(v, ' '),
-                       values_to_replace,
-                       condition)
+    condition_vars = reduce(lambda cond, v: cond.replace(v, ' '),
+                            values_to_replace,
+                            condition)
 
-    for condition_var in condition.split(' '):
+    for condition_var in condition_vars.split(' '):
 
         if len(condition_var.strip()) == 0:
             continue
@@ -176,7 +182,47 @@ def _validate_scenario_condition(condition, definitions_index):
         if not result.is_valid_config:
             return result
 
+    # condition structure validation
+    condition_structure_result = \
+        validate_condition_structure(parse_condition(condition),
+                                     definitions_index)
+    if not condition_structure_result.is_valid_config:
+        return condition_structure_result
+
     return get_content_correct_result()
+
+
+def validate_condition_structure(condition_dnf, definitions_index):
+    result = validate_condition_includes_positive_clause(condition_dnf)
+    if not result.is_valid_config:
+        return result
+
+    common_targets = get_condition_common_targets(condition_dnf,
+                                                  definitions_index,
+                                                  TemplateSymbolResolver())
+
+    return get_content_correct_result() if common_targets \
+        else get_content_fault_result(135)
+
+
+def validate_condition_includes_positive_clause(condition):
+    return get_content_correct_result() if \
+        is_condition_include_positive_clause(condition) \
+        else get_content_fault_result(134)
+
+
+class TemplateSymbolResolver(SymbolResolver):
+    def is_relationship(self, symbol):
+        return TemplateFields.RELATIONSHIP_TYPE in symbol
+
+    def get_relationship_source_id(self, relationship):
+        return relationship[TemplateFields.SOURCE]
+
+    def get_relationship_target_id(self, relationship):
+        return relationship[TemplateFields.TARGET]
+
+    def get_entity_id(self, entity):
+        return entity[TemplateFields.TEMPLATE_ID]
 
 
 def _validate_not_condition(dnf_result, definitions_index):
@@ -233,6 +279,7 @@ def _validate_scenario_action(action, definitions_index):
         ActionType.SET_STATE: SetStateValidator(),
         ActionType.ADD_CAUSAL_RELATIONSHIP: AddCausalRelationshipValidator(),
         ActionType.MARK_DOWN: MarkDownValidator(),
+        ActionType.EXECUTE_MISTRAL: ExecuteMistralValidator(),
     }
 
     if action_type not in action_validators:

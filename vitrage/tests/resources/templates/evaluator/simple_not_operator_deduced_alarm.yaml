@@ -20,7 +20,7 @@ definitions:
      template_id : alarm_on_port
 scenarios:
  - scenario:
-    condition: not alarm_on_port
+    condition: port and not alarm_on_port
     actions:
      - action:
         action_type: raise_alarm

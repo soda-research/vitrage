@@ -104,3 +104,8 @@ The following describes all the possible status code and their messages:
 | 133              | execute_mistral action must contain workflow field in   | content                       |
 |                  | properties block                                        |                               |
 +------------------+---------------------------------------------------------+-------------------------------+
+| 134              | condition can not contain only 'not' clauses            | content                       |
++------------------+---------------------------------------------------------+-------------------------------+
+| 135              | condition must contain a common entity for all 'or'     | content                       |
+|                  | clauses                                                 |                               |
++------------------+---------------------------------------------------------+-------------------------------+

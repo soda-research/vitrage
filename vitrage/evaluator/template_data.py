@@ -13,22 +13,20 @@
 # under the License.
 
 from collections import namedtuple
-from sympy.logic.boolalg import And
-from sympy.logic.boolalg import Not
-from sympy.logic.boolalg import Or
-from sympy.logic.boolalg import to_dnf as sympy_to_dfn
-from sympy import Symbol
 
 from vitrage.common.constants import EdgeProperties as EProps
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.common.exception import VitrageError
+from vitrage.evaluator.condition import EdgeDescription
+from vitrage.evaluator.condition import get_condition_common_targets
+from vitrage.evaluator.condition import parse_condition
+from vitrage.evaluator.condition import SymbolResolver
 from vitrage.evaluator.template_fields import TemplateFields as TFields
 from vitrage.graph.algo_driver.sub_graph_matching import NEG_CONDITION
 from vitrage.graph.driver.networkx_graph import NXGraph
 from vitrage.graph import Edge
 from vitrage.graph import Vertex
 
-ConditionVar = namedtuple('ConditionVar', ['symbol_name', 'positive'])
 ActionSpecs = namedtuple('ActionSpecs', ['type', 'targets', 'properties'])
 Scenario = namedtuple('Scenario', ['id',
                                    'condition',
@@ -37,8 +35,6 @@ Scenario = namedtuple('Scenario', ['id',
                                    'entities',
                                    'relationships'
                                    ])
-EdgeDescription = namedtuple('EdgeDescription', ['edge', 'source', 'target'])
-
 ENTITY = 'entity'
 RELATIONSHIP = 'relationship'
 
@@ -195,8 +191,8 @@ class TemplateData(object):
             self._relationships = {}
 
             self.scenario_id = scenario_id
-            self.condition = self._parse_condition(
-                scenario_dict[TFields.CONDITION])
+            self.condition = parse_condition(scenario_dict[TFields.CONDITION])
+            self.valid_target = self._calculate_missing_action_target()
             self.actions = self._build_actions(scenario_dict[TFields.ACTIONS])
             self.subgraphs = TemplateData.SubGraph.from_condition(
                 self.condition,
@@ -266,89 +262,20 @@ class TemplateData(object):
                                    target=target,
                                    edge=relationship.edge)
 
-        @staticmethod
-        def _build_actions(actions_def):
+        def _build_actions(self, actions_def):
 
             actions = []
             for action_def in actions_def:
 
                 action_dict = action_def[TFields.ACTION]
                 action_type = action_dict[TFields.ACTION_TYPE]
-                targets = action_dict.get(TFields.ACTION_TARGET, {})
+                targets = action_dict.get(TFields.ACTION_TARGET,
+                                          self.valid_target)
                 properties = action_dict.get(TFields.PROPERTIES, {})
 
                 actions.append(ActionSpecs(action_type, targets, properties))
 
             return actions
-
-        def _parse_condition(self, condition_str):
-            """Parse condition string into an object
-
-            The condition string will be converted here into DNF (Disjunctive
-            Normal Form), e.g., (X and Y) or (X and Z) or (X and V and not W)
-            ... where X, Y, Z, V, W are either entities or relationships
-            more details: https://en.wikipedia.org/wiki/Disjunctive_normal_form
-
-            The condition variable lists is then extracted from the DNF object.
-            It is a list of lists. Each inner list represents an AND expression
-            compound condition variables. The outer list presents the OR
-            expression
-
-              [[and_var1, and_var2, ...], or_list_2, ...]
-
-            :param condition_str: the string as it written in the template
-            :return: condition_vars_lists
-            """
-
-            condition_dnf = self.convert_to_dnf_format(condition_str)
-
-            if isinstance(condition_dnf, Or):
-                return self._extract_or_condition(condition_dnf)
-
-            if isinstance(condition_dnf, And):
-                return [self._extract_and_condition(condition_dnf)]
-
-            if isinstance(condition_dnf, Not):
-                return [(self._extract_not_condition_var(condition_dnf))]
-
-            if isinstance(condition_dnf, Symbol):
-                return [[(self._extract_condition_var(condition_dnf, True))]]
-
-        @staticmethod
-        def convert_to_dnf_format(condition_str):
-
-            condition_str = condition_str.replace(' and ', '&')
-            condition_str = condition_str.replace(' or ', '|')
-            condition_str = condition_str.replace(' not ', '~')
-            condition_str = condition_str.replace('not ', '~')
-
-            return sympy_to_dfn(condition_str)
-
-        def _extract_or_condition(self, or_condition):
-
-            vars_ = []
-            for var in or_condition.args:
-
-                if isinstance(var, And):
-                    vars_.append(self._extract_and_condition(var))
-                else:
-                    is_symbol = isinstance(var, Symbol)
-                    vars_.append([self._extract_condition_var(var, is_symbol)])
-
-            return vars_
-
-        def _extract_and_condition(self, and_condition):
-            return [self._extract_condition_var(arg, isinstance(arg, Symbol))
-                    for arg in and_condition.args]
-
-        def _extract_not_condition_var(self, not_condition):
-            return [self._extract_condition_var(arg, False)
-                    for arg in not_condition.args]
-
-        def _extract_condition_var(self, symbol, positive):
-            if isinstance(symbol, Not):
-                return self._extract_not_condition_var(symbol)[0]
-            return ConditionVar(symbol.name, positive)
 
         def _extract_var_and_update_index(self, symbol_name):
 
@@ -364,6 +291,36 @@ class TemplateData(object):
             entity = self._template_entities[symbol_name]
             self._entities[symbol_name] = entity
             return entity, ENTITY
+
+        def _calculate_missing_action_target(self):
+            """Return a vertex that can be used as an action target.
+
+            External actions like execute_mistral do not have an explicit
+            action target. This parameter is a must for the sub-graph matching
+            algorithm. If it is missing, we would like to select an arbitrary
+            target from the condition.
+
+            """
+            definition_index = self._template_entities.copy()
+            definition_index.update(self._template_relationships)
+            targets = \
+                get_condition_common_targets(self.condition,
+                                             definition_index,
+                                             self.TemplateDataSymbolResolver())
+            return {TFields.TARGET: targets.pop()} if targets else None
+
+        class TemplateDataSymbolResolver(SymbolResolver):
+            def is_relationship(self, symbol):
+                return isinstance(symbol, EdgeDescription)
+
+            def get_relationship_source_id(self, relationship):
+                return relationship.source.vertex_id
+
+            def get_relationship_target_id(self, relationship):
+                return relationship.target.vertex_id
+
+            def get_entity_id(self, entity):
+                return entity.vertex_id
 
     class SubGraph(object):
         @classmethod

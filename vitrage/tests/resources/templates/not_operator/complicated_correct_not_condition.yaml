@@ -47,7 +47,7 @@ definitions:
      template_id : alarm_on_instance
 scenarios:
  - scenario:
-     condition: zone_contains_host or host_contains_instance and not host_contains_instance or not port_attached_instance
+     condition: alarm_on_instance or host_contains_instance and not zone_contains_host or port_attached_instance and not zone_contains_host
      actions:
       - action:
          action_type: set_state
