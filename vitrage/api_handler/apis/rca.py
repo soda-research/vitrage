@@ -13,6 +13,7 @@
 # under the License.
 
 from oslo_log import log
+from osprofiler import profiler
 
 from vitrage.api_handler.apis.base import ALARMS_ALL_QUERY
 from vitrage.api_handler.apis.base import EDGE_QUERY
@@ -24,6 +25,8 @@ from vitrage.graph import Direction
 LOG = log.getLogger(__name__)
 
 
+@profiler.trace_cls("rca apis",
+                    info={}, hide_args=False, trace_private=False)
 class RcaApis(EntityGraphApisBase):
 
     def __init__(self, entity_graph, conf):

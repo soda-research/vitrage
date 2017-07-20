@@ -16,6 +16,7 @@ from datetime import datetime
 from oslo_log import log
 import oslo_messaging
 from oslo_utils import uuidutils
+from osprofiler import profiler
 import socket
 
 from vitrage.api_handler.apis.base import EntityGraphApisBase
@@ -25,6 +26,8 @@ from vitrage.messaging import get_transport
 LOG = log.getLogger(__name__)
 
 
+@profiler.trace_cls("event apis",
+                    info={}, hide_args=False, trace_private=False)
 class EventApis(EntityGraphApisBase):
 
     def __init__(self, conf):

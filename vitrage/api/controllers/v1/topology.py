@@ -17,6 +17,7 @@ import json
 
 from oslo_log import log
 from oslo_utils.strutils import bool_from_string
+from osprofiler import profiler
 import pecan
 from pecan.core import abort
 
@@ -31,6 +32,8 @@ from vitrage.datasources.transformer_base import CLUSTER_ID
 LOG = log.getLogger(__name__)
 
 
+@profiler.trace_cls("topology controller",
+                    info={}, hide_args=False, trace_private=False)
 class TopologyController(RootRestController):
 
     @pecan.expose('json')
