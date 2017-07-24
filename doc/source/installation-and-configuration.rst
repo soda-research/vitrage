@@ -47,3 +47,4 @@ Configuration
    alarm-severity-config
    zabbix_vitrage
    notifier-snmp-plugin
+   profiler-config
