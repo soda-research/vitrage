@@ -26,7 +26,7 @@ High Level Functionality
 High Level Architecture
 -----------------------
 
-.. image:: ./images/vitrage_graph_architecture.png
+.. image:: ./contributor/images/vitrage_graph_architecture.png
    :width: 100%
    :align: center
 
@@ -62,13 +62,22 @@ Installation Guide
 Developer Guide
 ---------------
 
+.. # NOTE(ifat-afek): Hide files we don't want to see in the table of contents.
+   # sphinx build fails if a file is not included in the toctree.
+.. toctree::
+   :hidden:
+   
+   contributor/index
+
 .. toctree::
    :maxdepth: 1
 
-   vitrage-first_steps
-   vitrage-api
-   vitrage-template-format
-   installation-and-configuration
+   contributor/vitrage-first_steps
+   contributor/vitrage-api
+   contributor/vitrage-template-format
+   contributor/devstack-installation
+   contributor/configuration
+   profiler-config
 
 Design Documents
 ----------------
@@ -76,10 +85,10 @@ Design Documents
 .. toctree::
    :maxdepth: 1
 
-   vitrage-graph-design
-   scenario-evaluator
-   vitrage-use-cases
-   add-new-datasource
-   not_operator_support
-   templates-loading
-   vitrage-ha-and-history-vision
+   contributor/vitrage-graph-design
+   contributor/scenario-evaluator
+   contributor/vitrage-use-cases
+   contributor/add-new-datasource
+   contributor/not_operator_support
+   contributor/templates-loading
+   contributor/vitrage-ha-and-history-vision
