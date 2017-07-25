@@ -33,8 +33,10 @@ class ListenerService(os_service.Service):
         self.enrich_callbacks_by_events = \
             self._create_callbacks_by_events_dict(drivers, conf)
 
-        topic = conf.datasources.notification_topic
-        self.listener = self._get_topic_listener(conf, topic, callback)
+        topics = conf.datasources.notification_topics
+        exchange = conf.datasources.notification_exchange
+        self.listener = self._get_topics_listener(
+            conf, topics, callback, exchange)
 
     def start(self):
         LOG.info("Vitrage data source Listener Service - Starting...")
@@ -65,10 +67,11 @@ class ListenerService(os_service.Service):
 
         return ret
 
-    def _get_topic_listener(self, conf, topic, callback):
+    def _get_topics_listener(self, conf, topics, callback, exchange=None):
         # Create a listener for each topic
         transport = messaging.get_transport(conf)
-        targets = [oslo_messaging.Target(topic=topic)]
+        targets = [oslo_messaging.Target(exchange=exchange, topic=topic)
+                   for topic in topics]
 
         return messaging.get_notification_listener(
             transport,
