@@ -14,6 +14,7 @@
 
 import json
 from oslo_log import log
+from osprofiler import profiler
 
 from vitrage.api_handler.apis.base import ALARM_QUERY
 from vitrage.api_handler.apis.base import ALARMS_ALL_QUERY
@@ -25,6 +26,8 @@ from vitrage.common.constants import VertexProperties as VProps
 LOG = log.getLogger(__name__)
 
 
+@profiler.trace_cls("alarm apis",
+                    info={}, hide_args=False, trace_private=False)
 class AlarmApis(EntityGraphApisBase):
 
     def __init__(self, entity_graph, conf):

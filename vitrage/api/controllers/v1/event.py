@@ -15,6 +15,7 @@
 import pecan
 
 from oslo_log import log
+from osprofiler import profiler
 from pecan.core import abort
 
 from vitrage.api.controllers.rest import RootRestController
@@ -24,6 +25,8 @@ from vitrage.api.policy import enforce
 LOG = log.getLogger(__name__)
 
 
+@profiler.trace_cls("event controller",
+                    info={}, hide_args=False, trace_private=False)
 class EventController(RootRestController):
 
     @pecan.expose('json')

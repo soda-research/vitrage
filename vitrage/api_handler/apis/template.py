@@ -14,6 +14,7 @@
 
 import json
 from oslo_log import log
+from osprofiler import profiler
 
 from vitrage.evaluator.template_fields import TemplateFields
 from vitrage.evaluator.template_validation.content.template_content_validator \
@@ -26,6 +27,8 @@ from vitrage.evaluator.template_validation.template_syntax_validator import \
 LOG = log.getLogger(__name__)
 
 
+@profiler.trace_cls("template apis",
+                    info={}, hide_args=False, trace_private=False)
 class TemplateApis(object):
 
     FAILED_MSG = 'validation failed'
