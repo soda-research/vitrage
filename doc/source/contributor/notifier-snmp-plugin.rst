@@ -9,7 +9,6 @@ The Evaluator may determine that an alarm should be created, deleted or otherwis
 Other components are notified of such changes by the Vitrage Notifier service. Among others, Vitrage Notifier is responsible for sending snmp traps for raised and deleted deduced alarms.
 
 This document describes the implementation of generating SNMP Traps on Vitrage alarms.
-You can find a description of the Vitrage Notifier infrastructure in the documentation file `notifier-aodh-plugin.rst <https://github.com/openstack/vitrage/blob/master/doc/source/notifier-aodh-plugin.rst>`_.
 
 SNMP Plugin
 ===========
