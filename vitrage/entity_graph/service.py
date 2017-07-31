@@ -21,6 +21,7 @@ from oslo_service import service as os_service
 
 from vitrage.entity_graph.processor import processor as proc
 from vitrage.entity_graph.vitrage_init import VitrageInit
+from vitrage.evaluator.evaluator_service import EvaluatorManager
 from vitrage import messaging
 
 LOG = log.getLogger(__name__)
@@ -31,18 +32,16 @@ class VitrageGraphService(os_service.Service):
     def __init__(self,
                  conf,
                  evaluator_queue,
-                 entity_graph,
-                 evaluator):
+                 graph):
         super(VitrageGraphService, self).__init__()
         self.conf = conf
         self.evaluator_queue = evaluator_queue
-        self.graph = entity_graph
-        self.evaluator = evaluator
-        self.init = VitrageInit(conf, entity_graph, evaluator,
-                                evaluator_queue)
+        self.graph = graph
+        self.evaluator = EvaluatorManager(conf, graph, evaluator_queue)
+        self.init = VitrageInit(conf, graph, self.evaluator, evaluator_queue)
         self.processor = proc.Processor(self.conf,
                                         self.init,
-                                        e_graph=entity_graph)
+                                        e_graph=graph)
         self.processor_lock = threading.RLock()
         self.listener = self._create_datasources_event_listener()
 
@@ -60,7 +59,7 @@ class VitrageGraphService(os_service.Service):
 
     def stop(self, graceful=False):
         LOG.info("Vitrage Graph Service - Stopping...")
-
+        self.evaluator.stop_all_workers()
         self.listener.stop()
         self.listener.wait()
         super(VitrageGraphService, self).stop(graceful)

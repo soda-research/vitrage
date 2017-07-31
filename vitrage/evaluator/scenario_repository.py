@@ -19,6 +19,7 @@ from oslo_log import log
 
 from oslo_utils import uuidutils
 
+from vitrage.common.utils import get_portion
 from vitrage.evaluator.base import Template
 from vitrage.evaluator.equivalence_repository import EquivalenceRepository
 from vitrage.evaluator.template_data import TemplateData
@@ -44,15 +45,23 @@ DEF_TEMPLATES_DIR_OPT = 'def_templates_dir'
 
 
 class ScenarioRepository(object):
-    def __init__(self, conf):
+    def __init__(self, conf, worker_index=None, workers_num=None):
+        """Create an instance of ScenarioRepository
+
+        :param conf:
+        :param worker_index: Index of the current evaluator worker
+        :param workers_num: Total number of evaluator workers
+        """
         self._templates = {}
         self._def_templates = {}
+        self._all_scenarios = []
         self.entity_equivalences = EquivalenceRepository().load_files(
             conf.evaluator.equivalences_dir)
         self.relationship_scenarios = defaultdict(list)
         self.entity_scenarios = defaultdict(list)
         self._load_def_template_files(conf)
         self._load_templates_files(conf)
+        self._enable_worker_scenarios(worker_index, workers_num)
         self.actions = self._create_actions_collection()
 
     @property
@@ -78,7 +87,7 @@ class ScenarioRepository(object):
         scenarios = []
         for scenario_key, value in self.entity_scenarios.items():
             if check_subset(entity_key, dict(scenario_key)):
-                scenarios += value
+                scenarios += [(e, s) for e, s in value if s.enabled]
         return scenarios
 
     def get_scenarios_by_edge(self, edge_description):
@@ -94,7 +103,7 @@ class ScenarioRepository(object):
                                      dict(scenario_key.source)) \
                     and check_subset(dict(key.target),
                                      dict(scenario_key.target)):
-                scenarios += value
+                scenarios += [(e, s) for e, s in value if s.enabled]
 
         return scenarios
 
@@ -171,6 +180,7 @@ class ScenarioRepository(object):
             self._add_entity_scenario(scenario, entity)
         for relationship in scenario.relationships.values():
             self._add_relationship_scenario(scenario, relationship)
+        self._all_scenarios.append(scenario)
 
     def _load_def_template_files(self, conf):
 
@@ -233,11 +243,21 @@ class ScenarioRepository(object):
         key = frozenset(list(entity.properties.items()))
         self.entity_scenarios[key].append((entity, scenario))
 
+    def _enable_worker_scenarios(self, worker_ind, n):
+        """Enable a portion of the scenarios"""
+        self._all_scenarios.sort(key=lambda scenario: scenario.id)
+
+        scenarios = self._all_scenarios if \
+            worker_ind is None or n is None else\
+            get_portion(self._all_scenarios, n, worker_ind)
+        for s in scenarios:
+            s.enabled = True
+
     def _create_actions_collection(self):
-        scenarios_val = itertools.chain(
-            self.relationship_scenarios.values(),
-            self.entity_scenarios.values()
-        )
-        action_lists = (s.actions for _, s in itertools.chain(*scenarios_val))
+        action_lists = (s.actions for s in self._all_scenarios)
         actions = (a for a in itertools.chain(*action_lists))
         return {a.id: a for a in actions}
+
+    def log_enabled_scenarios(self):
+        scenarios = [s for s in self._all_scenarios if s.enabled]
+        LOG.info("Scenarios:\n%s", sorted([s.id for s in scenarios]))

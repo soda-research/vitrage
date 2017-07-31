@@ -27,6 +27,7 @@ from vitrage.evaluator.actions.action_executor import ActionExecutor
 from vitrage.evaluator.actions.base import ActionMode
 from vitrage.evaluator.actions.base import ActionType
 import vitrage.evaluator.actions.priority_tools as pt
+from vitrage.evaluator.evaluator_base import EvaluatorBase
 from vitrage.evaluator.template_data import ActionSpecs
 from vitrage.evaluator.template_data import EdgeDescription
 from vitrage.graph.algo_driver.algorithm import Mapping
@@ -50,22 +51,21 @@ TARGET = 'target'
 SOURCE = 'source'
 
 
-class ScenarioEvaluator(object):
+class ScenarioEvaluator(EvaluatorBase):
 
     def __init__(self,
                  conf,
-                 entity_graph,
+                 e_graph,
                  scenario_repo,
                  event_queue,
                  enabled=False):
-        self.conf = conf
-        self._db_connection = storage.get_connection_from_config(self.conf)
+        super(ScenarioEvaluator, self).__init__(conf, e_graph, event_queue)
+        self._db_connection = storage.get_connection_from_config(self._conf)
         self._scenario_repo = scenario_repo
-        self._entity_graph = entity_graph
-        self._action_executor = ActionExecutor(conf, event_queue)
+        self._action_executor = ActionExecutor(self._conf, event_queue)
         self._entity_graph.subscribe(self.process_event)
         self._active_actions_tracker = ActiveActionsTracker(
-            self.conf, self._db_connection)
+            self._conf, self._db_connection)
         self.enabled = enabled
         self.connected_component_cache = defaultdict(dict)
 
@@ -446,12 +446,11 @@ class ActiveActionsTracker(object):
         Only a top scored action that is new should be performed
         :return: (is top score, is it already existing)
         """
-        exists = False
+        # TODO(idan_hefetz): DB read and write not in a transaction
         active_actions = self._query_similar_actions(action_info)
-        for a in active_actions:
-            if a.action_id == action_info.action_id \
-                    and a.trigger == action_info.trigger_id:
-                exists = True
+        exists = any(
+            a.action_id == action_info.action_id and
+            a.trigger == action_info.trigger_id for a in active_actions)
         if not exists:
             db_row = self._to_db_row(action_info)
             active_actions.append(db_row)
@@ -469,6 +468,7 @@ class ActiveActionsTracker(object):
         :param action_info: action to delete
         :return: is_highest_score, second highest action if exists
         """
+        # TODO(idan_hefetz): DB read and write not in a transaction
         active_actions = self._query_similar_actions(action_info)
 
         LOG.debug("DB delete active_actions %s %s",

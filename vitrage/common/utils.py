@@ -16,6 +16,10 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+from collections import defaultdict
+import copy
+import itertools
+import random
 
 from oslo_config import cfg
 
@@ -50,3 +54,28 @@ def do_cprofile(func):
         finally:
             profile.print_stats('cumulative')
     return profiled_func
+
+
+def get_portion(lst, num_of_portions, portion_index):
+    """Split a list into n slices and return the i'th slice
+
+    :rtype: list
+    """
+    # First shuffle the items to create an even distribution
+    # Use the same random seed to always get the same shuffle
+    if num_of_portions < 1 or portion_index < 0 or \
+            portion_index >= num_of_portions:
+        raise Exception('Cannot get_portion %s %s',
+                        str(num_of_portions),
+                        str(portion_index))
+
+    list_copy = copy.copy(lst)
+    random.Random(0.5).shuffle(list_copy)
+
+    portions = defaultdict(list)
+    portion_indexes = range(num_of_portions)
+    g = itertools.cycle(portion_indexes)
+    for curr_item in list_copy:
+        curr_portion = next(g)
+        portions[curr_portion].append(curr_item)
+    return portions[portion_index]

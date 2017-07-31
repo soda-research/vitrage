@@ -27,5 +27,12 @@ OPTS = [
                ),
     cfg.StrOpt('def_templates_dir',
                default='/etc/vitrage/templates/def_templates',
-               help='A path for def_template templates used by the evaluator')
+               help='A path for def_template templates used by the evaluator'
+               ),
+    cfg.IntOpt('workers',
+               default=1,
+               min=1,
+               max=10,
+               help='Number of workers for template evaluator'
+               ),
 ]

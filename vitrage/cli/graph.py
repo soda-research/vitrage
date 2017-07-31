@@ -13,7 +13,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from six.moves import queue
+import multiprocessing
 import sys
 
 from oslo_service import service as os_service
@@ -23,7 +23,6 @@ from vitrage.cli import VITRAGE_TITLE
 from vitrage import entity_graph
 from vitrage.entity_graph.consistency.service import VitrageConsistencyService
 from vitrage.entity_graph.service import VitrageGraphService
-from vitrage.evaluator.scenario_evaluator import ScenarioEvaluator
 from vitrage.evaluator.scenario_repository import ScenarioRepository
 from vitrage import service
 from vitrage import storage
@@ -34,42 +33,37 @@ def main():
 
     1. Starts the Entity graph service
     2. Starts the api_handler service
-    3. Starts the datasource service
-    4. Starts the Consistency service
+    3. Starts the Consistency service
     """
 
     print(VITRAGE_TITLE)
     conf = service.prepare_service()
-    evaluator_queue, evaluator, e_graph = init(conf)
+    evaluator_queue = multiprocessing.Queue()
+    e_graph = entity_graph.get_graph_driver(conf)('Entity Graph')
     launcher = os_service.ServiceLauncher(conf)
+    full_scenario_repo = ScenarioRepository(conf)
+    clear_db(conf)
 
-    graph_svc = VitrageGraphService(conf, evaluator_queue, e_graph, evaluator)
-    launcher.launch_service(graph_svc)
+    launcher.launch_service(VitrageGraphService(
+        conf, evaluator_queue, e_graph))
 
-    launcher.launch_service(VitrageApiHandlerService(conf, e_graph,
-                                                     evaluator.scenario_repo))
+    launcher.launch_service(VitrageApiHandlerService(
+        conf, e_graph, full_scenario_repo))
 
-    launcher.launch_service(VitrageConsistencyService(conf, evaluator_queue,
-                                                      e_graph))
+    launcher.launch_service(VitrageConsistencyService(
+        conf, evaluator_queue, e_graph))
 
     launcher.wait()
 
 
-def init(conf):
-    evaluator_q = queue.Queue()
-    e_graph = entity_graph.get_graph_driver(conf)('Entity Graph')
+def clear_db(conf):
+    """Delete all data from vitrage tables
 
+    The following deletes the entire vitrage database
+    It should be removed once graph is persistent
+    """
     db_connection = storage.get_connection_from_config(conf)
-    # The following deletes the entire vitrage database
-    # It should be removed once graph is persistent
     db_connection.clear()
-
-    scenario_repo = ScenarioRepository(conf)
-
-    evaluator = ScenarioEvaluator(conf, e_graph, scenario_repo, evaluator_q)
-
-    return evaluator_q, evaluator, e_graph
-
 
 if __name__ == "__main__":
     sys.exit(main())

@@ -32,13 +32,26 @@ from vitrage.utils import evaluator as evaluator_utils
 ActionSpecs = namedtuple(
     'ActionSpecs', ['id', 'type', 'targets', 'properties'])
 
-Scenario = namedtuple('Scenario', ['id',
-                                   'condition',
-                                   'actions',
-                                   'subgraphs',
-                                   'entities',
-                                   'relationships'
-                                   ])
+
+class Scenario(object):
+    def __init__(self, id, condition, actions, subgraphs, entities,
+                 relationships, enabled=False):
+        self.id = id
+        self.condition = condition
+        self.actions = actions
+        self.subgraphs = subgraphs
+        self.entities = entities
+        self.relationships = relationships
+        self.enabled = enabled
+
+    def __eq__(self, other):
+        return self.id == other.id and \
+            self.condition == other.condition and \
+            self.actions == other.actions and \
+            self.subgraphs == other.subgraphs and \
+            self.entities == other.entities and \
+            self.relationships == other.relationships
+
 ENTITY = 'entity'
 RELATIONSHIP = 'relationship'
 
