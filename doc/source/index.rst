@@ -77,7 +77,6 @@ Developer Guide
    contributor/vitrage-template-format
    contributor/devstack-installation
    contributor/configuration
-   profiler-config
 
 Design Documents
 ----------------
