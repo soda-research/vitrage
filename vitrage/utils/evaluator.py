@@ -1,4 +1,4 @@
-# Copyright 2016 - Nokia
+# Copyright 2017 - Nokia
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -11,25 +11,14 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+from vitrage.evaluator.template_fields import TemplateFields
 
-from vitrage.common.constants import TemplateTopologyFields
 
+def find_def_template(name, def_templates):
 
-class TemplateFields(TemplateTopologyFields):
+    for def_template_obj in def_templates.values():
+        def_template = def_template_obj.data
+        if def_template[TemplateFields.METADATA][TemplateFields.NAME] == name:
 
-    SCENARIOS = 'scenarios'
-
-    ALARM_NAME = 'alarm_name'
-    ACTION = 'action'
-    ACTIONS = 'actions'
-    ACTION_TARGET = 'action_target'
-    ACTION_TYPE = 'action_type'
-    CATEGORY = 'category'
-    CONDITION = 'condition'
-    INCLUDES = 'includes'
-    SEVERITY = 'severity'
-    SCENARIO = 'scenario'
-    STATE = 'state'
-    TEMPLATE_ID = 'template_id'
-
-    PROPERTIES = 'properties'
+            return def_template
+    return None

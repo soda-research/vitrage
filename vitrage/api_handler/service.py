@@ -52,7 +52,9 @@ class VitrageApiHandlerService(os_service.Service):
         endpoints = [TopologyApis(self.entity_graph, self.conf),
                      AlarmApis(self.entity_graph, self.conf),
                      RcaApis(self.entity_graph, self.conf),
-                     TemplateApis(self.scenario_repo.templates),
+                     TemplateApis(
+                         self.scenario_repo.templates,
+                         self.scenario_repo.def_templates),
                      EventApis(self.conf),
                      ResourceApis(self.entity_graph, self.conf)]
 

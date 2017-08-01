@@ -34,7 +34,8 @@ class TemplateApis(object):
     FAILED_MSG = 'validation failed'
     OK_MSG = 'validation OK'
 
-    def __init__(self, templates):
+    def __init__(self, templates, def_templates={}):
+        self.def_templates = def_templates
         self.templates = templates
 
     def get_templates(self, ctx):
@@ -72,10 +73,10 @@ class TemplateApis(object):
         results = []
         for template in templates:
 
-            template_def = template[1]
+            template_definition = template[1]
             path = template[0]
 
-            syntax_result = syntax_validation(template_def)
+            syntax_result = syntax_validation(template_definition)
             if not syntax_result.is_valid_config:
                 self._add_result(path,
                                  self.FAILED_MSG,
@@ -85,7 +86,9 @@ class TemplateApis(object):
                                  results)
                 continue
 
-            content_result = content_validation(template_def)
+            content_result = content_validation(
+                template_definition,
+                self.def_templates)
             if not content_result.is_valid_config:
                 self._add_result(path,
                                  self.FAILED_MSG,

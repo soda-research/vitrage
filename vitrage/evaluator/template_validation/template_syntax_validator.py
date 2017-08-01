@@ -19,6 +19,7 @@ from voluptuous import All
 from voluptuous import Any
 from voluptuous import Error
 from voluptuous import Invalid
+from voluptuous import Optional
 from voluptuous import Required
 from voluptuous import Schema
 
@@ -31,21 +32,24 @@ from vitrage.evaluator.template_validation.status_messages import status_msgs
 
 LOG = log.getLogger(__name__)
 
-
 RESULT_DESCRIPTION = 'Template syntax validation'
 
 
 def syntax_validation(template_conf):
-
     result = _validate_template_sections(template_conf)
 
     if result.is_valid_config:
         metadata = template_conf[TemplateFields.METADATA]
         result = _validate_metadata_section(metadata)
 
-    if result.is_valid_config:
+    if result.is_valid_config and TemplateFields.INCLUDES in template_conf:
+        includes = template_conf[TemplateFields.INCLUDES]
+        result = _validate_includes_section(includes)
+
+    if result.is_valid_config and TemplateFields.DEFINITIONS in template_conf:
         definitions = template_conf[TemplateFields.DEFINITIONS]
-        result = _validate_definitions_section(definitions)
+        has_includes = TemplateFields.INCLUDES in template_conf
+        result = _validate_definitions_section(definitions, has_includes)
 
     if result.is_valid_config:
         scenarios = template_conf[TemplateFields.SCENARIOS]
@@ -54,18 +58,52 @@ def syntax_validation(template_conf):
     return result
 
 
-def _validate_template_sections(template_conf):
+def def_template_syntax_validation(def_template_conf):
+    result = _validate_def_template_template_sections(def_template_conf)
 
+    if TemplateFields.INCLUDES in def_template_conf or \
+       TemplateFields.SCENARIOS in def_template_conf:
+        LOG.error('%s status code: %s' % (status_msgs[143], 143))
+        return get_fault_result(RESULT_DESCRIPTION, 143)
+
+    if result.is_valid_config:
+        metadata = def_template_conf[TemplateFields.METADATA]
+        result = _validate_metadata_section(metadata)
+
+    if result.is_valid_config:
+        definitions = def_template_conf[TemplateFields.DEFINITIONS]
+        result = _validate_definitions_section(definitions, False)
+
+    return result
+
+
+def _validate_def_template_template_sections(def_template_conf):
     schema = Schema({
         Required(TemplateFields.DEFINITIONS, msg=21): dict,
         Required(TemplateFields.METADATA, msg=62): dict,
-        Required(TemplateFields.SCENARIOS, msg=80): list
     })
+    return _validate_dict_schema(schema, def_template_conf)
+
+
+def _validate_template_sections(template_conf):
+    if TemplateFields.INCLUDES in template_conf:
+        schema = Schema({
+            Optional(TemplateFields.DEFINITIONS): dict,
+            Required(TemplateFields.METADATA, msg=62): dict,
+            Required(TemplateFields.SCENARIOS, msg=80): list,
+            Optional(TemplateFields.INCLUDES): list
+        })
+    else:
+        schema = Schema({
+            Required(TemplateFields.DEFINITIONS, msg=21): dict,
+            Required(TemplateFields.METADATA, msg=62): dict,
+            Required(TemplateFields.SCENARIOS, msg=80): list,
+            Optional(TemplateFields.INCLUDES): list
+        })
     return _validate_dict_schema(schema, template_conf)
 
 
 def _validate_metadata_section(metadata):
-
     any_str = Any(str, six.text_type)
 
     schema = Schema({
@@ -75,10 +113,45 @@ def _validate_metadata_section(metadata):
     return _validate_dict_schema(schema, metadata)
 
 
-def _validate_definitions_section(definitions):
+def _validate_includes_section(includes):
+    any_str = Any(str, six.text_type)
+    if not includes:
+        LOG.error('%s status code: %s' % (status_msgs[140], 140))
+        return get_fault_result(RESULT_DESCRIPTION, 140)
 
-    if TemplateFields.RELATIONSHIPS not in definitions or \
-            definitions[TemplateFields.RELATIONSHIPS] != '':
+    for name in includes:
+        schema = Schema({
+            Required(TemplateFields.NAME, msg=141): any_str
+        })
+        result = _validate_name_schema(schema, name)
+        if not result.is_valid_config:
+            return result
+
+    return result
+
+
+def _validate_name_schema(schema, name):
+    try:
+        schema(name)
+    except Error as e:
+
+        status_code = _get_status_code(e)
+        if status_code:
+            msg = status_msgs[status_code]
+        else:
+            # General syntax error
+            status_code = 4
+            msg = status_msgs[4] + str(e)
+
+        LOG.error('%s status code: %s' % (msg, status_code))
+        return get_fault_result(RESULT_DESCRIPTION, status_code, msg)
+
+    return get_correct_result(RESULT_DESCRIPTION)
+
+
+def _validate_definitions_section(definitions, has_includes):
+    if TemplateFields.RELATIONSHIPS not in definitions \
+            or definitions[TemplateFields.RELATIONSHIPS] != '':
         schema = Schema({
             Required(TemplateFields.ENTITIES, msg=20): list,
             TemplateFields.RELATIONSHIPS: list
@@ -88,8 +161,9 @@ def _validate_definitions_section(definitions):
     else:
         result = get_correct_result(RESULT_DESCRIPTION)
 
-    if result.is_valid_config:
-        result = _validate_entities(definitions[TemplateFields.ENTITIES])
+    if result.is_valid_config and TemplateFields.ENTITIES in definitions:
+        entities = definitions[TemplateFields.ENTITIES]
+        result = _validate_entities(entities, has_includes)
 
         relationships = definitions.get(TemplateFields.RELATIONSHIPS, None)
         if result.is_valid_config and relationships:
@@ -98,9 +172,8 @@ def _validate_definitions_section(definitions):
     return result
 
 
-def _validate_entities(entities):
-
-    if not entities:
+def _validate_entities(entities, has_includes):
+    if not entities and not has_includes:
         LOG.error('%s status code: %s' % (status_msgs[43], 43))
         return get_fault_result(RESULT_DESCRIPTION, 43)
 
@@ -121,7 +194,6 @@ def _validate_entities(entities):
 
 
 def _validate_entity_dict(entity_dict):
-
     any_str = Any(str, six.text_type)
     schema = Schema({
         Required(TemplateFields.CATEGORY, msg=42):
@@ -135,7 +207,6 @@ def _validate_entity_dict(entity_dict):
 
 
 def _validate_relationships(relationships):
-
     for relationship in relationships:
 
         schema = Schema({
@@ -153,7 +224,6 @@ def _validate_relationships(relationships):
 
 
 def _validate_relationship_dict(relationship_dict):
-
     any_str = Any(str, six.text_type)
     schema = Schema({
         Required(TemplateFields.SOURCE, msg=102): any_str,
@@ -166,7 +236,6 @@ def _validate_relationship_dict(relationship_dict):
 
 
 def _validate_scenarios_section(scenarios):
-
     if not scenarios:
         LOG.error('%s status code: %s' % (status_msgs[81], 81))
         return get_fault_result(RESULT_DESCRIPTION, 81)
@@ -188,7 +257,6 @@ def _validate_scenarios_section(scenarios):
 
 
 def _validate_scenario(scenario):
-
     any_str = Any(str, six.text_type)
     schema = Schema({
         Required(TemplateFields.CONDITION, msg=83): any_str,
@@ -203,7 +271,6 @@ def _validate_scenario(scenario):
 
 
 def _validate_actions_schema(actions):
-
     if not actions:
         LOG.error('%s status code: %s' % (status_msgs[121], 121))
         return get_fault_result(RESULT_DESCRIPTION, 121)
@@ -225,7 +292,6 @@ def _validate_actions_schema(actions):
 
 
 def _validate_action_schema(action):
-
     schema = Schema({
         Required(TemplateFields.ACTION_TYPE, msg=123):
             _validate_action_type_field(),
@@ -236,7 +302,6 @@ def _validate_action_schema(action):
 
 
 def _validate_dict_schema(schema, value):
-
     try:
         schema(value)
     except Error as e:
@@ -268,6 +333,7 @@ def _validate_template_id_value(msg=None):
             return str(v)
         else:
             raise Invalid(msg or 1)
+
     return f
 
 
@@ -277,6 +343,7 @@ def _validate_category_field(msg=None):
             return str(v)
         else:
             raise Invalid(msg or 45)
+
     return f
 
 
@@ -286,4 +353,5 @@ def _validate_action_type_field(msg=None):
             return str(v)
         else:
             raise Invalid(msg or 120)
+
     return f

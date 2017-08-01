@@ -43,17 +43,32 @@ from vitrage.evaluator.template_validation.content.raise_alarm_validator \
 from vitrage.evaluator.template_validation.content.set_state_validator \
     import SetStateValidator
 from vitrage.evaluator.template_validation.status_messages import status_msgs
+from vitrage.utils import evaluator as evaluator_utils
 
 LOG = log.getLogger(__name__)
 
 
-def content_validation(template):
+def content_validation(template, def_templates={}):
 
-    template_definitions = template[TemplateFields.DEFINITIONS]
-
+    result = get_content_correct_result()
     entities_index = {}
-    entities = template_definitions[TemplateFields.ENTITIES]
-    result = _validate_entities_definition(entities, entities_index)
+    template_definitions = {}
+
+    if TemplateFields.DEFINITIONS in template:
+        template_definitions = template[TemplateFields.DEFINITIONS]
+
+        if TemplateFields.ENTITIES in template_definitions:
+            entities = template_definitions[TemplateFields.ENTITIES]
+            result = _validate_entities_definition(entities, entities_index)
+
+    # If there are duplicate definitions in several includes under the same
+    # name, will regard the first one
+    if result.is_valid_config and TemplateFields.INCLUDES in template:
+
+        template_includes = template[TemplateFields.INCLUDES]
+        result = _validate_definitions_with_includes(template_includes,
+                                                     def_templates,
+                                                     entities_index)
 
     relationships_index = {}
 
@@ -64,11 +79,39 @@ def content_validation(template):
         result = _validate_relationships_definitions(relationships,
                                                      relationships_index,
                                                      entities_index)
+
+    if result.is_valid_config and TemplateFields.INCLUDES in template:
+        template_includes = template[TemplateFields.INCLUDES]
+        result = _validate_relationships_definitions_with_includes(
+            template_includes,
+            def_templates,
+            entities_index,
+            relationships_index)
+
     if result.is_valid_config:
         scenarios = template[TemplateFields.SCENARIOS]
         definitions_index = entities_index.copy()
         definitions_index.update(relationships_index)
         result = _validate_scenarios(scenarios, definitions_index)
+
+    return result
+
+
+def def_template_content_validation(def_template):
+    def_template_definitions = def_template[TemplateFields.DEFINITIONS]
+
+    entities_index = {}
+    entities = def_template_definitions[TemplateFields.ENTITIES]
+    result = _validate_entities_definition(entities, entities_index)
+
+    relationships_index = {}
+
+    if result.is_valid_config \
+            and TemplateFields.RELATIONSHIPS in def_template_definitions:
+        relationships = def_template_definitions[TemplateFields.RELATIONSHIPS]
+        result = _validate_relationships_definitions(relationships,
+                                                     relationships_index,
+                                                     entities_index)
 
     return result
 
@@ -98,6 +141,49 @@ def _validate_entity_definition(entity_dict, entities_index):
     return get_content_correct_result()
 
 
+def _validate_definitions_with_includes(
+        template_includes, def_templates, entities_index):
+
+    for include in template_includes:
+
+        name = include[TemplateFields.NAME]
+        def_template = evaluator_utils.find_def_template(name, def_templates)
+
+        if not def_template:
+
+            LOG.error('%s status code: %s' % (status_msgs[142], 142))
+            return get_content_fault_result(142)
+
+        def_template_definitions = def_template[TemplateFields.DEFINITIONS]
+        def_template_entities = \
+            def_template_definitions[TemplateFields.ENTITIES]
+        result = _validate_include_entities_definition(
+            def_template_entities, entities_index)
+
+        if not result.is_valid_config:
+            return result
+
+    return get_content_correct_result()
+
+
+def _validate_include_entities_definition(
+        def_template_entities,
+        entities_index):
+
+    for entity in def_template_entities:
+        entity_dict = entity[TemplateFields.ENTITY]
+        result = _validate_entity_definition(entity_dict, entities_index)
+
+        if not result.is_valid_config:
+            return result
+
+        if entity_dict[TemplateFields.TEMPLATE_ID] not in entities_index:
+            id = entity_dict[TemplateFields.TEMPLATE_ID]
+            entities_index[id] = entity_dict
+
+    return get_content_correct_result()
+
+
 def _validate_relationships_definitions(relationships,
                                         relationships_index,
                                         entities_index):
@@ -114,6 +200,49 @@ def _validate_relationships_definitions(relationships,
         template_id = relationship_dict[TemplateFields.TEMPLATE_ID]
         relationships_index[template_id] = relationship_dict
     return get_content_correct_result()
+
+
+def _validate_relationships_definitions_with_includes(template_includes,
+                                                      def_templates,
+                                                      entities_index,
+                                                      relationships_index):
+
+    for include in template_includes:
+
+        name = include[TemplateFields.NAME]
+        def_template = evaluator_utils.find_def_template(name, def_templates)
+
+        if def_template:
+            defs = def_template[TemplateFields.DEFINITIONS]
+            relationships = defs[TemplateFields.RELATIONSHIPS]
+
+            for relationship in relationships:
+                relationship_dict = relationship[TemplateFields.RELATIONSHIP]
+                template_id = relationship_dict[TemplateFields.TEMPLATE_ID]
+                if template_id not in relationships_index:
+                    result = _validate_def_template_relationship(
+                        relationship_dict,
+                        entities_index)
+
+                    if not result.is_valid_config:
+                        return result
+
+                    relationships_index[template_id] = relationship_dict
+
+    return get_content_correct_result()
+
+
+def _validate_def_template_relationship(relationship,
+                                        entities_index):
+
+    target = relationship[TemplateFields.TARGET]
+    result = validate_template_id(entities_index, target)
+
+    if result.is_valid_config:
+        source = relationship[TemplateFields.SOURCE]
+        result = validate_template_id(entities_index, source)
+
+    return result
 
 
 def _validate_relationship(relationship, relationships_index, entities_index):
