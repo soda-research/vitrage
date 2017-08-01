@@ -52,7 +52,11 @@ class ScenarioRepository(object):
 
     def get_scenarios_by_vertex(self, vertex):
 
-        entity_key = frozenset(vertex.properties.items())
+        try:
+            entity_key = frozenset(vertex.properties.items())
+        except Exception as e:
+            LOG.error('frozenset for vertex failed %s', str(vertex))
+            raise e
 
         scenarios = []
         for scenario_key, value in self.entity_scenarios.items():
@@ -148,9 +152,15 @@ class ScenarioRepository(object):
 
     @staticmethod
     def _create_edge_scenario_key(edge_desc):
-        return EdgeKeyScenario(edge_desc.edge.label,
-                               frozenset(edge_desc.source.properties.items()),
-                               frozenset(edge_desc.target.properties.items()))
+        try:
+            source_set = frozenset(edge_desc.source.properties.items())
+            target_set = frozenset(edge_desc.target.properties.items())
+        except Exception as e:
+            LOG.error('frozenset for edge failed - Source:%s Target:%s',
+                      str(edge_desc.source),
+                      str(edge_desc.target))
+            raise e
+        return EdgeKeyScenario(edge_desc.edge.label, source_set, target_set)
 
     def _add_entity_scenario(self, scenario, entity):
 
