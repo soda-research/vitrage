@@ -21,6 +21,7 @@ from osprofiler import profiler
 from pecan.core import abort
 
 from vitrage.api.controllers.rest import RootRestController
+from vitrage.api.controllers.v1 import count
 from vitrage.api.policy import enforce
 
 
@@ -30,6 +31,7 @@ LOG = log.getLogger(__name__)
 @profiler.trace_cls("alarm controller",
                     info={}, hide_args=False, trace_private=False)
 class AlarmsController(RootRestController):
+    count = count.CountsController()
 
     @pecan.expose('json')
     def index(self, vitrage_id, all_tenants=False):

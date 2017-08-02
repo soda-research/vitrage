@@ -21,6 +21,8 @@ from vitrage.api_handler.apis.base import ALARMS_ALL_QUERY
 from vitrage.api_handler.apis.base import EntityGraphApisBase
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import VertexProperties as VProps
+from vitrage.entity_graph.mappings.operational_alarm_severity import \
+    OperationalAlarmSeverity
 
 
 LOG = log.getLogger(__name__)
@@ -57,6 +59,34 @@ class AlarmApis(EntityGraphApisBase):
                                                  vertex_attr_filter=query)
 
         return json.dumps({'alarms': [v.properties for v in alarms]})
+
+    def get_alarm_counts(self, ctx, all_tenants):
+        LOG.debug("AlarmApis get_alarm_counts - all_tenants=%s", all_tenants)
+
+        project_id = ctx.get(self.TENANT_PROPERTY, None)
+        is_admin_project = ctx.get(self.IS_ADMIN_PROJECT_PROPERTY, False)
+
+        if all_tenants:
+            alarms = self.entity_graph.get_vertices(
+                query_dict=ALARMS_ALL_QUERY)
+        else:
+            alarms = self._get_alarms(project_id, is_admin_project)
+            alarms += self._get_alarms_via_resource(project_id,
+                                                    is_admin_project)
+            alarms = set(alarms)
+
+        counts = {OperationalAlarmSeverity.SEVERE: 0,
+                  OperationalAlarmSeverity.CRITICAL: 0,
+                  OperationalAlarmSeverity.WARNING: 0,
+                  OperationalAlarmSeverity.OK: 0,
+                  OperationalAlarmSeverity.NA: 0}
+
+        for alarm in alarms:
+            severity = alarm.get(VProps.VITRAGE_OPERATIONAL_SEVERITY)
+            if severity:
+                counts[severity] += 1
+
+        return json.dumps(counts)
 
     def _get_alarms(self, project_id, is_admin_project):
         """Finds all the alarms with project_id
