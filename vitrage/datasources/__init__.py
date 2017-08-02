@@ -45,9 +45,13 @@ OPTS = [
                min=1,
                help='Time to wait until retrying to snapshot the datasource'
                     ' in case of fault'),
-    cfg.StrOpt('notification_topic',
-               default='vitrage_notifications',
-               help='Vitrage configured notifications topic'),
+    cfg.ListOpt('notification_topics',
+                default=['vitrage_notifications'],
+                help='Vitrage configured notifications topic',
+                deprecated_name='notification_topic'),
+    cfg.StrOpt('notification_exchange',
+               required=False,
+               help='Exchange that is used for notifications.'),
     cfg.StrOpt('notification_topic_collector',
                default='vitrage_collector_notifications',
                help='The topic on which event will be sent from the '
