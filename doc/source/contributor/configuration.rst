@@ -11,6 +11,7 @@ General
    resource-state-config
    alarm-severity-config
    profiler-config
+   keycloak-config
 
 
 Datasources
