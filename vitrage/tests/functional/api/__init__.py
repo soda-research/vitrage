@@ -78,7 +78,7 @@ class FunctionalTest(base.BaseTest):
                               headers=headers, extra_environ=extra_environ,
                               status=status, method='put')
 
-    def post_json(self, path, params, expect_errors=False, headers=None,
+    def post_json(self, path, params=None, expect_errors=False, headers=None,
                   method="post", extra_environ=None, status=None):
         """Sends simulated HTTP POST request to Pecan test app.
 
