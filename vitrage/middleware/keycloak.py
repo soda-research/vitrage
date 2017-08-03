@@ -23,7 +23,7 @@ from webob import exc
 OPENID_CONNECT_USERINFO = '%s/realms/%s/protocol/openid-connect/userinfo'
 
 KEYCLOAK_OPTS = [
-    cfg.StrOpt('auth_url', default='http://127.0.0.1',
+    cfg.StrOpt('auth_url', default='http://127.0.0.1:9080/auth',
                help='Keycloak authentication server ip',),
     cfg.StrOpt('insecure', default=False,
                help='If True, SSL/TLS certificate verification is disabled'),
