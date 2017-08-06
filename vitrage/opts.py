@@ -23,6 +23,8 @@ import vitrage.datasources
 import vitrage.entity_graph.consistency
 import vitrage.evaluator
 import vitrage.keystone_client
+import vitrage.machine_learning
+import vitrage.machine_learning.plugins.jaccard_correlation
 import vitrage.notifier
 import vitrage.notifier.plugins.snmp
 import vitrage.os_clients
@@ -44,6 +46,10 @@ def list_opts():
         ('consistency', vitrage.entity_graph.consistency.OPTS),
         ('entity_graph', vitrage.entity_graph.OPTS),
         ('service_credentials', vitrage.keystone_client.OPTS),
+        ('machine_learning',
+         vitrage.machine_learning.OPTS),
+        ('jaccard_correlation',
+         vitrage.machine_learning.plugins.jaccard_correlation.OPTS),
         ('snmp', vitrage.notifier.plugins.snmp.OPTS),
         ('DEFAULT', itertools.chain(
             vitrage.os_clients.OPTS,

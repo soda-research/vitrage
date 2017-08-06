@@ -112,6 +112,8 @@ class GraphAction(object):
 class NotifierEventTypes(object):
     ACTIVATE_DEDUCED_ALARM_EVENT = 'vitrage.deduced_alarm.activate'
     DEACTIVATE_DEDUCED_ALARM_EVENT = 'vitrage.deduced_alarm.deactivate'
+    ACTIVATE_ALARM_EVENT = 'vitrage.alarm.activate'
+    DEACTIVATE_ALARM_EVENT = 'vitrage.alarm.deactivate'
     ACTIVATE_MARK_DOWN_EVENT = 'vitrage.mark_down.activate'
     DEACTIVATE_MARK_DOWN_EVENT = 'vitrage.mark_down.deactivate'
     EXECUTE_EXTERNAL_ACTION = 'vitrage.execute_external_action'
