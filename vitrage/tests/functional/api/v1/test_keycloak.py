@@ -37,8 +37,8 @@ HEADERS = {
     'X-Project-Id': 'my_realm'
 }
 
-OPENID_CONNECT_USERINFO = 'http://127.0.0.1/realms/my_realm/protocol/' \
-                          'openid-connect/userinfo'
+OPENID_CONNECT_USERINFO = 'http://127.0.0.1:9080/auth/realms/my_realm/' \
+                          'protocol/openid-connect/userinfo'
 
 USER_CLAIMS = {
     "sub": "248289761001",
