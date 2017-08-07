@@ -15,7 +15,12 @@
 import os
 import sys
 
-sys.path.insert(0, os.path.abspath('../..'))
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+ROOT = os.path.abspath(os.path.join(BASE_DIR, "..", ".."))
+
+sys.path.insert(0, ROOT)
+sys.path.insert(0, BASE_DIR)
+
 # -- General configuration ----------------------------------------------------
 
 # Add any Sphinx extension module names here, as strings. They can be
@@ -23,8 +28,13 @@ sys.path.insert(0, os.path.abspath('../..'))
 extensions = [
     'sphinx.ext.autodoc',
     # 'sphinx.ext.intersphinx',
-    'openstackdocstheme'
+    'openstackdocstheme',
+    'oslo_config.sphinxconfiggen',
 ]
+
+config_generator_config_file = os.path.join(ROOT,
+                                            'etc/vitrage/vitrage-config-generator.conf')
+sample_config_basename = '_static/vitrage'
 
 # autodoc generation is a bit aggressive and a nuisance when doing heavy
 # text edit cycles.
@@ -56,7 +66,7 @@ pygments_style = 'sphinx'
 # Sphinx are currently 'default' and 'sphinxdoc'.
 # html_theme_path = ["."]
 # html_theme = '_theme'
-# html_static_path = ['static']
+html_static_path = ['_static']
 html_theme = 'openstackdocs'
 
 # openstackdocstheme options

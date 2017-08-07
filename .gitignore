@@ -24,6 +24,7 @@ ChangeLog
 .coverage
 cover
 etc/vitrage/vitrage.conf
+doc/source/_static/
 
 #Python
 *.pyc

@@ -13,6 +13,7 @@ General
    profiler-config
    keycloak-config
 
+   ../configuration/index
 
 Datasources
 -----------
