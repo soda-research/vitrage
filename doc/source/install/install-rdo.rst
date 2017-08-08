@@ -175,6 +175,7 @@ Run the following commands:
 
 .. code:: bash
 
+    vitrage-collector
     vitrage-graph
     vitrage-api
     vitrage-notifier
