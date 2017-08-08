@@ -27,6 +27,8 @@ export KEEP_LOCALRC=1
 DEVSTACK_LOCAL_CONFIG+=$'\nenable_plugin heat git://git.openstack.org/openstack/heat'
 DEVSTACK_LOCAL_CONFIG+=$'\nenable_plugin ceilometer git://git.openstack.org/openstack/ceilometer'
 DEVSTACK_LOCAL_CONFIG+=$'\nenable_plugin aodh git://git.openstack.org/openstack/aodh'
+DEVSTACK_LOCAL_CONFIG+=$'\nenable_plugin mistral git://git.openstack.org/openstack/mistral'
+
 DEVSTACK_LOCAL_CONFIG+=$'\ndisable_service ceilometer-alarm-evaluator,ceilometer-alarm-notifier'
 DEVSTACK_LOCAL_CONFIG+=$'\ndisable_service n-net'
 DEVSTACK_LOCAL_CONFIG+=$'\ndisable_service s-account s-container s-object s-proxy'
@@ -62,6 +64,10 @@ driver = messagingv2
 topics = notifications, vitrage_notifications
 
 [[post-config|\$VITRAGE_CONF]]
+
+[DEFAULT]
+notifiers = mistral
+
 [static_physical]
 changes_interval = 5
 

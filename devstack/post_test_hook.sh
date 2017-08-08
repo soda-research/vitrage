@@ -13,21 +13,18 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-
 DEVSTACK_PATH="$BASE/new"
-
 
 if [ "$1" = "api" ]; then
   TESTS="topology"
 elif [ "$1" = "datasources" ]; then
-  TESTS="datasources|test_events"
+  TESTS="datasources|test_events|notifiers"
 else
   TESTS="topology"
 fi
 
 cd $DEVSTACK_PATH/
 sudo cp -rf vitrage/vitrage_tempest_tests/tests/resources/static_physical/static_physical_configuration.yaml /etc/vitrage/
-sudo cp -rf vitrage/vitrage_tempest_tests/tests/resources/templates/api/* /etc/vitrage/templates/
 sudo cp -rf vitrage/vitrage_tempest_tests/tests/resources/heat/heat_template.yaml /etc/vitrage/
 sudo cp -rf vitrage/vitrage_tempest_tests/tests/resources/heat/policy.json-tempest /etc/heat/
 
