@@ -50,22 +50,22 @@ class EvaluatorNotifier(object):
     def enabled(self):
         return len(self.oslo_notifiers) > 0
 
-    def notify(self, external_engine, properties):
+    def notify(self, execution_engine, properties):
         """Send a message to the wanted notifier
 
-        :param external_engine: the external engine that should handle the
+        :param execution_engine: the external engine that should handle the
                notification and execute an action
         :param properties: Properties to be processed by the external engine
         """
 
-        LOG.debug('external_engine: %s, properties: %s',
-                  external_engine,
+        LOG.debug('execution_engine: %s, properties: %s',
+                  execution_engine,
                   str(properties))
 
         try:
-            if external_engine in self.oslo_notifiers:
-                LOG.debug('Notifying %s', external_engine)
-                self.oslo_notifiers[external_engine].info(
+            if execution_engine in self.oslo_notifiers:
+                LOG.debug('Notifying %s', execution_engine)
+                self.oslo_notifiers[execution_engine].info(
                     {},
                     NotifierEventTypes.EXECUTE_EXTERNAL_ACTION,
                     properties)
