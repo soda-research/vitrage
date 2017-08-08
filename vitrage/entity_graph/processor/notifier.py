@@ -28,24 +28,41 @@ class GraphNotifier(object):
     """Allows writing to message bus"""
     def __init__(self, conf):
         self.oslo_notifier = None
-        try:
-            topic = conf.entity_graph.notifier_topic
-            notifier_plugins = conf.notifiers
-            if not topic or not notifier_plugins:
-                LOG.info('Graph Notifier is disabled')
-                return
-
-            self.oslo_notifier = oslo_messaging.Notifier(
-                get_transport(conf),
-                driver='messagingv2',
-                publisher_id='vitrage.graph',
-                topics=[topic])
-        except Exception as e:
-            LOG.info('Graph Notifier - missing configuration %s' % str(e))
+        topics = self._get_topics(conf)
+        if not topics:
+            LOG.info('Graph Notifier is disabled')
+            return
+        self.oslo_notifier = oslo_messaging.Notifier(
+            get_transport(conf),
+            driver='messagingv2',
+            publisher_id='vitrage.graph',
+            topics=topics)
 
     @property
     def enabled(self):
         return self.oslo_notifier is not None
+
+    def _get_topics(self, conf):
+        topics = []
+
+        try:
+            notifier_topic = conf.entity_graph.notifier_topic
+            notifier_plugins = conf.notifiers
+            if notifier_topic and notifier_plugins:
+                topics.append(notifier_topic)
+        except Exception as e:
+            LOG.info('Graph Notifier - missing configuration %s' % str(e))
+
+        try:
+            machine_learning_topic = \
+                conf.machine_learning.machine_learning_topic
+            machine_learning_plugins = conf.machine_learning.plugins
+            if machine_learning_topic and machine_learning_plugins:
+                topics.append(machine_learning_topic)
+        except Exception as e:
+            LOG.info('Machine Learning - missing configuration %s' % str(e))
+
+        return topics
 
     def notify_when_applicable(self, before, current, is_vertex, graph):
         """Callback subscribed to driver.graph updates
@@ -64,9 +81,9 @@ class GraphNotifier(object):
 
         # in case the vertex point to some resource add the resource to the
         # notification (useful for deduce alarm notifications)
-        if current.get(VProps.RESOURCE_ID):
+        if current.get(VProps.VITRAGE_RESOURCE_ID):
             current.properties[VProps.RESOURCE] = graph.get_vertex(
-                current.get(VProps.RESOURCE_ID))
+                current.get(VProps.VITRAGE_RESOURCE_ID))
 
         LOG.info('notification_types : %s', str(notification_types))
         LOG.info('notification properties : %s', current.properties)
@@ -99,6 +116,9 @@ def _get_notification_type(before, current, is_vertex):
         notification_type(_is_active_deduced_alarm,
                           NotifierEventTypes.ACTIVATE_DEDUCED_ALARM_EVENT,
                           NotifierEventTypes.DEACTIVATE_DEDUCED_ALARM_EVENT),
+        notification_type(_is_active_alarm,
+                          NotifierEventTypes.ACTIVATE_ALARM_EVENT,
+                          NotifierEventTypes.DEACTIVATE_ALARM_EVENT),
         notification_type(_is_marked_down,
                           NotifierEventTypes.ACTIVATE_MARK_DOWN_EVENT,
                           NotifierEventTypes.DEACTIVATE_MARK_DOWN_EVENT),
@@ -111,6 +131,12 @@ def _is_active_deduced_alarm(vertex):
         return False
     if vertex.get(VProps.VITRAGE_CATEGORY) == EntityCategory.ALARM and \
             vertex.get(VProps.VITRAGE_TYPE) == evaluator.VITRAGE_DATASOURCE:
+        return _is_relevant_vertex(vertex)
+    return False
+
+
+def _is_active_alarm(vertex):
+    if vertex and vertex.get(VProps.VITRAGE_CATEGORY) == EntityCategory.ALARM:
         return _is_relevant_vertex(vertex)
     return False
 

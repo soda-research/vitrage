@@ -7,6 +7,8 @@ enable_service vitrage-graph
 enable_service vitrage-notifier
 # Collector
 enable_service vitrage-collector
+# machine_learning
+enable_service vitrage-ml
 
 
 # Default directories
