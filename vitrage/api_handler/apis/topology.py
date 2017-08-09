@@ -46,7 +46,8 @@ class TopologyApis(EntityGraphApisBase):
         is_admin_project = ctx.get(self.IS_ADMIN_PROJECT_PROPERTY, False)
         ga = self.entity_graph.algo
 
-        if graph_type == 'tree':
+        if graph_type == 'tree' or \
+                ((root is not None) and (depth is not None)):
             if not query:
                 LOG.error("Graph-type 'tree' requires a filter.")
                 raise Exception("Graph-type 'tree' requires a filter.")
