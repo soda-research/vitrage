@@ -35,3 +35,4 @@ Notifiers
 
    nova-notifier
    notifier-snmp-plugin
+   mistral-config

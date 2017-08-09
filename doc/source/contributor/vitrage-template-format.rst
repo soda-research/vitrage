@@ -401,6 +401,22 @@ This can be used along with nova notifier to call force_down for a host
             action_target:
                 target: host # mandatory. entity (from the definitions section, only host) to be marked as down
 
+
+execute_mistral
+^^^^^^^^^^^^^^^
+Execute a Mistral workflow.
+If the Mistral notifier is used, the specified workflow will be executed with
+its parameters.
+::
+
+   action:
+        action_type: execute_mistral
+        properties:
+            workflow: demo_workflow            # mandatory. The name of the workflow to be executed
+            farewell: Goodbye and Good Luck!   # optional. A list of properties to be passed to the workflow
+            employee: John Smith               # optional. A list of properties to be passed to the workflow
+
+
 Future support & Open Issues
 ============================
 

@@ -28,6 +28,7 @@ OPTS = [
     cfg.StrOpt('cinder_version', default='2', help='Cinder version'),
     cfg.StrOpt('glance_version', default='2', help='Glance version'),
     cfg.StrOpt('heat_version', default='1', help='Heat version'),
+    cfg.StrOpt('mistral_version', default='2', help='Mistral version'),
 ]
 
 _client_modules = {
@@ -37,6 +38,7 @@ _client_modules = {
     'glance': 'glanceclient.client',
     'neutron': 'neutronclient.v2_0.client',
     'heat': 'heatclient.v1.client',
+    'mistral': 'mistralclient.api.v2.client',
 }
 
 
@@ -148,3 +150,26 @@ def heat_client(conf):
         return client
     except Exception as e:
         LOG.exception('Create Heat client - Got Exception: %s', e)
+
+
+def mistral_client(conf):
+    """Get an instance of Mistral client"""
+    try:
+        auth = v2.Password(
+            auth_url=conf.service_credentials.auth_url + '/v2.0',
+            username=conf.service_credentials.username,
+            password=conf.service_credentials.password,
+            tenant_name=conf.service_credentials.project_name)
+        session = kssession.Session(auth=auth)
+
+        endpoint = session.get_endpoint(service_type='workflowv2',
+                                        endpoint_type='internalURL')
+        args = {
+            'mistral_url': endpoint,
+            'session': session
+        }
+        client = driver_module('mistral').Client(**args)
+        LOG.info('Mistral client created')
+        return client
+    except Exception as e:
+        LOG.exception('Create Mistral client - Got Exception: %s', e)

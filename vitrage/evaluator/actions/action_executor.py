@@ -14,6 +14,7 @@
 
 import copy
 
+from copy import deepcopy
 from oslo_log import log
 from oslo_utils import importutils
 
@@ -113,11 +114,14 @@ class ActionExecutor(object):
     def _execute_external(self, params):
 
         # Send a notification to the external engine
-        external_engine = params[EXECUTION_ENGINE]
+        execution_engine = params[EXECUTION_ENGINE]
+        payload = deepcopy(params)
+        del payload[EXECUTION_ENGINE]
+
         LOG.debug('Notifying external engine %s. Properties: %s',
-                  external_engine,
-                  str(params))
-        self.notifier.notify(external_engine, params)
+                  execution_engine,
+                  str(payload))
+        self.notifier.notify(execution_engine, payload)
 
     @staticmethod
     def _add_default_properties(event):
