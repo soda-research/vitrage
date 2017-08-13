@@ -29,6 +29,8 @@ DEVSTACK_LOCAL_CONFIG+=$'\nenable_plugin ceilometer git://git.openstack.org/open
 DEVSTACK_LOCAL_CONFIG+=$'\nenable_plugin aodh git://git.openstack.org/openstack/aodh'
 DEVSTACK_LOCAL_CONFIG+=$'\ndisable_service ceilometer-alarm-evaluator,ceilometer-alarm-notifier'
 DEVSTACK_LOCAL_CONFIG+=$'\ndisable_service n-net'
+DEVSTACK_LOCAL_CONFIG+=$'\ndisable_service s-account s-container s-object s-proxy'
+
 
 DEVSTACK_LOCAL_CONFIG+="$(cat <<EOF
 

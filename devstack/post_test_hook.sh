@@ -13,37 +13,36 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-#sudo chmod -R a+rw /opt/stack/
+
 DEVSTACK_PATH="$BASE/new"
-#(cd $DEVSTACK_PATH/tempest/; sudo virtualenv .venv)
-#source $DEVSTACK_PATH/tempest/.venv/bin/activate
+
 
 if [ "$1" = "api" ]; then
   TESTS="topology"
 elif [ "$1" = "datasources" ]; then
-  TESTS="datasources\|test_events"
+  TESTS="datasources|test_events"
 else
   TESTS="topology"
 fi
 
-#(cd $DEVSTACK_PATH/tempest/; sudo pip install -r requirements.txt -r test-requirements.txt)
-
-(cd $DEVSTACK_PATH/; sudo sh -c 'cp -rf vitrage/vitrage_tempest_tests/tests/resources/static_physical/static_physical_configuration.yaml /etc/vitrage/')
-(cd $DEVSTACK_PATH/; sudo sh -c 'cp -rf vitrage/vitrage_tempest_tests/tests/resources/templates/api/* /etc/vitrage/templates/')
-(cd $DEVSTACK_PATH/; sudo sh -c 'cp -rf vitrage/vitrage_tempest_tests/tests/resources/heat/heat_template.yaml /etc/vitrage/')
-(cd $DEVSTACK_PATH/; sudo sh -c 'cp -rf vitrage/vitrage_tempest_tests/tests/resources/heat/policy.json-tempest /etc/heat/')
+cd $DEVSTACK_PATH/
+sudo cp -rf vitrage/vitrage_tempest_tests/tests/resources/static_physical/static_physical_configuration.yaml /etc/vitrage/
+sudo cp -rf vitrage/vitrage_tempest_tests/tests/resources/templates/api/* /etc/vitrage/templates/
+sudo cp -rf vitrage/vitrage_tempest_tests/tests/resources/heat/heat_template.yaml /etc/vitrage/
+sudo cp -rf vitrage/vitrage_tempest_tests/tests/resources/heat/policy.json-tempest /etc/heat/
 
 
 sudo cp $DEVSTACK_PATH/tempest/etc/logging.conf.sample $DEVSTACK_PATH/tempest/etc/logging.conf
 
-#(cd $DEVSTACK_PATH/vitrage/; sudo pip install -r requirements.txt -r  test-requirements.txt)
-#(cd $DEVSTACK_PATH/vitrage/; sudo python setup.py install)
+if [ "$DEVSTACK_GATE_USE_PYTHON3" == "True" ]; then
+        export PYTHON=python3
+fi
 
+cd $DEVSTACK_PATH/tempest/; sudo -E testr init
 
-(cd $BASE/new/tempest/; sudo -E testr init)
-
+env
 echo "Listing existing Tempest tests"
-(cd $DEVSTACK_PATH/tempest/; sudo sh -c 'testr list-tests vitrage_tempest_tests')
-(cd $DEVSTACK_PATH/tempest/; sudo sh -c 'testr list-tests vitrage_tempest_tests | grep -E '$TESTS' > vitrage_tempest_tests.list')
+sudo -E testr list-tests vitrage_tempest_tests
+sudo -E testr list-tests vitrage_tempest_tests | grep -E "$TESTS" > /tmp/vitrage_tempest_tests.list
 echo "Testing $1: $TESTS..."
-(cd $DEVSTACK_PATH/tempest/; sudo sh -c 'testr run --subunit --load-list=vitrage_tempest_tests.list | subunit-trace --fails')
+sudo -E testr run --subunit --load-list=/tmp/vitrage_tempest_tests.list | subunit-trace --fails
