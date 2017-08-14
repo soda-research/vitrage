@@ -858,6 +858,68 @@ Response Examples
      }
  ]
 
+Show Alarm Count
+^^^^^^^^^^^^^^^^
+
+Shows how many alarms of each operations severity exist
+
+GET /v1/alarm/count
+~~~~~~~~~~~~~~~~~~~
+
+Headers
+=======
+
+-  X-Auth-Token (string, required) - Keystone auth token
+
+Path Parameters
+===============
+
+None.
+
+Query Parameters
+================
+
+None.
+
+Request Body
+============
+
+* all_tenants - (boolean, optional) includes alarms of all tenants in the count (in case the user has the permissions).
+
+Request Examples
+================
+
+::
+
+    GET /v1/alarm/count/ HTTP/1.1
+    Host: 135.248.19.18:8999
+    X-Auth-Token: 2b8882ba2ec44295bf300aecb2caa4f7
+    Accept: application/json
+
+Response Status code
+====================
+
+-  200 - OK
+
+Response Body
+=============
+
+Returns a JSON object with all the alarms requested.
+
+Response Examples
+=================
+
+::
+
+   {
+     "severe": 2,
+     "critical": 1,
+     "warning": 3,
+     "na": 4,
+     "ok": 5
+   }
+
+
 Template Validate
 ^^^^^^^^^^^^^^^^^
 

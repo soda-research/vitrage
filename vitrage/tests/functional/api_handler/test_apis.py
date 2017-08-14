@@ -26,6 +26,8 @@ from vitrage.datasources import NOVA_INSTANCE_DATASOURCE
 from vitrage.datasources import NOVA_ZONE_DATASOURCE
 from vitrage.datasources.transformer_base \
     import create_cluster_placeholder_vertex
+from vitrage.entity_graph.mappings.operational_alarm_severity import \
+    OperationalAlarmSeverity
 from vitrage.graph.driver.networkx_graph import NXGraph
 import vitrage.graph.utils as graph_utils
 from vitrage.tests.unit.entity_graph.base import TestEntityGraphUnitBase
@@ -61,6 +63,23 @@ class TestApis(TestEntityGraphUnitBase):
         self.assertEqual(2, len(alarms))
         self._check_projects_entities(alarms, 'project_2', True)
 
+    def test_get_alarm_counts_with_not_admin_project(self):
+        # Setup
+        graph = self._create_graph()
+        apis = AlarmApis(graph, None)
+        ctx = {'tenant': 'project_2', 'is_admin': False}
+
+        # Action
+        counts = apis.get_alarm_counts(ctx, all_tenants=False)
+        counts = json.loads(counts)
+
+        # Test assertions
+        self.assertEqual(1, counts['WARNING'])
+        self.assertEqual(0, counts['SEVERE'])
+        self.assertEqual(1, counts['CRITICAL'])
+        self.assertEqual(0, counts['OK'])
+        self.assertEqual(0, counts['N/A'])
+
     def test_get_alarms_with_all_tenants(self):
         # Setup
         graph = self._create_graph()
@@ -74,6 +93,23 @@ class TestApis(TestEntityGraphUnitBase):
         # Test assertions
         self.assertEqual(5, len(alarms))
         self._check_projects_entities(alarms, None, True)
+
+    def test_get_alarm_counts_with_all_tenants(self):
+        # Setup
+        graph = self._create_graph()
+        apis = AlarmApis(graph, None)
+        ctx = {'tenant': 'project_1', 'is_admin': False}
+
+        # Action
+        counts = apis.get_alarm_counts(ctx, all_tenants=True)
+        counts = json.loads(counts)
+
+        # Test assertions
+        self.assertEqual(2, counts['WARNING'])
+        self.assertEqual(2, counts['SEVERE'])
+        self.assertEqual(1, counts['CRITICAL'])
+        self.assertEqual(0, counts['OK'])
+        self.assertEqual(0, counts['N/A'])
 
     def test_get_rca_with_admin_project(self):
         # Setup
@@ -418,33 +454,43 @@ class TestApis(TestEntityGraphUnitBase):
             'alarm_on_host',
             metadata={VProps.VITRAGE_TYPE: NOVA_HOST_DATASOURCE,
                       VProps.NAME: 'host_1',
-                      VProps.RESOURCE_ID: 'host_1'})
+                      VProps.RESOURCE_ID: 'host_1',
+                      VProps.VITRAGE_OPERATIONAL_SEVERITY:
+                          OperationalAlarmSeverity.SEVERE})
         alarm_on_instance_1_vertex = self._create_alarm(
             'alarm_on_instance_1',
             'deduced_alarm',
             project_id='project_1',
             metadata={VProps.VITRAGE_TYPE: NOVA_INSTANCE_DATASOURCE,
                       VProps.NAME: 'instance_1',
-                      VProps.RESOURCE_ID: 'sdg7849ythksjdg'})
+                      VProps.RESOURCE_ID: 'sdg7849ythksjdg',
+                      VProps.VITRAGE_OPERATIONAL_SEVERITY:
+                          OperationalAlarmSeverity.SEVERE})
         alarm_on_instance_2_vertex = self._create_alarm(
             'alarm_on_instance_2',
             'deduced_alarm',
             metadata={VProps.VITRAGE_TYPE: NOVA_INSTANCE_DATASOURCE,
                       VProps.NAME: 'instance_2',
-                      VProps.RESOURCE_ID: 'nbfhsdugf'})
+                      VProps.RESOURCE_ID: 'nbfhsdugf',
+                      VProps.VITRAGE_OPERATIONAL_SEVERITY:
+                          OperationalAlarmSeverity.WARNING})
         alarm_on_instance_3_vertex = self._create_alarm(
             'alarm_on_instance_3',
             'deduced_alarm',
             project_id='project_2',
             metadata={VProps.VITRAGE_TYPE: NOVA_INSTANCE_DATASOURCE,
                       VProps.NAME: 'instance_3',
-                      VProps.RESOURCE_ID: 'nbffhsdasdugf'})
+                      VProps.RESOURCE_ID: 'nbffhsdasdugf',
+                      VProps.VITRAGE_OPERATIONAL_SEVERITY:
+                          OperationalAlarmSeverity.CRITICAL})
         alarm_on_instance_4_vertex = self._create_alarm(
             'alarm_on_instance_4',
             'deduced_alarm',
             metadata={VProps.VITRAGE_TYPE: NOVA_INSTANCE_DATASOURCE,
                       VProps.NAME: 'instance_4',
-                      VProps.RESOURCE_ID: 'ngsuy76hgd87f'})
+                      VProps.RESOURCE_ID: 'ngsuy76hgd87f',
+                      VProps.VITRAGE_OPERATIONAL_SEVERITY:
+                          OperationalAlarmSeverity.WARNING})
 
         # create links
         edges = list()

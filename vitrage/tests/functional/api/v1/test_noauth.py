@@ -52,7 +52,6 @@ class NoAuthTest(FunctionalTest):
             self.assertEqual('200 OK', resp.status)
 
     def test_noauth_mode_get_topology(self):
-
         with mock.patch('pecan.request') as request:
             request.client.call.return_value = '{}'
             params = dict(depth=None, graph_type='graph', query=None,
@@ -65,7 +64,6 @@ class NoAuthTest(FunctionalTest):
             self.assertEqual({}, resp.json)
 
     def test_noauth_mode_list_alarms(self):
-
         with mock.patch('pecan.request') as request:
             request.client.call.return_value = '{"alarms": []}'
             params = dict(vitrage_id='all', all_tenants=False)
@@ -74,6 +72,16 @@ class NoAuthTest(FunctionalTest):
             self.assertEqual(1, request.client.call.call_count)
             self.assertEqual('200 OK', resp.status)
             self.assertEqual([], resp.json)
+
+    def test_noauth_mode_show_alarm_count(self):
+        with mock.patch('pecan.request') as request:
+            request.client.call.return_value = '{}'
+            params = dict(all_tenants=False)
+            resp = self.post_json('/alarm/count/', params=params)
+
+            self.assertEqual(1, request.client.call.call_count)
+            self.assertEqual('200 OK', resp.status)
+            self.assertEqual({}, resp.json)
 
     def test_noauth_mode_list_resources(self):
 

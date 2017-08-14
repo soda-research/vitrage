@@ -6,6 +6,8 @@
   "list resources:all_tenants": "role:admin",
   "list alarms": "",
   "list alarms:all_tenants": "role:admin",
+  "get alarms count": "",
+  "get alarms count:all_tenants": "role:admin",
   "get rca": "",
   "get rca:all_tenants": "role:admin",
   "template validate": "",
