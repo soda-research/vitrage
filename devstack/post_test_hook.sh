@@ -23,12 +23,9 @@ else
   TESTS="topology"
 fi
 
-cd $DEVSTACK_PATH/
-sudo cp -rf vitrage/vitrage_tempest_tests/tests/resources/static_physical/static_physical_configuration.yaml /etc/vitrage/
-sudo cp -rf vitrage/vitrage_tempest_tests/tests/resources/heat/heat_template.yaml /etc/vitrage/
-sudo cp -rf vitrage/vitrage_tempest_tests/tests/resources/heat/policy.json-tempest /etc/heat/
-
-
+sudo cp -rf $DEVSTACK_PATH/vitrage/vitrage_tempest_tests/tests/resources/static_physical/static_physical_configuration.yaml /etc/vitrage/
+sudo cp -rf $DEVSTACK_PATH/vitrage/vitrage_tempest_tests/tests/resources/heat/heat_template.yaml /etc/vitrage/
+sudo cp -rf $DEVSTACK_PATH/vitrage/vitrage_tempest_tests/tests/resources/heat/policy.json-tempest /etc/heat/
 sudo cp $DEVSTACK_PATH/tempest/etc/logging.conf.sample $DEVSTACK_PATH/tempest/etc/logging.conf
 
 if [ "$DEVSTACK_GATE_USE_PYTHON3" == "True" ]; then
@@ -37,7 +34,6 @@ fi
 
 cd $DEVSTACK_PATH/tempest/; sudo -E testr init
 
-env
 echo "Listing existing Tempest tests"
 sudo -E testr list-tests vitrage_tempest_tests
 sudo -E testr list-tests vitrage_tempest_tests | grep -E "$TESTS" > /tmp/vitrage_tempest_tests.list
