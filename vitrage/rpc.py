@@ -30,21 +30,22 @@ LOG = log.getLogger(__name__)
 
 
 class ProfilerContextSerializer(messaging.Serializer):
-    def __init__(self, base):
-        self._base = base
+    def __init__(self, serializer):
+        self._serializer = serializer
 
     def serialize_entity(self, context, entity):
-        if not self._base:
+        if not self._serializer:
             return entity
-        return self._base.serialize_entity(context, entity)
+        return self._serializer.serialize_entity(context, entity)
 
     def deserialize_entity(self, context, entity):
-        if not self._base:
+        if not self._serializer:
             return entity
-        return self._base.deserialize_entity(context, entity)
+        return self._serializer.deserialize_entity(context, entity)
 
     def serialize_context(self, context):
-        ctx = self._base.serialize_context(context) if self._base else {}
+        ctx = self._serializer.serialize_context(context) \
+            if self._serializer else context
 
         pfr = profiler.get()
 
@@ -63,8 +64,8 @@ class ProfilerContextSerializer(messaging.Serializer):
         if trace_info:
             profiler.init(**trace_info)
 
-        return self._base.deserialize_context(context)\
-            if self._base else context
+        return self._serializer.deserialize_context(context)\
+            if self._serializer else context
 
 
 def set_defaults(control_exchange):
@@ -76,7 +77,7 @@ def get_client(transport, target, version_cap=None, serializer=None):
 
     if profiler:
         LOG.info('profiler enabled for RPC client')
-        serializer = ProfilerContextSerializer(base=serializer)
+        serializer = ProfilerContextSerializer(serializer=serializer)
 
     return messaging.RPCClient(transport,
                                target,
@@ -89,7 +90,7 @@ def get_server(target, endpoints, transport, serializer=None):
 
     if profiler:
         LOG.info('profiler enabled for RPC server')
-        serializer = ProfilerContextSerializer(base=serializer)
+        serializer = ProfilerContextSerializer(serializer=serializer)
 
     access_policy = dispatcher.DefaultRPCAccessPolicy
     return messaging.get_rpc_server(transport,
