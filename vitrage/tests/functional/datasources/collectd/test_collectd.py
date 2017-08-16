@@ -68,11 +68,13 @@ class TestCollectd(TestDataSourcesBase):
 
         time1 = time.time()
         severity1 = 'WARNING'
+        link_down_message = 'link state of "qvo818dd156-be" is "DOWN"'
         collectd_event = self._create_collectd_event(time1,
                                                      resource_type,
                                                      resource_name,
                                                      host_name,
-                                                     severity1)
+                                                     severity1,
+                                                     link_down_message)
 
         # Action
         processor.process_event(collectd_event)
@@ -109,7 +111,8 @@ class TestCollectd(TestDataSourcesBase):
                                                      resource_type,
                                                      resource_name,
                                                      host_name,
-                                                     severity2)
+                                                     severity2,
+                                                     link_down_message)
 
         processor.process_event(collectd_event)
 
@@ -131,11 +134,13 @@ class TestCollectd(TestDataSourcesBase):
         # Action 3 - clear the alarm
         time3 = time.time()
         severity3 = 'OK'
+        link_up_message = 'link state of "qvo818dd156-be" is "UP"'
         collectd_event = self._create_collectd_event(time3,
                                                      resource_type,
                                                      resource_name,
                                                      host_name,
-                                                     severity3)
+                                                     severity3,
+                                                     link_up_message)
 
         processor.process_event(collectd_event)
 
@@ -153,13 +158,14 @@ class TestCollectd(TestDataSourcesBase):
                                resource_type,
                                resource_name,
                                host_name,
-                               severity):
+                               severity,
+                               message):
         update_vals = {CProps.TIME: time,
                        DSProps.SAMPLE_DATE: format_unix_timestamp(time),
                        CProps.HOST: host_name,
                        CProps.RESOURCE_TYPE: resource_type,
                        CProps.RESOURCE_NAME: resource_name,
-                       CProps.MESSAGE: 'A message for you',
+                       CProps.MESSAGE: message,
                        CProps.SEVERITY: severity}
 
         spec_list = mock_transformer.simple_collectd_alarm_generators(
