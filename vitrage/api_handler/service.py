@@ -44,7 +44,7 @@ class VitrageApiHandlerService(os_service.Service):
 
         super(VitrageApiHandlerService, self).start()
 
-        transport = messaging.get_transport(self.conf)
+        transport = messaging.get_rpc_transport(self.conf)
         rabbit_hosts = self.conf.oslo_messaging_rabbit.rabbit_hosts
         target = oslo_messaging.Target(topic=self.conf.rpc_topic,
                                        server=rabbit_hosts)
