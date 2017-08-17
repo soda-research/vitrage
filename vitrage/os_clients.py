@@ -12,8 +12,6 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import keystoneauth1.identity.v2 as v2
-import keystoneauth1.session as kssession
 from oslo_config import cfg
 from oslo_log import log
 from oslo_utils import importutils as utils
@@ -150,13 +148,7 @@ def heat_client(conf):
 def mistral_client(conf):
     """Get an instance of Mistral client"""
     try:
-        auth = v2.Password(
-            auth_url=conf.service_credentials.auth_url + '/v2.0',
-            username=conf.service_credentials.username,
-            password=conf.service_credentials.password,
-            tenant_name=conf.service_credentials.project_name)
-        session = kssession.Session(auth=auth)
-
+        session = keystone_client.get_session(conf)
         endpoint = session.get_endpoint(service_type='workflowv2',
                                         endpoint_type='internalURL')
         args = {
