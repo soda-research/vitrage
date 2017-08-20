@@ -11,11 +11,11 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+import time
 
 from oslo_log import log
 from oslo_service import service as os_service
 from vitrage.common.constants import DatasourceAction
-from vitrage.datasources.rescheduler import ReScheduler
 
 LOG = log.getLogger(__name__)
 
@@ -43,35 +43,37 @@ class SnapshotsService(DatasourceService):
         init_ttl = self.conf.consistency.initialization_max_retries * \
             self.conf.consistency.initialization_interval
 
-        snap_scheduler = ReScheduler()
-
         for ds_driver in self.registered_datasources.values():
+            callback = self.entities_to_queue(
+                ds_driver,
+                DatasourceAction.INIT_SNAPSHOT,
+                fault_interval,
+                init_ttl)
+            self.tg.add_thread(callback)
 
-            snap_scheduler.schedule(
-                func=self.entities_to_queue(ds_driver,
-                                            DatasourceAction.INIT_SNAPSHOT),
-                standard_interval=standard_interval,
-                fault_interval=fault_interval,
-                times=1,
-                ttl=init_ttl,
-                fault_callback=ds_driver.callback_on_fault)
-
-            snap_scheduler.schedule(
-                func=self.entities_to_queue(ds_driver,
-                                            DatasourceAction.SNAPSHOT),
-                initial_delay=standard_interval,
-                standard_interval=standard_interval,
-                fault_interval=fault_interval,
-                fault_callback=ds_driver.callback_on_fault)
-
-        self.tg.add_thread(snap_scheduler.run)
+            callback = self.entities_to_queue(
+                ds_driver,
+                DatasourceAction.SNAPSHOT,
+                fault_interval,
+                standard_interval)
+            self.tg.add_timer(standard_interval, callback, standard_interval)
 
         LOG.info('Vitrage datasources Snapshot Service - Started!')
 
-    def entities_to_queue(self, driver, datasource_action):
+    def entities_to_queue(self, driver, action, fault_interval, timeout):
         def _entities_to_queue():
-            for entity in driver.get_all(datasource_action):
-                self.send_to_queue(entity)
+            endtime = time.time() + timeout
+            while time.time() < endtime:
+                try:
+                    LOG.info('Driver %s - %s', type(driver).__name__, action)
+                    items = driver.get_all(action)
+                    for entity in items:
+                        self.send_to_queue(entity)
+                    break
+                except Exception as e:
+                    LOG.exception('Driver Exception: {0}'.format(e))
+                    time.sleep(fault_interval)
+                    driver.callback_on_fault(e)
         return _entities_to_queue
 
     def stop(self, graceful=False):

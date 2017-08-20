@@ -36,7 +36,7 @@ class DriverBase(object):
         pass
 
     def callback_on_fault(self, exception):
-        LOG.exception('Exception: {0}'.format(exception))
+        pass
 
     @staticmethod
     def _get_end_message(entity_type):
