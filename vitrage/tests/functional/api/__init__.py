@@ -50,12 +50,12 @@ class FunctionalTest(base.BaseTest):
         self.CONF.set_override('policy_file', os.path.join(vitrage_root,
                                                            'etc', 'vitrage',
                                                            'policy.json'),
-                               group='oslo_policy', enforce_type=True)
+                               group='oslo_policy')
 
         self.CONF.set_override('paste_config', os.path.join(vitrage_root,
                                                             'etc', 'vitrage',
                                                             'api-paste.ini'),
-                               group='api', enforce_type=True)
+                               group='api')
 
         self.CONF.set_override('auth_mode', self.auth, group='api')
         self.app = webtest.TestApp(app.load_app(self.CONF))
