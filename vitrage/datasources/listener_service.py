@@ -90,8 +90,13 @@ class NotificationsEndpoint(object):
             if str(event_type) == event_string:
 
                 callbacks = self.enrich_callbacks_by_events[event_string]
-                enriched_events = [callback(payload, event_type)
-                                   for callback in callbacks]
+                enriched_events = []
+                for callback in callbacks:
+                    result = callback(payload, event_type)
+                    if isinstance(result, list):
+                        enriched_events += result
+                    else:
+                        enriched_events.append(result)
                 self._enqueue_events(enriched_events)
 
     def _enqueue_events(self, enriched_events):
