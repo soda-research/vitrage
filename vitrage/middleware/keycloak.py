@@ -13,20 +13,34 @@
 # under the License.
 
 import jwt
+import os
 import requests
 
 from oslo_config import cfg
+from oslo_log import log as logging
 from oslo_middleware import base
 from oslo_serialization import jsonutils
+from six.moves import urllib
 from webob import exc
+
+
+LOG = logging.getLogger(__name__)
 
 OPENID_CONNECT_USERINFO = '%s/realms/%s/protocol/openid-connect/userinfo'
 
+KEYCLOAK_GROUP = 'keycloak'
 KEYCLOAK_OPTS = [
     cfg.StrOpt('auth_url', default='http://127.0.0.1:9080/auth',
                help='Keycloak authentication server ip',),
     cfg.StrOpt('insecure', default=False,
                help='If True, SSL/TLS certificate verification is disabled'),
+    cfg.StrOpt('certfile',
+               help='Required if identity server requires client certificate'),
+    cfg.StrOpt('keyfile',
+               help='Required if identity server requires client certificate'),
+    cfg.StrOpt('cafile',
+               help='A PEM encoded Certificate Authority to use when verifying'
+               ' HTTPs connections. Defaults to system CAs.'),
 ]
 
 
@@ -35,9 +49,13 @@ class KeycloakAuth(base.ConfigurableMiddleware):
     def __init__(self, application, conf=None):
         super(KeycloakAuth, self).__init__(application, conf)
 
-        self.oslo_conf.register_opts(KEYCLOAK_OPTS, 'keycloak')
-        self.auth_url = self._conf_get('auth_url', 'keycloak')
-        self.insecure = self._conf_get('insecure', 'keycloak')
+        self.oslo_conf.register_opts(KEYCLOAK_OPTS, '%s' % KEYCLOAK_GROUP)
+        self.auth_url = self._conf_get('auth_url', KEYCLOAK_GROUP)
+        self.insecure = self._conf_get('insecure', KEYCLOAK_GROUP)
+        self.certfile = self._conf_get('certfile', KEYCLOAK_GROUP)
+        self.keyfile = self._conf_get('keyfile', KEYCLOAK_GROUP)
+        self.cafile = self._conf_get('cafile', KEYCLOAK_GROUP) or \
+            self._get_system_ca_file()
 
     @property
     def reject_auth_headers(self):
@@ -73,8 +91,15 @@ class KeycloakAuth(base.ConfigurableMiddleware):
         endpoint = OPENID_CONNECT_USERINFO % (self.auth_url, realm_name)
         headers = {'Authorization': 'Bearer %s' % self.token}
 
+        verify = None
+        if urllib.parse.urlparse(endpoint).scheme == "https":
+            verify = False if self.insecure else self.cafile
+
+        cert = (self.certfile, self.keyfile) if self.certfile and self.keyfile \
+            else None
+
         resp = requests.get(endpoint, headers=headers,
-                            verify=not self.insecure)
+                            verify=verify, cert=cert)
 
         resp.raise_for_status()
 
@@ -95,6 +120,24 @@ class KeycloakAuth(base.ConfigurableMiddleware):
                                    headers=self.reject_auth_headers,
                                    charset='UTF-8',
                                    content_type='application/json')
+
+    @staticmethod
+    def _get_system_ca_file():
+        """Return path to system default CA file."""
+        # Standard CA file locations for Debian/Ubuntu, RedHat/Fedora,
+        # Suse, FreeBSD/OpenBSD, MacOSX, and the bundled ca
+        ca_path = ['/etc/ssl/certs/ca-certificates.crt',
+                   '/etc/pki/tls/certs/ca-bundle.crt',
+                   '/etc/ssl/ca-bundle.pem',
+                   '/etc/ssl/cert.pem',
+                   '/System/Library/OpenSSL/certs/cacert.pem',
+                   requests.certs.where()]
+        for ca in ca_path:
+            LOG.debug("Looking for ca file %s", ca)
+            if os.path.exists(ca):
+                LOG.debug("Using ca file %s", ca)
+                return ca
+        LOG.warning("System ca file could not be found.")
 
 
 filter_factory = KeycloakAuth.factory
