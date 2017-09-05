@@ -96,7 +96,7 @@ tuple with the following details:
 
 Note that for every driver there should be a matching Transformer.
 A transformer should inherit from
-``vitrage.datasoures.transformer_base.TransformerBase`` class and
+``vitrage.datasources.transformer_base.TransformerBase`` class and
 must implement the following methods:
 
 +----------------------------------+------------------------------------+----------------------------------------+

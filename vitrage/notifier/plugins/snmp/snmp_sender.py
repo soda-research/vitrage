@@ -65,7 +65,7 @@ class SnmpSender(SnmpSenderBase):
                                      self._get_var_binds(alarm_data),
                                      alarm_oid)
         else:
-            LOG.info('Vitrage snmp Info: Unregconized alarm. Alarm type: %s',
+            LOG.info('Vitrage snmp Info: Unrecognized alarm. Alarm type: %s',
                      alarm_data[VProps.NAME])
 
     def _get_details(self, alarm_data):

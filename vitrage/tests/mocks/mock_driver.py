@@ -253,8 +253,7 @@ def simple_stack_generators(stack_num, instance_and_volume_num,
     :param update_vals:  number of values from update event
     :param update_events: number of events from update event
     :param stack_num: number of stacks
-    :param volume_num: number of volumes
-    :param instance_num: number of instances
+    :param instance_and_volume_num: number of volumes and instances
     :param snapshot_events: number of snapshot events per host
     :param snap_vals: preset vals for ALL snapshot events
     :return: generators for volume_num volumes as specified
@@ -299,7 +298,7 @@ def simple_consistency_generators(consistency_num, update_events=0,
 
     :param update_vals:  number of values from update event
     :param update_events: number of events from update event
-    :param consistency_num: number of consisteny events
+    :param consistency_num: number of consistency events
     :param snap_vals: preset vals for ALL snapshot events
     :return: generators for consistency_num consistency events as specified
     """

@@ -53,7 +53,7 @@ Let's take a basic template as example
           action_target:
            target: resource
 
-``TemplateData`` will build ``entites``, ``relationships`` and most importantly
+``TemplateData`` will build ``entities``, ``relationships`` and most importantly
 ``scenarios`` out from the definition.
 
 .. code-block:: python

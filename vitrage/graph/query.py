@@ -93,15 +93,15 @@ def _create_query_expression(query, parent_operator=None):
     # Recursion evaluate leaf (stop condition)
     elif parent_operator in operators:
         for key, val in query.items():
-            expressions.append('item.get(' + _evaluatable_str(key) + ')' +
-                               parent_operator + ' ' + _evaluatable_str(val))
+            expressions.append('item.get(' + _evaluable_str(key) + ')' +
+                               parent_operator + ' ' + _evaluable_str(val))
         return _join_logical_operator('and', expressions)
     else:
         raise VitrageError('invalid partial query format',
                            parent_operator, query)
 
 
-def _evaluatable_str(value):
+def _evaluable_str(value):
     """wrap string/unicode with back tick"""
     if isinstance(value, six.string_types):
         return '\'' + value + '\''
