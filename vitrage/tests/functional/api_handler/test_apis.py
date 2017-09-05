@@ -324,8 +324,8 @@ class TestApis(TestEntityGraphUnitBase):
 
         # Test assertions
         self.assertIsNotNone(resource)
-        self._check_resource_propeties(resource, 'zone_1',
-                                       NOVA_ZONE_DATASOURCE)
+        self._check_resource_properties(resource, 'zone_1',
+                                        NOVA_ZONE_DATASOURCE)
 
     def test_resource_show_with_not_admin_and_no_project_resource(self):
         # Setup
@@ -351,9 +351,9 @@ class TestApis(TestEntityGraphUnitBase):
 
         # Test assertions
         self.assertIsNotNone(resource)
-        self._check_resource_propeties(resource, 'instance_2',
-                                       NOVA_INSTANCE_DATASOURCE,
-                                       project_id='project_1')
+        self._check_resource_properties(resource, 'instance_2',
+                                        NOVA_INSTANCE_DATASOURCE,
+                                        project_id='project_1')
 
     def test_resource_show_with_not_admin_and_resource_in_other_project(self):
         # Setup
@@ -379,9 +379,9 @@ class TestApis(TestEntityGraphUnitBase):
 
         # Test assertions
         self.assertIsNotNone(resource)
-        self._check_resource_propeties(resource, 'instance_2',
-                                       NOVA_INSTANCE_DATASOURCE,
-                                       project_id='project_1')
+        self._check_resource_properties(resource, 'instance_2',
+                                        NOVA_INSTANCE_DATASOURCE,
+                                        project_id='project_1')
 
     def test_resource_show_with_admin_and_resource_in_other_project(self):
         # Setup
@@ -395,9 +395,9 @@ class TestApis(TestEntityGraphUnitBase):
 
         # Test assertions
         self.assertIsNotNone(resource)
-        self._check_resource_propeties(resource, 'instance_2',
-                                       NOVA_INSTANCE_DATASOURCE,
-                                       project_id='project_1')
+        self._check_resource_properties(resource, 'instance_2',
+                                        NOVA_INSTANCE_DATASOURCE,
+                                        project_id='project_1')
 
     def _check_projects_entities(self,
                                  alarms,
@@ -415,8 +415,8 @@ class TestApis(TestEntityGraphUnitBase):
                      (tmp_project_id and tmp_project_id == project_id))
             self.assertEqual(True, condition)
 
-    def _check_resource_propeties(self, resource, vitrage_id,
-                                  resource_type, project_id=None):
+    def _check_resource_properties(self, resource, vitrage_id,
+                                   resource_type, project_id=None):
         self.assertEqual(resource[VProps.VITRAGE_ID], vitrage_id)
         self.assertEqual(resource[VProps.ID], vitrage_id)
         self.assertEqual(resource[VProps.VITRAGE_CATEGORY],

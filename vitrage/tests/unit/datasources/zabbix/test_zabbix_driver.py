@@ -121,7 +121,7 @@ class ZabbixDriverTest(ZabbixBaseTest):
         self._assert_contains(expected_alarm2, alarms)
 
         # Step 4 - Check inactive alarms. Get all function should return
-        # inactive alarm (alarm that teir status has changed to OK)
+        # inactive alarm (alarm that its status has changed to OK)
         # Test setup
         alarm_data1 = self._extract_alarm_data()
         alarm_data2 = self._extract_alarm_data(z_resource_name='compute-2')
