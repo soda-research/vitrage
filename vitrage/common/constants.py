@@ -39,7 +39,6 @@ class VertexProperties(object):
     RAWTEXT = 'rawtext'
     RESOURCE_ID = 'resource_id'
     RESOURCE_NAME = 'resource_name'
-    VITRAGE_RESOURCE_ID = 'vitrage_resource_id'
     VITRAGE_RESOURCE_TYPE = 'vitrage_resource_type'
     RESOURCE = 'resource'
     IS_REAL_VITRAGE_ID = 'is_real_vitrage_id'
