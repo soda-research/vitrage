@@ -81,7 +81,7 @@ class StressNotificationsService(os_service.Service):
 
     def stress_notifications(self):
         notifications = []
-        for i in xrange(EXISTING_COMPUTES_NUM * VMS_PER_COMPUTE):
+        for i in range(EXISTING_COMPUTES_NUM * VMS_PER_COMPUTE):
             vm = create_vm(i, i % EXISTING_COMPUTES_NUM)
             port = create_port(i, vm[0][1]['instance_id'], vm[0][1]['host'],
                                NET_ID)
