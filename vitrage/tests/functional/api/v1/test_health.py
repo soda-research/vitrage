@@ -15,6 +15,7 @@
 # limitations under the License.
 
 # noinspection PyPackageRequirements
+
 from vitrage.tests.functional import api
 
 
@@ -27,3 +28,10 @@ class HealthTest(api.FunctionalTest):
     def test_health(self):
         resp = self.app.get('/healthcheck')
         self.assertEqual('200 OK', resp.status)
+
+    def test_health_json(self):
+        resp = self.app.get('/healthcheck',
+                            headers={'Accept': 'application/json'})
+        self.assertEqual('200 OK', resp.status)
+        self.assertDictEqual({'detailed': False, 'reasons': ['OK']},
+                             resp.json, None)
