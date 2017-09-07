@@ -38,14 +38,14 @@ class AodhDriverTest(base.BaseTest):
         cls.conf = cfg.ConfigOpts()
         cls.conf.register_opts(cls.OPTS, group=AODH_DATASOURCE)
 
-    def test_enrich_event(self):
+    def test_event_alarm_notifications(self):
 
         aodh_driver = MockAodhDriver(self.conf)
 
         # 1. alarm creation with 'ok' state
         # prepare data
         detail_data = {"type": "creation",
-                       AodhProps.DETAIL: self._extract_alarm_data()}
+                       AodhProps.DETAIL: self._create_alarm_data_type_event()}
         generators = \
             mock_driver.simple_aodh_alarm_notification_generators(
                 alarm_num=1,
@@ -97,7 +97,7 @@ class AodhDriverTest(base.BaseTest):
         # prepare data
         detail_data = {"type": "creation",
                        AodhProps.DETAIL:
-                           self._extract_alarm_data(state="alarm")}
+                           self._create_alarm_data_type_event(state="alarm")}
         generators = \
             mock_driver.simple_aodh_alarm_notification_generators(
                 alarm_num=1,
@@ -180,10 +180,166 @@ class AodhDriverTest(base.BaseTest):
         # Test assertions
         self.assertIsNone(entity)
 
-    def _extract_alarm_data(self,
-                            state="ok",
-                            type="event",
-                            rule=None):
+    def test_gnocchi_threshold_alarm_notifications(self):
+        aodh_driver = MockAodhDriver(self.conf)
+
+        # 1. alarm creation with 'ok' state
+        # prepare data
+        detail_data = {"type": "gnocchi_resources_threshold",
+                       AodhProps.DETAIL: self._create_alarm_data_gnocchi()}
+        generators = \
+            mock_driver.simple_aodh_alarm_notification_generators(
+                alarm_num=1,
+                update_events=1,
+                update_vals=detail_data)
+        alarm = mock_driver.generate_sequential_events_list(generators)[0]
+        alarm_info = alarm.copy()
+
+        # action
+        entity = aodh_driver.enrich_event(alarm, AodhEventType.CREATION)
+
+        # Test assertions
+        # alarm with status OK should not be handled
+        self.assertIsNone(entity)
+
+        # 2.alarm state transition from 'ok' to 'alarm'
+        detail_data = {"type": "state transition",
+                       AodhProps.DETAIL: {AodhProps.STATE: "alarm"}}
+        alarm.update(detail_data)
+        entity = aodh_driver.enrich_event(alarm,
+                                          AodhEventType.STATE_TRANSITION)
+
+        # Test assertions
+        # alarm state change: ok->alarm, need to be added
+        self.assertIsNotNone(entity)
+        self._validate_aodh_entity_comm_props(entity, alarm_info)
+        self.assertEqual(entity[AodhProps.STATE],
+                         alarm[AodhProps.DETAIL][AodhProps.STATE])
+        self.assertEqual(entity[AodhProps.SEVERITY],
+                         alarm[AodhProps.SEVERITY])
+
+        # 3. delete alarm which is 'alarm' state
+        # prepare data
+        detail_data = {"type": "deletion"}
+        alarm.update(detail_data)
+
+        # action
+        entity = aodh_driver.enrich_event(alarm, AodhEventType.DELETION)
+
+        # Test assertions
+        self.assertIsNotNone(entity)
+        self._validate_aodh_entity_comm_props(entity, alarm_info)
+        self.assertEqual(entity[DSProps.EVENT_TYPE],
+                         AodhEventType.DELETION)
+
+        # 4. alarm creation with 'alarm' state
+        # prepare data
+        detail_data = {"type": "gnocchi_resources_threshold",
+                       AodhProps.DETAIL:
+                           self._create_alarm_data_gnocchi(state="alarm")}
+        generators = \
+            mock_driver.simple_aodh_alarm_notification_generators(
+                alarm_num=1,
+                update_events=1,
+                update_vals=detail_data)
+        alarm = mock_driver.generate_sequential_events_list(generators)[0]
+        alarm_info = alarm.copy()
+
+        # action
+        entity = aodh_driver.enrich_event(alarm, AodhEventType.CREATION)
+
+        # Test assertions
+        # alarm with status 'alarm' need to be added
+        self.assertIsNotNone(entity)
+        self._validate_aodh_entity_comm_props(entity, alarm_info)
+        self.assertEqual(entity[AodhProps.STATE],
+                         alarm[AodhProps.DETAIL][AodhProps.STATE])
+        self.assertEqual(entity[AodhProps.SEVERITY],
+                         alarm[AodhProps.SEVERITY])
+        self.assertEqual(entity[DSProps.EVENT_TYPE],
+                         AodhEventType.CREATION)
+
+        # 5. alarm rule change
+        # prepare data
+        detail_data = {"type": "rule change",
+                       AodhProps.DETAIL: {
+                           "severity": "critical",
+                           AodhProps.RULE:
+                               {"granularity": "300",
+                                "threshold": "0.0123",
+                                "comparison_operator": "eq"}}}
+        alarm.update(detail_data)
+
+        # action
+        entity = aodh_driver.enrich_event(alarm,
+                                          AodhEventType.RULE_CHANGE)
+
+        # Test assertions
+        # alarm rule change: need to be update
+        self.assertIsNotNone(entity)
+        self._validate_aodh_entity_comm_props(entity, alarm_info)
+        self.assertEqual(entity[AodhProps.SEVERITY],
+                         alarm[AodhProps.DETAIL][AodhProps.SEVERITY])
+        self.assertEqual(entity[DSProps.EVENT_TYPE],
+                         AodhEventType.RULE_CHANGE)
+
+        # 6. alarm state change from 'alarm' to 'ok'
+        # prepare data
+        detail_data = {"type": "state transition",
+                       AodhProps.DETAIL: {AodhProps.STATE: "ok"}}
+        alarm.update(detail_data)
+
+        # action
+        entity = aodh_driver.enrich_event(alarm,
+                                          AodhEventType.STATE_TRANSITION)
+
+        # Test assertions
+        # alarm state change: alarm->OK, need to be deleted
+        self.assertIsNotNone(entity)
+        self._validate_aodh_entity_comm_props(entity, alarm_info)
+        self.assertEqual(entity[DSProps.EVENT_TYPE],
+                         AodhEventType.STATE_TRANSITION)
+
+        # 7. delete alarm which is 'ok' state
+        # prepare data
+        detail_data = {"type": "deletion"}
+        alarm.update(detail_data)
+
+        # action
+        entity = aodh_driver.enrich_event(alarm, AodhEventType.DELETION)
+
+        # Test assertions
+        self.assertIsNone(entity)
+
+    def _create_alarm_data_gnocchi(self,
+                                   state="ok",
+                                   type="gnocchi_resources_threshold",
+                                   rule=None):
+
+        if rule is None:
+            rule = {"granularity": "300",
+                    "threshold": "0.001",
+                    "comparison_operator": "gt",
+                    "resource_type": "instance"
+                    }
+        return {AodhProps.DESCRIPTION: "test",
+                AodhProps.TIMESTAMP: "2016-11-09T01:39:13.839584",
+                AodhProps.ENABLED: True,
+                AodhProps.STATE_TIMESTAMP: "2016-11-09T01:39:13.839584",
+                AodhProps.ALARM_ID: "7e5c3754-e2eb-4782-ae00-7da5ded8568b",
+                AodhProps.REPEAT_ACTIONS: False,
+                AodhProps.PROJECT_ID: "c365d18fcc03493187016ae743f0cc4d",
+                AodhProps.NAME: "test",
+                AodhProps.SEVERITY: "low",
+                AodhProps.RESOURCE_ID: "88cd2d1d-8af4-4d00-9b5e-f82f8c8b0f8d",
+                AodhProps.TYPE: type,
+                AodhProps.STATE: state,
+                AodhProps.RULE: rule}
+
+    def _create_alarm_data_type_event(self,
+                                      state="ok",
+                                      type="event",
+                                      rule=None):
 
         if rule is None:
             rule = {"query": [], "event_type": "*"}
