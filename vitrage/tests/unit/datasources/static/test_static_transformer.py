@@ -26,6 +26,7 @@ from vitrage.datasources.nova.host.transformer import HostTransformer
 from vitrage.datasources.static import STATIC_DATASOURCE
 from vitrage.datasources.static import StaticFields
 from vitrage.datasources.static.transformer import StaticTransformer
+from vitrage.datasources.transformer_base import TransformerBase
 from vitrage.tests import base
 from vitrage.tests.mocks import mock_driver
 
@@ -66,7 +67,9 @@ class TestStaticTransformer(base.BaseTest):
             **properties)
 
         observed_entity_id = placeholder.vertex_id
-        expected_entity_id = 'RESOURCE:static:12345'
+        expected_entity_id = \
+            TransformerBase.uuid_from_deprecated_vitrage_id(
+                'RESOURCE:static:12345')
         self.assertEqual(expected_entity_id, observed_entity_id)
 
         observed_time = placeholder.get(VProps.VITRAGE_SAMPLE_TIMESTAMP)

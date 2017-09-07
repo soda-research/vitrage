@@ -41,12 +41,12 @@ class RcaApis(EntityGraphApisBase):
         is_admin_project = ctx.get(self.IS_ADMIN_PROJECT_PROPERTY, False)
         ga = self.entity_graph.algo
 
-        found_graph_out = ga.graph_query_vertices(query_dict=RCA_QUERY,
-                                                  root_id=root,
+        found_graph_out = ga.graph_query_vertices(root,
+                                                  query_dict=RCA_QUERY,
                                                   direction=Direction.OUT,
                                                   edge_query_dict=EDGE_QUERY)
-        found_graph_in = ga.graph_query_vertices(query_dict=RCA_QUERY,
-                                                 root_id=root,
+        found_graph_in = ga.graph_query_vertices(root,
+                                                 query_dict=RCA_QUERY,
                                                  direction=Direction.IN,
                                                  edge_query_dict=EDGE_QUERY)
 

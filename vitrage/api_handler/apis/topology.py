@@ -22,10 +22,9 @@ from vitrage.api_handler.apis.base import TOPOLOGY_AND_ALARMS_QUERY
 from vitrage.common.constants import EdgeProperties as EProps
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import VertexProperties as VProps
+from vitrage.common.exception import VitrageError
 from vitrage.datasources.nova.instance import NOVA_INSTANCE_DATASOURCE
-from vitrage.datasources.transformer_base\
-    import create_cluster_placeholder_vertex
-from vitrage.entity_graph.processor import processor_utils
+from vitrage.datasources import OPENSTACK_CLUSTER
 
 LOG = log.getLogger(__name__)
 
@@ -49,6 +48,14 @@ class TopologyApis(EntityGraphApisBase):
         LOG.debug('project_id = %s, is_admin_project  %s',
                   project_id, is_admin_project)
 
+        root_id = root
+        if not root:
+            root_vertex = self._get_root_vertex()
+            if not root_vertex:
+                LOG.warning("There is no openstack.cluster in the graph")
+                return
+            root_id = root_vertex.vertex_id
+
         if graph_type == 'tree' or \
                 ((root is not None) and (depth is not None)):
             if not query:
@@ -62,8 +69,8 @@ class TopologyApis(EntityGraphApisBase):
                             {'==': {VProps.PROJECT_ID: None}}]}
                 current_query = {'and': [query, project_query]}
 
-            graph = ga.graph_query_vertices(query_dict=current_query,
-                                            root_id=root,
+            graph = ga.graph_query_vertices(root_id,
+                                            query_dict=current_query,
                                             depth=depth,
                                             edge_query_dict=EDGE_QUERY)
         # By default the graph_type is 'graph'
@@ -79,7 +86,7 @@ class TopologyApis(EntityGraphApisBase):
                     query,
                     project_id,
                     is_admin_project,
-                    root)
+                    root_id)
 
             alarms = graph.get_vertices(query_dict=ALARMS_ALL_QUERY)
             graph.update_vertices(alarms)
@@ -196,18 +203,8 @@ class TopologyApis(EntityGraphApisBase):
 
         entities = []
 
-        if root:
-            root_vertex = \
-                self.entity_graph.get_vertex(root)
-        else:
-            key_values_hash = processor_utils.get_defining_properties(
-                create_cluster_placeholder_vertex())
-            tmp_vertices = self.entity_graph.get_vertices_by_key(
-                key_values_hash)
-            if not tmp_vertices:
-                LOG.debug("No root vertex found")
-                return set(entities)
-            root_vertex = tmp_vertices[0]
+        root_vertex = \
+            self.entity_graph.get_vertex(root)
 
         local_connected_component_subgraphs = \
             ga.connected_component_subgraphs(subgraph)
@@ -224,10 +221,23 @@ class TopologyApis(EntityGraphApisBase):
 
         return set(entities)
 
+    def _get_root_vertex(self):
+        tmp_vertices = self.entity_graph.get_vertices(
+            vertex_attr_filter={VProps.VITRAGE_TYPE: OPENSTACK_CLUSTER})
+        if not tmp_vertices:
+            LOG.debug("No root vertex found")
+            return None
+        if len(tmp_vertices) > 1:
+            raise VitrageError("Multiple root vertices found")
+        root_vertex = tmp_vertices[0]
+        return root_vertex
+
     @staticmethod
     def _find_instance_in_graph(graph):
         for node, node_data in graph.nodes_iter(data=True):
-            if node_data[VProps.VITRAGE_CATEGORY] == EntityCategory.RESOURCE and \
-                    node_data[VProps.VITRAGE_TYPE] == NOVA_INSTANCE_DATASOURCE:
+            if node_data[VProps.VITRAGE_CATEGORY] == \
+                    EntityCategory.RESOURCE \
+                    and node_data[VProps.VITRAGE_TYPE] == \
+                    NOVA_INSTANCE_DATASOURCE:
                 return node
         return None

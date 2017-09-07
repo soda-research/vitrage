@@ -77,11 +77,13 @@ class TestHeatStackTransformer(base.BaseTest):
             transformer.create_neighbor_placeholder_vertex(**properties)
 
         # Test assertions
-        observed_id_values = placeholder.vertex_id.split(
-            TransformerBase.KEY_SEPARATOR)
-        expected_id_values = transformer._key_values(HEAT_STACK_DATASOURCE,
-                                                     stack_id)
-        self.assertEqual(expected_id_values, tuple(observed_id_values))
+        observed_uuid = placeholder.vertex_id
+        expected_key = tbase.build_key(transformer._key_values(
+            HEAT_STACK_DATASOURCE,
+            stack_id))
+        expected_uuid = \
+            TransformerBase.uuid_from_deprecated_vitrage_id(expected_key)
+        self.assertEqual(expected_uuid, observed_uuid)
 
         observed_time = placeholder.get(VProps.VITRAGE_SAMPLE_TIMESTAMP)
         self.assertEqual(timestamp, observed_time)

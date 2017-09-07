@@ -75,12 +75,13 @@ class NovaHostTransformerTest(base.BaseTest):
             host_transformer.create_neighbor_placeholder_vertex(**properties)
 
         # Test assertions
-        observed_id_values = placeholder.vertex_id.split(
-            TransformerBase.KEY_SEPARATOR)
-        expected_id_values = host_transformer._key_values(
+        observed_uuid = placeholder.vertex_id
+        expected_key = tbase.build_key(host_transformer._key_values(
             NOVA_HOST_DATASOURCE,
-            host_name)
-        self.assertEqual(expected_id_values, tuple(observed_id_values))
+            host_name))
+        expected_uuid = \
+            TransformerBase.uuid_from_deprecated_vitrage_id(expected_key)
+        self.assertEqual(expected_uuid, observed_uuid)
 
         observed_time = placeholder.get(VProps.VITRAGE_SAMPLE_TIMESTAMP)
         self.assertEqual(timestamp, observed_time)
@@ -159,11 +160,12 @@ class NovaHostTransformerTest(base.BaseTest):
 
         # Validate neighbor edge
         edge = zone.edge
+        transformer = self.transformers[NOVA_HOST_DATASOURCE]
+        entity_key = transformer._create_entity_key(event)
+        entity_uuid = \
+            TransformerBase.uuid_from_deprecated_vitrage_id(entity_key)
         self.assertEqual(edge.source_id, zone.vertex.vertex_id)
-        self.assertEqual(
-            edge.target_id,
-            self.transformers[NOVA_HOST_DATASOURCE]._create_entity_key(event)
-        )
+        self.assertEqual(edge.target_id, entity_uuid)
         self.assertEqual(edge.label, EdgeLabel.CONTAINS)
 
     def _validate_vertex_props(self, vertex, event):

@@ -35,7 +35,7 @@ class TestDatasourceInfoMapperFunctional(TestFunctionalBase):
 
     def test_state_on_update(self):
         # setup
-        processor = self.create_processor_and_graph(self.conf, uuid=True)
+        processor = self.create_processor_and_graph(self.conf)
         event = self._create_event(spec_type='INSTANCE_SPEC',
                                    datasource_action=DSAction.INIT_SNAPSHOT)
 
@@ -44,7 +44,6 @@ class TestDatasourceInfoMapperFunctional(TestFunctionalBase):
 
         # test assertions
         entity = processor.transformer_manager.transform(event)
-        processor._find_and_fix_graph_vertex(entity.vertex, [])
         vertex = processor.entity_graph.get_vertex(entity.vertex.vertex_id)
         self.assertEqual('ACTIVE', vertex[VProps.VITRAGE_AGGREGATED_STATE])
         self.assertEqual(OperationalResourceState.OK,

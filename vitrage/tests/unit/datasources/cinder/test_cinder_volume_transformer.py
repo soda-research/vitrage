@@ -75,12 +75,13 @@ class TestCinderVolumeTransformer(base.BaseTest):
         placeholder = \
             transformer.create_neighbor_placeholder_vertex(**properties)
 
-        # Test assertions
-        observed_id_values = placeholder.vertex_id.split(
-            TransformerBase.KEY_SEPARATOR)
-        expected_id_values = transformer._key_values(CINDER_VOLUME_DATASOURCE,
-                                                     volume_id)
-        self.assertEqual(expected_id_values, tuple(observed_id_values))
+        # Test assertions)
+        expected_key = \
+            tbase.build_key(transformer._key_values(CINDER_VOLUME_DATASOURCE,
+                                                    volume_id))
+        expected_uuid = \
+            TransformerBase.uuid_from_deprecated_vitrage_id(expected_key)
+        self.assertEqual(expected_uuid, placeholder.vertex_id)
 
         observed_time = placeholder.get(VProps.VITRAGE_SAMPLE_TIMESTAMP)
         self.assertEqual(timestamp, observed_time)

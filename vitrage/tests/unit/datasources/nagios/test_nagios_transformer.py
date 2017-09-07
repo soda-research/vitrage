@@ -88,10 +88,20 @@ class NagiosTransformerTest(base.BaseTest):
                                                              events_num=10)
         nagios_alarms = mock_sync.generate_sequential_events_list(spec_list)
 
+        transformer = NagiosTransformer(self.transformers, self.conf)
+
         for alarm in nagios_alarms:
+
+            cur_alarm_uuid = None
+
+            if alarm.get(NagiosProperties.STATUS) == NagiosTestStatus.OK:
+                alarm_key = transformer._create_entity_key(alarm)
+                cur_alarm_uuid = \
+                    TransformerBase.uuid_from_deprecated_vitrage_id(
+                        alarm_key)
+
             # Test action
-            wrapper = NagiosTransformer(self.transformers, self.conf).\
-                transform(alarm)
+            wrapper = transformer.transform(alarm)
 
             self._validate_vertex(wrapper.vertex, alarm)
 
@@ -101,7 +111,8 @@ class NagiosTransformerTest(base.BaseTest):
 
             # Right now we are support only host as a resource
             if neighbor.vertex[VProps.VITRAGE_TYPE] == NOVA_HOST_DATASOURCE:
-                self._validate_host_neighbor(neighbors[0], alarm)
+                self._validate_host_neighbor(
+                    neighbors[0], alarm, cur_alarm_uuid)
 
             self._validate_action(alarm, wrapper)
 
@@ -147,15 +158,19 @@ class NagiosTransformerTest(base.BaseTest):
         self.assertFalse(vertex[VProps.VITRAGE_IS_DELETED])
         self.assertFalse(vertex[VProps.VITRAGE_IS_PLACEHOLDER])
 
-    def _validate_host_neighbor(self, neighbor, event):
+    def _validate_host_neighbor(self, neighbor, event, cur_alarm_uuid=None):
 
         host_vertex = neighbor.vertex
 
-        key_fields = host_vertex.vertex_id.split(TransformerBase.KEY_SEPARATOR)
+        expected_key = tbase.build_key((EntityCategory.RESOURCE,
+                                        NOVA_HOST_DATASOURCE,
+                                        event[NagiosProperties.RESOURCE_NAME]))
+        expected_uuid = self.transformers[NOVA_HOST_DATASOURCE].\
+            uuid_from_deprecated_vitrage_id(expected_key)
 
-        self.assertEqual(EntityCategory.RESOURCE, key_fields[0])
-        self.assertEqual(NOVA_HOST_DATASOURCE, key_fields[1])
-        self.assertEqual(event[NagiosProperties.RESOURCE_NAME], key_fields[2])
+        self.assertEqual(expected_uuid, host_vertex.vertex_id)
+        self.assertEqual(expected_uuid,
+                         host_vertex.properties.get(VProps.VITRAGE_ID))
 
         self.assertFalse(host_vertex[VProps.VITRAGE_IS_DELETED])
         self.assertTrue(host_vertex[VProps.VITRAGE_IS_PLACEHOLDER])
@@ -172,5 +187,8 @@ class NagiosTransformerTest(base.BaseTest):
 
         alarm_key = NagiosTransformer(self.transformers, self.conf).\
             _create_entity_key(event)
-        self.assertEqual(alarm_key, edge.source_id)
+        alarm_uuid = cur_alarm_uuid if cur_alarm_uuid else\
+            TransformerBase.uuid_from_deprecated_vitrage_id(alarm_key)
+
+        self.assertEqual(alarm_uuid, edge.source_id)
         self.assertEqual(host_vertex.vertex_id, edge.target_id)

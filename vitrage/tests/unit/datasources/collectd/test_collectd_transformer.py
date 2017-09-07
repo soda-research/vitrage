@@ -67,10 +67,12 @@ class TestCollectdTransformer(BaseAlarmTransformerTest):
         # Test assertions
         self._validate_vertex_props(wrapper.vertex, event)
 
+        entity_key = transformer._create_entity_key(event)
+        entity_uuid = TransformerBase.uuid_from_deprecated_vitrage_id(
+            entity_key)
+
         # Validate the neighbors: only one valid host neighbor
-        self._validate_host_neighbor(wrapper,
-                                     transformer._create_entity_key(event),
-                                     host1)
+        self._validate_host_neighbor(wrapper, entity_uuid, host1)
 
         # Validate the expected action on the graph - update or delete
         self._validate_graph_action(wrapper)
@@ -82,14 +84,16 @@ class TestCollectdTransformer(BaseAlarmTransformerTest):
         self.assertIsNotNone(event)
 
         # Test action
+        entity_key = transformer._create_entity_key(event)
+        entity_uuid = \
+            TransformerBase.uuid_from_deprecated_vitrage_id(entity_key)
+
         transformer = self.transformers[COLLECTD_DATASOURCE]
         wrapper = transformer.transform(event)
 
         # Test assertions
         self._validate_vertex_props(wrapper.vertex, event)
-        self._validate_host_neighbor(wrapper,
-                                     transformer._create_entity_key(event),
-                                     host2)
+        self._validate_host_neighbor(wrapper, entity_uuid, host2)
         self._validate_graph_action(wrapper)
 
     def _validate_vertex_props(self, vertex, event):

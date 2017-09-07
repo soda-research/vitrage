@@ -52,7 +52,7 @@ class TestHeatStack(TestDataSourcesBase):
 
     def test_heat_stack_validity(self):
         # Setup
-        processor = self._create_processor_with_graph(self.conf, uuid=True)
+        processor = self._create_processor_with_graph(self.conf)
         self.assertEqual(self._num_total_expected_vertices(),
                          len(processor.entity_graph))
 

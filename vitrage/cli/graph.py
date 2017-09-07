@@ -20,9 +20,6 @@ from oslo_service import service as os_service
 
 from vitrage.api_handler.service import VitrageApiHandlerService
 from vitrage.cli import VITRAGE_TITLE
-from vitrage.common.constants import EntityCategory
-from vitrage.datasources import OPENSTACK_CLUSTER
-from vitrage.datasources.transformer_base import CLUSTER_ID
 from vitrage import entity_graph
 from vitrage.entity_graph.consistency.service import VitrageConsistencyService
 from vitrage.entity_graph.service import VitrageGraphService
@@ -59,10 +56,7 @@ def main():
 
 def init(conf):
     evaluator_q = queue.Queue()
-    e_graph = entity_graph.get_graph_driver(conf)(
-        'Entity Graph',
-        '%s:%s:%s' % (EntityCategory.RESOURCE, OPENSTACK_CLUSTER, CLUSTER_ID),
-        uuid=True)
+    e_graph = entity_graph.get_graph_driver(conf)('Entity Graph')
 
     # TODO(ihefetz) uncomment db connection creation
     # db_connection = storage.get_connection_from_config(conf)

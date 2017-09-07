@@ -15,13 +15,9 @@
 
 from oslo_log import log
 
-from oslo_utils import uuidutils
-
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import GraphAction
 from vitrage.common.constants import VertexProperties as VProps
-from vitrage.common.exception import VitrageError
-from vitrage.datasources import OPENSTACK_CLUSTER
 from vitrage.datasources.transformer_base import TransformerBase
 from vitrage.entity_graph.mappings.datasource_info_mapper import \
     DatasourceInfoMapper
@@ -77,10 +73,7 @@ class Processor(processor.ProcessorBase):
         """
 
         LOG.debug('Add entity to entity graph:\n%s', new_vertex)
-        # TODO(doffek): check if it's possible to move the
-        # _find_and_fix_graph_vertex method call to the process_event method
-        # so it will be done in one central place
-        self._find_and_fix_graph_vertex(new_vertex, neighbors)
+
         self._add_resource_details_to_alarm(new_vertex, neighbors)
         self.entity_graph.add_vertex(new_vertex)
         self._connect_neighbors(neighbors, set(), GraphAction.CREATE_ENTITY)
@@ -100,8 +93,6 @@ class Processor(processor.ProcessorBase):
 
         LOG.debug('Update entity in entity graph:\n%s', updated_vertex)
 
-        if not updated_vertex.get(VProps.IS_REAL_VITRAGE_ID, False):
-            self._find_and_fix_graph_vertex(updated_vertex, neighbors)
         graph_vertex = self.entity_graph.get_vertex(updated_vertex.vertex_id)
 
         if (not graph_vertex) or \
@@ -128,8 +119,7 @@ class Processor(processor.ProcessorBase):
         """
 
         LOG.debug('Delete entity from entity graph:\n%s', deleted_vertex)
-        if not deleted_vertex.get(VProps.IS_REAL_VITRAGE_ID, False):
-            self._find_and_fix_graph_vertex(deleted_vertex, neighbors)
+
         graph_vertex = self.entity_graph.get_vertex(deleted_vertex.vertex_id)
 
         if graph_vertex and (not PUtils.is_deleted(graph_vertex)) and \
@@ -154,39 +144,17 @@ class Processor(processor.ProcessorBase):
     def update_relationship(self, entity_vertex, neighbors):
         LOG.debug('Update relationship in entity graph:\n%s', neighbors)
 
-        if not entity_vertex:
-            for neighbor in neighbors:
-                self.entity_graph.update_edge(neighbor.edge)
-            return
-
-        # TODO(doffek): check if we need here the update_vertex because the
-        # purpose of this method is to update the relationship
-        self._find_and_fix_graph_vertex(entity_vertex, [])
-        self.entity_graph.update_vertex(entity_vertex)
+        if entity_vertex:
+            self.entity_graph.update_vertex(entity_vertex)
         for neighbor in neighbors:
-            self._find_and_fix_relationship(entity_vertex, neighbor)
             self.entity_graph.update_edge(neighbor.edge)
 
     def delete_relationship(self, updated_vertex, neighbors):
         LOG.debug('Delete relationship from entity graph:\n%s', neighbors)
 
-        if not updated_vertex:
-            for neighbor in neighbors:
-                graph_edge = self.entity_graph.get_edge(
-                    neighbor.edge.source_id,
-                    neighbor.edge.target_id,
-                    neighbor.edge.label)
-            if graph_edge:
-                PUtils.mark_deleted(self.entity_graph, graph_edge)
-
-            return
-
-        # TODO(doffek): check if we need here the update_vertex because the
-        # purpose of this method is to update the relationship
-        self._find_and_fix_graph_vertex(updated_vertex, [])
-        self.entity_graph.update_vertex(updated_vertex)
+        if updated_vertex:
+            self.entity_graph.update_vertex(updated_vertex)
         for neighbor in neighbors:
-            self._find_and_fix_relationship(updated_vertex, neighbor)
             graph_edge = self.entity_graph.get_edge(neighbor.edge.source_id,
                                                     neighbor.edge.target_id,
                                                     neighbor.edge.label)
@@ -337,12 +305,8 @@ class Processor(processor.ProcessorBase):
             if action in [GraphAction.UPDATE_ENTITY,
                           GraphAction.DELETE_ENTITY,
                           GraphAction.CREATE_ENTITY]:
-                if vertex.get(VProps.IS_REAL_VITRAGE_ID, False):
-                    graph_vertex = self.entity_graph.get_vertex(
-                        vertex.vertex_id)
-                else:
-                    graph_vertex = self._get_single_graph_vertex_by_props(
-                        vertex)
+                graph_vertex = self.entity_graph.get_vertex(
+                    vertex.vertex_id)
             elif action in [GraphAction.END_MESSAGE,
                             GraphAction.REMOVE_DELETED_ENTITY,
                             GraphAction.UPDATE_RELATIONSHIP,
@@ -364,65 +328,6 @@ class Processor(processor.ProcessorBase):
         result = self.entity_graph.get_vertices(attr)
         event[TransformerBase.QUERY_RESULT] = result
 
-    def _find_and_fix_relationship(self, vertex, neighbor):
-        prev_neighbor_id = neighbor.vertex[VProps.VITRAGE_ID]
-        self._find_and_fix_graph_vertex(neighbor.vertex, [])
-        if neighbor.edge.source_id == prev_neighbor_id:
-            neighbor.edge.source_id = neighbor.vertex.vertex_id
-            neighbor.edge.target_id = vertex.vertex_id
-        else:
-            neighbor.edge.target_id = neighbor.vertex.vertex_id
-            neighbor.edge.source_id = vertex.vertex_id
-
-    def _find_and_fix_graph_vertex(self,
-                                   vertex,
-                                   neighbors=None,
-                                   include_deleted=False):
-        """Search for vertex in graph, and update vertex id and vitrage ID
-
-        Search for vertex in graph, and update vertex id and vitrage ID
-        Both in the Vertex itself, and in it's neighbors and edges
-
-        :param new_vertex: The vertex to update
-        :type new_vertex: Vertex
-
-        :param neighbors: The neighbors of the vertex
-        :type neighbors: list
-
-        :param include_deleted: If True, Include deleted entities in the search
-        :type include_deleted: bool
-        """
-
-        previous_vitrage_id = vertex[VProps.VITRAGE_ID]
-
-        graph_vertex = self._get_single_graph_vertex_by_props(
-            vertex, include_deleted)
-
-        if not graph_vertex or (PUtils.is_deleted(graph_vertex)
-                                and not include_deleted):
-
-            vitrage_id = uuidutils.generate_uuid()
-            if vertex[VProps.VITRAGE_TYPE] == OPENSTACK_CLUSTER:
-                self.entity_graph.root_id = vitrage_id
-        else:
-            vitrage_id = graph_vertex[VProps.VITRAGE_ID]
-
-        vertex[VProps.VITRAGE_ID] = vitrage_id
-        vertex.vertex_id = vitrage_id
-
-        if not neighbors:
-            return
-
-        for neighbor_vertex, edge in neighbors:
-            if not neighbor_vertex.get(VProps.IS_REAL_VITRAGE_ID, False):
-                self._find_and_fix_graph_vertex(neighbor_vertex)
-            if edge.target_id == previous_vitrage_id:
-                edge.target_id = vitrage_id
-                edge.source_id = neighbor_vertex.vertex_id
-            else:
-                edge.source_id = vitrage_id
-                edge.target_id = neighbor_vertex.vertex_id
-
     @staticmethod
     def _add_resource_details_to_alarm(vertex, neighbors):
 
@@ -442,37 +347,3 @@ class Processor(processor.ProcessorBase):
                     neighbor.vertex.vertex_id
                 vertex.properties[VProps.VITRAGE_RESOURCE_TYPE] = \
                     neighbor.vertex.get(VProps.VITRAGE_TYPE)
-
-    def _get_single_graph_vertex_by_props(self, vertex, include_deleted=False):
-        """Returns a single vertex by it's defining properties
-
-        Queries the graph DB for vertices according to the
-        vertice's "key" properties
-        In case multiple vertices return from the query,
-        an exception is issued
-
-        :param updated_vertex: The vertex with the defining properties
-        :type vertex: Vertex
-
-        :param include_deleted: Include deleted entities in the query
-        :type include_deleted: bool
-        """
-
-        received_graph_vertices = self.entity_graph.get_vertices_by_key(
-            PUtils.get_defining_properties(vertex))
-        graph_vertices = []
-        if include_deleted:
-            for tmp_vertex in received_graph_vertices:
-                graph_vertices.append(tmp_vertex)
-        else:
-            for tmp_vertex in received_graph_vertices:
-                if not tmp_vertex.get(VProps.VITRAGE_IS_DELETED, False):
-                    graph_vertices.append(tmp_vertex)
-
-        if len(graph_vertices) > 1:
-            raise VitrageError(
-                'found too many vertices with same properties: %s ',
-                vertex)
-        graph_vertex = None if not graph_vertices else graph_vertices[0]
-
-        return graph_vertex

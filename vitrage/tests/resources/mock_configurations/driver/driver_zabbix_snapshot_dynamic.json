@@ -13,5 +13,6 @@
   "value": "1",
   "priority": "1",
   "vitrage_datasource_action": "snapshot",
-  "rawtext": "CPU utilization"
+  "rawtext": "CPU utilization",
+  "vitrage_category": "ALARM"
 }
