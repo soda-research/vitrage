@@ -292,6 +292,27 @@ function start_vitrage {
     run_process vitrage-graph "$VITRAGE_BIN_DIR/vitrage-graph --config-file $VITRAGE_CONF"
     run_process vitrage-notifier "$VITRAGE_BIN_DIR/vitrage-notifier --config-file $VITRAGE_CONF"
     run_process vitrage-ml "$VITRAGE_BIN_DIR/vitrage-ml --config-file $VITRAGE_CONF"
+
+    write_systemd_dependency vitrage-graph vitrage-collector
+
+}
+
+function write_systemd_dependency {
+  local service_after=$1
+  local service_before=$2
+  local systemd_service_after="devstack@$service_after.service"
+  local systemd_service_before="devstack@$service_before.service"
+
+  local unitfile_after="$SYSTEMD_DIR/$systemd_service_after"
+  local unitfile_before="$SYSTEMD_DIR/$systemd_service_before"
+
+  iniset -sudo $unitfile_after "Unit" "Requires" "$systemd_service_before"
+  iniset -sudo $unitfile_after "Unit" "After" "$systemd_service_before"
+
+  iniset -sudo $unitfile_before "Unit" "Requires" "$systemd_service_after"
+  iniset -sudo $unitfile_before "Unit" "Before" "$systemd_service_after"
+
+  $SYSTEMCTL daemon-reload
 }
 
 # stop_vitrage() - Stop running processes
