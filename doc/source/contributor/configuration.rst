@@ -12,6 +12,7 @@ General
    alarm-severity-config
    profiler-config
    keycloak-config
+   template-config
 
    ../configuration/index
 

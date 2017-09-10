@@ -4,7 +4,7 @@ Vitrage Templates Format & Usage
 
 Overview
 ========
-In Vitrage we use configuration files, called "templates", to express rules
+In Vitrage we use configuration files, called ``templates``, to express rules
 regarding raising deduced alarms, setting deduced states, and detecting/setting
 RCA links.
 This page describes the format of the Vitrage templates, with some examples and
@@ -13,7 +13,7 @@ templates is presented.
 
 Template Structure
 ==================
-The template is written in YAML language, with the following structure.
+The template is written in YAML language, with the following structure:
  ::
 
   metadata:
@@ -26,6 +26,9 @@ The template is written in YAML language, with the following structure.
     relationships:
         - relationship: ...
         - relationship: ...
+  includes:
+        - name: <name as stated in the metadata of a definition template>
+        - name: ...
   scenarios:
       - scenario:
           condition: <if statement true do the action>
@@ -33,15 +36,42 @@ The template is written in YAML language, with the following structure.
               - action: ...
 
 
-The template is divided into three main sections:
+The template is divided into four main sections:
 
 - *metadata:* Contains the template name, and brief description of what the template does (optional)
-- *definitions:* This section contains the atomic definitions referenced later on, for entities and relationships
+- *definitions:* This section is **mandatory** unless an include section is specified in the template (see below).
+  This section contains the atomic definitions referenced later on, for entities and relationships.
+
    - *entities –* describes the resources and alarms which are relevant to the template scenario (conceptually, corresponds to a vertex in the entity graph)
    - *relationships –* the relationships between the entities (conceptually, corresponds to an edge in the entity graph)
+- *includes:* This section is optional. If included, it must contain a list of names of definition templates as they appear in the metadata section of said templates.
+  If only definitions from included definition templates are used to create scenarios within the template, then the *definitions* section is **optional**.
 - *scenarios:* A list of if-then scenarios to consider. Each scenario is comprised of:
    - *condition –* the condition to be met. This condition will be phrased referencing the entities and relationships previously defined.
    - *action(s) –* a list of actions to execute when the condition is met.
+
+Definition Template Structure
+-----------------------------
+These are separate files, which contain only definitions and can be included under the includes section in regular templates. The definition templates are written in YAML
+language, with the following structure:
+
+ ::
+
+  metadata:
+    name: <unique definition template identifier. Used in the includes section of regular templates>
+    description: <what definitions this template contains>
+  definitions:
+    entities:
+        - entity: ...
+        - entity: ...
+    relationships:
+        - relationship: ...
+        - relationship: ...
+
+A definition template is in same format as a regular template -
+except it **does not** contain a scenarios or an includes section. Once included in a
+template, the definition template's entities and relationships can be used within the template
+they are included to create scenarios.
 
 Condition Format
 ----------------
