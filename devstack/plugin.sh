@@ -269,13 +269,11 @@ function install_vitrageclient {
     fi
 }
 
-# start_vitrage() - Start running processes, including screen
+# start_vitrage() - Start running processes
 function start_vitrage {
     if [[ "$VITRAGE_DEPLOY" == "mod_wsgi" ]]; then
         enable_apache_site vitrage
         restart_apache_server
-        tail_log vitrage /var/log/$APACHE_NAME/vitrage.log
-        tail_log vitrage-api /var/log/$APACHE_NAME/vitrage_access.log
     elif [ "$VITRAGE_DEPLOY" == "uwsgi" ]; then
         run_process vitrage-api "$VITRAGE_BIN_DIR/uwsgi $VITRAGE_UWSGI_FILE"
     else
@@ -302,7 +300,6 @@ function stop_vitrage {
         disable_apache_site vitrage
         restart_apache_server
     fi
-    # Kill the vitrage screen windows
     for serv in vitrage-api vitrage-collector vitrage-graph vitrage-notifier; do
         stop_process $serv
     done
