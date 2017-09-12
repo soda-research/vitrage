@@ -47,8 +47,10 @@ class TopologyController(RootRestController):
                     pecan.request.enforcer, {})
 
         LOG.info('received get topology: depth->%(depth)s '
-                 'graph_type->%(graph_type)s root->%(root)s',
-                 {'depth': depth, 'graph_type': graph_type, 'root': root})
+                 'graph_type->%(graph_type)s root->%(root)s '
+                 'all_tenants-->%(all_tenants)s',
+                 {'depth': depth, 'graph_type': graph_type, 'root': root,
+                  'all_tenants': all_tenants})
 
         if query:
             query = json.loads(query)

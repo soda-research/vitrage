@@ -46,6 +46,9 @@ class TopologyApis(EntityGraphApisBase):
         is_admin_project = ctx.get(self.IS_ADMIN_PROJECT_PROPERTY, False)
         ga = self.entity_graph.algo
 
+        LOG.debug('project_id = %s, is_admin_project  %s',
+                  project_id, is_admin_project)
+
         if graph_type == 'tree' or \
                 ((root is not None) and (depth is not None)):
             if not query:
