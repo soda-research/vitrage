@@ -12,7 +12,6 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-
 from oslo_log import log
 
 from vitrage.common.constants import DatasourceAction
@@ -20,6 +19,7 @@ from vitrage.common.constants import DatasourceOpts as DSOpts
 from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.datasources.alarm_driver_base import AlarmDriverBase
 from vitrage.datasources.collectd import COLLECTD_DATASOURCE
+from vitrage.datasources.collectd.mapper import CollectdMapper
 from vitrage.datasources.collectd.properties\
     import CollectdProperties as CProps
 from vitrage.utils import file as file_utils
@@ -34,8 +34,9 @@ class CollectdDriver(AlarmDriverBase):
         super(CollectdDriver, self).__init__()
         self.conf = conf
         if not CollectdDriver.conf_map:
-            CollectdDriver.conf_map = \
-                CollectdDriver._configuration_mapping(conf)
+            mapper = CollectdDriver._configuration_mapping(conf)
+            if mapper:
+                CollectdDriver.conf_map = CollectdMapper(mapper)
 
     def _vitrage_type(self):
         return COLLECTD_DATASOURCE
@@ -85,7 +86,7 @@ class CollectdDriver(AlarmDriverBase):
                          event.get(CProps.PLUGIN_INSTANCE)]
             resource = '/'.join([resource for resource in resources if
                                  resource])
-            v_resource = CollectdDriver.conf_map[resource]
+            v_resource = CollectdDriver.conf_map.find(resource)
             event[CProps.RESOURCE_NAME] = v_resource[CProps.RESOURCE_NAME]
             event[CProps.RESOURCE_TYPE] = v_resource[CProps.RESOURCE_TYPE]
 
