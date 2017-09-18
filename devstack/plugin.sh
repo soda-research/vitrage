@@ -133,6 +133,15 @@ function disable_vitrage_datasource {
 
 }
 
+# Set configuration for database backend.
+function vitrage_configure_db_backend {
+    if [ "$VITRAGE_DATABASE" = 'mysql' ] || [ "$VITRAGE_DATABASE" = 'postgresql' ] ; then
+        iniset $VITRAGE_CONF database connection $(database_connection_url vitrage)
+    else
+        die $LINENO "Unable to configure unknown VITRAGE_DATABASE $VITRAGE_DATABASE"
+    fi
+}
+
 # Configure Vitrage
 function configure_vitrage {
     iniset_rpc_backend vitrage $VITRAGE_CONF
@@ -164,6 +173,9 @@ function configure_vitrage {
     iniset $VITRAGE_CONF service_credentials project_name admin
     iniset $VITRAGE_CONF service_credentials region_name $REGION_NAME
     iniset $VITRAGE_CONF service_credentials auth_url $KEYSTONE_SERVICE_URI
+
+    # Configured db
+    vitrage_configure_db_backend
 
     # remove neutron vitrage datasource if neutron datasource not installed
     if ! is_service_enabled neutron; then
@@ -239,6 +251,14 @@ function configure_vitrage {
 function init_vitrage {
     # Get vitrage keystone settings in place
     _vitrage_create_accounts
+
+    # Create and upgrade database only when used
+    if is_service_enabled mysql postgresql; then
+        if [ "$VITRAGE_DATABASE" = 'mysql' ] || [ "$VITRAGE_DATABASE" = 'postgresql' ] ; then
+            recreate_database vitrage
+            $VITRAGE_BIN_DIR/vitrage-dbsync
+        fi
+    fi
     # Create cache dir
     sudo install -d -o $STACK_USER $VITRAGE_AUTH_CACHE_DIR
     rm -f $VITRAGE_AUTH_CACHE_DIR/*

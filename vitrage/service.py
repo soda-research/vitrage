@@ -12,6 +12,7 @@
 # under the License.
 
 from oslo_config import cfg
+from oslo_db import options as db_options
 from oslo_log import log
 from oslo_policy import opts as policy_opts
 from osprofiler import initializer as osprofiler_initializer
@@ -31,6 +32,7 @@ def prepare_service(args=None, conf=None, config_files=None):
     log.register_options(conf)
     policy_opts.set_defaults(conf)
     osprofiler_opts.set_defaults(conf)
+    db_options.set_defaults(conf)
 
     for group, options in opts.list_opts():
         conf.register_opts(list(options),

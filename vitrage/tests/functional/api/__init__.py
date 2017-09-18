@@ -58,6 +58,11 @@ class FunctionalTest(base.BaseTest):
                                group='api')
 
         self.CONF.set_override('auth_mode', self.auth, group='api')
+
+        self.CONF.set_override('connection',
+                               'sqlite:///:memory:',
+                               group='database')
+
         self.app = webtest.TestApp(app.load_app(self.CONF))
 
     def put_json(self, path, params, expect_errors=False, headers=None,

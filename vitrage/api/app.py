@@ -39,7 +39,8 @@ def setup_app(root, conf=None):
     app_hooks = [hooks.ConfigHook(conf),
                  hooks.TranslationHook(),
                  hooks.RPCHook(conf),
-                 hooks.ContextHook()]
+                 hooks.ContextHook(),
+                 hooks.DBHook(conf)]
 
     app = pecan.make_app(
         root,

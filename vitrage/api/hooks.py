@@ -18,6 +18,7 @@ from pecan import hooks
 
 from vitrage import messaging
 from vitrage import rpc as vitrage_rpc
+from vitrage import storage
 
 
 class ConfigHook(hooks.PecanHook):
@@ -74,3 +75,12 @@ class ContextHook(hooks.PecanHook):
 
         # Inject the context...
         state.request.context = ctx.to_dict()
+
+
+class DBHook(hooks.PecanHook):
+
+    def __init__(self, conf):
+        self.storage = storage.get_connection_from_config(conf)
+
+    def before(self, state):
+        state.request.storage = self.storage
