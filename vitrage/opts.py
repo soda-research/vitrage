@@ -29,6 +29,7 @@ import vitrage.notifier
 import vitrage.notifier.plugins.snmp
 import vitrage.os_clients
 import vitrage.rpc
+import vitrage.storage
 
 LOG = log.getLogger(__name__)
 
@@ -44,6 +45,7 @@ def list_opts():
         ('datasources', vitrage.datasources.OPTS),
         ('evaluator', vitrage.evaluator.OPTS),
         ('consistency', vitrage.entity_graph.consistency.OPTS),
+        ('database', vitrage.storage.OPTS),
         ('entity_graph', vitrage.entity_graph.OPTS),
         ('service_credentials', vitrage.keystone_client.OPTS),
         ('machine_learning',

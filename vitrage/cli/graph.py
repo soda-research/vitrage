@@ -61,6 +61,10 @@ def init(conf):
         'Entity Graph',
         '%s:%s:%s' % (EntityCategory.RESOURCE, OPENSTACK_CLUSTER, CLUSTER_ID),
         uuid=True)
+
+    # TODO(ihefetz) uncomment db connection creation
+    # db_connection = storage.get_connection_from_config(conf)
+
     scenario_repo = ScenarioRepository(conf)
 
     evaluator = ScenarioEvaluator(conf, e_graph, scenario_repo, evaluator_q)
