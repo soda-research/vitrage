@@ -19,6 +19,7 @@ import sys
 from oslo_service import service as os_service
 
 from vitrage.api_handler.service import VitrageApiHandlerService
+from vitrage.cli import VITRAGE_TITLE
 from vitrage.common.constants import EntityCategory
 from vitrage.datasources import OPENSTACK_CLUSTER
 from vitrage.datasources.transformer_base import CLUSTER_ID
@@ -39,6 +40,7 @@ def main():
     4. Starts the Consistency service
     """
 
+    print(VITRAGE_TITLE)
     conf = service.prepare_service()
     evaluator_queue, evaluator, e_graph = init(conf)
     launcher = os_service.ServiceLauncher(conf)

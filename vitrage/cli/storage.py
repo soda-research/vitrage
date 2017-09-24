@@ -12,10 +12,12 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from vitrage.cli import VITRAGE_TITLE
 from vitrage import service
 from vitrage import storage
 
 
 def dbsync():
+    print(VITRAGE_TITLE)
     conf = service.prepare_service()
     storage.get_connection_from_config(conf).upgrade()

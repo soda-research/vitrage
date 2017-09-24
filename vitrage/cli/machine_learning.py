@@ -15,11 +15,13 @@
 from oslo_service import service as os_service
 import sys
 
+from vitrage.cli import VITRAGE_TITLE
 from vitrage.machine_learning.service import MachineLearningService
 from vitrage import service
 
 
 def main():
+    print(VITRAGE_TITLE)
     conf = service.prepare_service()
     launcher = os_service.ServiceLauncher(conf)
     launcher.launch_service(MachineLearningService(conf))

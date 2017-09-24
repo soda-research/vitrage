@@ -15,6 +15,7 @@
 import sys
 
 from oslo_service import service as os_service
+from vitrage.cli import VITRAGE_TITLE
 from vitrage.datasources.listener_service import ListenerService
 
 from vitrage.datasources.collector_notifier import CollectorNotifier
@@ -24,8 +25,10 @@ from vitrage import service
 
 
 def main():
+
     """Starts all the datasources drivers services"""
 
+    print(VITRAGE_TITLE)
     conf = service.prepare_service()
     launcher = os_service.ServiceLauncher(conf)
     rabbitmq = CollectorNotifier(conf)
