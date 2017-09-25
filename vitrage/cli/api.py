@@ -15,12 +15,15 @@
 import sys
 
 from vitrage.api import app
+from vitrage.cli import VITRAGE_TITLE
 from vitrage import service
 
 
 def main():
+    print(VITRAGE_TITLE)
     conf = service.prepare_service()
     app.build_server(conf)
+
 
 if __name__ == "__main__":
     sys.exit(main())
