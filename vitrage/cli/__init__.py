@@ -14,7 +14,7 @@
 
 from vitrage import __version__
 
-VITRAGE_TITLE = """
+VITRAGE_TITLE = r"""
  __     __  __    __
 /  |   /  |/  |  /  |
 $$ |   $$ |$$/  _$$ |_     ______   ______    ______    ______
