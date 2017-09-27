@@ -56,6 +56,7 @@ class KeycloakAuth(base.ConfigurableMiddleware):
         self.keyfile = self._conf_get('keyfile', KEYCLOAK_GROUP)
         self.cafile = self._conf_get('cafile', KEYCLOAK_GROUP) or \
             self._get_system_ca_file()
+        self.decoded = {}
 
     @property
     def reject_auth_headers(self):
@@ -64,16 +65,15 @@ class KeycloakAuth(base.ConfigurableMiddleware):
 
     @property
     def roles(self):
-        decoded = {}
-        try:
-            decoded = jwt.decode(self.token, algorithms=['RS256'],
-                                 verify=False)
-        except jwt.DecodeError:
-            message = "Token can't be decoded because of wrong format."
-            self._unauthorized(message)
+        return ','.join(self.decoded['realm_access']['roles']) \
+            if 'realm_access' in self.decoded else ''
 
-        return ','.join(decoded['realm_access']['roles']) \
-            if 'realm_access' in decoded else ''
+    @property
+    def realm_name(self):
+        # Get user realm from parsed token
+        # Format is "iss": "http://<host>:<port>/auth/realms/<realm_name>",
+        __, __, realm_name = self.decoded['iss'].strip().rpartition('/realms/')
+        return realm_name
 
     def process_request(self, req):
             self._authenticate(req)
@@ -81,29 +81,34 @@ class KeycloakAuth(base.ConfigurableMiddleware):
     def _authenticate(self, req):
         self.token = req.headers.get('X-Auth-Token')
         if self.token:
-            self._decode(req)
+            self._decode()
         else:
             message = 'Auth token must be provided in "X-Auth-Token" header.'
             self._unauthorized(message)
 
-    def _decode(self, req):
-        realm_name = req.headers.get('X-Project-Id')
-        endpoint = OPENID_CONNECT_USERINFO % (self.auth_url, realm_name)
-        headers = {'Authorization': 'Bearer %s' % self.token}
+        self.call_keycloak()
 
+        self._set_req_headers(req)
+
+    def _decode(self):
+        try:
+            self.decoded = jwt.decode(self.token, algorithms=['RS256'],
+                                      verify=False)
+        except jwt.DecodeError:
+            message = "Token can't be decoded because of wrong format."
+            self._unauthorized(message)
+
+    def call_keycloak(self):
+        endpoint = OPENID_CONNECT_USERINFO % (self.auth_url, self.realm_name)
+        headers = {'Authorization': 'Bearer %s' % self.token}
         verify = None
         if urllib.parse.urlparse(endpoint).scheme == "https":
             verify = False if self.insecure else self.cafile
-
         cert = (self.certfile, self.keyfile) if self.certfile and self.keyfile \
             else None
-
         resp = requests.get(endpoint, headers=headers,
                             verify=verify, cert=cert)
-
         resp.raise_for_status()
-
-        self._set_req_headers(req)
 
     def _set_req_headers(self, req):
         req.headers['X-Identity-Status'] = 'Confirmed'
