@@ -75,11 +75,13 @@ class NovaInstanceTransformerTest(base.BaseTest):
             transformer.create_neighbor_placeholder_vertex(**properties)
 
         # Test assertions
-        observed_id_values = placeholder.vertex_id.split(
-            TransformerBase.KEY_SEPARATOR)
-        expected_id_values = transformer._key_values(NOVA_INSTANCE_DATASOURCE,
-                                                     instance_id)
-        self.assertEqual(expected_id_values, tuple(observed_id_values))
+        observed_uuid = placeholder.vertex_id
+        expected_key = tbase.build_key(transformer._key_values(
+            NOVA_INSTANCE_DATASOURCE,
+            instance_id))
+        expected_uuid = \
+            TransformerBase.uuid_from_deprecated_vitrage_id(expected_key)
+        self.assertEqual(expected_uuid, observed_uuid)
 
         observed_time = placeholder.get(VProps.VITRAGE_SAMPLE_TIMESTAMP)
         self.assertEqual(timestamp, observed_time)
@@ -160,7 +162,7 @@ class NovaInstanceTransformerTest(base.BaseTest):
 
     def _validate_vertex_props(self, vertex, event):
 
-        self.assertEqual(12, len(vertex.properties))
+        self.assertEqual(13, len(vertex.properties))
 
         is_update_event = tbase.is_update_event(event)
 
@@ -224,8 +226,11 @@ class NovaInstanceTransformerTest(base.BaseTest):
 
         # Validate neighbor edge
         edge = h_neighbor.edge
+        entity_key = it._create_entity_key(event)
+        entity_uuid = \
+            TransformerBase.uuid_from_deprecated_vitrage_id(entity_key)
         self.assertEqual(edge.source_id, h_neighbor.vertex.vertex_id)
-        self.assertEqual(edge.target_id, it._create_entity_key(event))
+        self.assertEqual(edge.target_id, entity_uuid)
         self.assertEqual(edge.label, EdgeLabel.CONTAINS)
 
     def test_extract_key(self):
@@ -288,7 +293,9 @@ class NovaInstanceTransformerTest(base.BaseTest):
 
         # Test setup
         host_name = 'host123'
-        vertex_id = 'RESOURCE:nova.instance:instance321'
+        vertex_key = 'RESOURCE:nova.instance:instance321'
+        vertex_id = \
+            TransformerBase.uuid_from_deprecated_vitrage_id(vertex_key)
         time = datetime.datetime.utcnow()
         entity_event = {
             '_info': {
@@ -309,7 +316,9 @@ class NovaInstanceTransformerTest(base.BaseTest):
                                                   is_entity_source=False)
 
         # Test assertions
-        host_vertex_id = 'RESOURCE:nova.host:host123'
+        host_vertex_id = \
+            TransformerBase.uuid_from_deprecated_vitrage_id(
+                'RESOURCE:nova.host:host123')
         self.assertEqual(host_vertex_id, neighbor.vertex.vertex_id)
         self.assertEqual(
             time,

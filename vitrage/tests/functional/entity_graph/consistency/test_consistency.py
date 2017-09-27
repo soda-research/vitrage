@@ -78,7 +78,7 @@ class TestConsistencyFunctional(TestFunctionalBase):
         cls.conf.register_opts(cls.DATASOURCES_OPTS, group='datasources')
         cls.load_datasources(cls.conf)
 
-        cls.graph = NXGraph("Entity Graph", uuid=True)
+        cls.graph = NXGraph("Entity Graph")
         cls.initialization_status = VitrageInit(cls.conf, cls.graph)
         cls.processor = Processor(cls.conf, cls.initialization_status,
                                   cls.graph)
@@ -99,8 +99,7 @@ class TestConsistencyFunctional(TestFunctionalBase):
         # Setup
         num_of_host_alarms = self.NUM_HOSTS - 2
         num_instances_per_host = 4
-        self._create_processor_with_graph(self.conf, processor=self.processor,
-                                          uuid=True)
+        self._create_processor_with_graph(self.conf, processor=self.processor)
         self._add_alarms()
         self._set_end_messages()
         self.assertEqual(self._num_total_expected_vertices() +
@@ -175,8 +174,7 @@ class TestConsistencyFunctional(TestFunctionalBase):
         self.assertEqual(6, len(deleted_instance_vertices))
 
     def _periodic_process_setup_stage(self, consistency_interval):
-        self._create_processor_with_graph(self.conf, processor=self.processor,
-                                          uuid=True)
+        self._create_processor_with_graph(self.conf, processor=self.processor)
         current_time = utcnow()
 
         # set all vertices to be have timestamp that consistency won't get

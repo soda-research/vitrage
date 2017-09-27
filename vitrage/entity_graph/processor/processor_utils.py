@@ -17,7 +17,6 @@ from dateutil import parser
 from oslo_log import log
 
 from vitrage.common.constants import EdgeProperties as EProps
-from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.graph import Edge
 from vitrage.graph import Vertex
@@ -84,15 +83,6 @@ def get_vertex_types(vertex):
     vitrage_category = vertex[VProps.VITRAGE_CATEGORY]
     vitrage_type = vertex[VProps.VITRAGE_TYPE]
     return vitrage_category, vitrage_type
-
-
-def get_defining_properties(vertex):
-    if vertex.get(VProps.VITRAGE_CATEGORY) == EntityCategory.ALARM:
-        dp = (vertex.get(VProps.VITRAGE_TYPE), vertex.get(VProps.ID),
-              vertex.get(VProps.RESOURCE_ID), vertex.get(VProps.NAME))
-    else:
-        dp = (vertex.get(VProps.VITRAGE_TYPE), vertex.get(VProps.ID))
-    return hash(dp)
 
 
 def can_update_vertex(graph_vertex, new_vertex):

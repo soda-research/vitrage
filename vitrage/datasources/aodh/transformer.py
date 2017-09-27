@@ -24,6 +24,7 @@ from vitrage.datasources.aodh.properties import AodhProperties as AodhProps
 from vitrage.datasources.aodh.properties import AodhState
 from vitrage.datasources import transformer_base as tbase
 from vitrage.datasources.transformer_base import Neighbor
+from vitrage.datasources.transformer_base import TransformerBase
 from vitrage.evaluator.actions.evaluator_event_transformer \
     import VITRAGE_DATASOURCE
 import vitrage.graph.utils as graph_utils
@@ -62,6 +63,7 @@ class AodhTransformer(AlarmTransformerBase):
             'alarm_type': entity_event[AodhProps.TYPE]
         }
 
+        # TODO(annarez): convert EVENT_TYPE to tuple
         if entity_event[AodhProps.TYPE] == AodhProps.EVENT:
             metadata[AodhProps.EVENT_TYPE] = entity_event[AodhProps.EVENT_TYPE]
 
@@ -95,7 +97,8 @@ class AodhTransformer(AlarmTransformerBase):
         result = []
         for vertex in graph_neighbors:
             edge = graph_utils.create_edge(
-                source_id=self._create_entity_key(entity_event),
+                source_id=TransformerBase.uuid_from_deprecated_vitrage_id(
+                    self._create_entity_key(entity_event)),
                 target_id=vertex.vertex_id,
                 relationship_type=EdgeLabel.ON)
             result.append(Neighbor(vertex, edge))

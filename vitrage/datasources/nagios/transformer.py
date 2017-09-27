@@ -85,7 +85,6 @@ class NagiosTransformer(AlarmTransformerBase):
         return entity_event[NagiosProperties.STATUS] == NagiosTestStatus.OK
 
     def _create_entity_key(self, entity_event):
-
         entity_type = entity_event[DSProps.ENTITY_TYPE]
         alarm_name = entity_event[NagiosProperties.SERVICE]
         resource_name = entity_event[NagiosProperties.RESOURCE_NAME]

@@ -527,9 +527,9 @@ class TestScenarioEvaluator(TestFunctionalBase):
         # test asserts
         self.assertEqual(num_orig_vertices + num_added_vertices +
                          num_deduced_vertices + num_nagios_alarm_vertices +
-                         # This is due to keeping alarm history :
-                         # new alarm doesn't update same deleted alarm.
-                         # Instead, it keeps the old one and creates a new one
+                         # a new uuid is created for every new vertex,
+                         # even if it existed before with another uuid.
+                         # new alarm doesn't override old one
                          1,
                          entity_graph.num_vertices())
         self.assertEqual(num_orig_edges + num_added_edges + num_deduced_edges +
@@ -543,14 +543,14 @@ class TestScenarioEvaluator(TestFunctionalBase):
             port_neighbors = entity_graph.neighbors(port_vertex.vertex_id,
                                                     vertex_attr_filter=query)
             self.assertEqual(1, len(port_neighbors))
-            self.assertEqual(EntityCategory.ALARM,
-                             port_neighbors[0][VProps.VITRAGE_CATEGORY])
-            self.assertEqual(VITRAGE_DATASOURCE,
-                             port_neighbors[0][VProps.VITRAGE_TYPE])
-            self.assertEqual('simple_port_deduced_alarm',
-                             port_neighbors[0][VProps.NAME])
-            self.assertEqual(vitrage_is_deleted,
-                             port_neighbors[0][VProps.VITRAGE_IS_DELETED])
+            self.assertEqual(port_neighbors[0][VProps.VITRAGE_CATEGORY],
+                             EntityCategory.ALARM)
+            self.assertEqual(port_neighbors[0][VProps.VITRAGE_TYPE],
+                             VITRAGE_DATASOURCE)
+            self.assertEqual(port_neighbors[0][VProps.NAME],
+                             'simple_port_deduced_alarm')
+            self.assertEqual(port_neighbors[0][VProps.VITRAGE_IS_DELETED],
+                             vitrage_is_deleted)
             query = {VProps.VITRAGE_CATEGORY: EntityCategory.ALARM,
                      VProps.VITRAGE_TYPE: VITRAGE_DATASOURCE,
                      VProps.VITRAGE_IS_DELETED: False}
@@ -583,9 +583,9 @@ class TestScenarioEvaluator(TestFunctionalBase):
         # test asserts
         self.assertEqual(num_orig_vertices + num_added_vertices +
                          num_deduced_vertices + num_nagios_alarm_vertices +
-                         # This is due to keeping alarm history :
-                         # new alarm doesn't update same deleted alarm.
-                         # Instead, it keeps the old one and creates a new one
+                         # a new uuid is created for every new vertex,
+                         # even if it existed before with another uuid.
+                         # new alarm doesn't override old one
                          1,
                          entity_graph.num_vertices())
         self.assertEqual(num_orig_edges + num_added_edges + num_deduced_edges +
@@ -638,11 +638,9 @@ class TestScenarioEvaluator(TestFunctionalBase):
         # test asserts
         self.assertEqual(num_orig_vertices + num_added_vertices +
                          num_deduced_vertices + num_nagios_alarm_vertices +
-                         # This is due to keeping alarm history :
-                         # new alarm doesn't update same deleted alarm.
-                         # Instead, it keeps the old one and creates a new one
-                         # Since this is the second test, there are already two
-                         # alarms of this vitrage_type
+                         # a new uuid is created for every new vertex,
+                         # even if it existed before with another uuid.
+                         # new alarm doesn't override old one
                          2,
                          entity_graph.num_vertices())
         self.assertEqual(num_orig_edges + num_added_edges + num_deduced_edges +
@@ -660,7 +658,8 @@ class TestScenarioEvaluator(TestFunctionalBase):
                 self.assertEqual(
                     EntityCategory.ALARM,
                     port_neighbors[in_counter][VProps.VITRAGE_CATEGORY])
-                self.assertEqual(VITRAGE_DATASOURCE, port_neighbors[in_counter]
+                self.assertEqual(VITRAGE_DATASOURCE,
+                                 port_neighbors[in_counter]
                                  [VProps.VITRAGE_TYPE])
                 self.assertEqual('simple_port_deduced_alarm',
                                  port_neighbors[in_counter][VProps.NAME])
@@ -825,9 +824,9 @@ class TestScenarioEvaluator(TestFunctionalBase):
 
         self.assertEqual(num_orig_vertices + num_added_vertices +
                          num_deduced_vertices + num_network_alarm_vertices +
-                         # This is due to keeping alarm history :
-                         # new alarm doesn't update same deleted alarm.
-                         # Instead, it keeps the old one and creates a new one
+                         # a new uuid is created for every new vertex,
+                         # even if it existed before with another uuid.
+                         # new alarm doesn't override old one
                          1,
                          entity_graph.num_vertices())
         self.assertEqual(num_orig_edges + num_added_edges + num_deduced_edges +
@@ -1021,9 +1020,9 @@ class TestScenarioEvaluator(TestFunctionalBase):
 
         # test asserts
         self.assertEqual(num_orig_vertices + num_volumes + num_deduced_alarms +
-                         # This is due to keeping alarm history :
-                         # new alarm doesn't update same deleted alarm.
-                         # Instead, it keeps the old one and creates a new one
+                         # a new uuid is created for every new vertex,
+                         # even if it existed before with another uuid.
+                         # new alarm doesn't override old one
                          1,
                          entity_graph.num_vertices())
         self.assertEqual(num_orig_edges + num_volumes + num_deduced_alarms + 1,
@@ -1106,9 +1105,9 @@ class TestScenarioEvaluator(TestFunctionalBase):
 
         # test asserts
         self.assertEqual(num_orig_vertices + num_volumes + num_deduced_alarms +
-                         # This is due to keeping alarm history :
-                         # new alarm doesn't update same deleted alarm.
-                         # Instead, it keeps the old one and creates a new one
+                         # a new uuid is created for every new vertex,
+                         # even if it existed before with another uuid.
+                         # new alarm doesn't override old one
                          1,
                          entity_graph.num_vertices())
         self.assertEqual(num_orig_edges + num_volumes + num_deduced_alarms + 1,
@@ -1357,7 +1356,7 @@ class TestScenarioEvaluator(TestFunctionalBase):
         return host_v
 
     def _init_system(self):
-        processor = self._create_processor_with_graph(self.conf, uuid=True)
+        processor = self._create_processor_with_graph(self.conf)
         event_queue = queue.Queue()
         evaluator = ScenarioEvaluator(self.conf, processor.entity_graph,
                                       self.scenario_repository, event_queue,

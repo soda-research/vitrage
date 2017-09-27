@@ -22,6 +22,7 @@ from vitrage.common.constants import VertexProperties as VProps
 from vitrage.common.exception import VitrageTransformerError
 from vitrage.datasources import transformer_base
 from vitrage.datasources.transformer_base import Neighbor
+from vitrage.datasources.transformer_base import TransformerBase
 from vitrage.evaluator.actions.recipes.action_steps import ADD_EDGE
 from vitrage.evaluator.actions.recipes.action_steps import ADD_VERTEX
 from vitrage.evaluator.actions.recipes.action_steps import REMOVE_EDGE
@@ -124,7 +125,8 @@ class EvaluatorEventTransformer(transformer_base.TransformerBase):
         if event_type == ADD_VERTEX:
 
             relation_edge = graph_utils.create_edge(
-                source_id=self._create_entity_key(event),
+                source_id=TransformerBase.uuid_from_deprecated_vitrage_id(
+                    self._create_entity_key(event)),
                 target_id=event[TFields.TARGET],
                 relationship_type=EdgeLabel.ON,
                 update_timestamp=timestamp)

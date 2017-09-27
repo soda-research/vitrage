@@ -90,7 +90,9 @@ class TestAodhAlarmTransformer(AodhTransformerBaseTest):
             neighbors = event[TransformerBase.QUERY_RESULT]
             vertices = []
             for neighbor in neighbors:
-                vertices.append(self._convert_dist_to_vertex(neighbor))
+                neighbor_vertex = self._convert_dist_to_vertex(neighbor)
+                vertices.append(self.transformers[AODH_DATASOURCE].
+                                update_uuid_in_vertex(neighbor_vertex))
             event[TransformerBase.QUERY_RESULT] = vertices
 
             # Test action
@@ -137,7 +139,9 @@ class TestAodhAlarmPushTransformer(AodhTransformerBaseTest):
             neighbors = event[TransformerBase.QUERY_RESULT]
             vertices = []
             for neighbor in neighbors:
-                vertices.append(self._convert_dist_to_vertex(neighbor))
+                neighbor_vertex = self._convert_dist_to_vertex(neighbor)
+                vertices.append(self.transformers[AODH_DATASOURCE].
+                                update_uuid_in_vertex(neighbor_vertex))
             event[TransformerBase.QUERY_RESULT] = vertices
 
             # Test action

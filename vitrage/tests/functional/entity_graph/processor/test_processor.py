@@ -34,7 +34,7 @@ class TestProcessorFunctional(TestFunctionalBase):
         cls.load_datasources(cls.conf)
 
     def test_create_entity_graph(self):
-        processor = self._create_processor_with_graph(self.conf, uuid=True)
+        processor = self._create_processor_with_graph(self.conf)
 
         self.assertEqual(self._num_total_expected_vertices(),
                          processor.entity_graph.num_vertices())

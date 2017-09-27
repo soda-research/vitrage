@@ -18,6 +18,7 @@ from collections import namedtuple
 import six
 
 from oslo_log import log as logging
+from oslo_utils import uuidutils
 
 import vitrage.common.constants as cons
 from vitrage.common.constants import DatasourceAction
@@ -105,6 +106,8 @@ class TransformerBase(object):
     # graph actions which need to refer them differently
     GRAPH_ACTION_MAPPING = {}
 
+    key_to_uuid_cache = {}
+
     def __init__(self, transformers, conf):
         self.conf = conf
         self.transformers = transformers
@@ -128,6 +131,9 @@ class TransformerBase(object):
             neighbors = self._create_neighbors(entity_event)
             action = self._extract_graph_action(entity_event)
 
+            if action == GraphAction.DELETE_ENTITY:
+                self._delete_id_from_cache(entity_vertex.vertex_id)
+
             return EntityWrapper(entity_vertex, neighbors, action)
         else:
             return EntityWrapper(self._create_end_vertex(entity_event),
@@ -142,16 +148,48 @@ class TransformerBase(object):
             update_method = \
                 self.conf[self.get_vitrage_type()].update_method.lower()
             if update_method == UpdateMethod.PUSH:
-                return self._create_update_entity_vertex(entity_event)
+                vertex = self._create_update_entity_vertex(entity_event)
+                return self.update_uuid_in_vertex(vertex)
             elif update_method == UpdateMethod.PULL:
-                return self._create_snapshot_entity_vertex(entity_event)
+                vertex = self._create_snapshot_entity_vertex(entity_event)
+                return self.update_uuid_in_vertex(vertex)
             elif update_method == UpdateMethod.NONE:
                 return None
             else:
                 LOG.error('Update event arrived for dataresource that is '
                           'defined without updates')
         else:
-            return self._create_snapshot_entity_vertex(entity_event)
+            vertex = self._create_snapshot_entity_vertex(entity_event)
+            return self.update_uuid_in_vertex(vertex)
+
+    def update_uuid_in_vertex(self, vertex):
+        if not vertex:
+            return
+        # TODO(annarez): remove IS_REAL_VITRAGE_ID prop
+        if vertex.get(VProps.IS_REAL_VITRAGE_ID):
+            return vertex
+        new_uuid = self.uuid_from_deprecated_vitrage_id(vertex.vertex_id)
+        vertex.vertex_id = new_uuid
+        vertex.properties[VProps.VITRAGE_ID] = new_uuid
+        vertex.properties[VProps.IS_REAL_VITRAGE_ID] = True
+        return vertex
+
+    @classmethod
+    def uuid_from_deprecated_vitrage_id(cls, vitrage_id):
+        old_vitrage_id = hash(vitrage_id)
+        new_uuid = cls.key_to_uuid_cache.get(old_vitrage_id)
+        if not new_uuid:
+            new_uuid = uuidutils.generate_uuid()
+            cls.key_to_uuid_cache[old_vitrage_id] = new_uuid
+
+        return new_uuid
+
+    @classmethod
+    def _delete_id_from_cache(cls, vitrage_id):
+        for key, value in cls.key_to_uuid_cache.items():
+            if value == vitrage_id:
+                del cls.key_to_uuid_cache[key]
+                break
 
     @abc.abstractmethod
     def _create_snapshot_entity_vertex(self, entity_event):
@@ -206,7 +244,9 @@ class TransformerBase(object):
                          metadata=None):
         metadata = {} if metadata is None else metadata
         # create placeholder vertex
-        entity_vitrage_id = self._create_entity_key(entity_event)
+        entity_vitrage_id = \
+            self.uuid_from_deprecated_vitrage_id(
+                self._create_entity_key(entity_event))
         vitrage_sample_timestamp = entity_event[DSProps.SAMPLE_DATE]
         properties = {
             VProps.ID: neighbor_id,
@@ -217,7 +257,6 @@ class TransformerBase(object):
         }
         neighbor_vertex = \
             self.create_neighbor_placeholder_vertex(**properties)
-
         # connect placeholder vertex to entity vertex
         edge_direction = self._get_edge_direction(entity_vitrage_id,
                                                   neighbor_vertex.vertex_id,
@@ -261,7 +300,7 @@ class TransformerBase(object):
         key_fields = self._key_values(kwargs[VProps.VITRAGE_TYPE],
                                       kwargs[VProps.ID])
 
-        return graph_utils.create_vertex(
+        vertex = graph_utils.create_vertex(
             build_key(key_fields),
             vitrage_category=kwargs[VProps.VITRAGE_CATEGORY],
             vitrage_type=kwargs[VProps.VITRAGE_TYPE],
@@ -270,6 +309,7 @@ class TransformerBase(object):
                                               True),
             entity_id=kwargs[VProps.ID],
             metadata=metadata)
+        return self.update_uuid_in_vertex(vertex)
 
     def _extract_graph_action(self, entity_event):
         """Extract graph action.

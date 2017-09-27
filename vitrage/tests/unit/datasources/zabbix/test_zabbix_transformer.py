@@ -146,11 +146,17 @@ class ZabbixTransformerTest(base.BaseTest):
 
         host_vertex = neighbor.vertex
 
-        key_fields = host_vertex.vertex_id.split(TransformerBase.KEY_SEPARATOR)
+        observed_key = host_vertex.vertex_id
 
-        self.assertEqual(EntityCategory.RESOURCE, key_fields[0])
-        self.assertEqual(NOVA_HOST_DATASOURCE, key_fields[1])
-        self.assertEqual(event[ZabbixProps.RESOURCE_NAME], key_fields[2])
+        expected_key = tbase.build_key((EntityCategory.RESOURCE,
+                                        NOVA_HOST_DATASOURCE,
+                                        event[ZabbixProps.RESOURCE_NAME]))
+        expected_uuid = \
+            TransformerBase.uuid_from_deprecated_vitrage_id(expected_key)
+
+        self.assertEqual(expected_uuid, observed_key)
+        self.assertEqual(expected_uuid,
+                         host_vertex.properties.get(VProps.VITRAGE_ID))
 
         self.assertFalse(host_vertex[VProps.VITRAGE_IS_DELETED])
         self.assertTrue(host_vertex[VProps.VITRAGE_IS_PLACEHOLDER])
@@ -167,7 +173,8 @@ class ZabbixTransformerTest(base.BaseTest):
 
         alarm_key = ZabbixTransformer(self.transformers, self.conf).\
             _create_entity_key(event)
-        self.assertEqual(alarm_key, edge.source_id)
+        alarm_uuid = TransformerBase.uuid_from_deprecated_vitrage_id(alarm_key)
+        self.assertEqual(alarm_uuid, edge.source_id)
         self.assertEqual(host_vertex.vertex_id, edge.target_id)
 
     @staticmethod

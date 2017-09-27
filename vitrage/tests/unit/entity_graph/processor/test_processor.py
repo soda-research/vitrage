@@ -49,7 +49,7 @@ class TestProcessor(TestEntityGraphUnitBase):
 
     def test_process_event(self):
         # check create instance event
-        processor = self.create_processor_and_graph(self.conf, uuid=True)
+        processor = self.create_processor_and_graph(self.conf)
         event = self._create_event(spec_type=self.INSTANCE_SPEC,
                                    datasource_action=DSAction.INIT_SNAPSHOT)
         processor.process_event(event)

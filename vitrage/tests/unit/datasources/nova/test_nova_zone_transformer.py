@@ -30,7 +30,6 @@ from vitrage.datasources.nova.zone.transformer import ZoneTransformer
 from vitrage.datasources import OPENSTACK_CLUSTER
 from vitrage.datasources import transformer_base as tbase
 from vitrage.datasources.transformer_base import CLUSTER_ID
-from vitrage.datasources.transformer_base import TransformerBase
 from vitrage.tests import base
 from vitrage.tests.mocks import mock_driver as mock_sync
 
@@ -76,11 +75,13 @@ class NovaZoneTransformerTest(base.BaseTest):
             zone_transformer.create_neighbor_placeholder_vertex(**properties)
 
         # Test assertions
-        observed_id_values = placeholder.vertex_id.split(
-            TransformerBase.KEY_SEPARATOR)
-        expected_id_values = self.transformers[NOVA_ZONE_DATASOURCE].\
-            _key_values(NOVA_ZONE_DATASOURCE, zone_name)
-        self.assertEqual(expected_id_values, tuple(observed_id_values))
+        observed_uuid = placeholder.vertex_id
+        expected_key = tbase.build_key(zone_transformer._key_values(
+            NOVA_ZONE_DATASOURCE,
+            zone_name))
+        expected_uuid = \
+            zone_transformer.uuid_from_deprecated_vitrage_id(expected_key)
+        self.assertEqual(expected_uuid, observed_uuid)
 
         observed_time = placeholder.get(VProps.VITRAGE_SAMPLE_TIMESTAMP)
         self.assertEqual(timestamp, observed_time)

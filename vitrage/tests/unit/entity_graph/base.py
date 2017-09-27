@@ -75,7 +75,7 @@ class TestEntityGraphUnitBase(base.BaseTest):
         events = self._create_mock_events()
 
         if not processor:
-            processor = self.create_processor_and_graph(conf, uuid=False)
+            processor = self.create_processor_and_graph(conf)
 
         for event in events:
             processor.process_event(event)
@@ -117,7 +117,7 @@ class TestEntityGraphUnitBase(base.BaseTest):
 
         # add instance entity with host
         if processor is None:
-            processor = self.create_processor_and_graph(self.conf, True)
+            processor = self.create_processor_and_graph(self.conf)
 
         vertex, neighbors, event_type = processor.transformer_manager\
             .transform(event)
@@ -126,8 +126,8 @@ class TestEntityGraphUnitBase(base.BaseTest):
         return vertex, neighbors, processor
 
     @staticmethod
-    def create_processor_and_graph(conf, uuid):
-        e_graph = NXGraph("Entity Graph", uuid=uuid)
+    def create_processor_and_graph(conf):
+        e_graph = NXGraph("Entity Graph")
         init = VitrageInit(conf)
         return proc.Processor(conf, init, e_graph)
 

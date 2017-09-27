@@ -429,7 +429,7 @@ class TestApis(TestEntityGraphUnitBase):
             self.assertEqual(resource[VProps.PROJECT_ID], project_id)
 
     def _create_graph(self):
-        graph = NXGraph('Multi tenancy graph', uuid=True)
+        graph = NXGraph('Multi tenancy graph')
 
         # create vertices
         cluster_vertex = create_cluster_placeholder_vertex()

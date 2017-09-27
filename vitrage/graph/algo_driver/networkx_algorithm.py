@@ -47,15 +47,13 @@ class NXAlgorithm(GraphAlgorithm):
         return NXGraph(args, **kwargs)
 
     def graph_query_vertices(self,
+                             root_id,
                              query_dict=None,
-                             root_id=None,
                              depth=None,
                              direction=Direction.BOTH,
                              edge_query_dict=None):
         graph = self._create_new_graph('graph')
 
-        if not root_id:
-            root_id = self.graph.root_id
         root_data = self.graph._g.node[root_id]
 
         match_func = create_predicate(query_dict) if query_dict else None
@@ -88,7 +86,6 @@ class NXAlgorithm(GraphAlgorithm):
 
         graph = self._create_new_graph(
             graph.name,
-            graph.root_id,
             vertices=self._vertex_result_to_list(n_result),
             edges=self._edge_result_to_list(e_result))
 

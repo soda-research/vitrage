@@ -59,7 +59,7 @@ class TestActionExecutor(TestFunctionalBase):
     def test_execute_set_state(self):
 
         # Test Setup
-        processor = self._create_processor_with_graph(self.conf, uuid=True)
+        processor = self._create_processor_with_graph(self.conf)
 
         vertex_attrs = {VProps.VITRAGE_TYPE: NOVA_HOST_DATASOURCE}
         host_vertices = processor.entity_graph.get_vertices(
@@ -110,7 +110,7 @@ class TestActionExecutor(TestFunctionalBase):
     def test_execute_mark_down(self):
 
         # Test Setup
-        processor = self._create_processor_with_graph(self.conf, uuid=True)
+        processor = self._create_processor_with_graph(self.conf)
 
         vertex_attrs = {VProps.VITRAGE_TYPE: NOVA_HOST_DATASOURCE}
         host_vertices = processor.entity_graph.get_vertices(
@@ -147,7 +147,7 @@ class TestActionExecutor(TestFunctionalBase):
     def test_execute_add_edge(self):
 
         # Test Setup
-        processor = self._create_processor_with_graph(self.conf, uuid=True)
+        processor = self._create_processor_with_graph(self.conf)
 
         vertex_attrs = {VProps.VITRAGE_TYPE: NOVA_HOST_DATASOURCE}
         host_vertices = processor.entity_graph.get_vertices(
@@ -197,7 +197,7 @@ class TestActionExecutor(TestFunctionalBase):
     def test_execute_add_vertex(self):
 
         # Test Setup
-        processor = self._create_processor_with_graph(self.conf, uuid=True)
+        processor = self._create_processor_with_graph(self.conf)
 
         vertex_attrs = {VProps.VITRAGE_TYPE: NOVA_HOST_DATASOURCE}
         host_vertices = processor.entity_graph.get_vertices(
@@ -255,7 +255,7 @@ class TestActionExecutor(TestFunctionalBase):
     def test_execute_add_and_remove_vertex(self):
 
         # Test Setup
-        processor = self._create_processor_with_graph(self.conf, uuid=True)
+        processor = self._create_processor_with_graph(self.conf)
 
         vertex_attrs = {VProps.VITRAGE_TYPE: NOVA_HOST_DATASOURCE}
         host_vertices = processor.entity_graph.get_vertices(

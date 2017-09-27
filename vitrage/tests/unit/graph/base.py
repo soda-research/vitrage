@@ -139,10 +139,7 @@ class GraphTestBase(base.BaseTest):
                              num_of_tests_per_host):
 
         start = time.time()
-        g = NXGraph(name, EntityCategory.RESOURCE + ':' +
-                    OPENSTACK_CLUSTER + ':' +
-                    CLUSTER_ID,
-                    uuid=True)
+        g = NXGraph(name)
         g.add_vertex(v_node)
         g.add_vertex(v_switch)
         g.add_edge(e_node_to_switch)

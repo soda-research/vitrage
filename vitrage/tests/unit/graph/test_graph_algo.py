@@ -31,6 +31,8 @@ from vitrage.graph.driver.elements import Edge
 from vitrage.graph.driver.graph import Direction
 from vitrage.tests.unit.graph.base import *  # noqa
 
+ROOT_ID = EntityCategory.RESOURCE + ':' + OPENSTACK_CLUSTER + ':' + CLUSTER_ID
+
 
 class GraphAlgorithmTest(GraphTestBase):
 
@@ -54,7 +56,7 @@ class GraphAlgorithmTest(GraphTestBase):
         ga = self.entity_graph.algo
 
         query = {'==': {VProps.VITRAGE_TYPE: OPENSTACK_CLUSTER}}
-        subgraph = ga.graph_query_vertices(query)
+        subgraph = ga.graph_query_vertices(root_id=ROOT_ID, query_dict=query)
         self.assertEqual(
             1,  # For Cluster
             subgraph.num_vertices(), 'num of vertex node')
@@ -66,7 +68,7 @@ class GraphAlgorithmTest(GraphTestBase):
             ]
         }
 
-        subgraph = ga.graph_query_vertices(query)
+        subgraph = ga.graph_query_vertices(root_id=ROOT_ID, query_dict=query)
         self.assertEqual(
             ENTITY_GRAPH_HOSTS_PER_CLUSTER,
             subgraph.num_edges(), 'num of edges Host <-- NODE')
@@ -79,7 +81,7 @@ class GraphAlgorithmTest(GraphTestBase):
                 {'==': {VProps.VITRAGE_TYPE: OPENSTACK_CLUSTER}}
             ]
         }
-        subgraph = ga.graph_query_vertices(query)
+        subgraph = ga.graph_query_vertices(root_id=ROOT_ID, query_dict=query)
         self.assertEqual(
             ENTITY_GRAPH_HOSTS_PER_CLUSTER +
             ENTITY_GRAPH_HOSTS_PER_CLUSTER * ENTITY_GRAPH_ALARMS_PER_HOST +
@@ -95,7 +97,7 @@ class GraphAlgorithmTest(GraphTestBase):
 
         query = {'!=': {'NOTHING': 'IS EVERYTHING'}}
         subgraph = ga.graph_query_vertices(
-            query_dict=query, root_id=first_host_id, depth=1)
+            root_id=first_host_id, query_dict=query, depth=1)
         self.assertEqual(
             1 +  # For host
             1 +  # For Cluster
@@ -111,7 +113,7 @@ class GraphAlgorithmTest(GraphTestBase):
             ]
         }
         subgraph = ga.graph_query_vertices(
-            query_dict=query, root_id=first_host_id, depth=1)
+            root_id=first_host_id, query_dict=query, depth=1)
         self.assertEqual(
             1,  # For SWITCH
             subgraph.num_edges(), 'num of BOTH edges Host (depth 1)')
@@ -140,7 +142,9 @@ class GraphAlgorithmTest(GraphTestBase):
                 {'!=': {VProps.VITRAGE_CATEGORY: ALARM}}
             ]
         }
-        subgraph = ga.graph_query_vertices(query_dict=query, depth=3)
+        subgraph = ga.graph_query_vertices(root_id=ROOT_ID,
+                                           query_dict=query,
+                                           depth=3)
         self.assertEqual(
             1 +  # Cluster to switch
             ENTITY_GRAPH_HOSTS_PER_CLUSTER * 2 +
@@ -154,7 +158,9 @@ class GraphAlgorithmTest(GraphTestBase):
                 {'==': {VProps.VITRAGE_CATEGORY: ALARM}},
             ]
         }
-        subgraph = ga.graph_query_vertices(query_dict=query, depth=3)
+        subgraph = ga.graph_query_vertices(root_id=ROOT_ID,
+                                           query_dict=query,
+                                           depth=3)
         self.assertEqual(0, subgraph.num_edges(),
                          'num of BOTH edges Node (depth 3)')
         self.assertEqual(1, subgraph.num_vertices(),
@@ -163,8 +169,10 @@ class GraphAlgorithmTest(GraphTestBase):
         # check the edge_query_dict parameter
         query = {'!=': {'NOTHING': 'IS EVERYTHING'}}
         edge_query = {'==': {EProps.RELATIONSHIP_TYPE: EdgeLabel.CONTAINS}}
-        subgraph = ga.graph_query_vertices(
-            query_dict=query, depth=5, edge_query_dict=edge_query)
+        subgraph = ga.graph_query_vertices(root_id=ROOT_ID,
+                                           query_dict=query,
+                                           depth=5,
+                                           edge_query_dict=edge_query)
         alarms = subgraph.get_vertices(
             vertex_attr_filter={VProps.VITRAGE_CATEGORY: ALARM})
         self.assertEqual(len(alarms), 0, 'We filtered the ON relationship,'
@@ -201,8 +209,10 @@ class GraphAlgorithmTest(GraphTestBase):
 
         query = {'!=': {'NOTHING': 'IS EVERYTHING'}}
         edge_query = {'==': {EProps.VITRAGE_IS_DELETED: False}}
-        subgraph = ga.graph_query_vertices(
-            query_dict=query, depth=5, edge_query_dict=edge_query)
+        subgraph = ga.graph_query_vertices(root_id=ROOT_ID,
+                                           query_dict=query,
+                                           depth=5,
+                                           edge_query_dict=edge_query)
         self.assertEqual(self.entity_graph.num_edges() - 1,
                          subgraph.num_edges(),
                          'We filtered the ON relationship, so no alarms '
@@ -215,7 +225,9 @@ class GraphAlgorithmTest(GraphTestBase):
 
     def test_no_match_graph_query_vertices(self):
         query = {'==': {VProps.VITRAGE_TYPE: 'test'}}
-        subgraph = self.entity_graph.algo.graph_query_vertices(query)
+        subgraph = self.entity_graph.algo.graph_query_vertices(
+            root_id=ROOT_ID,
+            query_dict=query)
         self.assertEqual(
             0,
             subgraph.num_vertices(), 'num of vertex node')

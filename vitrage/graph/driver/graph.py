@@ -36,8 +36,7 @@ class Direction(object):
 
 @six.add_metaclass(abc.ABCMeta)
 class Graph(object):
-    def __init__(self, name, graph_type, vertices=None, edges=None,
-                 uuid=False):
+    def __init__(self, name, graph_type, vertices=None, edges=None):
         """Create a Graph instance
 
         :type name: str
@@ -48,8 +47,6 @@ class Graph(object):
         """
         self.name = name
         self.graph_type = graph_type
-        self.root_id = None
-        self.uuid = uuid
         self.notifier = Notifier()
 
     def subscribe(self, function):
