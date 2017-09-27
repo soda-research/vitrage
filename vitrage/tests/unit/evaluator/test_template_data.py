@@ -37,6 +37,119 @@ from vitrage.utils import file as file_utils
 class BasicTemplateTest(base.BaseTest):
 
     BASIC_TEMPLATE = 'basic.yaml'
+    BASIC_TEMPLATE_WITH_INCLUDE = 'basic_with_include.yaml'
+    DEF_TEMPLATE_TESTS_DIR = utils.get_resources_dir() +\
+        '/templates/def_template_tests'
+
+    def test_basic_template_with_include(self):
+
+        # Test setup
+        template_path = self.DEF_TEMPLATE_TESTS_DIR +\
+            '/templates/%s' % self.BASIC_TEMPLATE_WITH_INCLUDE
+        template_definition = file_utils.load_yaml_file(template_path, True)
+        def_templates_path = self.DEF_TEMPLATE_TESTS_DIR + \
+            '/definition_templates'
+        def_demplates_list = file_utils.load_yaml_files(
+            def_templates_path)
+        def_templates_dict = utils.get_def_templates_dict_from_list(
+            def_demplates_list)
+        template_data = TemplateData(template_definition, def_templates_dict)
+        entities = template_data.entities
+        relationships = template_data.relationships
+        scenarios = template_data.scenarios
+        definitions = template_definition[TFields.DEFINITIONS]
+        def_template = file_utils.load_yaml_file(
+            def_templates_path + '/basic_def_template.yaml')
+        def_template_entities = \
+            def_template[TFields.DEFINITIONS][TFields.ENTITIES]
+        def_template_relationships = \
+            def_template[TFields.DEFINITIONS][TFields.RELATIONSHIPS]
+        definitions[TFields.ENTITIES] += def_template_entities
+        definitions[TFields.RELATIONSHIPS] = def_template_relationships
+
+        # Assertions
+        for definition in definitions[TFields.ENTITIES]:
+            for key, value in definition['entity'].items():
+                new_key = TemplateData.PROPS_CONVERSION[key] if key in \
+                    TemplateData.PROPS_CONVERSION else key
+                del definition['entity'][key]
+                definition['entity'][new_key] = value
+        self._validate_entities(entities, definitions[TFields.ENTITIES])
+
+        relate_def = def_template_relationships
+        self._validate_relationships(relationships, relate_def, entities)
+        self._validate_scenarios(scenarios, entities)
+
+        expected_entities = {
+            'alarm11': Vertex(
+                vertex_id='alarm11',
+                properties={VProps.VITRAGE_CATEGORY: EntityCategory.ALARM,
+                            VProps.VITRAGE_TYPE: NAGIOS_DATASOURCE,
+                            VProps.NAME: 'host_problem'
+                            }),
+            'resource11': Vertex(
+                vertex_id='resource11',
+                properties={VProps.VITRAGE_CATEGORY: EntityCategory.RESOURCE,
+                            VProps.VITRAGE_TYPE: NOVA_HOST_DATASOURCE
+                            }),
+            'alarm': Vertex(
+                vertex_id='alarm',
+                properties={VProps.VITRAGE_CATEGORY: EntityCategory.ALARM,
+                            VProps.VITRAGE_TYPE: NAGIOS_DATASOURCE,
+                            VProps.NAME: 'host_problem'
+                            }),
+            'resource': Vertex(
+                vertex_id='resource',
+                properties={VProps.VITRAGE_CATEGORY: EntityCategory.RESOURCE,
+                            VProps.VITRAGE_TYPE: NOVA_HOST_DATASOURCE
+                            })
+        }
+        expected_relationships = {
+            'alarm_on_host': EdgeDescription(
+                edge=Edge(source_id='alarm',
+                          target_id='resource',
+                          label=EdgeLabel.ON,
+                          properties={EdgeProperties.RELATIONSHIP_TYPE:
+                                      EdgeLabel.ON}),
+                source=expected_entities['alarm'],
+                target=expected_entities['resource']
+            ),
+        }
+
+        scenario_entities = {
+            'alarm': Vertex(
+                vertex_id='alarm',
+                properties={VProps.VITRAGE_CATEGORY: EntityCategory.ALARM,
+                            VProps.VITRAGE_TYPE: NAGIOS_DATASOURCE,
+                            VProps.NAME: 'host_problem'
+                            }),
+            'resource': Vertex(
+                vertex_id='resource',
+                properties={VProps.VITRAGE_CATEGORY: EntityCategory.RESOURCE,
+                            VProps.VITRAGE_TYPE: NOVA_HOST_DATASOURCE
+                            })
+        }
+
+        expected_scenario = Scenario(
+            id='basic_template_with_include-scenario0',
+            condition=[
+                [ConditionVar(symbol_name='alarm_on_host',
+                              positive=True)]],
+            actions=[
+                ActionSpecs(
+                    type=ActionType.SET_STATE,
+                    targets={'target': 'resource'},
+                    properties={'state':
+                                OperationalResourceState.SUBOPTIMAL})],
+            subgraphs=template_data.scenarios[0].subgraphs,
+            entities=scenario_entities,
+            relationships=expected_relationships
+        )
+
+        self._validate_strict_equal(template_data,
+                                    expected_entities,
+                                    expected_relationships,
+                                    expected_scenario)
 
     def test_basic_template(self):
 

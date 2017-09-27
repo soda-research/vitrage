@@ -24,5 +24,8 @@ OPTS = [
     cfg.StrOpt('equivalences_dir',
                default='/etc/vitrage/templates/equivalences',
                help='A path for entity equivalences used by the evaluator'
-               )
+               ),
+    cfg.StrOpt('def_templates_dir',
+               default='/etc/vitrage/templates/def_templates',
+               help='A path for def_template templates used by the evaluator')
 ]

@@ -79,4 +79,10 @@ status_msgs = {
          'block',
     134: 'condition can not contain only \'not\' clauses',
     135: 'condition must contain a common entity for all \'or\' clauses',
+
+    # def_templates status messages 140-159
+    140: 'At least one template must be included',
+    141: 'Name field is unspecified for include',
+    142: 'Trying to include a template that does not exist',
+    143: 'Includable cannot have Includes or Scenarios',
 }

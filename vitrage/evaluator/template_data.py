@@ -14,6 +14,7 @@
 
 from collections import namedtuple
 
+
 from vitrage.common.constants import EdgeProperties as EProps
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.common.exception import VitrageError
@@ -26,6 +27,7 @@ from vitrage.graph.algo_driver.sub_graph_matching import NEG_CONDITION
 from vitrage.graph.driver.networkx_graph import NXGraph
 from vitrage.graph import Edge
 from vitrage.graph import Vertex
+from vitrage.utils import evaluator as evaluator_utils
 
 ActionSpecs = namedtuple('ActionSpecs', ['type', 'targets', 'properties'])
 Scenario = namedtuple('Scenario', ['id',
@@ -61,17 +63,31 @@ class TemplateData(object):
         'operational_severity': VProps.VITRAGE_OPERATIONAL_SEVERITY
     }
 
-    def __init__(self, template_def):
+    def __init__(self, template_def, def_templates={}):
 
         self.name = template_def[TFields.METADATA][TFields.NAME]
-
-        defs = template_def[TFields.DEFINITIONS]
-        self.entities = self._build_entities(defs[TFields.ENTITIES])
-
+        defs = {}
+        if TFields.DEFINITIONS in template_def:
+            defs = template_def[TFields.DEFINITIONS]
+            if TFields.ENTITIES in defs:
+                self.entities = self._build_entities(defs[TFields.ENTITIES])
         self.relationships = {}
+
+        # Add definitions from template then from definition templates.
+        if TFields.INCLUDES in template_def:
+            includes = template_def[TFields.INCLUDES]
+            self._build_entities_from_def_templates(
+                includes, def_templates, self.entities)
+
         if TFields.RELATIONSHIPS in defs:
             self.relationships = self._build_relationships(
                 defs[TFields.RELATIONSHIPS])
+
+        if TFields.INCLUDES in template_def:
+            includes = template_def[TFields.INCLUDES]
+            self._build_relationships_with_def_templates(includes,
+                                                         def_templates,
+                                                         self.relationships)
 
         self.scenarios = self._build_scenarios(template_def[TFields.SCENARIOS])
 
@@ -120,6 +136,27 @@ class TemplateData(object):
 
         return entities
 
+    def _build_entities_from_def_templates(
+            self, includes, def_templates, entities):
+
+        for def_template_dict in includes:
+
+            name = def_template_dict[TFields.NAME]
+            def_template = evaluator_utils.find_def_template(
+                name, def_templates)
+            defs = def_template[TFields.DEFINITIONS]
+            entities_defs = defs[TFields.ENTITIES]
+
+            for entity_def in entities_defs:
+
+                entity_dict = entity_def[TFields.ENTITY]
+                template_id = entity_dict[TFields.TEMPLATE_ID]
+                if template_id not in entities:
+
+                    properties = self._convert_properties_with_dictionary(
+                        self._extract_properties(entity_dict))
+                    entities[template_id] = Vertex(template_id, properties)
+
     def _build_relationships(self, relationships_defs):
 
         relationships = {}
@@ -131,6 +168,28 @@ class TemplateData(object):
             relationships[template_id] = relationship
 
         return relationships
+
+    def _build_relationships_with_def_templates(
+            self, includes, def_templates, relationships):
+
+        for def_template_dict in includes:
+
+            name = def_template_dict[TFields.NAME]
+            def_template = evaluator_utils.find_def_template(
+                name, def_templates)
+
+            if TFields.RELATIONSHIPS in def_template[TFields.DEFINITIONS]:
+                defs = def_template[TFields.DEFINITIONS]
+                relationship_defs = defs[TFields.RELATIONSHIPS]
+
+                for relationship_def in relationship_defs:
+                    relationship_dict = relationship_def[TFields.RELATIONSHIP]
+                    template_id = relationship_dict[TFields.TEMPLATE_ID]
+
+                    if template_id not in relationships:
+                        relationship = self._extract_relationship_info(
+                            relationship_dict)
+                        relationships[template_id] = relationship
 
     def _extract_relationship_info(self, relationship_dict):
 

@@ -23,6 +23,10 @@ from vitrage.evaluator.equivalence_repository import EquivalenceRepository
 from vitrage.evaluator.template_data import TemplateData
 from vitrage.evaluator.template_validation.content.template_content_validator \
     import content_validation
+from vitrage.evaluator.template_validation.content.template_content_validator \
+    import def_template_content_validation
+from vitrage.evaluator.template_validation.template_syntax_validator import \
+    def_template_syntax_validation
 from vitrage.evaluator.template_validation.template_syntax_validator import \
     syntax_validation
 from vitrage.utils import datetime as datetime_utils
@@ -31,20 +35,31 @@ from vitrage.utils import file as file_utils
 LOG = log.getLogger(__name__)
 
 EdgeKeyScenario = namedtuple('EdgeKeyScenario', ['label', 'source', 'target'])
+DEF_TEMPLATES_DIR_OPT = 'def_templates_dir'
 
 
 class ScenarioRepository(object):
     def __init__(self, conf):
         self._templates = {}
+        self._def_templates = {}
         self.entity_equivalences = EquivalenceRepository().load_files(
             conf.evaluator.equivalences_dir)
         self.relationship_scenarios = defaultdict(list)
         self.entity_scenarios = defaultdict(list)
+        self._load_def_template_files(conf)
         self._load_templates_files(conf)
 
     @property
     def templates(self):
         return self._templates
+
+    @property
+    def def_templates(self):
+        return self._def_templates
+
+    @def_templates.setter
+    def def_templates(self, def_templates):
+        self._def_templates = def_templates
 
     @templates.setter
     def templates(self, templates):
@@ -82,26 +97,46 @@ class ScenarioRepository(object):
 
     def add_template(self, template_def):
 
-        current_time = datetime_utils.utcnow()
-
         result = syntax_validation(template_def)
         if not result.is_valid_config:
-            LOG.info('Unable to load template: %s' % result.comment)
+            LOG.info('Unable to load template, syntax err: %s'
+                     % result.comment)
         else:
-            result = content_validation(template_def)
+            result = content_validation(template_def, self._def_templates)
             if not result.is_valid_config:
-                LOG.info('Unable to load template: %s' % result.comment)
+                LOG.info('Unable to load template, content err: %s'
+                         % result.comment)
 
         template_uuid = uuidutils.generate_uuid()
+        current_time = datetime_utils.utcnow()
         self.templates[str(template_uuid)] = Template(template_uuid,
                                                       template_def,
                                                       current_time,
                                                       result)
         if result.is_valid_config:
-            template_data = TemplateData(template_def)
+            template_data = TemplateData(template_def, self._def_templates)
             for scenario in template_data.scenarios:
                 for equivalent_scenario in self._expand_equivalence(scenario):
                     self._add_scenario(equivalent_scenario)
+
+    def add_def_template(self, def_template):
+
+        result = def_template_syntax_validation(def_template)
+        if not result.is_valid_config:
+            LOG.info('Unable to load definition template, syntax err: %s'
+                     % result.comment)
+        else:
+            result = def_template_content_validation(def_template)
+            if not result.is_valid_config:
+                LOG.info('Unable to load definition template, content err: %s'
+                         % result.comment)
+
+            current_time = datetime_utils.utcnow()
+            include_uuid = uuidutils.generate_uuid()
+            self._def_templates[str(include_uuid)] = Template(include_uuid,
+                                                              def_template,
+                                                              current_time,
+                                                              result)
 
     def _expand_equivalence(self, scenario):
         equivalent_scenarios = [scenario]
@@ -120,7 +155,7 @@ class ScenarioRepository(object):
         scenarios_out = list(scenarios_in)
         for entity_key in entity_keys:
             for scenario in scenarios_in:
-                equivalent_scenario = TemplateData.ScenarioData.\
+                equivalent_scenario = TemplateData.ScenarioData. \
                     build_equivalent_scenario(scenario,
                                               symbol_name,
                                               entity_key)
@@ -132,6 +167,16 @@ class ScenarioRepository(object):
             self._add_entity_scenario(scenario, entity)
         for relationship in scenario.relationships.values():
             self._add_relationship_scenario(scenario, relationship)
+
+    def _load_def_template_files(self, conf):
+
+        if DEF_TEMPLATES_DIR_OPT in conf.evaluator:
+
+            def_templates_dir = conf.evaluator.def_templates_dir
+            def_templates = file_utils.load_yaml_files(def_templates_dir)
+
+            for def_template in def_templates:
+                self.add_def_template(def_template)
 
     def _load_templates_files(self, conf):
 

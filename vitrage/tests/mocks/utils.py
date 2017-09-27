@@ -13,6 +13,7 @@
 # under the License.
 
 import codecs
+from collections import namedtuple
 import json
 from os.path import dirname
 from os import walk
@@ -45,6 +46,25 @@ def load_specs(target_filename, target_folder=None):
     reader = codecs.getreader("utf-8")
     with open(target, "rb") as infile:
         return json.load(reader(infile))
+
+
+def get_def_templates_dict_from_list(def_temps_list):
+    """Turns a list of def_temps into a dictionary of def_temps where the keys
+
+    are their index in the list. Used by unit tests
+
+    :param def_temps_list: def_temp list to convert
+    :type def_temps_list: list
+    :return: a def_temps dict
+    :rtype: dict
+    """
+
+    Template = namedtuple('Template', 'data')
+    dict = {}
+    for num, item in zip(range(len(def_temps_list)), def_temps_list):
+        dict[num] = Template(item)
+
+    return dict
 
 
 def _get_full_path(target_filename, target_folder):

@@ -33,10 +33,65 @@ class TemplateContentValidatorTest(ValidatorTest):
     def setUpClass(cls):
 
         template_dir_path = '%s/templates/general' % utils.get_resources_dir()
+        cls.def_templates_tests_path = '%s/templates/def_template_tests/' % \
+                                       utils.get_resources_dir()
+        cls.def_templates_dir_path = cls.def_templates_tests_path +\
+            'definition_templates'
         cls.templates = file_utils.load_yaml_files(template_dir_path)
+        def_templates_list = file_utils.load_yaml_files(
+            cls.def_templates_dir_path)
+        cls.def_templates = utils.get_def_templates_dict_from_list(
+            def_templates_list)
         cls.first_template = cls.templates[0]
 
         cls._hide_useless_logging_messages()
+
+    def test_template_with_conflicting_include_entities(self):
+        template_path = '/templates/with_conflicting_include_entities.yaml'
+        template = file_utils.load_yaml_file(self.def_templates_tests_path +
+                                             template_path)
+
+        self._execute_and_assert_with_fault_result(template,
+                                                   2,
+                                                   self.def_templates)
+
+    def test_template_with_no_defs_only_includes(self):
+        template_path = '/templates/only_using_def_template_definitions.yaml'
+        template = file_utils.load_yaml_file(self.def_templates_tests_path +
+                                             template_path)
+
+        self._execute_and_assert_with_correct_result(template,
+                                                     self.def_templates)
+
+    def test_template_with_multiple_includes(self):
+        template_path = '/templates/basic_with_two_includes.yaml'
+        template = file_utils.load_yaml_file(self.def_templates_tests_path +
+                                             template_path)
+
+        self._execute_and_assert_with_correct_result(template,
+                                                     self.def_templates)
+
+    def test_template_with_nonexisiting_includes(self):
+
+        template_path = '/templates/basic_with_include_that_doesnt_exist.yaml'
+        template = file_utils.load_yaml_file(self.def_templates_tests_path +
+                                             template_path)
+        self._execute_and_assert_with_fault_result(template, 142)
+
+    def test_template_with_missing_def_template_dir(self):
+
+        template_path = '/templates/basic_with_include.yaml'
+        template = file_utils.load_yaml_file(self.def_templates_tests_path +
+                                             template_path)
+        self._execute_and_assert_with_fault_result(template, 142)
+
+    def test_template_with_include(self):
+
+        template_path = '/templates/basic_with_include.yaml'
+        template = file_utils.load_yaml_file(self.def_templates_tests_path +
+                                             template_path)
+        self._execute_and_assert_with_correct_result(template,
+                                                     self.def_templates)
 
     @property
     def clone_template(self):
@@ -217,14 +272,17 @@ class TemplateContentValidatorTest(ValidatorTest):
         self._execute_and_assert_with_fault_result(
             template_definition, status_code)
 
-    def _execute_and_assert_with_fault_result(self, template, status_code):
+    def _execute_and_assert_with_fault_result(self,
+                                              template,
+                                              status_code,
+                                              def_temps={}):
 
-        result = validator.content_validation(template)
+        result = validator.content_validation(template, def_temps)
         self._assert_fault_result(result, status_code)
 
-    def _execute_and_assert_with_correct_result(self, template):
+    def _execute_and_assert_with_correct_result(self, template, def_temps={}):
 
-        result = validator.content_validation(template)
+        result = validator.content_validation(template, def_temps)
         self._assert_correct_result(result)
 
     def _create_scenario_actions(self, target, source):

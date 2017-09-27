@@ -29,6 +29,8 @@ class TemplateSyntaxValidatorTest(base.BaseTest):
     @classmethod
     def setUpClass(cls):
 
+        cls.def_template_dir_path = utils.get_resources_dir() + \
+            '/templates/def_template_tests'
         template_dir_path = '%s/templates/general' % utils.get_resources_dir()
         cls.template_yamls = file_utils.load_yaml_files(template_dir_path)
         cls.first_template = cls.template_yamls[0]
@@ -189,6 +191,19 @@ class TemplateSyntaxValidatorTest(base.BaseTest):
         scenario[TemplateFields.SCENARIO][TemplateFields.ACTIONS] = []
         self._test_execution_with_fault_result(template, 121)
 
+    def test_template_with_include_with_empty_name(self):
+        template_path = self.def_template_dir_path +\
+            '/templates/include_with_empty_name.yaml'
+        template = file_utils.load_yaml_file(template_path)
+        self._test_execution_with_fault_result(template, 4)
+
+    def test_template_with_include_with_no_defnitions(self):
+        template_path = self.def_template_dir_path +\
+            '/templates/no_definitions_only_include.yaml'
+        template = file_utils.load_yaml_file(template_path)
+
+        self._test_execution_with_correct_result(template)
+
     def _test_validate_action_without_required_fields(self):
 
         self._test_validate_action_without_required_field(
@@ -214,7 +229,9 @@ class TemplateSyntaxValidatorTest(base.BaseTest):
 
         self._test_execution_with_fault_result(template, status_msgs[100])
 
-    def _test_execution_with_fault_result(self, template, expected_code):
+    def _test_execution_with_fault_result(self,
+                                          template,
+                                          expected_code):
 
         # Test action
         result = template_syntax_validator.syntax_validation(template)
