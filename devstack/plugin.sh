@@ -158,10 +158,6 @@ function configure_vitrage {
         setup_colorized_logging $VITRAGE_CONF DEFAULT
     fi
 
-    # Install the policy file for the API server
-    cp $VITRAGE_DIR/etc/vitrage/policy.json $VITRAGE_CONF_DIR
-    iniset $VITRAGE_CONF oslo_policy policy_file $VITRAGE_CONF_DIR/policy.json
-
     cp $VITRAGE_DIR/etc/vitrage/api-paste.ini $VITRAGE_CONF_DIR
 
     # Service credentials - openstack clients using keystone
