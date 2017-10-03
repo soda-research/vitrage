@@ -31,7 +31,7 @@ class MarkDownRecipeTest(base.BaseTest):
         cls.target_vertex = Vertex('RESOURCE:nova.host:test1')
 
         targets = {TFields.TARGET: cls.target_vertex}
-        cls.action_spec = ActionSpecs(ActionType.MARK_DOWN, targets, None)
+        cls.action_spec = ActionSpecs(0, ActionType.MARK_DOWN, targets, None)
 
     def test_get_do_recipe(self):
 

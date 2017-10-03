@@ -34,7 +34,8 @@ class RaiseAlarmRecipeTest(BaseTest):
                      WORKFLOW: 'wf_4',
                      'host': 'host5',
                      'state': 'ok'}
-        cls.action_spec = ActionSpecs(ActionType.EXECUTE_MISTRAL,
+        cls.action_spec = ActionSpecs(0,
+                                      ActionType.EXECUTE_MISTRAL,
                                       {},
                                       cls.props)
 

@@ -37,9 +37,8 @@ class RaiseAlarmRecipeTest(base.BaseTest):
         cls.targets = {TFields.TARGET: cls.target_vertex}
         cls.props = {TFields.ALARM_NAME: 'VM_CPU_SUBOPTIMAL_PERFORMANCE'}
 
-        cls.action_spec = ActionSpecs(ActionType.SET_STATE,
-                                      cls.targets,
-                                      cls.props)
+        cls.action_spec = ActionSpecs(
+            0, ActionType.SET_STATE, cls.targets, cls.props)
 
     def test_get_do_recipe(self):
 

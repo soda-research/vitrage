@@ -68,7 +68,7 @@ class TestActionExecutor(TestFunctionalBase):
 
         targets = {TFields.TARGET: host_vertex_before}
         props = {TFields.STATE: OperationalResourceState.SUBOPTIMAL}
-        action_spec = ActionSpecs(ActionType.SET_STATE, targets, props)
+        action_spec = ActionSpecs(0, ActionType.SET_STATE, targets, props)
 
         event_queue = queue.Queue()
         action_executor = ActionExecutor(self.conf, event_queue)
@@ -119,7 +119,7 @@ class TestActionExecutor(TestFunctionalBase):
 
         targets = {TFields.TARGET: host_vertex_before}
         props = {}
-        action_spec = ActionSpecs(ActionType.MARK_DOWN, targets, props)
+        action_spec = ActionSpecs(0, ActionType.MARK_DOWN, targets, props)
 
         event_queue = queue.Queue()
         action_executor = ActionExecutor(self.conf, event_queue)
@@ -173,9 +173,8 @@ class TestActionExecutor(TestFunctionalBase):
             TFields.TARGET: alarm1,
             TFields.SOURCE: alarm2
         }
-        action_spec = ActionSpecs(ActionType.ADD_CAUSAL_RELATIONSHIP,
-                                  targets,
-                                  {})
+        action_spec = ActionSpecs(
+            0, ActionType.ADD_CAUSAL_RELATIONSHIP, targets, {})
 
         event_queue = queue.Queue()
         action_executor = ActionExecutor(self.conf, event_queue)
@@ -215,7 +214,7 @@ class TestActionExecutor(TestFunctionalBase):
         }
 
         # Raise alarm action adds new vertex with type vitrage to the graph
-        action_spec = ActionSpecs(ActionType.RAISE_ALARM, targets, props)
+        action_spec = ActionSpecs(0, ActionType.RAISE_ALARM, targets, props)
 
         alarm_vertex_attrs = {VProps.VITRAGE_TYPE: VITRAGE_DATASOURCE}
         before_alarms = processor.entity_graph.get_vertices(
@@ -270,7 +269,7 @@ class TestActionExecutor(TestFunctionalBase):
             VProps.STATE: AlarmProps.ACTIVE_STATE,
             VProps.RESOURCE_ID: host[VProps.ID]
         }
-        action_spec = ActionSpecs(ActionType.RAISE_ALARM, targets, props)
+        action_spec = ActionSpecs(0, ActionType.RAISE_ALARM, targets, props)
 
         add_vertex_event = TestActionExecutor._get_vitrage_add_vertex_event(
             host,

@@ -137,6 +137,7 @@ class BasicTemplateTest(base.BaseTest):
                               positive=True)]],
             actions=[
                 ActionSpecs(
+                    id='basic_template_with_include-scenario0-action0',
                     type=ActionType.SET_STATE,
                     targets={'target': 'resource'},
                     properties={'state':
@@ -210,6 +211,7 @@ class BasicTemplateTest(base.BaseTest):
                               positive=True)]],
             actions=[
                 ActionSpecs(
+                    id='basic_template-scenario0-action0',
                     type=ActionType.SET_STATE,
                     targets={'target': 'resource'},
                     properties={'state':

@@ -29,7 +29,9 @@ from vitrage.graph import Edge
 from vitrage.graph import Vertex
 from vitrage.utils import evaluator as evaluator_utils
 
-ActionSpecs = namedtuple('ActionSpecs', ['type', 'targets', 'properties'])
+ActionSpecs = namedtuple(
+    'ActionSpecs', ['id', 'type', 'targets', 'properties'])
+
 Scenario = namedtuple('Scenario', ['id',
                                    'condition',
                                    'actions',
@@ -252,7 +254,8 @@ class TemplateData(object):
             self.scenario_id = scenario_id
             self.condition = parse_condition(scenario_dict[TFields.CONDITION])
             self.valid_target = self._calculate_missing_action_target()
-            self.actions = self._build_actions(scenario_dict[TFields.ACTIONS])
+            self.actions = self._build_actions(scenario_dict[TFields.ACTIONS],
+                                               scenario_id)
             self.subgraphs = TemplateData.SubGraph.from_condition(
                 self.condition,
                 self._extract_var_and_update_index)
@@ -321,18 +324,19 @@ class TemplateData(object):
                                    target=target,
                                    edge=relationship.edge)
 
-        def _build_actions(self, actions_def):
+        def _build_actions(self, actions_def, scenario_id):
 
             actions = []
-            for action_def in actions_def:
-
+            for counter, action_def in enumerate(actions_def):
+                action_id = '%s-action%s' % (scenario_id, str(counter))
                 action_dict = action_def[TFields.ACTION]
                 action_type = action_dict[TFields.ACTION_TYPE]
                 targets = action_dict.get(TFields.ACTION_TARGET,
                                           self.valid_target)
                 properties = action_dict.get(TFields.PROPERTIES, {})
 
-                actions.append(ActionSpecs(action_type, targets, properties))
+                actions.append(
+                    ActionSpecs(action_id, action_type, targets, properties))
 
             return actions
 

@@ -39,9 +39,8 @@ class AddCausalRelationshipTest(base.BaseTest):
             TField.SOURCE: cls.source_vertex
         }
 
-        cls.action_spec = ActionSpecs(ActionType.ADD_CAUSAL_RELATIONSHIP,
-                                      targets,
-                                      {})
+        cls.action_spec = ActionSpecs(
+            0, ActionType.ADD_CAUSAL_RELATIONSHIP, targets, {})
 
     def test_get_do_recipe(self):
 

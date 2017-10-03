@@ -37,7 +37,8 @@ class SetStateRecipeTest(base.BaseTest):
         targets = {TFields.TARGET: cls.target_vertex}
         cls.props = {TFields.STATE: OperationalResourceState.SUBOPTIMAL}
 
-        cls.action_spec = ActionSpecs(ActionType.SET_STATE, targets, cls.props)
+        cls.action_spec = ActionSpecs(
+            0, ActionType.SET_STATE, targets, cls.props)
 
     def test_get_do_recipe(self):
 

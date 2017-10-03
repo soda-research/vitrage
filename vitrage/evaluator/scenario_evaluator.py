@@ -42,7 +42,7 @@ LOG = log.getLogger(__name__)
 # Trigger_id  - a unique identifier per match in graph (i.e., the subgraph
 # that matched the action in the spec) for the specific action.
 ActionInfo = \
-    namedtuple('ActionInfo', ['specs', 'mode', 'scenario_id', 'trigger_id'])
+    namedtuple('ActionInfo', ['specs', 'mode', 'action_id', 'trigger_id'])
 
 
 class ScenarioEvaluator(object):
@@ -175,8 +175,7 @@ class ScenarioEvaluator(object):
 
                 actions.extend(self._get_actions_from_matches(matches,
                                                               mode,
-                                                              action,
-                                                              scenario))
+                                                              action))
 
         return actions
 
@@ -199,8 +198,7 @@ class ScenarioEvaluator(object):
     def _get_actions_from_matches(self,
                                   combined_matches,
                                   mode,
-                                  action_spec,
-                                  scenario):
+                                  action_spec):
         actions = []
         for is_switch_mode, matches in combined_matches:
             new_mode = mode
@@ -209,11 +207,11 @@ class ScenarioEvaluator(object):
                     if mode == ActionMode.DO else ActionMode.DO
 
             for match in matches:
-                spec = self._get_action_spec(action_spec, match)
+                match_action_spec = self._get_action_spec(action_spec, match)
                 items_ids = [match[1].vertex_id for match in match.items()]
                 match_hash = hash(tuple(sorted(items_ids)))
-                actions.append(ActionInfo(spec, new_mode,
-                                          scenario.id, match_hash))
+                actions.append(ActionInfo(match_action_spec, new_mode,
+                                          match_action_spec.id, match_hash))
 
         return actions
 
@@ -223,7 +221,8 @@ class ScenarioEvaluator(object):
         real_items = {
             target: match[target_id] for target, target_id in targets.items()
         }
-        return ActionSpecs(action_spec.type,
+        return ActionSpecs(action_spec.id,
+                           action_spec.type,
                            real_items,
                            action_spec.properties)
 
@@ -252,7 +251,7 @@ class ScenarioEvaluator(object):
             if not new_dominant:  # removed last entry for key
                 undo_action = ActionInfo(prev_dominant.specs,
                                          ActionMode.UNDO,
-                                         prev_dominant.scenario_id,
+                                         prev_dominant.action_id,
                                          prev_dominant.trigger_id)
                 actions_to_perform[key] = undo_action
             elif new_dominant != prev_dominant:
@@ -406,10 +405,10 @@ class ActionTracker(object):
         self._tracker[key] = sorted(actions, key=scorer, reverse=True)
 
     def remove_action(self, key, action):
-        # actions are unique in their trigger and scenario_ids
+        # actions are unique in their trigger and action_ids
         def _is_equivalent(action_entry):
             return action_entry.trigger_id == action.trigger_id and \
-                action_entry.scenario_id == action.scenario_id
+                action_entry.action_id == action.action_id
 
         to_remove = [entry for entry in self._tracker.get(key, [])
                      if _is_equivalent(entry)]
