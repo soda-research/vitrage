@@ -29,10 +29,17 @@ OPTS = []
 def get_connection_from_config(conf):
     retries = conf.database.max_retries
     url = conf.database.connection
-    connection_scheme = urlparse.urlparse(url).scheme
-    LOG.debug('looking for %(name)r driver in %(namespace)r',
-              {'name': connection_scheme, 'namespace': _NAMESPACE})
-    mgr = driver.DriverManager(_NAMESPACE, connection_scheme)
+
+    try:
+        # TOTO(iafek): check why this call randomly fails
+        connection_scheme = urlparse.urlparse(url).scheme
+        LOG.debug('looking for %(name)r driver in %(namespace)r',
+                  {'name': connection_scheme, 'namespace': _NAMESPACE})
+        mgr = driver.DriverManager(_NAMESPACE, connection_scheme)
+
+    except Exception as e:
+        LOG.exception('Failed to get scheme %s. Exception: %s ', str(url), e)
+        return None
 
     @tenacity.retry(
         wait=tenacity.wait_fixed(conf.database.retry_interval),
