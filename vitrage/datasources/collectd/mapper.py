@@ -30,15 +30,16 @@ class CollectdMapper(object):
         if resource_value:
             return \
                 {
-                    CProps.RESOURCE_TYPE: resource_value['type'],
-                    CProps.RESOURCE_NAME: resource_value['name']
+                    CProps.RESOURCE_TYPE: resource_value[CProps.RESOURCE_TYPE],
+                    CProps.RESOURCE_NAME: resource_value[CProps.RESOURCE_NAME]
                 }
         return self.find_regex(collectd_name)
 
     def find_regex(self, collectd_name):
         for pattern, value in self.mapping.items():
             if re.match(pattern, collectd_name):
-                type_, name = value['type'], value['name']
+                type_, name = \
+                    value[CProps.RESOURCE_TYPE], value[CProps.RESOURCE_NAME]
                 if name == COLLECTD_HOST_PARAM:
                     return \
                         {

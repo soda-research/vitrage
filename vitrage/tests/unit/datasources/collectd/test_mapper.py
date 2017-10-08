@@ -15,16 +15,22 @@
 from unittest import TestCase
 
 from vitrage.datasources.collectd.mapper import CollectdMapper
+from vitrage.datasources.collectd.properties \
+    import CollectdProperties as CProps
 
 
 class TestCollectdMapper(TestCase):
     def setUp(self):
         super(TestCollectdMapper, self).setUp()
         self.mapping = {
-            'host1': {'type': 'value_host1', 'name': 'value_host1'},
-            'host_(.*)': {'type': 'value_host_2', 'name': 'value_host_2'},
-            'host-(.*)': {'type': 'value_hostX', 'name': '${collectd_host}'},
-            'hostabc': {'type': 'type_host_abc', 'name': 'name_host_abc'}
+            'host1': {CProps.RESOURCE_TYPE: 'value_host1',
+                      CProps.RESOURCE_NAME: 'value_host1'},
+            'host_(.*)': {CProps.RESOURCE_TYPE: 'value_host_2',
+                          CProps.RESOURCE_NAME: 'value_host_2'},
+            'host-(.*)': {CProps.RESOURCE_TYPE: 'value_hostX',
+                          CProps.RESOURCE_NAME: '${collectd_host}'},
+            'hostabc': {CProps.RESOURCE_TYPE: 'type_host_abc',
+                        CProps.RESOURCE_NAME: 'name_host_abc'}
         }
 
         self.mapper = CollectdMapper(self.mapping)
@@ -38,6 +44,9 @@ class TestCollectdMapper(TestCase):
     def test_match_resource_with_regex_parameter_value(self):
         self.should_match_on_collectd_host_param('host-5', 'host-(.*)')
 
+    def test_no_match(self):
+        self.should_not_match('host2')
+
     def test_match_ambiguous_value(self):
         # the host name is "hosta.c",
         # dot is part of the host name NOT a wildcard
@@ -46,20 +55,20 @@ class TestCollectdMapper(TestCase):
 
     def should_match(self, host, expected):
         value = self.mapper.find(host)
-        resource_name = value['resource_name']
-        resource_type = value['resource_type']
-        expected_name = self.mapping[expected]['name']
-        expected_type = self.mapping[expected]['type']
+        resource_name = value[CProps.RESOURCE_NAME]
+        resource_type = value[CProps.RESOURCE_TYPE]
+        expected_name = self.mapping[expected][CProps.RESOURCE_NAME]
+        expected_type = self.mapping[expected][CProps.RESOURCE_TYPE]
 
         self.assertEqual(resource_name, expected_name)
         self.assertEqual(resource_type, expected_type)
 
     def should_match_on_collectd_host_param(self, host, expected):
         value = self.mapper.find(host)
-        resource_name = value['resource_name']
-        resource_type = value['resource_type']
-        expected_name = self.mapping[expected]['name']
-        expected_type = self.mapping[expected]['type']
+        resource_name = value[CProps.RESOURCE_NAME]
+        resource_type = value[CProps.RESOURCE_TYPE]
+        expected_name = self.mapping[expected][CProps.RESOURCE_NAME]
+        expected_type = self.mapping[expected][CProps.RESOURCE_TYPE]
 
         self.assertEqual('${collectd_host}', expected_name)
         self.assertEqual(resource_name, host)
