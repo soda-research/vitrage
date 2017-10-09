@@ -14,12 +14,16 @@
 import copy
 import logging
 
+from vitrage.evaluator.scenario_repository import ScenarioRepository
 from vitrage.evaluator.template_fields import TemplateFields
 from vitrage.evaluator.template_validation.status_messages import status_msgs
 from vitrage.evaluator.template_validation import template_syntax_validator
 from vitrage.tests import base
 from vitrage.tests.mocks import utils
 from vitrage.utils import file as file_utils
+
+
+BAD_YAML_PATH = 'bad_yaml.yaml'
 
 
 # noinspection PyAttributeOutsideInit
@@ -33,6 +37,9 @@ class TemplateSyntaxValidatorTest(base.BaseTest):
             '/templates/def_template_tests'
         template_dir_path = '%s/templates/general' % utils.get_resources_dir()
         cls.template_yamls = file_utils.load_yaml_files(template_dir_path)
+        cls.bad_template = \
+            ScenarioRepository._load_template_file(template_dir_path
+                                                   + '/' + BAD_YAML_PATH)
         cls.first_template = cls.template_yamls[0]
 
         cls._hide_useless_logging_messages()
@@ -44,6 +51,9 @@ class TemplateSyntaxValidatorTest(base.BaseTest):
     def test_template_validator(self):
         for template in self.template_yamls:
             self._test_execution_with_correct_result(template)
+
+    def test_bad_yaml_validation(self):
+        self._test_execution_with_fault_result(self.bad_template, 5)
 
     def test_validate_template_without_metadata_section(self):
 

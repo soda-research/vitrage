@@ -72,7 +72,8 @@ class ScenarioRepositoryTest(base.BaseTest):
         self.assertIsNotNone(self.scenario_repository)
 
         scenario_templates = self.scenario_repository.templates
-        self.assertEqual(valid_template_counter, len(scenario_templates))
+        # there is one bad template
+        self.assertEqual(valid_template_counter, len(scenario_templates) - 1)
 
         entity_equivalences = self.scenario_repository.entity_equivalences
         for entity_props, equivalence in entity_equivalences.items():

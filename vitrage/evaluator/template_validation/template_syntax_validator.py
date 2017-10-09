@@ -33,27 +33,35 @@ from vitrage.evaluator.template_validation.status_messages import status_msgs
 LOG = log.getLogger(__name__)
 
 RESULT_DESCRIPTION = 'Template syntax validation'
+EXCEPTION = 'exception'
 
 
 def syntax_validation(template_conf):
-    result = _validate_template_sections(template_conf)
+    if template_conf.get(EXCEPTION):
+        result = get_fault_result(RESULT_DESCRIPTION,
+                                  5,
+                                  msg=status_msgs[5] +
+                                  template_conf.get(EXCEPTION))
+    else:
+        result = _validate_template_sections(template_conf)
 
-    if result.is_valid_config:
-        metadata = template_conf[TemplateFields.METADATA]
-        result = _validate_metadata_section(metadata)
+        if result.is_valid_config:
+            metadata = template_conf[TemplateFields.METADATA]
+            result = _validate_metadata_section(metadata)
 
-    if result.is_valid_config and TemplateFields.INCLUDES in template_conf:
-        includes = template_conf[TemplateFields.INCLUDES]
-        result = _validate_includes_section(includes)
+        if result.is_valid_config and TemplateFields.INCLUDES in template_conf:
+            includes = template_conf[TemplateFields.INCLUDES]
+            result = _validate_includes_section(includes)
 
-    if result.is_valid_config and TemplateFields.DEFINITIONS in template_conf:
-        definitions = template_conf[TemplateFields.DEFINITIONS]
-        has_includes = TemplateFields.INCLUDES in template_conf
-        result = _validate_definitions_section(definitions, has_includes)
+        if result.is_valid_config and \
+           TemplateFields.DEFINITIONS in template_conf:
+            definitions = template_conf[TemplateFields.DEFINITIONS]
+            has_includes = TemplateFields.INCLUDES in template_conf
+            result = _validate_definitions_section(definitions, has_includes)
 
-    if result.is_valid_config:
-        scenarios = template_conf[TemplateFields.SCENARIOS]
-        result = _validate_scenarios_section(scenarios)
+        if result.is_valid_config:
+            scenarios = template_conf[TemplateFields.SCENARIOS]
+            result = _validate_scenarios_section(scenarios)
 
     return result
 
