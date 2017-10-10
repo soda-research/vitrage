@@ -72,6 +72,8 @@ class CollectdDriver(AlarmDriverBase):
                     CProps.RESOURCE_NAME: element_config['name']
                 }
 
+            LOG.debug('collectd mappings: %s', str(mappings))
+
             return mappings
         except Exception as e:
             LOG.exception('failed in init %s ', e)
