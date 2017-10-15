@@ -21,8 +21,11 @@ from oslo_utils import uuidutils
 from vitrage.evaluator.base import Template
 from vitrage.evaluator.equivalence_repository import EquivalenceRepository
 from vitrage.evaluator.template_data import TemplateData
+from vitrage.evaluator.template_fields import TemplateFields
 from vitrage.evaluator.template_validation.content.template_content_validator \
     import content_validation
+from vitrage.evaluator.template_validation.template_syntax_validator import \
+    EXCEPTION
 from vitrage.evaluator.template_validation.template_syntax_validator import \
     syntax_validation
 from vitrage.utils import datetime as datetime_utils
@@ -136,10 +139,26 @@ class ScenarioRepository(object):
     def _load_templates_files(self, conf):
 
         templates_dir = conf.evaluator.templates_dir
-        template_defs = file_utils.load_yaml_files(templates_dir)
+
+        files = \
+            file_utils.list_files(templates_dir, '.yaml', with_pathname=True)
+
+        template_defs = []
+        for f in files:
+            template_defs.append(self._load_template_file(f))
 
         for template_def in template_defs:
             self.add_template(template_def)
+
+    @staticmethod
+    def _load_template_file(file_name):
+        try:
+            config = file_utils.load_yaml_file(file_name, with_exception=True)
+            if config:
+                return config
+        except Exception as e:
+            return {TemplateFields.METADATA: {TemplateFields.NAME: file_name},
+                    EXCEPTION: str(e)}
 
     @staticmethod
     def _create_scenario_key(properties):

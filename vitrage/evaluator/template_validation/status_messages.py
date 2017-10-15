@@ -23,6 +23,7 @@ status_msgs = {
     2: 'Duplicate template_id definition.',
     3: 'template_id does not appear in the definition block.',
     4: 'Syntax error: ',
+    5: 'Invalid yaml format: ',
 
     # definitions section 20-39
     20: 'definitions section must contain entities field.',
