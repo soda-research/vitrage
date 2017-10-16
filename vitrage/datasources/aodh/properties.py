@@ -29,11 +29,13 @@ class AodhProperties(object):
     SEVERITY = 'severity'
     STATE_TIMESTAMP = 'state_timestamp'
     THRESHOLD = 'threshold'
+    GNOCCHI_RESOURCES_THRESHOLD = 'gnocchi_resources_threshold'
     TIMESTAMP = 'timestamp'
     TYPE = 'type'
     VITRAGE_ID = 'vitrage_id'
     DETAIL = 'detail'
     RULE = 'rule'
+    GNOCCHI_RESOURCES_THRESHOLD_RULE = 'gnocchi_resources_threshold_rule'
 
 
 class AodhState(object):
