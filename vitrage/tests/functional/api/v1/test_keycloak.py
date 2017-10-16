@@ -17,12 +17,10 @@
 # noinspection PyPackageRequirements
 from datetime import datetime
 from mock import mock
-import requests
 import requests_mock
-from webtest import TestRequest
-
 from vitrage.middleware.keycloak import KeycloakAuth
 from vitrage.tests.functional.api.v1 import FunctionalTest
+from webtest import TestRequest
 
 
 TOKEN = {
@@ -112,12 +110,12 @@ class KeycloakTest(FunctionalTest):
             reason='Access token is invalid'
         )
 
-        self.assertRaises(requests.exceptions.HTTPError,
-                          self.post_json,
-                          '/topology/',
-                          params=None,
-                          headers=HEADERS,
-                          expect_errors=True)
+        resp = self.post_json('/topology/',
+                              params=None,
+                              headers=HEADERS,
+                              expect_errors=True)
+
+        self.assertEqual('401 Unauthorized', resp.status)
 
     @mock.patch('jwt.decode', return_value=TOKEN)
     @requests_mock.Mocker()

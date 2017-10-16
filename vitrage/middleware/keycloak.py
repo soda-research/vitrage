@@ -20,6 +20,7 @@ from oslo_config import cfg
 from oslo_log import log as logging
 from oslo_middleware import base
 from oslo_serialization import jsonutils
+from pecan.core import abort
 from six.moves import urllib
 from webob import exc
 
@@ -108,7 +109,9 @@ class KeycloakAuth(base.ConfigurableMiddleware):
             else None
         resp = requests.get(endpoint, headers=headers,
                             verify=verify, cert=cert)
-        resp.raise_for_status()
+
+        if not resp.ok:
+            abort(resp.status_code, resp.reason)
 
     def _set_req_headers(self, req):
         req.headers['X-Identity-Status'] = 'Confirmed'
