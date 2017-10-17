@@ -158,8 +158,12 @@ def _validate_name_schema(schema, name):
 
 
 def _validate_definitions_section(definitions, has_includes):
+    # Entities are required if there are no relationships, or if there are
+    # relationships and no imported entities from a definition template
+    # (otherwise the template is empty)
     if TemplateFields.RELATIONSHIPS not in definitions \
-            or definitions[TemplateFields.RELATIONSHIPS] != '':
+            or (definitions[TemplateFields.RELATIONSHIPS]
+                and not has_includes):
         schema = Schema({
             Required(TemplateFields.ENTITIES, msg=20): list,
             TemplateFields.RELATIONSHIPS: list

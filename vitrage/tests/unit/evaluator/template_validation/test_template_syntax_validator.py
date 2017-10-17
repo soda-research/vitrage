@@ -211,7 +211,12 @@ class TemplateSyntaxValidatorTest(base.BaseTest):
         template_path = self.def_template_dir_path +\
             '/templates/no_definitions_only_include.yaml'
         template = file_utils.load_yaml_file(template_path)
+        self._test_execution_with_correct_result(template)
 
+    def test_template_with_relationships_and_no_entities(self):
+        template_path = self.def_template_dir_path + \
+            '/templates/only_using_def_template_definitions.yaml'
+        template = file_utils.load_yaml_file(template_path)
         self._test_execution_with_correct_result(template)
 
     def _test_validate_action_without_required_fields(self):
