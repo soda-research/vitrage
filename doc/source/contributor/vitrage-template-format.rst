@@ -539,7 +539,7 @@ For example, we might use the one of the following formats
     - relationship: # option B, same as option A but split into two lines
         source: host
         target: instance
-        cardinality_for: instance
+        cardinality_for: target
         cardinality: 2
         relationship_type: contains
         template_id: host_contains_two_instances_B
