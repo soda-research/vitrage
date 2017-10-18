@@ -69,6 +69,7 @@ class TemplateData(object):
 
         self.name = template_def[TFields.METADATA][TFields.NAME]
         defs = {}
+        self.entities = {}
         if TFields.DEFINITIONS in template_def:
             defs = template_def[TFields.DEFINITIONS]
             if TFields.ENTITIES in defs:
