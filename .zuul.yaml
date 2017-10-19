@@ -1,0 +1,72 @@
+- project:
+    name: openstack/vitrage
+    check:
+      jobs:
+        - vitrage-dsvm-api-py27
+        - vitrage-dsvm-datasources-py27
+        - vitrage-dsvm-api-py35:
+            voting: false
+            branches: ^(?!stable/(newton|ocata|pike)).*$
+        - vitrage-dsvm-datasources-py35:
+            voting: false
+            branches: ^(?!stable/(newton|ocata|pike)).*$
+    gate:
+      jobs:
+        - vitrage-dsvm-api-py27
+        - vitrage-dsvm-datasources-py27
+
+- job:
+    name: vitrage-dsvm-api-py27
+    parent: legacy-dsvm-base
+    run: playbooks/legacy/vitrage-dsvm-api-py27/run
+    post-run: playbooks/legacy/vitrage-dsvm-api-py27/post
+    timeout: 7800
+    required-projects:
+      - openstack-infra/devstack-gate
+      - openstack/aodh
+      - openstack/mistral
+      - openstack/python-vitrageclient
+      - openstack/vitrage
+      - openstack/vitrage-dashboard
+
+- job:
+    name: vitrage-dsvm-api-py35
+    parent: legacy-dsvm-base
+    run: playbooks/legacy/vitrage-dsvm-api-py35/run
+    post-run: playbooks/legacy/vitrage-dsvm-api-py35/post
+    timeout: 7800
+    required-projects:
+      - openstack-infra/devstack-gate
+      - openstack/aodh
+      - openstack/mistral
+      - openstack/python-vitrageclient
+      - openstack/vitrage
+      - openstack/vitrage-dashboard
+
+- job:
+    name: vitrage-dsvm-datasources-py27
+    parent: legacy-dsvm-base
+    run: playbooks/legacy/vitrage-dsvm-datasources-py27/run
+    post-run: playbooks/legacy/vitrage-dsvm-datasources-py27/post
+    timeout: 7800
+    required-projects:
+      - openstack-infra/devstack-gate
+      - openstack/aodh
+      - openstack/mistral
+      - openstack/python-vitrageclient
+      - openstack/vitrage
+      - openstack/vitrage-dashboard
+
+- job:
+    name: vitrage-dsvm-datasources-py35
+    parent: legacy-dsvm-base
+    run: playbooks/legacy/vitrage-dsvm-datasources-py35/run
+    post-run: playbooks/legacy/vitrage-dsvm-datasources-py35/post
+    timeout: 7800
+    required-projects:
+      - openstack-infra/devstack-gate
+      - openstack/aodh
+      - openstack/mistral
+      - openstack/python-vitrageclient
+      - openstack/vitrage
+      - openstack/vitrage-dashboard
