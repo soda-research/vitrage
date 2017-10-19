@@ -26,6 +26,7 @@ from vitrage.entity_graph.service import VitrageGraphService
 from vitrage.evaluator.scenario_evaluator import ScenarioEvaluator
 from vitrage.evaluator.scenario_repository import ScenarioRepository
 from vitrage import service
+from vitrage import storage
 
 
 def main():
@@ -58,8 +59,10 @@ def init(conf):
     evaluator_q = queue.Queue()
     e_graph = entity_graph.get_graph_driver(conf)('Entity Graph')
 
-    # TODO(ihefetz) uncomment db connection creation
-    # db_connection = storage.get_connection_from_config(conf)
+    db_connection = storage.get_connection_from_config(conf)
+    # The following deletes the entire vitrage database
+    # It should be removed once graph is persistent
+    db_connection.clear()
 
     scenario_repo = ScenarioRepository(conf)
 

@@ -11,7 +11,10 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+from oslo_log import log
+LOG = log.getLogger(__name__)
 
+from oslo_db.options import database_opts
 from six.moves import queue
 
 from oslo_config import cfg
@@ -39,6 +42,8 @@ from vitrage.evaluator.actions.evaluator_event_transformer \
 from vitrage.evaluator.scenario_evaluator import ScenarioEvaluator
 from vitrage.evaluator.scenario_repository import ScenarioRepository
 from vitrage.graph import create_edge
+from vitrage import storage
+from vitrage.storage.sqlalchemy import models
 from vitrage.tests.functional.base import \
     TestFunctionalBase
 import vitrage.tests.mocks.mock_driver as mock_driver
@@ -75,6 +80,13 @@ class TestScenarioEvaluator(TestFunctionalBase):
         cls.conf.register_opts(cls.PROCESSOR_OPTS, group='entity_graph')
         cls.conf.register_opts(cls.EVALUATOR_OPTS, group='evaluator')
         cls.conf.register_opts(cls.DATASOURCES_OPTS, group='datasources')
+        cls.conf.register_opts(database_opts, group='database')
+        cls.conf.set_override('connection', 'sqlite:///test.db',
+                              group='database')
+        cls._db = storage.get_connection_from_config(cls.conf)
+        engine = cls._db._engine_facade.get_engine()
+        models.Base.metadata.create_all(engine)
+
         TestScenarioEvaluator.load_datasources(cls.conf)
         cls.scenario_repository = ScenarioRepository(cls.conf)
 

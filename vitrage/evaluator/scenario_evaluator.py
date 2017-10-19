@@ -11,8 +11,9 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-
 from collections import namedtuple
+from collections import OrderedDict
+import copy
 import time
 
 from oslo_log import log
@@ -32,17 +33,21 @@ from vitrage.graph.algo_driver.algorithm import Mapping
 from vitrage.graph.algo_driver.sub_graph_matching import \
     NEG_CONDITION
 from vitrage.graph.driver import Vertex
+from vitrage import storage
 
 LOG = log.getLogger(__name__)
 
 # Entry containing action info.
 # specs - ActionSpecs
 # mode - DO or UNDO (the action)
-# scenario_id - the scenario id in scenario_repository
+# action_id - the action id in scenario_repository
 # Trigger_id  - a unique identifier per match in graph (i.e., the subgraph
 # that matched the action in the spec) for the specific action.
 ActionInfo = \
     namedtuple('ActionInfo', ['specs', 'mode', 'action_id', 'trigger_id'])
+
+TARGET = 'target'
+SOURCE = 'source'
 
 
 class ScenarioEvaluator(object):
@@ -54,11 +59,13 @@ class ScenarioEvaluator(object):
                  event_queue,
                  enabled=False):
         self.conf = conf
+        self._db_connection = storage.get_connection_from_config(self.conf)
         self._scenario_repo = scenario_repo
         self._entity_graph = entity_graph
         self._action_executor = ActionExecutor(conf, event_queue)
         self._entity_graph.subscribe(self.process_event)
-        self._action_tracker = ActionTracker(DatasourceInfoMapper(self.conf))
+        self._active_actions_tracker = ActiveActionsTracker(
+            self.conf, self._db_connection)
         self.enabled = enabled
         self.connected_component_cache = defaultdict(dict)
 
@@ -115,14 +122,17 @@ class ScenarioEvaluator(object):
         actions.extend(self._process_and_get_actions(current,
                                                      current_scenarios,
                                                      ActionMode.DO))
+        actions_to_preform = []
+        try:
+            actions_to_preform = self._analyze_and_filter_actions(actions)
+        except Exception as e:
+            LOG.error("Evaluator error, will not execute actions %s",
+                      str(actions))
+            LOG.exception("Caught: %s", e)
 
-        if actions:
-            LOG.debug("Actions to perform: %s", actions)
-            filtered_actions = \
-                self._analyze_and_filter_actions(actions)
-            LOG.debug("Actions filtered: %s", filtered_actions)
-            for action in filtered_actions:
-                self._action_executor.execute(action.specs, action.mode)
+        for action in actions_to_preform:
+            LOG.info('Action: %s', self._action_str(action))
+            self._action_executor.execute(action.specs, action.mode)
 
         LOG.debug('Process event - completed')
 
@@ -171,7 +181,7 @@ class ScenarioEvaluator(object):
                 matches = self._evaluate_subgraphs(scenario.subgraphs,
                                                    element,
                                                    scenario_element,
-                                                   action.targets['target'])
+                                                   action.targets[TARGET])
 
                 actions.extend(self._get_actions_from_matches(matches,
                                                               mode,
@@ -236,32 +246,36 @@ class ScenarioEvaluator(object):
         )
 
     def _analyze_and_filter_actions(self, actions):
+        LOG.debug("Actions before filtering: %s", actions)
 
-        actions_to_perform = {}
-        for action in actions:
-            key = self._action_tracker.get_key(action.specs)
-            prev_dominant = self._action_tracker.get_dominant_action(key)
-            if action.mode == ActionMode.DO:
-                self._action_tracker.insert_action(key, action)
-            else:
-                self._action_tracker.remove_action(key, action)
-            new_dominant = self._action_tracker.get_dominant_action(key)
+        actions_to_perform = []
+        for action_info in actions:
+            if action_info.mode == ActionMode.DO:
+                is_highest_score, exists = \
+                    self._active_actions_tracker.calc_do_action(action_info)
+                if is_highest_score and not exists:
+                    actions_to_perform.append(action_info)
+            elif action_info.mode == ActionMode.UNDO:
+                is_highest_score, second_highest = \
+                    self._active_actions_tracker.calc_undo_action(action_info)
+                if is_highest_score:
+                    # We should 'DO' the Second highest scored action so
+                    # to override the existing dominant action.
+                    # or, if there is no second highest scored action
+                    # So we just 'UNDO' the existing dominant action
+                    if second_highest:
+                        action_to_perform = self._db_action_to_action_info(
+                            second_highest)
+                        actions_to_perform.append(action_to_perform)
+                    else:
 
-            # todo: (erosensw) improvement - first analyze DOs, then UNDOs
-            if not new_dominant:  # removed last entry for key
-                undo_action = ActionInfo(prev_dominant.specs,
-                                         ActionMode.UNDO,
-                                         prev_dominant.action_id,
-                                         prev_dominant.trigger_id)
-                actions_to_perform[key] = undo_action
-            elif new_dominant != prev_dominant:
-                actions_to_perform[key] = new_dominant
+                        actions_to_perform.append(action_info)
 
-        # filter the same action
-        final_actions = {ScenarioEvaluator._generate_action_id(action.specs):
-                         action for action in actions_to_perform.values()}
-
-        return final_actions.values()
+        unique_ordered_actions = OrderedDict()
+        for action in actions_to_perform:
+            id_ = ScenarioEvaluator._generate_action_id(action.specs)
+            unique_ordered_actions[id_] = action
+        return unique_ordered_actions.values()
 
     def _find_vertex_subgraph_matching(self,
                                        subgraphs,
@@ -351,6 +365,28 @@ class ScenarioEvaluator(object):
                 connected_component
         return connected_component
 
+    def _db_action_to_action_info(self, db_action):
+        target = self._entity_graph.get_vertex(db_action.target_vertex_id)
+        targets = {TARGET: target}
+        if db_action.source_vertex_id:
+            source = self._entity_graph.get_vertex(db_action.source_vertex_id)
+            targets[SOURCE] = source
+        scenario_action = self._scenario_repo.actions.get(db_action.action_id)
+        properties = copy.copy(scenario_action.properties)
+        action_specs = ActionSpecs(
+            id=db_action.action_id,
+            type=db_action.action_type,
+            targets=targets,
+            properties=properties,
+        )
+        action_info = ActionInfo(
+            specs=action_specs,
+            mode=ActionMode.DO,
+            action_id=db_action.action_id,
+            trigger_id=db_action.trigger,
+        )
+        return action_info
+
     @staticmethod
     def _switch_edge_negative_props(is_switch_mode,
                                     scenario_edge,
@@ -369,8 +405,16 @@ class ScenarioEvaluator(object):
             for v_id in ver_to_remove:
                 del match[v_id]
 
+    @staticmethod
+    def _action_str(action):
+        s = action.specs.targets.get(SOURCE, {}).get(VProps.VITRAGE_ID, '')
+        t = action.specs.targets.get(TARGET, {}).get(VProps.VITRAGE_ID, '')
+        return '%s %s \'%s\' targets (%s,%s)' % (action.mode.upper(),
+                                                 action.specs.type,
+                                                 action.action_id, s, t)
 
-class ActionTracker(object):
+
+class ActiveActionsTracker(object):
     """Keeps track of all active actions and relative dominance/priority.
 
     Actions are organized according to resource-id
@@ -382,11 +426,11 @@ class ActionTracker(object):
      entry, regardless of severity
     """
 
-    def __init__(self, datasource_info_mapper):
-        self._tracker = {}
-        alarms_score = \
-            datasource_info_mapper.get_datasource_priorities('vitrage')
-        all_scores = datasource_info_mapper.get_datasource_priorities()
+    def __init__(self, conf, db_connection):
+        info_mapper = DatasourceInfoMapper(conf)
+        self._db = db_connection
+        alarms_score = info_mapper.get_datasource_priorities('vitrage')
+        all_scores = info_mapper.get_datasource_priorities()
         self._action_tools = {
             ActionType.SET_STATE: pt.SetStateTools(all_scores),
             ActionType.RAISE_ALARM: pt.RaiseAlarmTools(alarms_score),
@@ -395,30 +439,102 @@ class ActionTracker(object):
             ActionType.EXECUTE_MISTRAL: pt.BaselineTools
         }
 
-    def get_key(self, action_specs):
-        return self._action_tools[action_specs.type].get_key(action_specs)
+    def calc_do_action(self, action_info):
+        """Add this action to active_actions table, if not exists
 
-    def insert_action(self, key, action):
-        actions = self._tracker.get(key, [])
-        actions.append(action)
-        scorer = self._action_tools[action.specs.type].get_score
-        self._tracker[key] = sorted(actions, key=scorer, reverse=True)
+        return value to help decide if action should be performed
+        Only a top scored action that is new should be performed
+        :return: (is top score, is it already existing)
+        """
+        exists = False
+        active_actions = self._query_similar_actions(action_info)
+        for a in active_actions:
+            if a.action_id == action_info.action_id \
+                    and a.trigger == action_info.trigger_id:
+                exists = True
+        if not exists:
+            db_row = self._to_db_row(action_info)
+            active_actions.append(db_row)
+            LOG.debug("DB Insert active_actions %s", str(db_row))
+            self._db.active_actions.create(db_row)
 
-    def remove_action(self, key, action):
-        # actions are unique in their trigger and action_ids
-        def _is_equivalent(action_entry):
-            return action_entry.trigger_id == action.trigger_id and \
-                action_entry.action_id == action.action_id
+        return self._is_highest_score(active_actions, action_info), exists
 
-        to_remove = [entry for entry in self._tracker.get(key, [])
-                     if _is_equivalent(entry)]
+    def calc_undo_action(self, action_info):
+        """Delete this action form active_actions table, if exists
 
-        if len(to_remove) == 0:
-            LOG.warning("Could not find action entry to remove "
-                        "from tracker: {}".format(action))
+        return value to help decide if action should be performed
+        A top scored action should be 'undone' if there is not a second action.
+        If there is a second, it should now be 'done' and become the dominant
+        :param action_info: action to delete
+        :return: is_highest_score, second highest action if exists
+        """
+        active_actions = self._query_similar_actions(action_info)
 
-        for entry in to_remove:
-            self._tracker[key].remove(entry)
+        LOG.debug("DB delete active_actions %s %s",
+                  action_info.action_id,
+                  str(action_info.trigger_id))
+        self._db.active_actions.delete(
+            action_id=action_info.action_id,
+            trigger=action_info.trigger_id)
 
-    def get_dominant_action(self, key):
-        return self._tracker[key][0] if self._tracker.get(key, None) else None
+        is_highest_score = self._is_highest_score(active_actions, action_info)
+        if is_highest_score and len(active_actions) > 1:
+            return is_highest_score, self._sort_db_actions(active_actions)[1]
+        else:
+            return is_highest_score, None
+
+    def _to_db_row(self, action_info):
+        source = action_info.specs.targets.get(SOURCE, {})
+        target = action_info.specs.targets.get(TARGET, {})
+        action_score = self._action_tools[action_info.specs.type].\
+            get_score(action_info)
+        extra_info = self._action_tools[action_info.specs.type].\
+            get_extra_info(action_info.specs)
+        return storage.sqlalchemy.models.ActiveAction(
+            action_type=action_info.specs.type,
+            extra_info=extra_info,
+            source_vertex_id=source.get(VProps.VITRAGE_ID),
+            target_vertex_id=target.get(VProps.VITRAGE_ID),
+            action_id=action_info.action_id,
+            trigger=action_info.trigger_id,
+            score=action_score)
+
+    def _query_similar_actions(self, action_info):
+        """Query DB for all actions with same properties"""
+        source = action_info.specs.targets.get(SOURCE, {})
+        target = action_info.specs.targets.get(TARGET, {})
+        extra_info = self._action_tools[action_info.specs.type].get_extra_info(
+            action_info.specs)
+        return self._db.active_actions.query(
+            action_type=action_info.specs.type,
+            extra_info=extra_info,
+            source_vertex_id=source.get(VProps.VITRAGE_ID),
+            target_vertex_id=target.get(VProps.VITRAGE_ID))
+
+    @classmethod
+    def _is_highest_score(cls, db_actions, action_info):
+        """Get the top action from the list and compare to action_info
+
+        Actions are sorted according to:
+        score - primary, ascending
+        created_at - secondary, descending
+        """
+        if not db_actions:
+            return True
+        highest_score_action = min(
+            db_actions, key=lambda action: (-action.score, action.created_at))
+        return highest_score_action.trigger == action_info.trigger_id and \
+            highest_score_action.action_id == action_info.action_id
+
+    @staticmethod
+    def _sort_db_actions(db_actions):
+        """Sort ActiveAction items by two fields
+
+        score - primary, ascending
+        created_at - secondary, descending
+        """
+        return sorted(
+            db_actions,
+            key=lambda action: (-action.score, action.created_at),
+            reverse=False)

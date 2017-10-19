@@ -15,6 +15,7 @@
 from oslo_db.sqlalchemy import models
 
 import six
+from sqlalchemy import Column, String, SmallInteger, BigInteger, Index
 from sqlalchemy.ext.declarative import declarative_base
 
 
@@ -37,3 +38,43 @@ class VitrageBase(models.TimestampMixin, models.ModelBase):
 
 
 Base = declarative_base(cls=VitrageBase)
+
+
+class ActiveAction(Base):
+    __tablename__ = 'active_actions'
+    __table_args__ = (
+        # Index 'ix_active_action' on fields:
+        # action_type, extra_info, source_vertex_id, target_vertex_id
+        Index('ix_active_action', 'action_type', 'extra_info',
+              'source_vertex_id', 'target_vertex_id'),
+    )
+
+    action_type = Column(String(128))
+    extra_info = Column(String(128))
+    source_vertex_id = Column(String(128))
+    target_vertex_id = Column(String(128))
+    action_id = Column(String(128), primary_key=True)
+    score = Column(SmallInteger())
+    trigger = Column(BigInteger(), primary_key=True)
+
+    def __repr__(self):
+        return \
+            "<ActiveAction(" \
+            "created_at='%s', " \
+            "action_type='%s', " \
+            "extra_info='%s', " \
+            "source_vertex_id='%s', " \
+            "target_vertex_id='%s', " \
+            "action_id='%s', " \
+            "score='%s', " \
+            "trigger='%s')>" %\
+            (
+                self.created_at,
+                self.action_type,
+                self.extra_info,
+                self.source_vertex_id,
+                self.target_vertex_id,
+                self.action_id,
+                self.score,
+                self.trigger
+            )

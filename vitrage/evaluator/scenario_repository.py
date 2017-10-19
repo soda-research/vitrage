@@ -14,6 +14,7 @@
 from collections import defaultdict
 from collections import namedtuple
 
+import itertools
 from oslo_log import log
 
 from oslo_utils import uuidutils
@@ -51,6 +52,7 @@ class ScenarioRepository(object):
         self.entity_scenarios = defaultdict(list)
         self._load_def_template_files(conf)
         self._load_templates_files(conf)
+        self.actions = self._create_actions_collection()
 
     @property
     def templates(self):
@@ -232,3 +234,12 @@ class ScenarioRepository(object):
 
         key = frozenset(list(entity.properties.items()))
         self.entity_scenarios[key].append((entity, scenario))
+
+    def _create_actions_collection(self):
+        scenarios_val = itertools.chain(
+            self.relationship_scenarios.values(),
+            self.entity_scenarios.values()
+        )
+        action_lists = (s.actions for _, s in itertools.chain(*scenarios_val))
+        actions = (a for a in itertools.chain(*action_lists))
+        return {a.id: a for a in actions}

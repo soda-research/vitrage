@@ -23,10 +23,9 @@ class BaselineTools(object):
     def get_score(action_info):
         return 1  # no priorities
 
-    @staticmethod
-    def get_key(action_specs):
-        target_ids = {k: v.vertex_id for k, v in action_specs.targets.items()}
-        return action_specs.type, hash(tuple(sorted(target_ids.items())))
+    @classmethod
+    def get_extra_info(cls, action_specs):
+        return None
 
 
 class RaiseAlarmTools(object):
@@ -38,11 +37,9 @@ class RaiseAlarmTools(object):
         severity = action_info.specs.properties[TemplateFields.SEVERITY]
         return self.scores.get(severity.upper(), 0)
 
-    @staticmethod
-    def get_key(action_specs):
-        return action_specs.type,\
-            action_specs.properties[TemplateFields.ALARM_NAME], \
-            hash(action_specs.targets[TemplateFields.TARGET].vertex_id)
+    @classmethod
+    def get_extra_info(cls, action_specs):
+        return action_specs.properties[TemplateFields.ALARM_NAME]
 
 
 class SetStateTools(object):
@@ -58,7 +55,6 @@ class SetStateTools(object):
             if target_vitrage_type in self.scores else DEFAULT_INFO_MAPPER
         return self.scores[score_name].get(state, 0)
 
-    @staticmethod
-    def get_key(action_specs):
-        return action_specs.type, \
-            hash(action_specs.targets[TemplateFields.TARGET].vertex_id)
+    @classmethod
+    def get_extra_info(cls, action_specs):
+        return None

@@ -39,6 +39,11 @@ class Connection(base.Connection):
         self._engine_facade = db_session.EngineFacade(self._dress_url(url),
                                                       **options)
         self.conf = conf
+        self._active_actions = ActiveActionsConnection(self._engine_facade)
+
+    @property
+    def active_actions(self):
+        return self._active_actions
 
     @staticmethod
     def _dress_url(url):
@@ -63,3 +68,70 @@ class Connection(base.Connection):
         for table in reversed(models.Base.metadata.sorted_tables):
             engine.execute(table.delete())
         engine.dispose()
+
+
+class BaseTableConn(object):
+    def __init__(self, engine_facade):
+        super(BaseTableConn, self).__init__()
+        self._engine_facade = engine_facade
+
+    def query_filter(self, model, **kwargs):
+        session = self._engine_facade.get_session()
+        query = session.query(model)
+        for keyword, arg in kwargs.items():
+            if arg is not None:
+                query = query.filter(getattr(model, keyword) == arg)
+        return query
+
+
+class ActiveActionsConnection(base.ActiveActionsConnection, BaseTableConn):
+    def __init__(self, engine_facade):
+        super(ActiveActionsConnection, self).__init__(engine_facade)
+
+    def create(self, active_action):
+        session = self._engine_facade.get_session()
+        with session.begin():
+            session.add(active_action)
+
+    def update(self, active_action):
+        session = self._engine_facade.get_session()
+        with session.begin():
+            session.merge(active_action)
+
+    def query(self,
+              action_type=None,
+              extra_info=None,
+              source_vertex_id=None,
+              target_vertex_id=None,
+              action_id=None,
+              score=None,
+              trigger=None):
+        query = self.query_filter(
+            models.ActiveAction,
+            action_type=action_type,
+            extra_info=extra_info,
+            source_vertex_id=source_vertex_id,
+            target_vertex_id=target_vertex_id,
+            action_id=action_id,
+            score=score,
+            trigger=trigger)
+        return query.all()
+
+    def delete(self,
+               action_type=None,
+               extra_info=None,
+               source_vertex_id=None,
+               target_vertex_id=None,
+               action_id=None,
+               score=None,
+               trigger=None):
+        query = self.query_filter(
+            models.ActiveAction,
+            action_type=action_type,
+            extra_info=extra_info,
+            source_vertex_id=source_vertex_id,
+            target_vertex_id=target_vertex_id,
+            action_id=action_id,
+            score=score,
+            trigger=trigger)
+        return query.delete()
