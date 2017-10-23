@@ -12,6 +12,9 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from vitrage.evaluator.template_fields import TemplateFields as Fields
+from vitrage.graph.utils import check_property_with_regex
+
 
 def check_filter(data, attr_filter, *args):
     """Check attr_filter against data
@@ -20,7 +23,7 @@ def check_filter(data, attr_filter, *args):
     :param attr_filter: a dictionary of either
     field_name : value (mandatory)
     field_name : list of values - data[field_name] must match ANY of the values
-    :param args: list of filter keys to ignore (if exist)
+    :param args: list of filter keys to ignore  (if exist)
     :rtype: bool
     """
     if not attr_filter:
@@ -30,6 +33,12 @@ def check_filter(data, attr_filter, *args):
             continue
         if not isinstance(content, list):
             content = [content]
-        if not data.get(key) in content:
-            return False
+        if data.get(key) not in content:
+            if key.lower().endswith(Fields.REGEX):
+                new_key = key[:-len(Fields.REGEX)]
+                if not check_property_with_regex(new_key, content[0],
+                                                 data):
+                    return False
+            else:
+                return False
     return True

@@ -22,6 +22,7 @@ Tests for `vitrage` graph driver
 from vitrage.common.constants import EdgeProperties as EProps
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.graph import Direction
+from vitrage.graph.filter import check_filter
 from vitrage.graph import utils
 from vitrage.tests.unit.graph.base import *  # noqa
 
@@ -529,3 +530,42 @@ class TestGraph(GraphTestBase):
 
         e = g1.get_vertex(v3.vertex_id)
         self.assertIsNotNone(e, 'Vertex missing after graphs union')
+
+
+class TestFilter(base.BaseTest):
+
+    def test_basic_regex(self):
+        event_properties = {
+            "time": 121354,
+            "vitrage_type": "zabbix",
+            "vitrage_category": "ALARM",
+            "rawtext": "Interface kukoo down on {HOST.NAME}",
+            "host": "some_host_kukoo"
+        }
+
+        attr_filter = {
+            "vitrage_category": "ALARM",
+            "rawtext.regex": "Interface ([_a-zA-Z0-9'\-]+) down on {"
+                             "HOST.NAME}",
+            "host": "some_host_kukoo"
+        }
+        self.assertEqual(True, check_filter(data=event_properties,
+                                            attr_filter=attr_filter))
+
+    def test_basic_regex_with_no_match(self):
+        event_properties = {
+            "time": 121354,
+            "vitrage_type": "zabbix",
+            "vitrage_category": "ALARM",
+            "rawtext": "Text With No Match",
+            "host": "some_host_kukoo"
+        }
+
+        attr_filter = {
+            "vitrage_category": "ALARM",
+            "rawtext.RegEx": "Interface ([_a-zA-Z0-9'\-]+) down on {"
+                             "HOST.NAME}",
+            "host": "some_host_kukoo"
+        }
+        self.assertEqual(False, check_filter(data=event_properties,
+                                             attr_filter=attr_filter))

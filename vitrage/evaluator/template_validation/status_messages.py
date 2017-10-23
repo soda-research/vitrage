@@ -36,6 +36,7 @@ status_msgs = {
     45: 'Invalid entity category. Category must be from types: '
         '{categories}'.format(categories=EntityCategory.categories()),
     46: 'Entity field is required.',
+    47: 'Invalid regular expression defined in field:',
 
     # metadata section status messages 60-79
     60: 'metadata section must contain id field.',

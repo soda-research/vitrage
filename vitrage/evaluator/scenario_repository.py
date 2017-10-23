@@ -33,6 +33,7 @@ from vitrage.evaluator.template_validation.template_syntax_validator import \
     EXCEPTION
 from vitrage.evaluator.template_validation.template_syntax_validator import \
     syntax_validation
+from vitrage.graph.filter import check_filter as check_subset
 from vitrage.utils import datetime as datetime_utils
 from vitrage.utils import file as file_utils
 
@@ -72,15 +73,11 @@ class ScenarioRepository(object):
 
     def get_scenarios_by_vertex(self, vertex):
 
-        try:
-            entity_key = frozenset(vertex.properties.items())
-        except Exception as e:
-            LOG.error('frozenset for vertex failed %s', str(vertex))
-            raise e
+        entity_key = vertex.properties
 
         scenarios = []
         for scenario_key, value in self.entity_scenarios.items():
-            if scenario_key.issubset(entity_key):
+            if check_subset(entity_key, dict(scenario_key)):
                 scenarios += value
         return scenarios
 
@@ -92,10 +89,11 @@ class ScenarioRepository(object):
         for scenario_key, value in self.relationship_scenarios.items():
 
             check_label = key.label == scenario_key.label
-            check_source_issubset = scenario_key.source.issubset(key.source)
-            check_target_issubset = scenario_key.target.issubset(key.target)
-
-            if check_label and check_source_issubset and check_target_issubset:
+            if check_label \
+                    and check_subset(dict(key.source),
+                                     dict(scenario_key.source)) \
+                    and check_subset(dict(key.target),
+                                     dict(scenario_key.target)):
                 scenarios += value
 
         return scenarios

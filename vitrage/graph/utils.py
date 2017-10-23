@@ -12,6 +12,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import re
 from vitrage.common.constants import EdgeProperties as EConst
 from vitrage.common.constants import VertexProperties as VConst
 from vitrage.graph.driver.elements import Edge
@@ -113,3 +114,20 @@ def create_edge(source_id,
                 label=relationship_type,
                 properties=properties)
     return edge
+
+
+def check_property_with_regex(key, regex, data):
+    """Checks if the contents of data[key] matches the given regex
+
+    :param: key: key to find in data
+    :param: data: dict to search
+    :type: data: dict
+    :param: regex: regular expression to check against
+    :type: regex: str
+    :rtype: bool
+    """
+    value = data.get(key)
+    if value is None:
+        return False
+    pattern = re.compile(regex)
+    return pattern.match(value) is not None

@@ -21,6 +21,7 @@ from vitrage.common.constants import VertexProperties as VProps
 from vitrage.evaluator.scenario_repository import ScenarioRepository
 from vitrage.evaluator.template_validation.template_syntax_validator import \
     syntax_validation
+from vitrage.graph import Vertex
 from vitrage.tests import base
 from vitrage.tests.mocks import utils
 from vitrage.utils import file as file_utils
@@ -97,6 +98,75 @@ class ScenarioRepositoryTest(base.BaseTest):
 
     def test_add_template(self):
         pass
+
+
+class RegExTemplateTest(base.BaseTest):
+
+    BASE_DIR = utils.get_resources_dir() + '/templates/regex'
+    OPTS = [
+        cfg.StrOpt('templates_dir',
+                   default=BASE_DIR),
+        cfg.StrOpt('equivalences_dir',
+                   default=BASE_DIR + '/equivalences')]
+
+    @classmethod
+    def setUpClass(cls):
+
+        cls.conf = cfg.ConfigOpts()
+        cls.conf.register_opts(cls.OPTS, group='evaluator')
+        cls.scenario_repository = ScenarioRepository(cls.conf)
+
+    def test_basic_regex(self):
+
+        event_properties = {
+            "time": 121354,
+            "vitrage_type": "zabbix",
+            "vitrage_category": "ALARM",
+            "rawtext": "Interface virtual-0 down on {HOST.NAME}",
+            "host": "some_host_kukoo"
+        }
+        event_vertex = Vertex(vertex_id="test_vertex",
+                              properties=event_properties)
+        relevant_scenarios = \
+            self.scenario_repository.get_scenarios_by_vertex(
+                event_vertex)
+        self.assertEqual(1, len(relevant_scenarios))
+        relevant_scenario = relevant_scenarios[0]
+        self.assertEqual("zabbix_alarm_pass", relevant_scenario[0].vertex_id)
+
+    def test_regex_with_exact_match(self):
+
+        event_properties = {
+            "time": 121354,
+            "vitrage_type": "zabbix",
+            "vitrage_category": "ALARM",
+            "rawtext": "Public interface host43 down",
+            "host": "some_host_kukoo"
+        }
+        event_vertex = Vertex(vertex_id="test_vertex",
+                              properties=event_properties)
+        relevant_scenarios = \
+            self.scenario_repository.get_scenarios_by_vertex(
+                event_vertex)
+        self.assertEqual(1, len(relevant_scenarios))
+        relevant_scenario = relevant_scenarios[0]
+        self.assertEqual("exact_match", relevant_scenario[0].vertex_id)
+
+    def test_basic_regex_with_no_match(self):
+
+        event_properties = {
+            "time": 121354,
+            "vitrage_type": "zabbix",
+            "vitrage_category": "ALARM",
+            "rawtext": "No Match",
+            "host": "some_host_kukoo"
+        }
+        event_vertex = Vertex(vertex_id="test_vertex",
+                              properties=event_properties)
+        relevant_scenarios = \
+            self.scenario_repository.get_scenarios_by_vertex(
+                event_vertex)
+        self.assertEqual(0, len(relevant_scenarios))
 
 
 class EquivalentScenarioTest(base.BaseTest):

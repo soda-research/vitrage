@@ -16,6 +16,7 @@ from sympy.logic.boolalg import Not
 from sympy import Symbol
 
 from oslo_log import log
+import re
 from six.moves import reduce
 
 from vitrage.common.constants import EdgeProperties as EProps
@@ -137,6 +138,16 @@ def _validate_entity_definition(entity_dict, entities_index):
     if template_id in entities_index:
         LOG.error('%s status code: %s' % (status_msgs[2], 2))
         return get_content_fault_result(2)
+
+    for key, value in entity_dict.items():
+
+        if key.lower().endswith(TemplateFields.REGEX):
+            try:
+                re.compile(value)
+            except Exception:
+                LOG.error('%s %s status code: %s' % (status_msgs[47],
+                                                     str(key), 47))
+                return get_content_fault_result(47)
 
     return get_content_correct_result()
 

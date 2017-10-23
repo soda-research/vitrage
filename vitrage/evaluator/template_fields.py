@@ -33,3 +33,4 @@ class TemplateFields(TemplateTopologyFields):
     TEMPLATE_ID = 'template_id'
 
     PROPERTIES = 'properties'
+    REGEX = '.regex'
