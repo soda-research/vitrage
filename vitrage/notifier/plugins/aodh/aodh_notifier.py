@@ -41,7 +41,7 @@ class AodhNotifier(NotifierBase):
 
     def __init__(self, conf):
         super(AodhNotifier, self).__init__(conf)
-        self.client = os_clients.ceilometer_client(conf)
+        self.client = os_clients.aodh_client(conf)
 
     def process_event(self, data, event_type):
         response = None
@@ -62,7 +62,7 @@ class AodhNotifier(NotifierBase):
         alarm_request = _alarm_request(alarm, state)
         try:
             LOG.info('Aodh Alarm - Activate: ' + str(alarm_request))
-            return self.client.alarms.create(**alarm_request)
+            return self.client.alarm.create(alarm_request)
         except Exception as e:
             LOG.exception('Failed to activate Aodh Alarm Got Exception: %s', e)
             return
@@ -71,7 +71,9 @@ class AodhNotifier(NotifierBase):
         aodh_id = alarm.get(VProps.ID)
         try:
             LOG.info('Aodh Alarm $%s update state %s', aodh_id, state)
-            return self.client.alarms.update(alarm_id=aodh_id, state=state)
+            alarm_update = {AodhState: state}
+            return self.client.alarm.update(alarm_id=aodh_id,
+                                            alarm_update=alarm_update)
         except Exception as e:
             LOG.exception('Failed to update Aodh Alarm Got Exception: %s', e)
             return

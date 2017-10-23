@@ -13,12 +13,11 @@
 # under the License.
 
 
-class AodhProperties(object):
+class CeilometerProperties(object):
     ALARM_ID = 'alarm_id'
     DESCRIPTION = 'description'
     ENABLED = 'enabled'
     EVENT = 'event'
-    EVENT_RULE = 'event_rule'
     EVENT_TYPE = 'event_type'
     EVENT_RESOURCE_ID = 'traits.resource_id'
     NAME = 'name'
@@ -30,7 +29,6 @@ class AodhProperties(object):
     SEVERITY = 'severity'
     STATE_TIMESTAMP = 'state_timestamp'
     THRESHOLD = 'threshold'
-    THRESHOLD_RULE = 'threshold_rule'
     GNOCCHI_RESOURCES_THRESHOLD = 'gnocchi_resources_threshold'
     TIMESTAMP = 'timestamp'
     TYPE = 'type'
@@ -42,21 +40,14 @@ class AodhProperties(object):
     STATE_REASON = 'state_reason'
 
 
-class AodhState(object):
+class CeilometerState(object):
     OK = 'ok'
     ALARM = 'alarm'
     INSUFFICIENT_DATA = 'insufficient_data'
 
 
-class AodhEventType(object):
+class CeilometerEventType(object):
     CREATION = 'alarm.creation'
     RULE_CHANGE = 'alarm.rule_change'
     STATE_TRANSITION = 'alarm.state_transition'
     DELETION = 'alarm.deletion'
-
-
-class AodhExtendedAlarmType(object):
-    EVENT = 'event'
-    VITRAGE = 'vitrage'
-    THRESHOLD = 'threshold'
-    GNOCCHI_RESOURCES_THRESHOLD = 'gnocchi_resources_threshold'

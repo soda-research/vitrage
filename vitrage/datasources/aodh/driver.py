@@ -19,6 +19,7 @@ from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.datasources.alarm_driver_base import AlarmDriverBase
 from vitrage.datasources.aodh import AODH_DATASOURCE
 from vitrage.datasources.aodh.properties import AodhEventType
+from vitrage.datasources.aodh.properties import AodhExtendedAlarmType
 from vitrage.datasources.aodh.properties import AodhProperties as AodhProps
 from vitrage.datasources.aodh.properties import AodhState
 from vitrage import os_clients
@@ -34,12 +35,44 @@ class AodhDriver(AlarmDriverBase):
         self._client = None
         self.conf = conf
         self._init_aodh_event_actions()
+        self._init_convert_aodh_alarm_rule_actions()
+        self._init_alarm_type_to_rule()
         self._cache_all_alarms()
+
+    def _init_aodh_event_actions(self):
+        self.actions = {
+            AodhEventType.CREATION: self._convert_alarm_creation_event,
+            AodhEventType.RULE_CHANGE: self._convert_alarm_rule_change_event,
+            AodhEventType.STATE_TRANSITION:
+                self._convert_alarm_state_transition_event,
+            AodhEventType.DELETION: self._convert_alarm_deletion_event
+        }
+
+    def _init_convert_aodh_alarm_rule_actions(self):
+        self.convert_rule_actions = {
+            AodhExtendedAlarmType.VITRAGE:
+                self._convert_vitrage_alarm_rule,
+            AodhExtendedAlarmType.EVENT:
+                self._convert_event_alarm_rule,
+            AodhExtendedAlarmType.THRESHOLD:
+                self._convert_threshold_alarm_rule,
+            AodhExtendedAlarmType.GNOCCHI_RESOURCES_THRESHOLD:
+                self._convert_gnocchi_resources_threshold_alarm_rule
+        }
+
+    def _init_alarm_type_to_rule(self):
+        self.alarm_rule_types = {
+            AodhExtendedAlarmType.VITRAGE: AodhProps.EVENT_RULE,
+            AodhExtendedAlarmType.EVENT: AodhProps.EVENT_RULE,
+            AodhExtendedAlarmType.THRESHOLD: AodhProps.THRESHOLD_RULE,
+            AodhExtendedAlarmType.GNOCCHI_RESOURCES_THRESHOLD:
+                AodhProps.GNOCCHI_RESOURCES_THRESHOLD_RULE
+        }
 
     @property
     def client(self):
         if not self._client:
-            self._client = os_clients.ceilometer_client(self.conf)
+            self._client = os_clients.aodh_client(self.conf)
         return self._client
 
     def _vitrage_type(self):
@@ -55,7 +88,7 @@ class AodhDriver(AlarmDriverBase):
 
     def _get_alarms(self):
         try:
-            aodh_alarms = self.client.alarms.list()
+            aodh_alarms = self.client.alarm.list()
             return [self._convert_alarm(alarm) for alarm in
                     aodh_alarms if alarm is not None]
         except Exception as e:
@@ -72,123 +105,37 @@ class AodhDriver(AlarmDriverBase):
     def _is_valid(self, alarm):
         return True
 
-    @classmethod
-    def _convert_event_alarm(cls, alarm):
-        res = cls._convert_base_alarm(alarm)
-        res[AodhProps.EVENT_TYPE] = alarm.event_rule[AodhProps.EVENT_TYPE],
-        res[AodhProps.RESOURCE_ID] = _parse_query(alarm.event_rule,
-                                                  AodhProps.EVENT_RESOURCE_ID)
-        return res
+    def _get_aodh_alarm_type(self, alarm):
 
-    @classmethod
-    def _convert_threshold_alarm(cls, alarm):
-        res = cls._convert_base_alarm(alarm)
-        res[AodhProps.STATE_TIMESTAMP] = alarm.state_timestamp
-        res[AodhProps.RESOURCE_ID] = _parse_query(alarm.threshold_rule,
-                                                  AodhProps.RESOURCE_ID)
-        return res
+        Aodh_type = [AodhExtendedAlarmType.EVENT,
+                     AodhExtendedAlarmType.THRESHOLD,
+                     AodhExtendedAlarmType.GNOCCHI_RESOURCES_THRESHOLD]
 
-    @classmethod
-    def _convert_gnocchi_resources_threshold(cls, alarm):
-        res = cls._convert_base_alarm_gnocchi(alarm)
-        if type(alarm) is not dict:
-            alarm = alarm.to_dict()
-            res[AodhProps.STATE_TIMESTAMP] = \
-                alarm.get(AodhProps.STATE_TIMESTAMP)
-            res[AodhProps.RESOURCE_ID] = \
-                alarm.get(AodhProps.GNOCCHI_RESOURCES_THRESHOLD_RULE,
-                          {}).get(AodhProps.RESOURCE_ID)
-        else:
-            res[AodhProps.STATE_TIMESTAMP] = \
-                alarm.get(AodhProps.DETAIL, {}).get(AodhProps.STATE_TIMESTAMP)
-            res[AodhProps.RESOURCE_ID] = \
-                alarm.get(AodhProps.DETAIL,
-                          {}).get(AodhProps.RULE,
-                                  {}).get(AodhProps.RESOURCE_ID)
-        return res
-
-    @classmethod
-    def _convert_vitrage_alarm(cls, alarm):
-        res = cls._convert_base_alarm(alarm)
-        res[AodhProps.VITRAGE_ID] = _parse_query(alarm.event_rule,
-                                                 AodhProps.VITRAGE_ID)
-        res[AodhProps.RESOURCE_ID] = _parse_query(alarm.event_rule,
-                                                  AodhProps.RESOURCE_ID)
-        return res
-
-    @staticmethod
-    def _convert_base_dict_alarm_gnocchi(alarm):
-        detail = alarm.get(AodhProps.DETAIL)
-        return {
-            AodhProps.SEVERITY: alarm.get(AodhProps.SEVERITY),
-            AodhProps.PROJECT_ID: alarm.get(AodhProps.PROJECT_ID),
-            AodhProps.TIMESTAMP: alarm.get(AodhProps.TIMESTAMP),
-            AodhProps.TYPE: alarm.get(AodhProps.TYPE),
-            AodhProps.ALARM_ID: alarm.get(AodhProps.ALARM_ID),
-            AodhProps.DESCRIPTION: detail.get(AodhProps.DESCRIPTION),
-            AodhProps.ENABLED: detail.get(AodhProps.ENABLED),
-            AodhProps.NAME: detail.get(AodhProps.NAME),
-            AodhProps.REPEAT_ACTIONS: detail.get(AodhProps.REPEAT_ACTIONS),
-            AodhProps.STATE: detail.get(AodhProps.STATE)
-        }
-
-    @staticmethod
-    def _convert_base_non_dict_alarm_gnocchi(alarm):
-        alarm = alarm.to_dict()
-        return {
-            AodhProps.SEVERITY: alarm.get(AodhProps.SEVERITY),
-            AodhProps.DESCRIPTION: alarm.get(AodhProps.DESCRIPTION),
-            AodhProps.ENABLED: alarm.get(AodhProps.ENABLED),
-            AodhProps.ALARM_ID: alarm.get(AodhProps.ALARM_ID),
-            AodhProps.NAME: alarm.get(AodhProps.NAME),
-            AodhProps.PROJECT_ID: alarm.get(AodhProps.PROJECT_ID),
-            AodhProps.REPEAT_ACTIONS: alarm.get(AodhProps.REPEAT_ACTIONS),
-            AodhProps.STATE: alarm.get(AodhProps.STATE),
-            AodhProps.TIMESTAMP: alarm.get(AodhProps.TIMESTAMP),
-            AodhProps.TYPE: alarm.get(AodhProps.TYPE)
-        }
-
-    @classmethod
-    def _convert_base_alarm_gnocchi(cls, alarm):
-        """distinguish between alarm received by notification (type dict)
-
-        to alarm received by _get_alarms() (type alarm).
-        """
-
-        if type(alarm) is dict:
-            return cls._convert_base_dict_alarm_gnocchi(alarm)
-
-        return cls._convert_base_non_dict_alarm_gnocchi(alarm)
-
-    @staticmethod
-    def _convert_base_alarm(alarm):
-        return {
-            AodhProps.SEVERITY: alarm.severity,
-            AodhProps.DESCRIPTION: alarm.description,
-            AodhProps.ENABLED: alarm.enabled,
-            AodhProps.ALARM_ID: alarm.alarm_id,
-            AodhProps.NAME: alarm.name,
-            AodhProps.PROJECT_ID: alarm.project_id,
-            AodhProps.REPEAT_ACTIONS: alarm.repeat_actions,
-            AodhProps.STATE: alarm.state,
-            AodhProps.TIMESTAMP: alarm.timestamp,
-            AodhProps.TYPE: alarm.type
-        }
-
-    @classmethod
-    def _convert_alarm(cls, alarm):
-        alarm_type = alarm.type
+        alarm_type = alarm[AodhProps.TYPE]
         if alarm_type == AodhProps.EVENT and \
-            _is_vitrage_alarm(alarm.event_rule):
-            return cls._convert_vitrage_alarm(alarm)
-        elif alarm_type == AodhProps.EVENT:
-            return cls._convert_event_alarm(alarm)
-        elif alarm_type == AodhProps.THRESHOLD:
-            return cls._convert_threshold_alarm(alarm)
-        elif alarm_type == AodhProps.GNOCCHI_RESOURCES_THRESHOLD:
-            return cls._convert_gnocchi_resources_threshold(alarm)
-        else:
+                _is_vitrage_alarm(alarm.get(AodhProps.EVENT_RULE)
+                                  or alarm.get(AodhProps.RULE)):
+            return AodhExtendedAlarmType.VITRAGE
+        elif alarm_type not in Aodh_type:
             LOG.warning('Unsupported Aodh alarm of type %s' % alarm_type)
+            alarm_type = None
+
+        return alarm_type
+
+    def _convert_alarm(self, alarm):
+
+        entity = self._convert_alarm_common(alarm)
+
+        detail = self._convert_alarm_detail(alarm)
+        entity.update(detail)
+
+        alarm_type = self._get_aodh_alarm_type(alarm)
+        alarm_rule_type = self.alarm_rule_types[alarm_type]
+        alarm_rule = alarm[alarm_rule_type]
+        rule = self._convert_alarm_rule(alarm_type, alarm_rule)
+        entity.update(rule)
+
+        return entity
 
     @staticmethod
     def get_event_types():
@@ -215,52 +162,27 @@ class AodhDriver(AlarmDriverBase):
                                           AODH_DATASOURCE,
                                           DatasourceAction.UPDATE)[0]
 
-    def _init_aodh_event_actions(self):
-        self.actions = {
-            AodhEventType.CREATION: self._convert_alarm_creation_event,
-            AodhEventType.RULE_CHANGE: self._convert_alarm_rule_change_event,
-            AodhEventType.STATE_TRANSITION:
-                self._convert_alarm_state_transition_event,
-            AodhEventType.DELETION: self._convert_alarm_deletion_event
-        }
-
     @classmethod
-    def _convert_base_event(cls, event):
-        return {
-            AodhProps.PROJECT_ID: event[AodhProps.PROJECT_ID],
-            AodhProps.ALARM_ID: event[AodhProps.ALARM_ID],
-            AodhProps.SEVERITY: event[AodhProps.SEVERITY],
-            AodhProps.TIMESTAMP: event[AodhProps.TIMESTAMP],
-        }
-
-    @classmethod
-    def _convert_vitrage_alarm_event(cls, rule):
+    def _convert_vitrage_alarm_rule(cls, rule):
         return {
             AodhProps.VITRAGE_ID: _parse_query(rule, AodhProps.VITRAGE_ID),
             AodhProps.RESOURCE_ID: _parse_query(rule, AodhProps.RESOURCE_ID)
         }
 
     @classmethod
-    def _convert_threshold_alarm_event(cls, event):
-        rule = event[AodhProps.DETAIL][AodhProps.RULE]
+    def _convert_threshold_alarm_rule(cls, rule):
         return {
-            AodhProps.RESOURCE_ID: _parse_query(rule, AodhProps.RESOURCE_ID),
-            AodhProps.STATE_TIMESTAMP: event[AodhProps.STATE_TIMESTAMP]
+            AodhProps.RESOURCE_ID: _parse_query(rule, AodhProps.RESOURCE_ID)
         }
 
     @classmethod
-    def _convert_gnocchi_resources_threshold_alarm_event(cls, event):
+    def _convert_gnocchi_resources_threshold_alarm_rule(cls, rule):
         return {
-            AodhProps.RESOURCE_ID: event.get(
-                AodhProps.DETAIL, {}).get(AodhProps.RULE,
-                                          {}).get(AodhProps.RESOURCE_ID),
-            AodhProps.STATE_TIMESTAMP:
-                event.get(AodhProps.DETAIL, {}).get(AodhProps.STATE_TIMESTAMP)
-
+            AodhProps.RESOURCE_ID: _parse_query(rule, AodhProps.RESOURCE_ID)
         }
 
     @classmethod
-    def _convert_event_alarm_event(cls, rule):
+    def _convert_event_alarm_rule(cls, rule):
         return {
             AodhProps.EVENT_TYPE: rule[AodhProps.EVENT_TYPE],
             AodhProps.RESOURCE_ID:
@@ -268,32 +190,37 @@ class AodhDriver(AlarmDriverBase):
         }
 
     @classmethod
-    def _convert_detail_event(cls, event):
-        alarm_info = event[AodhProps.DETAIL]
-        alarm_rule = alarm_info[AodhProps.RULE]
-
-        entity_detail = {
-            AodhProps.DESCRIPTION: alarm_info[AodhProps.DESCRIPTION],
-            AodhProps.ENABLED: alarm_info[AodhProps.ENABLED],
-            AodhProps.NAME: alarm_info[AodhProps.NAME],
-            AodhProps.STATE: alarm_info[AodhProps.STATE],
-            AodhProps.REPEAT_ACTIONS: alarm_info[AodhProps.REPEAT_ACTIONS],
-            AodhProps.TYPE: alarm_info[AodhProps.TYPE]
+    def _convert_alarm_common(cls, alarm):
+        return {
+            AodhProps.ALARM_ID: alarm.get(AodhProps.ALARM_ID),
+            AodhProps.USER_ID: alarm.get(AodhProps.USER_ID),
+            AodhProps.PROJECT_ID: alarm.get(AodhProps.PROJECT_ID),
+            AodhProps.SEVERITY: alarm.get(AodhProps.SEVERITY),
+            AodhProps.TIMESTAMP: alarm.get(AodhProps.TIMESTAMP)
         }
 
-        if _is_vitrage_alarm(alarm_rule):
-            entity_detail.update(cls._convert_vitrage_alarm_event(alarm_rule))
-        elif entity_detail[AodhProps.TYPE] == AodhProps.EVENT:
-            entity_detail.update(cls._convert_event_alarm_event(alarm_rule))
-        elif entity_detail[AodhProps.TYPE] == AodhProps.THRESHOLD:
-            entity_detail.update(
-                cls._convert_threshold_alarm_event(event))
-        elif entity_detail[AodhProps.TYPE] == \
-                AodhProps.GNOCCHI_RESOURCES_THRESHOLD:
-            entity_detail.update(
-                cls._convert_gnocchi_resources_threshold(event))
+    @classmethod
+    def _convert_alarm_detail(cls, alarm):
 
-        return entity_detail
+        return {
+            AodhProps.DESCRIPTION: alarm.get(AodhProps.DESCRIPTION),
+            AodhProps.ENABLED: alarm.get(AodhProps.ENABLED),
+            AodhProps.NAME: alarm.get(AodhProps.NAME),
+            AodhProps.STATE: alarm.get(AodhProps.STATE),
+            AodhProps.REPEAT_ACTIONS: alarm.get(AodhProps.REPEAT_ACTIONS),
+            AodhProps.TYPE: alarm.get(AodhProps.TYPE),
+            AodhProps.STATE_TIMESTAMP: alarm.get(AodhProps.STATE_TIMESTAMP),
+            AodhProps.STATE_REASON: alarm.get(AodhProps.STATE_REASON)
+        }
+
+    def _convert_alarm_rule(self, alarm_type, alarm_rule):
+        if alarm_type in self.convert_rule_actions:
+            entity = self.convert_rule_actions[alarm_type](alarm_rule)
+        else:
+            LOG.warning('Unsupported Aodh alarm type %s' % alarm_type)
+            return None
+
+        return entity
 
     @classmethod
     def _parse_changed_rule(cls, change_rule):
@@ -312,9 +239,16 @@ class AodhDriver(AlarmDriverBase):
         return entity
 
     def _convert_alarm_creation_event(self, event):
-        entity = self._convert_base_event(event)
-        detail = self._convert_detail_event(event)
+        entity = self._convert_alarm_common(event)
+
+        alarm_info = event[AodhProps.DETAIL]
+        detail = self._convert_alarm_detail(alarm_info)
         entity.update(detail)
+
+        alarm_type = self._get_aodh_alarm_type(alarm_info)
+        alarm_rule = alarm_info[AodhProps.RULE]
+        rule_info = self._convert_alarm_rule(alarm_type, alarm_rule)
+        entity.update(rule_info)
 
         return self._filter_and_cache_alarm(entity, None,
                                             self._filter_get_erroneous,
@@ -358,14 +292,6 @@ class AodhDriver(AlarmDriverBase):
         except Exception as e:
             LOG.exception("Failed to Convert alarm state"
                           " transition event - %s", e)
-        try:
-            state = event[AodhProps.DETAIL]  # type unicode
-            unicode_to_str = state.encode("ascii")
-            str_to_dict = eval(unicode_to_str)
-            entity[AodhProps.STATE] = str_to_dict[AodhProps.STATE]
-        except Exception as e:
-            LOG.exception("Failed to Convert alarm state "
-                          "transition event - %s", e)
 
         return self._filter_and_cache_alarm(entity, old_alarm,
                                             self._filter_get_change,
