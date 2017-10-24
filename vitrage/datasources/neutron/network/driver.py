@@ -34,6 +34,11 @@ class NetworkDriver(NeutronBase):
                                              NEUTRON_NETWORK_DATASOURCE,
                                              DatasourceAction.UPDATE)[0]
 
+    @staticmethod
+    def properties_to_filter_out():
+        """Return a list of properties to be removed from the event"""
+        return ['manager', '_info']
+
     def get_all(self, datasource_action):
         return self.make_pickleable(
             self.client.list_networks()['networks'],
