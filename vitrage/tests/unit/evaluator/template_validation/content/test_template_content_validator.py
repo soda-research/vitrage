@@ -24,6 +24,7 @@ from vitrage.utils import file as file_utils
 
 
 CONDITION_TEMPLATES_DIR = '%s/templates/evaluator/conditions/%s'
+REGEX_TEMPLATE_DIR = '%s/templates/regex/%s'
 
 
 class TemplateContentValidatorTest(ValidatorTest):
@@ -257,6 +258,24 @@ class TemplateContentValidatorTest(ValidatorTest):
     def test_validate_scenario_target_complex_not_unsupported_condition(self):
         self._execute_condition_template_with_fault_result(
             'complex_not_unsupported.yaml', 135)
+
+    def test_faulty_regex(self):
+        faulty_regex_path = \
+            REGEX_TEMPLATE_DIR % (utils.get_resources_dir(),
+                                  "faulty_regex.yaml")
+        faulty_regex_template = \
+            file_utils.load_yaml_file(faulty_regex_path)
+        self._execute_and_assert_with_fault_result(
+            faulty_regex_template, 47)
+
+    def test_basic_regex(self):
+        basic_regex_path = \
+            REGEX_TEMPLATE_DIR % (utils.get_resources_dir(),
+                                  "basic_regex.yaml")
+        basic_regex_template = \
+            file_utils.load_yaml_file(basic_regex_path)
+        self._execute_and_assert_with_correct_result(
+            basic_regex_template)
 
     def _execute_condition_template_with_correct_result(self, template_name):
         template_path = CONDITION_TEMPLATES_DIR % (utils.get_resources_dir(),

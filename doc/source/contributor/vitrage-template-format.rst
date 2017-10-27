@@ -50,6 +50,7 @@ The template is divided into four main sections:
    - *condition –* the condition to be met. This condition will be phrased referencing the entities and relationships previously defined.
    - *action(s) –* a list of actions to execute when the condition is met.
 
+
 Definition Template Structure
 -----------------------------
 These are separate files, which contain only definitions and can be included under the includes section in regular templates. The definition templates are written in YAML
@@ -378,6 +379,21 @@ Common parameters and their acceptable values - for writing templates
 |                   |                       | mark_down               |                                    |
 +-------------------+-----------------------+-------------------------+------------------------------------+
 
+Using regular expressions in an entity definition
+-------------------------------------------------
+All parameters within an entity defintion can be made to include regular
+expressions. To do this, simply add ".regex" to their key. For example, as
+Zabbix supports regular expressions and a Zabbix alarm contains a "rawtext"
+field which is a regular expression, a Zabbix alarm entity defined in the
+template may contain a "rawtext.regex" field that is also defined by a
+regular expression:
+::
+
+  - entity:
+     category: ALARM
+     type: zabbix
+     rawtext.regex: Interface ([_a-zA-Z0-9'-]+) down on {HOST.NAME}
+     template_id: zabbix_alarm
 
 Supported Actions
 -----------------
@@ -396,7 +412,7 @@ Raise a deduced alarm on a target entity
                 target: instance         # mandatory. entity (from the definitions section) to raise an alarm on. Should not be an alarm.
 
 set_state
-^^^^^^^^^^^
+^^^^^^^^^
 Set state of specified entity. This will directly affect the state as seen in vitrage, but will not impact the state at the relevant datasource of this entity.
  ::
 
