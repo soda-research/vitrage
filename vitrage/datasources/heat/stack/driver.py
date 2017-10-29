@@ -79,15 +79,22 @@ class HeatStackDriver(DriverBase):
         # change transformer that if delete we remove the stack from the graph
         # and hence all the edges to it
 
+        stack_id = event['stack_identity']
+        if self._is_nested_stack(stack_id):
+            return
+
         event[DSProps.EVENT_TYPE] = event_type
-        event = HeatStackDriver._retrieve_stack_resources(
-            event, event['stack_identity'])
+        event = HeatStackDriver._retrieve_stack_resources(event, stack_id)
 
         return HeatStackDriver.make_pickleable(
             [event],
             HEAT_STACK_DATASOURCE,
             DatasourceAction.UPDATE,
             *self.properties_to_filter_out())[0]
+
+    @staticmethod
+    def _is_nested_stack(_id):
+        return HeatStackDriver.client().stacks.get(_id).to_dict()['parent']
 
     def _filter_resource_types(self):
         types = self.conf.datasources.types
@@ -99,8 +106,9 @@ class HeatStackDriver(DriverBase):
 
         HeatStackDriver.RESOURCE_TYPE = tmp_dict
 
-    def _make_stacks_list(self, stacks):
-        return [stack.__dict__ for stack in stacks]
+    @staticmethod
+    def _make_stacks_list(stacks):
+        return [stack.to_dict() for stack in stacks]
 
     def _append_stacks_resources(self, stacks):
         return [self._retrieve_stack_resources(stack, stack['id'])
@@ -112,9 +120,12 @@ class HeatStackDriver(DriverBase):
 
     @staticmethod
     def _retrieve_stack_resources(stack, stack_id):
-        resources = HeatStackDriver.client().resources.list(stack_id)
-        stack['resources'] = [resource.__dict__ for resource in resources
-                              if resource.__dict__['resource_type'] in
+        resources = HeatStackDriver.client().resources.list(stack_id,
+                                                            # guess 10 is
+                                                            # enough
+                                                            nested_depth=10)
+        stack['resources'] = [resource.to_dict() for resource in resources
+                              if resource.to_dict()['resource_type'] in
                               HeatStackDriver.RESOURCE_TYPE]
         HeatStackDriver._filter_stack_resources(stack)
         return stack

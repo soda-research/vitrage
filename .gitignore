@@ -25,6 +25,7 @@ ChangeLog
 cover
 etc/vitrage/vitrage.conf
 doc/source/_static/
+*.db
 
 #Python
 *.pyc
