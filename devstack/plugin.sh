@@ -346,6 +346,14 @@ function stop_vitrage {
     done
 }
 
+function modify_heat_global_index_policy_rule {
+    if is_service_enabled heat; then
+        local policy_file=$HEAT_CONF_DIR/policy.json
+        # Allow to list all stacks
+        sed -i 's/"stacks:global_index": "rule:deny_everybody"/"stacks:global_index": "rule:deny_stack_user"/' $policy_file
+    fi
+}
+
 # This is the main for plugin.sh
 if is_service_enabled vitrage; then
     if [[ "$1" == "stack" && "$2" == "pre-install" ]]; then
@@ -361,6 +369,8 @@ if is_service_enabled vitrage; then
         configure_vitrage
     elif [[ "$1" == "stack" && "$2" == "extra" ]]; then
         echo_summary "Initializing Vitrage"
+        # enable global index
+        modify_heat_global_index_policy_rule
         # Tidy base for vitrage
         init_vitrage
         # Start the services
