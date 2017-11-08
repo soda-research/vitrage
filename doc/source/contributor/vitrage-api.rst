@@ -144,7 +144,7 @@ query expression
  query := expression
  expression := simple_expression|complex_expression
  simple_expression := {simple_operator: {field_name: value}}
- simple_operator := = | != | < | <= | > | >=
+ simple_operator := == | != | < | <= | > | >=
  complex_expression := {complex_operator: [expression, expression, ...]} | not_expression
  not_expression := {not: expression}
  complex_operator := and | or
@@ -165,26 +165,26 @@ Query example
        {
           "or":
           [
-              "=":
+              "==":
                   {
                     "vitrage_type":"host"
                   },
-              "=":
+              "==":
                   {
                     "vitrage_type":"instance"
                   },
-              "=":
+              "==":
                   {
                     "vitrage_type":"zone"
                   },
-              "=":
+              "==":
                   {
                     "vitrage_type":"node"
                   }
           ]
        }
        "graph_type" : "tree"
-       limit : 4
+       "depth" : 4
     }
 
 
