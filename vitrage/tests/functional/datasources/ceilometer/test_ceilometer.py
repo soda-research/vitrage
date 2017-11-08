@@ -17,8 +17,9 @@ from oslo_config import cfg
 from vitrage.common.constants import DatasourceProperties as DSProp
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import VertexProperties as VProps
-from vitrage.datasources.aodh import AODH_DATASOURCE
-from vitrage.datasources.aodh.properties import AodhProperties as AodhProps
+from vitrage.datasources.ceilometer import CEILOMETER_DATASOURCE
+from vitrage.datasources.ceilometer.properties \
+    import CeilometerProperties as CeilProps
 from vitrage.datasources import NOVA_HOST_DATASOURCE
 from vitrage.datasources import NOVA_INSTANCE_DATASOURCE
 from vitrage.datasources import NOVA_ZONE_DATASOURCE
@@ -28,11 +29,11 @@ from vitrage.tests.functional.datasources.base import \
 from vitrage.tests.mocks import mock_transformer
 
 
-class TestAodhAlarms(TestDataSourcesBase):
+class TestCeilometerAlarms(TestDataSourcesBase):
 
     DATASOURCES_OPTS = [
         cfg.ListOpt('types',
-                    default=[AODH_DATASOURCE,
+                    default=[CEILOMETER_DATASOURCE,
                              NOVA_HOST_DATASOURCE,
                              NOVA_INSTANCE_DATASOURCE,
                              NOVA_ZONE_DATASOURCE],
@@ -46,20 +47,20 @@ class TestAodhAlarms(TestDataSourcesBase):
     # noinspection PyPep8Naming
     @classmethod
     def setUpClass(cls):
-        super(TestAodhAlarms, cls).setUpClass()
+        super(TestCeilometerAlarms, cls).setUpClass()
         cls.conf = cfg.ConfigOpts()
         cls.conf.register_opts(cls.PROCESSOR_OPTS, group='entity_graph')
         cls.conf.register_opts(cls.DATASOURCES_OPTS, group='datasources')
         cls.load_datasources(cls.conf)
 
-    def test_aodh_alarms_validity(self):
+    def test_ceilometer_alarms_validity(self):
         # Setup
         processor = self._create_processor_with_graph(self.conf)
         self.assertEqual(self._num_total_expected_vertices(),
                          len(processor.entity_graph))
 
         detail = {TransformerBase.QUERY_RESULT: '',
-                  DSProp.ENTITY_TYPE: AODH_DATASOURCE}
+                  DSProp.ENTITY_TYPE: CEILOMETER_DATASOURCE}
         spec_list = \
             mock_transformer.simple_aodh_alarm_generators(alarm_num=1,
                                                           snapshot_events=1,
@@ -67,7 +68,7 @@ class TestAodhAlarms(TestDataSourcesBase):
         static_events = mock_transformer.generate_random_events_list(spec_list)
 
         aodh_event = static_events[0]
-        aodh_event[AodhProps.RESOURCE_ID] = \
+        aodh_event[CeilProps.RESOURCE_ID] = \
             self._find_entity_id_by_type(processor.entity_graph,
                                          NOVA_HOST_DATASOURCE)
 
@@ -81,7 +82,7 @@ class TestAodhAlarms(TestDataSourcesBase):
         aodh_vertices = processor.entity_graph.get_vertices(
             vertex_attr_filter={
                 VProps.VITRAGE_CATEGORY: EntityCategory.ALARM,
-                VProps.VITRAGE_TYPE: AODH_DATASOURCE
+                VProps.VITRAGE_TYPE: CEILOMETER_DATASOURCE
             })
         self.assertEqual(1, len(aodh_vertices))
 

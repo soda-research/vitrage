@@ -22,6 +22,7 @@ LOG = log.getLogger(__name__)
 
 OPTS = [
     cfg.StrOpt('aodh_version', default='2', help='Aodh version'),
+    cfg.StrOpt('ceilometer_version', default='2', help='Ceilometer version'),
     cfg.StrOpt('nova_version', default='2.11', help='Nova version'),
     cfg.StrOpt('cinder_version', default='2', help='Cinder version'),
     cfg.StrOpt('glance_version', default='2', help='Glance version'),
@@ -30,6 +31,7 @@ OPTS = [
 ]
 
 _client_modules = {
+    'aodh': 'aodhclient.client',
     'ceilometer': 'ceilometerclient.client',
     'nova': 'novaclient.client',
     'cinder': 'cinderclient.client',
@@ -46,13 +48,26 @@ def driver_module(driver):
     return module
 
 
+def aodh_client(conf):
+    """Get an instance of aodh client"""
+    try:
+        aodh_client = driver_module('aodh')
+        client = aodh_client.Client(
+            conf.aodh_version,
+            session=keystone_client.get_session(conf))
+        LOG.info('Aodh client created')
+        return client
+    except Exception as e:
+        LOG.exception('Create Aodh client - Got Exception: %s', e)
+
+
 def ceilometer_client(conf):
     """Get an instance of ceilometer client"""
     auth_config = conf.service_credentials
     try:
         cm_client = driver_module('ceilometer')
         client = cm_client.get_client(
-            version=conf.aodh_version,
+            version=conf.ceilometer_version,
             session=keystone_client.get_session(conf),
             region_name=auth_config.region_name,
             interface=auth_config.interface,
