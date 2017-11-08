@@ -15,6 +15,7 @@
 import multiprocessing
 import time
 
+from oslo_concurrency import processutils
 from oslo_log import log
 from oslo_service import service as os_service
 from vitrage.evaluator.evaluator_base import EvaluatorBase
@@ -33,7 +34,8 @@ class EvaluatorManager(EvaluatorBase):
     def __init__(self, conf, entity_graph, evaluator_queue):
         super(EvaluatorManager, self).__init__(conf, entity_graph,
                                                evaluator_queue)
-        self._workers_num = conf.evaluator.workers
+        self._workers_num = conf.evaluator.workers or \
+            processutils.get_worker_count()
         self._worker_queues = list()
         self._p_launcher = os_service.ProcessLauncher(conf)
 

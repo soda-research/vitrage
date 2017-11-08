@@ -30,9 +30,11 @@ OPTS = [
                help='A path for def_template templates used by the evaluator'
                ),
     cfg.IntOpt('workers',
-               default=1,
+               default=None,
                min=1,
-               max=10,
-               help='Number of workers for template evaluator'
+               max=32,
+               help='Number of workers for template evaluator, default is '
+                    'equal to the number of CPUs available if that can be '
+                    'determined, else a default worker count of 1 is returned.'
                ),
 ]
