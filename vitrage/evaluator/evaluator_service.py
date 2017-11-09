@@ -104,18 +104,22 @@ class EvaluatorWorker(os_service.Service):
                  enabled=False):
         super(EvaluatorWorker, self).__init__()
         self._conf = conf
-        entity_graph.notifier._subscriptions = []  # Quick n dirty
-        self._entity_graph = entity_graph
         self._task_queue = task_queue
-        self._evaluator = ScenarioEvaluator(
-            conf,
-            self._entity_graph,
-            scenario_repo,
-            evaluator_queue,
-            enabled)
+        self._entity_graph = entity_graph
+        self._scenario_repo = scenario_repo
+        self._evaluator_queue = evaluator_queue
+        self._enabled = enabled
+        self._evaluator = None
 
     def start(self):
         super(EvaluatorWorker, self).start()
+        self._entity_graph.notifier._subscriptions = []  # Quick n dirty
+        self._evaluator = ScenarioEvaluator(
+            self._conf,
+            self._entity_graph,
+            self._scenario_repo,
+            self._evaluator_queue,
+            self._enabled)
         self.tg.add_thread(self._read_queue)
         LOG.info("EvaluatorWorkerService - Started!")
         self._evaluator.scenario_repo.log_enabled_scenarios()
