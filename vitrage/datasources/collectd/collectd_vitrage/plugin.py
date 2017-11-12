@@ -51,7 +51,7 @@ class CollectDPlugin(object):
             else:
                 return config.key, config.values[0]
 
-        return dict([config_to_tuple(config)])
+        return {k: v for k, v in [config_to_tuple(config)]}
 
     def error(self, message):
         """Log an error message to the collectd logger. """
