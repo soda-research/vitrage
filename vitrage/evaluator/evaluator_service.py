@@ -90,7 +90,7 @@ class EvaluatorManager(EvaluatorBase):
 
     def reload_all_workers(self, enabled=True):
         self.stop_all_workers()
-        for i in xrange(self._workers_num):
+        for i in range(self._workers_num):
             self._add_worker(enabled=enabled)
 
 
