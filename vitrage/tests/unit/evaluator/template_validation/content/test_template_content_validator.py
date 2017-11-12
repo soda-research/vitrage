@@ -294,12 +294,19 @@ class TemplateContentValidatorTest(ValidatorTest):
     def _execute_and_assert_with_fault_result(self,
                                               template,
                                               status_code,
-                                              def_temps={}):
+                                              def_temps=None):
 
+        if def_temps is None:
+            def_temps = {}
         result = validator.content_validation(template, def_temps)
         self._assert_fault_result(result, status_code)
 
-    def _execute_and_assert_with_correct_result(self, template, def_temps={}):
+    def _execute_and_assert_with_correct_result(self,
+                                                template,
+                                                def_temps=None):
+
+        if def_temps is None:
+            def_temps = {}
 
         result = validator.content_validation(template, def_temps)
         self._assert_correct_result(result)
