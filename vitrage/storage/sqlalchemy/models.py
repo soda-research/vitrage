@@ -14,7 +14,6 @@
 
 from oslo_db.sqlalchemy import models
 
-import six
 from sqlalchemy import Column, String, SmallInteger, BigInteger, Index
 from sqlalchemy.ext.declarative import declarative_base
 
@@ -33,7 +32,7 @@ class VitrageBase(models.TimestampMixin, models.ModelBase):
 
     def update(self, values):
         """Make the model object behave like a dict."""
-        for k, v in six.iteritems(values):
+        for k, v in values.items():
             setattr(self, k, v)
 
 
