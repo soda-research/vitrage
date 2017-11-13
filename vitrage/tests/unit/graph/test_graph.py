@@ -20,7 +20,6 @@ Tests for `vitrage` graph driver
 """
 
 from vitrage.common.constants import EdgeProperties as EProps
-from vitrage.common.constants import VertexProperties as VProps
 from vitrage.graph import Direction
 from vitrage.graph.filter import check_filter
 from vitrage.graph import utils
