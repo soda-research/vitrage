@@ -87,7 +87,7 @@ def no_direct_use_of_unicode_function(logical_line):
 
 
 def check_no_contextlib_nested(logical_line):
-    msg = ("V327: contextlib.nested is deprecated since Python 2.7. See "
+    msg = ("V321: contextlib.nested is deprecated since Python 2.7. See "
            "https://docs.python.org/2/library/contextlib.html#contextlib."
            "nested for more information.")
     if ("with contextlib.nested(" in logical_line or
@@ -96,7 +96,7 @@ def check_no_contextlib_nested(logical_line):
 
 
 def dict_constructor_with_list_copy(logical_line):
-    msg = ("V328: Must use a dict comprehension instead of a dict constructor "
+    msg = ("V322: Must use a dict comprehension instead of a dict constructor "
            "with a sequence of key-value pairs.")
     if dict_constructor_with_list_copy_re.match(logical_line):
         yield (0, msg)
@@ -104,33 +104,33 @@ def dict_constructor_with_list_copy(logical_line):
 
 def check_python3_xrange(logical_line):
     if re.search(r"\bxrange\s*\(", logical_line):
-        yield(0, "V329: Do not use xrange. Use range, or six.moves.range for "
+        yield(0, "V323: Do not use xrange. Use range, or six.moves.range for "
                  "large loops.")
 
 
 def check_python3_no_iteritems(logical_line):
-    msg = ("V330: Use six.iteritems() or dict.items() instead of "
+    msg = ("V324: Use six.iteritems() or dict.items() instead of "
            "dict.iteritems().")
     if re.search(r".*\.iteritems\(\)", logical_line):
         yield(0, msg)
 
 
 def check_python3_no_iterkeys(logical_line):
-    msg = ("V331: Use six.iterkeys() or dict.keys() instead of "
+    msg = ("V325: Use six.iterkeys() or dict.keys() instead of "
            "dict.iterkeys().")
     if re.search(r".*\.iterkeys\(\)", logical_line):
         yield(0, msg)
 
 
 def check_python3_no_itervalues(logical_line):
-    msg = ("V332: Use six.itervalues() or dict.values instead of "
+    msg = ("V326: Use six.itervalues() or dict.values instead of "
            "dict.itervalues().")
     if re.search(r".*\.itervalues\(\)", logical_line):
         yield(0, msg)
 
 
 def no_mutable_default_args(logical_line):
-    msg = "V529: Method's default argument shouldn't be mutable!"
+    msg = "V327: Method's default argument shouldn't be mutable!"
     if mutable_default_args.match(logical_line):
         yield (0, msg)
 
