@@ -78,7 +78,10 @@ class TemplateData(object):
         'operational_severity': VProps.VITRAGE_OPERATIONAL_SEVERITY
     }
 
-    def __init__(self, template_def, def_templates={}):
+    def __init__(self, template_def, def_templates=None):
+
+        if def_templates is None:
+            def_templates = {}
 
         self.name = template_def[TFields.METADATA][TFields.NAME]
         defs = {}

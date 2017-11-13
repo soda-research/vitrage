@@ -34,7 +34,11 @@ class TemplateApis(object):
     FAILED_MSG = 'validation failed'
     OK_MSG = 'validation OK'
 
-    def __init__(self, templates, def_templates={}):
+    def __init__(self, templates, def_templates=None):
+
+        if def_templates is None:
+            def_templates = {}
+
         self.def_templates = def_templates
         self.templates = templates
 

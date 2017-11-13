@@ -49,7 +49,10 @@ from vitrage.utils import evaluator as evaluator_utils
 LOG = log.getLogger(__name__)
 
 
-def content_validation(template, def_templates={}):
+def content_validation(template, def_templates=None):
+
+    if def_templates is None:
+        def_templates = {}
 
     result = get_content_correct_result()
     entities_index = {}
