@@ -72,8 +72,7 @@ def create_vertex(vitrage_id,
     }
     if metadata:
         properties.update(metadata)
-    properties = dict(
-        (k, v) for k, v in properties.items() if v is not None)
+    properties = {k: v for k, v in properties.items() if v is not None}
     vertex = Vertex(vertex_id=vitrage_id, properties=properties)
     return vertex
 
@@ -107,8 +106,7 @@ def create_edge(source_id,
     }
     if metadata:
         properties.update(metadata)
-    properties = dict(
-        (k, v) for k, v in properties.items() if v is not None)
+    properties = {k: v for k, v in properties.items() if v is not None}
     edge = Edge(source_id=source_id,
                 target_id=target_id,
                 label=relationship_type,

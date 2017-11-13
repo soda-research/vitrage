@@ -228,8 +228,8 @@ class TemplateData(object):
     def _extract_properties(var_dict):
 
         ignore_ids = [TFields.TEMPLATE_ID, TFields.SOURCE, TFields.TARGET]
-        return dict((key, var_dict[key]) for key in var_dict
-                    if key not in ignore_ids)
+        return \
+            {key: var_dict[key] for key in var_dict if key not in ignore_ids}
 
     @staticmethod
     def _convert_props_with_set(properties):

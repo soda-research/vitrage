@@ -105,8 +105,7 @@ def generate_vals(param_specs):
     """
 
     if isinstance(param_specs, dict):
-        current_info = \
-            dict((k, generate_vals(v)) for k, v in param_specs.items())
+        current_info = {k: generate_vals(v) for k, v in param_specs.items()}
     elif isinstance(param_specs, list) or isinstance(param_specs, tuple):
         # convert tuples to lists
         current_info = [generate_vals(param) for param in param_specs]
