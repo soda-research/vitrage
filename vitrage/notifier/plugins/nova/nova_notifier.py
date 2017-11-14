@@ -45,6 +45,6 @@ class NovaNotifier(NotifierBase):
                      str(host_id), str(is_down))
             response = self.client.services.force_down(
                 host_id, 'nova-compute', is_down)
-            LOG.info('RESPONSE %s', str(response))
+            LOG.info('RESPONSE %s', str(response.to_dict()))
         except Exception as e:
             LOG.exception('Failed to services.force_down - %s', e)
