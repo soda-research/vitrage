@@ -27,6 +27,7 @@ LOG = log.getLogger(__name__)
 
 
 START_EVALUATION = 'start_evaluation'
+POISON_PILL = None
 
 
 class EvaluatorManager(EvaluatorBase):
@@ -85,7 +86,9 @@ class EvaluatorManager(EvaluatorBase):
             q.join()
 
     def stop_all_workers(self):
-        self._notify_and_wait(None)
+        self._notify_and_wait(POISON_PILL)
+        for q in self._worker_queues:
+            q.close()
         self._worker_queues = list()
 
     def reload_all_workers(self, enabled=True):
@@ -126,20 +129,17 @@ class EvaluatorWorker(os_service.Service):
 
     def _read_queue(self):
         while True:
-            try:
-                next_task = self._task_queue.get()
-                if next_task is None:
-                    self._task_queue.task_done()
-                    break  # poison pill
-                self._do_task(next_task)
+            next_task = self._task_queue.get()
+            if next_task is POISON_PILL:
                 self._task_queue.task_done()
-                # Evaluator queue may have been updated, thus the sleep:
-                time.sleep(0)
+                break
+            try:
+                self._do_task(next_task)
             except Exception as e:
-                # TODO(ihefetz): an exception here may break all the
-                # TODO(ihefetz): evaluators. If task_done was not called,
-                # TODO(ihefetz): evaluator manager will wait forever.
-                LOG.exception("Exception: %s", e)
+                LOG.exception("Graph may not be in sync: exception %s", e)
+            self._task_queue.task_done()
+            # Evaluator queue may have been updated, thus the sleep:
+            time.sleep(0)
 
     def _do_task(self, task):
             (before, current, is_vertex, action) = task

@@ -58,7 +58,7 @@ class Connection(base.Connection):
         engine = self._engine_facade.get_engine()
         engine.connect()
         models.Base.metadata.create_all(engine, checkfirst=False)
-        # TODO(ihefetz) upgrade logic is missing
+        # TODO(idan_hefetz) upgrade logic is missing
 
     def disconnect(self):
         self._engine_facade.get_engine().dispose()

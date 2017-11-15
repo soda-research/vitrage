@@ -59,7 +59,6 @@ class GraphAlgorithm(object):
 
         In sub-graph matching algorithms complexity is high in the general case
         Here it is considerably mitigated  as we have an anchor in the graph.
-        TODO(ihefetz)  document this
 
         :type known_mappings: list
         :type sub_graph: driver.Graph
