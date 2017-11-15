@@ -15,7 +15,7 @@
 
 import re
 
-mutable_default_args = re.compile(r"^\s*def .+\((.+=\{\}|.+=\[\])")
+mutable_default_args = re.compile(r"^\s*def .+\((.+={\}|.+=\[\])")
 
 asse_trueinst_re = re.compile(
     r"(.)*assertTrue\(isinstance\((\w|\.|\'|\"|\[|\])+, "
@@ -35,7 +35,7 @@ _all_log_levels = {'debug', 'error', 'info', 'warning',
 translated_logs = re.compile(
     r"(.)*LOG\.(%(level)s)\(\s*_\(" % {'level': '|'.join(_all_log_levels)})
 
-dict_constructor_with_list_copy_re = re.compile(r".*\bdict\((\[)?(\(|\[)")
+dict_constructor_with_list_copy_re = re.compile(r".*\bdict\((\[)?([(\[])")
 
 
 def assert_true_instance(logical_line):

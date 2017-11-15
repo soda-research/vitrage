@@ -161,33 +161,35 @@ Query example
     X-Auth-Token: 2b8882ba2ec44295bf300aecb2caa4f7
 
     {
-      "query" :
-       {
-          "or":
-          [
-              "==":
-                  {
-                    "vitrage_type":"host"
-                  },
-              "==":
-                  {
-                    "vitrage_type":"instance"
-                  },
-              "==":
-                  {
-                    "vitrage_type":"zone"
-                  },
-              "==":
-                  {
-                    "vitrage_type":"node"
-                  }
-          ]
-       }
-       "graph_type" : "tree"
-       "depth" : 4
-    }
+        "query" :
+         {
+            "or": [
+              {
+                "==": {
+                  "vitrage_type": "host"
+                }
+              },
+              {
+                "==": {
+                  "vitrage_type": "instance"
+                }
+              },
+              {
+                "==": {
+                  "vitrage_type": "zone"
+                }
+              },
+              {
+                "==": {
+                  "vitrage_type": "node"
+                }
+              }
+            ]
 
-
+         },
+         "graph_type" : "tree",
+         "depth" : 4
+     }
 
 Response Status Code
 ====================
