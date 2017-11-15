@@ -226,6 +226,7 @@ Response Examples
       "project_id": "0683517e1e354d2ba25cba6937f44e79",
       "vitrage_type": "nova.instance",
       "id": "20d12a8a-ea9a-89c6-5947-83bea959362e",
+      "graph_index": 0,
       "vitrage_id": "RESOURCE:nova.instance:20d12a8a-ea9a-89c6-5947-83bea959362e"
     },
     {
@@ -238,6 +239,7 @@ Response Examples
       "project_id": "0683517e1e354d2ba25cba6937f44e79",
       "vitrage_type": "nova.instance",
       "id": "dc35fa2f-4515-1653-ef6b-03b471bb395b",
+      "graph_index": 1,
       "vitrage_id": "RESOURCE:nova.instance:dc35fa2f-4515-1653-ef6b-03b471bb395b"
     },
     {
@@ -250,6 +252,7 @@ Response Examples
       "project_id": "0683517e1e354d2ba25cba6937f44e79",
       "vitrage_type": "nova.instance",
       "id": "9879cf5a-bdcf-3651-3017-961ed887ec86",
+      "graph_index": 2,
       "vitrage_id": "RESOURCE:nova.instance:9879cf5a-bdcf-3651-3017-961ed887ec86"
     },
     {
@@ -262,6 +265,7 @@ Response Examples
       "project_id": "0683517e1e354d2ba25cba6937f44e79",
       "vitrage_type": "nova.instance",
       "id": "fe124f4b-9ed7-4591-fcd1-803cf5c33cb1",
+      "graph_index": 3,
       "vitrage_id": "RESOURCE:nova.instance:fe124f4b-9ed7-4591-fcd1-803cf5c33cb1"
     },
     {
@@ -274,6 +278,7 @@ Response Examples
       "project_id": "0683517e1e354d2ba25cba6937f44e79",
       "vitrage_type": "nova.instance",
       "id": "f2e48a97-7350-061e-12d3-84c6dc3e67c0",
+      "graph_index": 4,
       "vitrage_id": "RESOURCE:nova.instance:f2e48a97-7350-061e-12d3-84c6dc3e67c0"
     },
     {
@@ -285,6 +290,7 @@ Response Examples
       "state": "available",
       "vitrage_type": "nova.host",
       "id": "host-2",
+      "graph_index": 5,
       "vitrage_id": "RESOURCE:nova.host:host-2"
     },
     {
@@ -296,6 +302,7 @@ Response Examples
       "state": "available",
       "vitrage_type": "nova.host",
       "id": "host-3",
+      "graph_index": 6,
       "vitrage_id": "RESOURCE:nova.host:host-3"
     },
     {
@@ -307,6 +314,7 @@ Response Examples
       "state": "available",
       "vitrage_type": "nova.host",
       "id": "host-0",
+      "graph_index": 7,
       "vitrage_id": "RESOURCE:nova.host:host-0"
     },
     {
@@ -318,6 +326,7 @@ Response Examples
       "state": "available",
       "vitrage_type": "nova.host",
       "id": "host-1",
+      "graph_index": 8,
       "vitrage_id": "RESOURCE:nova.host:host-1"
     },
     {
@@ -330,6 +339,7 @@ Response Examples
       "project_id": "0683517e1e354d2ba25cba6937f44e79",
       "vitrage_type": "nova.instance",
       "id": "275097cf-954e-8e24-b185-9514e24b8591",
+      "graph_index": 9,
       "vitrage_id": "RESOURCE:nova.instance:275097cf-954e-8e24-b185-9514e24b8591"
     },
     {
@@ -342,6 +352,7 @@ Response Examples
       "project_id": "0683517e1e354d2ba25cba6937f44e79",
       "vitrage_type": "nova.instance",
       "id": "a0f0805f-c804-cffe-c25a-1b38f555ed68",
+      "graph_index": 10,
       "vitrage_id": "RESOURCE:nova.instance:a0f0805f-c804-cffe-c25a-1b38f555ed68"
     },
     {
@@ -354,6 +365,7 @@ Response Examples
       "project_id": "0683517e1e354d2ba25cba6937f44e79",
       "vitrage_type": "nova.instance",
       "id": "56af57d2-34a4-19b1-5106-b613637a11a7",
+      "graph_index": 11,
       "vitrage_id": "RESOURCE:nova.instance:56af57d2-34a4-19b1-5106-b613637a11a7"
     },
     {
@@ -365,6 +377,7 @@ Response Examples
       "state": "available",
       "vitrage_type": "nova.zone",
       "id": "zone-1",
+      "graph_index": 12,
       "vitrage_id": "RESOURCE:nova.zone:zone-1"
     },
     {
@@ -377,6 +390,7 @@ Response Examples
       "project_id": "0683517e1e354d2ba25cba6937f44e79",
       "vitrage_type": "nova.instance",
       "id": "16e14c58-d254-2bec-53e4-c766e48810aa",
+      "graph_index": 13,
       "vitrage_id": "RESOURCE:nova.instance:16e14c58-d254-2bec-53e4-c766e48810aa"
     },
     {
@@ -389,6 +403,7 @@ Response Examples
       "project_id": "0683517e1e354d2ba25cba6937f44e79",
       "vitrage_type": "nova.instance",
       "id": "f35a1e10-74ff-7332-8edf-83cd6ffcb2de",
+      "graph_index": 14,
       "vitrage_id": "RESOURCE:nova.instance:f35a1e10-74ff-7332-8edf-83cd6ffcb2de"
     },
     {
@@ -396,11 +411,12 @@ Response Examples
       "vitrage_is_placeholder": false,
       "vitrage_is_deleted": false,
       "name": "vm-4",
-      "update_timestamp": "2015-12-01T12:46:41Z?vitrage_id=all",
+      "update_timestamp": "2015-12-01T12:46:41Z",
       "state": "ACTIVE",
       "project_id": "0683517e1e354d2ba25cba6937f44e79",
       "vitrage_type": "nova.instance",
       "id": "ea8a450e-cab1-2272-f431-494b40c5c378",
+      "graph_index": 15,
       "vitrage_id": "RESOURCE:nova.instance:ea8a450e-cab1-2272-f431-494b40c5c378"
     },
     {
@@ -413,6 +429,7 @@ Response Examples
       "project_id": "0683517e1e354d2ba25cba6937f44e79",
       "vitrage_type": "nova.instance",
       "id": "6e42bdc3-b776-1b2c-2c7d-b7a8bb98f721",
+      "graph_index": 16,
       "vitrage_id": "RESOURCE:nova.instance:6e42bdc3-b776-1b2c-2c7d-b7a8bb98f721"
     },
     {
@@ -425,6 +442,7 @@ Response Examples
       "project_id": "0683517e1e354d2ba25cba6937f44e79",
       "vitrage_type": "nova.instance",
       "id": "8c951613-c660-87c0-c18b-0fa3293ce8d8",
+      "graph_index": 17,
       "vitrage_id": "RESOURCE:nova.instance:8c951613-c660-87c0-c18b-0fa3293ce8d8"
     },
     {
@@ -436,6 +454,7 @@ Response Examples
       "state": "available",
       "vitrage_type": "nova.zone",
       "id": "zone-0",
+      "graph_index": 18,
       "vitrage_id": "RESOURCE:nova.zone:zone-0"
     },
     {
@@ -448,8 +467,9 @@ Response Examples
       "project_id": "0683517e1e354d2ba25cba6937f44e79",
       "vitrage_type": "nova.instance",
       "id": "78353ce4-2710-49b5-1341-b8cbb6000ebc",
+      "graph_index": 19,
       "vitrage_id": "RESOURCE:nova.instance:78353ce4-2710-49b5-1341-b8cbb6000ebc"
-    },TODO
+    },
     {
       "vitrage_category": "RESOURCE",
       "vitrage_is_placeholder": false,
@@ -460,6 +480,7 @@ Response Examples
       "project_id": "0683517e1e354d2ba25cba6937f44e79",
       "vitrage_type": "nova.instance",
       "id": "35bf479a-75d9-80a9-874e-d3b50fb2dd2e",
+      "graph_index": 20,
       "vitrage_id": "RESOURCE:nova.instance:35bf479a-75d9-80a9-874e-d3b50fb2dd2e"
     },
     {
@@ -469,152 +490,153 @@ Response Examples
       "name": "openstack.cluster",
       "vitrage_type": "openstack.cluster",
       "id": "openstack.cluster",
+      "graph_index": 21,
       "vitrage_id": "RESOURCE:openstack.cluster"
     }
   ],
   "links": [
     {
-      "relationship_name": "contains",
+      "relationship_type": "contains",
       "vitrage_is_deleted": false,
       "target": 3,
       "key": "contains",
       "source": 5
     },
     {
-      "relationship_name": "contains",
+      "relationship_type": "contains",
       "vitrage_is_deleted": false,
       "target": 1,
       "key": "contains",
       "source": 5
     },
     {
-      "relationship_name": "contains",
+      "relationship_type": "contains",
       "vitrage_is_deleted": false,
       "target": 16,
       "key": "contains",
       "source": 5
     },
     {
-      "relationship_name": "contains",
+      "relationship_type": "contains",
       "vitrage_is_deleted": false,
       "target": 11,
       "key": "contains",
       "source": 5
     },
     {
-      "relationship_name": "contains",
+      "relationship_type": "contains",
       "vitrage_is_deleted": false,
       "target": 13,
       "key": "contains",
       "source": 6
     },
     {
-      "relationship_name": "contains",
+      "relationship_type": "contains",
       "vitrage_is_deleted": false,
       "target": 4,
       "key": "contains",
       "source": 6
     },
     {
-      "relationship_name": "contains",
+      "relationship_type": "contains",
       "vitrage_is_deleted": false,
       "target": 14,
       "key": "contains",
       "source": 6
     },
     {
-      "relationship_name": "contains",
+      "relationship_type": "contains",
       "vitrage_is_deleted": false,
       "target": 20,
       "key": "contains",
       "source": 7
-    },?vitrage_id=all
+    },
     {
-      "relationship_name": "contains",
+      "relationship_type": "contains",
       "vitrage_is_deleted": false,
       "target": 0,
       "key": "contains",
       "source": 7
     },
     {
-      "relationship_name": "contains",
+      "relationship_type": "contains",
       "vitrage_is_deleted": false,
       "target": 19,
       "key": "contains",
       "source": 7
     },
     {
-      "relationship_name": "contains",
+      "relationship_type": "contains",
       "vitrage_is_deleted": false,
       "target": 15,
       "key": "contains",
       "source": 7
     },
     {
-      "relationship_name": "contains",
+      "relationship_type": "contains",
       "vitrage_is_deleted": false,
       "target": 9,
       "key": "contains",
       "source": 8
     },
     {
-      "relationship_name": "contains",
+      "relationship_type": "contains",
       "vitrage_is_deleted": false,
       "target": 10,
       "key": "contains",
       "source": 8
     },
     {
-      "relationship_name": "contains",
+      "relationship_type": "contains",
       "vitrage_is_deleted": false,
       "target": 2,
       "key": "contains",
       "source": 8
     },
     {
-      "relationship_name": "contains",
+      "relationship_type": "contains",
       "vitrage_is_deleted": false,
       "target": 17,
       "key": "contains",
       "source": 8
     },
     {
-      "relationship_name": "contains",
+      "relationship_type": "contains",
       "vitrage_is_deleted": false,
       "target": 6,
       "key": "contains",
       "source": 12
     },
     {
-      "relationship_name": "contains",
+      "relationship_type": "contains",
       "vitrage_is_deleted": false,
       "target": 8,
       "key": "contains",
       "source": 12
     },
     {
-      "relationship_name": "contains",
+      "relationship_type": "contains",
       "vitrage_is_deleted": false,
       "target": 5,
       "key": "contains",
       "source": 18
     },
     {
-      "relationship_name": "contains",
+      "relationship_type": "contains",
       "vitrage_is_deleted": false,
       "target": 7,
       "key": "contains",
       "source": 18
     },
     {
-      "relationship_name": "contains",
+      "relationship_type": "contains",
       "vitrage_is_deleted": false,
       "target": 18,
       "key": "contains",
       "source": 21
     },
     {
-      "relationship_name": "contains",
+      "relationship_type": "contains",
       "vitrage_is_deleted": false,
       "target": 12,
       "key": "contains",
