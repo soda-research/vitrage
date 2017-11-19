@@ -28,6 +28,7 @@ import vitrage.machine_learning.plugins.jaccard_correlation
 import vitrage.notifier
 import vitrage.notifier.plugins.snmp
 import vitrage.os_clients
+import vitrage.persistor
 import vitrage.rpc
 import vitrage.storage
 
@@ -46,6 +47,7 @@ def list_opts():
         ('evaluator', vitrage.evaluator.OPTS),
         ('consistency', vitrage.entity_graph.consistency.OPTS),
         ('database', vitrage.storage.OPTS),
+        ('persistor', vitrage.persistor.OPTS),
         ('entity_graph', vitrage.entity_graph.OPTS),
         ('service_credentials', vitrage.keystone_client.OPTS),
         ('machine_learning',

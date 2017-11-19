@@ -26,12 +26,17 @@ class CollectorNotifier(object):
     def __init__(self, conf):
         self.oslo_notifier = None
         try:
-            topic = conf.datasources.notification_topic_collector
+            topics = [conf.datasources.notification_topic_collector]
+            if conf.persistor.persist_events:
+                topics.append(conf.persistor.persistor_topic)
+            else:
+                LOG.warning("Not persisting events")
+
             self.oslo_notifier = oslo_messaging.Notifier(
                 get_transport(conf),
                 driver='messagingv2',
                 publisher_id='datasources.events',
-                topics=[topic])
+                topics=topics)
         except Exception as e:
             LOG.info('Collector notifier - missing configuration %s'
                      % str(e))

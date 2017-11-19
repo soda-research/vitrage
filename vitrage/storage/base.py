@@ -27,6 +27,10 @@ class Connection(object):
     def active_actions(self):
         return None
 
+    @property
+    def events(self):
+        return None
+
     @abc.abstractmethod
     def upgrade(self, nocreate=False):
         raise NotImplementedError('upgrade not implemented')
@@ -42,7 +46,6 @@ class Connection(object):
 
 @six.add_metaclass(abc.ABCMeta)
 class ActiveActionsConnection(object):
-
     @abc.abstractmethod
     def create(self, active_action):
         """Create a new action.
@@ -87,3 +90,41 @@ class ActiveActionsConnection(object):
                ):
         """Delete all active actions that match the filters."""
         raise NotImplementedError('delete active actions not implemented')
+
+
+@six.add_metaclass(abc.ABCMeta)
+class EventsConnection(object):
+    def create(self, event):
+        """Create a new event.
+
+        :type event: vitrage.storage.sqlalchemy.models.Event
+        """
+        raise NotImplementedError('create event not implemented')
+
+    def update(self, event):
+        """Update an existing event.
+
+        :type event: vitrage.storage.sqlalchemy.models.Event
+        """
+        raise NotImplementedError('update event not implemented')
+
+    def query(self,
+              event_id=None,
+              collector_timestamp=None,
+              payload=None,
+              gt_collector_timestamp=None,
+              lt_collector_timestamp=None):
+        """Yields a lists of events that match filters.
+
+        :rtype: list of vitrage.storage.sqlalchemy.models.Event
+        """
+        raise NotImplementedError('query events not implemented')
+
+    def delete(self,
+               event_id=None,
+               collector_timestamp=None,
+               payload=None,
+               gt_collector_timestamp=None,
+               lt_collector_timestamp=None):
+        """Delete all events that match the filters."""
+        raise NotImplementedError('delete events not implemented')

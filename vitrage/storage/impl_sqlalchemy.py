@@ -27,7 +27,6 @@ LOG = log.getLogger(__name__)
 
 
 class Connection(base.Connection):
-
     def __init__(self, conf, url):
         options = dict(conf.database.items())
         # set retries to 0 , since reconnection is already implemented
@@ -40,10 +39,15 @@ class Connection(base.Connection):
                                                       **options)
         self.conf = conf
         self._active_actions = ActiveActionsConnection(self._engine_facade)
+        self._events = EventsConnection(self._engine_facade)
 
     @property
     def active_actions(self):
         return self._active_actions
+
+    @property
+    def events(self):
+        return self._events
 
     @staticmethod
     def _dress_url(url):
@@ -135,3 +139,66 @@ class ActiveActionsConnection(base.ActiveActionsConnection, BaseTableConn):
             score=score,
             trigger=trigger)
         return query.delete()
+
+
+class EventsConnection(base.EventsConnection, BaseTableConn):
+    def __init__(self, engine_facade):
+        super(EventsConnection, self).__init__(engine_facade)
+
+    def create(self, event):
+        session = self._engine_facade.get_session()
+        with session.begin():
+            session.add(event)
+
+    def update(self, event):
+        session = self._engine_facade.get_session()
+        with session.begin():
+            session.merge(event)
+
+    def query(self,
+              event_id=None,
+              collector_timestamp=None,
+              payload=None,
+              gt_collector_timestamp=None,
+              lt_collector_timestamp=None):
+        query = self.query_filter(
+            models.Event,
+            event_id=event_id,
+            collector_timestamp=collector_timestamp,
+            payload=payload)
+
+        query = self._update_query_gt_lt(gt_collector_timestamp,
+                                         lt_collector_timestamp,
+                                         query)
+
+        return query.all()
+
+    @staticmethod
+    def _update_query_gt_lt(gt_collector_timestamp,
+                            lt_collector_timestamp,
+                            query):
+        if gt_collector_timestamp is not None:
+            query = query.filter(models.Event.collector_timestamp >=
+                                 gt_collector_timestamp)
+        if lt_collector_timestamp is not None:
+            query = query.filter(models.Event.collector_timestamp <=
+                                 lt_collector_timestamp)
+        return query
+
+    def delete(self,
+               event_id=None,
+               collector_timestamp=None,
+               payload=None,
+               gt_collector_timestamp=None,
+               lt_collector_timestamp=None):
+        query = self.query_filter(
+            models.Event,
+            event_id=event_id,
+            collector_timestamp=collector_timestamp,
+            payload=payload)
+
+        query = self._update_query_gt_lt(gt_collector_timestamp,
+                                         lt_collector_timestamp,
+                                         query)
+
+        query.delete()

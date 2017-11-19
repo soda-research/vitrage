@@ -13,12 +13,12 @@
 # under the License.
 
 from oslo_db.sqlalchemy import models
-
-from sqlalchemy import Column, String, SmallInteger, BigInteger, Index
+from sqlalchemy import Column, DateTime, INTEGER, String, \
+    SmallInteger, BigInteger, Index, Text
 from sqlalchemy.ext.declarative import declarative_base
 
 
-class VitrageBase(models.TimestampMixin, models.ModelBase):
+class VitrageBase(models.ModelBase):
     """Base class for Vitrage Models."""
     __table_args__ = {'mysql_charset': "utf8",
                       'mysql_engine': "InnoDB"}
@@ -39,7 +39,29 @@ class VitrageBase(models.TimestampMixin, models.ModelBase):
 Base = declarative_base(cls=VitrageBase)
 
 
-class ActiveAction(Base):
+class Event(Base):
+
+    __tablename__ = 'events'
+
+    event_id = Column("id", INTEGER, primary_key=True, nullable=False,
+                      autoincrement=True)
+    collector_timestamp = Column(DateTime, index=True, nullable=False)
+    payload = Column(Text, nullable=False)
+
+    def __repr__(self):
+        return \
+            "<Event(" \
+            "id='%s', " \
+            "collector_timestamp='%s', " \
+            "payload='%s')>" %\
+            (
+                self.event_id,
+                self.collector_timestamp,
+                self.payload
+            )
+
+
+class ActiveAction(Base, models.TimestampMixin):
     __tablename__ = 'active_actions'
     __table_args__ = (
         # Index 'ix_active_action' on fields:
