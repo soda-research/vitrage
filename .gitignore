@@ -24,6 +24,7 @@ ChangeLog
 .coverage
 cover
 etc/vitrage/vitrage.conf
+etc/vitrage/policy.yaml.sample
 doc/source/_static/
 *.db
 

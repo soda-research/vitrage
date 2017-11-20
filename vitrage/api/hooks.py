@@ -16,6 +16,7 @@ from oslo_context import context
 from oslo_policy import policy
 from pecan import hooks
 
+from vitrage.common import policies
 from vitrage import messaging
 from vitrage import rpc as vitrage_rpc
 from vitrage import storage
@@ -27,6 +28,10 @@ class ConfigHook(hooks.PecanHook):
     def __init__(self, conf):
         self.conf = conf
         self.enforcer = policy.Enforcer(conf)
+        self._register_rules()
+
+    def _register_rules(self):
+        self.enforcer.register_defaults(policies.list_rules())
 
     def before(self, state):
         state.request.cfg = self.conf

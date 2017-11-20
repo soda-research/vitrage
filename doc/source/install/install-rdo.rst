@@ -61,8 +61,6 @@ Create the Vitrage folders
         $ sudo mkdir /var/log/vitrage
         $ sudo chmod 755 /var/log/vitrage
 
-Copy `policy.json`_ to /etc/vitrage/
-
 Copy `api-paste.ini`_ to /etc/vitrage/
 
 Copy the `datasources_values`_ folder with its content
@@ -73,7 +71,6 @@ is vitrage.yaml
 
 
 
-.. _policy.json: http://git.openstack.org/cgit/openstack/vitrage/tree/etc/vitrage/policy.json
 .. _api-paste.ini: http://git.openstack.org/cgit/openstack/vitrage/tree/etc/vitrage/api-paste.ini
 .. _datasources_values: http://git.openstack.org/cgit/openstack/vitrage/tree/etc/vitrage/datasources_values
 

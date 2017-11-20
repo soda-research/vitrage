@@ -47,11 +47,6 @@ class FunctionalTest(base.BaseTest):
         vitrage_root = os.path.abspath(
             os.path.join(os.path.dirname(vitrage_init_file), '..', ))
 
-        self.CONF.set_override('policy_file', os.path.join(vitrage_root,
-                                                           'etc', 'vitrage',
-                                                           'policy.json'),
-                               group='oslo_policy')
-
         self.CONF.set_override('paste_config', os.path.join(vitrage_root,
                                                             'etc', 'vitrage',
                                                             'api-paste.ini'),
