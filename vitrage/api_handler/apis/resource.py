@@ -71,9 +71,10 @@ class ResourceApis(EntityGraphApisBase):
             else:
                 if project and project_id == project:
                     return json.dumps(resource.properties)
-            LOG.warn('Have no authority to get resource with vitrage_id(%s)',
-                     str(vitrage_id))
+            LOG.warning(
+                'Have no authority to get resource with vitrage_id(%s)',
+                str(vitrage_id))
         else:
-            LOG.warn('Can not find the resource with vitrage_id(%s)',
-                     str(vitrage_id))
+            LOG.warning('Can not find the resource with vitrage_id(%s)',
+                        str(vitrage_id))
         return None

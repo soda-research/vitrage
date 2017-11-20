@@ -47,7 +47,8 @@ class EventApis(EntityGraphApisBase):
                 event_type=event_type,
                 payload=event)
         except Exception as e:
-            LOG.warn('Failed to post event %s. Exception: %s', event_type, e)
+            LOG.warning('Failed to post event %s. Exception: %s',
+                        event_type, e)
             LOG.debug(e, exc_info=True)
 
     def _init_oslo_notifier(self):

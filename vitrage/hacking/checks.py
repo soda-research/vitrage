@@ -135,6 +135,15 @@ def no_mutable_default_args(logical_line):
         yield (0, msg)
 
 
+def no_log_warn(logical_line):
+    """Disallow 'LOG.warn('
+
+    V328
+    """
+    if logical_line.startswith('LOG.warn('):
+        yield(0, 'V328: Use LOG.warning() rather than LOG.warn()')
+
+
 def factory(register):
     register(assert_true_instance)
     register(assert_equal_type)
@@ -148,3 +157,4 @@ def factory(register):
     register(check_python3_no_iteritems)
     register(check_python3_no_iterkeys)
     register(check_python3_no_itervalues)
+    register(no_log_warn)

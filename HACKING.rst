@@ -18,3 +18,4 @@ Vitrage Specific Commandments
 [V325] Use six.iterkeys() or dict.keys() instead of dict.iterkeys()
 [V326] Use six.itervalues() or dict.values instead of dict.itervalues()
 [V327] Method's default argument shouldn't be mutable
+[V328] Disallow LOG.warn

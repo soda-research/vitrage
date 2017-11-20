@@ -153,6 +153,10 @@ class HackingTestCase(base.BaseTest):
         self.assertEqual(0, len(list(checks.no_mutable_default_args(
             "defined, undefined = [], {}"))))
 
+    def test_no_log_warn(self):
+        self.assertEqual(0, len(list(checks.no_log_warn('LOG.warning("bl")'))))
+        self.assertEqual(1, len(list(checks.no_log_warn('LOG.warn("foo")'))))
+
     def test_factory(self):
         class Register(object):
             def __init__(self):
