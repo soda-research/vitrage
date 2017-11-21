@@ -16,7 +16,9 @@ from oslo_log import log as logging
 from vitrage.common.constants import NotifierEventTypes
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.datasources import NOVA_HOST_DATASOURCE
+from vitrage.datasources import NOVA_INSTANCE_DATASOURCE
 from vitrage.notifier.plugins.base import NotifierBase
+from vitrage.notifier.plugins.nova import InstanceState
 from vitrage import os_clients
 
 LOG = logging.getLogger(__name__)
@@ -31,13 +33,21 @@ class NovaNotifier(NotifierBase):
     def __init__(self, conf):
         super(NovaNotifier, self).__init__(conf)
         self.client = os_clients.nova_client(conf)
+        self.actions = {
+            NOVA_HOST_DATASOURCE: self._mark_host_down,
+            NOVA_INSTANCE_DATASOURCE: self._reset_instance_state
+        }
 
     def process_event(self, data, event_type):
-        if data and data.get(VProps.VITRAGE_TYPE) == NOVA_HOST_DATASOURCE:
+        if data and data.get(VProps.VITRAGE_TYPE) in self.actions:
+            action = self.actions[data.get(VProps.VITRAGE_TYPE)]
             if event_type == NotifierEventTypes.ACTIVATE_MARK_DOWN_EVENT:
-                self._mark_host_down(data.get(VProps.ID), True)
+                action(data.get(VProps.ID), True)
             elif event_type == NotifierEventTypes.DEACTIVATE_MARK_DOWN_EVENT:
-                self._mark_host_down(data.get(VProps.ID), False)
+                action(data.get(VProps.ID), False)
+        elif data:
+            LOG.warning('Unsupport datasource type %s for mark_down action',
+                        data.get(VProps.VITRAGE_TYPE))
 
     def _mark_host_down(self, host_id, is_down):
         try:
@@ -48,3 +58,13 @@ class NovaNotifier(NotifierBase):
             LOG.info('RESPONSE %s', str(response.to_dict()))
         except Exception as e:
             LOG.exception('Failed to services.force_down - %s', e)
+
+    def _reset_instance_state(self, server_id, is_down):
+        state = InstanceState.ERROR if is_down else InstanceState.ACTIVE
+        try:
+            LOG.info('Nova servers.reset_state - server: %s, state: %s',
+                     str(server_id), str(state))
+            response = self.client.servers.reset_state(server_id, state)
+            LOG.info('RESPONSE %s', str(response))
+        except Exception as e:
+            LOG.exception('Failed to execute servers.reset_state - %s', e)
