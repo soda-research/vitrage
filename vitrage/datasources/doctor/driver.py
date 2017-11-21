@@ -93,7 +93,7 @@ class DoctorDriver(AlarmDriverBase):
 
         LOG.debug('Going to enrich event: %s', str(event))
 
-        event[DSProps.EVENT_TYPE] = event_type
+        event[DSProps.EVENT_TYPE] = event[EventProps.TYPE]
 
         old_alarm = self._old_alarm(event)
         if old_alarm and not self._status_changed(old_alarm, event):
@@ -113,4 +113,5 @@ class DoctorDriver(AlarmDriverBase):
 
     @staticmethod
     def get_event_types():
-        return [DoctorProps.HOST_DOWN]
+        return [DoctorProps.CUSTOM_EVENT_DOWN,
+                DoctorProps.CUSTOM_EVENT_UP]

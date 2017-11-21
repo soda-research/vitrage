@@ -21,6 +21,9 @@ import socket
 
 from vitrage.api_handler.apis.base import EntityGraphApisBase
 from vitrage.common.constants import EventProperties
+from vitrage.datasources.doctor.properties import DoctorDetails
+from vitrage.datasources.doctor.properties import DoctorProperties
+from vitrage.datasources.doctor.properties import DoctorStatus
 from vitrage.messaging import get_transport
 
 LOG = log.getLogger(__name__)
@@ -40,11 +43,18 @@ class EventApis(EntityGraphApisBase):
                      EventProperties.TIME: event_time,
                      EventProperties.DETAILS: details}
 
+            if details.get(DoctorDetails.STATUS) == DoctorStatus.UP:
+                notification_type = DoctorProperties.CUSTOM_EVENT_UP
+            elif details.get(DoctorDetails.STATUS) == DoctorStatus.DOWN:
+                notification_type = DoctorProperties.CUSTOM_EVENT_DOWN
+            else:
+                raise Exception("Unknown status")
+
             self.oslo_notifier.info(
                 ctxt={'message_id': uuidutils.generate_uuid(),
                       'publisher_id': self.publisher,
                       'timestamp': datetime.utcnow()},
-                event_type=event_type,
+                event_type=notification_type,
                 payload=event)
         except Exception as e:
             LOG.warning('Failed to post event %s. Exception: %s',

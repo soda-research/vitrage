@@ -20,6 +20,8 @@ class DoctorProperties(object):
     HOST_DOWN = 'compute.host.down'
     HOST_TYPE = NOVA_HOST_DATASOURCE
     UPDATE_TIME = 'update_time'
+    CUSTOM_EVENT_UP = 'vitrage.custom.event.up'
+    CUSTOM_EVENT_DOWN = 'vitrage.custom.event.down'
 
 
 class DoctorDetails(object):
