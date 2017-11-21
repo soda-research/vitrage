@@ -40,7 +40,6 @@ class NagiosTransformer(AlarmTransformerBase):
 
         update_timestamp = datetime_utils.change_to_utc_time_and_format(
             entity_event[NagiosProperties.LAST_CHECK],
-            '%Y-%m-%d %H:%M:%S',
             tbase.TIMESTAMP_FORMAT)
         vitrage_sample_timestamp = entity_event[DSProps.SAMPLE_DATE]
         update_timestamp = \
