@@ -66,7 +66,7 @@ topics = notifications, vitrage_notifications
 [[post-config|\$VITRAGE_CONF]]
 
 [DEFAULT]
-notifiers = mistral
+notifiers = mistral,nova
 
 [static_physical]
 changes_interval = 5

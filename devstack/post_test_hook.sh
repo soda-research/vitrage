@@ -18,7 +18,7 @@ DEVSTACK_PATH="$BASE/new"
 if [ "$1" = "api" ]; then
   TESTS="topology"
 elif [ "$1" = "datasources" ]; then
-  TESTS="datasources|test_events|notifiers"
+  TESTS="datasources|test_events|notifiers|e2e"
 else
   TESTS="topology"
 fi
