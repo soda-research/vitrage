@@ -204,9 +204,6 @@ function configure_vitrage {
     # copy datasources
     cp $VITRAGE_DIR/etc/vitrage/datasources_values/*.yaml $VITRAGE_CONF_DIR/datasources_values
 
-    # copy templates
-    cp -rf $VITRAGE_DIR/vitrage_tempest_tests/tests/resources/templates/api/* $VITRAGE_CONF_DIR/templates/
-
     configure_auth_token_middleware $VITRAGE_CONF vitrage $VITRAGE_AUTH_CACHE_DIR
 
     iniset $VITRAGE_CONF "keystone_authtoken" password $ADMIN_PASSWORD
