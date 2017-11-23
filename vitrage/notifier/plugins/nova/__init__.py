@@ -21,3 +21,8 @@ OPTS = [
                help='nova notifier class path',
                required=True),
 ]
+
+
+class InstanceState(object):
+    ERROR = 'error'
+    ACTIVE = 'active'

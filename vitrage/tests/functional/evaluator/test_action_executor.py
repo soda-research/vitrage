@@ -28,6 +28,7 @@ from vitrage.datasources.nagios import NAGIOS_DATASOURCE
 from vitrage.datasources.nagios.properties import NagiosProperties as NProps
 from vitrage.datasources.nagios.properties import NagiosTestStatus
 from vitrage.datasources.nova.host import NOVA_HOST_DATASOURCE
+from vitrage.datasources.nova.instance import NOVA_INSTANCE_DATASOURCE
 from vitrage.entity_graph.mappings.operational_alarm_severity import \
     OperationalAlarmSeverity
 from vitrage.entity_graph.mappings.operational_resource_state import \
@@ -115,6 +116,43 @@ class TestActionExecutor(TestFunctionalBase):
         self.assertEqual(agg_state_after_undo, agg_state_before)
         self.assertNotIn(
             VProps.VITRAGE_STATE, host_vertex_after_undo.properties)
+
+    def test_execute_mark_instance_down(self):
+
+        # Test Setup
+        processor = self._create_processor_with_graph(self.conf)
+
+        vertex_attrs = {VProps.VITRAGE_TYPE: NOVA_INSTANCE_DATASOURCE}
+        instance_vertices = processor.entity_graph.get_vertices(
+            vertex_attr_filter=vertex_attrs)
+        instance_vertex_before = instance_vertices[0]
+
+        targets = {TFields.TARGET: instance_vertex_before}
+        props = {}
+        action_spec = ActionSpecs(0, ActionType.MARK_DOWN, targets, props)
+
+        event_queue = queue.Queue()
+        action_executor = ActionExecutor(self.conf, event_queue)
+
+        # Test Action - do
+        action_executor.execute(action_spec, ActionMode.DO)
+        processor.process_event(event_queue.get())
+
+        instance_vertex_after = processor.entity_graph.get_vertex(
+            instance_vertex_before.vertex_id)
+
+        # Test Assertions
+        self.assertTrue(instance_vertex_after.get(VProps.IS_MARKED_DOWN))
+
+        # Test Action - undo
+        action_executor.execute(action_spec, ActionMode.UNDO)
+        processor.process_event(event_queue.get())
+
+        instance_vertex_after_undo = processor.entity_graph.get_vertex(
+            instance_vertex_before.vertex_id)
+
+        # Test Assertions
+        self.assertFalse(instance_vertex_after_undo.get(VProps.IS_MARKED_DOWN))
 
     def test_execute_mark_down(self):
 
