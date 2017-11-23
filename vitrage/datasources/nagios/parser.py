@@ -42,14 +42,24 @@ class NagiosParser(object):
             return None
 
     def _parse_services(self, status_tables):
+        LOG.debug('Start parsing Nagios status')
+
         services = []
         for status_table in status_tables:
             service_rows = status_table.xpath(self.SERVICE_ROWS_XPATH)
 
             for service_row in service_rows:
                 service = self._parse_service_row(service_row)
+
                 if service:
+                    LOG.debug('Appending service: %s', str(service))
                     services.append(service)
+                else:
+                    LOG.debug('service is None for service_row: %s',
+                              str(service_row))
+
+        LOG.debug('Done parsing Nagios status')
+
         return services
 
     def _parse_service_row(self, service_row):
