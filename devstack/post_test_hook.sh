@@ -28,7 +28,11 @@ sudo cp -rf $DEVSTACK_PATH/vitrage/vitrage_tempest_tests/tests/resources/heat/he
 sudo cp -rf $DEVSTACK_PATH/vitrage/vitrage_tempest_tests/tests/resources/heat/heat_nested_template.yaml /etc/vitrage/
 sudo cp -rf $DEVSTACK_PATH/vitrage/vitrage_tempest_tests/tests/resources/heat/server.yaml /etc/vitrage/
 sudo cp -rf $DEVSTACK_PATH/vitrage/vitrage_tempest_tests/tests/resources/heat/policy.json-tempest /etc/heat/
+sudo cp -rf $DEVSTACK_PATH/vitrage/vitrage_tempest_tests/tests/resources/templates/api/* /etc/vitrage/templates/
 sudo cp $DEVSTACK_PATH/tempest/etc/logging.conf.sample $DEVSTACK_PATH/tempest/etc/logging.conf
+
+# copied the templates need to restart
+sudo systemctl restart devstack@vitrage-graph.service
 
 if [ "$DEVSTACK_GATE_USE_PYTHON3" == "True" ]; then
         export PYTHON=python3
