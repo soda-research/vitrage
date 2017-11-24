@@ -43,7 +43,8 @@ class VitrageInit(object):
             LOG.info('Init Started')
 
             if not self._wait_for_all_end_messages():
-                LOG.error('Initialization  - max retries reached')
+                LOG.warning('Initialization  - max retries reached %s',
+                            self.end_messages)
             else:
                 LOG.info('Initialization - All end messages were received')
 
