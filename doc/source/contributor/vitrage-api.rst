@@ -137,6 +137,8 @@ Consists of a topology request definition which has the following properties:
 * query - (string, optional) a json query filter to filter the graph components. defaults to return all the graph
 * all_tenants - (boolean, optional) shows the entities of all the tenants in the graph (in case the user has the permissions).
 
+**Note that parameter graph_type=graph with depth parameter requires root parameter**
+
 query expression
 ================
 ::
@@ -161,34 +163,33 @@ Query example
     X-Auth-Token: 2b8882ba2ec44295bf300aecb2caa4f7
 
     {
-        "query" :
+        "query" :"
          {
-            "or": [
+            \"or\": [
               {
-                "==": {
-                  "vitrage_type": "host"
+                \"==\": {
+                  \"vitrage_type\": \"nova.host\"
                 }
               },
               {
-                "==": {
-                  "vitrage_type": "instance"
+                \"==\": {
+                  \"vitrage_type\": \"nova.instance\"
                 }
               },
               {
-                "==": {
-                  "vitrage_type": "zone"
+                \"==\": {
+                  \"vitrage_type\": \"nova.zone\"
                 }
               },
               {
-                "==": {
-                  "vitrage_type": "node"
+                \"==\": {
+                  \"vitrage_type\": \"openstack.cluster\"
                 }
               }
             ]
 
-         },
-         "graph_type" : "tree",
-         "depth" : 4
+         }",
+         "graph_type" : "tree"
      }
 
 Response Status Code
