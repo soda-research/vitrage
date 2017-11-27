@@ -37,7 +37,8 @@ LOG = log.getLogger(__name__)
 class TopologyController(RootRestController):
 
     @pecan.expose('json')
-    def post(self, depth, graph_type, query, root, all_tenants=False):
+    def post(self, depth=None, graph_type='graph', query=None, root=None,
+             all_tenants=False):
         all_tenants = bool_from_string(all_tenants)
         if all_tenants:
             enforce('get topology:all_tenants', pecan.request.headers,
