@@ -134,7 +134,6 @@ class NagiosTransformerTest(base.BaseTest):
         self.assertEqual(event[NagiosProperties.SERVICE], vertex[VProps.NAME])
         self.assertEqual(datetime_utils.change_to_utc_time_and_format(
             event[NagiosProperties.LAST_CHECK],
-            '%Y-%m-%d %H:%M:%S',
             tbase.TIMESTAMP_FORMAT),
             vertex[VProps.UPDATE_TIMESTAMP])
         event_type = event.get(DSProps.EVENT_TYPE, None)
