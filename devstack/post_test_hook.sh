@@ -15,8 +15,9 @@
 
 DEVSTACK_PATH="$BASE/new"
 
+#Argument is received from Zuul
 if [ "$1" = "api" ]; then
-  TESTS="topology"
+  TESTS="topology|test_rca|test_alarms|test_resources|test_template"
 elif [ "$1" = "datasources" ]; then
   TESTS="datasources|test_events|notifiers|e2e"
 else
