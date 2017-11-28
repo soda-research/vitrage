@@ -13,8 +13,6 @@
 """Use this file for deploying the API under mod_wsgi.
 See http://pecan.readthedocs.org/en/latest/deployment.html for details.
 """
-from oslo_config import cfg
-
 from vitrage.api import app
 from vitrage import service
 
