@@ -137,7 +137,7 @@ Consists of a topology request definition which has the following properties:
 * query - (string, optional) a json query filter to filter the graph components. defaults to return all the graph
 * all_tenants - (boolean, optional) shows the entities of all the tenants in the graph (in case the user has the permissions).
 
-**Note that parameter graph_type=graph with depth parameter requires root parameter**
+.. note:: **parameter graph_type=graph with depth parameter requires root parameter**
 
 query expression
 ================
