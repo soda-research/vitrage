@@ -162,7 +162,9 @@ Create the Vitrage endpoint
 .. code:: bash
 
     openstack service create rca --name vitrage --description="Root Cause Analysis Service"
-    openstack endpoint create --region <region> --publicurl http://<ip>:8999 --internalurl http://<ip>:8999 --adminurl http://<ip>:8999 vitrage
+    openstack endpoint create vitrage --region <region> public http://<ip>:8999
+    openstack endpoint create vitrage --region <region> internal http://<ip>:8999
+    openstack endpoint create vitrage --region <region> admin http://<ip>:8999
 
 
 Start the Vitrage Services
