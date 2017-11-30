@@ -39,7 +39,9 @@ class PortDriver(NeutronBase):
         return ['manager', '_info']
 
     def get_all(self, datasource_action):
+        ports = self.client.list_ports()['ports']
+        ports = [p for p in ports if p.get('device_owner') == 'compute:nova']
         return self.make_pickleable(
-            self.client.list_ports()['ports'],
+            ports,
             NEUTRON_PORT_DATASOURCE,
             datasource_action)
