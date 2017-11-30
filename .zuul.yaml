@@ -5,10 +5,8 @@
         - vitrage-dsvm-api-py27
         - vitrage-dsvm-datasources-py27
         - vitrage-dsvm-api-py35:
-            voting: false
             branches: ^(?!stable/(newton|ocata|pike)).*$
         - vitrage-dsvm-datasources-py35:
-            voting: false
             branches: ^(?!stable/(newton|ocata|pike)).*$
     gate:
       jobs:

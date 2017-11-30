@@ -66,6 +66,14 @@ class TestActionExecutor(TestFunctionalBase):
         for datasource_name in cls.conf.datasources.types:
             register_opts(cls.conf, datasource_name, cls.conf.datasources.path)
 
+    def _init_executer(self):
+        event_queue = queue.Queue()
+
+        def actions_callback(event_type, data):
+            event_queue.put(data)
+
+        return event_queue, ActionExecutor(self.conf, actions_callback)
+
     def test_execute_set_state(self):
 
         # Test Setup
@@ -80,8 +88,7 @@ class TestActionExecutor(TestFunctionalBase):
         props = {TFields.STATE: OperationalResourceState.SUBOPTIMAL}
         action_spec = ActionSpecs(0, ActionType.SET_STATE, targets, props)
 
-        event_queue = queue.Queue()
-        action_executor = ActionExecutor(self.conf, event_queue)
+        event_queue, action_executor = self._init_executer()
 
         # Test Action - do
         action_executor.execute(action_spec, ActionMode.DO)
@@ -131,8 +138,7 @@ class TestActionExecutor(TestFunctionalBase):
         props = {}
         action_spec = ActionSpecs(0, ActionType.MARK_DOWN, targets, props)
 
-        event_queue = queue.Queue()
-        action_executor = ActionExecutor(self.conf, event_queue)
+        event_queue, action_executor = self._init_executer()
 
         # Test Action - do
         action_executor.execute(action_spec, ActionMode.DO)
@@ -168,8 +174,7 @@ class TestActionExecutor(TestFunctionalBase):
         props = {}
         action_spec = ActionSpecs(0, ActionType.MARK_DOWN, targets, props)
 
-        event_queue = queue.Queue()
-        action_executor = ActionExecutor(self.conf, event_queue)
+        event_queue, action_executor = self._init_executer()
 
         # Test Action - do
         action_executor.execute(action_spec, ActionMode.DO)
@@ -223,8 +228,7 @@ class TestActionExecutor(TestFunctionalBase):
         action_spec = ActionSpecs(
             0, ActionType.ADD_CAUSAL_RELATIONSHIP, targets, {})
 
-        event_queue = queue.Queue()
-        action_executor = ActionExecutor(self.conf, event_queue)
+        event_queue, action_executor = self._init_executer()
 
         before_edge = processor.entity_graph.get_edge(alarm2.vertex_id,
                                                       alarm1.vertex_id,
@@ -266,8 +270,8 @@ class TestActionExecutor(TestFunctionalBase):
         alarm_vertex_attrs = {VProps.VITRAGE_TYPE: VITRAGE_DATASOURCE}
         before_alarms = processor.entity_graph.get_vertices(
             vertex_attr_filter=alarm_vertex_attrs)
-        event_queue = queue.Queue()
-        action_executor = ActionExecutor(self.conf, event_queue)
+
+        event_queue, action_executor = self._init_executer()
 
         # Test Action
         action_executor.execute(action_spec, ActionMode.DO)
@@ -330,8 +334,7 @@ class TestActionExecutor(TestFunctionalBase):
         before_alarms = processor.entity_graph.get_vertices(
             vertex_attr_filter=alarm_vertex_attrs)
 
-        event_queue = queue.Queue()
-        action_executor = ActionExecutor(self.conf, event_queue)
+        event_queue, action_executor = self._init_executer()
 
         # Test Action - undo
         action_executor.execute(action_spec, ActionMode.UNDO)

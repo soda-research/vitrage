@@ -32,6 +32,8 @@ OPTS = [
                help='graph driver implementation class'),
 ]
 
+EVALUATOR_TOPIC = 'vitrage.evaluator'
+
 
 def get_graph_driver(conf):
     try:

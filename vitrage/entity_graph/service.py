@@ -11,15 +11,15 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-
-import datetime
 import threading
+import time
 
 from oslo_log import log
 import oslo_messaging
 from oslo_service import service as os_service
 
-from vitrage.entity_graph.processor import processor as proc
+from vitrage.entity_graph import EVALUATOR_TOPIC
+from vitrage.entity_graph.processor.processor import Processor
 from vitrage.entity_graph.vitrage_init import VitrageInit
 from vitrage.evaluator.evaluator_service import EvaluatorManager
 from vitrage import messaging
@@ -31,30 +31,31 @@ class VitrageGraphService(os_service.Service):
 
     def __init__(self,
                  conf,
-                 evaluator_queue,
                  graph):
         super(VitrageGraphService, self).__init__()
         self.conf = conf
-        self.evaluator_queue = evaluator_queue
         self.graph = graph
-        self.evaluator = EvaluatorManager(conf, graph, evaluator_queue)
-        self.init = VitrageInit(conf, graph, self.evaluator, evaluator_queue)
-        self.processor = proc.Processor(self.conf,
-                                        self.init,
-                                        e_graph=graph)
-        self.processor_lock = threading.RLock()
-        self.listener = self._create_datasources_event_listener()
+        self.evaluator = EvaluatorManager(conf, graph)
+        self.init = VitrageInit(conf, graph, self.evaluator)
+        self.processor = Processor(self.conf, self.init, e_graph=graph)
+        self.listener = self._init_listener()
+
+    def _init_listener(self):
+        collector_topic = self.conf.datasources.notification_topic_collector
+        evaluator_topic = EVALUATOR_TOPIC
+        return TwoPriorityListener(
+            self.conf,
+            self.processor.process_event,
+            collector_topic,
+            evaluator_topic)
 
     def start(self):
         LOG.info("Vitrage Graph Service - Starting...")
-
         super(VitrageGraphService, self).start()
-        self.tg.add_timer(0.1, self._process_event_non_blocking)
         self.tg.add_thread(
             self.init.initializing_process,
             on_end_messages_func=self.processor.on_recieved_all_end_messages)
         self.listener.start()
-
         LOG.info("Vitrage Graph Service - Started!")
 
     def stop(self, graceful=False):
@@ -66,50 +67,66 @@ class VitrageGraphService(os_service.Service):
 
         LOG.info("Vitrage Graph Service - Stopped!")
 
-    def _process_event_non_blocking(self):
-        """Process events received from datasource
 
-        In order that other services (such as graph consistency, api handler)
-        could get work time as well, the work processing performed for 2
-        seconds and goes to sleep for 1 second. if there are more events in
-        the queue they are done when timer returns.
-        """
-        with self.processor_lock:
-            start_time = datetime.datetime.now()
-            while not self.evaluator_queue.empty():
-                time_delta = datetime.datetime.now() - start_time
-                if time_delta.total_seconds() >= 2:
-                    break
-                if not self.evaluator_queue.empty():
-                    self.do_process(self.evaluator_queue)
+PRIORITY_DELAY = 0.05
 
-    def do_process(self, queue):
-        try:
-            event = queue.get()
-            self.processor.process_event(event)
-        except Exception as e:
-            LOG.exception("Exception: %s", e)
 
-    def _create_datasources_event_listener(self):
-        topic = self.conf.datasources.notification_topic_collector
-        transport = messaging.get_transport(self.conf)
-        targets = [oslo_messaging.Target(topic=topic)]
+class TwoPriorityListener(object):
+    def __init__(self, conf, do_work_func, topic_low, topic_high):
+        self._conf = conf
+        self._do_work_func = do_work_func
+        self._lock = threading.Lock()
+        self._high_event_finish_time = 0
+
+        self._low_pri_listener = self._init_listener(
+            topic_low, self._do_low_priority_work)
+        self._high_pri_listener = self._init_listener(
+            topic_high, self._do_high_priority_work)
+
+    def start(self):
+        self._high_pri_listener.start()
+        self._low_pri_listener.start()
+
+    def stop(self):
+        self._low_pri_listener.stop()
+        self._high_pri_listener.stop()
+
+    def wait(self):
+        self._low_pri_listener.wait()
+        self._high_pri_listener.wait()
+
+    def _do_high_priority_work(self, event):
+        self._lock.acquire()
+        self._do_work_func(event)
+        self._high_event_finish_time = time.time()
+        self._lock.release()
+
+    def _do_low_priority_work(self, event):
+        while True:
+            self._lock.acquire()
+            if (time.time() - self._high_event_finish_time) < PRIORITY_DELAY:
+                self._lock.release()
+                time.sleep(PRIORITY_DELAY)
+            else:
+                break
+        self._do_work_func(event)
+        self._lock.release()
+
+    def _init_listener(self, topic, callback):
+        if not topic:
+            return
         return messaging.get_notification_listener(
-            transport,
-            targets,
-            [PushNotificationsEndpoint(self.processor.process_event,
-                                       self.processor_lock)])
+            transport=messaging.get_transport(self._conf),
+            targets=[oslo_messaging.Target(topic=topic)],
+            endpoints=[PushNotificationsEndpoint(callback)])
 
 
 class PushNotificationsEndpoint(object):
-
-    def __init__(self, process_event_callback, processor_lock):
+    def __init__(self, process_event_callback):
         self.process_event_callback = process_event_callback
-        self.processor_lock = processor_lock
 
     def info(self, ctxt, publisher_id, event_type, payload, metadata):
         try:
-            with self.processor_lock:
-                self.process_event_callback(payload)
+            self.process_event_callback(payload)
         except Exception as e:
             LOG.exception(e)

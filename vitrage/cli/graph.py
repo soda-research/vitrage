@@ -13,7 +13,6 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import multiprocessing
 import sys
 
 from oslo_service import service as os_service
@@ -38,20 +37,17 @@ def main():
 
     print(VITRAGE_TITLE)
     conf = service.prepare_service()
-    evaluator_queue = multiprocessing.Queue()
     e_graph = entity_graph.get_graph_driver(conf)('Entity Graph')
     launcher = os_service.ServiceLauncher(conf)
     full_scenario_repo = ScenarioRepository(conf)
     clear_db(conf)
 
-    launcher.launch_service(VitrageGraphService(
-        conf, evaluator_queue, e_graph))
+    launcher.launch_service(VitrageGraphService(conf, e_graph))
 
     launcher.launch_service(VitrageApiHandlerService(
         conf, e_graph, full_scenario_repo))
 
-    launcher.launch_service(VitrageConsistencyService(
-        conf, evaluator_queue, e_graph))
+    launcher.launch_service(VitrageConsistencyService(conf, e_graph))
 
     launcher.wait()
 

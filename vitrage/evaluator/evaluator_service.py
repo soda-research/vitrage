@@ -18,10 +18,13 @@ import time
 from oslo_concurrency import processutils
 from oslo_log import log
 from oslo_service import service as os_service
+
+from vitrage.entity_graph import EVALUATOR_TOPIC
 from vitrage.evaluator.evaluator_base import EvaluatorBase
 
 from vitrage.evaluator.scenario_evaluator import ScenarioEvaluator
 from vitrage.evaluator.scenario_repository import ScenarioRepository
+from vitrage.messaging import VitrageNotifier
 
 LOG = log.getLogger(__name__)
 
@@ -32,9 +35,8 @@ POISON_PILL = None
 
 class EvaluatorManager(EvaluatorBase):
 
-    def __init__(self, conf, entity_graph, evaluator_queue):
-        super(EvaluatorManager, self).__init__(conf, entity_graph,
-                                               evaluator_queue)
+    def __init__(self, conf, entity_graph):
+        super(EvaluatorManager, self).__init__(conf, entity_graph)
         self._workers_num = conf.evaluator.workers or \
             processutils.get_worker_count()
         self._worker_queues = list()
@@ -63,7 +65,6 @@ class EvaluatorManager(EvaluatorBase):
             tasks_queue,
             self._entity_graph,
             scenario_repo,
-            self._evaluator_queue,
             enabled)
         self._p_launcher.launch_service(w)
         self._worker_queues.append(tasks_queue)
@@ -103,25 +104,27 @@ class EvaluatorWorker(os_service.Service):
                  task_queue,
                  entity_graph,
                  scenario_repo,
-                 evaluator_queue,
                  enabled=False):
         super(EvaluatorWorker, self).__init__()
         self._conf = conf
         self._task_queue = task_queue
         self._entity_graph = entity_graph
         self._scenario_repo = scenario_repo
-        self._evaluator_queue = evaluator_queue
         self._enabled = enabled
         self._evaluator = None
 
     def start(self):
         super(EvaluatorWorker, self).start()
+        actions_callback = VitrageNotifier(
+            conf=self._conf,
+            publisher_id='vitrage_evaluator',
+            topic=EVALUATOR_TOPIC).notify
         self._entity_graph.notifier._subscriptions = []  # Quick n dirty
         self._evaluator = ScenarioEvaluator(
             self._conf,
             self._entity_graph,
             self._scenario_repo,
-            self._evaluator_queue,
+            actions_callback,
             self._enabled)
         self.tg.add_thread(self._read_queue)
         LOG.info("EvaluatorWorkerService - Started!")

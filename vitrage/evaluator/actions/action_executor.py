@@ -44,11 +44,14 @@ from vitrage.utils import datetime as datetime_utils
 
 LOG = log.getLogger(__name__)
 
+EVALUATOR_EVENT = 'evaluator.event'
+
 
 class ActionExecutor(object):
 
-    def __init__(self, conf, event_queue):
-        self.event_queue = event_queue
+    def __init__(self, conf, actions_callback):
+
+        self.actions_callback = actions_callback
         self.notifier = EvaluatorNotifier(conf)
         self.action_recipes = ActionExecutor._register_action_recipes()
 
@@ -78,7 +81,7 @@ class ActionExecutor(object):
         ActionExecutor._add_default_properties(event)
         event[EVALUATOR_EVENT_TYPE] = ADD_VERTEX
 
-        self.event_queue.put(event)
+        self.actions_callback(EVALUATOR_EVENT, event)
 
     def _update_vertex(self, params):
 
@@ -86,14 +89,14 @@ class ActionExecutor(object):
         ActionExecutor._add_default_properties(event)
         event[EVALUATOR_EVENT_TYPE] = UPDATE_VERTEX
 
-        self.event_queue.put(event)
+        self.actions_callback(EVALUATOR_EVENT, event)
 
     def _remove_vertex(self, params):
         event = copy.deepcopy(params)
         ActionExecutor._add_default_properties(event)
         event[EVALUATOR_EVENT_TYPE] = REMOVE_VERTEX
 
-        self.event_queue.put(event)
+        self.actions_callback(EVALUATOR_EVENT, event)
 
     def _add_edge(self, params):
 
@@ -101,7 +104,7 @@ class ActionExecutor(object):
         ActionExecutor._add_default_properties(event)
         event[EVALUATOR_EVENT_TYPE] = ADD_EDGE
 
-        self.event_queue.put(event)
+        self.actions_callback(EVALUATOR_EVENT, event)
 
     def _remove_edge(self, params):
 
@@ -109,7 +112,7 @@ class ActionExecutor(object):
         ActionExecutor._add_default_properties(event)
         event[EVALUATOR_EVENT_TYPE] = REMOVE_EDGE
 
-        self.event_queue.put(event)
+        self.actions_callback(EVALUATOR_EVENT, event)
 
     def _execute_external(self, params):
 

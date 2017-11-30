@@ -57,12 +57,12 @@ class ScenarioEvaluator(EvaluatorBase):
                  conf,
                  e_graph,
                  scenario_repo,
-                 event_queue,
+                 actions_callback,
                  enabled=False):
-        super(ScenarioEvaluator, self).__init__(conf, e_graph, event_queue)
+        super(ScenarioEvaluator, self).__init__(conf, e_graph)
         self._db_connection = storage.get_connection_from_config(self._conf)
         self._scenario_repo = scenario_repo
-        self._action_executor = ActionExecutor(self._conf, event_queue)
+        self._action_executor = ActionExecutor(self._conf, actions_callback)
         self._entity_graph.subscribe(self.process_event)
         self._active_actions_tracker = ActiveActionsTracker(
             self._conf, self._db_connection)

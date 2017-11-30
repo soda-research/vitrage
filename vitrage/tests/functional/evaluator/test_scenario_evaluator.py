@@ -1370,8 +1370,21 @@ class TestScenarioEvaluator(TestFunctionalBase):
     def _init_system(self):
         processor = self._create_processor_with_graph(self.conf)
         event_queue = queue.Queue()
-        evaluator = ScenarioEvaluator(self.conf, processor.entity_graph,
-                                      self.scenario_repository, event_queue,
+
+        def actions_callback(event_type, data):
+            """Mock notify method
+
+            Mocks vitrage.messaging.VitrageNotifier.notify(event_type, data)
+
+            :param event_type: is currently always the same and is ignored
+            :param data:
+            """
+            event_queue.put(data)
+
+        evaluator = ScenarioEvaluator(self.conf,
+                                      processor.entity_graph,
+                                      self.scenario_repository,
+                                      actions_callback,
                                       enabled=True)
         return event_queue, processor, evaluator
 
