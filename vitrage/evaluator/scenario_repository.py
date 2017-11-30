@@ -24,10 +24,10 @@ from vitrage.evaluator.base import Template
 from vitrage.evaluator.equivalence_repository import EquivalenceRepository
 from vitrage.evaluator.template_data import TemplateData
 from vitrage.evaluator.template_fields import TemplateFields
+from vitrage.evaluator.template_validation.content.definitions_validator \
+    import DefinitionsValidator as DefValidator
 from vitrage.evaluator.template_validation.content.template_content_validator \
     import content_validation
-from vitrage.evaluator.template_validation.content.template_content_validator \
-    import def_template_content_validation
 from vitrage.evaluator.template_validation.template_syntax_validator import \
     def_template_syntax_validation
 from vitrage.evaluator.template_validation.template_syntax_validator import \
@@ -139,7 +139,7 @@ class ScenarioRepository(object):
             LOG.info('Unable to load definition template, syntax err: %s'
                      % result.comment)
         else:
-            result = def_template_content_validation(def_template)
+            result = DefValidator.def_template_content_validation(def_template)
             if not result.is_valid_config:
                 LOG.info('Unable to load definition template, content err: %s'
                          % result.comment)
