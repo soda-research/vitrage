@@ -17,6 +17,7 @@ The template is written in YAML language, with the following structure:
  ::
 
   metadata:
+    version: <template version>
     name: <unique template identifier>
     description: <what this template does>
   definitions:
@@ -38,17 +39,21 @@ The template is written in YAML language, with the following structure:
 
 The template is divided into four main sections:
 
-- *metadata:* Contains the template name, and brief description of what the template does (optional)
+- *metadata:* Contains general information about the template.
+
+  - *version -* the version of the template format. The default is 1.
+  - *name -* the name of the template
+  - *description -* a brief description of what the template does (optional)
 - *definitions:* This section is **mandatory** unless an include section is specified in the template (see below).
   This section contains the atomic definitions referenced later on, for entities and relationships.
 
-   - *entities –* describes the resources and alarms which are relevant to the template scenario (conceptually, corresponds to a vertex in the entity graph)
-   - *relationships –* the relationships between the entities (conceptually, corresponds to an edge in the entity graph)
+  - *entities –* describes the resources and alarms which are relevant to the template scenario (conceptually, corresponds to a vertex in the entity graph)
+  - *relationships –* the relationships between the entities (conceptually, corresponds to an edge in the entity graph)
 - *includes:* This section is optional. If included, it must contain a list of names of definition templates as they appear in the metadata section of said templates.
   If only definitions from included definition templates are used to create scenarios within the template, then the *definitions* section is **optional**.
 - *scenarios:* A list of if-then scenarios to consider. Each scenario is comprised of:
-   - *condition –* the condition to be met. This condition will be phrased referencing the entities and relationships previously defined.
-   - *action(s) –* a list of actions to execute when the condition is met.
+  - *condition –* the condition to be met. This condition will be phrased referencing the entities and relationships previously defined.
+  - *action(s) –* a list of actions to execute when the condition is met.
 
 
 Definition Template Structure

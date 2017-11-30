@@ -25,6 +25,7 @@ from vitrage.utils import file as file_utils
 
 CONDITION_TEMPLATES_DIR = '%s/templates/evaluator/conditions/%s'
 REGEX_TEMPLATE_DIR = '%s/templates/regex/%s'
+VERSION_TEMPLATE_DIR = '%s/templates/version/%s'
 
 
 class TemplateContentValidatorTest(ValidatorTest):
@@ -276,6 +277,27 @@ class TemplateContentValidatorTest(ValidatorTest):
             file_utils.load_yaml_file(basic_regex_path)
         self._execute_and_assert_with_correct_result(
             basic_regex_template)
+
+    def test_validate_template_with_no_version(self):
+        invalid_version_path = \
+            VERSION_TEMPLATE_DIR % (utils.get_resources_dir(),
+                                    "no_version.yaml")
+        template = file_utils.load_yaml_file(invalid_version_path)
+        self._execute_and_assert_with_correct_result(template)
+
+    def test_validate_template_with_version_1(self):
+        invalid_version_path = \
+            VERSION_TEMPLATE_DIR % (utils.get_resources_dir(),
+                                    "version1.yaml")
+        template = file_utils.load_yaml_file(invalid_version_path)
+        self._execute_and_assert_with_correct_result(template)
+
+    def test_validate_template_with_invalid_version(self):
+        invalid_version_path = \
+            VERSION_TEMPLATE_DIR % (utils.get_resources_dir(),
+                                    "invalid_version.yaml")
+        template = file_utils.load_yaml_file(invalid_version_path)
+        self._execute_and_assert_with_fault_result(template, 63)
 
     def _execute_condition_template_with_correct_result(self, template_name):
         template_path = CONDITION_TEMPLATES_DIR % (utils.get_resources_dir(),

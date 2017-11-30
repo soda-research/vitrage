@@ -14,6 +14,7 @@
 from vitrage.common.constants import EdgeLabel
 from vitrage.common.constants import EntityCategory
 from vitrage.evaluator.actions.base import action_types
+from vitrage.evaluator.template_fields import SUPPORTED_VERSIONS
 
 status_msgs = {
 
@@ -41,6 +42,8 @@ status_msgs = {
     # metadata section status messages 60-79
     60: 'metadata section must contain id field.',
     62: 'metadata is a mandatory section.',
+    63: 'Unsupported version. Version must be one of: {versions}'
+        .format(versions=SUPPORTED_VERSIONS),
 
     # scenarios section status messages 80-99
     80: 'scenarios is a mandatory section.',

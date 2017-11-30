@@ -115,6 +115,7 @@ def _validate_metadata_section(metadata):
     any_str = Any(str, six.text_type)
 
     schema = Schema({
+        TemplateFields.VERSION: any_str,
         Required(TemplateFields.NAME, msg=60): any_str,
         TemplateFields.DESCRIPTION: any_str
     })
