@@ -43,17 +43,15 @@ class ConsistencyEnforcer(object):
 
     def periodic_process(self):
         try:
-            LOG.debug('Consistency Periodic Process - Started')
+            LOG.info('Periodic consistency check..')
 
-            # remove vitrage_is_deleted=True entities
             old_deleted_entities = self._find_old_deleted_entities()
             LOG.debug('Found %s vertices to be deleted by consistency service'
                       ': %s', len(old_deleted_entities), old_deleted_entities)
             self._push_events_to_queue(old_deleted_entities,
                                        GraphAction.REMOVE_DELETED_ENTITY)
 
-            # mark stale entities as vitrage_is_deleted=True
-            stale_entities = self._find_stale_entities()
+            stale_entities = self._find_placeholder_entities()
             LOG.debug('Found %s vertices to be marked as deleted by '
                       'consistency service: %s', len(stale_entities),
                       stale_entities)
@@ -63,14 +61,15 @@ class ConsistencyEnforcer(object):
             LOG.exception(
                 'Error in deleting vertices from entity_graph: %s', e)
 
-    def _find_stale_entities(self):
+    def _find_placeholder_entities(self):
         vitrage_sample_tstmp = str(utcnow() - timedelta(
             seconds=2 * self.conf.datasources.snapshots_interval))
         query = {
             'and': [
                 {'!=': {VProps.VITRAGE_TYPE: VITRAGE_DATASOURCE}},
                 {'<': {VProps.VITRAGE_SAMPLE_TIMESTAMP: vitrage_sample_tstmp}},
-                {'==': {VProps.VITRAGE_IS_DELETED: False}}
+                {'==': {VProps.VITRAGE_IS_DELETED: False}},
+                {'==': {VProps.VITRAGE_IS_PLACEHOLDER: True}},
             ]
         }
 

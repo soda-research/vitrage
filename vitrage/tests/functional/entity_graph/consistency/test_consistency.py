@@ -175,7 +175,7 @@ class TestConsistencyFunctional(TestFunctionalBase):
         self.assertEqual(self.NUM_INSTANCES - 3, len(instance_vertices))
         self.assertEqual(self._num_total_expected_vertices() - 3,
                          len(self.processor.entity_graph.get_vertices()))
-        self.assertEqual(6, len(deleted_instance_vertices))
+        self.assertEqual(3, len(deleted_instance_vertices))
 
     def _periodic_process_setup_stage(self, consistency_interval):
         self._create_processor_with_graph(self.conf, processor=self.processor)
