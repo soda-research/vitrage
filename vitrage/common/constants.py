@@ -123,6 +123,7 @@ class TemplateTopologyFields(object):
     METADATA = 'metadata'
     DESCRIPTION = 'description'
     NAME = 'name'
+    VERSION = 'version'
 
     DEFINITIONS = 'definitions'
 

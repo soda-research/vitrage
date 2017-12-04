@@ -36,6 +36,8 @@ class TemplateSyntaxValidatorTest(base.BaseTest):
         cls.def_template_dir_path = utils.get_resources_dir() + \
             '/templates/def_template_tests'
         template_dir_path = '%s/templates/general' % utils.get_resources_dir()
+        cls.version_dir_path = '%s/templates/version/' \
+                               % utils.get_resources_dir()
         cls.template_yamls = file_utils.load_yaml_files(template_dir_path)
         cls.bad_template = \
             ScenarioRepository._load_template_file(template_dir_path
@@ -216,6 +218,23 @@ class TemplateSyntaxValidatorTest(base.BaseTest):
     def test_template_with_relationships_and_no_entities(self):
         template_path = self.def_template_dir_path + \
             '/templates/only_using_def_template_definitions.yaml'
+        template = file_utils.load_yaml_file(template_path)
+        self._test_execution_with_correct_result(template)
+
+    def test_template_with_no_version(self):
+        template_path = self.version_dir_path + 'no_version.yaml'
+        template = file_utils.load_yaml_file(template_path)
+        self._test_execution_with_correct_result(template)
+
+    def test_template_with_valid_version(self):
+        template_path = self.version_dir_path + 'version1.yaml'
+        template = file_utils.load_yaml_file(template_path)
+        self._test_execution_with_correct_result(template)
+
+    def test_template_with_invalid_version(self):
+        # Invalid version number is checked by the content validator, not by
+        # the syntax validator
+        template_path = self.version_dir_path + 'invalid_version.yaml'
         template = file_utils.load_yaml_file(template_path)
         self._test_execution_with_correct_result(template)
 

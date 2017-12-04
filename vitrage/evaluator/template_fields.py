@@ -15,6 +15,10 @@
 from vitrage.common.constants import TemplateTopologyFields
 
 
+DEFAULT_VERSION = '1'
+SUPPORTED_VERSIONS = ['1']
+
+
 class TemplateFields(TemplateTopologyFields):
 
     SCENARIOS = 'scenarios'

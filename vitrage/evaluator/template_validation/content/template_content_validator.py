@@ -14,13 +14,18 @@
 
 from oslo_log import log
 
+from vitrage.evaluator.template_fields import DEFAULT_VERSION
+from vitrage.evaluator.template_fields import SUPPORTED_VERSIONS
 from vitrage.evaluator.template_fields import TemplateFields
 from vitrage.evaluator.template_validation.content.base import \
     get_content_correct_result
+from vitrage.evaluator.template_validation.content.base import \
+    get_content_fault_result
 from vitrage.evaluator.template_validation.content.definitions_validator \
     import DefinitionsValidator as DefValidator
 from vitrage.evaluator.template_validation.content.scenario_validator import \
     ScenarioValidator
+from vitrage.evaluator.template_validation.status_messages import status_msgs
 
 LOG = log.getLogger(__name__)
 
@@ -30,11 +35,12 @@ def content_validation(template, def_templates=None):
     if def_templates is None:
         def_templates = {}
 
-    result = get_content_correct_result()
+    result = _validate_version(template)
+
     entities_index = {}
     template_definitions = {}
 
-    if TemplateFields.DEFINITIONS in template:
+    if result.is_valid_config and TemplateFields.DEFINITIONS in template:
         template_definitions = template[TemplateFields.DEFINITIONS]
 
         if TemplateFields.ENTITIES in template_definitions:
@@ -76,3 +82,18 @@ def content_validation(template, def_templates=None):
         result = ScenarioValidator(definitions_index).validate(scenarios)
 
     return result
+
+
+def _validate_version(template):
+    metadata = template.get(TemplateFields.METADATA)
+
+    if metadata is None:
+        LOG.error('%s status code: %s' % (status_msgs[62], 62))
+        return get_content_fault_result(62)
+
+    version = metadata.get(TemplateFields.VERSION, DEFAULT_VERSION)
+    if version in SUPPORTED_VERSIONS:
+        return get_content_correct_result()
+    else:
+        LOG.error('%s status code: %s' % (status_msgs[63], 63))
+        return get_content_fault_result(63)
