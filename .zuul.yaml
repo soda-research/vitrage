@@ -28,6 +28,10 @@
       - openstack/python-vitrageclient
       - openstack/vitrage
       - openstack/vitrage-dashboard
+    irrelevant-files:
+      - ^.*\.rst$
+      - ^doc/.*$
+      - ^releasenotes/.*$
 
 - job:
     name: vitrage-dsvm-api-py35
@@ -42,6 +46,10 @@
       - openstack/python-vitrageclient
       - openstack/vitrage
       - openstack/vitrage-dashboard
+    irrelevant-files:
+      - ^.*\.rst$
+      - ^doc/.*$
+      - ^releasenotes/.*$
 
 - job:
     name: vitrage-dsvm-datasources-py27
@@ -56,6 +64,10 @@
       - openstack/python-vitrageclient
       - openstack/vitrage
       - openstack/vitrage-dashboard
+    irrelevant-files:
+      - ^.*\.rst$
+      - ^doc/.*$
+      - ^releasenotes/.*$
 
 - job:
     name: vitrage-dsvm-datasources-py35
@@ -70,3 +82,7 @@
       - openstack/python-vitrageclient
       - openstack/vitrage
       - openstack/vitrage-dashboard
+    irrelevant-files:
+      - ^.*\.rst$
+      - ^doc/.*$
+      - ^releasenotes/.*$
