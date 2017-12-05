@@ -18,11 +18,10 @@ import six
 @six.add_metaclass(abc.ABCMeta)
 class EvaluatorBase(object):
 
-    def __init__(self, conf, entity_graph, evaluator_queue):
+    def __init__(self, conf, entity_graph):
         super(EvaluatorBase, self).__init__()
         self._conf = conf
         self._entity_graph = entity_graph
-        self._evaluator_queue = evaluator_queue
 
     @abc.abstractmethod
     def run_evaluator(self):

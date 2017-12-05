@@ -35,10 +35,10 @@ class ConsistencyEnforcer(object):
 
     def __init__(self,
                  conf,
-                 evaluator_queue,
+                 actions_callback,
                  entity_graph):
         self.conf = conf
-        self.evaluator_queue = evaluator_queue
+        self.actions_callback = actions_callback
         self.graph = entity_graph
 
     def periodic_process(self):
@@ -104,7 +104,7 @@ class ConsistencyEnforcer(object):
                 VProps.VITRAGE_CATEGORY: vertex[VProps.VITRAGE_CATEGORY],
                 VProps.IS_REAL_VITRAGE_ID: True
             }
-            self.evaluator_queue.put(event)
+            self.actions_callback('consistency', event)
 
     @staticmethod
     def _filter_vertices_to_be_deleted(vertices):

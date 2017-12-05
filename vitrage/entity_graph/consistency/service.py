@@ -17,6 +17,8 @@ from oslo_service import service as os_service
 
 from vitrage.entity_graph.consistency.consistency_enforcer \
     import ConsistencyEnforcer
+from vitrage.entity_graph import EVALUATOR_TOPIC
+from vitrage.messaging import VitrageNotifier
 
 LOG = log.getLogger(__name__)
 
@@ -25,21 +27,22 @@ class VitrageConsistencyService(os_service.Service):
 
     def __init__(self,
                  conf,
-                 evaluator_queue,
                  entity_graph):
         super(VitrageConsistencyService, self).__init__()
         self.conf = conf
-        self.evaluator_queue = evaluator_queue
         self.entity_graph = entity_graph
+        self.actions_notifier = VitrageNotifier(
+            conf, 'vitrage_consistency', EVALUATOR_TOPIC)
 
     def start(self):
         LOG.info("Vitrage Consistency Service - Starting...")
 
         super(VitrageConsistencyService, self).start()
 
-        consistency_enf = ConsistencyEnforcer(self.conf,
-                                              self.evaluator_queue,
-                                              self.entity_graph)
+        consistency_enf = ConsistencyEnforcer(
+            conf=self.conf,
+            actions_callback=self.actions_notifier.notify,
+            entity_graph=self.entity_graph)
         self.tg.add_timer(self.conf.datasources.snapshots_interval,
                           consistency_enf.periodic_process,
                           initial_delay=60 +

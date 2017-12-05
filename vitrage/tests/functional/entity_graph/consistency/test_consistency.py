@@ -88,14 +88,25 @@ class TestConsistencyFunctional(TestFunctionalBase):
                                   cls.graph)
 
         cls.event_queue = queue.Queue()
+
+        def actions_callback(event_type, data):
+            """Mock notify method
+
+            Mocks vitrage.messaging.VitrageNotifier.notify(event_type, data)
+
+            :param event_type: is currently always the same and is ignored
+            :param data:
+            """
+            cls.event_queue.put(data)
+
         scenario_repo = ScenarioRepository(cls.conf)
         cls.evaluator = ScenarioEvaluator(cls.conf,
                                           cls.processor.entity_graph,
                                           scenario_repo,
-                                          cls.event_queue)
+                                          actions_callback)
         cls.consistency_enforcer = ConsistencyEnforcer(
             cls.conf,
-            cls.event_queue,
+            actions_callback,
             cls.processor.entity_graph)
 
     @unittest.skip("test_initializing_process skipping")
