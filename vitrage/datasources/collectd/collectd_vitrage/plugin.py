@@ -151,5 +151,5 @@ class CollectDPlugin(object):
         collectd.register_notification(callback, **kwargs)
 
 
-class PluginError(StandardError):
+class PluginError(Exception):
     pass
