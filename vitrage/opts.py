@@ -30,6 +30,7 @@ import vitrage.notifier.plugins.snmp
 import vitrage.os_clients
 import vitrage.persistor
 import vitrage.rpc
+import vitrage.snmp_parsing
 import vitrage.storage
 
 LOG = log.getLogger(__name__)
@@ -55,6 +56,7 @@ def list_opts():
         ('jaccard_correlation',
          vitrage.machine_learning.plugins.jaccard_correlation.OPTS),
         ('snmp', vitrage.notifier.plugins.snmp.OPTS),
+        ('snmp_parsing', vitrage.snmp_parsing.OPTS),
         ('DEFAULT', itertools.chain(
             vitrage.os_clients.OPTS,
             vitrage.rpc.OPTS,
