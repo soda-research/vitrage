@@ -89,5 +89,6 @@ status_msgs = {
     140: 'At least one template must be included',
     141: 'Name field is unspecified for include',
     142: 'Trying to include a template that does not exist',
-    143: 'Includable cannot have Includes or Scenarios',
+    143: 'A template definition file cannot contain \'includes\' or '
+         '\'scenarios\' blocks',
 }
