@@ -13,4 +13,4 @@ Root Cause Analysis service
 The Root Cause Analysis service (vitrage) provides...
 
 This chapter assumes a working setup of OpenStack following the
-`OpenStack Installation Tutorial <http://docs.openstack.org/#install-guides>`_.
+`OpenStack Installation Guide <https://docs.openstack.org/install-guide/>`_.
