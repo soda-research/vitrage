@@ -51,7 +51,7 @@ class VitrageNotifier(CollectDPlugin):
         """Set up the Vitrage API client and add the notification callback. """
 
         url = self.config['transport_url']
-        transport = messaging.get_transport(cfg.CONF, url)
+        transport = messaging.get_notification_transport(cfg.CONF, url)
         self.notifier = messaging.Notifier(transport,
                                            driver='messagingv2',
                                            publisher_id=COLLECTD_DATASOURCE,

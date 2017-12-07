@@ -66,7 +66,7 @@ def main():
                   args.sendto, args.topic, args.body)
 
     transport_url = args.sendto
-    transport = messaging.get_transport(cfg.CONF, transport_url)
+    transport = messaging.get_notification_transport(cfg.CONF, transport_url)
     driver = 'messagingv2'
     publisher = 'zabbix_%s' % socket.gethostname()
     notifier = messaging.Notifier(transport,
