@@ -14,7 +14,7 @@
 
 from vitrage.common.constants import TemplateTopologyFields
 from vitrage.common.exception import VitrageError
-from vitrage.evaluator.template_data import TemplateData
+from vitrage.evaluator.template_loading.props_converter import PropsConverter
 
 
 class Fields(TemplateTopologyFields):
@@ -24,7 +24,7 @@ class Fields(TemplateTopologyFields):
 
 
 # noinspection PyAttributeOutsideInit
-class EquivalenceData(object):
+class EquivalenceLoader(object):
 
     def __init__(self, equivalence_def):
 
@@ -54,7 +54,7 @@ class EquivalenceData(object):
                                 for k, v in entity_def[Fields.ENTITY].items()}
 
                 entity_key = frozenset(
-                    TemplateData._convert_props_with_set(entity_props))
+                    PropsConverter.convert_props_with_set(entity_props))
                 if entity_key in equivalence:
                     raise VitrageError('duplicated entities found in '
                                        'equivalence')

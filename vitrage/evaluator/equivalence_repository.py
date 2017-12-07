@@ -13,7 +13,8 @@
 # under the License.
 
 from vitrage.common.exception import VitrageError
-from vitrage.evaluator.equivalence_data import EquivalenceData
+from vitrage.evaluator.template_loading.equivalence_loader import \
+    EquivalenceLoader
 from vitrage.utils import file as file_utils
 
 
@@ -25,8 +26,8 @@ class EquivalenceRepository(object):
         equivalence_defs = file_utils.load_yaml_files(directory)
 
         for equivalence_def in equivalence_defs:
-            equivalence_data = EquivalenceData(equivalence_def)
-            for equivalence in equivalence_data.equivalences:
+            equivalences = EquivalenceLoader(equivalence_def).equivalences
+            for equivalence in equivalences:
                 self._add_equivalence(equivalence)
         return self.entity_equivalences
 

@@ -12,9 +12,9 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from vitrage.evaluator.condition import EdgeDescription
 from vitrage.evaluator.condition import SymbolResolver
-from vitrage.evaluator.template_data import TemplateData
+from vitrage.evaluator.template_data import EdgeDescription
+from vitrage.evaluator.template_loading.template_loader import TemplateLoader
 from vitrage.evaluator.template_validation.content.scenario_validator \
     import get_condition_common_targets
 from vitrage.tests import base
@@ -93,7 +93,7 @@ class ConditionTest(base.BaseTest):
                                                    template_name)
         template_definition = file_utils.load_yaml_file(template_path, True)
 
-        template_data = TemplateData(template_definition)
+        template_data = TemplateLoader().load(template_definition)
         definitions_index = template_data.entities.copy()
         definitions_index.update(template_data.relationships)
 

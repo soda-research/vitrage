@@ -25,8 +25,8 @@ from vitrage.evaluator.scenario_evaluator import ActionType
 from vitrage.evaluator.template_data import ActionSpecs
 from vitrage.evaluator.template_data import EdgeDescription
 from vitrage.evaluator.template_data import Scenario
-from vitrage.evaluator.template_data import TemplateData
 from vitrage.evaluator.template_fields import TemplateFields as TFields
+from vitrage.evaluator.template_loading.template_loader import TemplateLoader
 from vitrage.graph import Edge
 from vitrage.graph import Vertex
 from vitrage.tests import base
@@ -53,7 +53,8 @@ class BasicTemplateTest(base.BaseTest):
             def_templates_path)
         def_templates_dict = utils.get_def_templates_dict_from_list(
             def_demplates_list)
-        template_data = TemplateData(template_definition, def_templates_dict)
+        template_data = \
+            TemplateLoader().load(template_definition, def_templates_dict)
         entities = template_data.entities
         relationships = template_data.relationships
         scenarios = template_data.scenarios
@@ -70,8 +71,8 @@ class BasicTemplateTest(base.BaseTest):
         # Assertions
         for definition in definitions[TFields.ENTITIES]:
             for key, value in definition['entity'].items():
-                new_key = TemplateData.PROPS_CONVERSION[key] if key in \
-                    TemplateData.PROPS_CONVERSION else key
+                new_key = TemplateLoader.PROPS_CONVERSION[key] if key in \
+                    TemplateLoader.PROPS_CONVERSION else key
                 del definition['entity'][key]
                 definition['entity'][new_key] = value
         self._validate_entities(entities, definitions[TFields.ENTITIES])
@@ -159,7 +160,7 @@ class BasicTemplateTest(base.BaseTest):
                                                      self.BASIC_TEMPLATE)
         template_definition = file_utils.load_yaml_file(template_path, True)
 
-        template_data = TemplateData(template_definition)
+        template_data = TemplateLoader().load(template_definition)
         entities = template_data.entities
         relationships = template_data.relationships
         scenarios = template_data.scenarios
@@ -168,8 +169,8 @@ class BasicTemplateTest(base.BaseTest):
         # Assertions
         for definition in definitions[TFields.ENTITIES]:
             for key, value in definition['entity'].items():
-                new_key = TemplateData.PROPS_CONVERSION[key] if key in \
-                    TemplateData.PROPS_CONVERSION else key
+                new_key = TemplateLoader.PROPS_CONVERSION[key] if key in \
+                    TemplateLoader.PROPS_CONVERSION else key
                 del definition['entity'][key]
                 definition['entity'][new_key] = value
         self._validate_entities(entities, definitions[TFields.ENTITIES])

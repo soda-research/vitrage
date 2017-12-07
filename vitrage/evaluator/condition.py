@@ -22,7 +22,6 @@ from sympy import Symbol
 
 
 ConditionVar = namedtuple('ConditionVar', ['symbol_name', 'positive'])
-EdgeDescription = namedtuple('EdgeDescription', ['edge', 'source', 'target'])
 
 
 class SymbolResolver(object):
