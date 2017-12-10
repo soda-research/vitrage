@@ -74,7 +74,8 @@ class TestEvents(BaseVitrageTempest):
             # Action
             time_before_action = datetime.datetime.utcnow()
             nova_utils.create_instances(num_instances=1,
-                                        name=INSTANCE_NAME)
+                                        name=INSTANCE_NAME,
+                                        set_public_network=True)
 
             writen_events = self._load_db_events(time_before_action)
 
