@@ -12,6 +12,8 @@
       jobs:
         - vitrage-dsvm-api-py27
         - vitrage-dsvm-datasources-py27
+        - vitrage-dsvm-api-py35
+        - vitrage-dsvm-datasources-py35
 
 - job:
     name: vitrage-dsvm-api-py27
