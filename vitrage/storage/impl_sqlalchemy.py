@@ -61,6 +61,7 @@ class Connection(base.Connection):
     def upgrade(self, nocreate=False):
         engine = self._engine_facade.get_engine()
         engine.connect()
+        models.Base.metadata.drop_all(engine, tables=[models.Event.__table__])
         models.Base.metadata.create_all(engine)
         # TODO(idan_hefetz) upgrade logic is missing
 
