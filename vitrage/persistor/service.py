@@ -18,7 +18,6 @@ import dateutil.parser
 import oslo_messaging as oslo_m
 
 from oslo_log import log
-from oslo_serialization import jsonutils
 from oslo_service import service as os_service
 from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import GraphAction
@@ -73,6 +72,6 @@ class VitragePersistorEndpoint(object):
             return
         collector_timestamp = \
             dateutil.parser.parse(data.get(DSProps.SAMPLE_DATE))
-        event_row = models.Event(payload=jsonutils.dumps(data),
+        event_row = models.Event(payload=data,
                                  collector_timestamp=collector_timestamp)
         self.db_connection.events.create(event_row)

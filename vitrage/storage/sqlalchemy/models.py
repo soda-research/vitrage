@@ -14,8 +14,11 @@
 
 from oslo_db.sqlalchemy import models
 from sqlalchemy import Column, DateTime, INTEGER, String, \
-    SmallInteger, BigInteger, Index, Text
+    SmallInteger, BigInteger, Index
 from sqlalchemy.ext.declarative import declarative_base
+import sqlalchemy.types as types
+
+import json
 
 
 class VitrageBase(models.ModelBase):
@@ -39,6 +42,28 @@ class VitrageBase(models.ModelBase):
 Base = declarative_base(cls=VitrageBase)
 
 
+class StringyJSON(types.TypeDecorator):
+    """Stores and retrieves JSON as TEXT.
+
+    Adjust JSON type to sqlite for unit test
+    """
+
+    impl = types.TEXT
+
+    def process_bind_param(self, value, dialect):
+        if value is not None:
+            value = json.dumps(value)
+        return value
+
+    def process_result_value(self, value, dialect):
+        if value is not None:
+            value = json.loads(value)
+        return value
+
+
+MagicJSON = types.JSON().with_variant(StringyJSON, 'sqlite')
+
+
 class Event(Base):
 
     __tablename__ = 'events'
@@ -46,14 +71,14 @@ class Event(Base):
     event_id = Column("id", INTEGER, primary_key=True, nullable=False,
                       autoincrement=True)
     collector_timestamp = Column(DateTime, index=True, nullable=False)
-    payload = Column(Text, nullable=False)
+    payload = Column(MagicJSON, nullable=False)
 
     def __repr__(self):
         return \
             "<Event(" \
             "id='%s', " \
             "collector_timestamp='%s', " \
-            "payload='%s')>" %\
+            "payload='%s')>" % \
             (
                 self.event_id,
                 self.collector_timestamp,
@@ -88,7 +113,7 @@ class ActiveAction(Base, models.TimestampMixin):
             "target_vertex_id='%s', " \
             "action_id='%s', " \
             "score='%s', " \
-            "trigger='%s')>" %\
+            "trigger='%s')>" % \
             (
                 self.created_at,
                 self.action_type,
