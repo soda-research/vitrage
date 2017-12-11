@@ -15,7 +15,6 @@
 from six.moves import queue
 
 from oslo_config import cfg
-from oslo_db.options import database_opts
 
 from vitrage.common.constants import DatasourceAction
 from vitrage.common.constants import DatasourceProperties as DSProp
@@ -43,12 +42,11 @@ from vitrage.evaluator.actions.recipes.base import EVALUATOR_EVENT_TYPE
 from vitrage.evaluator.template_data import ActionSpecs
 from vitrage.evaluator.template_fields import TemplateFields as TFields
 from vitrage.opts import register_opts
-from vitrage import storage
-from vitrage.storage.sqlalchemy import models
 from vitrage.tests.functional.base import TestFunctionalBase
+from vitrage.tests.test_configuration import TestConfiguration
 
 
-class TestActionExecutor(TestFunctionalBase):
+class TestActionExecutor(TestFunctionalBase, TestConfiguration):
 
     # noinspection PyPep8Naming
     @classmethod
@@ -56,12 +54,7 @@ class TestActionExecutor(TestFunctionalBase):
         cls.conf = cfg.ConfigOpts()
         cls.conf.register_opts(cls.PROCESSOR_OPTS, group='entity_graph')
         cls.conf.register_opts(cls.DATASOURCES_OPTS, group='datasources')
-        cls.conf.register_opts(database_opts, group='database')
-        cls.conf.set_override('connection', 'sqlite:///:memory:',
-                              group='database')
-        cls._db = storage.get_connection_from_config(cls.conf)
-        engine = cls._db._engine_facade.get_engine()
-        models.Base.metadata.create_all(engine)
+        cls.add_db(cls.conf)
 
         for datasource_name in cls.conf.datasources.types:
             register_opts(cls.conf, datasource_name, cls.conf.datasources.path)
