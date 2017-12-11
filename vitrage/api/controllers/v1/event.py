@@ -15,6 +15,7 @@
 import pecan
 
 from oslo_log import log
+from oslo_utils import encodeutils
 from osprofiler import profiler
 from pecan.core import abort
 
@@ -51,5 +52,6 @@ class EventController(RootRestController):
                                       event_type=event_type,
                                       details=details)
         except Exception as e:
-            LOG.exception('Failed to post an event', e)
+            LOG.exception('Failed to post an event %s',
+                          encodeutils.exception_to_unicode(e))
             abort(404, str(e))
