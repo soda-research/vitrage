@@ -37,7 +37,9 @@ To install a specific version, add the version number:
 +==================+=================+===============+
 | Ocata            | 1.5.1           | 1.1.1         |
 +------------------+-----------------+---------------+
-| Pike             | ...             | ...           |
+| Pike             | 1.8.2           | 1.4.0         |
++------------------+-----------------+---------------+
+| Queens           | ...             | ...           |
 +------------------+-----------------+---------------+
 
 Configure Vitrage
@@ -63,7 +65,7 @@ Create the Vitrage folders
 
 Copy `api-paste.ini`_ to /etc/vitrage/
 
-Copy the `datasources_values`_ folder with its content
+Copy the `datasources_values`_ folder with its content under /etc/vitrage/
 
 **Note:** You don't need to copy all files in this folder, only the ones that
 belong to datasources you plan to use. The only file that **must** be copied
@@ -71,8 +73,8 @@ is vitrage.yaml
 
 
 
-.. _api-paste.ini: http://git.openstack.org/cgit/openstack/vitrage/tree/etc/vitrage/api-paste.ini
-.. _datasources_values: http://git.openstack.org/cgit/openstack/vitrage/tree/etc/vitrage/datasources_values
+.. _api-paste.ini: https://git.openstack.org/cgit/openstack/vitrage/tree/etc/vitrage/api-paste.ini
+.. _datasources_values: https://git.openstack.org/cgit/openstack/vitrage/tree/etc/vitrage/datasources_values
 
 Create the vitrage.conf file
 ============================
@@ -106,6 +108,7 @@ Create /etc/vitrage/vitrage.conf file with the following information:
     auth_url = http://<ip>:35357
     auth_type = password
 
+Replace **<ip>** with your controller node's IP.
 Set the list of datasource you would like to use for Vitrage.
 
 **Note:** In order for a datasource to be supported, the underlying component
@@ -185,7 +188,7 @@ Install the Vitrage Dashboard
 
 Follow the vitrage-dashboard_ installation procedure.
 
-.. _vitrage-dashboard: http://git.openstack.org/cgit/openstack/vitrage-dashboard/tree/doc/source/installation.rst
+.. _vitrage-dashboard: https://git.openstack.org/cgit/openstack/vitrage-dashboard/tree/doc/source/contributor/installation.rst
 
 Automatic
 +++++++++
