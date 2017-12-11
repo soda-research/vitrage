@@ -17,6 +17,7 @@ import json
 import pecan
 
 from oslo_log import log
+from oslo_utils import encodeutils
 from oslo_utils.strutils import bool_from_string
 from osprofiler import profiler
 from pecan.core import abort
@@ -59,5 +60,6 @@ class RCAController(RootRestController):
             return graph
 
         except Exception as e:
-            LOG.exception('failed to get rca %s ', e)
-            abort(404, str(e))
+            to_unicode = encodeutils.exception_to_unicode(e)
+            LOG.exception('failed to get rca %s ', to_unicode)
+            abort(404, to_unicode)

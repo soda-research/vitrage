@@ -15,6 +15,7 @@ import json
 import pecan
 
 from oslo_log import log
+from oslo_utils import encodeutils
 from osprofiler import profiler
 from pecan.core import abort
 
@@ -41,8 +42,9 @@ class TemplateController(RootRestController):
         try:
             return self._get_templates()
         except Exception as e:
-            LOG.exception('failed to get template list %s', e)
-            abort(404, str(e))
+            to_unicode = encodeutils.exception_to_unicode(e)
+            LOG.exception('failed to get template list %s', to_unicode)
+            abort(404, to_unicode)
 
     @pecan.expose('json')
     def get(self, template_uuid):
@@ -57,8 +59,11 @@ class TemplateController(RootRestController):
         try:
             return self._show_template(template_uuid)
         except Exception as e:
-            LOG.exception('failed to show template %s' % template_uuid, e)
-            abort(404, str(e))
+            to_unicode = encodeutils.exception_to_unicode(e)
+            LOG.exception('failed to show template %s --> %s',
+                          template_uuid,
+                          to_unicode)
+            abort(404, to_unicode)
 
     @pecan.expose('json')
     def post(self, **kwargs):
@@ -75,8 +80,9 @@ class TemplateController(RootRestController):
         try:
             return self._validate(templates)
         except Exception as e:
-            LOG.exception('failed to validate template(s) %s', e)
-            abort(404, str(e))
+            to_unicode = encodeutils.exception_to_unicode(e)
+            LOG.exception('failed to validate template(s) %s', to_unicode)
+            abort(404, to_unicode)
 
     @staticmethod
     def _get_templates():
@@ -88,8 +94,9 @@ class TemplateController(RootRestController):
             template_list = json.loads(templates_json)['templates_details']
             return template_list
         except Exception as e:
-            LOG.exception('failed to get template list %s ', e)
-            abort(404, str(e))
+            to_unicode = encodeutils.exception_to_unicode(e)
+            LOG.exception('failed to get template list %s ', to_unicode)
+            abort(404, to_unicode)
 
     @staticmethod
     def _show_template(template_uuid):
@@ -102,8 +109,9 @@ class TemplateController(RootRestController):
         try:
             return json.loads(template_json)
         except Exception as e:
-            LOG.exception('failed to show template with uuid: %s ', e)
-            abort(404, str(e))
+            to_unicode = encodeutils.exception_to_unicode(e)
+            LOG.exception('failed to show template with uuid: %s ', to_unicode)
+            abort(404, to_unicode)
 
     @staticmethod
     def _validate(templates):
@@ -114,5 +122,6 @@ class TemplateController(RootRestController):
         try:
             return json.loads(result_json)
         except Exception as e:
-            LOG.exception('failed to open template file(s) %s ', e)
-            abort(404, str(e))
+            to_unicode = encodeutils.exception_to_unicode(e)
+            LOG.exception('failed to open template file(s) %s ', to_unicode)
+            abort(404, to_unicode)

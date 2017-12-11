@@ -16,6 +16,7 @@
 import json
 
 from oslo_log import log
+from oslo_utils import encodeutils
 from oslo_utils.strutils import bool_from_string
 from osprofiler import profiler
 import pecan
@@ -89,8 +90,9 @@ class TopologyController(RootRestController):
                 return RootRestController.as_tree(graph, node_id)
 
         except Exception as e:
-            LOG.exception('failed to get topology %s ', e)
-            abort(404, str(e))
+            to_unicode = encodeutils.exception_to_unicode(e)
+            LOG.exception('failed to get topology %s ', to_unicode)
+            abort(404, to_unicode)
 
     @staticmethod
     def _check_input_para(graph_type, depth, query, root, all_tenants):

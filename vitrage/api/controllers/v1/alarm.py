@@ -16,6 +16,7 @@ import json
 import pecan
 
 from oslo_log import log
+from oslo_utils import encodeutils
 from oslo_utils.strutils import bool_from_string
 from osprofiler import profiler
 from pecan.core import abort
@@ -52,8 +53,9 @@ class AlarmsController(RootRestController):
         try:
             return self._get_alarms(vitrage_id, all_tenants)
         except Exception as e:
-            LOG.exception('failed to get alarms %s', e)
-            abort(404, str(e))
+            to_unicode = encodeutils.exception_to_unicode(e)
+            LOG.exception('failed to get alarms %s', to_unicode)
+            abort(404, to_unicode)
 
     @staticmethod
     def _get_alarms(vitrage_id=None, all_tenants=False):
@@ -68,5 +70,6 @@ class AlarmsController(RootRestController):
             return alarms_list
 
         except Exception as e:
-            LOG.exception('failed to open file %s ', e)
-            abort(404, str(e))
+            to_unicode = encodeutils.exception_to_unicode(e)
+            LOG.exception('failed to open file %s ', to_unicode)
+            abort(404, to_unicode)

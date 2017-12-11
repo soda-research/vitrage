@@ -52,6 +52,6 @@ class EventController(RootRestController):
                                       event_type=event_type,
                                       details=details)
         except Exception as e:
-            LOG.exception('Failed to post an event %s',
-                          encodeutils.exception_to_unicode(e))
-            abort(404, str(e))
+            to_unicode = encodeutils.exception_to_unicode(e)
+            LOG.exception('Failed to post an event %s', to_unicode)
+            abort(404, to_unicode)
