@@ -76,11 +76,7 @@ class ResourcesController(RootRestController):
                 pecan.request.enforcer,
                 {})
 
-        try:
-            return self._show_resource(vitrage_id)
-        except Exception as e:
-            LOG.exception('failed to show resource %s, %s' % vitrage_id, e)
-            abort(404, str(e))
+        return self._show_resource(vitrage_id)
 
     @staticmethod
     def _show_resource(vitrage_id):
@@ -89,7 +85,11 @@ class ResourcesController(RootRestController):
                 pecan.request.context,
                 'show_resource',
                 vitrage_id=vitrage_id)
-            LOG.info(resource)
+            if not resource:
+                abort(404, "Failed to find resource %s" % vitrage_id)
+
+            LOG.debug('resource found = %s', resource)
+
             return json.loads(resource)
         except Exception as e:
             LOG.exception('failed to show resource with vitrage_id(%s),'
