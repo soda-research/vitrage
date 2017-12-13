@@ -18,6 +18,7 @@ import time
 import unittest
 
 from oslo_config import cfg
+from oslo_db.options import database_opts
 
 from vitrage.common.constants import EdgeLabel
 from vitrage.common.constants import EntityCategory
@@ -38,11 +39,10 @@ from vitrage.graph.driver.networkx_graph import NXGraph
 import vitrage.graph.utils as graph_utils
 from vitrage.tests.functional.base import TestFunctionalBase
 from vitrage.tests.mocks import utils
-from vitrage.tests.test_configuration import TestConfiguration
 from vitrage.utils.datetime import utcnow
 
 
-class TestConsistencyFunctional(TestFunctionalBase, TestConfiguration):
+class TestConsistencyFunctional(TestFunctionalBase):
 
     CONSISTENCY_OPTS = [
         cfg.IntOpt('min_time_to_delete',
@@ -77,7 +77,9 @@ class TestConsistencyFunctional(TestFunctionalBase, TestConfiguration):
         cls.conf.register_opts(cls.PROCESSOR_OPTS, group='entity_graph')
         cls.conf.register_opts(cls.EVALUATOR_OPTS, group='evaluator')
         cls.conf.register_opts(cls.DATASOURCES_OPTS, group='datasources')
-        cls.add_db(cls.conf)
+        cls.conf.register_opts(database_opts, group='database')
+        cls.conf.set_override('connection', 'sqlite:///:memory:',
+                              group='database')
         cls.load_datasources(cls.conf)
 
         cls.graph = NXGraph("Entity Graph")

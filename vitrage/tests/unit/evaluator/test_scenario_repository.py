@@ -24,12 +24,10 @@ from vitrage.evaluator.template_validation.template_syntax_validator import \
 from vitrage.graph import Vertex
 from vitrage.tests import base
 from vitrage.tests.mocks import utils
-from vitrage.tests.test_configuration import TestConfiguration
-from vitrage.tests.unit.entity_graph.base import TestEntityGraphUnitBase
 from vitrage.utils import file as file_utils
 
 
-class ScenarioRepositoryTest(base.BaseTest, TestConfiguration):
+class ScenarioRepositoryTest(base.BaseTest):
     BASE_DIR = utils.get_resources_dir() + '/templates/general'
     OPTS = [
         cfg.StrOpt('templates_dir',
@@ -43,10 +41,9 @@ class ScenarioRepositoryTest(base.BaseTest, TestConfiguration):
     # noinspection PyPep8Naming
     @classmethod
     def setUpClass(cls):
-        super(ScenarioRepositoryTest, cls).setUpClass()
+
         cls.conf = cfg.ConfigOpts()
         cls.conf.register_opts(cls.OPTS, group='evaluator')
-        cls.add_db(cls.conf)
 
         templates_dir_path = cls.conf.evaluator.templates_dir
         cls.template_defs = file_utils.load_yaml_files(templates_dir_path)
@@ -103,7 +100,7 @@ class ScenarioRepositoryTest(base.BaseTest, TestConfiguration):
         pass
 
 
-class RegExTemplateTest(TestEntityGraphUnitBase, TestConfiguration):
+class RegExTemplateTest(base.BaseTest):
 
     BASE_DIR = utils.get_resources_dir() + '/templates/regex'
     OPTS = [
@@ -114,10 +111,9 @@ class RegExTemplateTest(TestEntityGraphUnitBase, TestConfiguration):
 
     @classmethod
     def setUpClass(cls):
-        super(RegExTemplateTest, cls).setUpClass()
+
         cls.conf = cfg.ConfigOpts()
         cls.conf.register_opts(cls.OPTS, group='evaluator')
-        cls.add_db(cls.conf)
         cls.scenario_repository = ScenarioRepository(cls.conf)
 
     def test_basic_regex(self):
@@ -173,7 +169,7 @@ class RegExTemplateTest(TestEntityGraphUnitBase, TestConfiguration):
         self.assertEqual(0, len(relevant_scenarios))
 
 
-class EquivalentScenarioTest(base.BaseTest, TestConfiguration):
+class EquivalentScenarioTest(base.BaseTest):
     BASE_DIR = utils.get_resources_dir() + '/templates/equivalent_scenarios/'
     OPTS = [
         cfg.StrOpt('templates_dir',
@@ -189,10 +185,10 @@ class EquivalentScenarioTest(base.BaseTest, TestConfiguration):
 
     @classmethod
     def setUpClass(cls):
-        super(EquivalentScenarioTest, cls).setUpClass()
+
         cls.conf = cfg.ConfigOpts()
         cls.conf.register_opts(cls.OPTS, group='evaluator')
-        cls.add_db(cls.conf)
+
         templates_dir_path = cls.conf.evaluator.templates_dir
         cls.template_defs = file_utils.load_yaml_files(templates_dir_path)
 
