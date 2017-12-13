@@ -12,7 +12,6 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import eventlet
 from oslo_log import log
 import oslo_messaging
 from oslo_service import service as os_service
@@ -27,8 +26,6 @@ from vitrage import messaging
 from vitrage import rpc as vitrage_rpc
 
 LOG = log.getLogger(__name__)
-
-eventlet.monkey_patch()
 
 
 class VitrageApiHandlerService(os_service.Service):
