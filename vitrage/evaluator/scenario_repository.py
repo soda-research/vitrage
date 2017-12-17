@@ -22,8 +22,9 @@ from oslo_utils import uuidutils
 from vitrage.common.utils import get_portion
 from vitrage.evaluator.base import Template
 from vitrage.evaluator.equivalence_repository import EquivalenceRepository
-from vitrage.evaluator.template_data import TemplateData
 from vitrage.evaluator.template_fields import TemplateFields
+from vitrage.evaluator.template_loading.scenario_loader import ScenarioLoader
+from vitrage.evaluator.template_loading.template_loader import TemplateLoader
 from vitrage.evaluator.template_validation.content.definitions_validator \
     import DefinitionsValidator as DefValidator
 from vitrage.evaluator.template_validation.content.template_content_validator \
@@ -127,7 +128,8 @@ class ScenarioRepository(object):
                                                       current_time,
                                                       result)
         if result.is_valid_config:
-            template_data = TemplateData(template_def, self._def_templates)
+            template_data = \
+                TemplateLoader().load(template_def, self._def_templates)
             for scenario in template_data.scenarios:
                 for equivalent_scenario in self._expand_equivalence(scenario):
                     self._add_scenario(equivalent_scenario)
@@ -168,10 +170,10 @@ class ScenarioRepository(object):
         scenarios_out = list(scenarios_in)
         for entity_key in entity_keys:
             for scenario in scenarios_in:
-                equivalent_scenario = TemplateData.ScenarioData. \
-                    build_equivalent_scenario(scenario,
-                                              symbol_name,
-                                              entity_key)
+                equivalent_scenario = \
+                    ScenarioLoader.build_equivalent_scenario(scenario,
+                                                             symbol_name,
+                                                             entity_key)
                 scenarios_out.append(equivalent_scenario)
         return scenarios_out
 

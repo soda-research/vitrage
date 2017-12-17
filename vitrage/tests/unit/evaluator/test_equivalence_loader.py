@@ -18,7 +18,8 @@ from vitrage.datasources.nagios import NAGIOS_DATASOURCE
 from vitrage.datasources.zabbix import ZABBIX_DATASOURCE
 from vitrage.evaluator.actions.evaluator_event_transformer \
     import VITRAGE_DATASOURCE
-from vitrage.evaluator.equivalence_data import EquivalenceData
+from vitrage.evaluator.template_loading.equivalence_loader import \
+    EquivalenceLoader
 from vitrage.tests import base
 from vitrage.tests.mocks import utils
 from vitrage.utils import file as file_utils
@@ -35,8 +36,7 @@ class EquivalenceTemplateTest(base.BaseTest):
             self.BASIC_TEMPLATE)
         equivalence_definition = file_utils.load_yaml_file(equivalence_path,
                                                            True)
-        equivalence_data = EquivalenceData(equivalence_definition)
-        equivalences = equivalence_data.equivalences
+        equivalences = EquivalenceLoader(equivalence_definition).equivalences
 
         expected = [
             frozenset([
