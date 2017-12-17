@@ -24,6 +24,8 @@ The following describes all the possible status code and their messages:
 +------------------+---------------------------------------------------------+-------------------------------+
 | 4                | Syntax error: [error message]                           | syntax                        |
 +------------------+---------------------------------------------------------+-------------------------------+
+| 5                | Invalid yaml format                                     | syntax                        |
++------------------+---------------------------------------------------------+-------------------------------+
 | 20               | definitions section must contain entities field         | syntax                        |
 +------------------+---------------------------------------------------------+-------------------------------+
 | 21               | definitions section is a mandatory section              | syntax                        |
@@ -39,9 +41,13 @@ The following describes all the possible status code and their messages:
 +------------------+---------------------------------------------------------+-------------------------------+
 | 46               | Entity field is required                                | syntax                        |
 +------------------+---------------------------------------------------------+-------------------------------+
+| 47               | Invalid regular expression defined in field             | content                       |
++------------------+---------------------------------------------------------+-------------------------------+
 | 60               | metadata section must contain id field                  | syntax                        |
 +------------------+---------------------------------------------------------+-------------------------------+
 | 62               | metadata is a mandatory section                         | syntax                        |
++------------------+---------------------------------------------------------+-------------------------------+
+| 63               | Unsupported version. Version must be one of: {versions} | content                       |
 +------------------+---------------------------------------------------------+-------------------------------+
 | 80               | scenarios is a mandatory section                        | syntax                        |
 +------------------+---------------------------------------------------------+-------------------------------+
@@ -54,6 +60,8 @@ The following describes all the possible status code and their messages:
 | 84               | Entity definition must contain actions field            | syntax                        |
 +------------------+---------------------------------------------------------+-------------------------------+
 | 85               | Failed to convert condition                             | content                       |
++------------------+---------------------------------------------------------+-------------------------------+
+| 86               | Not operator can be used only on relationships.         | content                       |
 +------------------+---------------------------------------------------------+-------------------------------+
 | 100              | Invalid relation type. Relation type must be from types:| syntax                        |
 |                  | [relation_types]                                        |                               |
@@ -108,4 +116,13 @@ The following describes all the possible status code and their messages:
 +------------------+---------------------------------------------------------+-------------------------------+
 | 135              | condition must contain a common entity for all 'or'     | content                       |
 |                  | clauses                                                 |                               |
++------------------+---------------------------------------------------------+-------------------------------+
+| 140              | At least one template must be included                  | syntax                        |
++------------------+---------------------------------------------------------+-------------------------------+
+| 141              | Name field is unspecified for include                   | syntax                        |
++------------------+---------------------------------------------------------+-------------------------------+
+| 142              | Trying to include a template that does not exist        | content                       |
++------------------+---------------------------------------------------------+-------------------------------+
+| 143              | A template definition file cannot contain 'includes' or | syntax                        |
+|                  | 'scenarios' blocks                                      |                               |
 +------------------+---------------------------------------------------------+-------------------------------+
