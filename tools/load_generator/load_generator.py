@@ -63,12 +63,12 @@ class StressNotificationsService(os_service.Service):
     def __init__(self, conf):
         super(StressNotificationsService, self).__init__()
         self.oslo_notifier = None
-        topic = conf.datasources.notification_topic
+        topics = conf.datasources.notification_topics
         self.oslo_notifier = oslo_messaging.Notifier(
             get_transport(conf),
             driver='messagingv2',
             publisher_id='vitrage.stress',
-            topics=[topic])
+            topics=topics)
 
     def start(self):
         super(StressNotificationsService, self).start()
