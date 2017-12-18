@@ -44,6 +44,7 @@ class TestCollectdTransformer(BaseAlarmTransformerTest):
     # noinspection PyAttributeOutsideInit,PyPep8Naming
     @classmethod
     def setUpClass(cls):
+        super(TestCollectdTransformer, cls).setUpClass()
         cls.transformers = {}
         cls.conf = cfg.ConfigOpts()
         cls.conf.register_opts(cls.OPTS, group=COLLECTD_DATASOURCE)

@@ -52,6 +52,7 @@ class ZabbixTransformerTest(base.BaseTest):
     # noinspection PyAttributeOutsideInit,PyPep8Naming
     @classmethod
     def setUpClass(cls):
+        super(ZabbixTransformerTest, cls).setUpClass()
         cls.transformers = {}
         cls.conf = cfg.ConfigOpts()
         cls.conf.register_opts(cls.OPTS, group=ZABBIX_DATASOURCE)

@@ -39,8 +39,10 @@ class TestCeilometerAlarmTransformer(CeilometerTransformerBaseTest):
                    default=UpdateMethod.PULL),
     ]
 
+    # noinspection PyPep8Naming
     @classmethod
     def setUpClass(cls):
+        super(TestCeilometerAlarmTransformer, cls).setUpClass()
         cls.transformers = {}
         cls.conf = cfg.ConfigOpts()
         cls.conf.register_opts(cls.OPTS, group=CEILOMETER_DATASOURCE)
@@ -119,8 +121,10 @@ class TestCeilometerAlarmPushTransformer(CeilometerTransformerBaseTest):
                    default=UpdateMethod.PUSH),
     ]
 
+    # noinspection PyPep8Naming
     @classmethod
     def setUpClass(cls):
+        super(TestCeilometerAlarmPushTransformer, cls).setUpClass()
         cls.transformers = {}
         cls.conf = cfg.ConfigOpts()
         cls.conf.register_opts(cls.OPTS, group=CEILOMETER_DATASOURCE)

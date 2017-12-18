@@ -29,7 +29,7 @@ class RaiseAlarmRecipeTest(BaseTest):
     # noinspection PyPep8Naming
     @classmethod
     def setUpClass(cls):
-
+        super(RaiseAlarmRecipeTest, cls).setUpClass()
         cls.props = {EXECUTION_ENGINE: MISTRAL,
                      WORKFLOW: 'wf_4',
                      'host': 'host5',

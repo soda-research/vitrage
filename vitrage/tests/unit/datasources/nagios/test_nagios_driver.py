@@ -41,6 +41,7 @@ class NagiosDriverTest(NagiosBaseTest):
     # noinspection PyPep8Naming
     @classmethod
     def setUpClass(cls):
+        super(NagiosDriverTest, cls).setUpClass()
         cls.conf = cfg.ConfigOpts()
         cls.conf.register_opts(cls.OPTS, group=NAGIOS_DATASOURCE)
 

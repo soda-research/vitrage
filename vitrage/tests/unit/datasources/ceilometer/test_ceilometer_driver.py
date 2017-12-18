@@ -37,6 +37,7 @@ class CeilometerDriverTest(base.BaseTest):
     # noinspection PyPep8Naming
     @classmethod
     def setUpClass(cls):
+        super(CeilometerDriverTest, cls).setUpClass()
         cls.conf = cfg.ConfigOpts()
         cls.conf.register_opts(cls.OPTS, group=CEILOMETER_DATASOURCE)
 

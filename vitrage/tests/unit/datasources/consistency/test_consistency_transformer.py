@@ -38,6 +38,7 @@ class TestConsistencyTransformer(base.BaseTest):
     # noinspection PyAttributeOutsideInit,PyPep8Naming
     @classmethod
     def setUpClass(cls):
+        super(TestConsistencyTransformer, cls).setUpClass()
         cls.transformers = {}
         cls.conf = cfg.ConfigOpts()
         cls.conf.register_opts(cls.OPTS, group=CONSISTENCY_DATASOURCE)

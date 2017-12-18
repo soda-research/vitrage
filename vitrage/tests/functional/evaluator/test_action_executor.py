@@ -53,6 +53,7 @@ class TestActionExecutor(TestFunctionalBase):
     # noinspection PyPep8Naming
     @classmethod
     def setUpClass(cls):
+        super(TestActionExecutor, cls).setUpClass()
         cls.conf = cfg.ConfigOpts()
         cls.conf.register_opts(cls.PROCESSOR_OPTS, group='entity_graph')
         cls.conf.register_opts(cls.DATASOURCES_OPTS, group='datasources')

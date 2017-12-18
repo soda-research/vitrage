@@ -35,6 +35,7 @@ class AodhDriverTest(base.BaseTest):
     # noinspection PyPep8Naming
     @classmethod
     def setUpClass(cls):
+        super(AodhDriverTest, cls).setUpClass()
         cls.conf = cfg.ConfigOpts()
         cls.conf.register_opts(cls.OPTS, group=AODH_DATASOURCE)
 

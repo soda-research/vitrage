@@ -47,6 +47,7 @@ class NovaZoneTransformerTest(base.BaseTest):
     # noinspection PyAttributeOutsideInit,PyPep8Naming
     @classmethod
     def setUpClass(cls):
+        super(NovaZoneTransformerTest, cls).setUpClass()
         cls.transformers = {}
         cls.conf = cfg.ConfigOpts()
         cls.conf.register_opts(cls.OPTS, group=NOVA_ZONE_DATASOURCE)

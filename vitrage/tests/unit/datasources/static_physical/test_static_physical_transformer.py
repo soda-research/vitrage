@@ -47,6 +47,7 @@ class TestStaticPhysicalTransformer(base.BaseTest):
     # noinspection PyAttributeOutsideInit,PyPep8Naming
     @classmethod
     def setUpClass(cls):
+        super(TestStaticPhysicalTransformer, cls).setUpClass()
         cls.transformers = {}
         cls.conf = cfg.ConfigOpts()
         cls.conf.register_opts(cls.OPTS, group=STATIC_PHYSICAL_DATASOURCE)
