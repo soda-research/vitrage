@@ -24,8 +24,10 @@ from vitrage.tests.unit.notifier.snmp_notifier import common
 
 class SnmpNotifierTest(base.BaseTest):
 
+    # noinspection PyPep8Naming
     @classmethod
     def setUpClass(cls):
+        super(SnmpNotifierTest, cls).setUpClass()
         cls.resource_props = {VProps.VITRAGE_IS_DELETED: common.false_,
                               VProps.VITRAGE_IS_PLACEHOLDER: common.false_}
         cls.props = {VProps.VITRAGE_IS_DELETED: common.false_,

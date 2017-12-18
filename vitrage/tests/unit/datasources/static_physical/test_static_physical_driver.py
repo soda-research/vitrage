@@ -69,6 +69,7 @@ class TestStaticPhysicalDriver(base.BaseTest):
     # noinspection PyAttributeOutsideInit,PyPep8Naming
     @classmethod
     def setUpClass(cls):
+        super(TestStaticPhysicalDriver, cls).setUpClass()
         cls.conf = cfg.ConfigOpts()
         cls.conf.register_opts(cls.OPTS, group=STATIC_PHYSICAL_DATASOURCE)
         cls.static_physical_driver = driver.StaticPhysicalDriver(cls.conf)

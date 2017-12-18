@@ -30,7 +30,7 @@ class RaiseAlarmRecipeTest(base.BaseTest):
     # noinspection PyPep8Naming
     @classmethod
     def setUpClass(cls):
-
+        super(RaiseAlarmRecipeTest, cls).setUpClass()
         cls.target_props = {VProps.VITRAGE_TYPE: NOVA_HOST_DATASOURCE}
         cls.target_vertex = Vertex('RESOURCE:nova.host:test1',
                                    cls.target_props)

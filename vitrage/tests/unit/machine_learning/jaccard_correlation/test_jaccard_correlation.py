@@ -158,8 +158,10 @@ class JaccardCorrelationTest(base.BaseTest):
                      help='medium correlation lower limit'),
     ]
 
+    # noinspection PyPep8Naming
     @classmethod
     def setUpClass(cls):
+        super(JaccardCorrelationTest, cls).setUpClass()
 
         cls.conf = cfg.ConfigOpts()
         cls.conf.register_opts(cls.OPTS, group='jaccard_correlation')

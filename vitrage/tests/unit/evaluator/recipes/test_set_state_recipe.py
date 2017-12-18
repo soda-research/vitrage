@@ -31,6 +31,7 @@ class SetStateRecipeTest(base.BaseTest):
     # noinspection PyPep8Naming
     @classmethod
     def setUpClass(cls):
+        super(SetStateRecipeTest, cls).setUpClass()
 
         cls.target_vertex = Vertex('RESOURCE:nova.host:test1')
 

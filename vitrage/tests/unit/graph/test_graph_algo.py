@@ -39,6 +39,7 @@ class GraphAlgorithmTest(GraphTestBase):
     # noinspection PyPep8Naming
     @classmethod
     def setUpClass(cls):
+        super(GraphAlgorithmTest, cls).setUpClass()
         cls.vm_id = 10000000
         cls.vm_alarm_id = 30000000
         cls.vms = []

@@ -30,7 +30,7 @@ class AddCausalRelationshipTest(base.BaseTest):
     # noinspection PyPep8Naming
     @classmethod
     def setUpClass(cls):
-
+        super(AddCausalRelationshipTest, cls).setUpClass()
         cls.target_vertex = Vertex('RESOURCE:nova.host:test_target')
         cls.source_vertex = Vertex('RESOURCE:nova.host:test_source')
 

@@ -33,6 +33,7 @@ class TemplateContentValidatorTest(ValidatorTest):
     # noinspection PyPep8Naming
     @classmethod
     def setUpClass(cls):
+        super(TemplateContentValidatorTest, cls).setUpClass()
 
         template_dir_path = '%s/templates/general' % utils.get_resources_dir()
         cls.def_templates_tests_path = '%s/templates/def_template_tests/' % \

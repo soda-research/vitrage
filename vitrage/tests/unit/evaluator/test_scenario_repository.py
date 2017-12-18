@@ -41,7 +41,7 @@ class ScenarioRepositoryTest(base.BaseTest):
     # noinspection PyPep8Naming
     @classmethod
     def setUpClass(cls):
-
+        super(ScenarioRepositoryTest, cls).setUpClass()
         cls.conf = cfg.ConfigOpts()
         cls.conf.register_opts(cls.OPTS, group='evaluator')
 
@@ -111,7 +111,7 @@ class RegExTemplateTest(base.BaseTest):
 
     @classmethod
     def setUpClass(cls):
-
+        super(RegExTemplateTest, cls).setUpClass()
         cls.conf = cfg.ConfigOpts()
         cls.conf.register_opts(cls.OPTS, group='evaluator')
         cls.scenario_repository = ScenarioRepository(cls.conf)
@@ -185,7 +185,7 @@ class EquivalentScenarioTest(base.BaseTest):
 
     @classmethod
     def setUpClass(cls):
-
+        super(EquivalentScenarioTest, cls).setUpClass()
         cls.conf = cfg.ConfigOpts()
         cls.conf.register_opts(cls.OPTS, group='evaluator')
 

@@ -39,6 +39,7 @@ class TestAodhAlarmTransformer(AodhTransformerBaseTest):
 
     @classmethod
     def setUpClass(cls):
+        super(TestAodhAlarmTransformer, cls).setUpClass()
         cls.transformers = {}
         cls.conf = cfg.ConfigOpts()
         cls.conf.register_opts(cls.OPTS, group=AODH_DATASOURCE)
@@ -116,8 +117,10 @@ class TestAodhAlarmPushTransformer(AodhTransformerBaseTest):
                    default=UpdateMethod.PUSH),
     ]
 
+    # noinspection PyPep8Naming
     @classmethod
     def setUpClass(cls):
+        super(TestAodhAlarmPushTransformer, cls).setUpClass()
         cls.transformers = {}
         cls.conf = cfg.ConfigOpts()
         cls.conf.register_opts(cls.OPTS, group=AODH_DATASOURCE)

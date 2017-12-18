@@ -27,7 +27,7 @@ class MarkDownRecipeTest(base.BaseTest):
     # noinspection PyPep8Naming
     @classmethod
     def setUpClass(cls):
-
+        super(MarkDownRecipeTest, cls).setUpClass()
         cls.target_vertex = Vertex('RESOURCE:nova.host:test1')
 
         targets = {TFields.TARGET: cls.target_vertex}

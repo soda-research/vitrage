@@ -48,6 +48,7 @@ class TestCinderVolumeTransformer(base.BaseTest):
     # noinspection PyAttributeOutsideInit,PyPep8Naming
     @classmethod
     def setUpClass(cls):
+        super(TestCinderVolumeTransformer, cls).setUpClass()
         cls.transformers = {}
         cls.conf = cfg.ConfigOpts()
         cls.conf.register_opts(cls.OPTS, group=CINDER_VOLUME_DATASOURCE)

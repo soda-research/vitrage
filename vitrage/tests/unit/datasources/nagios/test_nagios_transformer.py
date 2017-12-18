@@ -50,6 +50,7 @@ class NagiosTransformerTest(base.BaseTest):
     # noinspection PyAttributeOutsideInit,PyPep8Naming
     @classmethod
     def setUpClass(cls):
+        super(NagiosTransformerTest, cls).setUpClass()
         cls.transformers = {}
         cls.conf = cfg.ConfigOpts()
         cls.conf.register_opts(cls.OPTS, group=NAGIOS_DATASOURCE)

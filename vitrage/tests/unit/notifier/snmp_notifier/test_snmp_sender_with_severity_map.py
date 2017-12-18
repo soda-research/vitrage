@@ -45,8 +45,10 @@ class SnmpNotifierTest(base.BaseTest):
                    'oid_tree_with_severity_mapping.yaml'),
     ]
 
+    # noinspection PyPep8Naming
     @classmethod
     def setUpClass(cls):
+        super(SnmpNotifierTest, cls).setUpClass()
 
         cls.conf = cfg.ConfigOpts()
         cls.conf.register_opts(cls.simple_opts, group='snmp')

@@ -61,6 +61,7 @@ class ActionValidatorTest(ValidatorTest):
     # noinspection PyPep8Naming
     @classmethod
     def setUpClass(cls):
+        super(ActionValidatorTest, cls).setUpClass()
 
         cls._hide_useless_logging_messages()
 

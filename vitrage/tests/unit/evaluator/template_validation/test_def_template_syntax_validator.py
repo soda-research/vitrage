@@ -24,6 +24,7 @@ class DefTemplateSyntaxValidatorTest(base.BaseTest):
     # noinspection PyPep8Naming
     @classmethod
     def setUpClass(cls):
+        super(DefTemplateSyntaxValidatorTest, cls).setUpClass()
 
         cls.def_template_dir_path = utils.get_resources_dir() + \
             '/templates/def_template_tests'
