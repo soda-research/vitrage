@@ -11,6 +11,12 @@ This page describes the format of the Vitrage templates, with some examples and
 open questions on extending this format. Additionally, a short guide on adding
 templates is presented.
 
+*Note:* This document refers to Vitrage templates version 2. The documentation
+of version 1 can be found here_
+
+.. _here: https://docs.openstack.org/vitrage/pike/
+
+
 Template Structure
 ==================
 The template is written in YAML language, with the following structure:
@@ -463,9 +469,10 @@ its parameters.
    action:
         action_type: execute_mistral
         properties:
-            workflow: demo_workflow            # mandatory. The name of the workflow to be executed
-            farewell: Goodbye and Good Luck!   # optional. A list of properties to be passed to the workflow
-            employee: John Smith               # optional. A list of properties to be passed to the workflow
+            workflow: demo_workflow                # mandatory. The name of the workflow to be executed
+            input:                                 # optional. A list of properties to be passed to the workflow
+               farewell: Goodbye and Good Luck!
+               employee: John Smith
 
 
 Future support & Open Issues

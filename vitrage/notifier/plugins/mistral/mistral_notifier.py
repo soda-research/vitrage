@@ -14,6 +14,7 @@
 from oslo_log import log as logging
 
 from vitrage.common.constants import NotifierEventTypes
+from vitrage.evaluator.actions.recipes.execute_mistral import INPUT
 from vitrage.evaluator.actions.recipes.execute_mistral import WORKFLOW
 from vitrage.notifier.plugins.base import NotifierBase
 from vitrage import os_clients
@@ -63,11 +64,11 @@ class MistralNotifier(NotifierBase):
 
             try:
                 workflow = data[WORKFLOW]
-                del data[WORKFLOW]
+                workflow_input = data.get(INPUT, {})
 
                 response = self.client.executions.create(
                     workflow_identifier=workflow,
-                    workflow_input=data,
+                    workflow_input=workflow_input,
                     wf_params={})
 
                 if response:

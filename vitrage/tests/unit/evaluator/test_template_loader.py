@@ -38,6 +38,8 @@ class BasicTemplateTest(base.BaseTest):
 
     BASIC_TEMPLATE = 'basic.yaml'
     BASIC_TEMPLATE_WITH_INCLUDE = 'basic_with_include.yaml'
+    V1_MISTRAL_TEMPLATE = 'v1_execute_mistral.yaml'
+    V2_MISTRAL_TEMPLATE = 'v2_execute_mistral.yaml'
     DEF_TEMPLATE_TESTS_DIR = utils.get_resources_dir() +\
         '/templates/def_template_tests'
 
@@ -229,6 +231,39 @@ class BasicTemplateTest(base.BaseTest):
                                     expected_entities,
                                     expected_relationships,
                                     expected_scenario)
+
+    def test_convert_v1_template(self):
+        # Load v1 and v2 templates, and get their actions
+        v1_action = self._get_template_single_action(self.V1_MISTRAL_TEMPLATE)
+        v2_action = self._get_template_single_action(self.V2_MISTRAL_TEMPLATE)
+
+        # Validate that the action definition is identical (since v1 template
+        # should be converted to v2 format)
+        self._assert_equal_actions(v1_action, v2_action)
+
+    def _get_template_single_action(self, template_file):
+        template_path = '%s/templates/version/%s' % (utils.get_resources_dir(),
+                                                     template_file)
+        template_definition = file_utils.load_yaml_file(template_path, True)
+        template_data = TemplateLoader().load(template_definition)
+        scenarios = template_data.scenarios
+        self.assertIsNotNone(scenarios, 'Template should include a scenario')
+        self.assertEqual(1, len(scenarios),
+                         'Template should include a single scenario')
+        actions = scenarios[0].actions
+        self.assertIsNotNone(actions, 'Scenario should include an action')
+        self.assertEqual(1, len(actions),
+                         'Scenario should include a single action')
+        return actions[0]
+
+    def _assert_equal_actions(self, action1, action2):
+        """Compare all action fields except from the id"""
+        self.assertEqual(action1.type, action2.type,
+                         'Action types should be equal')
+        self.assert_dict_equal(action1.targets, action2.targets,
+                               'Action targets should be equal')
+        self.assert_dict_equal(action1.properties, action2.properties,
+                               'Action targets should be equal')
 
     def _validate_strict_equal(self,
                                template_data,

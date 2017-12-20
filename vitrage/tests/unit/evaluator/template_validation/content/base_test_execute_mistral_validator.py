@@ -11,28 +11,30 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+import abc
 
 from vitrage.evaluator.actions.base import ActionType
 from vitrage.evaluator.actions.recipes.execute_mistral import WORKFLOW
 from vitrage.evaluator.template_fields import TemplateFields
-from vitrage.evaluator.template_validation.content.execute_mistral_validator \
-    import ExecuteMistralValidator
 from vitrage.tests.unit.evaluator.template_validation.content.base import \
     ActionValidatorTest
 from vitrage.tests.unit.evaluator.template_validation.content.base import \
     DEFINITIONS_INDEX_MOCK
 
 
-class ExecuteMistralValidatorTest(ActionValidatorTest):
+class BaseExecuteMistralValidatorTest(ActionValidatorTest):
 
-    def test_validate_execute_mistral_action(self):
+    @abc.abstractmethod
+    def _create_execute_mistral_action(self, workflow, host, host_state):
+        pass
 
+    def _validate_execute_mistral_action(self, validator):
         self._validate_action(
             self._create_execute_mistral_action('wf_1', 'host_2', 'down'),
-            ExecuteMistralValidator.validate
+            validator.validate
         )
 
-    def test_validate_execute_mistral_action_without_workflow(self):
+    def _validate_execute_mistral_action_without_workflow(self, validator):
 
         # Test setup
         idx = DEFINITIONS_INDEX_MOCK.copy()
@@ -40,56 +42,86 @@ class ExecuteMistralValidatorTest(ActionValidatorTest):
         action[TemplateFields.PROPERTIES].pop(WORKFLOW)
 
         # Test action
-        result = ExecuteMistralValidator.validate(action, idx)
+        result = validator.validate(action, idx)
 
         # Test assertions
         self._assert_fault_result(result, 133)
 
-    def test_validate_execute_mistral_action_with_empty_workflow(self):
+    def _validate_execute_mistral_action_with_empty_workflow(self, validator):
 
         # Test setup
         idx = DEFINITIONS_INDEX_MOCK.copy()
         action = self._create_execute_mistral_action('', 'host_2', 'down')
 
         # Test action
-        result = ExecuteMistralValidator.validate(action, idx)
+        result = validator.validate(action, idx)
 
         # Test assertions
         self._assert_fault_result(result, 133)
 
-    def test_validate_execute_mistral_action_with_none_workflow(self):
+    def _validate_execute_mistral_action_with_none_workflow(self, validator):
 
         # Test setup
         idx = DEFINITIONS_INDEX_MOCK.copy()
         action = self._create_execute_mistral_action(None, 'host_2', 'down')
 
         # Test action
-        result = ExecuteMistralValidator.validate(action, idx)
+        result = validator.validate(action, idx)
 
         # Test assertions
         self._assert_fault_result(result, 133)
 
-    def test_validate_execute_mistral_action_without_additional_params(self):
+    def _validate_execute_mistral_action_without_additional_props(self,
+                                                                  validator):
 
         # Test setup - having only the 'workflow' param is a legal config
         idx = DEFINITIONS_INDEX_MOCK.copy()
-        action = self._create_execute_mistral_action('wf_1', 'host_2', 'down')
-        action[TemplateFields.PROPERTIES].pop('host')
-        action[TemplateFields.PROPERTIES].pop('host_state')
+        action = self._create_no_input_mistral_action('wf_1')
 
         # Test action
-        result = ExecuteMistralValidator.validate(action, idx)
+        result = validator.validate(action, idx)
 
         # Test assertions
         self._assert_correct_result(result)
 
     @staticmethod
-    def _create_execute_mistral_action(workflow, host, host_state):
+    def _create_no_input_mistral_action(workflow):
+
+        properties = {
+            WORKFLOW: workflow,
+        }
+        action = {
+            TemplateFields.ACTION_TYPE: ActionType.EXECUTE_MISTRAL,
+            TemplateFields.PROPERTIES: properties
+        }
+
+        return action
+
+    @staticmethod
+    def _create_v1_execute_mistral_action(workflow, host, host_state):
 
         properties = {
             WORKFLOW: workflow,
             'host': host,
             'host_state': host_state
+        }
+        action = {
+            TemplateFields.ACTION_TYPE: ActionType.EXECUTE_MISTRAL,
+            TemplateFields.PROPERTIES: properties
+        }
+
+        return action
+
+    @staticmethod
+    def _create_v2_execute_mistral_action(workflow, host, host_state):
+
+        input_props = {
+            'host': host,
+            'host_state': host_state
+        }
+        properties = {
+            WORKFLOW: workflow,
+            'input': input_props
         }
         action = {
             TemplateFields.ACTION_TYPE: ActionType.EXECUTE_MISTRAL,

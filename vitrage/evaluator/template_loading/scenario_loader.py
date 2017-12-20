@@ -12,24 +12,29 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from oslo_log import log
+
 from vitrage.common.exception import VitrageError
 from vitrage.evaluator.condition import get_condition_common_targets
 from vitrage.evaluator.condition import parse_condition
 from vitrage.evaluator.condition import SymbolResolver
-from vitrage.evaluator.template_data import ActionSpecs
 from vitrage.evaluator.template_data import EdgeDescription
 from vitrage.evaluator.template_data import ENTITY
 from vitrage.evaluator.template_data import RELATIONSHIP
 from vitrage.evaluator.template_data import Scenario
 from vitrage.evaluator.template_fields import TemplateFields as TFields
-from vitrage.evaluator.template_loading.subgraph_builder import SubGraphBuilder
+from vitrage.evaluator.template_loading.subgraph_builder import \
+    SubGraphBuilder
 from vitrage.graph import Vertex
+
+LOG = log.getLogger(__name__)
 
 
 class ScenarioLoader(object):
 
-    def __init__(self, name, entities, relationships):
+    def __init__(self, template_schema, name, entities, relationships):
         self.name = name
+        self._template_schema = template_schema
         self._template_entities = entities
         self._template_relationships = relationships
 
@@ -93,14 +98,14 @@ class ScenarioLoader(object):
 
         for counter, action_def in enumerate(actions_def):
             action_id = '%s-action%s' % (scenario_id, str(counter))
-            action_dict = action_def[TFields.ACTION]
-            action_type = action_dict[TFields.ACTION_TYPE]
-            targets = action_dict.get(TFields.ACTION_TARGET,
-                                      self.valid_target)
-            properties = action_dict.get(TFields.PROPERTIES, {})
+            action_type = action_def[TFields.ACTION][TFields.ACTION_TYPE]
+            action_loader = self._template_schema.loader(action_type)
 
-            actions.append(
-                ActionSpecs(action_id, action_type, targets, properties))
+            if action_loader:
+                actions.append(action_loader.load(action_id, self.valid_target,
+                                                  action_def))
+            else:
+                LOG.warning('Failed to load action of type %s', action_type)
 
         return actions
 

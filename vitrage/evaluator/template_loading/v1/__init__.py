@@ -1,4 +1,4 @@
-# Copyright 2016 - Nokia
+# Copyright 2017 - Nokia
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -12,25 +12,4 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from vitrage.common.constants import TemplateTopologyFields
-
-
-class TemplateFields(TemplateTopologyFields):
-
-    SCENARIOS = 'scenarios'
-
-    ALARM_NAME = 'alarm_name'
-    ACTION = 'action'
-    ACTIONS = 'actions'
-    ACTION_TARGET = 'action_target'
-    ACTION_TYPE = 'action_type'
-    CATEGORY = 'category'
-    CONDITION = 'condition'
-    INCLUDES = 'includes'
-    SEVERITY = 'severity'
-    SCENARIO = 'scenario'
-    STATE = 'state'
-    TEMPLATE_ID = 'template_id'
-
-    PROPERTIES = 'properties'
-    REGEX = '.regex'
+__author__ = 'stack'

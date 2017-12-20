@@ -14,18 +14,9 @@
 
 from oslo_log import log
 
-from vitrage.evaluator.template_fields import DEFAULT_VERSION
-from vitrage.evaluator.template_fields import SUPPORTED_VERSIONS
 from vitrage.evaluator.template_fields import TemplateFields
 from vitrage.evaluator.template_validation.content.base import \
-    get_content_correct_result
-from vitrage.evaluator.template_validation.content.base import \
-    get_content_fault_result
-from vitrage.evaluator.template_validation.content.definitions_validator \
-    import DefinitionsValidator as DefValidator
-from vitrage.evaluator.template_validation.content.scenario_validator import \
-    ScenarioValidator
-from vitrage.evaluator.template_validation.status_messages import status_msgs
+    get_template_schema
 
 LOG = log.getLogger(__name__)
 
@@ -35,65 +26,57 @@ def content_validation(template, def_templates=None):
     if def_templates is None:
         def_templates = {}
 
-    result = _validate_version(template)
-
     entities_index = {}
     template_definitions = {}
+
+    result, template_schema = get_template_schema(template)
+    def_validator = template_schema.validator(TemplateFields.DEFINITIONS) \
+        if result.is_valid_config and template_schema else None
+
+    if result.is_valid_config and not def_validator:
+        result.is_valid_config = False  # Not supposed to happen
 
     if result.is_valid_config and TemplateFields.DEFINITIONS in template:
         template_definitions = template[TemplateFields.DEFINITIONS]
 
         if TemplateFields.ENTITIES in template_definitions:
             entities = template_definitions[TemplateFields.ENTITIES]
-            result = DefValidator.validate_entities_definition(entities,
-                                                               entities_index)
+            result = def_validator.validate_entities_definition(entities,
+                                                                entities_index)
 
     # If there are duplicate definitions in several includes under the same
     # name, will regard the first one
     if result.is_valid_config and TemplateFields.INCLUDES in template:
         template_includes = template[TemplateFields.INCLUDES]
         result = \
-            DefValidator.validate_definitions_with_includes(template_includes,
-                                                            def_templates,
-                                                            entities_index)
+            def_validator.validate_definitions_with_includes(template_includes,
+                                                             def_templates,
+                                                             entities_index)
 
     relationship_index = {}
 
     if result.is_valid_config and \
             TemplateFields.RELATIONSHIPS in template_definitions:
         relationships = template_definitions[TemplateFields.RELATIONSHIPS]
-        result = \
-            DefValidator.validate_relationships_definitions(relationships,
-                                                            relationship_index,
-                                                            entities_index)
+        result = def_validator.validate_relationships_definitions(
+            relationships, relationship_index, entities_index)
 
     if result.is_valid_config and TemplateFields.INCLUDES in template:
         template_includes = template[TemplateFields.INCLUDES]
-        result = DefValidator.validate_relationships_definitions_with_includes(
-            template_includes,
-            def_templates,
-            entities_index,
-            relationship_index)
+        result = \
+            def_validator.validate_relationships_definitions_with_includes(
+                template_includes,
+                def_templates,
+                entities_index,
+                relationship_index)
 
     if result.is_valid_config:
+        scenario_validator = template_schema.validator(
+            TemplateFields.SCENARIOS)
         scenarios = template[TemplateFields.SCENARIOS]
         definitions_index = entities_index.copy()
         definitions_index.update(relationship_index)
-        result = ScenarioValidator(definitions_index).validate(scenarios)
+        result = scenario_validator.validate(template_schema,
+                                             definitions_index, scenarios)
 
     return result
-
-
-def _validate_version(template):
-    metadata = template.get(TemplateFields.METADATA)
-
-    if metadata is None:
-        LOG.error('%s status code: %s' % (status_msgs[62], 62))
-        return get_content_fault_result(62)
-
-    version = metadata.get(TemplateFields.VERSION, DEFAULT_VERSION)
-    if version in SUPPORTED_VERSIONS:
-        return get_content_correct_result()
-    else:
-        LOG.error('%s status code: %s' % (status_msgs[63], 63))
-        return get_content_fault_result(63)

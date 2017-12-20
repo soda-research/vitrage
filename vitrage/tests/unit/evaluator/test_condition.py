@@ -15,7 +15,7 @@
 from vitrage.evaluator.condition import SymbolResolver
 from vitrage.evaluator.template_data import EdgeDescription
 from vitrage.evaluator.template_loading.template_loader import TemplateLoader
-from vitrage.evaluator.template_validation.content.scenario_validator \
+from vitrage.evaluator.template_validation.content.v1.scenario_validator \
     import get_condition_common_targets
 from vitrage.tests import base
 from vitrage.tests.mocks import utils

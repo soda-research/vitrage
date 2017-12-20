@@ -12,15 +12,21 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from oslo_log import log
+
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.evaluator.template_data import EdgeDescription
 from vitrage.evaluator.template_data import TemplateData
 from vitrage.evaluator.template_fields import TemplateFields as TFields
 from vitrage.evaluator.template_loading.props_converter import PropsConverter
 from vitrage.evaluator.template_loading.scenario_loader import ScenarioLoader
+from vitrage.evaluator.template_schema_factory import TemplateSchemaFactory
 from vitrage.graph import Edge
 from vitrage.graph import Vertex
 from vitrage.utils import evaluator as evaluator_utils
+
+
+LOG = log.getLogger(__name__)
 
 
 class TemplateLoader(object):
@@ -43,6 +49,12 @@ class TemplateLoader(object):
         self.relationships = {}
 
     def load(self, template_def, def_templates=None):
+
+        template_schema = self._get_template_schema(template_def)
+        if not template_schema:
+            LOG.error('Failed to load template - unsupported version')
+            return
+
         name = template_def[TFields.METADATA][TFields.NAME]
 
         if def_templates is None:
@@ -70,8 +82,9 @@ class TemplateLoader(object):
                                                          def_templates,
                                                          self.relationships)
 
-        scenarios = ScenarioLoader(name, self.entities, self.relationships)\
-            .build_scenarios(template_def[TFields.SCENARIOS])
+        scenarios = ScenarioLoader(template_schema, name, self.entities,
+                                   self.relationships).\
+            build_scenarios(template_def[TFields.SCENARIOS])
 
         return TemplateData(name, self.entities, self.relationships, scenarios)
 
@@ -162,3 +175,13 @@ class TemplateLoader(object):
         ignore_ids = [TFields.TEMPLATE_ID, TFields.SOURCE, TFields.TARGET]
         return \
             {key: var_dict[key] for key in var_dict if key not in ignore_ids}
+
+    @staticmethod
+    def _get_template_schema(template):
+        metadata = template.get(TFields.METADATA)
+
+        if metadata:
+            version = metadata.get(TFields.VERSION)
+            return TemplateSchemaFactory().template_schema(version)
+        else:
+            return None

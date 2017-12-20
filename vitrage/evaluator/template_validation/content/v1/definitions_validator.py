@@ -143,6 +143,7 @@ class DefinitionsValidator(object):
 
         return get_content_correct_result()
 
+    # noinspection PyBroadException
     @classmethod
     def _validate_entity_definition(cls, entity_dict, entities_index):
         template_id = entity_dict[TemplateFields.TEMPLATE_ID]

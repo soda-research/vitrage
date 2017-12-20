@@ -14,7 +14,7 @@
 
 from vitrage.evaluator.actions.base import ActionType
 from vitrage.evaluator.template_fields import TemplateFields
-from vitrage.evaluator.template_validation.content. \
+from vitrage.evaluator.template_validation.content.v1.\
     add_causal_relationship_validator import AddCausalRelationshipValidator
 from vitrage.tests.unit.evaluator.template_validation.content.base import \
     ActionValidatorTest

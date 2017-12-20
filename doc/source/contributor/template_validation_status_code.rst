@@ -117,6 +117,9 @@ The following describes all the possible status code and their messages:
 | 135              | condition must contain a common entity for all 'or'     | content                       |
 |                  | clauses                                                 |                               |
 +------------------+---------------------------------------------------------+-------------------------------+
+| 136              | Input parameters for Mistral workflow in execute_mistral| content (version 2)           |
+|                  | action must be placed under an 'input' block            |                               |
++------------------+---------------------------------------------------------+-------------------------------+
 | 140              | At least one template must be included                  | syntax                        |
 +------------------+---------------------------------------------------------+-------------------------------+
 | 141              | Name field is unspecified for include                   | syntax                        |

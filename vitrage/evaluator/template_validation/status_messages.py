@@ -14,7 +14,8 @@
 from vitrage.common.constants import EdgeLabel
 from vitrage.common.constants import EntityCategory
 from vitrage.evaluator.actions.base import action_types
-from vitrage.evaluator.template_fields import SUPPORTED_VERSIONS
+from vitrage.evaluator.template_schema_factory import TemplateSchemaFactory
+
 
 status_msgs = {
 
@@ -43,7 +44,7 @@ status_msgs = {
     60: 'metadata section must contain id field.',
     62: 'metadata is a mandatory section.',
     63: 'Unsupported version. Version must be one of: {versions}'
-        .format(versions=SUPPORTED_VERSIONS),
+        .format(versions=TemplateSchemaFactory.supported_versions()),
 
     # scenarios section status messages 80-99
     80: 'scenarios is a mandatory section.',
@@ -84,6 +85,8 @@ status_msgs = {
          'block',
     134: 'condition can not contain only \'not\' clauses',
     135: 'condition must contain a common entity for all \'or\' clauses',
+    136: 'Input parameters for the Mistral workflow in execute_mistral action '
+         'must be placed under an \'input\' block ',
 
     # def_templates status messages 140-159
     140: 'At least one template must be included',

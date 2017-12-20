@@ -14,7 +14,7 @@
 
 from vitrage.evaluator.actions.base import ActionType
 from vitrage.evaluator.template_fields import TemplateFields
-from vitrage.evaluator.template_validation.content.raise_alarm_validator \
+from vitrage.evaluator.template_validation.content.v1.raise_alarm_validator \
     import RaiseAlarmValidator
 from vitrage.tests.unit.evaluator.template_validation.content.base import \
     ActionValidatorTest

@@ -14,6 +14,8 @@
 
 from oslo_config import cfg
 
+from vitrage.evaluator.template_schemas import init_template_schemas
+
 
 # Register options for the service
 OPTS = [
@@ -38,3 +40,5 @@ OPTS = [
                     'determined, else a default worker count of 1 is returned.'
                ),
 ]
+
+init_template_schemas()

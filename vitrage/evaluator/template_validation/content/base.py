@@ -16,6 +16,8 @@ import abc
 import six
 
 from oslo_log import log
+from vitrage.evaluator.template_fields import TemplateFields
+from vitrage.evaluator.template_schema_factory import TemplateSchemaFactory
 from vitrage.evaluator.template_validation.base import get_correct_result
 from vitrage.evaluator.template_validation.base import get_fault_result
 from vitrage.evaluator.template_validation.status_messages import status_msgs
@@ -40,6 +42,23 @@ def validate_template_id(definitions_index, id_to_check):
         return get_fault_result(RESULT_DESCRIPTION, 3, msg)
 
     return get_correct_result(RESULT_DESCRIPTION)
+
+
+def get_template_schema(template):
+    metadata = template.get(TemplateFields.METADATA)
+
+    if metadata is None:
+        LOG.error('%s status code: %s' % (status_msgs[62], 62))
+        return get_content_fault_result(62), None
+
+    version = metadata.get(TemplateFields.VERSION)
+    template_schema = TemplateSchemaFactory().template_schema(version)
+
+    if template_schema:
+        return get_content_correct_result(), template_schema
+    else:
+        LOG.error('%s status code: %s' % (status_msgs[63], 63))
+        return get_content_fault_result(63), None
 
 
 @six.add_metaclass(abc.ABCMeta)
