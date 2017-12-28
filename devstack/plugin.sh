@@ -1,6 +1,6 @@
 # Install and start **Vitrage** service in devstack
 #
-# To enable vitrage in devstack add an entry to local.conf that
+# To enable vitragebehaviortack add an entry to local.conf that
 # looks like
 #
 # [[local|localrc]]
@@ -342,18 +342,11 @@ function stop_vitrage {
 
 function modify_heat_global_index_policy_rule {
     if is_service_enabled heat; then
-        # Allow to list all stacks
-        local policy_file=$HEAT_CONF_DIR/policy.json
-        local rule_to_change='"stacks:global_index": "rule:deny_everybody"'
-        local rule_to_add='"stacks:global_index": "rule:deny_stack_user"'
-
-        # replace only if exists deny_everybody
-        if grep -q "$rule_to_change" $policy_file; then
-            sed -i "s/$rule_to_change/$rule_to_add/" $policy_file
-        # add only if not exists deny_stack_user
-        elif ! grep -q "$rule_to_add" $policy_file; then
-            sed -i "/}/i\\ \\ \\ ,$rule_to_add" $policy_file
-        fi
+        cat << EOF > /etc/heat/policy.yaml
+# List stacks globally.
+# GET  /v1/{tenant_id}/stacks
+"stacks:global_index": "rule:deny_stack_user"
+EOF
     fi
 }
 
