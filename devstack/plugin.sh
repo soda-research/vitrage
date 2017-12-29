@@ -342,11 +342,11 @@ function stop_vitrage {
 
 function modify_heat_global_index_policy_rule {
     if is_service_enabled heat; then
-        cat << EOF > /etc/heat/policy.yaml
-# List stacks globally.
-# GET  /v1/{tenant_id}/stacks
-"stacks:global_index": "rule:deny_stack_user"
-EOF
+        local heat_policy=/etc/heat/policy.yaml
+        touch $heat_policy
+        # List stacks globally.
+        # GET  /v1/{tenant_id}/stacks
+        echo '"stacks:global_index": "rule:deny_stack_user"' >> $heat_policy
     fi
 }
 
