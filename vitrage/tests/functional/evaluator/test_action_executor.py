@@ -43,7 +43,7 @@ from vitrage.evaluator.template_data import ActionSpecs
 from vitrage.evaluator.template_fields import TemplateFields as TFields
 from vitrage.opts import register_opts
 from vitrage.tests.functional.base import TestFunctionalBase
-from vitrage_tempest_tests.tests.test_configuration import TestConfiguration
+from vitrage.tests.functional.test_configuration import TestConfiguration
 
 
 class TestActionExecutor(TestFunctionalBase, TestConfiguration):
