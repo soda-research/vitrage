@@ -42,11 +42,8 @@ class VitrageBase(models.ModelBase):
 Base = declarative_base(cls=VitrageBase)
 
 
-class StringyJSON(types.TypeDecorator):
-    """Stores and retrieves JSON as TEXT.
-
-    Adjust JSON type to sqlite for unit test
-    """
+class JSONEncodedDict(types.TypeDecorator):
+    """Represents an immutable structure as a json-encoded string"""
 
     impl = types.TEXT
 
@@ -61,9 +58,6 @@ class StringyJSON(types.TypeDecorator):
         return value
 
 
-MagicJSON = types.JSON().with_variant(StringyJSON, 'sqlite')
-
-
 class Event(Base):
 
     __tablename__ = 'events'
@@ -71,7 +65,7 @@ class Event(Base):
     event_id = Column("id", INTEGER, primary_key=True, nullable=False,
                       autoincrement=True)
     collector_timestamp = Column(DateTime, index=True, nullable=False)
-    payload = Column(MagicJSON, nullable=False)
+    payload = Column(JSONEncodedDict(), nullable=False)
 
     def __repr__(self):
         return \
