@@ -18,6 +18,7 @@ from vitrage.common.policies import rca
 from vitrage.common.policies import resource
 from vitrage.common.policies import template
 from vitrage.common.policies import topology
+from vitrage.common.policies import webhook
 
 
 def list_rules():
@@ -27,5 +28,6 @@ def list_rules():
         rca.list_rules(),
         template.list_rules(),
         topology.list_rules(),
-        resource.list_rules()
+        resource.list_rules(),
+        webhook.list_rules()
     )

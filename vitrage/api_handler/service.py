@@ -25,6 +25,7 @@ from vitrage.api_handler.apis.rca import RcaApis
 from vitrage.api_handler.apis.resource import ResourceApis
 from vitrage.api_handler.apis.template import TemplateApis
 from vitrage.api_handler.apis.topology import TopologyApis
+from vitrage.api_handler.apis.webhook import WebhookApis
 from vitrage import messaging
 from vitrage import rpc as vitrage_rpc
 
@@ -55,7 +56,8 @@ class VitrageApiHandlerService(os_service.Service):
                      RcaApis(self.entity_graph, self.conf),
                      TemplateApis(self.notifier),
                      EventApis(self.conf),
-                     ResourceApis(self.entity_graph, self.conf)]
+                     ResourceApis(self.entity_graph, self.conf),
+                     WebhookApis(self.conf)]
 
         server = vitrage_rpc.get_server(target, endpoints, transport)
 

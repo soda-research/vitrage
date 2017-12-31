@@ -12,8 +12,10 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+
 import json
 import pecan
+
 
 from oslo_log import log
 from oslo_utils import encodeutils
@@ -24,6 +26,8 @@ from pecan.core import abort
 from vitrage.api.controllers.rest import RootRestController
 from vitrage.api.controllers.v1 import count
 from vitrage.api.policy import enforce
+from vitrage.common.constants import TenantProps
+from vitrage.common.constants import VertexProperties as Vprops
 
 
 LOG = log.getLogger(__name__)
@@ -36,8 +40,8 @@ class AlarmsController(RootRestController):
 
     @pecan.expose('json')
     def get_all(self, **kwargs):
-        vitrage_id = kwargs.get('vitrage_id')
-        all_tenants = kwargs.get('all_tenants', False)
+        vitrage_id = kwargs.get(Vprops.VITRAGE_ID)
+        all_tenants = kwargs.get(TenantProps.ALL_TENANTS, False)
         all_tenants = bool_from_string(all_tenants)
         if all_tenants:
             enforce("list alarms:all_tenants", pecan.request.headers,

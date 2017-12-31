@@ -1498,7 +1498,7 @@ Resource show
 Show the details of specified resource.
 
 GET /v1/resources/[vitrage_id]
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Headers
 =======
@@ -1562,3 +1562,270 @@ Response Examples
       "id": "dc35fa2f-4515-1653-ef6b-03b471bb395b",
       "vitrage_id": "RESOURCE:nova.instance:dc35fa2f-4515-1653-ef6b-03b471bb395b"
     }
+
+Webhook List
+^^^^^^^^^^^^
+List all webhooks.
+
+GET /v1/webhook/
+~~~~~~~~~~~~~~~~
+
+Headers
+=======
+
+-  X-Auth-Token (string, required) - Keystone auth token
+-  Accept (string) - application/json
+-  User-Agent (String)
+-  Content-Type (String): application/json
+
+Path Parameters
+===============
+
+None.
+
+Query Parameters
+================
+
+None.
+
+Request Body
+============
+
+None.
+
+Request Examples
+================
+
+::
+
+    GET /v1/webhook
+    Host: 135.248.18.122:8999
+    User-Agent: keystoneauth1/2.3.0 python-requests/2.9.1 CPython/2.7.6
+    Content-Type: application/json
+    Accept: application/json
+    X-Auth-Token: 2b8882ba2ec44295bf300aecb2caa4f7
+
+
+Response Status code
+====================
+
+-  200 - OK
+-  404 - Bad request
+
+Response Body
+=============
+
+Returns a list with all webhooks.
+
+Response Examples
+=================
+
+::
+
+  [
+   {
+      "url":"https://requestb.in/tq3fkvtq",
+      "headers":"{'content-type': 'application/json'}",
+      "regex_filter":"{'name':'e2e.*'}",
+      "created_at":"2018-01-04T12:27:47.000000",
+      "id":"c35caf11-f34d-440e-a804-0c1a4fdfb95b"
+   }
+  ]
+
+Webhook Show
+^^^^^^^^^^^^
+Show the details of specified webhook.
+
+GET /v1/webhook/[id]
+~~~~~~~~~~~~~~~~~~~~
+
+Headers
+=======
+
+-  X-Auth-Token (string, required) - Keystone auth token
+-  Accept (string) - application/json
+-  User-Agent (String)
+-  Content-Type (String): application/json
+
+Path Parameters
+===============
+
+- id.
+
+Query Parameters
+================
+
+None.
+
+Request Body
+============
+
+None.
+
+Request Examples
+================
+
+::
+
+    GET /v1/resources/`<id>`
+    Host: 127.0.0.1:8999
+    User-Agent: keystoneauth1/2.3.0 python-requests/2.9.1 CPython/2.7.6
+    Accept: application/json
+    X-Auth-Token: 2b8882ba2ec44295bf300aecb2caa4f7
+
+Response Status code
+====================
+
+-  200 - OK
+-  404 - Bad request
+
+Response Body
+=============
+
+Returns details of the requested webhook.
+
+Response Examples
+=================
+
+::
+
+   {
+      "url":"https://requestb.in/tq3fkvtq",
+      "created_at":"2018-01-04T12:27:47.000000",
+      "updated_at":null,
+      "id":"c35caf11-f34d-440e-a804-0c1a4fdfb95b",
+      "headers":"{'content-type': 'application/json'}",
+      "regex_filter":"{'name':'e2e.*'}"
+   }
+
+Webhook Add
+^^^^^^^^^^^
+Add a webhook to the database, to be used by the notifier.
+
+POST /v1/webhook/
+~~~~~~~~~~~~~~~~~
+
+Headers
+=======
+
+-  X-Auth-Token (string, required) - Keystone auth token
+-  Accept (string) - application/json
+-  User-Agent (String)
+-  Content-Type (String): application/json
+
+Path Parameters
+===============
+
+None.
+
+Query Parameters
+================
+
+None.
+
+Request Body
+============
+
+A webhook to be added. Will contain the following fields:
+
++------------------+-----------------------------------------------------------------+--------------+
+| Name             | Description                                                     | Required     |
++==================+=================================================================+==============+
+| url              | The webhook URL to which notifications will be sent             | Yes          |
++------------------+-----------------------------------------------------------------+--------------+
+| regex_filter     | A JSON string to filter for specific events                     | No           |
++------------------+-----------------------------------------------------------------+--------------+
+| headers          | A JSON string specifying additional headers to the notification | No           |
++------------------+-----------------------------------------------------------------+--------------+
+
+- If no regex filter is supplied, all notifications will be sent.
+- The defaults headers are : '{'content-type': 'application/json'}'
+
+Request Examples
+================
+
+::
+
+    POST /v1/webhook/
+    Host: 135.248.18.122:8999
+    User-Agent: keystoneauth1/2.3.0 python-requests/2.9.1 CPython/2.7.6
+    Content-Type: application/json
+    Accept: application/json
+    X-Auth-Token: 2b8882ba2ec44295bf300aecb2caa4f7
+
+
+::
+
+   {
+      "webhook":{
+         "url":"https://requestb.in/tqfkvtqa",
+         "headers":null,
+         "regex_filter":"{'name':'e2e.*'}"
+      }
+   }
+
+
+Response Status code
+====================
+
+-  200 - OK
+-  400 - Bad request
+
+Response Body
+=============
+
+Returns webhook details if request was OK,
+otherwise returns a detailed error message (e.g. 'headers in bad format').
+
+Webhook Delete
+^^^^^^^^^^^^^^
+Delete a specified webhook.
+
+DELETE /v1/webhook/[id]
+~~~~~~~~~~~~~~~~~~~~~~~
+
+Headers
+=======
+
+-  X-Auth-Token (string, required) - Keystone auth token
+-  Accept (string) - application/json
+-  User-Agent (String)
+-  Content-Type (String): application/json
+
+Path Parameters
+===============
+
+- id.
+
+Query Parameters
+================
+
+None.
+
+Request Body
+============
+
+None.
+
+Request Examples
+================
+
+::
+
+    DELETE /v1/resources/`<id>`
+    Host: 127.0.0.1:8999
+    User-Agent: keystoneauth1/2.3.0 python-requests/2.9.1 CPython/2.7.6
+    Accept: application/json
+    X-Auth-Token: 2b8882ba2ec44295bf300aecb2caa4f7
+
+Response Status code
+====================
+
+-  200 - OK
+-  404 - Bad request
+
+Response Body
+=============
+
+Returns a success message if the webhook is deleted, otherwise an error
+message is returned.

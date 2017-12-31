@@ -39,17 +39,21 @@ class Connection(object):
     def graph_snapshots(self):
         return None
 
+    @property
+    def webhooks(self):
+        return None
+
     @abc.abstractmethod
     def upgrade(self, nocreate=False):
-        raise NotImplementedError('upgrade not implemented')
+        raise NotImplementedError('upgrade is not implemented')
 
     @abc.abstractmethod
     def disconnect(self):
-        raise NotImplementedError('disconnect not implemented')
+        raise NotImplementedError('disconnect is not implemented')
 
     @abc.abstractmethod
     def clear(self):
-        raise NotImplementedError('clear not implemented')
+        raise NotImplementedError('clear is not implemented')
 
 
 @six.add_metaclass(abc.ABCMeta)
@@ -60,7 +64,7 @@ class ActiveActionsConnection(object):
 
         :type active_action: vitrage.storage.sqlalchemy.models.ActiveAction
         """
-        raise NotImplementedError('create active action not implemented')
+        raise NotImplementedError('create active action is not implemented')
 
     @abc.abstractmethod
     def update(self, active_action):
@@ -68,7 +72,7 @@ class ActiveActionsConnection(object):
 
         :type active_action: vitrage.storage.sqlalchemy.models.ActiveAction
         """
-        raise NotImplementedError('update active action not implemented')
+        raise NotImplementedError('update active action is not implemented')
 
     @abc.abstractmethod
     def query(self,
@@ -84,7 +88,7 @@ class ActiveActionsConnection(object):
 
         :rtype: list of vitrage.storage.sqlalchemy.models.ActiveAction
         """
-        raise NotImplementedError('query active actions not implemented')
+        raise NotImplementedError('query active actions is not implemented')
 
     @abc.abstractmethod
     def delete(self,
@@ -97,7 +101,40 @@ class ActiveActionsConnection(object):
                trigger=None,
                ):
         """Delete all active actions that match the filters."""
-        raise NotImplementedError('delete active actions not implemented')
+        raise NotImplementedError('delete active actions is not implemented')
+
+
+@six.add_metaclass(abc.ABCMeta)
+class WebhooksConnection(object):
+
+    @abc.abstractmethod
+    def create(self, webhook):
+        """Create a new webhook.
+
+        :type webhook:
+        vitrage.storage.sqlalchemy.models.Webhook
+        """
+        raise NotImplementedError('create webhook is not implemented')
+
+    @abc.abstractmethod
+    def query(self,
+              id=None,
+              project_id=None,
+              is_admin_webhook=None,
+              url=None,
+              headers=None,
+              regex_filter=None,
+              ):
+        """Yields a lists of webhooks that match filters.
+
+        :rtype: list of vitrage.storage.sqlalchemy.models.Webhook
+        """
+        raise NotImplementedError('query webhook is not implemented')
+
+    @abc.abstractmethod
+    def delete(self, id=None):
+        """Delete all webhooks that match the filters."""
+        raise NotImplementedError('delete webhook is not implemented')
 
 
 @six.add_metaclass(abc.ABCMeta)
@@ -145,14 +182,14 @@ class EventsConnection(object):
 
         :type event: vitrage.storage.sqlalchemy.models.Event
         """
-        raise NotImplementedError('create event not implemented')
+        raise NotImplementedError('create event is not implemented')
 
     def update(self, event):
         """Update an existing event.
 
         :type event: vitrage.storage.sqlalchemy.models.Event
         """
-        raise NotImplementedError('update event not implemented')
+        raise NotImplementedError('update event is not implemented')
 
     def query(self,
               event_id=None,
@@ -164,7 +201,7 @@ class EventsConnection(object):
 
         :rtype: list of vitrage.storage.sqlalchemy.models.Event
         """
-        raise NotImplementedError('query events not implemented')
+        raise NotImplementedError('query events is not implemented')
 
     def delete(self,
                event_id=None,
@@ -172,7 +209,7 @@ class EventsConnection(object):
                gt_collector_timestamp=None,
                lt_collector_timestamp=None):
         """Delete all events that match the filters."""
-        raise NotImplementedError('delete events not implemented')
+        raise NotImplementedError('delete events is not implemented')
 
 
 @six.add_metaclass(abc.ABCMeta)

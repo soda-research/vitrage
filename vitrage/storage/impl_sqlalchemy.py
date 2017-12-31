@@ -44,6 +44,12 @@ class Connection(base.Connection):
         self._events = EventsConnection(self._engine_facade)
         self._templates = TemplatesConnection(self._engine_facade)
         self._graph_snapshots = GraphSnapshotsConnection(self._engine_facade)
+        self._webhooks = WebhooksConnection(
+            self._engine_facade)
+
+    @property
+    def webhooks(self):
+        return self._webhooks
 
     @property
     def active_actions(self):
@@ -188,6 +194,38 @@ class ActiveActionsConnection(base.ActiveActionsConnection, BaseTableConn):
             action_id=action_id,
             score=score,
             trigger=trigger)
+        return query.delete()
+
+
+class WebhooksConnection(base.WebhooksConnection,
+                         BaseTableConn):
+    def __init__(self, engine_facade):
+        super(WebhooksConnection, self).__init__(engine_facade)
+
+    def create(self, webhook):
+        session = self._engine_facade.get_session()
+        with session.begin():
+            session.add(webhook)
+
+    def query(self,
+              id=None,
+              project_id=None,
+              is_admin_webhook=None,
+              url=None,
+              headers=None,
+              regex_filter=None):
+        query = self.query_filter(
+            models.Webhooks,
+            id=id,
+            project_id=project_id,
+            is_admin_webhook=is_admin_webhook,
+            url=url,
+            headers=headers,
+            regex_filter=regex_filter)
+        return query.all()
+
+    def delete(self, id=None):
+        query = self.query_filter(models.Webhooks, id=id)
         return query.delete()
 
 

@@ -169,3 +169,9 @@ class TemplateStatus(object):
     DELETING = 'DELETING'
     DELETED = 'DELETED'
     LOADING = 'LOADING'
+
+
+class TenantProps(object):
+    ALL_TENANTS = 'all_tenants'
+    TENANT = 'tenant'
+    IS_ADMIN = 'is_admin'

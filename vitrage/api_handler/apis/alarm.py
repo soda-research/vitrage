@@ -20,6 +20,7 @@ from vitrage.api_handler.apis.base import ALARM_QUERY
 from vitrage.api_handler.apis.base import ALARMS_ALL_QUERY
 from vitrage.api_handler.apis.base import EntityGraphApisBase
 from vitrage.common.constants import EntityCategory as ECategory
+from vitrage.common.constants import TenantProps
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.entity_graph.mappings.operational_alarm_severity import \
     OperationalAlarmSeverity
@@ -40,8 +41,8 @@ class AlarmApis(EntityGraphApisBase):
         LOG.debug("AlarmApis get_alarms - vitrage_id: %s, all_tenants=%s",
                   str(vitrage_id), all_tenants)
 
-        project_id = ctx.get(self.TENANT_PROPERTY, None)
-        is_admin_project = ctx.get(self.IS_ADMIN_PROJECT_PROPERTY, False)
+        project_id = ctx.get(TenantProps.TENANT, None)
+        is_admin_project = ctx.get(TenantProps.IS_ADMIN, False)
 
         if not vitrage_id or vitrage_id == 'all':
             if all_tenants:
@@ -68,8 +69,8 @@ class AlarmApis(EntityGraphApisBase):
             LOG.warning('Alarm show - Not found (%s)', vitrage_id)
             return None
 
-        is_admin = ctx.get(self.IS_ADMIN_PROJECT_PROPERTY, False)
-        curr_project = ctx.get(self.TENANT_PROPERTY, None)
+        is_admin = ctx.get(TenantProps.IS_ADMIN, False)
+        curr_project = ctx.get(TenantProps.TENANT, None)
         alarm_project = alarm.get(VProps.PROJECT_ID)
         if not is_admin and curr_project != alarm_project:
             LOG.warning('Alarm show - Authorization failed (%s)', vitrage_id)
@@ -80,8 +81,8 @@ class AlarmApis(EntityGraphApisBase):
     def get_alarm_counts(self, ctx, all_tenants):
         LOG.debug("AlarmApis get_alarm_counts - all_tenants=%s", all_tenants)
 
-        project_id = ctx.get(self.TENANT_PROPERTY, None)
-        is_admin_project = ctx.get(self.IS_ADMIN_PROJECT_PROPERTY, False)
+        project_id = ctx.get(TenantProps.TENANT, None)
+        is_admin_project = ctx.get(TenantProps.IS_ADMIN, False)
 
         if all_tenants:
             alarms = self.entity_graph.get_vertices(
