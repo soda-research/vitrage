@@ -22,6 +22,7 @@ from sqlalchemy.engine import url as sqlalchemy_url
 from vitrage import storage
 from vitrage.storage import base
 from vitrage.storage.sqlalchemy import models
+from vitrage.storage.sqlalchemy.models import Template
 
 LOG = log.getLogger(__name__)
 
@@ -40,6 +41,7 @@ class Connection(base.Connection):
         self.conf = conf
         self._active_actions = ActiveActionsConnection(self._engine_facade)
         self._events = EventsConnection(self._engine_facade)
+        self._templates = TemplatesConnection(self._engine_facade)
 
     @property
     def active_actions(self):
@@ -48,6 +50,10 @@ class Connection(base.Connection):
     @property
     def events(self):
         return self._events
+
+    @property
+    def templates(self):
+        return self._templates
 
     @staticmethod
     def _dress_url(url):
@@ -87,6 +93,44 @@ class BaseTableConn(object):
             if arg is not None:
                 query = query.filter(getattr(model, keyword) == arg)
         return query
+
+
+class TemplatesConnection(base.TemplatesConnection, BaseTableConn):
+    def __init__(self, engine_facade):
+        super(TemplatesConnection, self).__init__(engine_facade)
+
+    def create(self, template):
+        session = self._engine_facade.get_session()
+        with session.begin():
+            session.add(template)
+
+    def update(self, uuid, var, value):
+        session = self._engine_facade.get_session()
+        with session.begin():
+            session.query(Template).filter_by(uuid=uuid).update({var: value})
+
+    def query(self, name=None, file_content=None,
+              uuid=None, status=None, status_details=None, is_deleted=None,
+              template_type=None):
+        query = self.query_filter(
+            models.Template,
+            name=name,
+            file_content=file_content,
+            uuid=uuid,
+            status=status,
+            status_details=status_details,
+            is_deleted=is_deleted,
+            template_type=template_type,
+            )
+        return query.all()
+
+    def delete(self, name=None, uuid=None):
+        query = self.query_filter(
+            models.Template,
+            name=name,
+            uuid=uuid,
+            )
+        return query.delete()
 
 
 class ActiveActionsConnection(base.ActiveActionsConnection, BaseTableConn):

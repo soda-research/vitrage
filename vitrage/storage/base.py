@@ -31,6 +31,10 @@ class Connection(object):
     def events(self):
         return None
 
+    @property
+    def templates(self):
+        return None
+
     @abc.abstractmethod
     def upgrade(self, nocreate=False):
         raise NotImplementedError('upgrade not implemented')
@@ -90,6 +94,44 @@ class ActiveActionsConnection(object):
                ):
         """Delete all active actions that match the filters."""
         raise NotImplementedError('delete active actions not implemented')
+
+
+@six.add_metaclass(abc.ABCMeta)
+class TemplatesConnection(object):
+
+    @abc.abstractmethod
+    def create(self, template):
+        """Add a new template.
+
+        :type template: vitrage.storage.sqlalchemy.models.Template
+        """
+        raise NotImplementedError('Create Template not implemented')
+
+    @abc.abstractmethod
+    def update(self, uuid, var, value):
+        """update existing template.
+
+        :type template: vitrage.storage.sqlalchemy.models.Template
+        """
+        raise NotImplementedError('Update Template not implemented')
+
+    @abc.abstractmethod
+    def query(self, name=None, file_content=None,
+              uuid=None, status=None, status_details=None, is_deleted=None,
+              template_type=None):
+        """Yields a lists of templates that match filters.
+
+        :type: list of vitrage.storage.sqlalchemy.models.Template
+        """
+        raise NotImplementedError('Query Templates not implemented')
+
+    @abc.abstractmethod
+    def delete(self, name=None, uuid=None):
+        """Delete existing template
+
+        :type: list of vitrage.storage.sqlalchemy.models.Template
+        """
+        raise NotImplementedError('Delete Templates not implemented')
 
 
 @six.add_metaclass(abc.ABCMeta)

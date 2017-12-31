@@ -152,3 +152,9 @@ class DatasourceOpts(object):
     UPDATE_METHOD = 'update_method'
     CHANGES_INTERVAL = 'changes_interval'
     CONFIG_FILE = 'config_file'
+
+
+class TemplateTypes(object):
+    STANDARD = 'standard'
+    DEFINITION = 'definition'
+    EQUIVALENCE = 'equivalence'

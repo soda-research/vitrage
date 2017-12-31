@@ -11,14 +11,15 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+import json
 
 from oslo_db.sqlalchemy import models
-from sqlalchemy import Column, DateTime, INTEGER, String, \
-    SmallInteger, BigInteger, Index
-from sqlalchemy.ext.declarative import declarative_base
-import sqlalchemy.types as types
 
-import json
+from sqlalchemy import Column, DateTime, INTEGER, String, \
+    SmallInteger, BigInteger, Index, Boolean
+from sqlalchemy.ext.declarative import declarative_base
+
+import sqlalchemy.types as types
 
 
 class VitrageBase(models.ModelBase):
@@ -118,3 +119,30 @@ class ActiveAction(Base, models.TimestampMixin):
                 self.score,
                 self.trigger
             )
+
+
+class Template(Base, models.TimestampMixin):
+    __tablename__ = 'templates'
+
+    uuid = Column("id", String(64), primary_key=True, nullable=False)
+    status = Column(String(16))
+    status_details = Column(String(128))
+    name = Column(String(128), nullable=False)
+    file_content = Column(JSONEncodedDict, nullable=False)
+    is_deleted = Column(Boolean, nullable=False, default=False)
+    template_type = Column("type", String(64), default='standard')
+
+    def __repr__(self):
+        return "<Template(id='%s', name='%s', created_at='%s'," \
+               " updated_at='%s', status='%s'," \
+               "status_details='%s', file_content='%s', is_deleted='%s'," \
+               " template_type='%s' )>" % \
+               (self.uuid,
+                self.name,
+                self.created_at,
+                self.updated_at,
+                self.status,
+                self.status_details,
+                self.file_content,
+                self.is_deleted,
+                self.template_type,)
