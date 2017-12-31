@@ -37,9 +37,9 @@ from vitrage.evaluator.scenario_repository import ScenarioRepository
 from vitrage.graph.driver.networkx_graph import NXGraph
 import vitrage.graph.utils as graph_utils
 from vitrage.tests.functional.base import TestFunctionalBase
+from vitrage.tests.functional.test_configuration import TestConfiguration
 from vitrage.tests.mocks import utils
 from vitrage.utils.datetime import utcnow
-from vitrage_tempest_tests.tests.test_configuration import TestConfiguration
 
 
 class TestConsistencyFunctional(TestFunctionalBase, TestConfiguration):
