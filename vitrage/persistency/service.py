@@ -35,7 +35,7 @@ class PersistorService(os_service.Service):
         self.db_connection = db_connection
         transport = messaging.get_transport(conf)
         target = \
-            oslo_m.Target(topic=conf.persistor.persistor_topic)
+            oslo_m.Target(topic=conf.persistency.persistor_topic)
         self.listener = messaging.get_notification_listener(
             transport, [target],
             [VitragePersistorEndpoint(self.db_connection)])

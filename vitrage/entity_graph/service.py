@@ -11,11 +11,11 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+import oslo_messaging
 import threading
 import time
 
 from oslo_log import log
-import oslo_messaging
 from oslo_service import service as os_service
 
 from vitrage.entity_graph import EVALUATOR_TOPIC
@@ -23,6 +23,7 @@ from vitrage.entity_graph.processor.processor import Processor
 from vitrage.entity_graph.vitrage_init import VitrageInit
 from vitrage.evaluator.evaluator_service import EvaluatorManager
 from vitrage import messaging
+from vitrage.persistency.graph_persistor import GraphPersistor
 
 LOG = log.getLogger(__name__)
 
@@ -37,7 +38,10 @@ class VitrageGraphService(os_service.Service):
         self.graph = graph
         self.evaluator = EvaluatorManager(conf, graph)
         self.init = VitrageInit(conf, graph, self.evaluator)
-        self.processor = Processor(self.conf, self.init, e_graph=graph)
+        self.graph_persistor = GraphPersistor(conf) if \
+            self.conf.persistency.enable_persistency else None
+        self.processor = Processor(self.conf, self.init, graph,
+                                   self.graph_persistor)
         self.listener = self._init_listener()
 
     def _init_listener(self):
@@ -52,6 +56,12 @@ class VitrageGraphService(os_service.Service):
     def start(self):
         LOG.info("Vitrage Graph Service - Starting...")
         super(VitrageGraphService, self).start()
+        if self.graph_persistor:
+            self.tg.add_timer(
+                self.conf.persistency.graph_persistency_interval,
+                self.graph_persistor.store_graph,
+                self.conf.persistency.graph_persistency_interval,
+                graph=self.graph)
         self.tg.add_thread(
             self.init.initializing_process,
             on_end_messages_func=self.processor.on_recieved_all_end_messages)

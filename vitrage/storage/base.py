@@ -35,6 +35,10 @@ class Connection(object):
     def templates(self):
         return None
 
+    @property
+    def graph_snapshots(self):
+        return None
+
     @abc.abstractmethod
     def upgrade(self, nocreate=False):
         raise NotImplementedError('upgrade not implemented')
@@ -165,8 +169,35 @@ class EventsConnection(object):
     def delete(self,
                event_id=None,
                collector_timestamp=None,
-               payload=None,
                gt_collector_timestamp=None,
                lt_collector_timestamp=None):
         """Delete all events that match the filters."""
         raise NotImplementedError('delete events not implemented')
+
+
+@six.add_metaclass(abc.ABCMeta)
+class GraphSnapshotsConnection(object):
+    def create(self, graph_snapshot):
+        """Create a new graph snapshot.
+
+        :type graph_snapshot: vitrage.storage.sqlalchemy.models.GraphSnapshot
+        """
+        raise NotImplementedError('create graph snapshot not implemented')
+
+    def update(self, graph_snapshot):
+        """Update a graph snapshot.
+
+        :type graph_snapshot: vitrage.storage.sqlalchemy.models.GraphSnapshot
+        """
+        raise NotImplementedError('update graph snapshot not implemented')
+
+    def query(self, timestamp=None):
+        """Yields latest graph snapshot taken until timestamp.
+
+        :rtype: vitrage.storage.sqlalchemy.models.GraphSnapshot
+        """
+        raise NotImplementedError('query graph snapshot not implemented')
+
+    def delete(self, timestamp=None):
+        """Delete all graph snapshots taken until timestamp."""
+        raise NotImplementedError('delete graph snapshots not implemented')

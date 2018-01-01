@@ -30,6 +30,10 @@ class VitrageError(VitrageException):
     """Exception for a serious error in Vitrage"""
 
 
+class VitrageInputError(VitrageError):
+    """Exception raised for errors in the input"""
+
+
 class VitrageAlgorithmError(VitrageException):
     """Exception for unexpected termination of algorithms."""
 

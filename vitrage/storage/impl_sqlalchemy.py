@@ -19,6 +19,7 @@ from oslo_db.sqlalchemy import session as db_session
 from oslo_log import log
 from sqlalchemy.engine import url as sqlalchemy_url
 
+from vitrage.common.exception import VitrageInputError
 from vitrage import storage
 from vitrage.storage import base
 from vitrage.storage.sqlalchemy import models
@@ -42,6 +43,7 @@ class Connection(base.Connection):
         self._active_actions = ActiveActionsConnection(self._engine_facade)
         self._events = EventsConnection(self._engine_facade)
         self._templates = TemplatesConnection(self._engine_facade)
+        self._graph_snapshots = GraphSnapshotsConnection(self._engine_facade)
 
     @property
     def active_actions(self):
@@ -54,6 +56,10 @@ class Connection(base.Connection):
     @property
     def templates(self):
         return self._templates
+
+    @property
+    def graph_snapshots(self):
+        return self._graph_snapshots
 
     @staticmethod
     def _dress_url(url):
@@ -206,6 +212,19 @@ class EventsConnection(base.EventsConnection, BaseTableConn):
               payload=None,
               gt_collector_timestamp=None,
               lt_collector_timestamp=None):
+        """Yields a lists of events that match filters.
+
+        :raises: vitrage.common.exception.VitrageInputError.
+        :rtype: list of vitrage.storage.sqlalchemy.models.Event
+        """
+
+        if (event_id or collector_timestamp or payload) and \
+           (gt_collector_timestamp or lt_collector_timestamp):
+            msg = "Calling function with both specific event and range of " \
+                  "events parameters at the same time "
+            LOG.debug(msg)
+            raise VitrageInputError(msg)
+
         query = self.query_filter(
             models.Event,
             event_id=event_id,
@@ -233,17 +252,56 @@ class EventsConnection(base.EventsConnection, BaseTableConn):
     def delete(self,
                event_id=None,
                collector_timestamp=None,
-               payload=None,
                gt_collector_timestamp=None,
                lt_collector_timestamp=None):
+        """Delete all events that match the filters.
+
+        :raises: vitrage.common.exception.VitrageInputError.
+        """
+        if (event_id or collector_timestamp) and \
+           (gt_collector_timestamp or lt_collector_timestamp):
+            msg = "Calling function with both specific event and range of " \
+                  "events parameters at the same time "
+            LOG.debug(msg)
+            raise VitrageInputError(msg)
+
         query = self.query_filter(
             models.Event,
             event_id=event_id,
-            collector_timestamp=collector_timestamp,
-            payload=payload)
+            collector_timestamp=collector_timestamp)
 
         query = self._update_query_gt_lt(gt_collector_timestamp,
                                          lt_collector_timestamp,
                                          query)
 
+        query.delete()
+
+
+class GraphSnapshotsConnection(base.GraphSnapshotsConnection, BaseTableConn):
+    def __init__(self, engine_facade):
+        super(GraphSnapshotsConnection, self).__init__(engine_facade)
+
+    def create(self, graph_snapshot):
+        session = self._engine_facade.get_session()
+        with session.begin():
+            session.add(graph_snapshot)
+
+    def update(self, graph_snapshot):
+        session = self._engine_facade.get_session()
+        with session.begin():
+            session.merge(graph_snapshot)
+
+    def query(self, timestamp=None):
+        query = self.query_filter(models.GraphSnapshot)
+        query = query.filter(models.GraphSnapshot.last_event_timestamp <=
+                             timestamp)
+        return query.order_by(
+            models.GraphSnapshot.last_event_timestamp.desc()).first()
+
+    def delete(self, timestamp=None):
+        """Delete all graph snapshots taken until timestamp."""
+        query = self.query_filter(models.GraphSnapshot)
+
+        query = query.filter(models.GraphSnapshot.last_event_timestamp <=
+                             timestamp)
         query.delete()
