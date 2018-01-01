@@ -20,6 +20,7 @@ from oslo_log import log
 
 from vitrage.common.constants import EdgeProperties as EProps
 from vitrage.common.constants import VertexProperties as VProps
+from vitrage.common.utils import recursive_keypairs
 from vitrage.datasources.listener_service import defaultdict
 from vitrage.entity_graph.mappings.datasource_info_mapper \
     import DatasourceInfoMapper
@@ -238,11 +239,19 @@ class ScenarioEvaluator(EvaluatorBase):
 
     @staticmethod
     def _generate_action_id(action_spec):
+        """Generate a unique action id for the action
+
+            BEWARE: The implementation of this function MUST NOT BE CHANGED!!
+
+            The created hash is used for storing the active actions in the
+            database. If changed, existing active actions can no longer be
+            retrieved.
+        """
         targets = [(k, v.vertex_id) for k, v in action_spec.targets.items()]
         return hash(
             (action_spec.type,
              tuple(sorted(targets)),
-             tuple(sorted(action_spec.properties.items())))
+             tuple(sorted(recursive_keypairs(action_spec.properties))))
         )
 
     def _analyze_and_filter_actions(self, actions):

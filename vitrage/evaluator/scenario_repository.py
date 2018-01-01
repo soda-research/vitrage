@@ -25,8 +25,8 @@ from vitrage.evaluator.equivalence_repository import EquivalenceRepository
 from vitrage.evaluator.template_fields import TemplateFields
 from vitrage.evaluator.template_loading.scenario_loader import ScenarioLoader
 from vitrage.evaluator.template_loading.template_loader import TemplateLoader
-from vitrage.evaluator.template_validation.content.definitions_validator \
-    import DefinitionsValidator as DefValidator
+from vitrage.evaluator.template_validation.content.base import \
+    get_template_schema
 from vitrage.evaluator.template_validation.content.template_content_validator \
     import content_validation
 from vitrage.evaluator.template_validation.template_syntax_validator import \
@@ -135,23 +135,30 @@ class ScenarioRepository(object):
                     self._add_scenario(equivalent_scenario)
 
     def add_def_template(self, def_template):
+        result, template_schema = get_template_schema(def_template)
 
-        result = def_template_syntax_validation(def_template)
-        if not result.is_valid_config:
-            LOG.info('Unable to load definition template, syntax err: %s'
-                     % result.comment)
-        else:
-            result = DefValidator.def_template_content_validation(def_template)
+        if result.is_valid_config:
+            result = def_template_syntax_validation(def_template)
             if not result.is_valid_config:
-                LOG.info('Unable to load definition template, content err: %s'
+                LOG.info('Unable to load definition template, syntax err: %s'
                          % result.comment)
 
-            current_time = datetime_utils.utcnow()
-            include_uuid = uuidutils.generate_uuid()
-            self._def_templates[str(include_uuid)] = Template(include_uuid,
-                                                              def_template,
-                                                              current_time,
-                                                              result)
+        if result.is_valid_config:
+            def_validator = \
+                template_schema.validator(TemplateFields.DEFINITIONS)
+            result = \
+                def_validator.def_template_content_validation(def_template)
+
+            if result.is_valid_config:
+                current_time = datetime_utils.utcnow()
+                include_uuid = uuidutils.generate_uuid()
+                self._def_templates[str(include_uuid)] = Template(include_uuid,
+                                                                  def_template,
+                                                                  current_time,
+                                                                  result)
+            else:
+                LOG.info('Unable to load definition template, content err: %s'
+                         % result.comment)
 
     def _expand_equivalence(self, scenario):
         equivalent_scenarios = [scenario]

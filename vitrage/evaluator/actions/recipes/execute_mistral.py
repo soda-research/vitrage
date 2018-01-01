@@ -18,6 +18,7 @@ from vitrage.evaluator.actions.recipes.base import ActionStepWrapper
 
 
 MISTRAL = 'mistral'
+INPUT = 'input'
 WORKFLOW = 'workflow'
 
 

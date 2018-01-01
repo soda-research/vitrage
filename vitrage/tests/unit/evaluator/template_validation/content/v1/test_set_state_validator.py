@@ -16,7 +16,7 @@ from vitrage.entity_graph.mappings.operational_resource_state import \
     OperationalResourceState
 from vitrage.evaluator.actions.base import ActionType
 from vitrage.evaluator.template_fields import TemplateFields
-from vitrage.evaluator.template_validation.content.set_state_validator \
+from vitrage.evaluator.template_validation.content.v1.set_state_validator \
     import SetStateValidator
 from vitrage.tests.unit.evaluator.template_validation.content.base import \
     ActionValidatorTest
