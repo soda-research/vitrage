@@ -35,11 +35,9 @@ class AlarmsController(RootRestController):
     count = count.CountsController()
 
     @pecan.expose('json')
-    def index(self, vitrage_id, all_tenants=False):
-        return self.get(vitrage_id, all_tenants)
-
-    @pecan.expose('json')
-    def get(self, vitrage_id, all_tenants=False):
+    def get_all(self, **kwargs):
+        vitrage_id = kwargs.get('vitrage_id')
+        all_tenants = kwargs.get('all_tenants', False)
         all_tenants = bool_from_string(all_tenants)
         if all_tenants:
             enforce("list alarms:all_tenants", pecan.request.headers,
@@ -72,4 +70,36 @@ class AlarmsController(RootRestController):
         except Exception as e:
             to_unicode = encodeutils.exception_to_unicode(e)
             LOG.exception('failed to open file %s ', to_unicode)
+            abort(404, to_unicode)
+
+    @pecan.expose('json')
+    def get(self, vitrage_id):
+        enforce("get alarm",
+                pecan.request.headers,
+                pecan.request.enforcer,
+                {})
+
+        LOG.info('returns show alarm with vitrage id %s', vitrage_id)
+
+        try:
+            return self._show_alarm(vitrage_id)
+        except Exception as e:
+            to_unicode = encodeutils.exception_to_unicode(e)
+            LOG.exception('failed to load json %s ', to_unicode)
+            abort(404, to_unicode)
+
+    @staticmethod
+    def _show_alarm(vitrage_id):
+        alarm_json = pecan.request.client.call(pecan.request.context,
+                                               'show_alarm',
+                                               vitrage_id=vitrage_id)
+        LOG.info(alarm_json)
+
+        try:
+            alarms_list = json.loads(alarm_json)
+            return alarms_list
+
+        except Exception as e:
+            to_unicode = encodeutils.exception_to_unicode(e)
+            LOG.exception('failed to load json %s ', to_unicode)
             abort(404, to_unicode)

@@ -58,23 +58,19 @@ class ResourceApis(EntityGraphApisBase):
                                          for resource in resources]})
 
     def show_resource(self, ctx, vitrage_id):
-        LOG.debug('Show resource with vitrage_id: %s', str(vitrage_id))
 
-        project_id = ctx.get(self.TENANT_PROPERTY, None)
-        is_admin_project = ctx.get(self.IS_ADMIN_PROJECT_PROPERTY, False)
-
+        LOG.debug('Show resource with vitrage_id: %s', vitrage_id)
         resource = self.entity_graph.get_vertex(vitrage_id)
-        if resource:
-            project = resource.get(VProps.PROJECT_ID)
-            if is_admin_project:
-                return json.dumps(resource.properties)
-            else:
-                if project and project_id == project:
-                    return json.dumps(resource.properties)
-            LOG.warning(
-                'Have no authority to get resource with vitrage_id(%s)',
-                str(vitrage_id))
-        else:
-            LOG.warning('Can not find the resource with vitrage_id(%s)',
-                        str(vitrage_id))
-        return None
+        if not resource or resource.get(VProps.VITRAGE_CATEGORY) != \
+                EntityCategory.RESOURCE:
+            LOG.warning('Resource show - not found (%s)', vitrage_id)
+            return None
+
+        is_admin = ctx.get(self.IS_ADMIN_PROJECT_PROPERTY, False)
+        curr_project = ctx.get(self.TENANT_PROPERTY, None)
+        resource_project = resource.get(VProps.PROJECT_ID)
+        if not is_admin and curr_project != resource_project:
+            LOG.warning('Authorization failed for resource (%s)', vitrage_id)
+            return None
+
+        return json.dumps(resource.properties)

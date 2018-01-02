@@ -67,11 +67,19 @@ class NoAuthTest(FunctionalTest):
         with mock.patch('pecan.request') as request:
             request.client.call.return_value = '{"alarms": []}'
             params = dict(vitrage_id='all', all_tenants=False)
-            resp = self.post_json('/alarm/', params=params)
+            data = self.get_json('/alarm/', params=params)
 
             self.assertEqual(1, request.client.call.call_count)
-            self.assertEqual('200 OK', resp.status)
-            self.assertEqual([], resp.json)
+            self.assertEqual([], data)
+
+    def test_noauth_mode_show_alarm(self):
+
+        with mock.patch('pecan.request') as request:
+            request.client.call.return_value = '{}'
+            data = self.get_json('/alarm/1234')
+
+            self.assertEqual(1, request.client.call.call_count)
+            self.assertEqual({}, data)
 
     def test_noauth_mode_show_alarm_count(self):
         with mock.patch('pecan.request') as request:
@@ -97,8 +105,7 @@ class NoAuthTest(FunctionalTest):
 
         with mock.patch('pecan.request') as request:
             request.client.call.return_value = '{}'
-            params = dict(resource_type='all', all_tenants=False)
-            data = self.get_json('/resources/1234', params=params)
+            data = self.get_json('/resources/1234')
 
             self.assertEqual(1, request.client.call.call_count)
             self.assertEqual({}, data)
