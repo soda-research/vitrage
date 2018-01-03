@@ -883,6 +883,83 @@ Response Examples
      }
  ]
 
+
+Show alarm
+^^^^^^^^^^
+Show details of the specified alarm.
+
+GET /v1/alarm/[vitrage_id]
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Headers
+=======
+
+-  X-Auth-Token (string, required) - Keystone auth token
+-  Accept (string) - application/json
+-  User-Agent (String)
+-  Content-Type (String): application/json
+
+Path Parameters
+===============
+
+- vitrage_id.
+
+Query Parameters
+================
+
+None.
+
+Request Body
+============
+
+None.
+
+Request Examples
+================
+
+::
+
+    GET /v1/alarm/7cfed44c-52cc-4097-931f-8fbec7410c5c
+    Host: 127.0.0.1:8999
+    User-Agent: keystoneauth1/2.3.0 python-requests/2.9.1 CPython/2.7.6
+    Accept: application/json
+    X-Auth-Token: 2b8882ba2ec44295bf300aecb2caa4f7
+
+Response Status code
+====================
+
+-  200 - OK
+-  404 - Bad request
+
+Response Body
+=============
+
+Returns details of the requested alarm.
+
+Response Examples
+=================
+
+::
+
+    {
+      "vitrage_id": "019912c4-89e0-4d39-9836-237364cf6967",
+      "vitrage_is_deleted": false,
+      "severity": "critical",
+      "update_timestamp": "2018-01-03T07:52:06Z",
+      "resource_id": "82ea32a3-528b-4836-bfdb-3f17acd2f640",
+      "vitrage_category": "ALARM",
+      "state": "Active",
+      "vitrage_type": "vitrage",
+      "vitrage_sample_timestamp": "2018-01-03 07:52:06.497732+00:00",
+      "vitrage_operational_severity": "CRITICAL",
+      "vitrage_is_placeholder": false,
+      "vitrage_aggregated_severity": "CRITICAL",
+      "vitrage_resource_id": "82ea32a3-528b-4836-bfdb-3f17acd2f640",
+      "vitrage_resource_type": "nova.instance",
+      "is_real_vitrage_id": true,
+      "name": "deducy"
+    }
+
 Show Alarm Count
 ^^^^^^^^^^^^^^^^
 
