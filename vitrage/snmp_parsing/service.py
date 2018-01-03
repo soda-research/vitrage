@@ -12,13 +12,16 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from pyasn1.codec.ber import decoder
 from pysnmp.carrier.asyncore.dgram import udp
 from pysnmp.carrier.asyncore.dgram import udp6
 from pysnmp.carrier.asyncore.dispatch import AsyncoreDispatcher
+from pysnmp.proto import api as snmp_api
+from pysnmp.proto.rfc1902 import Integer
 
 from oslo_log import log
 from oslo_service import service as os_service
-
+import sys
 
 LOG = log.getLogger(__name__)
 
@@ -68,5 +71,36 @@ class SnmpParsingService(os_service.Service):
     # noinspection PyUnusedLocal
     def callback_func(self, transport_dispatcher, transport_domain,
                       transport_address, whole_msg):
-        # TODO(peipei): need to parse wholeMsg and send to message queue
-        pass
+        while whole_msg:
+            msg_ver = int(snmp_api.decodeMessageVersion(whole_msg))
+            if msg_ver in snmp_api.protoModules:
+                p_mod = snmp_api.protoModules[msg_ver]
+            else:
+                LOG.error('Unsupported SNMP version %s.' % msg_ver)
+                return
+            req_msg, whole_msg = decoder.decode(
+                whole_msg, asn1Spec=p_mod.Message(),
+            )
+            req_pdu = p_mod.apiMessage.getPDU(req_msg)
+            if req_pdu.isSameTypeWith(p_mod.TrapPDU()):
+                ver_binds = p_mod.apiTrapPDU.getVarBinds(req_pdu) \
+                    if msg_ver == snmp_api.protoVersion1 \
+                    else p_mod.apiPDU.getVarBinds(req_pdu)
+
+                binds_dict = self._convert_binds_to_dict(ver_binds)
+                LOG.debug('Received binds info after convert: %s' % binds_dict)
+                # TODO(peipei): need to send to message queue
+
+    def _convert_binds_to_dict(self, var_binds):
+        binds_dict = {}
+        for oid, val in var_binds:
+            u_oid = self._convert_obj_to_unicode(oid)
+            binds_dict[u_oid] = int(val) if type(val) == Integer \
+                else self._convert_obj_to_unicode(val)
+        return binds_dict
+
+    @staticmethod
+    def _convert_obj_to_unicode(val):
+        if sys.version_info[0] < 3:
+            return str(val).decode('iso-8859-1')
+        return str(val)
