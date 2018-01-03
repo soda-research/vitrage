@@ -19,3 +19,4 @@ Vitrage Specific Commandments
 [V326] Use six.itervalues() or dict.values instead of dict.itervalues()
 [V327] Method's default argument shouldn't be mutable
 [V328] Disallow LOG.warn
+[V329] Don't use assertEqual(True/False, observed).

@@ -144,8 +144,29 @@ def no_log_warn(logical_line):
         yield(0, 'V328: Use LOG.warning() rather than LOG.warn()')
 
 
+def check_assert_true_false(logical_line):
+    """V329 - Don't use assertEqual(True/False, observed)."""
+    if re.search(r"assertEqual\(\s*True,[^,]*(,[^,]*)?", logical_line):
+        msg = ("V329: Use assertTrue(observed) instead of "
+               "assertEqual(True, observed)")
+        yield (0, msg)
+    if re.search(r"assertEqual\([^,]*,\s*True(,[^,]*)?", logical_line):
+        msg = ("V329: Use assertTrue(observed) instead of "
+               "assertEqual(True, observed)")
+        yield (0, msg)
+    if re.search(r"assertEqual\(\s*False,[^,]*(,[^,]*)?", logical_line):
+        msg = ("V329: Use assertFalse(observed) instead of "
+               "assertEqual(False, observed)")
+        yield (0, msg)
+    if re.search(r"assertEqual\([^,]*,\s*False(,[^,]*)?", logical_line):
+        msg = ("V329: Use assertFalse(observed) instead of "
+               "assertEqual(False, observed)")
+        yield (0, msg)
+
+
 def factory(register):
     register(assert_true_instance)
+    register(check_assert_true_false)
     register(assert_equal_type)
     register(assert_equal_none)
     register(no_translate_logs)
