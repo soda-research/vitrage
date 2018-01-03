@@ -63,14 +63,15 @@ class ResourceApis(EntityGraphApisBase):
         resource = self.entity_graph.get_vertex(vitrage_id)
         if not resource or resource.get(VProps.VITRAGE_CATEGORY) != \
                 EntityCategory.RESOURCE:
-            LOG.warning('Resource show - not found (%s)', vitrage_id)
+            LOG.warning('Resource show - Not found (%s)', vitrage_id)
             return None
 
         is_admin = ctx.get(self.IS_ADMIN_PROJECT_PROPERTY, False)
         curr_project = ctx.get(self.TENANT_PROPERTY, None)
         resource_project = resource.get(VProps.PROJECT_ID)
         if not is_admin and curr_project != resource_project:
-            LOG.warning('Authorization failed for resource (%s)', vitrage_id)
+            LOG.warning('Resource show - Authorization failed (%s)',
+                        vitrage_id)
             return None
 
         return json.dumps(resource.properties)
