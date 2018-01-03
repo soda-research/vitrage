@@ -19,7 +19,7 @@ from osprofiler import profiler
 from vitrage.api_handler.apis.base import ALARM_QUERY
 from vitrage.api_handler.apis.base import ALARMS_ALL_QUERY
 from vitrage.api_handler.apis.base import EntityGraphApisBase
-from vitrage.common.constants import EntityCategory
+from vitrage.common.constants import EntityCategory as ECategory
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.entity_graph.mappings.operational_alarm_severity import \
     OperationalAlarmSeverity
@@ -53,12 +53,29 @@ class AlarmApis(EntityGraphApisBase):
                                                         is_admin_project)
                 alarms = set(alarms)
         else:
-            query = {VProps.VITRAGE_CATEGORY: EntityCategory.ALARM,
+            query = {VProps.VITRAGE_CATEGORY: ECategory.ALARM,
                      VProps.VITRAGE_IS_DELETED: False}
             alarms = self.entity_graph.neighbors(vitrage_id,
                                                  vertex_attr_filter=query)
 
         return json.dumps({'alarms': [v.properties for v in alarms]})
+
+    def show_alarm(self, ctx, vitrage_id):
+        LOG.debug('Show alarm with vitrage_id: %s', vitrage_id)
+
+        alarm = self.entity_graph.get_vertex(vitrage_id)
+        if not alarm or alarm.get(VProps.VITRAGE_CATEGORY) != ECategory.ALARM:
+            LOG.warning('Alarm show - not found (%s)', vitrage_id)
+            return None
+
+        is_admin = ctx.get(self.IS_ADMIN_PROJECT_PROPERTY, False)
+        curr_project = ctx.get(self.TENANT_PROPERTY, None)
+        alarm_project = alarm.get(VProps.PROJECT_ID)
+        if not is_admin and curr_project != alarm_project:
+            LOG.warning('Authorization failed for alarm (%s)', vitrage_id)
+            return None
+
+        return json.dumps(alarm.properties)
 
     def get_alarm_counts(self, ctx, all_tenants):
         LOG.debug("AlarmApis get_alarm_counts - all_tenants=%s", all_tenants)
@@ -99,7 +116,7 @@ class AlarmApis(EntityGraphApisBase):
         :rtype: list
         """
 
-        alarm_query = self._get_query_with_project(EntityCategory.ALARM,
+        alarm_query = self._get_query_with_project(ECategory.ALARM,
                                                    project_id,
                                                    is_admin_project)
         alarms = self.entity_graph.get_vertices(query_dict=alarm_query)
@@ -117,7 +134,7 @@ class AlarmApis(EntityGraphApisBase):
         :rtype: list
         """
 
-        resource_query = self._get_query_with_project(EntityCategory.RESOURCE,
+        resource_query = self._get_query_with_project(ECategory.RESOURCE,
                                                       project_id,
                                                       is_admin_project)
 

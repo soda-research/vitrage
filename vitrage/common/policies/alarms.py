@@ -16,6 +16,17 @@ from vitrage.common.policies import base
 
 rules = [
     policy.DocumentedRuleDefault(
+        name='get alarm',
+        check_str=base.UNPROTECTED,
+        description='Show the details of specified alarm',
+        operations=[
+            {
+                'path': '/alarm',
+                'method': 'GET'
+            }
+        ]
+    ),
+    policy.DocumentedRuleDefault(
         name='list alarms',
         check_str=base.UNPROTECTED,
         description='List the alarms on a resource, or all alarms',
