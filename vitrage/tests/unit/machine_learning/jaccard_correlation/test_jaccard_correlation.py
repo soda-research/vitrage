@@ -382,7 +382,7 @@ class JaccardCorrelationTest(base.BaseTest):
             str(now) + "_correlations_test.out"
         is_file = os.path.isfile(file_path)
 
-        self.assertEqual(is_file, True)
+        self.assertTrue(is_file)
 
         if os.path.isfile(file_path):
             os.remove(file_path)

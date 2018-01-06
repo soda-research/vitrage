@@ -548,8 +548,8 @@ class TestFilter(base.BaseTest):
                              "HOST.NAME}",
             "host": "some_host_kukoo"
         }
-        self.assertEqual(True, check_filter(data=event_properties,
-                                            attr_filter=attr_filter))
+        self.assertTrue(check_filter(data=event_properties,
+                                     attr_filter=attr_filter))
 
     def test_basic_regex_with_no_match(self):
         event_properties = {
@@ -566,5 +566,5 @@ class TestFilter(base.BaseTest):
                              "HOST.NAME}",
             "host": "some_host_kukoo"
         }
-        self.assertEqual(False, check_filter(data=event_properties,
-                                             attr_filter=attr_filter))
+        self.assertFalse(check_filter(data=event_properties,
+                                      attr_filter=attr_filter))

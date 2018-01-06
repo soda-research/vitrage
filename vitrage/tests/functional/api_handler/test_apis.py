@@ -413,7 +413,7 @@ class TestApis(TestEntityGraphUnitBase):
                 condition = condition and \
                     (not tmp_project_id or
                      (tmp_project_id and tmp_project_id == project_id))
-            self.assertEqual(True, condition)
+            self.assertTrue(condition)
 
     def _check_resource_properties(self, resource, vitrage_id,
                                    resource_type, project_id=None):

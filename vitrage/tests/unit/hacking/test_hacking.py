@@ -157,13 +157,50 @@ class HackingTestCase(base.BaseTest):
         self.assertEqual(0, len(list(checks.no_log_warn('LOG.warning("bl")'))))
         self.assertEqual(1, len(list(checks.no_log_warn('LOG.warn("foo")'))))
 
+    def test_asserttruefalse(self):
+        true_fail_code1 = """
+               test_bool = True
+               self.assertEqual(True, test_bool)
+               """
+        true_fail_code2 = """
+               test_bool = True
+               self.assertEqual(test_bool, True)
+               """
+        true_pass_code = """
+               test_bool = True
+               self.assertTrue(test_bool)
+               """
+        false_fail_code1 = """
+               test_bool = False
+               self.assertEqual(False, test_bool)
+               """
+        false_fail_code2 = """
+               test_bool = False
+               self.assertEqual(test_bool, False)
+               """
+        false_pass_code = """
+               test_bool = False
+               self.assertFalse(test_bool)
+               """
+        self.assertEqual(1, len(
+            list(checks.check_assert_true_false(true_fail_code1))))
+        self.assertEqual(1, len(
+            list(checks.check_assert_true_false(true_fail_code2))))
+        self.assertEqual(0, len(
+            list(checks.check_assert_true_false(true_pass_code))))
+        self.assertEqual(1, len(
+            list(checks.check_assert_true_false(false_fail_code1))))
+        self.assertEqual(1, len(
+            list(checks.check_assert_true_false(false_fail_code2))))
+        self.assertFalse(list(checks.check_assert_true_false(false_pass_code)))
+
     def test_factory(self):
         class Register(object):
             def __init__(self):
                 self.funcs = []
 
-            def __call__(self, func):
-                self.funcs.append(func)
+            def __call__(self, _func):
+                self.funcs.append(_func)
 
         register = Register()
         checks.factory(register)
