@@ -21,7 +21,7 @@ from oslo_service import service as os_service
 from vitrage.entity_graph import EVALUATOR_TOPIC
 from vitrage.entity_graph.processor.processor import Processor
 from vitrage.entity_graph.vitrage_init import VitrageInit
-from vitrage.evaluator.evaluator_service import EvaluatorManager
+from vitrage.evaluator.template_loader_service import TemplateLoaderManager
 from vitrage import messaging
 from vitrage.persistency.graph_persistor import GraphPersistor
 
@@ -32,12 +32,16 @@ class VitrageGraphService(os_service.Service):
 
     def __init__(self,
                  conf,
-                 graph):
+                 graph,
+                 evaluator,
+                 db):
         super(VitrageGraphService, self).__init__()
         self.conf = conf
         self.graph = graph
-        self.evaluator = EvaluatorManager(conf, graph)
-        self.init = VitrageInit(conf, graph, self.evaluator)
+        self.evaluator = evaluator
+        self.templates_loader = TemplateLoaderManager(conf, graph, db)
+        self.init = VitrageInit(conf, graph, self.evaluator,
+                                self.templates_loader)
         self.graph_persistor = GraphPersistor(conf) if \
             self.conf.persistency.enable_persistency else None
         self.processor = Processor(self.conf, self.init, graph,
@@ -49,9 +53,16 @@ class VitrageGraphService(os_service.Service):
         evaluator_topic = EVALUATOR_TOPIC
         return TwoPriorityListener(
             self.conf,
-            self.processor.process_event,
+            self.process_event,
             collector_topic,
             evaluator_topic)
+
+    def process_event(self, event):
+        if event.get('template_action'):
+            self.templates_loader.handle_template_event(event)
+            self.evaluator.reload_evaluators_templates()
+        else:
+            self.processor.process_event(event)
 
     def start(self):
         LOG.info("Vitrage Graph Service - Starting...")

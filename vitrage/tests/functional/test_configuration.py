@@ -13,9 +13,12 @@
 # under the License.
 from oslo_db.options import database_opts
 
+from vitrage.common.constants import TemplateStatus
+from vitrage.common.constants import TemplateTypes as TType
+from vitrage.evaluator.template_db.template_repository import \
+    add_template_to_db
 from vitrage import storage
 from vitrage.storage.sqlalchemy import models
-
 
 TEMPLATE_DIR = '/etc/vitrage/templates'
 
@@ -32,3 +35,15 @@ class TestConfiguration(object):
         models.Base.metadata.drop_all(engine)
         models.Base.metadata.create_all(engine)
         return cls._db
+
+    @classmethod
+    def add_templates(cls, templates_dir, templates_type=TType.STANDARD):
+        templates = add_template_to_db(cls._db, templates_dir, templates_type)
+        for t in templates:
+            if t.status == TemplateStatus.LOADING:
+                cls._db.templates.update(t.uuid, 'status',
+                                         TemplateStatus.ACTIVE)
+            if t.status == TemplateStatus.DELETING:
+                cls._db.templates.update(t.uuid, 'status',
+                                         TemplateStatus.DELETED)
+        return templates

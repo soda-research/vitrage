@@ -16,6 +16,9 @@ from oslo_log import log
 import oslo_messaging
 from oslo_service import service as os_service
 
+from vitrage.entity_graph import EVALUATOR_TOPIC
+from vitrage.messaging import VitrageNotifier
+
 from vitrage.api_handler.apis.alarm import AlarmApis
 from vitrage.api_handler.apis.event import EventApis
 from vitrage.api_handler.apis.rca import RcaApis
@@ -30,11 +33,12 @@ LOG = log.getLogger(__name__)
 
 class VitrageApiHandlerService(os_service.Service):
 
-    def __init__(self, conf, e_graph, scenario_repo):
+    def __init__(self, conf, e_graph):
         super(VitrageApiHandlerService, self).__init__()
         self.conf = conf
         self.entity_graph = e_graph
-        self.scenario_repo = scenario_repo
+        self.notifier = VitrageNotifier(self.conf, "vitrage.api",
+                                        EVALUATOR_TOPIC)
 
     def start(self):
         LOG.info("Vitrage Api Handler Service - Starting...")
@@ -49,9 +53,7 @@ class VitrageApiHandlerService(os_service.Service):
         endpoints = [TopologyApis(self.entity_graph, self.conf),
                      AlarmApis(self.entity_graph, self.conf),
                      RcaApis(self.entity_graph, self.conf),
-                     TemplateApis(
-                         self.scenario_repo.templates,
-                         self.scenario_repo.def_templates),
+                     TemplateApis(self.notifier),
                      EventApis(self.conf),
                      ResourceApis(self.entity_graph, self.conf)]
 

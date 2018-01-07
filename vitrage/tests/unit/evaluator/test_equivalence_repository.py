@@ -14,22 +14,30 @@
 
 import os
 
+from oslo_config import cfg
+
+from vitrage.common.constants import TemplateTypes
 from vitrage.common.exception import VitrageError
 from vitrage.evaluator.equivalence_repository import EquivalenceRepository
 from vitrage.tests import base
+from vitrage.tests.functional.test_configuration import TestConfiguration
 from vitrage.tests.mocks import utils
 
 
-class TestEquivalenceRepository(base.BaseTest):
+class TestEquivalenceRepository(base.BaseTest, TestConfiguration):
 
     # noinspection PyPep8Naming
     def setUp(self):
         super(TestEquivalenceRepository, self).setUp()
+        conf = cfg.ConfigOpts()
+        self.add_db(conf)
         self.equivalence_repository = EquivalenceRepository()
 
     def test_duplicate_entities_in_equivalence(self):
         base_dir = utils.get_resources_dir() + '/templates/equivalences_dup'
         for directory in os.listdir(base_dir):
-            self.assertRaises(VitrageError,
-                              self.equivalence_repository.load_files,
-                              os.path.join(base_dir, directory))
+            self.add_templates(os.path.join(base_dir, directory),
+                               TemplateTypes.EQUIVALENCE)
+            self.assertRaises(
+                VitrageError,
+                self.equivalence_repository.load, self._db)

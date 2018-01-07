@@ -16,7 +16,7 @@ import json
 from oslo_db.sqlalchemy import models
 
 from sqlalchemy import Column, DateTime, INTEGER, String, \
-    SmallInteger, BigInteger, Index, Boolean
+    SmallInteger, BigInteger, Index
 from sqlalchemy.ext.declarative import declarative_base
 
 import sqlalchemy.types as types
@@ -146,13 +146,12 @@ class Template(Base, models.TimestampMixin):
     status_details = Column(String(128))
     name = Column(String(128), nullable=False)
     file_content = Column(JSONEncodedDict, nullable=False)
-    is_deleted = Column(Boolean, nullable=False, default=False)
     template_type = Column("type", String(64), default='standard')
 
     def __repr__(self):
         return "<Template(id='%s', name='%s', created_at='%s'," \
                " updated_at='%s', status='%s'," \
-               "status_details='%s', file_content='%s', is_deleted='%s'," \
+               "status_details='%s', file_content='%s', " \
                " template_type='%s' )>" % \
                (self.uuid,
                 self.name,
@@ -161,5 +160,4 @@ class Template(Base, models.TimestampMixin):
                 self.status,
                 self.status_details,
                 self.file_content,
-                self.is_deleted,
                 self.template_type,)

@@ -13,11 +13,12 @@
 # under the License.
 
 from datetime import timedelta
-from six.moves import queue
 import time
 import unittest
 
 from oslo_config import cfg
+from six.moves import queue
+
 
 from vitrage.common.constants import EdgeLabel
 from vitrage.common.constants import EntityCategory

@@ -18,6 +18,28 @@ TEMPLATE = 'template %s'
 
 rules = [
     policy.DocumentedRuleDefault(
+        name=TEMPLATE % 'delete',
+        check_str=base.UNPROTECTED,
+        description='Delete a template',
+        operations=[
+            {
+                'path': '/template',
+                'method': 'DELETE'
+            }
+        ]
+    ),
+    policy.DocumentedRuleDefault(
+        name=TEMPLATE % 'add',
+        check_str=base.UNPROTECTED,
+        description='Add a template',
+        operations=[
+            {
+                'path': '/template',
+                'method': 'PUT'
+            }
+        ]
+    ),
+    policy.DocumentedRuleDefault(
         name=TEMPLATE % 'validate',
         check_str=base.UNPROTECTED,
         description='Validate a template, or all templates in a folder',

@@ -161,3 +161,11 @@ class TemplateTypes(object):
     STANDARD = 'standard'
     DEFINITION = 'definition'
     EQUIVALENCE = 'equivalence'
+
+
+class TemplateStatus(object):
+    ACTIVE = 'ACTIVE'
+    ERROR = 'ERROR'
+    DELETING = 'DELETING'
+    DELETED = 'DELETED'
+    LOADING = 'LOADING'

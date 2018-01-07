@@ -11,20 +11,26 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-
+from vitrage.common.constants import TemplateStatus
+from vitrage.common.constants import TemplateTypes
 from vitrage.common.exception import VitrageError
 from vitrage.evaluator.template_loading.equivalence_loader import \
     EquivalenceLoader
-from vitrage.utils import file as file_utils
+
+from oslo_log import log as logging
+
+LOG = logging.getLogger(__name__)
 
 
 class EquivalenceRepository(object):
     def __init__(self):
         self.entity_equivalences = {}
 
-    def load_files(self, directory):
-        equivalence_defs = file_utils.load_yaml_files(directory)
-
+    def load(self, db):
+        equivalence_defs = db.templates.query(
+            template_type=TemplateTypes.EQUIVALENCE,
+            status=TemplateStatus.ACTIVE)
+        equivalence_defs = [e.file_content for e in equivalence_defs]
         for equivalence_def in equivalence_defs:
             equivalences = EquivalenceLoader(equivalence_def).equivalences
             for equivalence in equivalences:

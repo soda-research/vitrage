@@ -21,7 +21,9 @@ from pecan.core import abort
 
 from vitrage.api.controllers.rest import RootRestController
 from vitrage.api.policy import enforce
-
+from vitrage.common.constants import TemplateStatus as TStatus
+from vitrage.common.exception import VitrageError
+from vitrage.evaluator.template_db import template_repository as template_repo
 
 LOG = log.getLogger(__name__)
 
@@ -66,6 +68,38 @@ class TemplateController(RootRestController):
             abort(404, to_unicode)
 
     @pecan.expose('json')
+    def delete(self, **kwargs):
+        uuid = kwargs['uuid']
+        LOG.info("delete template. uuid: %s", str(uuid))
+
+        enforce("template delete",
+                pecan.request.headers,
+                pecan.request.enforcer,
+                {})
+        try:
+            return self._delete(uuid)
+        except Exception as e:
+            LOG.exception('failed to delete template %s', e)
+            abort(404, str(e))
+
+    @pecan.expose('json')
+    def put(self, **kwargs):
+        template_path = kwargs['path']
+        LOG.info("add template: %s", template_path)
+
+        enforce("template add",
+                pecan.request.headers,
+                pecan.request.enforcer,
+                {})
+        template_type = kwargs['template_type']
+
+        try:
+            return self._add(template_path, template_type)
+        except Exception as e:
+            LOG.exception('failed to add template %s', e)
+            abort(404, str(e))
+
+    @pecan.expose('json')
     def post(self, **kwargs):
 
         LOG.info('validate template. args: %s', kwargs)
@@ -84,30 +118,25 @@ class TemplateController(RootRestController):
             LOG.exception('failed to validate template(s) %s', to_unicode)
             abort(404, to_unicode)
 
-    @staticmethod
-    def _get_templates():
-        templates_json = pecan.request.client.call(pecan.request.context,
-                                                   'get_templates')
-        LOG.info(templates_json)
-
+    @classmethod
+    def _get_templates(cls):
         try:
-            template_list = json.loads(templates_json)['templates_details']
-            return template_list
+            templates = pecan.request.storage.templates.query()
+            templates = [t for t in templates if t.status != TStatus.DELETED]
+            templates.sort(key=lambda template: template.created_at)
+            return [cls._db_template_to_dict(t) for t in templates]
         except Exception as e:
             to_unicode = encodeutils.exception_to_unicode(e)
             LOG.exception('failed to get template list %s ', to_unicode)
             abort(404, to_unicode)
 
     @staticmethod
-    def _show_template(template_uuid):
-
-        template_json = pecan.request.client.call(pecan.request.context,
-                                                  'show_template',
-                                                  template_uuid=template_uuid)
-        LOG.info(template_json)
-
+    def _show_template(uuid):
         try:
-            return json.loads(template_json)
+            templates = pecan.request.storage.templates.query(uuid=uuid)
+            if not templates:
+                raise VitrageError("Template %s not found", uuid)
+            return templates[0].file_content
         except Exception as e:
             to_unicode = encodeutils.exception_to_unicode(e)
             LOG.exception('failed to show template with uuid: %s ', to_unicode)
@@ -125,3 +154,44 @@ class TemplateController(RootRestController):
             to_unicode = encodeutils.exception_to_unicode(e)
             LOG.exception('failed to open template file(s) %s ', to_unicode)
             abort(404, to_unicode)
+
+    @classmethod
+    def _add(cls, path, template_type):
+        try:
+            templates = template_repo.add_template_to_db(
+                pecan.request.storage, path, template_type)
+            pecan.request.client.call(pecan.request.context, 'add_template')
+            return [cls._db_template_to_dict(t) for t in templates]
+        except Exception as e:
+            LOG.exception('failed to add template file %s ', e)
+            abort(404, str(e))
+
+    @classmethod
+    def _db_template_to_dict(cls, template):
+        return {
+            "uuid": template.uuid,
+            "name": template.name,
+            "status": template.status,
+            "date": template.created_at,
+            "status details": template.status_details,
+            "type": template.template_type,
+        }
+
+    @staticmethod
+    def _delete(uuid):
+        try:
+            storage = pecan.request.storage
+            templates = storage.templates.query(uuid=uuid)
+            if not templates:
+                raise VitrageError('template does not exists')
+            elif templates[0].status == TStatus.DELETED:
+                raise VitrageError('template is deleted')
+            elif templates[0].status == TStatus.ERROR:
+                storage.templates.update(uuid, "status", TStatus.DELETED)
+            elif templates[0].status == TStatus.ACTIVE:
+                storage.templates.update(uuid, "status", TStatus.DELETING)
+                pecan.request.client.call(pecan.request.context,
+                                          'delete_template')
+        except Exception as e:
+            LOG.exception('failed to delete template file %s ', e)
+            abort(404, str(e))

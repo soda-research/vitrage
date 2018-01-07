@@ -21,10 +21,11 @@ from vitrage.api_handler.service import VitrageApiHandlerService
 from vitrage.cli import VITRAGE_TITLE
 from vitrage import entity_graph
 from vitrage.entity_graph.consistency.service import VitrageConsistencyService
-from vitrage.entity_graph.service import VitrageGraphService
-from vitrage.evaluator.scenario_repository import ScenarioRepository
 from vitrage import service
 from vitrage import storage
+
+from vitrage.entity_graph.service import VitrageGraphService
+from vitrage.evaluator.evaluator_service import EvaluatorManager
 
 
 def main():
@@ -38,28 +39,28 @@ def main():
     print(VITRAGE_TITLE)
     conf = service.prepare_service()
     e_graph = entity_graph.get_graph_driver(conf)('Entity Graph')
+    evaluator = EvaluatorManager(conf, e_graph)
     launcher = os_service.ServiceLauncher(conf)
-    full_scenario_repo = ScenarioRepository(conf)
-    clear_db(conf)
+    db_connection = storage.get_connection_from_config(conf)
+    clear_active_actions_table(db_connection)
 
-    launcher.launch_service(VitrageGraphService(conf, e_graph))
+    launcher.launch_service(VitrageGraphService(
+        conf, e_graph, evaluator, db_connection))
 
-    launcher.launch_service(VitrageApiHandlerService(
-        conf, e_graph, full_scenario_repo))
+    launcher.launch_service(VitrageApiHandlerService(conf, e_graph))
 
     launcher.launch_service(VitrageConsistencyService(conf, e_graph))
 
     launcher.wait()
 
 
-def clear_db(conf):
-    """Delete all data from vitrage tables
+def clear_active_actions_table(db_connection):
+    """Delete all data from active_actions table
 
     The following deletes the entire vitrage database
     It should be removed once graph is persistent
     """
-    db_connection = storage.get_connection_from_config(conf)
-    db_connection.clear()
+    db_connection.active_actions.delete()
 
 if __name__ == "__main__":
     sys.exit(main())

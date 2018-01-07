@@ -12,22 +12,22 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import os
-
 from oslo_config import cfg
 
 from vitrage.common.constants import EntityCategory
+from vitrage.common.constants import TemplateTypes as TType
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.evaluator.scenario_repository import ScenarioRepository
 from vitrage.evaluator.template_validation.template_syntax_validator import \
     syntax_validation
 from vitrage.graph import Vertex
 from vitrage.tests import base
+from vitrage.tests.functional.test_configuration import TestConfiguration
 from vitrage.tests.mocks import utils
 from vitrage.utils import file as file_utils
 
 
-class ScenarioRepositoryTest(base.BaseTest):
+class ScenarioRepositoryTest(base.BaseTest, TestConfiguration):
     BASE_DIR = utils.get_resources_dir() + '/templates/general'
     OPTS = [
         cfg.StrOpt('templates_dir',
@@ -44,7 +44,8 @@ class ScenarioRepositoryTest(base.BaseTest):
         super(ScenarioRepositoryTest, cls).setUpClass()
         cls.conf = cfg.ConfigOpts()
         cls.conf.register_opts(cls.OPTS, group='evaluator')
-
+        cls.add_db(cls.conf)
+        cls.add_templates(cls.conf.evaluator.templates_dir)
         templates_dir_path = cls.conf.evaluator.templates_dir
         cls.template_defs = file_utils.load_yaml_files(templates_dir_path)
 
@@ -57,8 +58,10 @@ class ScenarioRepositoryTest(base.BaseTest):
 
         # Test assertions
         self.assertIsNotNone(scenario_repository)
-        path, dirs, files = next(os.walk(self.conf.evaluator.templates_dir))
-        self.assertEqual(len(files), len(scenario_repository.templates))
+        self.assertEqual(
+            2,
+            len(scenario_repository.templates),
+            'scenario_repository.templates should contain all valid templates')
 
     def test_init_scenario_repository(self):
 
@@ -74,7 +77,10 @@ class ScenarioRepositoryTest(base.BaseTest):
 
         scenario_templates = self.scenario_repository.templates
         # there is one bad template
-        self.assertEqual(valid_template_counter, len(scenario_templates) - 1)
+        self.assertEqual(
+            valid_template_counter,
+            len(scenario_templates),
+            'scenario_repository.templates should contain all valid templates')
 
         entity_equivalences = self.scenario_repository.entity_equivalences
         for entity_props, equivalence in entity_equivalences.items():
@@ -100,20 +106,20 @@ class ScenarioRepositoryTest(base.BaseTest):
         pass
 
 
-class RegExTemplateTest(base.BaseTest):
+class RegExTemplateTest(base.BaseTest, TestConfiguration):
 
     BASE_DIR = utils.get_resources_dir() + '/templates/regex'
     OPTS = [
         cfg.StrOpt('templates_dir',
-                   default=BASE_DIR),
-        cfg.StrOpt('equivalences_dir',
-                   default=BASE_DIR + '/equivalences')]
+                   default=BASE_DIR)]
 
     @classmethod
     def setUpClass(cls):
         super(RegExTemplateTest, cls).setUpClass()
         cls.conf = cfg.ConfigOpts()
         cls.conf.register_opts(cls.OPTS, group='evaluator')
+        cls.add_db(cls.conf)
+        cls.add_templates(cls.conf.evaluator.templates_dir)
         cls.scenario_repository = ScenarioRepository(cls.conf)
 
     def test_basic_regex(self):
@@ -169,7 +175,7 @@ class RegExTemplateTest(base.BaseTest):
         self.assertEqual(0, len(relevant_scenarios))
 
 
-class EquivalentScenarioTest(base.BaseTest):
+class EquivalentScenarioTest(base.BaseTest, TestConfiguration):
     BASE_DIR = utils.get_resources_dir() + '/templates/equivalent_scenarios/'
     OPTS = [
         cfg.StrOpt('templates_dir',
@@ -188,10 +194,12 @@ class EquivalentScenarioTest(base.BaseTest):
         super(EquivalentScenarioTest, cls).setUpClass()
         cls.conf = cfg.ConfigOpts()
         cls.conf.register_opts(cls.OPTS, group='evaluator')
-
-        templates_dir_path = cls.conf.evaluator.templates_dir
-        cls.template_defs = file_utils.load_yaml_files(templates_dir_path)
-
+        cls.add_db(cls.conf)
+        cls.add_templates(cls.conf.evaluator.templates_dir)
+        cls.add_templates(cls.conf.evaluator.equivalences_dir,
+                          TType.EQUIVALENCE)
+        cls.add_templates(cls.conf.evaluator.def_templates_dir,
+                          TType.DEFINITION)
         cls.scenario_repository = ScenarioRepository(cls.conf)
 
     def test_expansion(self):

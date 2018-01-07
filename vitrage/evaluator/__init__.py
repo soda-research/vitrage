@@ -16,7 +16,6 @@ from oslo_config import cfg
 
 from vitrage.evaluator.template_schemas import init_template_schemas
 
-
 # Register options for the service
 OPTS = [
     cfg.StrOpt('templates_dir',

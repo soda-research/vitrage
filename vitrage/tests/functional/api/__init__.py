@@ -55,7 +55,7 @@ class FunctionalTest(base.BaseTest):
         self.CONF.set_override('auth_mode', self.auth, group='api')
 
         self.CONF.set_override('connection',
-                               'sqlite:///:memory:',
+                               'sqlite:///:test.db:',
                                group='database')
 
         self.app = webtest.TestApp(app.load_app(self.CONF))
