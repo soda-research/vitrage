@@ -65,14 +65,14 @@ class AlarmApis(EntityGraphApisBase):
 
         alarm = self.entity_graph.get_vertex(vitrage_id)
         if not alarm or alarm.get(VProps.VITRAGE_CATEGORY) != ECategory.ALARM:
-            LOG.warning('Alarm show - not found (%s)', vitrage_id)
+            LOG.warning('Alarm show - Not found (%s)', vitrage_id)
             return None
 
         is_admin = ctx.get(self.IS_ADMIN_PROJECT_PROPERTY, False)
         curr_project = ctx.get(self.TENANT_PROPERTY, None)
         alarm_project = alarm.get(VProps.PROJECT_ID)
         if not is_admin and curr_project != alarm_project:
-            LOG.warning('Authorization failed for alarm (%s)', vitrage_id)
+            LOG.warning('Alarm show - Authorization failed (%s)', vitrage_id)
             return None
 
         return json.dumps(alarm.properties)
