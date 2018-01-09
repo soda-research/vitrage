@@ -184,7 +184,7 @@ class ScenarioValidator(object):
     @staticmethod
     def _validate_scenario_action(template_schema, def_index, action):
         action_type = action[TemplateFields.ACTION_TYPE]
-        action_validator = template_schema.validator(action_type)
+        action_validator = template_schema.validators.get(action_type)
 
         if not action_validator:
             LOG.error('%s status code: %s' % (status_msgs[120], 120))

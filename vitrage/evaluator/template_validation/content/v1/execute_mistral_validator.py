@@ -15,6 +15,7 @@
 from oslo_log import log
 
 from vitrage.evaluator.actions.recipes.execute_mistral import WORKFLOW
+from vitrage.evaluator.base import is_function
 from vitrage.evaluator.template_fields import TemplateFields
 from vitrage.evaluator.template_validation.content.base import \
     ActionValidator
@@ -37,5 +38,10 @@ class ExecuteMistralValidator(ActionValidator):
         if WORKFLOW not in properties or not properties[WORKFLOW]:
             LOG.error('%s status code: %s' % (status_msgs[133], 133))
             return get_content_fault_result(133)
+
+        for key, value in properties.items():
+            if not isinstance(value, dict) and is_function(value):
+                LOG.error('%s status code: %s' % (status_msgs[137], 137))
+                return get_content_fault_result(137)
 
         return get_content_correct_result()

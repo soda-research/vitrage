@@ -1,4 +1,4 @@
-# Copyright 2016 - Nokia
+# Copyright 2018 - Nokia
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -11,16 +11,5 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-from collections import namedtuple
-import re
 
-Template = namedtuple('Template', ['uuid', 'data', 'date', 'result'])
-
-
-def is_function(str):
-    """Check if the string represents a function
-
-    A function has the format: func_name(params)
-    Search for a regex with open and close parenthesis
-    """
-    return re.match('.*\(.*\)', str)
+__author__ = 'stack'

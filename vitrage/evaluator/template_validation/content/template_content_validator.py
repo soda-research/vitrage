@@ -30,7 +30,8 @@ def content_validation(template, def_templates=None):
     template_definitions = {}
 
     result, template_schema = get_template_schema(template)
-    def_validator = template_schema.validator(TemplateFields.DEFINITIONS) \
+    def_validator = \
+        template_schema.validators.get(TemplateFields.DEFINITIONS) \
         if result.is_valid_config and template_schema else None
 
     if result.is_valid_config and not def_validator:
@@ -71,7 +72,7 @@ def content_validation(template, def_templates=None):
                 relationship_index)
 
     if result.is_valid_config:
-        scenario_validator = template_schema.validator(
+        scenario_validator = template_schema.validators.get(
             TemplateFields.SCENARIOS)
         scenarios = template[TemplateFields.SCENARIOS]
         definitions_index = entities_index.copy()

@@ -14,6 +14,7 @@
 from collections import namedtuple
 from collections import OrderedDict
 import copy
+import re
 import time
 
 from oslo_log import log
@@ -28,8 +29,10 @@ from vitrage.evaluator.actions.action_executor import ActionExecutor
 from vitrage.evaluator.actions.base import ActionMode
 from vitrage.evaluator.actions.base import ActionType
 import vitrage.evaluator.actions.priority_tools as pt
+from vitrage.evaluator.base import is_function
 from vitrage.evaluator.template_data import ActionSpecs
 from vitrage.evaluator.template_data import EdgeDescription
+from vitrage.evaluator.template_schema_factory import TemplateSchemaFactory
 from vitrage.graph.algo_driver.algorithm import Mapping
 from vitrage.graph.algo_driver.sub_graph_matching import \
     NEG_CONDITION
@@ -184,7 +187,8 @@ class ScenarioEvaluator(object):
                                                    scenario_element,
                                                    action.targets[TARGET])
 
-                actions.extend(self._get_actions_from_matches(matches,
+                actions.extend(self._get_actions_from_matches(scenario.version,
+                                                              matches,
                                                               mode,
                                                               action))
 
@@ -207,6 +211,7 @@ class ScenarioEvaluator(object):
                                                      scenario_element)
 
     def _get_actions_from_matches(self,
+                                  scenario_version,
                                   combined_matches,
                                   mode,
                                   action_spec):
@@ -217,14 +222,66 @@ class ScenarioEvaluator(object):
                 new_mode = ActionMode.UNDO \
                     if mode == ActionMode.DO else ActionMode.DO
 
+            template_schema = \
+                TemplateSchemaFactory().template_schema(scenario_version)
+
             for match in matches:
                 match_action_spec = self._get_action_spec(action_spec, match)
-                items_ids = [match[1].vertex_id for match in match.items()]
+                items_ids = \
+                    [match_item[1].vertex_id for match_item in match.items()]
                 match_hash = hash(tuple(sorted(items_ids)))
+                self._evaluate_property_functions(template_schema, match,
+                                                  match_action_spec.properties)
+
                 actions.append(ActionInfo(match_action_spec, new_mode,
                                           match_action_spec.id, match_hash))
 
         return actions
+
+    def _evaluate_property_functions(self, template_schema, match,
+                                     action_props):
+        """Evaluate the action properties, in case they contain functions
+
+        In template version 2 we introduced functions, and specifically the
+        get_attr function. This method evaluate its value and updates the
+        action properties, before the action is being executed.
+
+        Example:
+
+        - action:
+            action_type: execute_mistral
+            properties:
+              workflow: evacuate_vm
+              input:
+                vm_name: get_attr(instance1,name)
+                force: false
+
+        In this example, the method will iterate over 'properties', and then
+        recursively over 'input', and for 'vm_name' it will replace the
+        call for get_attr with the actual name of the VM. The input for the
+        Mistral workflow will then be:
+        vm_name: vm_1
+        force: false
+
+        """
+        for key, value in action_props.items():
+            if isinstance(value, dict):
+                # Recursive call for a dictionary
+                self._evaluate_property_functions(template_schema,
+                                                  match, value)
+
+            elif value is not None and is_function(value):
+                # The value is a function
+                func_and_args = re.split('[(),]', value)
+                func_name = func_and_args.pop(0)
+                args = [arg.strip() for arg in func_and_args if len(arg) > 0]
+
+                # Get the function, execute it and update the property value
+                func = template_schema.functions.get(func_name)
+                action_props[key] = func(match, *args)
+
+                LOG.debug('Changed property %s value from %s to %s', key,
+                          value, action_props[key])
 
     @staticmethod
     def _get_action_spec(action_spec, match):

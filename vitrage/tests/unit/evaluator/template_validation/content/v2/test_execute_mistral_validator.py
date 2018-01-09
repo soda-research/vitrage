@@ -63,6 +63,53 @@ class ExecuteMistralValidatorTest(BaseExecuteMistralValidatorTest):
         self._validate_execute_mistral_action_without_additional_props(
             self.validator)
 
+    def test_v2_validate_execute_mistral_action_with_func(self):
+        self._validate_action(
+            self._create_v2_execute_mistral_action(
+                'wf_1', 'host_2', 'down', func1='get_attr(alarm,name)'),
+            self.validator.validate
+        )
+
+    def test_v2_validate_execute_mistral_action_with_func_2(self):
+        self._validate_action(
+            self._create_v2_execute_mistral_action(
+                'wf_1', 'host_2', 'down', func1='get_attr(alarm, name)'),
+            self.validator.validate
+        )
+
+    def test_v2_validate_execute_mistral_action_with_func_3(self):
+        self._validate_action(
+            self._create_v2_execute_mistral_action(
+                'wf_1', 'host_2', 'down', func1='get_attr ( alarm , name ) '),
+            self.validator.validate
+        )
+
+    def test_v2_validate_execute_mistral_action_with_func_typo_1(self):
+        # Test setup
+        idx = DEFINITIONS_INDEX_MOCK.copy()
+        action = \
+            self._create_v2_execute_mistral_action(
+                'wf_1', 'host_2', 'down', func1='get_attr(alarm, name')
+
+        # Test action
+        result = self.validator.validate(action, idx)
+
+        # Test assertions
+        self._assert_warning_result(result, 138)
+
+    def test_v2_validate_execute_mistral_action_with_func_typo_2(self):
+        # Test setup
+        idx = DEFINITIONS_INDEX_MOCK.copy()
+        action = \
+            self._create_v2_execute_mistral_action(
+                'wf_1', 'host_2', 'down', func1='get_attr, name)')
+
+        # Test action
+        result = self.validator.validate(action, idx)
+
+        # Test assertions
+        self._assert_warning_result(result, 138)
+
     def _create_execute_mistral_action(self, workflow, host, host_state):
         return self.\
             _create_v2_execute_mistral_action(workflow, host, host_state)

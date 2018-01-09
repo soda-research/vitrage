@@ -406,6 +406,40 @@ regular expression:
      rawtext.regex: Interface ([_a-zA-Z0-9'-]+) down on {HOST.NAME}
      template_id: zabbix_alarm
 
+Using functions in an action definition
+---------------------------------------
+Some properties of an action can be defined using functions. On version 2, one
+function is supported: get_attr, and it is supported only for execute_mistral
+action.
+
+*Note:* Functions are supported from version 2 and on.
+
+get_attr
+^^^^^^^^
+This function retrieves the value of an attribute of an entity that is defined
+in the template.
+
+Usage
+~~~~~
+
+get_attr(template_id, attr_name)
+
+Example
+~~~~~~~
+::
+
+   scenario:
+     condition: alarm_on_host_1
+     actions:
+       action:
+         action_type: execute_mistral
+         properties:
+           workflow: demo_workflow
+           input:
+             host_name: get_attr(host_1,name)
+             retries: 5
+
+
 Supported Actions
 -----------------
 

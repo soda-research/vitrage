@@ -57,7 +57,8 @@ class ScenarioLoader(object):
                 self._extract_var_and_update_index)
 
             scenarios.append(
-                Scenario(scenario_id, condition, actions, subgraphs,
+                Scenario(scenario_id, self._template_schema.version(),
+                         condition, actions, subgraphs,
                          self.entities, self.relationships))
 
         return scenarios
@@ -87,6 +88,7 @@ class ScenarioLoader(object):
             scenario.condition, extract_var)
 
         return Scenario(id=scenario.id + '_equivalence',
+                        version=scenario.version,
                         condition=scenario.condition,
                         actions=scenario.actions,
                         subgraphs=subgraphs,
@@ -99,7 +101,7 @@ class ScenarioLoader(object):
         for counter, action_def in enumerate(actions_def):
             action_id = '%s-action%s' % (scenario_id, str(counter))
             action_type = action_def[TFields.ACTION][TFields.ACTION_TYPE]
-            action_loader = self._template_schema.loader(action_type)
+            action_loader = self._template_schema.loaders.get(action_type)
 
             if action_loader:
                 actions.append(action_loader.load(action_id, self.valid_target,

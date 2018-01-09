@@ -15,6 +15,8 @@ from oslo_log import log
 
 from vitrage.evaluator.actions.base import ActionType
 from vitrage.evaluator.template_fields import TemplateFields
+from vitrage.evaluator.template_functions.v2.functions import get_attr
+from vitrage.evaluator.template_functions.v2.functions import GET_ATTR
 from vitrage.evaluator.template_loading.v1.action_loader import ActionLoader
 from vitrage.evaluator.template_loading.v1.execute_mistral_loader import \
     ExecuteMistralLoader
@@ -43,7 +45,7 @@ LOG = log.getLogger(__name__)
 
 class TemplateSchema1(object):
     def __init__(self):
-        self._validators = {
+        self.validators = {
             TemplateFields.DEFINITIONS: DefinitionsValidator,
             TemplateFields.SCENARIOS: ScenarioValidator,
             ActionType.ADD_CAUSAL_RELATIONSHIP: AddCausalRelationshipValidator,
@@ -53,7 +55,7 @@ class TemplateSchema1(object):
             ActionType.SET_STATE: SetStateValidator,
         }
 
-        self._loaders = {
+        self.loaders = {
             ActionType.ADD_CAUSAL_RELATIONSHIP: ActionLoader(),
             ActionType.EXECUTE_MISTRAL: ExecuteMistralLoader(),
             ActionType.MARK_DOWN: ActionLoader(),
@@ -61,24 +63,23 @@ class TemplateSchema1(object):
             ActionType.SET_STATE: ActionLoader(),
         }
 
-    def validator(self, validator_type):
-        LOG.debug('Get validator. validator_type: %s. validators: %s',
-                  validator_type, self._validators)
-        return self._validators.get(validator_type)
+        self.functions = {}
 
-    def loader(self, loader_type):
-        LOG.debug('Get loader. loader_type: %s. loaders: %s',
-                  loader_type, self._loaders)
-        return self._loaders.get(loader_type)
+    def version(self):
+        return '1'
 
 
 class TemplateSchema2(TemplateSchema1):
 
     def __init__(self):
         super(TemplateSchema2, self).__init__()
-        self._validators[ActionType.EXECUTE_MISTRAL] = \
+        self.validators[ActionType.EXECUTE_MISTRAL] = \
             V2ExecuteMistralValidator()
-        self._loaders[ActionType.EXECUTE_MISTRAL] = ActionLoader()
+        self.loaders[ActionType.EXECUTE_MISTRAL] = ActionLoader()
+        self.functions[GET_ATTR] = get_attr
+
+    def version(self):
+        return '2'
 
 
 def init_template_schemas():

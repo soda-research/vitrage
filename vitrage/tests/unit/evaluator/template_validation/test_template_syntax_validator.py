@@ -228,7 +228,7 @@ class TemplateSyntaxValidatorTest(base.BaseTest):
         self._test_execution_with_correct_result(template)
 
     def test_template_with_valid_version(self):
-        template_path = self.version_dir_path + 'version1.yaml'
+        template_path = self.version_dir_path + 'v1/version1.yaml'
         template = file_utils.load_yaml_file(template_path)
         self._test_execution_with_correct_result(template)
 

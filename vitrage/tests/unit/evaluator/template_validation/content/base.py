@@ -47,6 +47,12 @@ class ValidatorTest(base.BaseTest):
         self.assertTrue(result.comment.startswith(status_msgs[status_code]))
         self.assertEqual(result.status_code, status_code)
 
+    def _assert_warning_result(self, result, status_code):
+
+        self.assertTrue(result.is_valid_config)
+        self.assertTrue(result.comment.startswith(status_msgs[status_code]))
+        self.assertEqual(result.status_code, status_code)
+
     @staticmethod
     def _hide_useless_logging_messages():
 
