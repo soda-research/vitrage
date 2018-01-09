@@ -426,13 +426,23 @@ class ScenarioEvaluator(EvaluatorBase):
 class ActiveActionsTracker(object):
     """Keeps track of all active actions and relative dominance/priority.
 
-    Actions are organized according to resource-id
-    and action details.
+    Actions are organized according to resource-id and action details.
+
     Examples:
-    - all set_state actions on a given resource share the same entry,
+
+    - all set_state actions on a given resource are considered similar action
     regardless of state
-    - all raise_alarm of type alarm_name on a given resource share the same
-     entry, regardless of severity
+    - all raise_alarm of type alarm_name on a given resource are considered
+    similar action, regardless of severity
+
+    Each action is assigned a score by mapping the value property to the
+    priority defined in datasource values config.
+
+    - Alarm: severity
+    - Resource: state
+
+    The score is used to determine which action in each group of similar
+    actions to be executed next.
     """
 
     def __init__(self, conf, db_connection):
