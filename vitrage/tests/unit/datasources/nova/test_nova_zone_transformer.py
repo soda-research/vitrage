@@ -119,7 +119,7 @@ class NovaZoneTransformerTest(base.BaseTest):
         )
         self.assertEqual(zone_name, observed_key_fields[2])
 
-    def test_extract_key(self):
+    def test_create_entity_key(self):
         pass
 
     def test_snapshot_transform(self):

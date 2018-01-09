@@ -57,7 +57,7 @@ class NagiosTransformerTest(base.BaseTest):
         cls.transformers[NOVA_HOST_DATASOURCE] = \
             HostTransformer(cls.transformers, cls.conf)
 
-    def test_extract_key(self):
+    def test_create_entity_key(self):
         LOG.debug('Test get key from nova instance transformer')
 
         # Test setup

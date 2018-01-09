@@ -234,7 +234,7 @@ class NovaInstanceTransformerTest(base.BaseTest):
         self.assertEqual(edge.target_id, entity_uuid)
         self.assertEqual(edge.label, EdgeLabel.CONTAINS)
 
-    def test_extract_key(self):
+    def test_create_entity_key(self):
         LOG.debug('Test get key from nova instance transformer')
 
         # Test setup

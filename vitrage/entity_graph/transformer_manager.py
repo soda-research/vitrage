@@ -81,10 +81,6 @@ class TransformerManager(object):
         entity_type = self.get_entity_type(entity_event)
         return self.get_transformer(entity_type).get_enrich_query(entity_event)
 
-    def extract_key(self, entity_event):
-        entity_type = self.get_entity_type(entity_event)
-        return self.get_transformer(entity_type)._create_entity_key()
-
     @staticmethod
     def get_entity_type(entity_event):
         try:
