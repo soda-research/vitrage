@@ -19,6 +19,6 @@ OPTS = [
                default=8162,
                help='The listening port of snmp_parsing service'),
     cfg.StrOpt('oid_mapping',
-               default='/etc/vitrage/snmp_parsing_conf.yaml',
-               help='The default path of oid_mapping yaml file'),
+               default='',
+               help='The default path of oid_mapping yaml file.'),
     ]

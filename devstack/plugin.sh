@@ -306,6 +306,7 @@ function start_vitrage {
     run_process vitrage-notifier "$VITRAGE_BIN_DIR/vitrage-notifier --config-file $VITRAGE_CONF"
     run_process vitrage-ml "$VITRAGE_BIN_DIR/vitrage-ml --config-file $VITRAGE_CONF"
     run_process vitrage-persistor "$VITRAGE_BIN_DIR/vitrage-persistor --config-file $VITRAGE_CONF"
+    run_process vitrage-snmp-parsing "$VITRAGE_BIN_DIR/vitrage-snmp-parsing --config-file $VITRAGE_CONF"
 
     write_systemd_dependency vitrage-graph vitrage-collector
 
@@ -335,7 +336,7 @@ function stop_vitrage {
         disable_apache_site vitrage
         restart_apache_server
     fi
-    for serv in vitrage-api vitrage-collector vitrage-graph vitrage-notifier vitrage-persistor; do
+    for serv in vitrage-api vitrage-collector vitrage-graph vitrage-notifier vitrage-persistor vitrage-snmp-parsing; do
         stop_process $serv
     done
 }

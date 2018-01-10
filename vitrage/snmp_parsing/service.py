@@ -12,27 +12,37 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from datetime import datetime
+import json
+from oslo_log import log
+import oslo_messaging
+from oslo_service import service as os_service
+from oslo_utils import uuidutils
 from pyasn1.codec.ber import decoder
 from pysnmp.carrier.asyncore.dgram import udp
 from pysnmp.carrier.asyncore.dgram import udp6
 from pysnmp.carrier.asyncore.dispatch import AsyncoreDispatcher
 from pysnmp.proto import api as snmp_api
 from pysnmp.proto.rfc1902 import Integer
-
-from oslo_log import log
-from oslo_service import service as os_service
 import sys
+
+from vitrage.common.constants import EventProperties
+from vitrage.datasources.transformer_base import extract_field_value
+from vitrage.messaging import get_transport
+from vitrage.snmp_parsing.properties import SnmpEventProperties as SEProps
+from vitrage.utils.file import load_yaml_file
 
 LOG = log.getLogger(__name__)
 
 
 class SnmpParsingService(os_service.Service):
-    RUN_FORVER = 1
+    RUN_FOREVER = 1
 
     def __init__(self, conf):
         super(SnmpParsingService, self).__init__()
         self.conf = conf
         self.listening_port = conf.snmp_parsing.snmp_listening_port
+        self._init_oslo_notifier()
 
     def start(self):
         LOG.info("Vitrage SNMP Parsing Service - Starting...")
@@ -53,7 +63,7 @@ class SnmpParsingService(os_service.Service):
         transport_dispatcher.registerTransport(udp6.domainName, udp6_transport)
         LOG.info("Vitrage SNMP Parsing Service - Started!")
 
-        transport_dispatcher.jobStarted(self.RUN_FORVER)
+        transport_dispatcher.jobStarted(self.RUN_FOREVER)
         try:
             transport_dispatcher.runDispatcher()
         except Exception:
@@ -88,8 +98,8 @@ class SnmpParsingService(os_service.Service):
                     else p_mod.apiPDU.getVarBinds(req_pdu)
 
                 binds_dict = self._convert_binds_to_dict(ver_binds)
-                LOG.debug('Received binds info after convert: %s' % binds_dict)
-                # TODO(peipei): need to send to message queue
+                LOG.debug('Receive binds info after convert: %s' % binds_dict)
+                self._send_snmp_to_queue(binds_dict)
 
     def _convert_binds_to_dict(self, var_binds):
         binds_dict = {}
@@ -104,3 +114,51 @@ class SnmpParsingService(os_service.Service):
         if sys.version_info[0] < 3:
             return str(val).decode('iso-8859-1')
         return str(val)
+
+    def _init_oslo_notifier(self):
+        self.oslo_notifier = None
+        try:
+            self.publisher = 'vitrage-snmp-parsing'
+            self.oslo_notifier = oslo_messaging.Notifier(
+                get_transport(self.conf),
+                driver='messagingv2',
+                publisher_id=self.publisher,
+                topics=['vitrage_notifications'])
+        except Exception as e:
+            LOG.warning('Failed to initialize oslo notifier %s', str(e))
+
+    def _send_snmp_to_queue(self, snmp_trap):
+        if str == type(snmp_trap):
+            snmp_trap = json.loads(snmp_trap)
+        try:
+            event_type = self._get_event_type(snmp_trap)
+            if not event_type:
+                return
+            event = {EventProperties.TIME: datetime.utcnow(),
+                     EventProperties.TYPE: event_type,
+                     EventProperties.DETAILS: snmp_trap}
+            LOG.debug('snmp oslo_notifier event: %s' % event)
+            self.oslo_notifier.info(
+                ctxt={'message_id': uuidutils.generate_uuid(),
+                      'publisher_id': self.publisher,
+                      'timestamp': datetime.utcnow()},
+                event_type=event_type,
+                payload=event)
+        except Exception as e:
+            LOG.warning('Snmp failed to post event. Exception: %s', e)
+
+    def _get_event_type(self, snmp_trap):
+        yaml_file_content = load_yaml_file(self.conf.snmp_parsing.oid_mapping)
+        if not yaml_file_content:
+            LOG.warning('No snmp trap is configured!')
+            return None
+
+        for mapping_info in yaml_file_content:
+            system_oid = extract_field_value(mapping_info, SEProps.SYSTEM_OID)
+            conf_system = extract_field_value(mapping_info, SEProps.SYSTEM)
+            if conf_system == extract_field_value(snmp_trap, system_oid):
+                LOG.debug('snmp trap mapped the system: %s.' % conf_system)
+                return extract_field_value(mapping_info, SEProps.DATASOURCE)
+
+        LOG.error("Snmp trap does not contain system info!")
+        return None

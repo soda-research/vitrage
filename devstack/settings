@@ -11,6 +11,8 @@ enable_service vitrage-collector
 enable_service vitrage-ml
 # Persistor
 enable_service vitrage-persistor
+# snmp_parsing
+enable_service vitrage-snmp-parsing
 
 # Default directories
 VITRAGE_DIR=$DEST/vitrage

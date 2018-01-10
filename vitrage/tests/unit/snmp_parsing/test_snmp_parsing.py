@@ -12,6 +12,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import copy
 from oslo_config import cfg
 
 from pysnmp.proto.rfc1902 import Integer
@@ -112,7 +113,8 @@ class TestSnmpParsing(base.BaseTest):
         cfg.IntOpt('snmp_listening_port', default=8162,
                    help='The listening port of snmp_parsing service'),
         cfg.StrOpt('oid_mapping',
-                   default='/etc/vitrage/snmp_parsing_conf.yaml',
+                   default='vitrage/tests/resources/snmp_parsing/'
+                           'snmp_parsing_conf.yaml',
                    help='The default path of oid_mapping yaml file'),
     ]
 
@@ -127,3 +129,16 @@ class TestSnmpParsing(base.BaseTest):
         parsing_service = SnmpParsingService(self.conf)
         dict_converted = parsing_service._convert_binds_to_dict(BINDS_REPORTED)
         self.assertEqual(dict_converted, DICT_EXPECTED)
+
+    def test_get_event_type(self):
+        parsing_service = SnmpParsingService(self.conf)
+        event_type = parsing_service._get_event_type(DICT_EXPECTED)
+        self.assertEqual(event_type, 'vitrage.snmp.event')
+
+    def test_converted_trap_mapping_diff_system(self):
+        converted_trap_diff_sys = copy.copy(DICT_EXPECTED)
+        converted_trap_diff_sys.update(
+            {u'1.3.6.1.4.1.3902.4101.1.3.1.12': u'Different System'})
+        parsing_service = SnmpParsingService(self.conf)
+        event_type = parsing_service._get_event_type(converted_trap_diff_sys)
+        self.assertIsNone(event_type)

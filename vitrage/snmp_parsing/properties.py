@@ -12,4 +12,8 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-__author__ = 'stack'
+
+class SnmpEventProperties(object):
+    SYSTEM_OID = 'system_oid'
+    SYSTEM = 'system'
+    DATASOURCE = 'datasource'
