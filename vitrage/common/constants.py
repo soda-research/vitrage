@@ -63,8 +63,7 @@ class EdgeLabel(object):
 
     @staticmethod
     def labels():
-        return [EdgeLabel.__dict__[label]
-                for label in vars(EdgeLabel)
+        return [value for label, value in vars(EdgeLabel).items()
                 if not label.startswith(('_', 'labels'))]
 
 
@@ -86,8 +85,7 @@ class EntityCategory(object):
 
     @staticmethod
     def categories():
-        return [EntityCategory.__dict__[category]
-                for category in vars(EntityCategory)
+        return [value for category, value in vars(EntityCategory).items()
                 if not category.startswith(('_', 'categories'))]
 
 
