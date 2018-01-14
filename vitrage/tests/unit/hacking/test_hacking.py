@@ -35,16 +35,6 @@ class HackingTestCase(base.BaseTest):
         self.assertEqual(
             0, len(list(checks.assert_equal_type("self.assertTrue()"))))
 
-    def test_assert_equal_none(self):
-        self.assertEqual(1, len(list(checks.assert_equal_none(
-            "self.assertEqual(A, None)"))))
-
-        self.assertEqual(1, len(list(checks.assert_equal_none(
-            "self.assertEqual(None, A)"))))
-
-        self.assertEqual(
-            0, len(list(checks.assert_equal_none("self.assertIsNone()"))))
-
     def test_no_translate_logs(self):
         for log in checks._all_log_levels:
             bad = 'LOG.%s(_("Bad"))' % log
