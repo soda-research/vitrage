@@ -28,7 +28,6 @@ from vitrage.evaluator.actions.action_executor import ActionExecutor
 from vitrage.evaluator.actions.base import ActionMode
 from vitrage.evaluator.actions.base import ActionType
 import vitrage.evaluator.actions.priority_tools as pt
-from vitrage.evaluator.evaluator_base import EvaluatorBase
 from vitrage.evaluator.template_data import ActionSpecs
 from vitrage.evaluator.template_data import EdgeDescription
 from vitrage.graph.algo_driver.algorithm import Mapping
@@ -52,7 +51,7 @@ TARGET = 'target'
 SOURCE = 'source'
 
 
-class ScenarioEvaluator(EvaluatorBase):
+class ScenarioEvaluator(object):
 
     def __init__(self,
                  conf,
@@ -60,7 +59,8 @@ class ScenarioEvaluator(EvaluatorBase):
                  scenario_repo,
                  actions_callback,
                  enabled=False):
-        super(ScenarioEvaluator, self).__init__(conf, e_graph)
+        self._conf = conf
+        self._entity_graph = e_graph
         self._db_connection = storage.get_connection_from_config(self._conf)
         self._scenario_repo = scenario_repo
         self._action_executor = ActionExecutor(self._conf, actions_callback)

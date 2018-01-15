@@ -1,4 +1,4 @@
-# Copyright 2017 - Nokia
+# Copyright 2018 - Nokia
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -11,19 +11,4 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-import abc
-import six
-
-
-@six.add_metaclass(abc.ABCMeta)
-class EvaluatorBase(object):
-
-    def __init__(self, conf, entity_graph):
-        super(EvaluatorBase, self).__init__()
-        self._conf = conf
-        self._entity_graph = entity_graph
-
-    @abc.abstractmethod
-    def run_evaluator(self):
-        """Start evaluation """
-        pass
+__author__ = 'stack'
