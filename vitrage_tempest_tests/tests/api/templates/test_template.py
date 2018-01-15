@@ -33,7 +33,7 @@ class TestValidate(BaseTemplateTest):
         """template_list test
 
         There test validate correctness of template list,
-        compare templates files existence with default folder
+        equals templates files existence with default folder
         and between cli via api ...
         """
         api_template_list = self.vitrage_client.template.list()
@@ -46,7 +46,7 @@ class TestValidate(BaseTemplateTest):
         """template_validate test
 
         There test validate correctness of template validation,
-        compare templates files validation between cli via api
+        equals templates files validation between cli via api
         """
         path = self.DEFAULT_PATH
         api_template_validation = \

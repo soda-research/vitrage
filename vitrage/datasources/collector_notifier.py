@@ -27,8 +27,8 @@ class CollectorNotifier(object):
         self.oslo_notifier = None
         try:
             topics = [conf.datasources.notification_topic_collector]
-            if conf.persistor.persist_events:
-                topics.append(conf.persistor.persistor_topic)
+            if conf.persistency.enable_persistency:
+                topics.append(conf.persistency.persistor_topic)
             else:
                 LOG.warning("Not persisting events")
 

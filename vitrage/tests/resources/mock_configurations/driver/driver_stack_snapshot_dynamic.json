@@ -7,7 +7,7 @@
   "vitrage_datasource_action": "init_snapshot",
   "id": "f22416fb-b33c-4e24-822e-0174421f5ece",
   "stack_status": "CREATE_COMPLETE",
-  "vitrage_sample_date": "2016-08-2515:12:28.281460+00:00",
+  "vitrage_sample_date": "2017-12-13 11:24:02.598358+00:00",
   "vitrage_entity_type": "heat.stack",
   "resources": [{
     "resource_name": "cinder_volume_1",

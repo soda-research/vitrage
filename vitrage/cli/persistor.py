@@ -17,7 +17,7 @@ import sys
 from oslo_log import log
 from oslo_service import service as os_service
 from vitrage.cli import VITRAGE_TITLE
-from vitrage.persistor.service import PersistorService
+from vitrage.persistency.service import PersistorService
 from vitrage import service
 from vitrage import storage
 

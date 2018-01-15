@@ -121,6 +121,23 @@ class ActiveAction(Base, models.TimestampMixin):
             )
 
 
+class GraphSnapshot(Base):
+    __tablename__ = 'graph_snapshots'
+
+    last_event_timestamp = Column(DateTime, primary_key=True, nullable=False)
+    graph_snapshot = Column(JSONEncodedDict(), nullable=False)
+
+    def __repr__(self):
+        return \
+            "<GraphSnapshot(" \
+            "last_event_timestamp='%s', " \
+            "graph_snapshot='%s')>" %\
+            (
+                self.last_event_timestamp,
+                self.graph_snapshot
+            )
+
+
 class Template(Base, models.TimestampMixin):
     __tablename__ = 'templates'
 

@@ -12,7 +12,6 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-
 from oslo_log import log
 
 from vitrage.common.constants import EntityCategory
@@ -32,7 +31,8 @@ LOG = log.getLogger(__name__)
 
 class Processor(processor.ProcessorBase):
 
-    def __init__(self, conf, initialization_status, e_graph):
+    def __init__(self, conf, initialization_status, e_graph,
+                 graph_persistor=None):
         super(Processor, self).__init__()
         self.conf = conf
         self.transformer_manager = TransformerManager(self.conf)
@@ -41,6 +41,7 @@ class Processor(processor.ProcessorBase):
         self.initialization_status = initialization_status
         self.entity_graph = e_graph
         self._notifier = GraphNotifier(conf)
+        self._graph_persistor = graph_persistor
 
     def process_event(self, event):
         """Decides which action to run on given event
@@ -59,6 +60,8 @@ class Processor(processor.ProcessorBase):
         entity = self.transformer_manager.transform(event)
         self._calculate_vitrage_aggregated_state(entity.vertex, entity.action)
         self.actions[entity.action](entity.vertex, entity.neighbors)
+        if self._graph_persistor:
+            self._graph_persistor.update_last_event_timestamp(event)
 
     def create_entity(self, new_vertex, neighbors):
         """Adds new vertex to the entity graph

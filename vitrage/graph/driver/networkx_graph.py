@@ -293,6 +293,15 @@ class NXGraph(Graph):
 
         return json.dumps(node_link_data)
 
+    def to_json(self):
+        return json_graph.node_link_data(self._g)
+
+    @staticmethod
+    def from_json(data):
+        graph = NXGraph()
+        graph._g = nx.MultiDiGraph(json_graph.node_link_graph(data))
+        return graph
+
     def union(self, other_graph):
         """Union two graphs - add all vertices and edges of other graph
 
