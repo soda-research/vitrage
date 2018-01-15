@@ -239,11 +239,9 @@ class TemplateSyntaxValidatorTest(base.BaseTest):
         template = file_utils.load_yaml_file(template_path)
         self._test_execution_with_correct_result(template)
 
-    def _test_validate_action_without_required_fields(self):
-
+    def test_validate_action_without_required_fields(self):
         self._test_validate_action_without_required_field(
-            TemplateFields.ACTION_TYPE,
-            status_msgs[123])
+            TemplateFields.ACTION_TYPE, 123)
 
     def _test_validate_action_without_required_field(self,
                                                      field_name,
@@ -254,7 +252,7 @@ class TemplateSyntaxValidatorTest(base.BaseTest):
         action[TemplateFields.ACTION].pop(field_name)
         self._test_execution_with_fault_result(template, expected_comment)
 
-    def _test_validate_action_with_invalid_datasource_action(self):
+    def test_validate_action_with_invalid_datasource_action(self):
 
         template = self.clone_template
         scenario = template[TemplateFields.SCENARIOS][0]
@@ -262,7 +260,7 @@ class TemplateSyntaxValidatorTest(base.BaseTest):
         action_dict = action[TemplateFields.ACTION]
         action_dict[TemplateFields.ACTION_TYPE] = 'unknown'
 
-        self._test_execution_with_fault_result(template, status_msgs[100])
+        self._test_execution_with_fault_result(template, 120)
 
     def _test_execution_with_fault_result(self,
                                           template,

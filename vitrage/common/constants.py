@@ -51,6 +51,11 @@ class EdgeProperties(object):
 
 
 class EdgeLabel(object):
+    """Define *some* edge labels
+
+    Note that edge labels are not restricted to the values in this class, and
+    other datasources can defined their own edge labels.
+    """
     ON = 'on'
     CONTAINS = 'contains'
     CAUSES = 'causes'
