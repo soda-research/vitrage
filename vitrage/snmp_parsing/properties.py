@@ -16,4 +16,4 @@
 class SnmpEventProperties(object):
     SYSTEM_OID = 'system_oid'
     SYSTEM = 'system'
-    DATASOURCE = 'datasource'
+    EVENT_TYPE = 'event_type'

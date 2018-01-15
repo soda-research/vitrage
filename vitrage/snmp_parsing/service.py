@@ -158,7 +158,7 @@ class SnmpParsingService(os_service.Service):
             conf_system = extract_field_value(mapping_info, SEProps.SYSTEM)
             if conf_system == extract_field_value(snmp_trap, system_oid):
                 LOG.debug('snmp trap mapped the system: %s.' % conf_system)
-                return extract_field_value(mapping_info, SEProps.DATASOURCE)
+                return extract_field_value(mapping_info, SEProps.EVENT_TYPE)
 
         LOG.error("Snmp trap does not contain system info!")
         return None

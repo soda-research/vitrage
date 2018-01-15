@@ -91,3 +91,4 @@ Design Documents
    contributor/not_operator_support
    contributor/templates-loading
    contributor/vitrage-ha-and-history-vision
+   contributor/datasource-snmp-parsing-support
