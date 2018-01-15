@@ -11,7 +11,6 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-from vitrage.common.constants import EdgeLabel
 from vitrage.common.constants import EntityCategory
 from vitrage.evaluator.actions.base import action_types
 from vitrage.evaluator.template_schema_factory import TemplateSchemaFactory
@@ -56,8 +55,6 @@ status_msgs = {
     86: 'Not operator can be used only on relationships.',
 
     # relationships status messages 100-119
-    100: 'Invalid relation type. Relation type must be from types: '
-         '{labels}'.format(labels=EdgeLabel.labels()),
     101: 'Relationship field is required.',
     102: 'Relationship definition must contain source field.',
     103: 'Relationship definition must contain target field.',
