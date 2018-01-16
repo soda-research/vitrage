@@ -43,7 +43,7 @@ class VitrageInit(object):
 
             on_end_messages_func()
 
-            self.evaluator.run_evaluator()
+            self.evaluator.start()
 
             # TODO(idan_hefetz) As vitrage is not yet persistent, there aren't
             # TODO(idan_hefetz) any deduced alarms to be removed during init
