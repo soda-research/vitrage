@@ -56,18 +56,6 @@ def assert_equal_type(logical_line):
         yield (0, "V317: assertEqual(type(A), B) sentences not allowed")
 
 
-def assert_equal_none(logical_line):
-    """Check for assertEqual(A, None) or assertEqual(None, A) sentences
-
-    V318
-    """
-    res = (asse_equal_start_with_none_re.match(logical_line) or
-           asse_equal_end_with_none_re.match(logical_line))
-    if res:
-        yield (0, "V318: assertEqual(A, None) or assertEqual(None, A) "
-               "sentences not allowed")
-
-
 def no_translate_logs(logical_line):
     """Check for use of LOG.*(_(
 
@@ -168,7 +156,6 @@ def factory(register):
     register(assert_true_instance)
     register(check_assert_true_false)
     register(assert_equal_type)
-    register(assert_equal_none)
     register(no_translate_logs)
     register(no_direct_use_of_unicode_function)
     register(no_mutable_default_args)
