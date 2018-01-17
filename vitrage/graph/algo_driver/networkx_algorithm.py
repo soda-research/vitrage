@@ -230,6 +230,8 @@ class NXAlgorithm(GraphAlgorithm):
 
     @staticmethod
     def _apply_edge_attr_filter(graph, edge_attr_filter):
-        for source, target, edge_data in graph._g.edges_iter(data=True):
-            if not check_filter(edge_data, edge_attr_filter):
-                graph._g.remove_edge(u=source, v=target)
+        edges_iter = graph._g.edges_iter(data=True, keys=True)
+        edges_to_remove = [(u, v, k) for (u, v, k, d) in edges_iter
+                           if not check_filter(d, edge_attr_filter)]
+        for source, target, key in edges_to_remove:
+            graph._g.remove_edge(u=source, v=target, key=key)
