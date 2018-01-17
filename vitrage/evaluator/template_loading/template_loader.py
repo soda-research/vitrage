@@ -86,7 +86,8 @@ class TemplateLoader(object):
                                    self.relationships).\
             build_scenarios(template_def[TFields.SCENARIOS])
 
-        return TemplateData(name, self.entities, self.relationships, scenarios)
+        return TemplateData(name, template_schema.version(), self.entities,
+                            self.relationships, scenarios)
 
     def _build_entities(self, entities_defs):
         entities = {}

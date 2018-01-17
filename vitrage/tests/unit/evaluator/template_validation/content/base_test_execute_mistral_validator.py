@@ -98,13 +98,16 @@ class BaseExecuteMistralValidatorTest(ActionValidatorTest):
         return action
 
     @staticmethod
-    def _create_v1_execute_mistral_action(workflow, host, host_state):
+    def _create_v1_execute_mistral_action(workflow, host, host_state,
+                                          **kwargs):
 
         properties = {
             WORKFLOW: workflow,
             'host': host,
             'host_state': host_state
         }
+        properties.update(kwargs)
+
         action = {
             TemplateFields.ACTION_TYPE: ActionType.EXECUTE_MISTRAL,
             TemplateFields.PROPERTIES: properties
@@ -113,16 +116,19 @@ class BaseExecuteMistralValidatorTest(ActionValidatorTest):
         return action
 
     @staticmethod
-    def _create_v2_execute_mistral_action(workflow, host, host_state):
+    def _create_v2_execute_mistral_action(workflow, host, host_state,
+                                          **kwargs):
 
         input_props = {
             'host': host,
             'host_state': host_state
         }
+        input_props.update(kwargs)
         properties = {
             WORKFLOW: workflow,
             'input': input_props
         }
+
         action = {
             TemplateFields.ACTION_TYPE: ActionType.EXECUTE_MISTRAL,
             TemplateFields.PROPERTIES: properties

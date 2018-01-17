@@ -13,9 +13,11 @@
 # under the License.
 
 from oslo_log import log
+import re
 
 from vitrage.evaluator.actions.recipes.execute_mistral import INPUT
 from vitrage.evaluator.actions.recipes.execute_mistral import WORKFLOW
+from vitrage.evaluator.base import is_function
 from vitrage.evaluator.template_fields import TemplateFields
 from vitrage.evaluator.template_validation.content.base import \
     ActionValidator
@@ -23,6 +25,8 @@ from vitrage.evaluator.template_validation.content.base import \
     get_content_correct_result
 from vitrage.evaluator.template_validation.content.base import \
     get_content_fault_result
+from vitrage.evaluator.template_validation.content.base import \
+    get_content_warning_result
 from vitrage.evaluator.template_validation.status_messages import status_msgs
 
 
@@ -43,5 +47,12 @@ class ExecuteMistralValidator(ActionValidator):
             if prop not in {WORKFLOW, INPUT}:
                 LOG.error('%s status code: %s' % (status_msgs[136], 136))
                 return get_content_fault_result(136)
+
+        inputs = properties[INPUT] if INPUT in properties else {}
+
+        for key, value in inputs.items():
+            if re.findall('[(),]', value) and not is_function(value):
+                LOG.error('%s status code: %s' % (status_msgs[138], 138))
+                return get_content_warning_result(138)
 
         return get_content_correct_result()

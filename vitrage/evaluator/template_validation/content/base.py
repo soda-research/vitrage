@@ -20,6 +20,7 @@ from vitrage.evaluator.template_fields import TemplateFields
 from vitrage.evaluator.template_schema_factory import TemplateSchemaFactory
 from vitrage.evaluator.template_validation.base import get_correct_result
 from vitrage.evaluator.template_validation.base import get_fault_result
+from vitrage.evaluator.template_validation.base import get_warning_result
 from vitrage.evaluator.template_validation.status_messages import status_msgs
 
 
@@ -33,6 +34,10 @@ def get_content_correct_result():
 
 def get_content_fault_result(code, msg=None):
     return get_fault_result(RESULT_DESCRIPTION, code, msg)
+
+
+def get_content_warning_result(code):
+    return get_warning_result(RESULT_DESCRIPTION, code)
 
 
 def validate_template_id(definitions_index, id_to_check):

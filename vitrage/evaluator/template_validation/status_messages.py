@@ -84,6 +84,9 @@ status_msgs = {
     135: 'condition must contain a common entity for all \'or\' clauses',
     136: 'Input parameters for the Mistral workflow in execute_mistral action '
          'must be placed under an \'input\' block ',
+    137: 'Functions are supported only from version 2',
+    138: 'Warning: only open or close parenthesis exists. Did you try to use '
+         'a function?',
 
     # def_templates status messages 140-159
     140: 'At least one template must be included',

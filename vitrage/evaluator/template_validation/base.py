@@ -22,6 +22,10 @@ def get_correct_result(description):
     return Result(description, True, 0, status_msgs[0])
 
 
+def get_warning_result(description, code):
+    return Result(description, True, code, status_msgs[code])
+
+
 def get_fault_result(description, code, msg=None):
     if msg:
         return Result(description, False, code, msg)

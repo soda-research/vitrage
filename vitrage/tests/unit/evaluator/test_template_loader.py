@@ -38,8 +38,8 @@ class BasicTemplateTest(base.BaseTest):
 
     BASIC_TEMPLATE = 'basic.yaml'
     BASIC_TEMPLATE_WITH_INCLUDE = 'basic_with_include.yaml'
-    V1_MISTRAL_TEMPLATE = 'v1_execute_mistral.yaml'
-    V2_MISTRAL_TEMPLATE = 'v2_execute_mistral.yaml'
+    V1_MISTRAL_TEMPLATE = 'v1/v1_execute_mistral.yaml'
+    V2_MISTRAL_TEMPLATE = 'v2/v2_execute_mistral.yaml'
     DEF_TEMPLATE_TESTS_DIR = utils.get_resources_dir() +\
         '/templates/def_template_tests'
 
@@ -135,6 +135,7 @@ class BasicTemplateTest(base.BaseTest):
 
         expected_scenario = Scenario(
             id='basic_template_with_include-scenario0',
+            version=1,
             condition=[
                 [ConditionVar(symbol_name='alarm_on_host',
                               positive=True)]],
@@ -209,6 +210,7 @@ class BasicTemplateTest(base.BaseTest):
 
         expected_scenario = Scenario(
             id='basic_template-scenario0',
+            version=1,
             condition=[
                 [ConditionVar(symbol_name='alarm_on_host',
                               positive=True)]],

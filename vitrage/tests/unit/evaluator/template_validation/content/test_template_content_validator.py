@@ -289,7 +289,7 @@ class TemplateContentValidatorTest(ValidatorTest):
     def test_validate_template_with_version_1(self):
         invalid_version_path = \
             VERSION_TEMPLATE_DIR % (utils.get_resources_dir(),
-                                    "version1.yaml")
+                                    "v1/version1.yaml")
         template = file_utils.load_yaml_file(invalid_version_path)
         self._execute_and_assert_with_correct_result(template)
 

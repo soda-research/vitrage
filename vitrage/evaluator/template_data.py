@@ -24,9 +24,10 @@ RELATIONSHIP = 'relationship'
 
 
 class Scenario(object):
-    def __init__(self, id, condition, actions, subgraphs, entities,
+    def __init__(self, id, version, condition, actions, subgraphs, entities,
                  relationships, enabled=False):
         self.id = id
+        self.version = version
         self.condition = condition
         self.actions = actions
         self.subgraphs = subgraphs
@@ -46,8 +47,9 @@ class Scenario(object):
 # noinspection PyAttributeOutsideInit
 class TemplateData(object):
 
-    def __init__(self, name, entities, relationships, scenarios):
+    def __init__(self, name, version, entities, relationships, scenarios):
         self.name = name
+        self.version = version
         self.entities = entities
         self.relationships = relationships
         self.scenarios = scenarios
@@ -59,6 +61,14 @@ class TemplateData(object):
     @name.setter
     def name(self, template_name):
         self._name = template_name
+
+    @property
+    def version(self):
+        return self._version
+
+    @version.setter
+    def version(self, version):
+        self._version = version
 
     @property
     def entities(self):

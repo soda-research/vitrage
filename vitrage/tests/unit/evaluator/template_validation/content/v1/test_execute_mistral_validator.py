@@ -60,6 +60,34 @@ class ExecuteMistralValidatorTest(BaseExecuteMistralValidatorTest):
         # Test assertions
         self._assert_correct_result(result)
 
+    def test_validate_execute_mistral_action_with_input_dict(self):
+        """A version1 execute_mistral action can have an 'input' dictionary"""
+
+        # Test setup
+        idx = DEFINITIONS_INDEX_MOCK.copy()
+        action = self._create_execute_mistral_action('wf_1', 'host_2', 'down')
+        input_dict = {'a': '1'}
+        action[TemplateFields.PROPERTIES]['input'] = input_dict
+
+        # Test action
+        result = self.validator.validate(action, idx)
+
+        # Test assertions
+        self._assert_correct_result(result)
+
+    def test_validate_execute_mistral_action_with_func(self):
+        # Test setup
+        idx = DEFINITIONS_INDEX_MOCK.copy()
+        action = \
+            self._create_v1_execute_mistral_action(
+                'wf_1', 'host_2', 'down', func1='get_attr(alarm, name)')
+
+        # Test action
+        result = self.validator.validate(action, idx)
+
+        # Test assertions
+        self._assert_fault_result(result, 137)
+
     def _create_execute_mistral_action(self, workflow, host, host_state):
         return self.\
             _create_v1_execute_mistral_action(workflow, host, host_state)

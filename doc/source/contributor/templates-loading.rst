@@ -128,11 +128,17 @@ as high availability condition.
 Scenarios
 =========
 
-``Scenario`` are defined as a ``namedtuple``
+``Scenario`` class holds the following properties:
 
-.. code-block:: python
+* id
+* version
+* condition
+* actions
+* subgraphs
+* entities
+* relationships
+* enabled
 
-  Scenario = namedtuple('Scenario', ['id', 'condition', 'actions', 'subgraphs'])
 
 id
 --

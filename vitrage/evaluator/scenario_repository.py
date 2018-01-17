@@ -145,7 +145,7 @@ class ScenarioRepository(object):
 
         if result.is_valid_config:
             def_validator = \
-                template_schema.validator(TemplateFields.DEFINITIONS)
+                template_schema.validators.get(TemplateFields.DEFINITIONS)
             result = \
                 def_validator.def_template_content_validation(def_template)
 
