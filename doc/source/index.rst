@@ -49,8 +49,9 @@ an RCA (Root Cause Analysis) relationship between alarms, raise a deduced alarm
 or set a deduced state.
 
 **Vitrage Notifiers** can be used to notify external systems of Vitrage alarms
-and states. Currently Vitrage has an Aodh notifier for raising Vitrage alarms
-in Aodh, and a Nova notifier for marking that the host is down.
+and states. The following notifiers are currently supported: Nova (update the
+states of the host and instances), Mistral (execute workflows), SNMP and HTTP
+webhooks.
 
 Installation Guide
 ------------------
