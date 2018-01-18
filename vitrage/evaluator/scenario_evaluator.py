@@ -81,14 +81,18 @@ class ScenarioEvaluator(object):
     def scenario_repo(self, scenario_repo):
         self._scenario_repo = scenario_repo
 
-    def run_evaluator(self):
+    def run_evaluator(self, action_mode=ActionMode.DO):
         self.enabled = True
         vertices = self._entity_graph.get_vertices()
         start_time = time.time()
         for vertex in vertices:
-            self.process_event(None, vertex, True)
-        LOG.info('Run Evaluator on %s items - took %s', str(len(vertices)),
-                 str(time.time() - start_time))
+            if action_mode == ActionMode.DO:
+                self.process_event(None, vertex, True)
+            elif action_mode == ActionMode.UNDO:
+                self.process_event(vertex, None, True)
+        LOG.info(
+            'Run %s Evaluator on %s items - took %s',
+            action_mode, str(len(vertices)), str(time.time() - start_time))
 
     def process_event(self, before, current, is_vertex, *args, **kwargs):
         """Notification of a change in the entity graph.

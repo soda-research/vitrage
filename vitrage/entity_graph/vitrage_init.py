@@ -24,10 +24,11 @@ class VitrageInit(object):
     RECEIVED_ALL_END_MESSAGES = 'received_all_end_messages'
     FINISHED = 'finished'
 
-    def __init__(self, conf, graph=None, evaluator=None):
+    def __init__(self, conf, graph=None, evaluator=None, template_loader=None):
         self.conf = conf
         self.graph = graph
         self.evaluator = evaluator
+        self.template_loader = template_loader
         self.status = self.STARTED
         self.end_messages = {}
 
@@ -44,6 +45,8 @@ class VitrageInit(object):
             on_end_messages_func()
 
             self.evaluator.start()
+            if self.template_loader:
+                self.template_loader.start()
 
             # TODO(idan_hefetz) As vitrage is not yet persistent, there aren't
             # TODO(idan_hefetz) any deduced alarms to be removed during init

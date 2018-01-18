@@ -121,7 +121,7 @@ class TemplatesConnection(object):
 
     @abc.abstractmethod
     def query(self, name=None, file_content=None,
-              uuid=None, status=None, status_details=None, is_deleted=None,
+              uuid=None, status=None, status_details=None,
               template_type=None):
         """Yields a lists of templates that match filters.
 

@@ -16,7 +16,6 @@ import json
 from oslo_log import log
 from osprofiler import profiler
 
-from vitrage.evaluator.template_fields import TemplateFields
 from vitrage.evaluator.template_validation.content.template_content_validator \
     import content_validation
 from vitrage.evaluator.template_validation.status_messages import status_msgs
@@ -34,41 +33,8 @@ class TemplateApis(object):
     FAILED_MSG = 'validation failed'
     OK_MSG = 'validation OK'
 
-    def __init__(self, templates, def_templates=None):
-
-        if def_templates is None:
-            def_templates = {}
-
-        self.def_templates = def_templates
-        self.templates = templates
-
-    def get_templates(self, ctx):
-        LOG.debug("TemplateApis get_templates")
-
-        templates_details = []
-        for uuid, template in self.templates.items():
-
-            template_metadata = template.data[TemplateFields.METADATA]
-
-            templates_details.append({
-                'uuid': str(template.uuid),
-                'name': template_metadata[TemplateFields.NAME],
-                'status': self._get_template_status(template.result),
-                'status details': template.result.comment,
-                'date': template.date.strftime('%Y-%m-%dT%H:%M:%SZ')
-            })
-        return json.dumps({'templates_details': templates_details})
-
-    def show_template(self, ctx, template_uuid):
-
-        LOG.debug("Show template with uuid: %s", str(template_uuid))
-
-        template = self.templates[template_uuid]
-
-        if template:
-            return json.dumps(template.data)
-        else:
-            return json.dumps({'ERROR': 'Incorrect uuid'})
+    def __init__(self, notifier=None):
+        self.notifier = notifier
 
     def validate_template(self, ctx, templates):
         LOG.debug("TemplateApis validate_template templates:"
@@ -110,6 +76,23 @@ class TemplateApis(object):
                              results)
 
         return json.dumps({'results': results})
+
+    def add_template(self, ctx):
+        """Signal the evaluator
+
+         A new template has been added to the database with a status of
+         LOADING that needs to be handled.
+        """
+        LOG.info("Add Template Running")
+        self.notifier.notify("add template", {'template_action': 'add'})
+
+    def delete_template(self, ctx):
+        """Signal the evaluator
+
+         A template status has been changed to DELETING.
+        """
+        LOG.info("Delete Template Running")
+        self.notifier.notify("delete template", {'template_action': 'delete'})
 
     @staticmethod
     def _add_result(template_path, status, description, message, status_code,

@@ -24,22 +24,25 @@ else
   TESTS="topology"
 fi
 
+if [ "$DEVSTACK_GATE_USE_PYTHON3" == "True" ]; then
+        export PYTHON=python3
+fi
+
 sudo cp -rf $DEVSTACK_PATH/vitrage/vitrage_tempest_tests/tests/resources/static_physical/static_physical_configuration.yaml /etc/vitrage/
 sudo cp -rf $DEVSTACK_PATH/vitrage/vitrage_tempest_tests/tests/resources/heat/heat_template.yaml /etc/vitrage/
 sudo cp -rf $DEVSTACK_PATH/vitrage/vitrage_tempest_tests/tests/resources/heat/heat_nested_template.yaml /etc/vitrage/
 sudo cp -rf $DEVSTACK_PATH/vitrage/vitrage_tempest_tests/tests/resources/heat/server.yaml /etc/vitrage/
-sudo cp -rf $DEVSTACK_PATH/vitrage/vitrage_tempest_tests/tests/resources/templates/api/* /etc/vitrage/templates/
 sudo cp $DEVSTACK_PATH/tempest/etc/logging.conf.sample $DEVSTACK_PATH/tempest/etc/logging.conf
 
-# copied the templates need to restart
+${PYTHON:-python} $DEVSTACK_PATH/vitrage/vitrage_tempest_tests/add_legacy_dir_templates.py
+
+# restart due to configuration files changes
 sudo systemctl restart devstack@vitrage-graph.service
 
 # wait for 30 seconds
 sleep 30
 
-if [ "$DEVSTACK_GATE_USE_PYTHON3" == "True" ]; then
-        export PYTHON=python3
-fi
+
 
 cd $DEVSTACK_PATH/tempest/; sudo -E testr init
 

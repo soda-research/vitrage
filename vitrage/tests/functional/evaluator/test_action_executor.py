@@ -12,9 +12,8 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from six.moves import queue
-
 from oslo_config import cfg
+from six.moves import queue
 
 from vitrage.common.constants import DatasourceAction
 from vitrage.common.constants import DatasourceProperties as DSProp

@@ -99,4 +99,8 @@ class EvaluatorWorker(base.GraphCloneWorkerBase):
             self._reload_templates()
 
     def _reload_templates(self):
-        raise NotImplementedError()
+        scenario_repo = ScenarioRepository(self._conf, self._worker_index,
+                                           self._workers_num)
+        self._evaluator.scenario_repo = scenario_repo
+        LOG.info("reloading evaluator scenarios")
+        self._evaluator.scenario_repo.log_enabled_scenarios()

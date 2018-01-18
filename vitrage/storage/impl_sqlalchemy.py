@@ -116,7 +116,7 @@ class TemplatesConnection(base.TemplatesConnection, BaseTableConn):
             session.query(Template).filter_by(uuid=uuid).update({var: value})
 
     def query(self, name=None, file_content=None,
-              uuid=None, status=None, status_details=None, is_deleted=None,
+              uuid=None, status=None, status_details=None,
               template_type=None):
         query = self.query_filter(
             models.Template,
@@ -125,7 +125,6 @@ class TemplatesConnection(base.TemplatesConnection, BaseTableConn):
             uuid=uuid,
             status=status,
             status_details=status_details,
-            is_deleted=is_deleted,
             template_type=template_type,
             )
         return query.all()

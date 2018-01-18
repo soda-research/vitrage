@@ -19,6 +19,7 @@ from datetime import datetime
 # noinspection PyPackageRequirements
 from mock import mock
 
+from vitrage.storage.sqlalchemy import models
 from vitrage.tests.functional.api.v1 import FunctionalTest
 
 
@@ -113,19 +114,20 @@ class NoAuthTest(FunctionalTest):
     def test_noauth_mode_list_templates(self):
 
         with mock.patch('pecan.request') as request:
-            request.client.call.return_value = '{"templates_details": []}'
+            request.storage.templates.query.return_value = []
             data = self.get_json('/template/')
 
-            self.assertEqual(1, request.client.call.call_count)
+            self.assertEqual(1, request.storage.templates.query.call_count)
             self.assertEqual([], data)
 
     def test_noauth_mode_show_template(self):
 
         with mock.patch('pecan.request') as request:
-            request.client.call.return_value = '{}'
+            request.storage.templates.query.return_value = \
+                [models.Template(file_content={})]
             data = self.get_json('/template/1234')
 
-            self.assertEqual(1, request.client.call.call_count)
+            self.assertEqual(1, request.storage.templates.query.call_count)
             self.assertEqual({}, data)
 
     def test_noauth_mode_validate_template(self):
