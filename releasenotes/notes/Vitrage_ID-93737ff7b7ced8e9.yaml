@@ -2,5 +2,5 @@
 features:
   - The ``Vitrage ID feature`` is a change in the way we create an entity
     Vitrage ID. Instead of The ID being created as a concatenation of different
-    entity fields, it is a standard openstak UUID generation. This also allows
+    entity fields, it is a standard openstack UUID generation. This also allows
     future history support.
