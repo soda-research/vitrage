@@ -34,7 +34,7 @@ class TestGraphPersistor(TestFunctionalBase):
         cls.conf.register_opts(cls.PROCESSOR_OPTS, group='entity_graph')
         cls.conf.register_opts(cls.DATASOURCES_OPTS, group='datasources')
         cls.conf.register_opts(database_opts, group='database')
-        cls.conf.set_override('connection', 'sqlite:///:test.db:',
+        cls.conf.set_override('connection', 'sqlite:///test.db',
                               group='database')
         cls._db = storage.get_connection_from_config(cls.conf)
         engine = cls._db._engine_facade.get_engine()
