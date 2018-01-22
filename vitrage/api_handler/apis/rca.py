@@ -15,10 +15,12 @@
 from oslo_log import log
 from osprofiler import profiler
 
+
 from vitrage.api_handler.apis.base import ALARMS_ALL_QUERY
 from vitrage.api_handler.apis.base import EDGE_QUERY
 from vitrage.api_handler.apis.base import EntityGraphApisBase
 from vitrage.api_handler.apis.base import RCA_QUERY
+from vitrage.common.constants import TenantProps
 from vitrage.graph import Direction
 
 
@@ -37,8 +39,8 @@ class RcaApis(EntityGraphApisBase):
         LOG.debug("RcaApis get_rca - root: %s, all_tenants=%s",
                   str(root), all_tenants)
 
-        project_id = ctx.get(self.TENANT_PROPERTY, None)
-        is_admin_project = ctx.get(self.IS_ADMIN_PROJECT_PROPERTY, False)
+        project_id = ctx.get(TenantProps.TENANT, None)
+        is_admin_project = ctx.get(TenantProps.IS_ADMIN, False)
         ga = self.entity_graph.algo
 
         found_graph_out = ga.graph_query_vertices(root,

@@ -19,6 +19,7 @@ from osprofiler import profiler
 from vitrage.api_handler.apis.base import EntityGraphApisBase
 from vitrage.api_handler.apis.base import RESOURCES_ALL_QUERY
 from vitrage.common.constants import EntityCategory
+from vitrage.common.constants import TenantProps
 from vitrage.common.constants import VertexProperties as VProps
 
 
@@ -37,8 +38,8 @@ class ResourceApis(EntityGraphApisBase):
         LOG.debug('ResourceApis get_resources - resource_type: %s,'
                   'all_tenants: %s', str(resource_type), all_tenants)
 
-        project_id = ctx.get(self.TENANT_PROPERTY, None)
-        is_admin_project = ctx.get(self.IS_ADMIN_PROJECT_PROPERTY, False)
+        project_id = ctx.get(TenantProps.TENANT, None)
+        is_admin_project = ctx.get(TenantProps.IS_ADMIN, False)
 
         if all_tenants:
             resource_query = RESOURCES_ALL_QUERY
@@ -66,8 +67,8 @@ class ResourceApis(EntityGraphApisBase):
             LOG.warning('Resource show - Not found (%s)', vitrage_id)
             return None
 
-        is_admin = ctx.get(self.IS_ADMIN_PROJECT_PROPERTY, False)
-        curr_project = ctx.get(self.TENANT_PROPERTY, None)
+        is_admin = ctx.get(TenantProps.IS_ADMIN, False)
+        curr_project = ctx.get(TenantProps.TENANT, None)
         resource_project = resource.get(VProps.PROJECT_ID)
         if not is_admin and curr_project != resource_project:
             LOG.warning('Resource show - Authorization failed (%s)',

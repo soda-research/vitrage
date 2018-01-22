@@ -89,8 +89,6 @@ RESOURCES_ALL_QUERY = {
 
 
 class EntityGraphApisBase(object):
-    TENANT_PROPERTY = 'tenant'
-    IS_ADMIN_PROJECT_PROPERTY = 'is_admin'
 
     @staticmethod
     def _get_query_with_project(vitrage_category, project_id, is_admin):

@@ -21,6 +21,7 @@ from vitrage.api_handler.apis.base import EntityGraphApisBase
 from vitrage.api_handler.apis.base import TOPOLOGY_AND_ALARMS_QUERY
 from vitrage.common.constants import EdgeProperties as EProps
 from vitrage.common.constants import EntityCategory
+from vitrage.common.constants import TenantProps
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.common.exception import VitrageError
 from vitrage.datasources.nova.instance import NOVA_INSTANCE_DATASOURCE
@@ -41,8 +42,8 @@ class TopologyApis(EntityGraphApisBase):
         LOG.debug("TopologyApis get_topology - root: %s, all_tenants=%s",
                   str(root), all_tenants)
 
-        project_id = ctx.get(self.TENANT_PROPERTY, None)
-        is_admin_project = ctx.get(self.IS_ADMIN_PROJECT_PROPERTY, False)
+        project_id = ctx.get(TenantProps.TENANT, None)
+        is_admin_project = ctx.get(TenantProps.IS_ADMIN, False)
         ga = self.entity_graph.algo
 
         LOG.debug('project_id = %s, is_admin_project  %s',

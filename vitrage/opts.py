@@ -27,6 +27,7 @@ import vitrage.machine_learning
 import vitrage.machine_learning.plugins.jaccard_correlation
 import vitrage.notifier
 import vitrage.notifier.plugins.snmp
+import vitrage.notifier.plugins.webhook
 import vitrage.os_clients
 import vitrage.persistency
 import vitrage.rpc
@@ -56,6 +57,7 @@ def list_opts():
         ('jaccard_correlation',
          vitrage.machine_learning.plugins.jaccard_correlation.OPTS),
         ('snmp', vitrage.notifier.plugins.snmp.OPTS),
+        ('webhook', vitrage.notifier.plugins.webhook.OPTS),
         ('snmp_parsing', vitrage.snmp_parsing.OPTS),
         ('DEFAULT', itertools.chain(
             vitrage.os_clients.OPTS,
@@ -98,6 +100,8 @@ def _normalize_path_to_datasource_name(path_list, top=os.getcwd()):
 def register_opts(conf, package_name, paths):
     """register opts of package package_name, with base path in paths"""
     for path in paths:
+        LOG.info("package name: %s" % package_name)
+        LOG.info("path: % s" % path)
         try:
             opt = importutils.import_module(
                 "%s.%s" % (path, package_name)).OPTS
@@ -107,6 +111,5 @@ def register_opts(conf, package_name, paths):
             )
             return
         except ImportError:
-            pass
-
-    LOG.error("Failed to register config options for %s" % package_name)
+            LOG.error("Failed to register config options for %s" %
+                      package_name)

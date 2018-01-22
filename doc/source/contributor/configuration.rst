@@ -37,6 +37,7 @@ Notifiers
    nova-notifier
    notifier-snmp-plugin
    mistral-config
+   notifier-webhook-plugin
 
 
 Machine_Learning

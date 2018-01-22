@@ -16,13 +16,13 @@ import json
 from oslo_db.sqlalchemy import models
 
 from sqlalchemy import Column, DateTime, INTEGER, String, \
-    SmallInteger, BigInteger, Index
+    SmallInteger, BigInteger, Index, Boolean, UniqueConstraint
 from sqlalchemy.ext.declarative import declarative_base
 
 import sqlalchemy.types as types
 
 
-class VitrageBase(models.ModelBase):
+class VitrageBase(models.TimestampMixin, models.ModelBase):
     """Base class for Vitrage Models."""
     __table_args__ = {'mysql_charset': "utf8",
                       'mysql_engine': "InnoDB"}
@@ -161,3 +161,37 @@ class Template(Base, models.TimestampMixin):
                 self.status_details,
                 self.file_content,
                 self.template_type,)
+
+
+class Webhooks(Base):
+    __tablename__ = 'webhooks'
+
+    id = Column(String(128), primary_key=True)
+    project_id = Column(String(128), nullable=False)
+    is_admin_webhook = Column(Boolean, nullable=False)
+    url = Column(String(256), nullable=False)
+    headers = Column(String(1024))
+    regex_filter = Column(String(512))
+    constraint = UniqueConstraint('url', 'regex_filter')
+
+    __table_args__ = (UniqueConstraint('url', 'regex_filter'),)
+
+    def __repr__(self):
+        return \
+            "<Webhook(" \
+            "id='%s', " \
+            "created_at='%s', " \
+            "project_id='%s', " \
+            "is_admin_webhook='%s', " \
+            "url='%s', " \
+            "headers='%s', " \
+            "regex_filter='%s')> " %\
+            (
+                self.id,
+                self.created_at,
+                self.project_id,
+                self.is_admin_webhook,
+                self.url,
+                self.headers,
+                self.regex_filter
+            )
