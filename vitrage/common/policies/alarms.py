@@ -50,7 +50,7 @@ rules = [
         ]
     ),
     policy.DocumentedRuleDefault(
-        name='list alarms count',
+        name='get alarms count',
         check_str=base.UNPROTECTED,
         description='Show how many alarms of each operations severity exist',
         operations=[
@@ -61,7 +61,7 @@ rules = [
         ]
     ),
     policy.DocumentedRuleDefault(
-        name='list alarms count:all_tenants',
+        name='get alarms count:all_tenants',
         check_str=base.ROLE_ADMIN,
         description='Show how many alarms of each operation severity exist. '
                     'Consider the alarms of all tenants (if the user has the '
