@@ -27,6 +27,7 @@ from vitrage.api_handler.apis.template import TemplateApis
 from vitrage.api_handler.apis.topology import TopologyApis
 from vitrage import messaging
 from vitrage import rpc as vitrage_rpc
+from vitrage import storage
 
 LOG = log.getLogger(__name__)
 
@@ -39,6 +40,7 @@ class VitrageApiHandlerService(os_service.Service):
         self.entity_graph = e_graph
         self.notifier = VitrageNotifier(self.conf, "vitrage.api",
                                         EVALUATOR_TOPIC)
+        self.db = storage.get_connection_from_config(conf)
 
     def start(self):
         LOG.info("Vitrage Api Handler Service - Starting...")
@@ -53,7 +55,7 @@ class VitrageApiHandlerService(os_service.Service):
         endpoints = [TopologyApis(self.entity_graph, self.conf),
                      AlarmApis(self.entity_graph, self.conf),
                      RcaApis(self.entity_graph, self.conf),
-                     TemplateApis(self.notifier),
+                     TemplateApis(self.notifier, self.db),
                      EventApis(self.conf),
                      ResourceApis(self.entity_graph, self.conf)]
 
