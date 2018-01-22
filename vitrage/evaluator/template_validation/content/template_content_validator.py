@@ -30,6 +30,20 @@ def content_validation(template, def_templates=None):
     template_definitions = {}
 
     result, template_schema = get_template_schema(template)
+
+    # Validate metadata
+    metadata_validator = \
+        template_schema.validators.get(TemplateFields.METADATA) \
+        if result.is_valid_config and template_schema else None
+
+    if result.is_valid_config:
+        if metadata_validator:
+            metadata = template.get(TemplateFields.METADATA)
+            result = metadata_validator.validate(metadata)
+        else:
+            result.is_valid_config = False  # Not supposed to happen
+
+    # Validate definitions
     def_validator = \
         template_schema.validators.get(TemplateFields.DEFINITIONS) \
         if result.is_valid_config and template_schema else None
@@ -71,6 +85,7 @@ def content_validation(template, def_templates=None):
                 entities_index,
                 relationship_index)
 
+    # Validate scenarios
     if result.is_valid_config:
         scenario_validator = template_schema.validators.get(
             TemplateFields.SCENARIOS)

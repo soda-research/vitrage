@@ -2,6 +2,7 @@ metadata:
  version: 2
  name: v2_with_func
  description: template with a function
+ type: standard
 definitions:
  entities:
   - entity:
