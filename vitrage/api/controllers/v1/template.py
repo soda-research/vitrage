@@ -23,7 +23,6 @@ from vitrage.api.controllers.rest import RootRestController
 from vitrage.api.policy import enforce
 from vitrage.common.constants import TemplateStatus as TStatus
 from vitrage.common.exception import VitrageError
-from vitrage.evaluator.template_db import template_repository as template_repo
 
 LOG = log.getLogger(__name__)
 
@@ -84,8 +83,8 @@ class TemplateController(RootRestController):
 
     @pecan.expose('json')
     def put(self, **kwargs):
-        template_path = kwargs['path']
-        LOG.info("add template: %s", template_path)
+        templates = kwargs['templates']
+        LOG.info("add template: %s", templates)
 
         enforce("template add",
                 pecan.request.headers,
@@ -94,7 +93,7 @@ class TemplateController(RootRestController):
         template_type = kwargs['template_type']
 
         try:
-            return self._add(template_path, template_type)
+            return self._add(templates, template_type)
         except Exception as e:
             LOG.exception('failed to add template %s', e)
             abort(404, str(e))
@@ -110,9 +109,10 @@ class TemplateController(RootRestController):
                 {})
 
         templates = kwargs['templates']
+        template_type = kwargs.get('template_type')
 
         try:
-            return self._validate(templates)
+            return self._validate(templates, template_type)
         except Exception as e:
             to_unicode = encodeutils.exception_to_unicode(e)
             LOG.exception('failed to validate template(s) %s', to_unicode)
@@ -143,11 +143,12 @@ class TemplateController(RootRestController):
             abort(404, to_unicode)
 
     @staticmethod
-    def _validate(templates):
+    def _validate(templates, template_type):
 
         result_json = pecan.request.client.call(pecan.request.context,
                                                 'validate_template',
-                                                templates=templates)
+                                                templates=templates,
+                                                template_type=template_type)
         try:
             return json.loads(result_json)
         except Exception as e:
@@ -156,12 +157,14 @@ class TemplateController(RootRestController):
             abort(404, to_unicode)
 
     @classmethod
-    def _add(cls, path, template_type):
+    def _add(cls, templates, template_type):
         try:
-            templates = template_repo.add_template_to_db(
-                pecan.request.storage, path, template_type)
-            pecan.request.client.call(pecan.request.context, 'add_template')
-            return [cls._db_template_to_dict(t) for t in templates]
+            results = pecan.request.client.call(
+                pecan.request.context,
+                'add_template',
+                templates=templates,
+                template_type=template_type)
+            return results
         except Exception as e:
             LOG.exception('failed to add template file %s ', e)
             abort(404, str(e))
