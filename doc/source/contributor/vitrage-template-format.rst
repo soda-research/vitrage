@@ -25,6 +25,7 @@ The template is written in YAML language, with the following structure:
   metadata:
     version: <template version>
     name: <unique template identifier>
+    type: <one of: standard, definition, equivalence>
     description: <what this template does>
   definitions:
     entities:
@@ -49,6 +50,7 @@ The template is divided into four main sections:
 
   - *version -* the version of the template format. The default is 1.
   - *name -* the name of the template
+  - *type -* the type of the template. Should be one of: standard, definition, equivalence
   - *description -* a brief description of what the template does (optional)
 - *definitions:* This section is **mandatory** unless an include section is specified in the template (see below).
   This section contains the atomic definitions referenced later on, for entities and relationships.
@@ -70,7 +72,9 @@ language, with the following structure:
  ::
 
   metadata:
+    version: 2
     name: <unique definition template identifier. Used in the includes section of regular templates>
+    type: definition
     description: <what definitions this template contains>
   definitions:
     entities:
@@ -159,7 +163,9 @@ The following template demonstrates
  ::
 
     metadata:
+        version: 2
         name: host_high_mem_load_to_instance_mem_suboptimal
+        type: standard
         description: when there is high memory on the host, show implications on the instances
     definitions:
         entities:
@@ -268,7 +274,9 @@ case-insensitive.
  ::
 
     metadata:
+        version: 2
         name: deduced_alarm_for_all_host_in_error
+        type: standard
         description: raise deduced alarm for all hosts in error
     definitions:
         entities:
@@ -297,7 +305,9 @@ an alarm on the hosting zone or an alarm on the hosting host.
  ::
 
     metadata:
+        version: 2
         name: deduced_alarm_two_possible_triggers
+        type: standard
         description: deduced alarm using or in condition
     definitions:
         entities:
@@ -520,7 +530,9 @@ E2 both are instances like this:
  ::
 
     metadata:
+        version: 2
         name: two_similar_instances
+        type: standard
     definitions:
         entities:
             - entity:

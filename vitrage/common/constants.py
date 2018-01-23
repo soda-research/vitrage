@@ -162,6 +162,11 @@ class TemplateTypes(object):
     DEFINITION = 'definition'
     EQUIVALENCE = 'equivalence'
 
+    @staticmethod
+    def types():
+        return [value for type, value in vars(TemplateTypes).items()
+                if not type.startswith(('_', 'types'))]
+
 
 class TemplateStatus(object):
     ACTIVE = 'ACTIVE'

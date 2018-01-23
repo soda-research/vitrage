@@ -34,7 +34,7 @@ from vitrage.tests.mocks import utils
 from vitrage.utils import file as file_utils
 
 
-class BasicTemplateTest(base.BaseTest):
+class TemplateLoaderTest(base.BaseTest):
 
     BASIC_TEMPLATE = 'basic.yaml'
     BASIC_TEMPLATE_WITH_INCLUDE = 'basic_with_include.yaml'

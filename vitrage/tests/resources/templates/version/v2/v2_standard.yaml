@@ -1,31 +1,32 @@
 metadata:
  version: 2
- name: v2_execute_mistral
- description: execute mistral
+ name: v2_standard
  type: standard
+ description: v2 standard template
 definitions:
  entities:
   - entity:
      category: ALARM
-     name: notifiers.mistral.trigger.alarm.2
+     type: nagios
+     name: host_problem
      template_id: alarm
   - entity:
      category: RESOURCE
      type: nova.host
-     template_id: host
+     template_id: resource
  relationships:
   - relationship:
      source: alarm
+     target: resource
      relationship_type: on
-     target: host
      template_id : alarm_on_host
 scenarios:
  - scenario:
     condition: alarm_on_host
     actions:
      - action:
-        action_type: execute_mistral
+        action_type: set_state
         properties:
-         workflow: wf_for_tempest_test_1234
-         input:
-          farewell: Hello and Goodbye
+         state: SUBOPTIMAL
+        action_target:
+         target: resource

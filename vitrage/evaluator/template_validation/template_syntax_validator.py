@@ -117,7 +117,8 @@ def _validate_metadata_section(metadata):
     schema = Schema({
         TemplateFields.VERSION: any_str,
         Required(TemplateFields.NAME, msg=60): any_str,
-        TemplateFields.DESCRIPTION: any_str
+        TemplateFields.DESCRIPTION: any_str,
+        TemplateFields.TYPE: any_str,
     })
     return _validate_dict_schema(schema, metadata)
 

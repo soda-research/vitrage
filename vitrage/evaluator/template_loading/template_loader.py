@@ -57,6 +57,9 @@ class TemplateLoader(object):
 
         name = template_def[TFields.METADATA][TFields.NAME]
 
+        # type might be None, it is defined only in version 2
+        type = template_def[TFields.METADATA].get(TFields.TYPE)
+
         if def_templates is None:
             def_templates = {}
         defs = {}
@@ -86,8 +89,8 @@ class TemplateLoader(object):
                                    self.relationships).\
             build_scenarios(template_def[TFields.SCENARIOS])
 
-        return TemplateData(name, template_schema.version(), self.entities,
-                            self.relationships, scenarios)
+        return TemplateData(name, type, template_schema.version(),
+                            self.entities, self.relationships, scenarios)
 
     def _build_entities(self, entities_defs):
         entities = {}
