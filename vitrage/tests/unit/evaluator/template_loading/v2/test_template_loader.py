@@ -45,7 +45,7 @@ class TemplateLoaderTest(base.BaseTest):
         template_data = TemplateLoader().load(template_definition)
         self.assertIsNotNone(template_data)
 
-        type = template_data.type
-        self.assertIsNotNone(type, 'v2 template must include a type')
-        self.assertEqual(TemplateTypes.STANDARD, type,
-                         'type should be ' + TemplateTypes.STANDARD)
+        template_type = template_data.template_type
+        self.assertIsNotNone(template_type, 'v2 template must include a type')
+        self.assertEqual(TemplateTypes.STANDARD, template_type,
+                         'template_type should be ' + TemplateTypes.STANDARD)
