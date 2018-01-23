@@ -310,6 +310,16 @@ function start_vitrage {
 
     write_systemd_dependency vitrage-graph vitrage-collector
 
+    change_systemd_kill_mode vitrage-graph
+
+}
+
+function change_systemd_kill_mode {
+   local service=$1
+   local systemd_service="devstack@$service.service"
+   local unitfile="$SYSTEMD_DIR/$systemd_service"
+
+   iniset -sudo $unitfile "Service" "KillMode" "control-group"
 }
 
 function write_systemd_dependency {
