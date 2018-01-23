@@ -34,7 +34,7 @@ class TemplateApis(object):
         self.db = db
 
     def validate_template(self, ctx, templates, template_type):
-        LOG.debug("TemplateApis validate_template type: %s content: ",
+        LOG.debug("TemplateApis validate_template type: %s content: %s",
                   str(template_type), str(templates))
 
         files_content = [t[1] for t in templates]
@@ -50,7 +50,7 @@ class TemplateApis(object):
          A new template has been added to the database with a status of
          LOADING that needs to be handled.
         """
-        LOG.debug("TemplateApis add_template type: %s content: ",
+        LOG.debug("TemplateApis add_template type: %s content: %s",
                   str(template_type), str(templates))
 
         files_content = [t[1] for t in templates]
