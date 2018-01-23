@@ -48,10 +48,10 @@
           set -x
           export PYTHONUNBUFFERED=true
           export PROJECTS="openstack/python-vitrageclient $PROJECTS"
-          export PROJECTS="openstack/vitrage $PROJECTS"
-          export PROJECTS="openstack/vitrage-dashboard $PROJECTS"
           export PROJECTS="openstack/aodh $PROJECTS"
           export PROJECTS="openstack/mistral $PROJECTS"
+          export PROJECTS="openstack/vitrage $PROJECTS"
+          export PROJECTS="openstack/vitrage-dashboard $PROJECTS"
           export ENABLED_SERVICES=tempest
 
           if [ "py27" == "py35" ] ; then
