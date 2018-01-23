@@ -82,6 +82,7 @@ class VitrageGraphService(os_service.Service):
     def stop(self, graceful=False):
         LOG.info("Vitrage Graph Service - Stopping...")
         self.evaluator.stop_all_workers()
+        self.templates_loader.stop_all_workers()
         self.listener.stop()
         self.listener.wait()
         super(VitrageGraphService, self).stop(graceful)
