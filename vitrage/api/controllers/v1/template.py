@@ -181,20 +181,23 @@ class TemplateController(RootRestController):
         }
 
     @staticmethod
-    def _delete(uuid):
+    def _delete(uuids):
+
         try:
-            storage = pecan.request.storage
-            templates = storage.templates.query(uuid=uuid)
+            if type(uuids) != list:
+                uuids = [uuids]
+            storage = pecan.request.storage.templates
+            templates = [t for _id in uuids for t in storage.query(uuid=_id)
+                         if t.status != TStatus.DELETED]
             if not templates:
-                raise VitrageError('template does not exists')
-            elif templates[0].status == TStatus.DELETED:
-                raise VitrageError('template is deleted')
-            elif templates[0].status == TStatus.ERROR:
-                storage.templates.update(uuid, "status", TStatus.DELETED)
-            elif templates[0].status == TStatus.ACTIVE:
-                storage.templates.update(uuid, "status", TStatus.DELETING)
-                pecan.request.client.call(pecan.request.context,
-                                          'delete_template')
+                raise VitrageError('Template not found')
+            for t in templates:
+                if t.status == TStatus.ERROR:
+                    storage.update(t.uuid, "status", TStatus.DELETED)
+                else:
+                    storage.update(t.uuid, "status", TStatus.DELETING)
+                    pecan.request.client.call(pecan.request.context,
+                                              'delete_template')
         except Exception as e:
             LOG.exception('failed to delete template file %s ', e)
             abort(404, str(e))
