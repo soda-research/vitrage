@@ -1149,23 +1149,21 @@ None
 Response Body
 =============
 
-Returns list of all templates loaded from /etc/vitrage/templates, both those that passed validation and those that did not.
+Returns list of all templates in the database with status ACTIVE or ERROR.
 
 Response Examples
 =================
 
 ::
 
-    +--------------------------------------+---------------------------------------+--------+--------------------------------------------------+----------------------+
-    | uuid                                 | name                                  | status | status details                                   | date                 |
-    +--------------------------------------+---------------------------------------+--------+--------------------------------------------------+----------------------+
-    | 67bebcb4-53b1-4240-ad05-451f34db2438 | vm_down_causes_suboptimal_application | failed | Entity definition must contain template_id field | 2016-06-29T12:24:16Z |
-    | 4cc899e6-f6cb-43d8-94a0-6fa937e41ae2 | host_cpu_load_causes_vm_problem       | pass   | Template validation is OK                        | 2016-06-29T12:24:16Z |
-    | 0548367e-711a-4c08-9bdb-cb61f96fed04 | switch_connectivity_issues            | pass   | Template validation is OK                        | 2016-06-29T12:24:16Z |
-    | 33cb4400-f846-4c64-b168-530824d38f3e | host_nic_down                         | pass   | Template validation is OK                        | 2016-06-29T12:24:16Z |
-    | a04cd155-0fcf-4409-a27c-c83ba8b20a3c | disconnected_storage_problems         | pass   | Template validation is OK                        | 2016-06-29T12:24:16Z |
-    +--------------------------------------+---------------------------------------+--------+--------------------------------------------------+----------------------+
-
+  +--------------------------------------+-----------------------------------------+--------+---------------------------+---------------------+-------------+
+  | UUID                                 | Name                                    | Status | Status details            | Date                | Type        |
+  +--------------------------------------+-----------------------------------------+--------+---------------------------+---------------------+-------------+
+  | ae3c0752-1df9-408c-89d5-8b32b86f403f | host_disk_io_overloaded_usage_scenarios | ACTIVE | Template validation is OK | 2018-01-23 10:14:05 | standard    |
+  | f254edb0-53cb-4552-969b-bdad24a14a03 | ceph_health_is_not_ok_scenarios         | ACTIVE | Template validation is OK | 2018-01-23 10:20:29 | standard    |
+  | bf405cfa-3f19-4761-9329-6e48f21cd466 | basic_def_template                      | ACTIVE | Template validation is OK | 2018-01-23 10:20:56 | definition  |
+  | 7b5d6ca8-9ee0-4388-8c91-819b8786b78e | zabbix_host_equivalence                 | ACTIVE | No Validation             | 2018-01-23 10:21:13 | equivalence |
+  +--------------------------------------+-----------------------------------------+--------+---------------------------+---------------------+-------------+
 
 Template Show
 ^^^^^^^^^^^^^
@@ -1327,6 +1325,121 @@ Response Examples
       "metadata": {
         "name": "first_deduced_alarm_ever"
     }
+
+
+PUT /v1/template/
+~~~~~~~~~~~~~~~~~
+
+Headers
+=======
+
+-  X-Auth-Token (string, required) - Keystone auth token
+-  Accept (string) - application/json
+-  User-Agent (String)
+
+Path Parameters
+===============
+
+None
+
+Query Parameters
+================
+
+-  path (string, required) - the path to template file or directory
+-  type (string, optional) - template type (standard,definition,equivalence)
+
+Request Body
+============
+
+None
+
+Request Examples
+================
+
+::
+
+    PUT /v1/template/
+    Host: 135.248.18.122:8999
+    User-Agent: keystoneauth1/2.3.0 python-requests/2.9.1 CPython/2.7.6
+    Accept: application/json
+    X-Auth-Token: 2b8882ba2ec44295bf300aecb2caa4f7
+
+Response Status code
+====================
+
+None
+
+Response Body
+=============
+
+Returns list of all added templates.
+In case of duplicate templates returns info message.
+
+Response Examples
+=================
+
+::
+
+
+   +--------------------------------------+----------------------------------+---------+---------------------------+----------------------------+----------+
+   | UUID                                 | Name                             | Status  | Status details            | Date                       | Type     |
+   +--------------------------------------+----------------------------------+---------+---------------------------+----------------------------+----------+
+   | d661a9b1-87b5-4b2e-933f-043b19a39d17 | host_high_memory_usage_scenarios | LOADING | Template validation is OK | 2018-01-23 18:55:54.472329 | standard |
+   +--------------------------------------+----------------------------------+---------+---------------------------+----------------------------+----------+
+
+
+
+DELETE /v1/template/
+~~~~~~~~~~~~~~~~~~~~
+
+Headers
+=======
+
+-  X-Auth-Token (string, required) - Keystone auth token
+-  Accept (string) - application/json
+-  User-Agent (String)
+
+Path Parameters
+===============
+
+template uuid
+
+Query Parameters
+================
+
+None
+
+Request Body
+============
+
+None
+
+Request Examples
+================
+
+::
+
+    DELETE /v1/template/
+    Host: 135.248.18.122:8999
+    User-Agent: keystoneauth1/2.3.0 python-requests/2.9.1 CPython/2.7.6
+    Accept: string
+    X-Auth-Token: 2b8882ba2ec44295bf300aecb2caa4f7
+
+Response Status code
+====================
+
+None
+
+Response Body
+=============
+
+None
+
+Response Examples
+=================
+
+None
+
 
 Event Post
 ^^^^^^^^^^
