@@ -34,8 +34,8 @@ as the trigger for deduced alarms, states and RCA templates in Vitrage.
 Vitrage in action
 =================
 
-In order to see Vitrage in action, you should place your templates under
-*/etc/vitrage/templates*. See template_ example.
+In order to see Vitrage in action, you should add templates to Vitrage using
+``vitrage template add`` API. See template_ example.
 
 .. _template: host_high_memory_consumption.yaml
 

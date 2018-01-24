@@ -57,9 +57,6 @@ Create the Vitrage folders
         $ mkdir /etc/vitrage/static_datasources
         $ chmod 755 /etc/vitrage/static_datasources
 
-        $ mkdir /etc/vitrage/templates
-        $ chmod 755 /etc/vitrage/templates
-
         $ sudo mkdir /var/log/vitrage
         $ sudo chmod 755 /var/log/vitrage
 
