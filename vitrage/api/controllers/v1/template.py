@@ -169,8 +169,8 @@ class TemplateController(RootRestController):
             LOG.exception('failed to add template file %s ', e)
             abort(404, str(e))
 
-    @classmethod
-    def _db_template_to_dict(cls, template):
+    @staticmethod
+    def _db_template_to_dict(template):
         return {
             "uuid": template.uuid,
             "name": template.name,
