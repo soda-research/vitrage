@@ -4,9 +4,13 @@ prelude: |
 
     - Major changes were made in Vitrage templates. Version 2 was introduced,
       and it includes features like:
+
       - templates that contain only topology definitions
+
       - regular expressions
+
       - functions (get_attr)
+
       The templates are now stored in a database, and there is a new API for
       adding and deleting them.
 
