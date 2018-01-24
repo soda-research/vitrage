@@ -15,7 +15,7 @@
 import json
 from oslo_log import log
 from osprofiler import profiler
-
+from vitrage.common.constants import TemplateStatus as TStatus
 from vitrage.evaluator.template_db import template_repository as template_repo
 
 
@@ -54,20 +54,43 @@ class TemplateApis(object):
                   str(template_type), str(templates))
 
         files_content = [t[1] for t in templates]
-        results = template_repo.add_templates_to_db(self.db, files_content,
+        db_rows = template_repo.add_templates_to_db(self.db, files_content,
                                                     template_type)
-        LOG.info("Add Template Running")
-        self.notifier.notify("add template", {'template_action': 'add'})
-        results = [_db_template_to_dict(r) for r in results]
-        return results
+        if self._is_evaluator_reload_required(db_rows):
+            LOG.info("Adding templates..")
+            self.notifier.notify("add template", {'template_action': 'add'})
 
-    def delete_template(self, ctx):
+        return [_db_template_to_dict(r) for r in db_rows]
+
+    def _is_evaluator_reload_required(self, db_rows):
+        """Is  evaluator reload required
+
+        If all the templates have error status, no need to reload evaluators
+        """
+        return any([True for t in db_rows if t.status != TStatus.ERROR])
+
+    def delete_template(self, ctx, uuids):
         """Signal the evaluator
 
          A template status has been changed to DELETING.
         """
-        LOG.info("Delete Template Running")
-        self.notifier.notify("delete template", {'template_action': 'delete'})
+        db = self.db
+
+        if type(uuids) != list:
+            uuids = [uuids]
+        LOG.info("Deleting templates %s ", str(uuids))
+        templates = [t for _id in uuids for t in db.templates.query(uuid=_id)
+                     if t.status != TStatus.DELETED]
+        if not templates:
+            return
+        for t in templates:
+            if t.status == TStatus.ERROR:
+                db.templates.update(t.uuid, "status", TStatus.DELETED)
+            else:
+                db.templates.update(t.uuid, "status", TStatus.DELETING)
+        if self._is_evaluator_reload_required(templates):
+            self.notifier.notify("delete template",
+                                 {'template_action': 'delete'})
 
 
 def _to_result(result, template_path):

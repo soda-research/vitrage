@@ -15,6 +15,7 @@ from oslo_log import log
 from oslo_utils import uuidutils
 
 from vitrage.common.constants import TemplateStatus
+from vitrage.common.constants import TemplateTopologyFields as TFields
 from vitrage.common.constants import TemplateTypes as TType
 from vitrage.common.exception import VitrageError
 from vitrage.evaluator.base import Template
@@ -28,23 +29,34 @@ METADATA = 'metadata'
 NAME = 'name'
 
 
-def add_templates_to_db(db, templates, template_type):
-    results = list()
+def add_templates_to_db(db, templates, cli_type):
+    db_rows = list()
     for template in templates:
-        result = _validate_template(db, template, template_type)
+        final_type = template[METADATA].get(TFields.TYPE, cli_type)
+        if not final_type or (cli_type and cli_type != final_type):
+            db_rows.append(_get_error_result(template, final_type,
+                                             "Unknown template type"))
+            continue
+
+        result = _validate_template(db, template, final_type)
         if not _is_duplicate(db, template, result):
-            db_row = _to_db_row(result, template, template_type)
+            db_row = _to_db_row(result, template, final_type)
             db.templates.create(db_row)
-            results.append(db_row)
+            db_rows.append(db_row)
         else:
-            results.append(_get_duplicate_result(template, template_type))
-    return results
+            db_rows.append(_get_error_result(template, final_type,
+                                             "Duplicate template name"))
+    return db_rows
 
 
-def validate_templates(db, templates, template_type):
+def validate_templates(db, templates, cli_type):
     results = list()
     for template in templates:
-        results.append(_validate_template(db, template, template_type))
+        final_type = template[METADATA].get(TFields.TYPE, cli_type)
+        if not final_type or (cli_type and cli_type != final_type):
+            results.append(base.Result("", False, "", "Unknown template type"))
+        else:
+            results.append(_validate_template(db, template, final_type))
     return results
 
 
@@ -69,12 +81,12 @@ def _is_duplicate(db, template, result):
             return True
 
 
-def _get_duplicate_result(template, template_type):
+def _get_error_result(template, template_type, msg):
     return models.Template(
         name=template[METADATA][NAME],
         uuid="",
-        status="Failed",
-        status_details="Duplicate template name",
+        status=TemplateStatus.ERROR,
+        status_details=msg,
         file_content=template,
         template_type=template_type)
 
