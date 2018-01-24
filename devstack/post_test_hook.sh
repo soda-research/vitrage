@@ -29,11 +29,11 @@ if [ "$DEVSTACK_GATE_USE_PYTHON3" == "True" ]; then
         export PYTHON=python3
 fi
 
-sudo cp -rf $DEVSTACK_PATH/vitrage/vitrage_tempest_tests/tests/resources/static_physical/static_physical_configuration.yaml /etc/vitrage/
 sudo cp -rf $DEVSTACK_PATH/vitrage/vitrage_tempest_tests/tests/resources/heat/heat_template.yaml /etc/vitrage/
 sudo cp -rf $DEVSTACK_PATH/vitrage/vitrage_tempest_tests/tests/resources/heat/heat_nested_template.yaml /etc/vitrage/
 sudo cp -rf $DEVSTACK_PATH/vitrage/vitrage_tempest_tests/tests/resources/heat/server.yaml /etc/vitrage/
-sudo cp $DEVSTACK_PATH/tempest/etc/logging.conf.sample $DEVSTACK_PATH/tempest/etc/logging.conf
+
+sudo cp -rf $DEVSTACK_PATH/tempest/etc/logging.conf.sample $DEVSTACK_PATH/tempest/etc/logging.conf
 
 ${PYTHON:-python} $DEVSTACK_PATH/vitrage/vitrage_tempest_tests/add_legacy_dir_templates.py
 
