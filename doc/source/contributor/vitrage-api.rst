@@ -1478,7 +1478,7 @@ An event to be posted. Will contain the following fields:
 A dict of some potential details, copied from the Doctor SB API reference:
 
 - hostname: the hostname on which the event occurred.
-- source: the display name of reporter of this event. This is not limited to monitor, other entity can be specified such as ‘KVM’.
+- source: the display name of reporter of this event. This is not limited to monitor, other entity can be specified such as 'KVM'.
 - cause: description of the cause of this event which could be different from the type of this event.
 - severity: the severity of this event set by the monitor.
 - status: the status of target object in which error occurred.
