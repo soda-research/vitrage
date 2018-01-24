@@ -29,6 +29,8 @@ from vitrage.messaging import VitrageNotifier
 LOG = log.getLogger(__name__)
 
 TEMPLATE_ACTION = 'template_action'
+ADD = 'add'
+DELETE = 'delete'
 
 
 class TemplateLoaderManager(base.GraphCloneManagerBase):
@@ -47,13 +49,13 @@ class TemplateLoaderManager(base.GraphCloneManagerBase):
         return tasks_queue
 
     def handle_template_event(self, event):
-        template_action = event.get('template_action')
+        template_action = event.get(TEMPLATE_ACTION)
 
-        if template_action == 'add':
+        if template_action == ADD:
             templates = self._db.templates.query(status=TStatus.LOADING)
             new_status = TStatus.ACTIVE
             action_mode = ActionMode.DO
-        elif template_action == 'delete':
+        elif template_action == DELETE:
             templates = self._db.templates.query(status=TStatus.DELETING)
             new_status = TStatus.DELETED
             action_mode = ActionMode.UNDO

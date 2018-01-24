@@ -23,7 +23,6 @@ from vitrage.evaluator.template_validation.template_syntax_validator import \
 from vitrage.evaluator.template_validation.template_syntax_validator import \
     syntax_validation
 
-__author__ = 'stack'
 
 LOG = log.getLogger(__name__)
 
@@ -31,11 +30,11 @@ LOG = log.getLogger(__name__)
 def validate_template(template, def_templates):
     result = syntax_validation(template)
     if not result.is_valid_config:
-        LOG.error('Unable to load template, syntax err: %s' % result.comment)
+        LOG.error('Unable to load template, syntax error: %s' % result.comment)
         return result
     result = content_validation(template, def_templates)
     if not result.is_valid_config:
-        LOG.error('Unable to load template, content err: %s' % result.comment)
+        LOG.error('Unable to load template, content error:%s' % result.comment)
         return result
     return result
 
