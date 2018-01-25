@@ -49,14 +49,7 @@ class TopologyApis(EntityGraphApisBase):
         LOG.debug('project_id = %s, is_admin_project  %s',
                   project_id, is_admin_project)
 
-        root_id = root
-        if not root:
-            root_vertex = self._get_root_vertex()
-            if not root_vertex:
-                LOG.warning("There is no openstack.cluster in the graph")
-                return
-            root_id = root_vertex.vertex_id
-
+        root_id = root or self._default_root_id()
         if graph_type == 'tree' or \
                 ((root is not None) and (depth is not None)):
             if not query:
@@ -222,7 +215,7 @@ class TopologyApis(EntityGraphApisBase):
 
         return set(entities)
 
-    def _get_root_vertex(self):
+    def _default_root_id(self):
         tmp_vertices = self.entity_graph.get_vertices(
             vertex_attr_filter={VProps.VITRAGE_TYPE: OPENSTACK_CLUSTER})
         if not tmp_vertices:
@@ -230,8 +223,7 @@ class TopologyApis(EntityGraphApisBase):
             return None
         if len(tmp_vertices) > 1:
             raise VitrageError("Multiple root vertices found")
-        root_vertex = tmp_vertices[0]
-        return root_vertex
+        return tmp_vertices[0].vertex_id
 
     @staticmethod
     def _find_instance_in_graph(graph):
