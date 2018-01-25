@@ -39,15 +39,20 @@ class NovaNotifier(NotifierBase):
         }
 
     def process_event(self, data, event_type):
-        if data and data.get(VProps.VITRAGE_TYPE) in self.actions:
-            action = self.actions[data.get(VProps.VITRAGE_TYPE)]
-            if event_type == NotifierEventTypes.ACTIVATE_MARK_DOWN_EVENT:
-                action(data.get(VProps.ID), True)
-            elif event_type == NotifierEventTypes.DEACTIVATE_MARK_DOWN_EVENT:
-                action(data.get(VProps.ID), False)
-        elif data:
-            LOG.warning('Unsupport datasource type %s for mark_down action',
-                        data.get(VProps.VITRAGE_TYPE))
+        if not data or not event_type:
+            return
+
+        if event_type == NotifierEventTypes.ACTIVATE_MARK_DOWN_EVENT or \
+                event_type == NotifierEventTypes.DEACTIVATE_MARK_DOWN_EVENT:
+
+            is_down = event_type == NotifierEventTypes.ACTIVATE_MARK_DOWN_EVENT
+            action = self.actions.get(data.get(VProps.VITRAGE_TYPE))
+
+            if action:
+                action(data.get(VProps.ID), is_down)
+            else:
+                LOG.warning('Unsupport datasource type %s for mark_down '
+                            'action', data.get(VProps.VITRAGE_TYPE))
 
     def _mark_host_down(self, host_id, is_down):
         try:
