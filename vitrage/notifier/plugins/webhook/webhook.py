@@ -54,18 +54,27 @@ class Webhook(NotifierBase):
         if event_type == NotifierEventTypes.ACTIVATE_ALARM_EVENT \
                 or event_type == NotifierEventTypes.DEACTIVATE_ALARM_EVENT:
 
-            LOG.info('Webhook API starting to process %s', str(data))
+            LOG.info('Webhook notifier started processing %s', str(data))
 
             webhooks = self._load_webhooks()
+
+            LOG.debug('There are %d registered webhooks', len(webhooks))
+
             if webhooks:
                 for webhook in webhooks:
                     webhook_filters = self._get_webhook_filters(webhook)
                     data = self._filter_fields(data)
+
+                    LOG.debug('webhook_filter: %s, filtered data: %s',
+                              str(webhook_filters), str(data))
+
                     if self._check_against_filter(webhook_filters, data)\
                             and self._check_correct_tenant(webhook, data):
+                        LOG.info('Going to post data to webhook %s',
+                                 str(webhook))
                         self._post_data(webhook, event_type, data)
 
-            LOG.info('Webhook API finished processing %s', str(data))
+            LOG.info('Webhook notifier finished processing %s', str(data))
 
     def _post_data(self, webhook, event_type, data):
         try:
