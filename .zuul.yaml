@@ -1,5 +1,4 @@
 - project:
-    name: openstack/vitrage
     check:
       jobs:
         - vitrage-dsvm-api-py27
