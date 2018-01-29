@@ -28,6 +28,7 @@
       - openstack/python-vitrageclient
       - openstack/vitrage
       - openstack/vitrage-dashboard
+      - openstack/vitrage-tempest-plugin
     irrelevant-files:
       - ^.*\.rst$
       - ^doc/.*$
@@ -46,6 +47,7 @@
       - openstack/python-vitrageclient
       - openstack/vitrage
       - openstack/vitrage-dashboard
+      - openstack/vitrage-tempest-plugin
     irrelevant-files:
       - ^.*\.rst$
       - ^doc/.*$
@@ -64,6 +66,7 @@
       - openstack/python-vitrageclient
       - openstack/vitrage
       - openstack/vitrage-dashboard
+      - openstack/vitrage-tempest-plugin
     irrelevant-files:
       - ^.*\.rst$
       - ^doc/.*$
@@ -82,6 +85,7 @@
       - openstack/python-vitrageclient
       - openstack/vitrage
       - openstack/vitrage-dashboard
+      - openstack/vitrage-tempest-plugin
     irrelevant-files:
       - ^.*\.rst$
       - ^doc/.*$

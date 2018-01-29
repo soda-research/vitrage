@@ -11,6 +11,7 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+from oslo_log import log as logging
 
 from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import EdgeLabel
@@ -24,6 +25,8 @@ from vitrage.datasources.resource_transformer_base import \
 from vitrage.datasources import transformer_base as tbase
 from vitrage.datasources.transformer_base import extract_field_value
 import vitrage.graph.utils as graph_utils
+
+LOG = logging.getLogger(__name__)
 
 
 class InstanceTransformer(ResourceTransformerBase):
@@ -99,12 +102,16 @@ class InstanceTransformer(ResourceTransformerBase):
         return [host_neighbor]
 
     def _create_entity_key(self, event):
+        LOG.debug('Creating key for instance event: %s', str(event))
 
         instance_id = 'instance_id' if tbase.is_update_event(event) else 'id'
         key_fields = self._key_values(NOVA_INSTANCE_DATASOURCE,
                                       extract_field_value(event,
                                                           instance_id))
-        return tbase.build_key(key_fields)
+        key = tbase.build_key(key_fields)
+        LOG.debug('Created key: %s', key)
+
+        return key
 
     def get_vitrage_type(self):
         return NOVA_INSTANCE_DATASOURCE

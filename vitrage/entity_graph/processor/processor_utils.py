@@ -62,6 +62,9 @@ def mark_deleted(g, item):
 def delete_placeholder_vertex(g, vertex):
     """Checks if it is a placeholder vertex, and if so deletes it """
 
+    LOG.debug('Asked to delete a placeholder vertex: %s with %d neighbors',
+              str(vertex), len(g.get_edges(vertex.vertex_id)))
+
     if not vertex[VProps.VITRAGE_IS_PLACEHOLDER]:
         return
     if not any(True for neighbor_edge in g.get_edges(vertex.vertex_id)
@@ -80,6 +83,10 @@ def find_neighbor_types(neighbors):
 
 
 def get_vertex_types(vertex):
+    props = vertex.items()
+    if VProps.VITRAGE_CATEGORY not in props:
+        LOG.warning('no vitrage_category in vertex: %s', str(vertex))
+
     vitrage_category = vertex[VProps.VITRAGE_CATEGORY]
     vitrage_type = vertex[VProps.VITRAGE_TYPE]
     return vitrage_category, vitrage_type
