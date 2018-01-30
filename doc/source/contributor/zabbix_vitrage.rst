@@ -86,7 +86,7 @@ Vitrage configuration
 .. code::
 
     [datasources]
-    types = zabbix,nova.host,nova.instance,nova.zone,static_physical,aodh,cinder.volume,neutron.network,neutron.port,heat.stack
+    types = zabbix,nova.host,nova.instance,nova.zone,static,aodh,cinder.volume,neutron.network,neutron.port,heat.stack
 
 2. Add following section to ``/etc/vitrage/vitrage.conf``
 

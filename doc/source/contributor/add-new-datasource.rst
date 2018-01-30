@@ -203,7 +203,7 @@ or by configuring ``vitrage.conf``.
     [datasources]
     snapshots_interval = 300
     # Names of supported plugins (list value)
-    types = nagios,zabbix,nova.host,nova.instance,nova.zone,static_physical,aodh,cinder.volume,neutron.network,neutron.port,heat.stack
+    types = zabbix,nova.host,nova.instance,nova.zone,static,aodh,cinder.volume,neutron.network,neutron.port,heat.stack
 
     [zabbix]
     url = http://<ip>/zabbix
