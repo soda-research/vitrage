@@ -12,6 +12,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 import time
+import unittest
 
 from oslo_config import cfg
 from oslo_db.options import database_opts
@@ -42,6 +43,7 @@ class TestGraphPersistor(TestFunctionalBase):
         cls.load_datasources(cls.conf)
         cls.graph_persistor = GraphPersistor(cls.conf)
 
+    @unittest.skip("persistency is disabled in queens")
     def test_persist_graph(self):
         g = GraphGenerator().create_graph()
         current_time = utcnow()
@@ -51,6 +53,7 @@ class TestGraphPersistor(TestFunctionalBase):
         self.assert_graph_equal(g, graph_snapshot)
         self.graph_persistor.delete_graph_snapshots(utcnow())
 
+    @unittest.skip("persistency is disabled in queens")
     def test_persist_two_graphs(self):
         g1 = GraphGenerator().create_graph()
         current_time1 = utcnow()
@@ -68,6 +71,7 @@ class TestGraphPersistor(TestFunctionalBase):
         self.assert_graph_equal(g2, graph_snapshot2)
         self.graph_persistor.delete_graph_snapshots(utcnow())
 
+    @unittest.skip("persistency is disabled in queens")
     def test_load_last_graph_snapshot_until_timestamp(self):
         g1 = GraphGenerator().create_graph()
         self.graph_persistor.last_event_timestamp = utcnow()
@@ -85,6 +89,7 @@ class TestGraphPersistor(TestFunctionalBase):
         self.assert_graph_equal(g1, graph_snapshot)
         self.graph_persistor.delete_graph_snapshots(utcnow())
 
+    @unittest.skip("persistency is disabled in queens")
     def test_delete_graph_snapshots(self):
         g = GraphGenerator().create_graph()
         self.graph_persistor.last_event_timestamp = utcnow()

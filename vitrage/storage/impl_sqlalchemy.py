@@ -79,8 +79,13 @@ class Connection(base.Connection):
     def upgrade(self, nocreate=False):
         engine = self._engine_facade.get_engine()
         engine.connect()
-        models.Base.metadata.drop_all(engine, tables=[models.Event.__table__])
-        models.Base.metadata.create_all(engine)
+        models.Base.metadata.drop_all(
+            engine, tables=[models.Event.__table__,
+                            models.GraphSnapshot.__table__])
+        models.Base.metadata.create_all(
+            engine, tables=[models.ActiveAction.__table__,
+                            models.Template.__table__,
+                            models.Webhooks.__table__])
         # TODO(idan_hefetz) upgrade logic is missing
 
     def disconnect(self):

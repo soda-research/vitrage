@@ -73,9 +73,6 @@ changes_interval = 5
 
 [datasources]
 snapshots_interval = 120
-
-[persistency]
-enable_persistency=true
 EOF
 )"
 
