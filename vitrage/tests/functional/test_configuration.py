@@ -23,8 +23,6 @@ from vitrage.evaluator.template_db.template_repository import \
 from vitrage import storage
 from vitrage.storage.sqlalchemy import models
 
-TEMPLATE_DIR = '/etc/vitrage/templates'
-
 
 class TestConfiguration(object):
 
