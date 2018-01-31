@@ -16,7 +16,7 @@ import json
 from oslo_db.sqlalchemy import models
 
 from sqlalchemy import Column, DateTime, INTEGER, String, \
-    SmallInteger, BigInteger, Index, Boolean, UniqueConstraint
+    SmallInteger, BigInteger, Index, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 
 import sqlalchemy.types as types
@@ -172,9 +172,6 @@ class Webhooks(Base):
     url = Column(String(256), nullable=False)
     headers = Column(String(1024))
     regex_filter = Column(String(512))
-    constraint = UniqueConstraint('url', 'regex_filter')
-
-    __table_args__ = (UniqueConstraint('url', 'regex_filter'),)
 
     def __repr__(self):
         return \
