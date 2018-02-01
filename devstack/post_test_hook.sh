@@ -29,16 +29,6 @@ if [ "$DEVSTACK_GATE_USE_PYTHON3" == "True" ]; then
 fi
 
 sudo cp -rf $DEVSTACK_PATH/tempest/etc/logging.conf.sample $DEVSTACK_PATH/tempest/etc/logging.conf
-
-${PYTHON:-python} $DEVSTACK_PATH/vitrage-tempest-plugin/vitrage_tempest_tests/add_legacy_dir_templates.py
-
-# restart due to configuration files changes
-sudo systemctl restart devstack@vitrage-graph.service
-
-# wait for 30 seconds (initialization might take time)
-sleep 30
-
-
 cd $DEVSTACK_PATH/tempest/
 sudo -E testr init
 
