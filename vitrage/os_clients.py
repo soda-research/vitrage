@@ -162,15 +162,13 @@ def heat_client(conf):
 
 def mistral_client(conf):
     """Get an instance of Mistral client"""
+    auth_config = conf.service_credentials
     try:
-        session = keystone_client.get_session(conf)
-        endpoint = session.get_endpoint(service_type='workflowv2',
-                                        endpoint_type='internalURL')
-        args = {
-            'mistral_url': endpoint,
-            'session': session
-        }
-        client = driver_module('mistral').Client(**args)
+        mi_client = driver_module('mistral')
+        client = mi_client.Client(
+            session=keystone_client.get_session(conf),
+            auth_url=auth_config.auth_url
+        )
         LOG.info('Mistral client created')
         return client
     except Exception as e:
