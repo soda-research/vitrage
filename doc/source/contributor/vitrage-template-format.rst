@@ -402,7 +402,7 @@ Common parameters and their acceptable values - for writing templates
 
 Using regular expressions in an entity definition
 -------------------------------------------------
-All parameters within an entity defintion can be made to include regular
+All parameters within an entity definition can be made to include regular
 expressions. To do this, simply add ".regex" to their key. For example, as
 Zabbix supports regular expressions and a Zabbix alarm contains a "rawtext"
 field which is a regular expression, a Zabbix alarm entity defined in the
