@@ -29,9 +29,6 @@ from vitrage import os_clients
 
 class HeatStackDriver(DriverBase):
 
-    _client = None
-    conf = None
-
     RESOURCE_TYPE = {
         'OS::Nova::Server': NOVA_INSTANCE_DATASOURCE,
         'OS::Cinder::Volume': CINDER_VOLUME_DATASOURCE,
@@ -48,16 +45,15 @@ class HeatStackDriver(DriverBase):
 
     def __init__(self, conf):
         super(HeatStackDriver, self).__init__()
-        HeatStackDriver.conf = conf
+        self._client = None
+        self._conf = conf
         self._filter_resource_types()
-        HeatStackDriver.client()
 
-    @staticmethod
-    def client():
-        if not HeatStackDriver._client:
-            HeatStackDriver._client = os_clients.heat_client(
-                HeatStackDriver.conf)
-        return HeatStackDriver._client
+    @property
+    def client(self):
+        if not self._client:
+            self._client = os_clients.heat_client(self._conf)
+        return self._client
 
     @staticmethod
     def get_topic(conf):
@@ -84,7 +80,7 @@ class HeatStackDriver(DriverBase):
             return
 
         event[DSProps.EVENT_TYPE] = event_type
-        event = HeatStackDriver._retrieve_stack_resources(event, stack_id)
+        event = self._retrieve_stack_resources(event, stack_id)
 
         return HeatStackDriver.make_pickleable(
             [event],
@@ -92,19 +88,14 @@ class HeatStackDriver(DriverBase):
             DatasourceAction.UPDATE,
             *self.properties_to_filter_out())[0]
 
-    @staticmethod
-    def _is_nested_stack(_id):
-        return HeatStackDriver.client().stacks.get(_id).to_dict()['parent']
+    def _is_nested_stack(self, _id):
+        return self.client.stacks.get(_id).to_dict()['parent']
 
     def _filter_resource_types(self):
-        types = self.conf.datasources.types
-        tmp_dict = {}
+        types = self._conf.datasources.types
 
-        for key, value in HeatStackDriver.RESOURCE_TYPE.items():
-            if value in types:
-                tmp_dict[key] = value
-
-        HeatStackDriver.RESOURCE_TYPE = tmp_dict
+        self.RESOURCE_TYPE = {key: value for key, value in
+                              self.RESOURCE_TYPE.items() if value in types}
 
     @staticmethod
     def _make_stacks_list(stacks):
@@ -118,16 +109,13 @@ class HeatStackDriver(DriverBase):
     def properties_to_filter_out():
         return ['manager', '_info']
 
-    @staticmethod
-    def _retrieve_stack_resources(stack, stack_id):
-        resources = HeatStackDriver.client().resources.list(stack_id,
-                                                            # guess 10 is
-                                                            # enough
-                                                            nested_depth=10)
+    def _retrieve_stack_resources(self, stack, stack_id):
+                                                    # guess 10 is enough
+        resources = self.client.resources.list(stack_id, nested_depth=10)
         stack['resources'] = [resource.to_dict() for resource in resources
                               if resource.to_dict()['resource_type'] in
-                              HeatStackDriver.RESOURCE_TYPE]
-        HeatStackDriver._filter_stack_resources(stack)
+                              self.RESOURCE_TYPE]
+        self._filter_stack_resources(stack)
         return stack
 
     @staticmethod
@@ -140,7 +128,7 @@ class HeatStackDriver(DriverBase):
                     del resource[prop]
 
     def get_all(self, datasource_action):
-        stacks = HeatStackDriver.client().stacks.list(global_tenant=True)
+        stacks = self.client.stacks.list(global_tenant=True)
         stacks_list = self._make_stacks_list(stacks)
         stacks_with_resources = self._append_stacks_resources(stacks_list)
         return self.make_pickleable(stacks_with_resources,
