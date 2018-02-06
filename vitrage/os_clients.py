@@ -37,7 +37,7 @@ _client_modules = {
     'cinder': 'cinderclient.client',
     'glance': 'glanceclient.client',
     'neutron': 'neutronclient.v2_0.client',
-    'heat': 'heatclient.v1.client',
+    'heat': 'heatclient.client',
     'mistral': 'mistralclient.api.v2.client',
 }
 
@@ -51,8 +51,8 @@ def driver_module(driver):
 def aodh_client(conf):
     """Get an instance of aodh client"""
     try:
-        aodh_client = driver_module('aodh')
-        client = aodh_client.Client(
+        ao_client = driver_module('aodh')
+        client = ao_client.Client(
             conf.aodh_version,
             session=keystone_client.get_session(conf))
         LOG.info('Aodh client created')
@@ -63,14 +63,11 @@ def aodh_client(conf):
 
 def ceilometer_client(conf):
     """Get an instance of ceilometer client"""
-    auth_config = conf.service_credentials
     try:
         cm_client = driver_module('ceilometer')
         client = cm_client.get_client(
             version=conf.ceilometer_version,
             session=keystone_client.get_session(conf),
-            region_name=auth_config.region_name,
-            interface=auth_config.interface,
         )
         LOG.info('Ceilometer client created')
         return client
@@ -80,14 +77,11 @@ def ceilometer_client(conf):
 
 def nova_client(conf):
     """Get an instance of nova client"""
-    auth_config = conf.service_credentials
     try:
         n_client = driver_module('nova')
         client = n_client.Client(
             version=conf.nova_version,
             session=keystone_client.get_session(conf),
-            region_name=auth_config.region_name,
-            endpoint_type='publicURL',
         )
         LOG.info('Nova client created')
         return client
@@ -97,14 +91,11 @@ def nova_client(conf):
 
 def cinder_client(conf):
     """Get an instance of cinder client"""
-    auth_config = conf.service_credentials
     try:
         cin_client = driver_module('cinder')
         client = cin_client.Client(
             version=conf.cinder_version,
             session=keystone_client.get_session(conf),
-            region_name=auth_config.region_name,
-            interface=auth_config.interface,
         )
         LOG.info('Cinder client created')
         return client
@@ -114,14 +105,11 @@ def cinder_client(conf):
 
 def glance_client(conf):
     """Get an instance of glance client"""
-    auth_config = conf.service_credentials
     try:
         glan_client = driver_module('glance')
         client = glan_client.Client(
             version=conf.glance_version,
             session=keystone_client.get_session(conf),
-            region_name=auth_config.region_name,
-            interface=auth_config.interface,
         )
         LOG.info('Glance client created')
         return client
@@ -131,13 +119,10 @@ def glance_client(conf):
 
 def neutron_client(conf):
     """Get an instance of neutron client"""
-    auth_config = conf.service_credentials
     try:
         ne_client = driver_module('neutron')
         client = ne_client.Client(
-            session=keystone_client.get_session(conf),
-            region_name=auth_config.region_name,
-            interface=auth_config.interface,
+            session=keystone_client.get_session(conf)
         )
         LOG.info('Neutron client created')
         return client
@@ -147,13 +132,12 @@ def neutron_client(conf):
 
 def heat_client(conf):
     """Get an instance of heat client"""
-    # auth_config = conf.service_credentials
     try:
-        session = keystone_client.get_session(conf)
-        endpoint = session.get_endpoint(service_type='orchestration',
-                                        interface='publicURL')
         he_client = driver_module('heat')
-        client = he_client.Client(session=session, endpoint=endpoint)
+        client = he_client.Client(
+            version=conf.heat_version,
+            session=keystone_client.get_session(conf)
+        )
         LOG.info('Heat client created')
         return client
     except Exception as e:
