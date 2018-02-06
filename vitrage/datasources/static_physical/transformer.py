@@ -12,6 +12,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from debtcollector import removals
 from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import GraphAction
@@ -37,6 +38,7 @@ class StaticPhysicalTransformer(ResourceTransformerBase):
     }
 
     def __init__(self, transformers, conf):
+        removals.removed_module(__name__, "datasources.static")
         super(StaticPhysicalTransformer, self).__init__(transformers, conf)
         self._register_relations_direction()
 

@@ -14,6 +14,7 @@
 
 import copy
 
+from debtcollector import removals
 from oslo_log import log
 
 from vitrage.common.constants import DatasourceProperties as DSProps
@@ -38,6 +39,7 @@ class StaticPhysicalDriver(DriverBase):
     ENTITIES_SECTION = 'entities'
 
     def __init__(self, conf):
+        removals.removed_module(__name__, "datasources.static")
         super(StaticPhysicalDriver, self).__init__()
         self.cfg = conf
         self.cache = {}
