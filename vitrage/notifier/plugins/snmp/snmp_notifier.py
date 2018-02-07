@@ -53,8 +53,23 @@ class SnmpNotifier(NotifierBase):
         new_data_format = {}
 
         for key, val in data.items():
-            new_data_format[key] = val
+            # TODO(ifat_afek): quick and dirty bug fix for Queens for
+            # https://bugs.launchpad.net/vitrage/+bug/1747895
+            #
+            # RESOURCE_ID is automatically generated with the correct value by
+            # "RESOURCE_ + ID" in the loop below.
+            # The problem is that for deduced alarms there is also a
+            # RESOURCE_ID property in the data that holds the vitrage_id of the
+            # resource instead of its id.
+            # In some cases it overwrites the right auto-generated RESOURCE_ID.
+            # The RESOURCE_ID should probably be deleted from deduced alarms,
+            # but for now we just ignore it in the SNMP notifier.
+            if key != VProps.RESOURCE_ID:
+                new_data_format[key] = val
+
             if key == VProps.RESOURCE:
+                # For each property of the resource, generate a RESOURCE_+key
+                # property in the alarm
                 for k, v in val.items():
                     new_data_format[VProps.RESOURCE + '_' + str(k)] = v
 
