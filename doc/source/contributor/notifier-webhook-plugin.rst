@@ -65,25 +65,15 @@ Data is sent by the webhook notifier in the following format.
           "update_timestamp": "2018-01-22 10:00:34.327142+00:00",
           "vitrage_category": "RESOURCE",
           "vitrage_operational_state": "OK",
-          "state": "active",
           "vitrage_type": "nova.instance",
-          "vitrage_sample_timestamp": "2018-01-22 10:00:34.327142+00:00",
-          "vitrage_aggregated_state": "ACTIVE",
-          "host_id": "iafek-devstack-pre-queens",
           "project_id": "8f007e5ba0944e84baa6f2a4f2b5d03a",
           "id": "9b7d93b9-94ec-41e1-9cec-f28d4f8d702c"
         },
-        "severity": "warning",
         "update_timestamp": "2018-01-22T10:00:34Z",
-        "resource_id": "437f1f4c-ccce-40a4-ac62-1c2f1fd9f6ac",
         "vitrage_category": "ALARM",
         "state": "Active",
         "vitrage_type": "vitrage",
-        "vitrage_sample_timestamp": "2018-01-22 10:00:34.366364+00:00",
         "vitrage_operational_severity": "WARNING",
-        "vitrage_aggregated_severity": "WARNING",
-        "vitrage_resource_id": "437f1f4c-ccce-40a4-ac62-1c2f1fd9f6ac",
-        "vitrage_resource_type": "nova.instance",
         "name": "Instance memory performance degraded"
       }
     }
