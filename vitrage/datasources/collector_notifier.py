@@ -27,10 +27,11 @@ class CollectorNotifier(object):
         self.oslo_notifier = None
         try:
             topics = [conf.datasources.notification_topic_collector]
-            if conf.persistency.enable_persistency:
-                topics.append(conf.persistency.persistor_topic)
-            else:
-                LOG.warning("Not persisting events")
+            # TODO(idan_hefetz): persistency is in development
+            # if conf.persistency.enable_persistency:
+            #     topics.append(conf.persistency.persistor_topic)
+            # else:
+            #     LOG.warning("Not persisting events")
 
             self.oslo_notifier = oslo_messaging.Notifier(
                 get_transport(conf),
