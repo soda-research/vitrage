@@ -29,11 +29,34 @@ from vitrage import storage
 LOG = logging.getLogger(__name__)
 URL = 'url'
 IS_ADMIN_WEBHOOK = 'is_admin_webhook'
-FIELDS_TO_REMOVE = (VProps.VITRAGE_IS_PLACEHOLDER,
-                    VProps.VITRAGE_IS_DELETED,
-                    VProps.IS_REAL_VITRAGE_ID)
 NOTIFICATION_TYPE = 'notification_type'
+NOTIFICATION = 'notification'
 PAYLOAD = 'payload'
+ALARM_FILTER = (NOTIFICATION,
+                PAYLOAD,
+                VProps.VITRAGE_ID,
+                VProps.ID,
+                VProps.RESOURCE,
+                VProps.NAME,
+                VProps.UPDATE_TIMESTAMP,
+                VProps.VITRAGE_OPERATIONAL_STATE,
+                VProps.VITRAGE_TYPE,
+                VProps.PROJECT_ID,
+                VProps.UPDATE_TIMESTAMP,
+                VProps.VITRAGE_CATEGORY,
+                VProps.STATE,
+                VProps.VITRAGE_OPERATIONAL_SEVERITY)
+RESOURCE_FILTER = (VProps.VITRAGE_ID,
+                   VProps.ID,
+                   VProps.RESOURCE,
+                   VProps.NAME,
+                   VProps.VITRAGE_CATEGORY,
+                   VProps.UPDATE_TIMESTAMP,
+                   VProps.VITRAGE_OPERATIONAL_STATE,
+                   VProps.VITRAGE_TYPE,
+                   VProps.PROJECT_ID,
+                   VProps.UPDATE_TIMESTAMP,
+                   VProps.VITRAGE_OPERATIONAL_SEVERITY)
 
 
 class Webhook(NotifierBase):
@@ -129,10 +152,11 @@ class Webhook(NotifierBase):
         return True
 
     def _filter_fields(self, data):
-        data = {k: v for k, v in data.items() if k not in FIELDS_TO_REMOVE}
+        data = {k: v for k, v in data.items() if k in ALARM_FILTER}
         if data.get(VProps.RESOURCE):
             data[VProps.RESOURCE] = \
-                self._filter_fields(data[VProps.RESOURCE])
+                {k: v for k, v in data[VProps.RESOURCE].items() if k in
+                 RESOURCE_FILTER}
         return data
 
     def _check_correct_tenant(self, webhook, data):
