@@ -21,9 +21,8 @@ OPTS = [
                     'datasources to the persistor'),
     cfg.BoolOpt('enable_persistency',
                 default=False,
-                help='Periodically store the entire graph snapshot to '
-                     'the database'),
+                help='Periodically store entity graph snapshot to database'),
     cfg.IntOpt('graph_persistency_interval',
                default=3600,
-               help='Store the graph to the database every X seconds'),
+               help='Store graph to database every X seconds'),
     ]

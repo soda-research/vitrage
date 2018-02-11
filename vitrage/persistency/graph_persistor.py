@@ -36,7 +36,7 @@ class GraphPersistor(object):
 
     def store_graph(self, graph):
         try:
-            graph_snapshot = graph.to_json()
+            graph_snapshot = graph.write_gpickle()
             db_row = models.GraphSnapshot(
                 last_event_timestamp=self.last_event_timestamp,
                 graph_snapshot=graph_snapshot)
@@ -47,7 +47,7 @@ class GraphPersistor(object):
     def load_graph(self, timestamp=None):
         db_row = self.db_connection.graph_snapshots.query(timestamp) if \
             timestamp else self.db_connection.graph_snapshots.query(utcnow())
-        return NXGraph.from_json(db_row.graph_snapshot) if db_row else None
+        return NXGraph.read_gpickle(db_row.graph_snapshot) if db_row else None
 
     def delete_graph_snapshots(self, timestamp):
         """Deletes all graph snapshots until timestamp"""

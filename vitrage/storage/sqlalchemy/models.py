@@ -12,6 +12,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 import json
+import zlib
 
 from oslo_db.sqlalchemy import models
 
@@ -49,14 +50,23 @@ class JSONEncodedDict(types.TypeDecorator):
     impl = types.TEXT
 
     def process_bind_param(self, value, dialect):
-        if value is not None:
-            value = json.dumps(value)
-        return value
+        return json.dumps(value) if value else None
 
     def process_result_value(self, value, dialect):
-        if value is not None:
-            value = json.loads(value)
-        return value
+        return json.loads(value) if value else None
+
+
+class CompressedBinary(types.TypeDecorator):
+    impl = types.LargeBinary
+
+    def process_bind_param(self, value, dialect):
+        return zlib.compress(value) if value else None
+
+    def process_result_value(self, value, dialect):
+        return zlib.decompress(value) if value else None
+
+    def copy(self, **kwargs):
+        return CompressedBinary(self.impl.length)
 
 
 class Event(Base):
@@ -125,7 +135,7 @@ class GraphSnapshot(Base):
     __tablename__ = 'graph_snapshots'
 
     last_event_timestamp = Column(DateTime, primary_key=True, nullable=False)
-    graph_snapshot = Column(JSONEncodedDict(), nullable=False)
+    graph_snapshot = Column(CompressedBinary((2 ** 32) - 1), nullable=False)
 
     def __repr__(self):
         return \
