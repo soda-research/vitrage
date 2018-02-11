@@ -20,17 +20,11 @@ export DEVSTACK_GATE_TEMPEST=1
 export DEVSTACK_GATE_TEMPEST_NOTESTS=1
 export KEEP_LOCALRC=1
 
-
-# if [ -z ${DEVSTACK_LOCAL_CONFIG+x} ]; then
-#     DEVSTACK_LOCAL_CONFIG="enable_plugin vitrage git://git.openstack.org/openstack/vitrage"
-# fi
 DEVSTACK_LOCAL_CONFIG+=$'\nenable_plugin heat git://git.openstack.org/openstack/heat'
 DEVSTACK_LOCAL_CONFIG+=$'\nenable_plugin ceilometer git://git.openstack.org/openstack/ceilometer'
 DEVSTACK_LOCAL_CONFIG+=$'\nenable_plugin aodh git://git.openstack.org/openstack/aodh'
 DEVSTACK_LOCAL_CONFIG+=$'\nenable_plugin mistral git://git.openstack.org/openstack/mistral'
 
-DEVSTACK_LOCAL_CONFIG+=$'\ndisable_service ceilometer-alarm-evaluator,ceilometer-alarm-notifier'
-DEVSTACK_LOCAL_CONFIG+=$'\ndisable_service n-net'
 DEVSTACK_LOCAL_CONFIG+=$'\ndisable_service s-account s-container s-object s-proxy'
 
 
@@ -81,13 +75,7 @@ export DEVSTACK_LOCAL_CONFIG
 if [ -z ${ENABLED_SERVICES+x} ]; then
     ENABLED_SERVICES=tempest
 fi
-ENABLED_SERVICES+=,q-svc,q-dhcp,q-meta,q-agt,q-l3
-ENABLED_SERVICES+=,h-eng h-api h-api-cfn h-api-cw
-ENABLED_SERVICES+=,vitrage-api,vitrage-graph
-ENABLED_SERVICES+=,key,aodh-api,aodh-notifier,aodh-evaluator
-ENABLED_SERVICES+=,ceilometer-alarm-evaluator,ceilometer-alarm-notifier
-ENABLED_SERVICES+=,ceilometer-api
-ENABLED_SERVICES+=,aodh-api
+
 export ENABLED_SERVICES
 
 
