@@ -25,9 +25,6 @@ DEVSTACK_LOCAL_CONFIG+=$'\nenable_plugin ceilometer git://git.openstack.org/open
 DEVSTACK_LOCAL_CONFIG+=$'\nenable_plugin aodh git://git.openstack.org/openstack/aodh'
 DEVSTACK_LOCAL_CONFIG+=$'\nenable_plugin mistral git://git.openstack.org/openstack/mistral'
 
-DEVSTACK_LOCAL_CONFIG+=$'\ndisable_service s-account s-container s-object s-proxy'
-
-
 DEVSTACK_LOCAL_CONFIG+="$(cat <<EOF
 
 
@@ -71,14 +68,4 @@ EOF
 )"
 
 export DEVSTACK_LOCAL_CONFIG
-
-if [ -z ${ENABLED_SERVICES+x} ]; then
-    ENABLED_SERVICES=tempest
-fi
-
-export ENABLED_SERVICES
-
-
-GATE_DEST=$BASE/new
-DEVSTACK_PATH=$GATE_DEST/devstack
-$GATE_DEST/devstack-gate/devstack-vm-gate.sh
+$BASE/new/devstack-gate/devstack-vm-gate.sh

@@ -54,13 +54,8 @@
           export PROJECTS="openstack/vitrage $PROJECTS"
           export PROJECTS="openstack/vitrage-tempest-plugin $PROJECTS"
           export ENABLED_SERVICES=tempest
-          export DEVSTACK_GATE_TEMPEST_ALL_PLUGINS=1
 
-          if [ "py27" == "py35" ] ; then
-             export DEVSTACK_GATE_USE_PYTHON3=True
-          else
-             export DEVSTACK_GATE_USE_PYTHON3=False
-          fi
+          export DEVSTACK_GATE_USE_PYTHON3=False
 
           function pre_test_hook {
               source $BASE/new/vitrage/devstack/pre_test_hook.sh
