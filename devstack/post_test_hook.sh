@@ -30,12 +30,6 @@ fi
 
 sudo cp -rf $DEVSTACK_PATH/tempest/etc/logging.conf.sample $DEVSTACK_PATH/tempest/etc/logging.conf
 
-# restart due to configuration files changes
-sudo systemctl restart devstack@vitrage-graph.service
-
-# wait for 30 seconds
-sleep 30
-
 cd $DEVSTACK_PATH/tempest/
 sudo -E testr init
 

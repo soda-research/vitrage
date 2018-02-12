@@ -27,33 +27,12 @@
         cmd: |
           set -e
           set -x
-          cat << 'EOF' >>"/tmp/dg-local.conf"
-          [[local|localrc]]
-          enable_plugin vitrage git://git.openstack.org/openstack/vitrage
-          enable_plugin vitrage-tempest-plugin git://git.openstack.org/openstack/vitrage-tempest-plugin
-
-          # swift is not ready for python3 yet
-          disable_service s-account
-          disable_service s-container
-          disable_service s-object
-          disable_service s-proxy
-
-          EOF
-        executable: /bin/bash
-        chdir: '{{ ansible_user_dir }}/workspace'
-      environment: '{{ zuul | zuul_legacy_vars }}'
-
-    - shell:
-        cmd: |
-          set -e
-          set -x
           export PYTHONUNBUFFERED=true
           export PROJECTS="openstack/python-vitrageclient $PROJECTS"
           export PROJECTS="openstack/aodh $PROJECTS"
           export PROJECTS="openstack/mistral $PROJECTS"
           export PROJECTS="openstack/vitrage $PROJECTS"
           export PROJECTS="openstack/vitrage-tempest-plugin $PROJECTS"
-          export ENABLED_SERVICES=tempest
 
           export DEVSTACK_GATE_USE_PYTHON3=True
 

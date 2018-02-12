@@ -24,6 +24,11 @@ DEVSTACK_LOCAL_CONFIG+=$'\nenable_plugin heat git://git.openstack.org/openstack/
 DEVSTACK_LOCAL_CONFIG+=$'\nenable_plugin ceilometer git://git.openstack.org/openstack/ceilometer'
 DEVSTACK_LOCAL_CONFIG+=$'\nenable_plugin aodh git://git.openstack.org/openstack/aodh'
 DEVSTACK_LOCAL_CONFIG+=$'\nenable_plugin mistral git://git.openstack.org/openstack/mistral'
+DEVSTACK_LOCAL_CONFIG+=$'\nenable_plugin vitrage git://git.openstack.org/openstack/vitrage'
+DEVSTACK_LOCAL_CONFIG+=$'\nenable_plugin vitrage-tempest-plugin git://git.openstack.org/openstack/vitrage-tempest-plugin'
+
+# we don't want swift
+DEVSTACK_LOCAL_CONFIG+=$'\ndisable_service s-account s-container s-object s-proxy'
 
 DEVSTACK_LOCAL_CONFIG+="$(cat <<EOF
 
