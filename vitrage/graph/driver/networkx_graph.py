@@ -64,9 +64,9 @@ class NXGraph(Graph):
 
     def copy(self):
         # Networkx graph copy is very slow, so we implement
-        nodes = self._g.nodes_iter(data=True)
+        nodes = self._g.nodes(data=True)
         vertices = [Vertex(vertex_id=n, properties=data) for n, data in nodes]
-        edges_iter = self._g.edges_iter(data=True, keys=True)
+        edges_iter = self._g.edges(data=True, keys=True)
         edges = [Edge(source_id=u, target_id=v, label=l, properties=data)
                  for u, v, l, data in edges_iter]
         return NXGraph(self.name, vertices, edges)
@@ -82,7 +82,10 @@ class NXGraph(Graph):
 
     def _add_vertex(self, v):
         properties_copy = copy.copy(v.properties)
-        self._g.add_node(n=v.vertex_id, attr_dict=properties_copy)
+        if properties_copy:
+            self._g.add_node(n=v.vertex_id, **properties_copy)
+        else:
+            self._g.add_node(n=v.vertex_id)
 
     @Notifier.update_notify
     def add_edge(self, e):
@@ -95,8 +98,12 @@ class NXGraph(Graph):
 
     def _add_edge(self, e):
         properties_copy = copy.copy(e.properties)
-        self._g.add_edge(u=e.source_id, v=e.target_id,
-                         key=e.label, attr_dict=properties_copy)
+        if properties_copy:
+            self._g.add_edge(u=e.source_id, v=e.target_id,
+                             key=e.label, **properties_copy)
+        else:
+            self._g.add_edge(u=e.source_id, v=e.target_id,
+                             key=e.label)
 
     def get_vertex(self, v_id):
         """Fetch a vertex from the graph
@@ -175,8 +182,10 @@ class NXGraph(Graph):
         if not orig_prop:
             self._add_vertex(v)
             return
-        new_prop = self._merge_properties(orig_prop, v.properties)
-        self._g.node[v.vertex_id] = new_prop
+        self._g.node[v.vertex_id].update(v.properties)
+        for prop, value in v.properties.items():
+            if value is None:
+                del self._g.node[v.vertex_id][prop]
 
     @Notifier.update_notify
     def update_edge(self, e):
@@ -184,15 +193,17 @@ class NXGraph(Graph):
 
         :type e: Edge
         """
-        orig_prop = self._g.edge.get(
+        orig_prop = self._g.adj.get(
             e.source_id, {}).get(
             e.target_id, {}).get(
             e.label, None)
         if not orig_prop:
             self._add_edge(e)
             return
-        new_prop = self._merge_properties(orig_prop, e.properties)
-        self._g.edge[e.source_id][e.target_id][e.label] = new_prop
+        self._g.adj[e.source_id][e.target_id][e.label].update(e.properties)
+        for prop, value in e.properties.items():
+            if value is None:
+                del self._g.adj[e.source_id][e.target_id][e.label][prop]
 
     def remove_vertex(self, v):
         """Remove Vertex v and its edges from the graph
@@ -216,12 +227,12 @@ class NXGraph(Graph):
             return check_filter(vertex_data[1], vertex_attr_filter)
 
         if not query_dict:
-            items = filter(check_vertex, self._g.nodes_iter(data=True))
+            items = filter(check_vertex, list(self._g.nodes(data=True)))
             return [vertex_copy(node, node_data) for node, node_data in items]
         elif not vertex_attr_filter:
             vertices = []
             match_func = create_predicate(query_dict)
-            for node, node_data in self._g.nodes_iter(data=True):
+            for node, node_data in self._g.nodes(data=True):
                 v = vertex_copy(node, node_data)
                 if match_func(v):
                     vertices.append(v)
@@ -283,13 +294,33 @@ class NXGraph(Graph):
         return nodes, edges_filtered2
 
     def json_output_graph(self, **kwargs):
+        """supports both 1.10<=networkx<2.0 and networx>=2.0 by returning the
+
+        same json output regardless networx version
+
+        :return: graph in json format
+        """
+
+        # TODO(annarez): when we decide to support networkx 2.0 with
+        # versioning of Vitrage, we can move part of the logic to vitrageclient
         node_link_data = json_graph.node_link_data(self._g)
         node_link_data.update(kwargs)
 
+        vitrage_id_to_index = dict()
+
         for index, node in enumerate(node_link_data['nodes']):
+            vitrage_id_to_index[node[VProps.VITRAGE_ID]] = index
             if VProps.ID in self._g.node[node[VProps.ID]]:
                 node[VProps.ID] = self._g.node[node[VProps.ID]][VProps.ID]
                 node[VProps.GRAPH_INDEX] = index
+
+        vers = nx.__version__
+        if vers >= '2.0':
+            for i in range(len(node_link_data['links'])):
+                node_link_data['links'][i]['source'] = vitrage_id_to_index[
+                    node_link_data['links'][i]['source']]
+                node_link_data['links'][i]['target'] = vitrage_id_to_index[
+                    node_link_data['links'][i]['target']]
 
         return json.dumps(node_link_data)
 

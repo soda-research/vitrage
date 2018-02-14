@@ -72,9 +72,9 @@ class BaseTest(base.BaseTestCase):
         edges of each graph.
         """
         g1_nodes = g1._g.node
-        g1_edges = g1._g.edge
+        g1_edges = g1._g.adj
         g2_nodes = g2._g.node
-        g2_edges = g2._g.edge
+        g2_edges = g2._g.adj
         self.assertEqual(g1.num_vertices(), g2.num_vertices(),
                          "Two graphs have different amount of nodes")
         self.assertEqual(g1.num_edges(), g2.num_edges(),
@@ -83,9 +83,10 @@ class BaseTest(base.BaseTestCase):
             self.assert_dict_equal(g1_nodes.get(n_id),
                                    g2_nodes.get(n_id),
                                    "Nodes of each graph are not equal")
+
         for e_source_id in g1_edges:
-            self.assert_dict_equal(g1_edges.get(e_source_id),
-                                   g2_edges.get(e_source_id),
+            self.assert_dict_equal(dict(g1_edges.get(e_source_id)),
+                                   dict(g2_edges.get(e_source_id)),
                                    "Edges of each graph are not equal")
 
     @staticmethod
