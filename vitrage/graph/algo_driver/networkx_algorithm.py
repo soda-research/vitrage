@@ -90,11 +90,11 @@ class NXAlgorithm(GraphAlgorithm):
             edges=self._edge_result_to_list(e_result))
 
         LOG.debug('graph_query_vertices: find graph: nodes %s, edges %s',
-                  str(graph._g.nodes(data=True)),
-                  str(graph._g.edges(data=True)))
+                  str(list(graph._g.nodes(data=True))),
+                  str(list(graph._g.edges(data=True))))
         LOG.debug('graph_query_vertices: real graph: nodes %s, edges %s',
-                  str(self.graph._g.nodes(data=True)),
-                  str(self.graph._g.edges(data=True)))
+                  str(list(self.graph._g.nodes(data=True))),
+                  str(list(self.graph._g.edges(data=True))))
         return graph
 
     def sub_graph_matching(self,
@@ -148,18 +148,18 @@ class NXAlgorithm(GraphAlgorithm):
         vertices_ids = [vertex.vertex_id for vertex in vertices]
 
         graph = self._create_new_graph('graph')
-        graph._g = self.graph._g.subgraph(vertices_ids)
+        graph._g = self.graph._g.subgraph(vertices_ids).copy()
 
         # delete non matching edges
         if edge_attr_filter:
             self._apply_edge_attr_filter(graph, edge_attr_filter)
 
         LOG.debug('match query, find graph: nodes %s, edges %s',
-                  str(graph._g.nodes(data=True)),
-                  str(graph._g.edges(data=True)))
+                  str(list(graph._g.nodes(data=True))),
+                  str(list(graph._g.edges(data=True))))
         LOG.debug('match query, real graph: nodes %s, edges %s',
-                  str(self.graph._g.nodes(data=True)),
-                  str(self.graph._g.edges(data=True)))
+                  str(list(self.graph._g.nodes(data=True))),
+                  str(list(self.graph._g.edges(data=True))))
 
         return graph
 
@@ -230,8 +230,8 @@ class NXAlgorithm(GraphAlgorithm):
 
     @staticmethod
     def _apply_edge_attr_filter(graph, edge_attr_filter):
-        edges_iter = graph._g.edges_iter(data=True, keys=True)
-        edges_to_remove = [(u, v, k) for (u, v, k, d) in edges_iter
+        edges = graph._g.edges(data=True, keys=True)
+        edges_to_remove = [(u, v, k) for (u, v, k, d) in edges
                            if not check_filter(d, edge_attr_filter)]
         for source, target, key in edges_to_remove:
             graph._g.remove_edge(u=source, v=target, key=key)

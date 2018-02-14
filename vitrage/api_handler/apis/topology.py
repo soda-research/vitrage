@@ -82,9 +82,6 @@ class TopologyApis(EntityGraphApisBase):
                     is_admin_project,
                     root_id)
 
-            alarms = graph.get_vertices(query_dict=ALARMS_ALL_QUERY)
-            graph.update_vertices(alarms)
-
         return graph.json_output_graph()
 
     def _get_topology_for_specific_project(self,
@@ -179,7 +176,7 @@ class TopologyApis(EntityGraphApisBase):
     def _create_graph_of_connected_components(self, ga, tmp_graph, root):
         return ga.subgraph(self._topology_for_unrooted_graph(ga,
                                                              tmp_graph,
-                                                             root))
+                                                             root)).copy()
 
     def _topology_for_unrooted_graph(self, ga, subgraph, root):
         """Finds topology for unrooted subgraph
@@ -204,7 +201,7 @@ class TopologyApis(EntityGraphApisBase):
             ga.connected_component_subgraphs(subgraph)
 
         for component_subgraph in local_connected_component_subgraphs:
-            entities += component_subgraph.nodes()
+            entities += list(component_subgraph.nodes())
             instance_in_component_subgraph = \
                 self._find_instance_in_graph(component_subgraph)
             if instance_in_component_subgraph:
@@ -227,7 +224,7 @@ class TopologyApis(EntityGraphApisBase):
 
     @staticmethod
     def _find_instance_in_graph(graph):
-        for node, node_data in graph.nodes_iter(data=True):
+        for node, node_data in graph.nodes(data=True):
             if node_data[VProps.VITRAGE_CATEGORY] == \
                     EntityCategory.RESOURCE \
                     and node_data[VProps.VITRAGE_TYPE] == \
