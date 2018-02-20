@@ -74,6 +74,9 @@ class EvaluatorWorker(base.GraphCloneWorkerBase):
         self._workers_num = workers_num
         self._evaluator = None
 
+    def name(self):
+        return "(%s)" % str(self._worker_index)
+
     def start(self):
         super(EvaluatorWorker, self).start()
         scenario_repo = ScenarioRepository(self._conf, self._worker_index,

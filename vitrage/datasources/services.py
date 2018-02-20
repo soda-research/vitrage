@@ -11,6 +11,7 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+import setproctitle
 import time
 
 from oslo_log import log
@@ -27,12 +28,29 @@ class DatasourceService(os_service.Service):
         self.registered_datasources = registered_datasources
         self.send_to_queue = send_to_queue_func
 
+    def name(self):
+        return ''
+
+    def start(self):
+        super(DatasourceService, self).start()
+        try:
+            setproctitle.setproctitle('{} {} {}'.format(
+                'vitrage-collector',
+                self.__class__.__name__,
+                self.name()))
+        except Exception:
+            LOG.warning('failed to set process name')
+
 
 class SnapshotsService(DatasourceService):
     def __init__(self, conf, registered_datasources, callback_function):
         super(SnapshotsService, self).__init__(conf,
                                                registered_datasources,
                                                callback_function)
+
+    def name(self):
+        names = [name for name in self.registered_datasources]
+        return ','.join(names)
 
     def start(self):
         LOG.info("Vitrage datasources Snapshot Service - Starting...")
@@ -93,6 +111,10 @@ class ChangesService(DatasourceService):
                                              registered_datasources,
                                              callback_function)
         self.changes_interval = changes_interval
+
+    def name(self):
+        names = [d.__class__.__name__ for d in self.registered_datasources]
+        return ','.join(names)
 
     def start(self):
         LOG.info("Vitrage Datasource Changes Service For: %s - Starting...",
