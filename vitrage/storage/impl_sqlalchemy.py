@@ -277,7 +277,7 @@ class EventsConnection(base.EventsConnection, BaseTableConn):
                                          lt_collector_timestamp,
                                          query)
 
-        return query.all()
+        return query.order_by(models.Event.collector_timestamp.desc()).all()
 
     @staticmethod
     def _update_query_gt_lt(gt_collector_timestamp,

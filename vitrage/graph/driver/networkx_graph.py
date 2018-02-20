@@ -17,6 +17,7 @@ import json
 import networkx as nx
 from networkx.algorithms.operators.binary import compose
 from networkx.readwrite import json_graph
+from six.moves import cPickle
 
 from oslo_log import log as logging
 
@@ -324,13 +325,16 @@ class NXGraph(Graph):
 
         return json.dumps(node_link_data)
 
-    def to_json(self):
-        return json_graph.node_link_data(self._g)
+    def write_gpickle(self):
+        return cPickle.dumps(self._g, cPickle.HIGHEST_PROTOCOL)
 
     @staticmethod
-    def from_json(data):
-        graph = NXGraph()
-        graph._g = nx.MultiDiGraph(json_graph.node_link_graph(data))
+    def read_gpickle(data, graph_to_update=None):
+        if graph_to_update is not None:
+            graph = graph_to_update
+        else:
+            graph = NXGraph()
+        graph._g = cPickle.loads(data)
         return graph
 
     def union(self, other_graph):
