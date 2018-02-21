@@ -801,7 +801,7 @@ Request Examples
 
 ::
 
-    GET /v1/alarms/?vitrage_id=all HTTP/1.1
+    GET /v1/alarm/?vitrage_id=all
     Host: 135.248.19.18:8999
     X-Auth-Token: 2b8882ba2ec44295bf300aecb2caa4f7
     Accept: application/json
