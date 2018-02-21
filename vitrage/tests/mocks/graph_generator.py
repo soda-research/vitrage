@@ -13,7 +13,10 @@
 # under the License.
 import itertools
 
+from oslo_utils import uuidutils
+
 from vitrage.common.constants import EdgeProperties
+from vitrage.common.constants import VertexProperties as VProps
 from vitrage.graph import Direction
 from vitrage.graph.driver.networkx_graph import NXGraph
 from vitrage.graph import Edge
@@ -35,7 +38,6 @@ class GraphGenerator(object):
                  num_of_vitrage_alarms_per_instance=2,
                  num_of_tripleo_controllers=2,
                  num_of_zabbix_alarms_per_controller=2):
-        self.id_counter = 0
         self._num_of_networks = num_of_networks
         self._num_of_zones_per_cluster = num_of_zones_per_cluster
         self._num_of_hosts_per_zone = num_of_hosts_per_zone
@@ -116,7 +118,7 @@ class GraphGenerator(object):
     def _create_n_vertices(self, g, n, props_file):
         created_vertices = []
         for i in range(n):
-            v = self._file_to_vertex(props_file)
+            v = self._file_to_vertex(props_file, i)
             created_vertices.append(v)
             g.add_vertex(v)
         return created_vertices
@@ -127,7 +129,8 @@ class GraphGenerator(object):
         created_vertices = []
         for source_v in source_v_list:
             for i in range(n):
-                v = self._file_to_vertex(neighbor_props_file)
+                v = self._file_to_vertex(neighbor_props_file, i)
+                v[VProps.NAME] = source_v[VProps.NAME] + "-" + v[VProps.NAME]
                 created_vertices.append(v)
                 g.add_vertex(v)
                 if direction == Direction.OUT:
@@ -153,12 +156,14 @@ class GraphGenerator(object):
                                               source_v.vertex_id,
                                               v.vertex_id))
 
-    def _file_to_vertex(self, relative_path):
+    def _file_to_vertex(self, relative_path, index=0):
         full_path = RESOURCES_PATH + "/vertices/"
         props = utils.load_specs(relative_path, full_path)
-        v = Vertex(str(self.id_counter), props)
-        self.id_counter += 1
-        return v
+        if props.get(VProps.ID):
+            props[VProps.ID] = uuidutils.generate_uuid()
+        props[VProps.NAME] = "%s-%s" % (props[VProps.VITRAGE_TYPE], str(index))
+        props[VProps.VITRAGE_ID] = uuidutils.generate_uuid()
+        return Vertex(props[VProps.VITRAGE_ID], props)
 
     @staticmethod
     def _file_to_edge(relative_path, source_id, target_id):
