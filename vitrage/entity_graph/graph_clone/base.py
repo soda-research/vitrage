@@ -12,6 +12,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 import abc
+import setproctitle
 import time
 
 from oslo_log import log
@@ -83,8 +84,18 @@ class GraphCloneWorkerBase(os_service.Service):
         self._task_queue = task_queue
         self._entity_graph = entity_graph
 
+    def name(self):
+        return ''
+
     def start(self):
         super(GraphCloneWorkerBase, self).start()
+        try:
+            setproctitle.setproctitle('{} {} {}'.format(
+                'vitrage-graph',
+                self.__class__.__name__,
+                self.name()))
+        except Exception:
+            LOG.warning('failed to set process name')
         self._entity_graph.notifier._subscriptions = []  # Quick n dirty
         self.tg.add_thread(self._read_queue)
         LOG.info("%s - Started!", self.__class__.__name__)
