@@ -21,6 +21,7 @@ develop-eggs/
 AUTHORS
 ChangeLog
 .testrepository
+.stestr
 .coverage
 cover
 etc/vitrage/vitrage.conf

@@ -31,9 +31,9 @@ fi
 sudo cp -rf $DEVSTACK_PATH/tempest/etc/logging.conf.sample $DEVSTACK_PATH/tempest/etc/logging.conf
 
 cd $DEVSTACK_PATH/tempest/
-sudo -E testr init
+sudo -E stestr init
 
 echo "Listing existing Tempest tests"
-sudo -E testr list-tests vitrage_tempest_tests | grep -E "$TESTS" | tee /tmp/vitrage_tempest_tests.list
+sudo -E stestr list vitrage_tempest_plugin | grep -E "$TESTS" | tee /tmp/vitrage_tempest_tests.list
 echo "Testing $1: $TESTS..."
-sudo -E testr run --subunit --load-list=/tmp/vitrage_tempest_tests.list | subunit-trace --fails
+sudo -E stestr run --serial --subunit --load-list=/tmp/vitrage_tempest_tests.list | subunit-trace --fails
