@@ -27,8 +27,8 @@ as the trigger for deduced alarms, states and RCA templates in Vitrage.
 
 .. _Nagios: https://www.nagios.org/
 
-- `Install Nagios on your devstack <http://docs.openstack.org/developer/vitrage/nagios-devstack-installation.html>`_
-- `Configure Nagios datasource <http://docs.openstack.org/developer/vitrage/nagios-config.html>`_
+- `Install Nagios on your devstack <https://docs.openstack.org/vitrage/latest/contributor/nagios-devstack-installation.html>`_
+- `Configure Nagios datasource <https://docs.openstack.org/vitrage/latest/contributor/nagios-config.html>`_
 
 
 Vitrage in action
@@ -114,12 +114,12 @@ differently, for each data-source you can define it's own mapping to the
 *normalized* states/severities supported in Vitrage. This will impact UI and
 templates behavior that depends on these fields.
 
-- `Resource state configuration <http://docs.openstack.org/developer/vitrage/resource-state-config.html>`_
-- `Alarm severity configuration <http://docs.openstack.org/developer/vitrage/alarm-severity-config.html>`_
+- `Resource state configuration <https://docs.openstack.org/vitrage/latest/contributor/resource-state-config.html>`_
+- `Alarm severity configuration <https://docs.openstack.org/vitrage/latest/contributor/alarm-severity-config.html>`_
 
 Writing your own templates
 --------------------------
 For more information regarding Vitrage templates, their format and how to add
 them, see here_.
 
-.. _here: http://docs.openstack.org/developer/vitrage/vitrage-template-format.html
+.. _here: https://docs.openstack.org/vitrage/latest/contributor/vitrage-template-format.html
