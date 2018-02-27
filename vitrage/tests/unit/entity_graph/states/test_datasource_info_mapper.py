@@ -67,18 +67,18 @@ class TestDatasourceInfoMapper(base.BaseTest):
         cls.conf.register_opts(cls.DATASOURCES_OPTS, group='datasources')
         cls._load_datasources(cls.conf)
 
-    def test_load_datasource_state_without_errors(self):
+    def test_load_datasource_value_without_errors(self):
         # action
-        state_manager = DatasourceInfoMapper(self.conf)
+        info_mapper = DatasourceInfoMapper(self.conf)
 
         # test assertions
 
         # Total datasources plus the evaluator which is not definable
         total_datasources = len(self.conf.datasources.types) + 1
-        self.assertThat(state_manager.datasources_state_confs,
+        self.assertThat(info_mapper.datasources_value_confs,
                         matchers.HasLength(total_datasources))
 
-    def test_load_datasources_state_with_errors(self):
+    def test_load_datasources_value_with_errors(self):
         # setup
         entity_graph_opts = [
             cfg.StrOpt('datasources_values_dir',
@@ -91,108 +91,107 @@ class TestDatasourceInfoMapper(base.BaseTest):
         self._load_datasources(conf)
 
         # action
-        state_manager = DatasourceInfoMapper(conf)
+        info_mapper = DatasourceInfoMapper(conf)
 
         # test assertions
-        missing_states = 1
+        missing_values = 1
         erroneous_values = 1
-        num_valid_datasources = len(state_manager.datasources_state_confs) + \
-            missing_states + erroneous_values
+        num_valid_datasources = len(info_mapper.datasources_value_confs) + \
+            missing_values + erroneous_values
         self.assertThat(conf.datasources.types,
                         matchers.HasLength(num_valid_datasources))
 
-    def test_vitrage_operational_state_exists(self):
+    def test_vitrage_operational_value_exists(self):
         # setup
-        state_manager = DatasourceInfoMapper(self.conf)
+        info_mapper = DatasourceInfoMapper(self.conf)
 
         # action
-        vitrage_operational_state = \
-            state_manager.vitrage_operational_state(NOVA_INSTANCE_DATASOURCE,
-                                                    'BUILDING')
+        vitrage_operational_value = \
+            info_mapper.vitrage_operational_value(NOVA_INSTANCE_DATASOURCE,
+                                                  'BUILDING')
 
         # test assertions
         self.assertEqual(OperationalResourceState.TRANSIENT,
-                         vitrage_operational_state)
+                         vitrage_operational_value)
 
-    def test_vitrage_operational_state_not_exists(self):
+    def test_vitrage_operational_value_not_exists(self):
         # setup
-        state_manager = DatasourceInfoMapper(self.conf)
+        info_mapper = DatasourceInfoMapper(self.conf)
 
         # action
-        vitrage_operational_state = \
-            state_manager.vitrage_operational_state(NOVA_INSTANCE_DATASOURCE,
-                                                    'NON EXISTING STATE')
+        vitrage_operational_value = \
+            info_mapper.vitrage_operational_value(NOVA_INSTANCE_DATASOURCE,
+                                                  'NON EXISTING STATE')
 
         # test assertions
         self.assertEqual(OperationalResourceState.NA,
-                         vitrage_operational_state)
+                         vitrage_operational_value)
 
-    def test_vitrage_operational_state_DS_not_exists_and_state_not_exist(self):
+    def test_vitrage_operational_value_DS_not_exists_and_value_not_exist(self):
         # setup
-        state_manager = DatasourceInfoMapper(self.conf)
+        info_mapper = DatasourceInfoMapper(self.conf)
 
         # action
-        vitrage_operational_state = \
-            state_manager.vitrage_operational_state('NON EXISTING DATASOURCE',
-                                                    'BUILDING')
+        vitrage_operational_value = \
+            info_mapper.vitrage_operational_value('NON EXISTING DATASOURCE',
+                                                  'BUILDING')
 
         # test assertions
         self.assertEqual(OperationalResourceState.NA,
-                         vitrage_operational_state)
+                         vitrage_operational_value)
 
-    def test_vitrage_operational_state_DS_not_exists_and_state_exist(self):
+    def test_vitrage_operational_value_DS_not_exists_and_value_exist(self):
         # setup
-        state_manager = DatasourceInfoMapper(self.conf)
+        info_mapper = DatasourceInfoMapper(self.conf)
 
         # action
-        vitrage_operational_state = \
-            state_manager.vitrage_operational_state('NON EXISTING DATASOURCE',
-                                                    'AVAILABLE')
+        vitrage_operational_value = \
+            info_mapper.vitrage_operational_value('NON EXISTING DATASOURCE',
+                                                  'AVAILABLE')
 
         # test assertions
         self.assertEqual(OperationalResourceState.OK,
-                         vitrage_operational_state)
+                         vitrage_operational_value)
 
-    def test_state_priority(self):
+    def test_value_priority(self):
         # setup
-        state_manager = DatasourceInfoMapper(self.conf)
+        info_mapper = DatasourceInfoMapper(self.conf)
 
         # action
-        state_priority = \
-            state_manager.state_priority(NOVA_INSTANCE_DATASOURCE,
-                                         'ACTIVE')
+        value_priority = \
+            info_mapper.value_priority(NOVA_INSTANCE_DATASOURCE, 'ACTIVE')
 
         # test assertions
-        self.assertEqual(10, state_priority)
+        self.assertEqual(10, value_priority)
 
-    def test_state_priority_not_exists(self):
+    def test_value_priority_not_exists(self):
         # setup
-        state_manager = DatasourceInfoMapper(self.conf)
+        info_mapper = DatasourceInfoMapper(self.conf)
 
         # action
-        state_priority = \
-            state_manager.state_priority(NOVA_INSTANCE_DATASOURCE,
-                                         'NON EXISTING STATE')
+        value_priority = \
+            info_mapper.value_priority(NOVA_INSTANCE_DATASOURCE,
+                                       'NON EXISTING STATE')
 
         # test assertions
-        self.assertEqual(0, state_priority)
+        self.assertEqual(0, value_priority)
 
-    def test_state_priority_datasource_not_exists(self):
+    def test_value_priority_datasource_not_exists(self):
         # setup
-        state_manager = DatasourceInfoMapper(self.conf)
+        info_mapper = DatasourceInfoMapper(self.conf)
 
         # action
-        state_priority = \
-            state_manager.state_priority('NON EXISTING DATASOURCE',
-                                         'ACTIVE')
+        value_priority = \
+            info_mapper.value_priority('NON EXISTING DATASOURCE',
+                                       'ACTIVE')
 
         # test assertions
         self.assertEqual(10,
-                         state_priority)
+                         value_priority)
 
-    def test_vitrage_aggregated_state(self):
+    def test_vitrage_aggregated_value(self):
         # setup
-        state_manager = DatasourceInfoMapper(self.conf)
+        info_mapper = DatasourceInfoMapper(self.conf)
         metadata1 = {VProps.VITRAGE_STATE: 'SUSPENDED'}
         new_vertex1 = create_vertex('12345',
                                     vitrage_category=EntityCategory.RESOURCE,
@@ -207,8 +206,8 @@ class TestDatasourceInfoMapper(base.BaseTest):
                                     metadata=metadata2)
 
         # action
-        state_manager.vitrage_aggregated_state(new_vertex1, None)
-        state_manager.vitrage_aggregated_state(new_vertex2, None)
+        info_mapper.vitrage_aggregate_values(new_vertex1, None)
+        info_mapper.vitrage_aggregate_values(new_vertex2, None)
 
         # test assertions
         self.assertEqual('SUSPENDED',
@@ -220,9 +219,9 @@ class TestDatasourceInfoMapper(base.BaseTest):
         self.assertEqual(OperationalResourceState.SUBOPTIMAL,
                          new_vertex2[VProps.VITRAGE_OPERATIONAL_STATE])
 
-    def test_vitrage_aggregated_state_functionalities(self):
+    def test_vitrage_aggregated_value_functionalities(self):
         # setup
-        state_manager = DatasourceInfoMapper(self.conf)
+        info_mapper = DatasourceInfoMapper(self.conf)
         new_vertex1 = create_vertex('12345',
                                     vitrage_category=EntityCategory.RESOURCE,
                                     vitrage_type=NOVA_INSTANCE_DATASOURCE,
@@ -244,12 +243,12 @@ class TestDatasourceInfoMapper(base.BaseTest):
                                       metadata=metadata3)
 
         # action
-        state_manager.vitrage_aggregated_state(new_vertex1,
-                                               None)
-        state_manager.vitrage_aggregated_state(new_vertex2,
-                                               None)
-        state_manager.vitrage_aggregated_state(new_vertex3,
-                                               graph_vertex3)
+        info_mapper.vitrage_aggregate_values(new_vertex1,
+                                             None)
+        info_mapper.vitrage_aggregate_values(new_vertex2,
+                                             None)
+        info_mapper.vitrage_aggregate_values(new_vertex3,
+                                             graph_vertex3)
 
         # test assertions
         self.assertEqual('ACTIVE',
@@ -265,9 +264,9 @@ class TestDatasourceInfoMapper(base.BaseTest):
         self.assertEqual(OperationalResourceState.SUBOPTIMAL,
                          new_vertex3[VProps.VITRAGE_OPERATIONAL_STATE])
 
-    def test_vitrage_aggregated_state_datasource_not_exists(self):
+    def test_vitrage_aggregated_value_datasource_not_exists(self):
         # setup
-        state_manager = DatasourceInfoMapper(self.conf)
+        info_mapper = DatasourceInfoMapper(self.conf)
         metadata = {VProps.VITRAGE_STATE: 'SUSPENDED'}
         new_vertex = create_vertex('12345',
                                    vitrage_category=EntityCategory.RESOURCE,
@@ -276,7 +275,7 @@ class TestDatasourceInfoMapper(base.BaseTest):
                                    metadata=metadata)
 
         # action
-        state_manager.vitrage_aggregated_state(new_vertex, None)
+        info_mapper.vitrage_aggregate_values(new_vertex, None)
 
         # test assertions
         self.assertEqual('ACTIVE',
@@ -284,9 +283,9 @@ class TestDatasourceInfoMapper(base.BaseTest):
         self.assertEqual(OperationalResourceState.OK,
                          new_vertex[VProps.VITRAGE_OPERATIONAL_STATE])
 
-    def test_vitrage_aggregated_state_DS_not_exists_and_wrong_state(self):
+    def test_vitrage_aggregated_value_DS_not_exists_and_wrong_state(self):
         # setup
-        state_manager = DatasourceInfoMapper(self.conf)
+        info_mapper = DatasourceInfoMapper(self.conf)
         metadata = {VProps.VITRAGE_STATE: 'SUSPENDED'}
         new_vertex = create_vertex('12345',
                                    vitrage_category=EntityCategory.RESOURCE,
@@ -295,7 +294,7 @@ class TestDatasourceInfoMapper(base.BaseTest):
                                    metadata=metadata)
 
         # action
-        state_manager.vitrage_aggregated_state(new_vertex, None)
+        info_mapper.vitrage_aggregate_values(new_vertex, None)
 
         # test assertions
         self.assertEqual('NON EXISTING STATE',

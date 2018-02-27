@@ -45,13 +45,16 @@ The alarm severity configuration files configure how the severity of each
 alarm is aggregated and normalized. There are several guidelines for creating
 a config file:
 
+- Severity comes with a priority, the higher severity "wins" in case
+  the same deduced alarm is raised in two scenarios (e.g., a host alarm caused
+  by both memory low and cpu high)
 - Operational severity is a normalized severity values can be mapped to
   specific defined values which can be found in operational_alarm_severity.py
   (OperationalAlarmSeverity class).
-- Aggregated severity comes with a priority, so that if an alarm is given
-  different severities from different sources (e.g., a host alarm raised both
-  by nagios and Vitrage), the severity with the highest priority will be used
-  as the **aggregated severity**.
+- Aggregated severity is not used at the moment. It is designed for the use case
+  that an alarm is given different severities from different sources (e.g., a
+  host alarm raised both by nagios and Vitrage), the severity with the highest
+  priority will be used as the **aggregated severity**.
 - The config file is in YAML format.
 - The config filename must be <datasource name>.yaml, for the relevant
   datasource.
