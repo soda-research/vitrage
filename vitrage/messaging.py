@@ -65,13 +65,13 @@ def get_notification_listener(transport, targets, endpoints,
 
 class VitrageNotifier(object):
     """Allows writing to message bus"""
-    def __init__(self, conf, publisher_id, topic):
+    def __init__(self, conf, publisher_id, topics):
         transport = get_transport(conf)
         self.notifier = oslo_msg.Notifier(
             transport,
             driver='messagingv2',
             publisher_id=publisher_id,
-            topics=[topic])
+            topics=topics)
 
     def notify(self, event_type, data):
         LOG.debug('notify : ' + event_type + ' ' + str(data))

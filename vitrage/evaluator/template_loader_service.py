@@ -86,7 +86,7 @@ class TemplateLoaderWorker(base.GraphCloneWorkerBase):
         actions_callback = VitrageNotifier(
             conf=self._conf,
             publisher_id='vitrage_evaluator',
-            topic=EVALUATOR_TOPIC).notify
+            topics=[EVALUATOR_TOPIC]).notify
         self._evaluator = ScenarioEvaluator(
             self._conf,
             self._entity_graph,

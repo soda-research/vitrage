@@ -32,7 +32,7 @@ class VitrageConsistencyService(os_service.Service):
         self.conf = conf
         self.entity_graph = entity_graph
         self.actions_notifier = VitrageNotifier(
-            conf, 'vitrage_consistency', EVALUATOR_TOPIC)
+            conf, 'vitrage_consistency', [EVALUATOR_TOPIC])
 
     def start(self):
         LOG.info("Vitrage Consistency Service - Starting...")

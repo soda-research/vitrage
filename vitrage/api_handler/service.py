@@ -40,7 +40,7 @@ class VitrageApiHandlerService(os_service.Service):
         self.conf = conf
         self.entity_graph = e_graph
         self.notifier = VitrageNotifier(self.conf, "vitrage.api",
-                                        EVALUATOR_TOPIC)
+                                        [EVALUATOR_TOPIC])
         self.db = storage.get_connection_from_config(conf)
 
     def start(self):
