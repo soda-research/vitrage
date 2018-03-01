@@ -13,6 +13,7 @@
 # under the License.
 
 from oslo_config import cfg
+from testtools import matchers
 
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import VertexProperties as VProps
@@ -53,8 +54,10 @@ class TestCinderVolume(TestDataSourcesBase):
     def test_cinder_volume_validity(self):
         # Setup
         processor = self._create_processor_with_graph(self.conf)
-        self.assertEqual(self._num_total_expected_vertices(),
-                         len(processor.entity_graph))
+        self.assertThat(processor.entity_graph,
+                        matchers.HasLength(
+                            self._num_total_expected_vertices())
+                        )
 
         spec_list = mock_driver.simple_volume_generators(
             volume_num=1,
@@ -70,19 +73,20 @@ class TestCinderVolume(TestDataSourcesBase):
         processor.process_event(cinder_volume_event)
 
         # Test assertions
-        self.assertEqual(self._num_total_expected_vertices() + 1,
-                         len(processor.entity_graph))
+        self.assertThat(processor.entity_graph,
+                        matchers.HasLength(
+                            self._num_total_expected_vertices() + 1)
+                        )
 
         cinder_vertices = processor.entity_graph.get_vertices(
             vertex_attr_filter={
                 VProps.VITRAGE_CATEGORY: EntityCategory.RESOURCE,
                 VProps.VITRAGE_TYPE: CINDER_VOLUME_DATASOURCE
             })
-        self.assertEqual(1, len(cinder_vertices))
+        self.assertThat(cinder_vertices, matchers.HasLength(1))
 
         cinder_neighbors = processor.entity_graph.neighbors(
             cinder_vertices[0].vertex_id)
-        self.assertEqual(1, len(cinder_neighbors))
-
+        self.assertThat(cinder_neighbors, matchers.HasLength(1))
         self.assertEqual(NOVA_INSTANCE_DATASOURCE,
                          cinder_neighbors[0][VProps.VITRAGE_TYPE])

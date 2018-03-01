@@ -11,6 +11,7 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+from testtools import matchers
 
 from vitrage.common.constants import EdgeLabel
 from vitrage.common.constants import EdgeProperties
@@ -50,11 +51,11 @@ class AddCausalRelationshipTest(base.BaseTest):
         # Test Assertions
 
         # expecting for one step: add edge
-        self.assertEqual(1, len(action_steps))
+        self.assertThat(action_steps, matchers.HasLength(1))
 
         self.assertEqual(ADD_EDGE, action_steps[0].type)
         add_edge_step_params = action_steps[0].params
-        self.assertEqual(3, len(add_edge_step_params))
+        self.assertThat(add_edge_step_params, matchers.HasLength(3))
 
         source = add_edge_step_params.get(TField.SOURCE)
         self.assertEqual(self.source_vertex.vertex_id, source)
@@ -73,11 +74,11 @@ class AddCausalRelationshipTest(base.BaseTest):
         # Test Assertions
 
         # expecting for one step: remove edge
-        self.assertEqual(1, len(action_steps))
+        self.assertThat(action_steps, matchers.HasLength(1))
 
         self.assertEqual(REMOVE_EDGE, action_steps[0].type)
         add_edge_step_params = action_steps[0].params
-        self.assertEqual(3, len(add_edge_step_params))
+        self.assertThat(add_edge_step_params, matchers.HasLength(3))
 
         source = add_edge_step_params.get(TField.SOURCE)
         self.assertEqual(self.source_vertex.vertex_id, source)

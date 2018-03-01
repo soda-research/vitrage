@@ -18,11 +18,13 @@ test_vitrage graph
 
 Tests for `vitrage` graph driver
 """
+from testtools import matchers
 
 from vitrage.common.constants import EdgeProperties as EProps
 from vitrage.graph import Direction
 from vitrage.graph.filter import check_filter
 from vitrage.graph import utils
+from vitrage.tests.base import IsEmpty
 from vitrage.tests.unit.graph.base import *  # noqa
 
 LOG = logging.getLogger(__name__)
@@ -33,20 +35,26 @@ class TestGraph(GraphTestBase):
     def test_graph(self):
         g = NXGraph('test_graph')
         self.assertEqual('test_graph', g.name, 'graph name')
-        self.assertEqual(0, len(g), 'graph __len__')
+        self.assertThat(g, IsEmpty(), 'graph __len__')
 
         g.add_vertex(v_node)
         g.add_vertex(v_host)
         g.add_edge(e_node_to_host)
-        self.assertEqual(2, len(g), 'graph __len__ after add vertices')
+        self.assertThat(g,
+                        matchers.HasLength(2),
+                        'graph __len__ after add vertices')
 
         graph_copy = g.copy()
         self.assertEqual('test_graph', graph_copy.name, 'graph copy name')
-        self.assertEqual(2, len(graph_copy), 'graph copy __len__')
+        self.assertThat(graph_copy,
+                        matchers.HasLength(2),
+                        'graph copy __len__')
 
         g.remove_vertex(v_node)
-        self.assertEqual(1, len(g), 'graph __len__ after remove vertex')
-        self.assertEqual(2, len(graph_copy), 'graph copy __len__')
+        self.assertThat(g, matchers.HasLength(1),
+                        'graph __len__ after remove vertex')
+        self.assertThat(graph_copy, matchers.HasLength(2),
+                        'graph copy __len__')
 
         updated_vertex = g.get_vertex(v_host.vertex_id)
         updated_vertex[VProps.VITRAGE_CATEGORY] = ALARM
@@ -125,7 +133,8 @@ class TestGraph(GraphTestBase):
 
         # Remove the item
         g.remove_vertex(another_vertex)
-        self.assertEqual(1, len(g), 'graph __len__ after remove vertex')
+        self.assertThat(g, matchers.HasLength(1),
+                        'graph __len__ after remove vertex')
         v = g.get_vertex(another_vertex.vertex_id)
         self.assertIsNone(v, 'removed vertex not in graph')
 
@@ -171,19 +180,17 @@ class TestGraph(GraphTestBase):
 
         # Edge is correct
         v_node_neig = g.neighbors(v_node.vertex_id, direction=Direction.OUT)
-        self.assertEqual(1, len(v_node_neig),
-                         'v_node OUT neighbor count')
+        self.assertThat(v_node_neig, matchers.HasLength(1),
+                        'v_node OUT neighbor count')
         self.assertEqual(v_host.vertex_id, v_node_neig.pop().vertex_id,
                          'v_node OUT neighbor is v_host')
         v_node_neig = g.neighbors(v_node.vertex_id, direction=Direction.IN)
-        self.assertEqual(0, len(v_node_neig),
-                         'v_node IN neighbor count')
+        self.assertThat(v_node_neig, IsEmpty(), 'v_node IN neighbor count')
         v_host_neig = g.neighbors(v_host.vertex_id, direction=Direction.OUT)
-        self.assertEqual(0, len(v_host_neig),
-                         'v_host OUT neighbor count')
+        self.assertThat(v_host_neig, IsEmpty(), 'v_host OUT neighbor count')
         v_host_neig = g.neighbors(v_host.vertex_id, direction=Direction.IN)
-        self.assertEqual(1, len(v_host_neig),
-                         'v_host IN neighbor count')
+        self.assertThat(v_host_neig, matchers.HasLength(1),
+                        'v_host IN neighbor count')
         self.assertEqual(v_node.vertex_id, v_host_neig.pop().vertex_id,
                          'v_host IN neighbor is v_node')
 
@@ -400,13 +407,13 @@ class TestGraph(GraphTestBase):
         g.add_edge(e_node_to_host)
 
         all_vertices = g.get_vertices()
-        self.assertEqual(2, len(all_vertices),
-                         'get_vertices __len__ all vertices')
+        self.assertThat(all_vertices, matchers.HasLength(2),
+                        'get_vertices __len__ all vertices')
 
         node_vertices = g.get_vertices(
             vertex_attr_filter={VProps.VITRAGE_TYPE: OPENSTACK_CLUSTER})
-        self.assertEqual(1, len(node_vertices),
-                         'get_vertices __len__ node vertices')
+        self.assertThat(node_vertices, matchers.HasLength(1),
+                        'get_vertices __len__ node vertices')
         found_vertex = node_vertices.pop()
         self.assertEqual(OPENSTACK_CLUSTER, found_vertex[VProps.VITRAGE_TYPE],
                          'get_vertices check node vertex')
@@ -414,8 +421,8 @@ class TestGraph(GraphTestBase):
         node_vertices = g.get_vertices(
             vertex_attr_filter={VProps.VITRAGE_TYPE: OPENSTACK_CLUSTER,
                                 VProps.VITRAGE_CATEGORY: RESOURCE})
-        self.assertEqual(1, len(node_vertices),
-                         'get_vertices __len__ node vertices')
+        self.assertThat(node_vertices, matchers.HasLength(1),
+                        'get_vertices __len__ node vertices')
         found_vertex = node_vertices.pop()
         self.assertEqual(OPENSTACK_CLUSTER, found_vertex[VProps.VITRAGE_TYPE],
                          'get_vertices check node vertex')
@@ -519,7 +526,8 @@ class TestGraph(GraphTestBase):
         g2.add_edge(e_v3_v4)
 
         g1.union(g2)
-        self.assertEqual(4, len(g1), 'incorrect graph len after union')
+        self.assertThat(g1, matchers.HasLength(4),
+                        'incorrect graph len after union')
 
         e = g1.get_edge(e_v3_v4.source_id, e_v3_v4.target_id, e_v3_v4.label)
         self.assertIsNotNone(e, 'Edge missing after graphs union')

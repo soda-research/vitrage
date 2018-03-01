@@ -13,6 +13,7 @@
 # under the License.
 
 from oslo_config import cfg
+from testtools import matchers
 
 from vitrage.common.constants import DatasourceProperties as DSProp
 from vitrage.common.constants import EntityCategory
@@ -55,8 +56,10 @@ class TestAodhAlarms(TestDataSourcesBase):
     def test_aodh_alarms_validity(self):
         # Setup
         processor = self._create_processor_with_graph(self.conf)
-        self.assertEqual(self._num_total_expected_vertices(),
-                         len(processor.entity_graph))
+        self.assertThat(processor.entity_graph,
+                        matchers.HasLength(
+                            self._num_total_expected_vertices())
+                        )
 
         detail = {TransformerBase.QUERY_RESULT: '',
                   DSProp.ENTITY_TYPE: AODH_DATASOURCE}
@@ -75,19 +78,21 @@ class TestAodhAlarms(TestDataSourcesBase):
         processor.process_event(aodh_event)
 
         # Test assertions
-        self.assertEqual(self._num_total_expected_vertices() + 1,
-                         len(processor.entity_graph))
+        self.assertThat(processor.entity_graph,
+                        matchers.HasLength(
+                            self._num_total_expected_vertices() + 1)
+                        )
 
         aodh_vertices = processor.entity_graph.get_vertices(
             vertex_attr_filter={
                 VProps.VITRAGE_CATEGORY: EntityCategory.ALARM,
                 VProps.VITRAGE_TYPE: AODH_DATASOURCE
             })
-        self.assertEqual(1, len(aodh_vertices))
+        self.assertThat(aodh_vertices, matchers.HasLength(1))
 
         aodh_neighbors = processor.entity_graph.neighbors(
             aodh_vertices[0].vertex_id)
-        self.assertEqual(1, len(aodh_neighbors))
+        self.assertThat(aodh_neighbors, matchers.HasLength(1))
 
         self.assertEqual(NOVA_HOST_DATASOURCE,
                          aodh_neighbors[0][VProps.VITRAGE_TYPE])

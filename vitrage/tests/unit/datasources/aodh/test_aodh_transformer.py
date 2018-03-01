@@ -14,6 +14,7 @@
 
 from oslo_config import cfg
 from oslo_log import log as logging
+from testtools import matchers
 
 from vitrage.common.constants import DatasourceOpts as DSOpts
 from vitrage.common.constants import DatasourceProperties as DSProps
@@ -104,7 +105,7 @@ class TestAodhAlarmTransformer(AodhTransformerBaseTest):
             self._validate_aodh_vertex_props(vertex, event)
 
             neighbors = wrapper.neighbors
-            self.assertEqual(1, len(neighbors))
+            self.assertThat(neighbors, matchers.HasLength(1))
             self._validate_neighbors(neighbors, vertex.vertex_id, event)
 
             self._validate_action(event, wrapper)
@@ -155,7 +156,7 @@ class TestAodhAlarmPushTransformer(AodhTransformerBaseTest):
             self._validate_aodh_vertex_props(vertex, event)
 
             neighbors = wrapper.neighbors
-            self.assertEqual(1, len(neighbors))
+            self.assertThat(neighbors, matchers.HasLength(1))
             self._validate_neighbors(neighbors, vertex.vertex_id, event)
 
             self._validate_action(event, wrapper)

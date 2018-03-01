@@ -12,6 +12,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 from oslo_log import log
+from testtools import matchers
 
 from vitrage.tests.functional.test_configuration import TestConfiguration
 
@@ -44,6 +45,7 @@ from vitrage.evaluator.actions.evaluator_event_transformer \
 from vitrage.evaluator.scenario_evaluator import ScenarioEvaluator
 from vitrage.evaluator.scenario_repository import ScenarioRepository
 from vitrage.graph import create_edge
+from vitrage.tests.base import IsEmpty
 from vitrage.tests.functional.base import \
     TestFunctionalBase
 import vitrage.tests.mocks.mock_driver as mock_driver
@@ -234,11 +236,11 @@ class TestScenarioEvaluator(TestFunctionalBase, TestConfiguration):
                                            processor, _TARGET_HOST)
         alarms = \
             self._get_deduced_alarms_on_host(host_v, processor.entity_graph)
-        self.assertEqual(1, len(alarms))
+        self.assertThat(alarms, matchers.HasLength(1))
         self.assertEqual(NagiosTestStatus.WARNING,
                          alarms[0][VProps.SEVERITY])
         causes = self._get_alarm_causes(alarms[0], processor.entity_graph)
-        self.assertEqual(1, len(causes))
+        self.assertThat(causes, matchers.HasLength(1))
 
         # next disable the alarm
         warning_test[NagiosProperties.STATUS] = NagiosTestStatus.OK
@@ -246,7 +248,7 @@ class TestScenarioEvaluator(TestFunctionalBase, TestConfiguration):
                                            processor, _TARGET_HOST)
         alarms = \
             self._get_deduced_alarms_on_host(host_v, processor.entity_graph)
-        self.assertEqual(0, len(alarms))
+        self.assertThat(alarms, IsEmpty())
 
         # recreate the nagios alarm
         warning_test[NagiosProperties.STATUS] = NagiosTestStatus.WARNING
@@ -255,11 +257,11 @@ class TestScenarioEvaluator(TestFunctionalBase, TestConfiguration):
                                            processor, _TARGET_HOST)
         alarms = \
             self._get_deduced_alarms_on_host(host_v, processor.entity_graph)
-        self.assertEqual(1, len(alarms))
+        self.assertThat(alarms, matchers.HasLength(1))
         self.assertEqual(NagiosTestStatus.WARNING,
                          alarms[0][VProps.SEVERITY])
         causes = self._get_alarm_causes(alarms[0], processor.entity_graph)
-        self.assertEqual(1, len(causes))
+        self.assertThat(causes, matchers.HasLength(1))
 
         # next disable the alarm
         warning_test[NagiosProperties.STATUS] = NagiosTestStatus.OK
@@ -267,7 +269,7 @@ class TestScenarioEvaluator(TestFunctionalBase, TestConfiguration):
                                            processor, _TARGET_HOST)
         alarms = \
             self._get_deduced_alarms_on_host(host_v, processor.entity_graph)
-        self.assertEqual(0, len(alarms))
+        self.assertThat(alarms, IsEmpty())
 
     def test_overlapping_deduced_alarm_1(self):
 
@@ -284,11 +286,11 @@ class TestScenarioEvaluator(TestFunctionalBase, TestConfiguration):
                                            processor, _TARGET_HOST)
         alarms = \
             self._get_deduced_alarms_on_host(host_v, processor.entity_graph)
-        self.assertEqual(1, len(alarms))
+        self.assertThat(alarms, matchers.HasLength(1))
         self.assertEqual(NagiosTestStatus.WARNING,
                          alarms[0][VProps.SEVERITY])
         causes = self._get_alarm_causes(alarms[0], processor.entity_graph)
-        self.assertEqual(1, len(causes))
+        self.assertThat(causes, matchers.HasLength(1))
 
         # generate CRITICAL nagios alarm to trigger
         vals = {NagiosProperties.STATUS: NagiosTestStatus.CRITICAL,
@@ -301,11 +303,11 @@ class TestScenarioEvaluator(TestFunctionalBase, TestConfiguration):
                                            processor, _TARGET_HOST)
         alarms = \
             self._get_deduced_alarms_on_host(host_v, processor.entity_graph)
-        self.assertEqual(1, len(alarms))
+        self.assertThat(alarms, matchers.HasLength(1))
         self.assertEqual(NagiosTestStatus.CRITICAL,
                          alarms[0][VProps.SEVERITY])
         causes = self._get_alarm_causes(alarms[0], processor.entity_graph)
-        self.assertEqual(2, len(causes))
+        self.assertThat(causes, matchers.HasLength(2))
 
         # remove WARNING nagios alarm, leaving only CRITICAL one
         warning_test[NagiosProperties.STATUS] = NagiosTestStatus.OK
@@ -313,10 +315,10 @@ class TestScenarioEvaluator(TestFunctionalBase, TestConfiguration):
                                            processor, _TARGET_HOST)
         alarms = \
             self._get_deduced_alarms_on_host(host_v, processor.entity_graph)
-        self.assertEqual(1, len(alarms))
+        self.assertThat(alarms, matchers.HasLength(1))
         self.assertEqual(NagiosTestStatus.CRITICAL, alarms[0][VProps.SEVERITY])
         causes = self._get_alarm_causes(alarms[0], processor.entity_graph)
-        self.assertEqual(1, len(causes))
+        self.assertThat(causes, matchers.HasLength(1))
 
         # next disable the alarm
         critical_test[NagiosProperties.STATUS] = NagiosTestStatus.OK
@@ -324,7 +326,7 @@ class TestScenarioEvaluator(TestFunctionalBase, TestConfiguration):
                                            processor, _TARGET_HOST)
         alarms = \
             self._get_deduced_alarms_on_host(host_v, processor.entity_graph)
-        self.assertEqual(0, len(alarms))
+        self.assertThat(alarms, IsEmpty())
 
     def test_overlapping_deduced_alarm_2(self):
 
@@ -342,7 +344,7 @@ class TestScenarioEvaluator(TestFunctionalBase, TestConfiguration):
                                            processor, _TARGET_HOST)
         alarms = \
             self._get_deduced_alarms_on_host(host_v, processor.entity_graph)
-        self.assertEqual(1, len(alarms))
+        self.assertThat(alarms, matchers.HasLength(1))
         self.assertEqual(NagiosTestStatus.CRITICAL,
                          alarms[0][VProps.SEVERITY])
 
@@ -357,7 +359,7 @@ class TestScenarioEvaluator(TestFunctionalBase, TestConfiguration):
                                            processor, _TARGET_HOST)
         alarms = \
             self._get_deduced_alarms_on_host(host_v, processor.entity_graph)
-        self.assertEqual(1, len(alarms))
+        self.assertThat(alarms, matchers.HasLength(1))
         self.assertEqual(NagiosTestStatus.CRITICAL,
                          alarms[0][VProps.SEVERITY])
 
@@ -367,7 +369,7 @@ class TestScenarioEvaluator(TestFunctionalBase, TestConfiguration):
                                            processor, _TARGET_HOST)
         alarms = \
             self._get_deduced_alarms_on_host(host_v, processor.entity_graph)
-        self.assertEqual(1, len(alarms))
+        self.assertThat(alarms, matchers.HasLength(1))
         self.assertEqual(NagiosTestStatus.WARNING,
                          alarms[0][VProps.SEVERITY])
 
@@ -459,7 +461,7 @@ class TestScenarioEvaluator(TestFunctionalBase, TestConfiguration):
                          num_deduced_vertices, entity_graph.num_vertices())
         self.assertEqual(num_orig_edges + num_added_edges + num_deduced_edges,
                          entity_graph.num_edges())
-        self.assertEqual(1, len(port_neighbors))
+        self.assertThat(port_neighbors, matchers.HasLength(1))
         self.assertEqual(EntityCategory.ALARM,
                          port_neighbors[0][VProps.VITRAGE_CATEGORY])
         self.assertEqual(VITRAGE_DATASOURCE,
@@ -494,7 +496,7 @@ class TestScenarioEvaluator(TestFunctionalBase, TestConfiguration):
                  VProps.VITRAGE_TYPE: VITRAGE_DATASOURCE}
         port_neighbors = entity_graph.neighbors(port_vertex.vertex_id,
                                                 vertex_attr_filter=query)
-        self.assertEqual(1, len(port_neighbors))
+        self.assertThat(port_neighbors, matchers.HasLength(1))
         self.assertEqual(EntityCategory.ALARM,
                          port_neighbors[0][VProps.VITRAGE_CATEGORY])
         self.assertEqual(VITRAGE_DATASOURCE,
@@ -546,7 +548,7 @@ class TestScenarioEvaluator(TestFunctionalBase, TestConfiguration):
         for counter in range(0, 1):
             port_neighbors = entity_graph.neighbors(port_vertex.vertex_id,
                                                     vertex_attr_filter=query)
-            self.assertEqual(1, len(port_neighbors))
+            self.assertThat(port_neighbors, matchers.HasLength(1))
             self.assertEqual(port_neighbors[0][VProps.VITRAGE_CATEGORY],
                              EntityCategory.ALARM)
             self.assertEqual(port_neighbors[0][VProps.VITRAGE_TYPE],
@@ -602,7 +604,7 @@ class TestScenarioEvaluator(TestFunctionalBase, TestConfiguration):
         for counter in range(0, 1):
             port_neighbors = entity_graph.neighbors(port_vertex.vertex_id,
                                                     vertex_attr_filter=query)
-            self.assertEqual(2, len(port_neighbors))
+            self.assertThat(port_neighbors, matchers.HasLength(2))
             for in_counter in range(0, 1):
                 self.assertEqual(
                     EntityCategory.ALARM,
@@ -657,7 +659,7 @@ class TestScenarioEvaluator(TestFunctionalBase, TestConfiguration):
         for counter in range(0, 1):
             port_neighbors = entity_graph.neighbors(port_vertex.vertex_id,
                                                     vertex_attr_filter=query)
-            self.assertEqual(2, len(port_neighbors))
+            self.assertThat(port_neighbors, matchers.HasLength(2))
             for in_counter in range(0, 1):
                 self.assertEqual(
                     EntityCategory.ALARM,
@@ -765,7 +767,7 @@ class TestScenarioEvaluator(TestFunctionalBase, TestConfiguration):
                          num_deduced_vertices, entity_graph.num_vertices())
         self.assertEqual(num_orig_edges + num_added_edges + num_deduced_edges,
                          entity_graph.num_edges())
-        self.assertEqual(1, len(zone_neighbors))
+        self.assertThat(zone_neighbors, matchers.HasLength(1))
         self.assertEqual(EntityCategory.ALARM,
                          zone_neighbors[0][VProps.VITRAGE_CATEGORY])
         self.assertEqual(VITRAGE_DATASOURCE,
@@ -799,7 +801,7 @@ class TestScenarioEvaluator(TestFunctionalBase, TestConfiguration):
         query = {VProps.VITRAGE_CATEGORY: EntityCategory.ALARM}
         network_neighbors = entity_graph.neighbors(network_vertex.vertex_id,
                                                    vertex_attr_filter=query)
-        self.assertEqual(1, len(network_neighbors))
+        self.assertThat(network_neighbors, matchers.HasLength(1))
         self.assertEqual(EntityCategory.ALARM,
                          network_neighbors[0][VProps.VITRAGE_CATEGORY])
         self.assertEqual(NAGIOS_DATASOURCE,
@@ -810,7 +812,7 @@ class TestScenarioEvaluator(TestFunctionalBase, TestConfiguration):
 
         zone_neighbors = entity_graph.neighbors(zone_vertex.vertex_id,
                                                 vertex_attr_filter=query)
-        self.assertEqual(1, len(zone_neighbors))
+        self.assertThat(zone_neighbors, matchers.HasLength(1))
         self.assertEqual(EntityCategory.ALARM,
                          zone_neighbors[0][VProps.VITRAGE_CATEGORY])
         self.assertEqual(VITRAGE_DATASOURCE,
@@ -839,7 +841,7 @@ class TestScenarioEvaluator(TestFunctionalBase, TestConfiguration):
         query = {VProps.VITRAGE_CATEGORY: EntityCategory.ALARM}
         network_neighbors = entity_graph.neighbors(network_vertex.vertex_id,
                                                    vertex_attr_filter=query)
-        self.assertEqual(1, len(network_neighbors))
+        self.assertThat(network_neighbors, matchers.HasLength(1))
         self.assertEqual(EntityCategory.ALARM,
                          network_neighbors[0][VProps.VITRAGE_CATEGORY])
         self.assertEqual(NAGIOS_DATASOURCE,
@@ -855,7 +857,7 @@ class TestScenarioEvaluator(TestFunctionalBase, TestConfiguration):
         for counter in range(0, 1):
             zone_neighbors = entity_graph.neighbors(zone_vertex.vertex_id,
                                                     vertex_attr_filter=query)
-            self.assertEqual(1, len(zone_neighbors))
+            self.assertThat(zone_neighbors, matchers.HasLength(1))
             self.assertEqual(EntityCategory.ALARM,
                              zone_neighbors[0][VProps.VITRAGE_CATEGORY])
             self.assertEqual(VITRAGE_DATASOURCE,
@@ -920,7 +922,7 @@ class TestScenarioEvaluator(TestFunctionalBase, TestConfiguration):
                  VProps.VITRAGE_TYPE: CINDER_VOLUME_DATASOURCE}
         instance_neighbors = entity_graph.neighbors(instances[0].vertex_id,
                                                     vertex_attr_filter=query)
-        self.assertEqual(1, len(instance_neighbors))
+        self.assertThat(instance_neighbors, matchers.HasLength(1))
         self.assertEqual(EntityCategory.RESOURCE,
                          instance_neighbors[0][VProps.VITRAGE_CATEGORY])
         self.assertEqual(CINDER_VOLUME_DATASOURCE,
@@ -969,7 +971,7 @@ class TestScenarioEvaluator(TestFunctionalBase, TestConfiguration):
                  VProps.VITRAGE_TYPE: CINDER_VOLUME_DATASOURCE}
         instance_neighbors = entity_graph.neighbors(instances[1].vertex_id,
                                                     vertex_attr_filter=query)
-        self.assertEqual(1, len(instance_neighbors))
+        self.assertThat(instance_neighbors, matchers.HasLength(1))
         self.assertEqual(EntityCategory.RESOURCE,
                          instance_neighbors[0][VProps.VITRAGE_CATEGORY])
         self.assertEqual(CINDER_VOLUME_DATASOURCE,
@@ -984,7 +986,7 @@ class TestScenarioEvaluator(TestFunctionalBase, TestConfiguration):
                  VProps.NAME: 'ha_error_deduced_alarm'}
         host_neighbors = entity_graph.neighbors(hosts[0].vertex_id,
                                                 vertex_attr_filter=query)
-        self.assertEqual(1, len(host_neighbors))
+        self.assertThat(host_neighbors, matchers.HasLength(1))
         self.assertEqual(EntityCategory.ALARM,
                          host_neighbors[0][VProps.VITRAGE_CATEGORY])
         self.assertEqual(VITRAGE_DATASOURCE,
@@ -1000,7 +1002,7 @@ class TestScenarioEvaluator(TestFunctionalBase, TestConfiguration):
                  VProps.NAME: 'ha_warning_deduced_alarm'}
         host_neighbors = entity_graph.neighbors(hosts[0].vertex_id,
                                                 vertex_attr_filter=query)
-        self.assertEqual(1, len(host_neighbors))
+        self.assertThat(host_neighbors, matchers.HasLength(1))
         self.assertEqual(EntityCategory.ALARM,
                          host_neighbors[0][VProps.VITRAGE_CATEGORY])
         self.assertEqual(VITRAGE_DATASOURCE,
@@ -1036,7 +1038,7 @@ class TestScenarioEvaluator(TestFunctionalBase, TestConfiguration):
                  VProps.VITRAGE_TYPE: CINDER_VOLUME_DATASOURCE}
         instance_neighbors = entity_graph.neighbors(instances[1].vertex_id,
                                                     vertex_attr_filter=query)
-        self.assertEqual(1, len(instance_neighbors))
+        self.assertThat(instance_neighbors, matchers.HasLength(1))
         self.assertEqual(EntityCategory.RESOURCE,
                          instance_neighbors[0][VProps.VITRAGE_CATEGORY])
         self.assertEqual(CINDER_VOLUME_DATASOURCE,
@@ -1051,7 +1053,7 @@ class TestScenarioEvaluator(TestFunctionalBase, TestConfiguration):
                  VProps.NAME: 'ha_error_deduced_alarm'}
         host_neighbors = entity_graph.neighbors(hosts[0].vertex_id,
                                                 vertex_attr_filter=query)
-        self.assertEqual(1, len(host_neighbors))
+        self.assertThat(host_neighbors, matchers.HasLength(1))
         self.assertEqual(EntityCategory.ALARM,
                          host_neighbors[0][VProps.VITRAGE_CATEGORY])
         self.assertEqual(VITRAGE_DATASOURCE,
@@ -1068,7 +1070,7 @@ class TestScenarioEvaluator(TestFunctionalBase, TestConfiguration):
                  VProps.VITRAGE_IS_DELETED: False}
         host_neighbors = entity_graph.neighbors(hosts[0].vertex_id,
                                                 vertex_attr_filter=query)
-        self.assertEqual(1, len(host_neighbors))
+        self.assertThat(host_neighbors, matchers.HasLength(1))
         self.assertEqual(EntityCategory.ALARM,
                          host_neighbors[0][VProps.VITRAGE_CATEGORY])
         self.assertEqual(VITRAGE_DATASOURCE,
@@ -1085,7 +1087,7 @@ class TestScenarioEvaluator(TestFunctionalBase, TestConfiguration):
                  VProps.VITRAGE_IS_DELETED: True}
         host_neighbors = entity_graph.neighbors(hosts[0].vertex_id,
                                                 vertex_attr_filter=query)
-        self.assertEqual(1, len(host_neighbors))
+        self.assertThat(host_neighbors, matchers.HasLength(1))
         self.assertEqual(EntityCategory.ALARM,
                          host_neighbors[0][VProps.VITRAGE_CATEGORY])
         self.assertEqual(VITRAGE_DATASOURCE,
@@ -1121,7 +1123,7 @@ class TestScenarioEvaluator(TestFunctionalBase, TestConfiguration):
                  VProps.VITRAGE_TYPE: CINDER_VOLUME_DATASOURCE}
         instance_neighbors = entity_graph.neighbors(instances[0].vertex_id,
                                                     vertex_attr_filter=query)
-        self.assertEqual(1, len(instance_neighbors))
+        self.assertThat(instance_neighbors, matchers.HasLength(1))
         self.assertEqual(EntityCategory.RESOURCE,
                          instance_neighbors[0][VProps.VITRAGE_CATEGORY])
         self.assertEqual(CINDER_VOLUME_DATASOURCE,
@@ -1136,7 +1138,7 @@ class TestScenarioEvaluator(TestFunctionalBase, TestConfiguration):
                  VProps.NAME: 'ha_error_deduced_alarm'}
         host_neighbors = entity_graph.neighbors(hosts[0].vertex_id,
                                                 vertex_attr_filter=query)
-        self.assertEqual(1, len(host_neighbors))
+        self.assertThat(host_neighbors, matchers.HasLength(1))
         self.assertEqual(EntityCategory.ALARM,
                          host_neighbors[0][VProps.VITRAGE_CATEGORY])
         self.assertEqual(VITRAGE_DATASOURCE,
@@ -1152,7 +1154,7 @@ class TestScenarioEvaluator(TestFunctionalBase, TestConfiguration):
                  VProps.NAME: 'ha_warning_deduced_alarm'}
         host_neighbors = entity_graph.neighbors(hosts[0].vertex_id,
                                                 vertex_attr_filter=query)
-        self.assertEqual(2, len(host_neighbors))
+        self.assertThat(host_neighbors, matchers.HasLength(2))
 
         self.assertEqual(EntityCategory.ALARM,
                          host_neighbors[0][VProps.VITRAGE_CATEGORY])
@@ -1199,7 +1201,7 @@ class TestScenarioEvaluator(TestFunctionalBase, TestConfiguration):
         host_v = self.get_host_after_event(event_queue, alarm1_test,
                                            processor, _TARGET_HOST)
         alarms = self._get_alarms_on_host(host_v, processor.entity_graph)
-        self.assertEqual(2, len(alarms))
+        self.assertThat(alarms, matchers.HasLength(2))
 
         # generate nagios alarm2 to trigger
         test_vals = {NagiosProperties.STATUS: NagiosTestStatus.WARNING,
@@ -1211,14 +1213,13 @@ class TestScenarioEvaluator(TestFunctionalBase, TestConfiguration):
         host_v = self.get_host_after_event(event_queue, alarm2_test,
                                            processor, _TARGET_HOST)
         alarms = self._get_alarms_on_host(host_v, processor.entity_graph)
-        self.assertEqual(3, len(alarms))
-
+        self.assertThat(alarms, matchers.HasLength(3))
         # disable alarm1, alarm3 is not deleted
         alarm1_test[NagiosProperties.STATUS] = NagiosTestStatus.OK
         host_v = self.get_host_after_event(event_queue, alarm1_test,
                                            processor, _TARGET_HOST)
         alarms = self._get_alarms_on_host(host_v, processor.entity_graph)
-        self.assertEqual(2, len(alarms))
+        self.assertThat(alarms, matchers.HasLength(2))
 
         # disable alarm2, alarm3 is deleted
         alarm2_test[NagiosProperties.STATUS] = NagiosTestStatus.OK
@@ -1226,7 +1227,7 @@ class TestScenarioEvaluator(TestFunctionalBase, TestConfiguration):
         host_v = self.get_host_after_event(event_queue, alarm2_test,
                                            processor, _TARGET_HOST)
         alarms = self._get_alarms_on_host(host_v, processor.entity_graph)
-        self.assertEqual(0, len(alarms))
+        self.assertThat(alarms, IsEmpty())
 
     def test_both_and_or_operator_for_tracker(self):
         """(alarm_a or alarm_b) and alarm_c use case
@@ -1266,7 +1267,7 @@ class TestScenarioEvaluator(TestFunctionalBase, TestConfiguration):
         host_v = self.get_host_after_event(event_queue, alarm_a_test,
                                            processor, _TARGET_HOST)
         alarms = self._get_alarms_on_host(host_v, entity_graph)
-        self.assertEqual(1, len(alarms))
+        self.assertThat(alarms, matchers.HasLength(1))
         self.assertEqual(num_orig_vertices + 1, entity_graph.num_vertices())
         self.assertEqual(num_orig_edges + 1, entity_graph.num_edges())
 
@@ -1280,7 +1281,7 @@ class TestScenarioEvaluator(TestFunctionalBase, TestConfiguration):
         host_v = self.get_host_after_event(event_queue, alarm_b_test,
                                            processor, _TARGET_HOST)
         alarms = self._get_alarms_on_host(host_v, entity_graph)
-        self.assertEqual(2, len(alarms))
+        self.assertThat(alarms, matchers.HasLength(2))
         self.assertEqual(num_orig_vertices + 2, entity_graph.num_vertices())
         self.assertEqual(num_orig_edges + 2, entity_graph.num_edges())
 
@@ -1294,7 +1295,7 @@ class TestScenarioEvaluator(TestFunctionalBase, TestConfiguration):
         host_v = self.get_host_after_event(event_queue, alarm_c_test,
                                            processor, _TARGET_HOST)
         alarms = self._get_alarms_on_host(host_v, entity_graph)
-        self.assertEqual(4, len(alarms))
+        self.assertThat(alarms, matchers.HasLength(4))
         self.assertEqual(num_orig_vertices + 4, entity_graph.num_vertices())
         self.assertEqual(num_orig_edges + 4, entity_graph.num_edges())
 
@@ -1308,7 +1309,7 @@ class TestScenarioEvaluator(TestFunctionalBase, TestConfiguration):
         host_v = self.get_host_after_event(event_queue, alarm_b_ok,
                                            processor, _TARGET_HOST)
         alarms = self._get_alarms_on_host(host_v, entity_graph)
-        self.assertEqual(3, len(alarms))
+        self.assertThat(alarms, matchers.HasLength(3))
 
         query = {VProps.VITRAGE_CATEGORY: EntityCategory.ALARM,
                  VProps.VITRAGE_IS_DELETED: True}
@@ -1333,7 +1334,7 @@ class TestScenarioEvaluator(TestFunctionalBase, TestConfiguration):
         host_v = self.get_host_after_event(event_queue, alarm_a_ok,
                                            processor, _TARGET_HOST)
         alarms = self._get_alarms_on_host(host_v, entity_graph)
-        self.assertEqual(1, len(alarms))
+        self.assertThat(alarms, matchers.HasLength(1))
 
         query = {VProps.VITRAGE_CATEGORY: EntityCategory.ALARM,
                  VProps.VITRAGE_IS_DELETED: True}
@@ -1388,7 +1389,6 @@ class TestScenarioEvaluator(TestFunctionalBase, TestConfiguration):
                         VProps.ID: entity_id,
                         VProps.NAME: entity_name}
         vertices = entity_graph.get_vertices(vertex_attr_filter=vertex_attrs)
-        # assert len(vertices) == 1, "incorrect number of vertices"
         return vertices[0]
 
     @staticmethod

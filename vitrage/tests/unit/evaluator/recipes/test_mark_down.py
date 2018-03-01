@@ -11,6 +11,7 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+from testtools import matchers
 
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.evaluator.actions.base import ActionType
@@ -41,11 +42,11 @@ class MarkDownRecipeTest(base.BaseTest):
         # Test Assertions
 
         # expecting for one step: [update_vertex]
-        self.assertEqual(1, len(action_steps))
+        self.assertThat(action_steps, matchers.HasLength(1))
 
         self.assertEqual(UPDATE_VERTEX, action_steps[0].type)
         update_vertex_step_params = action_steps[0].params
-        self.assertEqual(3, len(update_vertex_step_params))
+        self.assertThat(update_vertex_step_params, matchers.HasLength(3))
 
         is_marked_down = update_vertex_step_params[VProps.IS_MARKED_DOWN]
         self.assertTrue(is_marked_down)
@@ -65,11 +66,11 @@ class MarkDownRecipeTest(base.BaseTest):
         # Test Assertions
 
         # expecting for one step: [update_vertex]
-        self.assertEqual(1, len(action_steps))
+        self.assertThat(action_steps, matchers.HasLength(1))
 
         self.assertEqual(UPDATE_VERTEX, action_steps[0].type)
         update_vertex_step_params = action_steps[0].params
-        self.assertEqual(3, len(update_vertex_step_params))
+        self.assertThat(update_vertex_step_params, matchers.HasLength(3))
 
         is_marked_down = update_vertex_step_params[VProps.IS_MARKED_DOWN]
         self.assertFalse(is_marked_down)

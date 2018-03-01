@@ -11,6 +11,7 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+from testtools import matchers
 
 from vitrage.common.constants import EdgeLabel
 from vitrage.common.constants import EdgeProperties
@@ -250,12 +251,12 @@ class TemplateLoaderTest(base.BaseTest):
         template_data = TemplateLoader().load(template_definition)
         scenarios = template_data.scenarios
         self.assertIsNotNone(scenarios, 'Template should include a scenario')
-        self.assertEqual(1, len(scenarios),
-                         'Template should include a single scenario')
+        self.assertThat(scenarios, matchers.HasLength(1),
+                        'Template should include a single scenario')
         actions = scenarios[0].actions
         self.assertIsNotNone(actions, 'Scenario should include an action')
-        self.assertEqual(1, len(actions),
-                         'Scenario should include a single action')
+        self.assertThat(actions, matchers.HasLength(1),
+                        'Scenario should include a single action')
         return actions[0]
 
     def _assert_equal_actions(self, action1, action2):
@@ -344,12 +345,12 @@ class TemplateLoaderTest(base.BaseTest):
         :param entities
         """
         self.assertIsNotNone(scenarios)
-        self.assertEqual(1, len(scenarios))
+        self.assertThat(scenarios, matchers.HasLength(1))
 
         scenario = scenarios[0]
 
         condition = scenario.condition
-        self.assertEqual(1, len(condition))
+        self.assertThat(condition, matchers.HasLength(1))
 
         condition_var = condition[0][0]
         self.assertIsInstance(condition_var, ConditionVar)
@@ -359,16 +360,16 @@ class TemplateLoaderTest(base.BaseTest):
 
         actions = scenario.actions
         self.assert_is_not_empty(scenario.actions)
-        self.assertEqual(1, len(actions))
+        self.assertThat(actions, matchers.HasLength(1))
 
         action = actions[0]
         self.assertEqual(action.type, ActionType.SET_STATE)
 
         targets = action.targets
-        self.assertEqual(1, len(targets))
+        self.assertThat(targets, matchers.HasLength(1))
         self.assertEqual('resource', targets['target'])
 
         properties = action.properties
-        self.assertEqual(1, len(properties))
+        self.assertThat(properties, matchers.HasLength(1))
         self.assertEqual(properties['state'],
                          OperationalResourceState.SUBOPTIMAL)

@@ -13,6 +13,7 @@
 # under the License.
 
 from oslo_config import cfg
+from testtools import matchers
 
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import VertexProperties as VProps
@@ -53,8 +54,10 @@ class TestHeatStack(TestDataSourcesBase):
     def test_heat_stack_validity(self):
         # Setup
         processor = self._create_processor_with_graph(self.conf)
-        self.assertEqual(self._num_total_expected_vertices(),
-                         len(processor.entity_graph))
+        self.assertThat(processor.entity_graph,
+                        matchers.HasLength(
+                            self._num_total_expected_vertices())
+                        )
 
         spec_list = mock_driver.simple_stack_generators(
             stack_num=1,
@@ -67,30 +70,33 @@ class TestHeatStack(TestDataSourcesBase):
         processor.process_event(heat_stack_event)
 
         # Test assertions
-        self.assertEqual(self._num_total_expected_vertices() + 3,
-                         len(processor.entity_graph))
+        self.assertThat(processor.entity_graph,
+                        matchers.HasLength(
+                            self._num_total_expected_vertices() + 3)
+                        )
 
         stack_vertices = processor.entity_graph.get_vertices(
             vertex_attr_filter={
                 VProps.VITRAGE_CATEGORY: EntityCategory.RESOURCE,
                 VProps.VITRAGE_TYPE: HEAT_STACK_DATASOURCE
             })
-        self.assertEqual(1, len(stack_vertices))
+        self.assertThat(stack_vertices, matchers.HasLength(1))
 
         instance_vertices = processor.entity_graph.get_vertices(
             vertex_attr_filter={
                 VProps.VITRAGE_CATEGORY: EntityCategory.RESOURCE,
                 VProps.VITRAGE_TYPE: NOVA_INSTANCE_DATASOURCE
             })
-        self.assertEqual(self.NUM_INSTANCES + 1, len(instance_vertices))
+        self.assertThat(instance_vertices,
+                        matchers.HasLength(self.NUM_INSTANCES + 1))
 
         cinder_vertices = processor.entity_graph.get_vertices(
             vertex_attr_filter={
                 VProps.VITRAGE_CATEGORY: EntityCategory.RESOURCE,
                 VProps.VITRAGE_TYPE: CINDER_VOLUME_DATASOURCE
             })
-        self.assertEqual(1, len(cinder_vertices))
+        self.assertThat(cinder_vertices, matchers.HasLength(1))
 
         stack_neighbors = processor.entity_graph.neighbors(
             stack_vertices[0].vertex_id)
-        self.assertEqual(2, len(stack_neighbors))
+        self.assertThat(stack_neighbors, matchers.HasLength(2))

@@ -15,6 +15,7 @@ import itertools
 
 from vitrage.common import utils
 from vitrage.tests import base
+from vitrage.tests.base import IsEmpty
 
 
 class UtilsTest(base.BaseTest):
@@ -60,9 +61,9 @@ class UtilsTest(base.BaseTest):
         self._assert_set_equal(union, set(all_items), 'chunks union differs')
         combinations = itertools.combinations(range(len(chunks)), 2)
         for i, j in combinations:
-            self.assertEqual(
-                0, len(chunks[i].intersection(chunks[j])),
-                "Each two chunks should not have intersecting items")
+            self.assertThat(chunks[i].intersection(chunks[j]), IsEmpty(),
+                            "Each two chunks should not have "
+                            "intersecting items")
         max_size = len(max(chunks, key=lambda x: len(x)))
         min_size = len(min(chunks, key=lambda x: len(x)))
         expected_max_difference = 1 if len(all_items) % len(chunks) else 0

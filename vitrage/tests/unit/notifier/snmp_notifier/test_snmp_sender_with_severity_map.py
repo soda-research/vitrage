@@ -14,6 +14,7 @@
 
 from oslo_config import cfg
 from pysnmp.proto.rfc1902 import OctetString
+from testtools import matchers
 
 from vitrage.common.constants import VertexProperties as VProps
 import vitrage.notifier.plugins.snmp.snmp_sender as sender
@@ -58,8 +59,8 @@ class SnmpNotifierTest(base.BaseTest):
 
         oids, var_lst = self.snmp_sender._build_oids()
 
-        self.assertEqual(4, len(oids))
-        self.assertEqual(3, len(var_lst))
+        self.assertThat(oids, matchers.HasLength(4))
+        self.assertThat(var_lst, matchers.HasLength(3))
 
         self.assertIn(VProps.NAME, oids)
         self.assertIn(VProps.VITRAGE_IS_DELETED, oids)
@@ -78,7 +79,7 @@ class SnmpNotifierTest(base.BaseTest):
 
         var_binds = self.snmp_sender._get_var_binds(common.alarm_data)
 
-        self.assertEqual(3, len(var_binds))
+        self.assertThat(var_binds, matchers.HasLength(3))
 
         self.assertIn((oid_with_alarm_objects + '.' + common.NAME_OID,
                       OctetString(common.alarm_data.get(VProps.NAME,

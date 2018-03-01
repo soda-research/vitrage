@@ -14,6 +14,7 @@
 import time
 
 from oslo_config import cfg
+from testtools import matchers
 
 from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import EntityCategory
@@ -63,8 +64,10 @@ class TestCollectd(TestDataSourcesBase):
     def _test_collectd_alarm(self, resource_type, resource_name, host_name):
         # Setup
         processor = self._create_processor_with_graph(self.conf)
-        self.assertEqual(self._num_total_expected_vertices(),
-                         len(processor.entity_graph))
+        self.assertThat(processor.entity_graph,
+                        matchers.HasLength(
+                            self._num_total_expected_vertices())
+                        )
 
         time1 = time.time()
         severity1 = 'WARNING'
@@ -80,8 +83,10 @@ class TestCollectd(TestDataSourcesBase):
         processor.process_event(collectd_event)
 
         # Test assertions
-        self.assertEqual(self._num_total_expected_vertices() + 1,
-                         len(processor.entity_graph))
+        self.assertThat(processor.entity_graph,
+                        matchers.HasLength(
+                            self._num_total_expected_vertices() + 1)
+                        )
 
         collectd_vertices = processor.entity_graph.get_vertices(
             vertex_attr_filter={
@@ -89,7 +94,7 @@ class TestCollectd(TestDataSourcesBase):
                 VProps.VITRAGE_TYPE: COLLECTD_DATASOURCE
             })
 
-        self.assertEqual(1, len(collectd_vertices))
+        self.assertThat(collectd_vertices, matchers.HasLength(1))
         collectd_vertex1 = collectd_vertices[0]
         self._assert_collectd_vertex_equals(collectd_vertex1,
                                             time1,
@@ -117,8 +122,10 @@ class TestCollectd(TestDataSourcesBase):
         processor.process_event(collectd_event)
 
         # Test assertions - the collectd alarm vertex should be the same
-        self.assertEqual(self._num_total_expected_vertices() + 1,
-                         len(processor.entity_graph))
+        self.assertThat(processor.entity_graph,
+                        matchers.HasLength(
+                            self._num_total_expected_vertices() + 1)
+                        )
 
         collectd_vertices = processor.entity_graph.get_vertices(
             vertex_attr_filter={
@@ -126,7 +133,7 @@ class TestCollectd(TestDataSourcesBase):
                 VProps.VITRAGE_TYPE: COLLECTD_DATASOURCE
             })
 
-        self.assertEqual(1, len(collectd_vertices))
+        self.assertThat(collectd_vertices, matchers.HasLength(1))
         collectd_vertex2 = collectd_vertices[0]
         self.assertEqual(collectd_vertex1[VProps.VITRAGE_ID],
                          collectd_vertex2[VProps.VITRAGE_ID])
@@ -193,7 +200,7 @@ class TestCollectd(TestDataSourcesBase):
                                          collectd_neighbors,
                                          expected_resource_type,
                                          expected_resource_name):
-        self.assertEqual(1, len(collectd_neighbors))
+        self.assertThat(collectd_neighbors, matchers.HasLength(1))
 
         self.assertEqual(expected_resource_type,
                          collectd_neighbors[0][VProps.VITRAGE_TYPE])

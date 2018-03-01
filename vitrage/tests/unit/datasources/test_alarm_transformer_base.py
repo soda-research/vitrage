@@ -14,6 +14,8 @@
 
 import abc
 
+from testtools import matchers
+
 from vitrage.common.constants import EdgeLabel
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import GraphAction
@@ -50,7 +52,7 @@ class BaseAlarmTransformerTest(BaseTransformerTest):
                                 alarm_id,
                                 host_name):
 
-        self.assertEqual(1, len(wrapper.neighbors))
+        self.assertThat(wrapper.neighbors, matchers.HasLength(1))
         host_neighbor = wrapper.neighbors[0]
 
         host_transformer = self.transformers[NOVA_HOST_DATASOURCE]

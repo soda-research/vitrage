@@ -16,6 +16,7 @@ import datetime
 
 from oslo_config import cfg
 from oslo_log import log as logging
+from testtools import matchers
 
 from vitrage.common.constants import DatasourceAction
 from vitrage.common.constants import DatasourceOpts as DSOpts
@@ -118,9 +119,8 @@ class NovaInstanceTransformerTest(base.BaseTest):
             # Test assertions
             self._validate_vertex_props(wrapper.vertex, event)
 
-            self.assertEqual(1,
-                             len(wrapper.neighbors),
-                             'Instance has only one host neighbor')
+            self.assertThat(wrapper.neighbors, matchers.HasLength(1),
+                            'Instance has only one host neighbor')
             host_neighbor = wrapper.neighbors[0]
             self._validate_host_neighbor(host_neighbor, event)
 
@@ -150,7 +150,7 @@ class NovaInstanceTransformerTest(base.BaseTest):
 
             # Validate the neighbors: only one  valid host neighbor
             neighbors = wrapper.neighbors
-            self.assertEqual(1, len(neighbors))
+            self.assertThat(neighbors, matchers.HasLength(1))
             self._validate_host_neighbor(neighbors[0], event)
 
             event_type = event[DSProps.EVENT_TYPE]
@@ -163,7 +163,7 @@ class NovaInstanceTransformerTest(base.BaseTest):
 
     def _validate_vertex_props(self, vertex, event):
 
-        self.assertEqual(13, len(vertex.properties))
+        self.assertThat(vertex.properties, matchers.HasLength(13))
 
         is_update_event = tbase.is_update_event(event)
 

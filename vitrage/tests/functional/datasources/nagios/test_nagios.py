@@ -13,6 +13,7 @@
 # under the License.
 
 from oslo_config import cfg
+from testtools import matchers
 
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import VertexProperties as VProps
@@ -53,8 +54,10 @@ class TestNagios(TestDataSourcesBase):
     def test_nagios_validity(self):
         # Setup
         processor = self._create_processor_with_graph(self.conf)
-        self.assertEqual(self._num_total_expected_vertices(),
-                         len(processor.entity_graph))
+        self.assertThat(processor.entity_graph,
+                        matchers.HasLength(
+                            self._num_total_expected_vertices())
+                        )
 
         spec_list = mock_driver.simple_nagios_alarm_generators(
             host_num=1,
@@ -70,19 +73,21 @@ class TestNagios(TestDataSourcesBase):
         processor.process_event(nagios_event)
 
         # Test assertions
-        self.assertEqual(self._num_total_expected_vertices() + 1,
-                         len(processor.entity_graph))
+        self.assertThat(processor.entity_graph,
+                        matchers.HasLength(
+                            self._num_total_expected_vertices() + 1)
+                        )
 
         nagios_vertices = processor.entity_graph.get_vertices(
             vertex_attr_filter={
                 VProps.VITRAGE_CATEGORY: EntityCategory.ALARM,
                 VProps.VITRAGE_TYPE: NAGIOS_DATASOURCE
             })
-        self.assertEqual(1, len(nagios_vertices))
+        self.assertThat(nagios_vertices, matchers.HasLength(1))
 
         nagios_neighbors = processor.entity_graph.neighbors(
             nagios_vertices[0].vertex_id)
-        self.assertEqual(1, len(nagios_neighbors))
+        self.assertThat(nagios_neighbors, matchers.HasLength(1))
 
         self.assertEqual(NOVA_HOST_DATASOURCE,
                          nagios_neighbors[0][VProps.VITRAGE_TYPE])

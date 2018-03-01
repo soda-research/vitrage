@@ -13,6 +13,7 @@
 # under the License.
 
 from oslo_config import cfg
+from testtools import matchers
 
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import TemplateTypes as TType
@@ -22,6 +23,7 @@ from vitrage.evaluator.template_validation.template_syntax_validator import \
     syntax_validation
 from vitrage.graph import Vertex
 from vitrage.tests import base
+from vitrage.tests.base import IsEmpty
 from vitrage.tests.functional.test_configuration import TestConfiguration
 from vitrage.tests.mocks import utils
 from vitrage.utils import file as file_utils
@@ -58,10 +60,10 @@ class ScenarioRepositoryTest(base.BaseTest, TestConfiguration):
 
         # Test assertions
         self.assertIsNotNone(scenario_repository)
-        self.assertEqual(
-            2,
-            len(scenario_repository.templates),
-            'scenario_repository.templates should contain all valid templates')
+        self.assertThat(scenario_repository.templates,
+                        matchers.HasLength(2),
+                        'scenario_repository.templates '
+                        'should contain all valid templates')
 
     def test_init_scenario_repository(self):
 
@@ -77,10 +79,10 @@ class ScenarioRepositoryTest(base.BaseTest, TestConfiguration):
 
         scenario_templates = self.scenario_repository.templates
         # there is one bad template
-        self.assertEqual(
-            valid_template_counter,
-            len(scenario_templates),
-            'scenario_repository.templates should contain all valid templates')
+        self.assertThat(scenario_templates,
+                        matchers.HasLength(valid_template_counter),
+                        'scenario_repository.templates '
+                        'should contain all valid templates')
 
         entity_equivalences = self.scenario_repository.entity_equivalences
         for entity_props, equivalence in entity_equivalences.items():
@@ -136,7 +138,7 @@ class RegExTemplateTest(base.BaseTest, TestConfiguration):
         relevant_scenarios = \
             self.scenario_repository.get_scenarios_by_vertex(
                 event_vertex)
-        self.assertEqual(1, len(relevant_scenarios))
+        self.assertThat(relevant_scenarios, matchers.HasLength(1))
         relevant_scenario = relevant_scenarios[0]
         self.assertEqual("zabbix_alarm_pass", relevant_scenario[0].vertex_id)
 
@@ -154,7 +156,7 @@ class RegExTemplateTest(base.BaseTest, TestConfiguration):
         relevant_scenarios = \
             self.scenario_repository.get_scenarios_by_vertex(
                 event_vertex)
-        self.assertEqual(1, len(relevant_scenarios))
+        self.assertThat(relevant_scenarios, matchers.HasLength(1))
         relevant_scenario = relevant_scenarios[0]
         self.assertEqual("exact_match", relevant_scenario[0].vertex_id)
 
@@ -172,7 +174,7 @@ class RegExTemplateTest(base.BaseTest, TestConfiguration):
         relevant_scenarios = \
             self.scenario_repository.get_scenarios_by_vertex(
                 event_vertex)
-        self.assertEqual(0, len(relevant_scenarios))
+        self.assertThat(relevant_scenarios, IsEmpty())
 
 
 class EquivalentScenarioTest(base.BaseTest, TestConfiguration):
@@ -207,11 +209,11 @@ class EquivalentScenarioTest(base.BaseTest, TestConfiguration):
         for key, scenarios in entity_scenarios.items():
             if (VProps.VITRAGE_CATEGORY, EntityCategory.ALARM) in key:
                 # scenarios expanded on the other alarm
-                self.assertEqual(2, len(scenarios))
+                self.assertThat(scenarios, matchers.HasLength(2))
             if (VProps.VITRAGE_CATEGORY, EntityCategory.RESOURCE) in key:
                 # Scenarios expanded on the two alarms. Each alarm is expanded
                 # to two equivalent alarms. Thus 2 x 2 = 4 in total
-                self.assertEqual(4, len(scenarios))
+                self.assertThat(scenarios, matchers.HasLength(4))
         # each relationship is expand to two. Thus 2 x 2 = 4 in total
         relationships = self.scenario_repository.relationship_scenarios.keys()
-        self.assertEqual(4, len(relationships))
+        self.assertThat(relationships, matchers.HasLength(4))

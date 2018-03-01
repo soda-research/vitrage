@@ -14,6 +14,7 @@
 
 from oslo_config import cfg
 from oslo_log import log as logging
+from testtools import matchers
 
 from vitrage.common.constants import DatasourceAction
 from vitrage.common.constants import DatasourceOpts as DSOpts
@@ -100,7 +101,7 @@ class ZabbixTransformerTest(base.BaseTest):
             self._validate_vertex(wrapper.vertex, alarm)
 
             neighbors = wrapper.neighbors
-            self.assertEqual(1, len(neighbors))
+            self.assertThat(neighbors, matchers.HasLength(1))
             neighbor = neighbors[0]
 
             # Right now we are support only host as a resource

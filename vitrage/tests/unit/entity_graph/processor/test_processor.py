@@ -13,6 +13,7 @@
 # under the License.
 
 from oslo_config import cfg
+from testtools import matchers
 
 from vitrage.common.constants import DatasourceAction as DSAction
 from vitrage.common.constants import DatasourceProperties as DSProps
@@ -408,7 +409,8 @@ class TestProcessor(TestEntityGraphUnitBase):
                      num_vertices,
                      num_edges,
                      vertex_id=None):
-        self.assertEqual(num_vertices, len(processor.entity_graph))
+        self.assertThat(processor.entity_graph,
+                        matchers.HasLength(num_vertices))
 
         if not vertex_id:
             self.assertEqual(num_edges, processor.entity_graph.num_edges())

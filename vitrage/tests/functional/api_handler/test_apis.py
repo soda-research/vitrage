@@ -14,6 +14,8 @@
 
 import json
 
+from testtools import matchers
+
 from vitrage.api_handler.apis.alarm import AlarmApis
 from vitrage.api_handler.apis.rca import RcaApis
 from vitrage.api_handler.apis.resource import ResourceApis
@@ -30,6 +32,7 @@ from vitrage.entity_graph.mappings.operational_alarm_severity import \
     OperationalAlarmSeverity
 from vitrage.graph.driver.networkx_graph import NXGraph
 import vitrage.graph.utils as graph_utils
+from vitrage.tests.base import IsEmpty
 from vitrage.tests.unit.entity_graph.base import TestEntityGraphUnitBase
 
 
@@ -46,7 +49,7 @@ class TestApis(TestEntityGraphUnitBase):
         alarms = json.loads(alarms)['alarms']
 
         # Test assertions
-        self.assertEqual(3, len(alarms))
+        self.assertThat(alarms, matchers.HasLength(3))
         self._check_projects_entities(alarms, 'project_1', True)
 
     def test_get_alarms_with_not_admin_project(self):
@@ -60,7 +63,7 @@ class TestApis(TestEntityGraphUnitBase):
         alarms = json.loads(alarms)['alarms']
 
         # Test assertions
-        self.assertEqual(2, len(alarms))
+        self.assertThat(alarms, matchers.HasLength(2))
         self._check_projects_entities(alarms, 'project_2', True)
 
     def test_get_alarm_counts_with_not_admin_project(self):
@@ -91,7 +94,7 @@ class TestApis(TestEntityGraphUnitBase):
         alarms = json.loads(alarms)['alarms']
 
         # Test assertions
-        self.assertEqual(5, len(alarms))
+        self.assertThat(alarms, matchers.HasLength(5))
         self._check_projects_entities(alarms, None, True)
 
     def test_get_alarm_counts_with_all_tenants(self):
@@ -122,7 +125,7 @@ class TestApis(TestEntityGraphUnitBase):
         graph_rca = json.loads(graph_rca)
 
         # Test assertions
-        self.assertEqual(3, len(graph_rca['nodes']))
+        self.assertThat(graph_rca['nodes'], matchers.HasLength(3))
         self._check_projects_entities(graph_rca['nodes'], 'project_1', True)
 
     def test_get_rca_with_not_admin_project(self):
@@ -138,7 +141,7 @@ class TestApis(TestEntityGraphUnitBase):
         graph_rca = json.loads(graph_rca)
 
         # Test assertions
-        self.assertEqual(2, len(graph_rca['nodes']))
+        self.assertThat(graph_rca['nodes'], matchers.HasLength(2))
         self._check_projects_entities(graph_rca['nodes'], 'project_2', True)
 
     def test_get_rca_with_not_admin_bla_project(self):
@@ -152,7 +155,7 @@ class TestApis(TestEntityGraphUnitBase):
         graph_rca = json.loads(graph_rca)
 
         # Test assertions
-        self.assertEqual(3, len(graph_rca['nodes']))
+        self.assertThat(graph_rca['nodes'], matchers.HasLength(3))
         self._check_projects_entities(graph_rca['nodes'], 'project_2', True)
 
     def test_get_rca_with_all_tenants(self):
@@ -166,7 +169,7 @@ class TestApis(TestEntityGraphUnitBase):
         graph_rca = json.loads(graph_rca)
 
         # Test assertions
-        self.assertEqual(5, len(graph_rca['nodes']))
+        self.assertThat(graph_rca['nodes'], matchers.HasLength(5))
         self._check_projects_entities(graph_rca['nodes'], None, True)
 
     def test_get_topology_with_admin_project(self):
@@ -186,7 +189,7 @@ class TestApis(TestEntityGraphUnitBase):
         graph_topology = json.loads(graph_topology)
 
         # Test assertions
-        self.assertEqual(8, len(graph_topology['nodes']))
+        self.assertThat(graph_topology['nodes'], matchers.HasLength(8))
         self._check_projects_entities(graph_topology['nodes'],
                                       'project_1',
                                       False)
@@ -208,7 +211,7 @@ class TestApis(TestEntityGraphUnitBase):
         graph_topology = json.loads(graph_topology)
 
         # Test assertions
-        self.assertEqual(7, len(graph_topology['nodes']))
+        self.assertThat(graph_topology['nodes'], matchers.HasLength(7))
         self._check_projects_entities(graph_topology['nodes'],
                                       'project_2',
                                       False)
@@ -230,7 +233,7 @@ class TestApis(TestEntityGraphUnitBase):
         graph_topology = json.loads(graph_topology)
 
         # Test assertions
-        self.assertEqual(12, len(graph_topology['nodes']))
+        self.assertThat(graph_topology['nodes'], matchers.HasLength(12))
 
     def test_resource_list_with_admin_project(self):
         # Setup
@@ -246,7 +249,7 @@ class TestApis(TestEntityGraphUnitBase):
         resources = json.loads(resources)['resources']
 
         # Test assertions
-        self.assertEqual(5, len(resources))
+        self.assertThat(resources, matchers.HasLength(5))
 
     def test_resource_list_with_not_admin_project(self):
         # Setup
@@ -262,7 +265,7 @@ class TestApis(TestEntityGraphUnitBase):
         resources = json.loads(resources)['resources']
 
         # Test assertions
-        self.assertEqual(2, len(resources))
+        self.assertThat(resources, matchers.HasLength(2))
 
     def test_resource_list_with_not_admin_project_and_no_existing_type(self):
         # Setup
@@ -278,7 +281,7 @@ class TestApis(TestEntityGraphUnitBase):
         resources = json.loads(resources)['resources']
 
         # Test assertions
-        self.assertEqual(0, len(resources))
+        self.assertThat(resources, IsEmpty())
 
     def test_resource_list_with_not_admin_project_and_existing_type(self):
         # Setup
@@ -294,7 +297,7 @@ class TestApis(TestEntityGraphUnitBase):
         resources = json.loads(resources)['resources']
 
         # Test assertions
-        self.assertEqual(2, len(resources))
+        self.assertThat(resources, matchers.HasLength(2))
 
     def test_resource_list_with_all_tenants(self):
         # Setup
@@ -310,7 +313,7 @@ class TestApis(TestEntityGraphUnitBase):
         resources = json.loads(resources)['resources']
 
         # Test assertions
-        self.assertEqual(7, len(resources))
+        self.assertThat(resources, matchers.HasLength(7))
 
     def test_resource_show_with_admin_and_no_project_resource(self):
         # Setup

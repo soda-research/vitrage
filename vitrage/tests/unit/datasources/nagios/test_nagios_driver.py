@@ -13,6 +13,7 @@
 # under the License.
 
 from oslo_config import cfg
+from testtools import matchers
 
 from vitrage.common.constants import DatasourceOpts as DSOpts
 from vitrage.common.constants import DatasourceProperties as DSProps
@@ -21,6 +22,7 @@ from vitrage.datasources.nagios import NAGIOS_DATASOURCE
 from vitrage.datasources.nagios.properties import NagiosProperties as \
     NagiosProps
 from vitrage.datasources.nagios.properties import NagiosTestStatus
+from vitrage.tests.base import IsEmpty
 from vitrage.tests.mocks import utils
 from vitrage.tests.unit.datasources.nagios.mock_driver import MockNagiosDriver
 from vitrage.tests.unit.datasources.nagios.nagios_base_test import \
@@ -75,7 +77,7 @@ class NagiosDriverTest(NagiosBaseTest):
         # Test assertions
         # Services with status OK should not be returned
         self.assertIsNotNone(services, 'No services returned')
-        self.assertEqual(0, len(services))
+        self.assertThat(services, IsEmpty())
 
         # Action
         service_data1 = {NagiosProps.RESOURCE_NAME: 'compute-0',
@@ -96,7 +98,7 @@ class NagiosDriverTest(NagiosBaseTest):
 
         # Test assertions
         self.assertIsNotNone(services, 'No services returned')
-        self.assertEqual(1, len(services))
+        self.assertThat(services, matchers.HasLength(1))
         self._assert_contains(service_data1, services)
 
         # Action
@@ -118,7 +120,7 @@ class NagiosDriverTest(NagiosBaseTest):
 
         # Test assertions
         self.assertIsNotNone(services, 'No services returned')
-        self.assertEqual(2, len(services))
+        self.assertThat(services, matchers.HasLength(2))
         self._assert_contains(service_data1, services)
         self._assert_contains(service_data2, services)
 
@@ -143,7 +145,7 @@ class NagiosDriverTest(NagiosBaseTest):
         # The services of service_data1/2 should be returned although their
         # status is OK, because they were not OK earlier
         self.assertIsNotNone(services, 'No services returned')
-        self.assertEqual(2, len(services))
+        self.assertThat(services, matchers.HasLength(2))
         self._assert_contains(service_data1, services)
         self._assert_contains(service_data2, services)
 
@@ -154,7 +156,7 @@ class NagiosDriverTest(NagiosBaseTest):
         # Calling get_services again should not return anything, since all
         # services are still OK
         self.assertIsNotNone(services, 'services is None')
-        self.assertEqual(0, len(services))
+        self.assertThat(services, IsEmpty())
 
     def test_get_changes(self):
         """Check get_changes functionality.
@@ -186,7 +188,7 @@ class NagiosDriverTest(NagiosBaseTest):
         # Test assertions
         # Services with status OK should not be returned
         self.assertIsNotNone(services, 'No services returned')
-        self.assertEqual(0, len(services))
+        self.assertThat(services, IsEmpty())
 
         # Action
         service_data1 = {NagiosProps.RESOURCE_NAME: 'compute-0',
@@ -207,7 +209,7 @@ class NagiosDriverTest(NagiosBaseTest):
 
         # Test assertions
         self.assertIsNotNone(services, 'No services returned')
-        self.assertEqual(1, len(services))
+        self.assertThat(services, matchers.HasLength(1))
         self._assert_contains(service_data1, services)
 
         # Action
@@ -229,7 +231,7 @@ class NagiosDriverTest(NagiosBaseTest):
 
         # Test assertions
         self.assertIsNotNone(services, 'No services returned')
-        self.assertEqual(2, len(services))
+        self.assertThat(services, matchers.HasLength(2))
         self._assert_contains(service_data1, services)
         self._assert_contains(service_data2, services)
 
@@ -252,7 +254,7 @@ class NagiosDriverTest(NagiosBaseTest):
 
         # Test assertions
         self.assertIsNotNone(services, 'No services returned')
-        self.assertEqual(1, len(services))
+        self.assertThat(services, matchers.HasLength(1))
         self._assert_contains(service_data2, services)
 
         # Action
@@ -274,7 +276,7 @@ class NagiosDriverTest(NagiosBaseTest):
 
         # Test assertions
         self.assertIsNotNone(services, 'No services returned')
-        self.assertEqual(2, len(services))
+        self.assertThat(services, matchers.HasLength(2))
         self._assert_contains(service_data1, services)
         self._assert_contains(service_data2, services)
 
@@ -283,7 +285,7 @@ class NagiosDriverTest(NagiosBaseTest):
 
         # Test assertions
         self.assertIsNotNone(services, 'services is None')
-        self.assertEqual(0, len(services))
+        self.assertThat(services, IsEmpty())
 
     def test_get_changes_and_get_all(self):
         """Check get_changes and get_all functionalities """
@@ -310,7 +312,7 @@ class NagiosDriverTest(NagiosBaseTest):
 
         # Test assertions
         self.assertIsNotNone(services, 'No services returned')
-        self.assertEqual(1, len(services))
+        self.assertThat(services, matchers.HasLength(1))
         self._assert_contains(service_data1, services)
 
         # Action
@@ -319,14 +321,14 @@ class NagiosDriverTest(NagiosBaseTest):
         # Test assertions
         # Calling get_changes for the second time should return nothing
         self.assertIsNotNone(services, 'No services returned')
-        self.assertEqual(0, len(services))
+        self.assertThat(services, IsEmpty())
 
         # Action
         services = nagios_driver._get_all_alarms()
 
         # Test assertions
         self.assertIsNotNone(services, 'No services returned')
-        self.assertEqual(1, len(services))
+        self.assertThat(services, matchers.HasLength(1))
         self._assert_contains(service_data1, services)
 
         # Action
@@ -335,7 +337,7 @@ class NagiosDriverTest(NagiosBaseTest):
         # Test assertions
         # Calling get_all for the second time should return the same results
         self.assertIsNotNone(services, 'No services returned')
-        self.assertEqual(1, len(services))
+        self.assertThat(services, matchers.HasLength(1))
         self._assert_contains(service_data1, services)
 
         # Action
@@ -357,7 +359,7 @@ class NagiosDriverTest(NagiosBaseTest):
 
         # Test assertions
         self.assertIsNotNone(services, 'No services returned')
-        self.assertEqual(2, len(services))
+        self.assertThat(services, matchers.HasLength(2))
         self._assert_contains(service_data1, services)
         self._assert_contains(service_data2, services)
 
@@ -367,7 +369,7 @@ class NagiosDriverTest(NagiosBaseTest):
         # Test assertions
         # Calling get_changes after get_all should return nothing
         self.assertIsNotNone(services, 'No services returned')
-        self.assertEqual(0, len(services))
+        self.assertThat(services, IsEmpty())
 
         # Action
         services = nagios_driver._get_all_alarms()
@@ -375,7 +377,7 @@ class NagiosDriverTest(NagiosBaseTest):
         # Test assertions
         # Calling get_all for the second time should return the same results
         self.assertIsNotNone(services, 'No services returned')
-        self.assertEqual(2, len(services))
+        self.assertThat(services, matchers.HasLength(2))
         self._assert_contains(service_data1, services)
         self._assert_contains(service_data2, services)
 
@@ -398,7 +400,7 @@ class NagiosDriverTest(NagiosBaseTest):
 
         # Test assertions
         self.assertIsNotNone(services, 'No services returned')
-        self.assertEqual(2, len(services))
+        self.assertThat(services, matchers.HasLength(2))
         self._assert_contains(service_data2, services)
         self._assert_contains(service_data3, services)
 
@@ -421,7 +423,7 @@ class NagiosDriverTest(NagiosBaseTest):
 
         # Test assertions
         self.assertIsNotNone(services, 'No services returned')
-        self.assertEqual(1, len(services))
+        self.assertThat(services, matchers.HasLength(1))
         self._assert_contains(service_data1, services)
 
         # Action
@@ -429,7 +431,7 @@ class NagiosDriverTest(NagiosBaseTest):
 
         # Test assertions
         self.assertIsNotNone(services, 'services is None')
-        self.assertEqual(0, len(services))
+        self.assertThat(services, IsEmpty())
 
         # Action
         services = nagios_driver._get_all_alarms()
@@ -437,7 +439,7 @@ class NagiosDriverTest(NagiosBaseTest):
         # Test assertions
         # Calling get_all for the second time should return the same results
         self.assertIsNotNone(services, 'No services returned')
-        self.assertEqual(3, len(services))
+        self.assertThat(services, matchers.HasLength(3))
         self._assert_contains(service_data1, services)
         self._assert_contains(service_data2, services)
         self._assert_contains(service_data3, services)
@@ -467,7 +469,7 @@ class NagiosDriverTest(NagiosBaseTest):
 
         # Test assertions
         self.assertIsNotNone(services, 'No services returned')
-        self.assertEqual(1, len(services))
+        self.assertThat(services, matchers.HasLength(1))
         self._assert_contains(service_data1, services)
 
         # Action - delete a service that was OK
@@ -484,7 +486,7 @@ class NagiosDriverTest(NagiosBaseTest):
 
         # Test assertions
         self.assertIsNotNone(services, 'No services returned')
-        self.assertEqual(1, len(services))
+        self.assertThat(services, matchers.HasLength(1))
         self._assert_contains(service_data1, services)
 
         # Action - delete a service that was not OK
@@ -498,7 +500,7 @@ class NagiosDriverTest(NagiosBaseTest):
 
         # Test assertions
         self.assertIsNotNone(services, 'No services returned')
-        self.assertEqual(1, len(services))
+        self.assertThat(services, matchers.HasLength(1))
         self._assert_contains(service_data1, services)
         self.assertEqual(GraphAction.DELETE_ENTITY,
                          services[0][DSProps.EVENT_TYPE])
@@ -508,7 +510,7 @@ class NagiosDriverTest(NagiosBaseTest):
 
         # Test assertions
         self.assertIsNotNone(services, 'services is None')
-        self.assertEqual(0, len(services))
+        self.assertThat(services, IsEmpty())
 
         # Action - "undelete" the service that was OK
         service_data1 = {NagiosProps.RESOURCE_NAME: 'compute-0',
@@ -524,7 +526,7 @@ class NagiosDriverTest(NagiosBaseTest):
 
         # Test assertions
         self.assertIsNotNone(services, 'No services returned')
-        self.assertEqual(1, len(services))
+        self.assertThat(services, matchers.HasLength(1))
         self._assert_contains(service_data1, services)
         self.assertNotIn(DSProps.EVENT_TYPE, services[0])
 
@@ -539,7 +541,7 @@ class NagiosDriverTest(NagiosBaseTest):
 
         # Test assertions
         self.assertIsNotNone(services, 'No services returned')
-        self.assertEqual(1, len(services))
+        self.assertThat(services, matchers.HasLength(1))
         self._assert_contains(service_data1, services)
         self.assertEqual(GraphAction.DELETE_ENTITY,
                          services[0][DSProps.EVENT_TYPE])

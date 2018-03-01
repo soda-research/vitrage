@@ -15,6 +15,7 @@
 import os
 
 from oslo_config import cfg
+from testtools import matchers
 
 from vitrage.common.constants import DatasourceAction
 from vitrage.common.constants import DatasourceOpts as DSOpts
@@ -25,6 +26,7 @@ from vitrage.datasources.static_physical import driver
 from vitrage.datasources.static_physical import STATIC_PHYSICAL_DATASOURCE
 from vitrage.datasources.static_physical import SWITCH
 from vitrage.tests import base
+from vitrage.tests.base import IsEmpty
 from vitrage.tests.mocks import utils
 from vitrage.utils import file as file_utils
 
@@ -94,13 +96,13 @@ class TestStaticPhysicalDriver(base.BaseTest):
             self.static_physical_driver.get_all(DatasourceAction.UPDATE)
 
         # Test assertions
-        self.assertEqual(5, len(static_entities))
+        self.assertThat(static_entities, matchers.HasLength(5))
 
     # noinspection PyAttributeOutsideInit
     def test_get_changes(self):
         # Setup
         entities = self.static_physical_driver.get_all(DatasourceAction.UPDATE)
-        self.assertEqual(5, len(entities))
+        self.assertThat(entities, matchers.HasLength(5))
 
         self.conf = cfg.ConfigOpts()
         self.conf.register_opts(self.CHANGES_OPTS,
@@ -133,11 +135,11 @@ class TestStaticPhysicalDriver(base.BaseTest):
                      change[StaticFields.ID] == '56789' for change in changes)
         self.assertTrue(status)
 
-        self.assertEqual(4, len(changes))
+        self.assertThat(changes, matchers.HasLength(4))
 
         # Action
         changes = self.static_physical_driver.get_changes(
             GraphAction.UPDATE_ENTITY)
 
         # Test Assertions
-        self.assertEqual(0, len(changes))
+        self.assertThat(changes, IsEmpty())

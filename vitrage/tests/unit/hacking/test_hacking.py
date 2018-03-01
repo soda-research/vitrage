@@ -15,137 +15,153 @@
 
 import inspect
 
+from testtools import matchers
+
 from vitrage.hacking import checks
 from vitrage.tests import base
+from vitrage.tests.base import IsEmpty
 
 
 class HackingTestCase(base.BaseTest):
     def test_assert_true_instance(self):
-        self.assertEqual(1, len(list(checks.assert_true_instance(
+        self.assertThat(list(checks.assert_true_instance(
             "self.assertTrue(isinstance(e, "
-            "exception.BuildAbortException))"))))
+            "exception.BuildAbortException))")), matchers.HasLength(1))
 
-        self.assertEqual(
-            0, len(list(checks.assert_true_instance("self.assertTrue()"))))
+        self.assertThat(list(checks.assert_true_instance("self.assertTrue("
+                                                         ")")), IsEmpty())
 
     def test_assert_equal_type(self):
-        self.assertEqual(1, len(list(checks.assert_equal_type(
-            "self.assertEqual(type(als['QuicAssist']), list)"))))
+        self.assertThat(list(checks.assert_equal_type(
+            "self.assertEqual(type(als['QuicAssist']), list)")),
+            matchers.HasLength(1))
 
-        self.assertEqual(
-            0, len(list(checks.assert_equal_type("self.assertTrue()"))))
+        self.assertThat(list(checks.assert_equal_type("self.assertTrue()")),
+                        IsEmpty())
 
     def test_no_translate_logs(self):
         for log in checks._all_log_levels:
             bad = 'LOG.%s(_("Bad"))' % log
-            self.assertEqual(1, len(list(checks.no_translate_logs(bad))))
+            self.assertThat(list(checks.no_translate_logs(bad)),
+                            matchers.HasLength(1))
             # Catch abuses when used with a variable and not a literal
             bad = 'LOG.%s(_(msg))' % log
-            self.assertEqual(1, len(list(checks.no_translate_logs(bad))))
+            self.assertThat(list(checks.no_translate_logs(bad)),
+                            matchers.HasLength(1))
 
     def test_no_direct_use_of_unicode_function(self):
-        self.assertEqual(1, len(list(checks.no_direct_use_of_unicode_function(
-            "unicode('the party don't start til the unicode walks in')"))))
-        self.assertEqual(1, len(list(checks.no_direct_use_of_unicode_function(
+        self.assertThat(list(checks.no_direct_use_of_unicode_function(
+            "unicode('the party don't start til the unicode walks in')")),
+            matchers.HasLength(1))
+        self.assertThat(list(checks.no_direct_use_of_unicode_function(
             """unicode('something '
-                       'something else"""))))
-        self.assertEqual(0, len(list(checks.no_direct_use_of_unicode_function(
-            "six.text_type('party over')"))))
-        self.assertEqual(0, len(list(checks.no_direct_use_of_unicode_function(
-            "not_actually_unicode('something completely different')"))))
+                       'something else""")), matchers.HasLength(1))
+        self.assertThat(list(checks.no_direct_use_of_unicode_function(
+            "six.text_type('party over')")), IsEmpty())
+        self.assertThat(list(checks.no_direct_use_of_unicode_function(
+            "not_actually_unicode('something completely different')")),
+            IsEmpty())
 
     def test_no_contextlib_nested(self):
-        self.assertEqual(1, len(list(checks.check_no_contextlib_nested(
-            "with contextlib.nested("))))
+        self.assertThat(list(checks.check_no_contextlib_nested(
+            "with contextlib.nested(")), matchers.HasLength(1))
 
-        self.assertEqual(1, len(list(checks.check_no_contextlib_nested(
-            "with nested("))))
+        self.assertThat(list(checks.check_no_contextlib_nested(
+            "with nested(")), matchers.HasLength(1))
 
-        self.assertEqual(0, len(list(checks.check_no_contextlib_nested(
-            "with foo as bar"))))
+        self.assertThat(list(checks.check_no_contextlib_nested(
+            "with foo as bar")), IsEmpty())
 
     def test_dict_constructor_with_list_copy(self):
-        self.assertEqual(1, len(list(checks.dict_constructor_with_list_copy(
-            "    dict([(i, connect_info[i])"))))
+        self.assertThat(list(checks.dict_constructor_with_list_copy(
+            "    dict([(i, connect_info[i])")), matchers.HasLength(1))
 
-        self.assertEqual(1, len(list(checks.dict_constructor_with_list_copy(
-            "    attrs = dict([(k, _from_json(v))"))))
+        self.assertThat(list(checks.dict_constructor_with_list_copy(
+            "    attrs = dict([(k, _from_json(v))")), matchers.HasLength(1))
 
-        self.assertEqual(1, len(list(checks.dict_constructor_with_list_copy(
-            "        type_names = dict((value, key) for key, value in"))))
+        self.assertThat(list(checks.dict_constructor_with_list_copy(
+            "        type_names = dict((value, key) for key, value in")),
+            matchers.HasLength(1))
 
-        self.assertEqual(1, len(list(checks.dict_constructor_with_list_copy(
-            "   dict((value, key) for key, value in"))))
+        self.assertThat(list(checks.dict_constructor_with_list_copy(
+            "   dict((value, key) for key, value in")), matchers.HasLength(1))
 
-        self.assertEqual(1, len(list(checks.dict_constructor_with_list_copy(
-            "foo(param=dict((k, v) for k, v in bar.items()))"))))
+        self.assertThat(list(checks.dict_constructor_with_list_copy(
+            "foo(param=dict((k, v) for k, v in bar.items()))")),
+            matchers.HasLength(1))
 
-        self.assertEqual(1, len(list(checks.dict_constructor_with_list_copy(
-            " dict([[i,i] for i in range(3)])"))))
+        self.assertThat(list(checks.dict_constructor_with_list_copy(
+            " dict([[i,i] for i in range(3)])")), matchers.HasLength(1))
 
-        self.assertEqual(1, len(list(checks.dict_constructor_with_list_copy(
-            "  dd = dict([i,i] for i in range(3))"))))
+        self.assertThat(list(checks.dict_constructor_with_list_copy(
+            "  dd = dict([i,i] for i in range(3))")), matchers.HasLength(1))
 
-        self.assertEqual(0, len(list(checks.dict_constructor_with_list_copy(
-            "        create_kwargs = dict(snapshot=snapshot,"))))
+        self.assertThat(list(checks.dict_constructor_with_list_copy(
+            "        create_kwargs = dict(snapshot=snapshot,")), IsEmpty())
 
-        self.assertEqual(0, len(list(checks.dict_constructor_with_list_copy(
-            "      self._render_dict(xml, data_el, data.__dict__)"))))
+        self.assertThat(list(checks.dict_constructor_with_list_copy(
+            "      self._render_dict(xml, data_el, data.__dict__)")),
+            IsEmpty())
 
     def test_check_python3_xrange(self):
         func = checks.check_python3_xrange
-        self.assertEqual(1, len(list(func('for i in xrange(10)'))))
-        self.assertEqual(1, len(list(func('for i in xrange    (10)'))))
-        self.assertEqual(0, len(list(func('for i in range(10)'))))
-        self.assertEqual(0, len(list(func('for i in six.moves.range(10)'))))
-        self.assertEqual(0, len(list(func('testxrange(10)'))))
+        self.assertThat(list(func('for i in xrange(10)')),
+                        matchers.HasLength(1))
+        self.assertThat(list(func('for i in xrange    (10)')),
+                        matchers.HasLength(1))
+        self.assertThat(list(func('for i in range(10)')), IsEmpty())
+        self.assertThat(list(func('for i in six.moves.range(10)')), IsEmpty())
+        self.assertThat(list(func('testxrange(10)')), IsEmpty())
 
     def test_dict_iteritems(self):
-        self.assertEqual(1, len(list(checks.check_python3_no_iteritems(
-            "obj.iteritems()"))))
+        self.assertThat(list(checks.check_python3_no_iteritems(
+            "obj.iteritems()")), matchers.HasLength(1))
 
-        self.assertEqual(0, len(list(checks.check_python3_no_iteritems(
-            "six.iteritems(obj)"))))
+        self.assertThat(list(checks.check_python3_no_iteritems(
+            "six.iteritems(obj)")), IsEmpty())
 
-        self.assertEqual(0, len(list(checks.check_python3_no_iteritems(
-            "obj.items()"))))
+        self.assertThat(list(checks.check_python3_no_iteritems(
+            "obj.items()")), IsEmpty())
 
     def test_dict_iterkeys(self):
-        self.assertEqual(1, len(list(checks.check_python3_no_iterkeys(
-            "obj.iterkeys()"))))
+        self.assertThat(list(checks.check_python3_no_iterkeys(
+            "obj.iterkeys()")), matchers.HasLength(1))
 
-        self.assertEqual(0, len(list(checks.check_python3_no_iterkeys(
-            "six.iterkeys(obj)"))))
+        self.assertThat(list(checks.check_python3_no_iterkeys(
+            "six.iterkeys(obj)")), IsEmpty())
 
-        self.assertEqual(0, len(list(checks.check_python3_no_iterkeys(
-            "obj.keys()"))))
+        self.assertThat(list(checks.check_python3_no_iterkeys(
+            "obj.keys()")), IsEmpty())
 
     def test_dict_itervalues(self):
-        self.assertEqual(1, len(list(checks.check_python3_no_itervalues(
-            "obj.itervalues()"))))
+        self.assertThat(list(checks.check_python3_no_itervalues(
+            "obj.itervalues()")), matchers.HasLength(1))
 
-        self.assertEqual(0, len(list(checks.check_python3_no_itervalues(
-            "six.itervalues(ob)"))))
+        self.assertThat(list(checks.check_python3_no_itervalues(
+            "six.itervalues(ob)")), IsEmpty())
 
-        self.assertEqual(0, len(list(checks.check_python3_no_itervalues(
-            "obj.values()"))))
+        self.assertThat(list(checks.check_python3_no_itervalues(
+            "obj.values()")), IsEmpty())
 
     def test_no_mutable_default_args(self):
-        self.assertEqual(1, len(list(checks.no_mutable_default_args(
-            " def fake_suds_context(calls={}):"))))
+        self.assertThat(list(checks.no_mutable_default_args(
+            " def fake_suds_context(calls={}):")), matchers.HasLength(1))
 
-        self.assertEqual(1, len(list(checks.no_mutable_default_args(
-            "def get_info_from_bdm(virt_type, bdm, mapping=[])"))))
+        self.assertThat(list(checks.no_mutable_default_args(
+            "def get_info_from_bdm(virt_type, bdm, mapping=[])")),
+            matchers.HasLength(1))
 
-        self.assertEqual(0, len(list(checks.no_mutable_default_args(
-            "defined = []"))))
+        self.assertThat(list(checks.no_mutable_default_args(
+            "defined = []")), IsEmpty())
 
-        self.assertEqual(0, len(list(checks.no_mutable_default_args(
-            "defined, undefined = [], {}"))))
+        self.assertThat(list(checks.no_mutable_default_args(
+            "defined, undefined = [], {}")), IsEmpty())
 
     def test_no_log_warn(self):
-        self.assertEqual(0, len(list(checks.no_log_warn('LOG.warning("bl")'))))
-        self.assertEqual(1, len(list(checks.no_log_warn('LOG.warn("foo")'))))
+        self.assertThat(list(checks.no_log_warn('LOG.warning("bl")')),
+                        IsEmpty())
+        self.assertThat(list(checks.no_log_warn('LOG.warn("foo")')),
+                        matchers.HasLength(1))
 
     def test_asserttruefalse(self):
         true_fail_code1 = """
@@ -172,16 +188,16 @@ class HackingTestCase(base.BaseTest):
                test_bool = False
                self.assertFalse(test_bool)
                """
-        self.assertEqual(1, len(
-            list(checks.check_assert_true_false(true_fail_code1))))
-        self.assertEqual(1, len(
-            list(checks.check_assert_true_false(true_fail_code2))))
-        self.assertEqual(0, len(
-            list(checks.check_assert_true_false(true_pass_code))))
-        self.assertEqual(1, len(
-            list(checks.check_assert_true_false(false_fail_code1))))
-        self.assertEqual(1, len(
-            list(checks.check_assert_true_false(false_fail_code2))))
+        self.assertThat(list(checks.check_assert_true_false(
+            true_fail_code1)), matchers.HasLength(1))
+        self.assertThat(list(checks.check_assert_true_false(
+            true_fail_code2)), matchers.HasLength(1))
+        self.assertThat(list(checks.check_assert_true_false(
+            true_pass_code)), IsEmpty())
+        self.assertThat(list(checks.check_assert_true_false(
+            false_fail_code1)), matchers.HasLength(1))
+        self.assertThat(list(checks.check_assert_true_false(
+            false_fail_code2)), matchers.HasLength(1))
         self.assertFalse(list(checks.check_assert_true_false(false_pass_code)))
 
     def test_factory(self):

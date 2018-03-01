@@ -18,7 +18,7 @@ import unittest
 
 from oslo_config import cfg
 from six.moves import queue
-
+from testtools import matchers
 
 from vitrage.common.constants import EdgeLabel
 from vitrage.common.constants import EntityCategory
@@ -115,9 +115,11 @@ class TestConsistencyFunctional(TestFunctionalBase, TestConfiguration):
         self._create_processor_with_graph(self.conf, processor=self.processor)
         self._add_alarms()
         self._set_end_messages()
-        self.assertEqual(self._num_total_expected_vertices() +
-                         num_of_host_alarms + self.NUM_INSTANCES,
-                         len(self.processor.entity_graph.get_vertices()))
+        self.assertThat(self.processor.entity_graph.get_vertices(),
+                        matchers.HasLength(
+                            self._num_total_expected_vertices() +
+                            num_of_host_alarms + self.NUM_INSTANCES)
+                        )
 
         # Action
         # eventlet.spawn(self._process_events)
@@ -142,23 +144,28 @@ class TestConsistencyFunctional(TestFunctionalBase, TestConfiguration):
             VProps.VITRAGE_CATEGORY: EntityCategory.ALARM,
             VProps.VITRAGE_IS_DELETED: False
         })
-        self.assertEqual(num_correct_alarms, len(alarm_vertices_in_graph))
+        self.assertThat(alarm_vertices_in_graph,
+                        matchers.HasLength(num_correct_alarms))
 
         is_deleted_alarm_vertices_in_graph = \
             self.processor.entity_graph.get_vertices({
                 VProps.VITRAGE_CATEGORY: EntityCategory.ALARM,
                 VProps.VITRAGE_IS_DELETED: True
             })
-        self.assertEqual(num_of_host_alarms * num_instances_per_host,
-                         len(is_deleted_alarm_vertices_in_graph))
+        self.assertEqual(is_deleted_alarm_vertices_in_graph,
+                         matchers.HasLength(
+                             num_of_host_alarms * num_instances_per_host)
+                         )
 
         instance_vertices = self.processor.entity_graph.get_vertices({
             VProps.VITRAGE_CATEGORY: EntityCategory.ALARM,
             VProps.VITRAGE_TYPE: VITRAGE_DATASOURCE,
             VProps.VITRAGE_IS_DELETED: False
         })
-        self.assertEqual(num_of_host_alarms * num_instances_per_host,
-                         len(instance_vertices))
+        self.assertThat(instance_vertices,
+                        matchers.HasLength(
+                            num_of_host_alarms * num_instances_per_host)
+                        )
 
     def test_periodic_process(self):
         # Setup
@@ -181,10 +188,13 @@ class TestConsistencyFunctional(TestFunctionalBase, TestConfiguration):
                 VProps.VITRAGE_TYPE: NOVA_INSTANCE_DATASOURCE,
                 VProps.VITRAGE_IS_DELETED: True
             })
-        self.assertEqual(self.NUM_INSTANCES - 3, len(instance_vertices))
-        self.assertEqual(self._num_total_expected_vertices() - 3,
-                         len(self.processor.entity_graph.get_vertices()))
-        self.assertEqual(3, len(deleted_instance_vertices))
+        self.assertThat(instance_vertices,
+                        matchers.HasLength(self.NUM_INSTANCES - 3))
+        self.assertThat(self.processor.entity_graph.get_vertices(),
+                        matchers.HasLength(
+                            self._num_total_expected_vertices() - 3)
+                        )
+        self.assertThat(deleted_instance_vertices, matchers.HasLength(3))
 
     def _periodic_process_setup_stage(self, consistency_interval):
         self._create_processor_with_graph(self.conf, processor=self.processor)
@@ -200,7 +210,8 @@ class TestConsistencyFunctional(TestFunctionalBase, TestConfiguration):
             VProps.VITRAGE_CATEGORY: EntityCategory.RESOURCE,
             VProps.VITRAGE_TYPE: NOVA_INSTANCE_DATASOURCE
         })
-        self.assertEqual(self.NUM_INSTANCES, len(instance_vertices))
+        self.assertThat(instance_vertices,
+                        matchers.HasLength(self.NUM_INSTANCES))
 
         # set current timestamp of part of the instances
         self._update_timestamp(instance_vertices[0:3], current_time)
