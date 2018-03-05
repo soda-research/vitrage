@@ -310,7 +310,7 @@ function start_vitrage {
 
     write_systemd_dependency vitrage-graph vitrage-collector
 
-    change_systemd_kill_mode vitrage-graph
+    change_systemd_kill_mode vitrage-graph vitrage-collector
 
 }
 
