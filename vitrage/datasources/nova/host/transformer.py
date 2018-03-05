@@ -36,9 +36,7 @@ class HostTransformer(ResourceTransformerBase):
         super(HostTransformer, self).__init__(transformers, conf)
 
     def _create_snapshot_entity_vertex(self, entity_event):
-
-        host_name = extract_field_value(entity_event, '_info', 'host_name')
-        return self._create_vertex(entity_event, host_name)
+        return self._create_vertex(entity_event, entity_event.get('host'))
 
     def _create_update_entity_vertex(self, entity_event):
         LOG.warning('Host Update is not supported yet')
@@ -78,10 +76,8 @@ class HostTransformer(ResourceTransformerBase):
         return [zone_neighbor]
 
     def _create_entity_key(self, entity_event):
-
-        host_name = extract_field_value(entity_event, '_info', 'host_name')
-
-        key_fields = self._key_values(NOVA_HOST_DATASOURCE, host_name)
+        key_fields = self._key_values(NOVA_HOST_DATASOURCE,
+                                      entity_event.get('host'))
         return transformer_base.build_key(key_fields)
 
     def get_vitrage_type(self):

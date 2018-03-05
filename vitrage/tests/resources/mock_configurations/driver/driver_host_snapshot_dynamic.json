@@ -5,7 +5,7 @@
     "zone": "zone0"
   },
   "_loaded": "True",
-  "host_name": "compute-0-0.local",
+  "host": "compute-0-0.local",
   "service": "compute",
   "vitrage_entity_type": "nova.host",
   "zone": "zone0",

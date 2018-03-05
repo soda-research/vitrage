@@ -247,7 +247,7 @@ def _get_host_snapshot_driver_values(spec):
     static_values = []
     for host_name, zone_name in host_zone_mapping:
 
-        mapping = {'host_name': host_name,
+        mapping = {'host': host_name,
                    'zone': zone_name,
                    '_info': {'host_name': host_name,
                              'zone': zone_name}}

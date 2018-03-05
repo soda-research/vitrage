@@ -18,18 +18,10 @@ from vitrage.datasources.nova.nova_driver_base import NovaDriverBase
 
 class HostDriver(NovaDriverBase):
 
-    @staticmethod
-    def filter_none_compute_hosts(entities):
-        compute_hosts = []
-        for host in entities:
-            host_dict = host.__dict__
-            if host_dict['service'] and host_dict['service'] == 'compute':
-                compute_hosts.append(host_dict)
-        return compute_hosts
-
     def get_all(self, datasource_action):
+        hosts = self.client.services.list(binary='nova-compute')
         return self.make_pickleable(
-            self.filter_none_compute_hosts(self.client.hosts.list()),
+            [h.to_dict() for h in hosts],
             NOVA_HOST_DATASOURCE,
             datasource_action,
             *self.properties_to_filter_out())
