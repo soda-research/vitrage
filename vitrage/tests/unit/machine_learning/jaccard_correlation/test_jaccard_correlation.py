@@ -17,6 +17,8 @@ import os.path
 from oslo_config import cfg
 import time
 
+from testtools import matchers
+
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.datasources.aodh import AODH_DATASOURCE
@@ -240,14 +242,14 @@ class JaccardCorrelationTest(base.BaseTest):
                          self.data_manager.active_start_times)
 
         expected_activity_dict_len = len(ACTIVE_ALARMS)
-        self.assertEqual(expected_activity_dict_len,
-                         len(self.data_manager.alarms_activity))
+        self.assertThat(self.data_manager.alarms_activity,
+                        matchers.HasLength(expected_activity_dict_len))
 
         # choose 2
         expected_intersections_dict_len = \
             (len(ACTIVE_ALARMS) * (len(ACTIVE_ALARMS) - 1)) / 2
-        self.assertEqual(expected_intersections_dict_len,
-                         len(self.data_manager.alarms_intersects))
+        self.assertThat(self.data_manager.alarms_intersects,
+                        matchers.HasLength(expected_intersections_dict_len))
 
     def _test_append_inactive(self):
         deleted_alarm_ids = []

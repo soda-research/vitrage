@@ -205,7 +205,4 @@ class GraphTestBase(base.BaseTest):
         if not expected_graph_size == len(g):
             raise VitrageError('Init failed, graph size unexpected {0} != {1}'
                                .format(expected_graph_size, len(g)))
-        # cls.assertEqual(
-        #     expected_graph_size,
-        #     len(g), 'num of vertex node')
         return g

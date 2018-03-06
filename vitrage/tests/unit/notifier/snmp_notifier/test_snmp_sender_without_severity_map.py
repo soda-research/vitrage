@@ -13,6 +13,7 @@
 # under the License.
 
 from oslo_config import cfg
+from testtools import matchers
 
 from vitrage.common.constants import VertexProperties as VProps
 import vitrage.notifier.plugins.snmp.snmp_sender as sender
@@ -57,8 +58,8 @@ class SnmpNotifierTest(base.BaseTest):
 
         oids, var_lst = self.snmp_sender._build_oids()
 
-        self.assertEqual(4, len(oids))
-        self.assertEqual(3, len(var_lst))
+        self.assertThat(oids, matchers.HasLength(4))
+        self.assertThat(var_lst, matchers.HasLength(3))
 
         self.assertIn(VProps.NAME, oids)
         self.assertIn(VProps.VITRAGE_IS_DELETED, oids)

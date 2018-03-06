@@ -15,12 +15,14 @@
 import copy
 
 from oslo_config import cfg
+from testtools import matchers
 
 from vitrage.common.constants import DatasourceOpts as DSOpts
 from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import GraphAction
 from vitrage.datasources.zabbix.properties import ZabbixProperties as ZProps
 from vitrage.datasources.zabbix import ZABBIX_DATASOURCE
+from vitrage.tests.base import IsEmpty
 from vitrage.tests.mocks import utils
 from vitrage.tests.unit.datasources.zabbix.mock_driver import MockZabbixDriver
 from vitrage.tests.unit.datasources.zabbix.zabbix_base_test import \
@@ -63,7 +65,7 @@ class ZabbixDriverTest(ZabbixBaseTest):
 
         # Test assertions
         self.assertIsNotNone(alarms, 'No alarms returned')
-        self.assertEqual(1, len(alarms))
+        self.assertThat(alarms, matchers.HasLength(1))
         self._assert_contains(alarm_data3, alarms)
 
     def test_get_all_functionality(self):
@@ -84,7 +86,7 @@ class ZabbixDriverTest(ZabbixBaseTest):
 
         # Test assertions
         self.assertIsNotNone(alarms, 'No alarms returned')
-        self.assertEqual(0, len(alarms))
+        self.assertThat(alarms, IsEmpty())
 
         # Step 2 - one raised alarm
         # Test setup
@@ -97,7 +99,7 @@ class ZabbixDriverTest(ZabbixBaseTest):
 
         # Test assertions
         self.assertIsNotNone(alarms, 'No alarms returned')
-        self.assertEqual(1, len(alarms))
+        self.assertThat(alarms, matchers.HasLength(1))
         self._assert_contains(alarm_data1, alarms)
 
         # Step 3 - two raised alarms
@@ -117,7 +119,7 @@ class ZabbixDriverTest(ZabbixBaseTest):
 
         # Test assertions
         self.assertIsNotNone(alarms, 'No alarms returned')
-        self.assertEqual(2, len(alarms))
+        self.assertThat(alarms, matchers.HasLength(2))
         self._assert_contains(expected_alarm1, alarms)
         self._assert_contains(expected_alarm2, alarms)
 
@@ -140,7 +142,7 @@ class ZabbixDriverTest(ZabbixBaseTest):
         # The alarms of alarm_data1/2 should be returned although their
         # status is OK, because they were not OK earlier
         self.assertIsNotNone(alarms, 'No alarms returned')
-        self.assertEqual(2, len(alarms))
+        self.assertThat(alarms, matchers.HasLength(2))
         self._assert_contains(expected_alarm1, alarms)
         self._assert_contains(expected_alarm2, alarms)
 
@@ -152,7 +154,7 @@ class ZabbixDriverTest(ZabbixBaseTest):
 
         # Test assertions
         self.assertIsNotNone(alarms, 'alarms is None')
-        self.assertEqual(0, len(alarms))
+        self.assertThat(alarms, IsEmpty())
 
     def test_get_changes_functionality(self):
 
@@ -174,7 +176,7 @@ class ZabbixDriverTest(ZabbixBaseTest):
 
         # Test assertions
         self.assertIsNotNone(alarms, 'No alarms returned')
-        self.assertEqual(0, len(alarms))
+        self.assertThat(alarms, IsEmpty())
 
         # Step 2 - get changes when alarm is raised
         # Test setup
@@ -187,7 +189,7 @@ class ZabbixDriverTest(ZabbixBaseTest):
 
         # Test assertions
         self.assertIsNotNone(alarms, 'No alarms returned')
-        self.assertEqual(1, len(alarms))
+        self.assertThat(alarms, matchers.HasLength(1))
         self._assert_contains(alarm_data1, alarms)
 
         # Step 3 - get changes when the priority of inactive alarm is changed
@@ -201,7 +203,7 @@ class ZabbixDriverTest(ZabbixBaseTest):
 
         # Test assertions
         self.assertIsNotNone(alarms, 'No alarms returned')
-        self.assertEqual(0, len(alarms))
+        self.assertThat(alarms, IsEmpty())
 
         # Step 4 - get changes when:
         # 1. alarm1 - priority of active alarm is changed (should be returned)
@@ -227,7 +229,7 @@ class ZabbixDriverTest(ZabbixBaseTest):
 
         # Test assertions
         self.assertIsNotNone(alarms, 'No alarms returned')
-        self.assertEqual(2, len(alarms))
+        self.assertThat(alarms, matchers.HasLength(2))
         self._assert_contains(expected_alarm1, alarms)
         self._assert_contains(expected_alarm2, alarms)
 
@@ -248,7 +250,7 @@ class ZabbixDriverTest(ZabbixBaseTest):
 
         # Test assertions
         self.assertIsNotNone(alarms, 'No alarms returned')
-        self.assertEqual(2, len(alarms))
+        self.assertThat(alarms, matchers.HasLength(2))
         self._assert_contains(expected_alarm1, alarms)
         self._assert_contains(expected_alarm2, alarms)
 
@@ -258,7 +260,7 @@ class ZabbixDriverTest(ZabbixBaseTest):
 
         # Test assertions
         self.assertIsNotNone(alarms, 'alarms is None')
-        self.assertEqual(0, len(alarms))
+        self.assertThat(alarms, IsEmpty())
 
     def test_get_changes_and_get_all(self):
 
@@ -278,7 +280,7 @@ class ZabbixDriverTest(ZabbixBaseTest):
 
         # Step assertions
         self.assertIsNotNone(alarms, 'No alarms returned')
-        self.assertEqual(1, len(alarms))
+        self.assertThat(alarms, matchers.HasLength(1))
         self._assert_contains(alarm_data1, alarms)
 
         # Step 2 - get changes when no change occurred (returns nothing)
@@ -287,7 +289,7 @@ class ZabbixDriverTest(ZabbixBaseTest):
 
         # Step assertions
         self.assertIsNotNone(alarms, 'No alarms returned')
-        self.assertEqual(0, len(alarms))
+        self.assertThat(alarms, IsEmpty())
 
         # Step 3 - get all
         # Step action
@@ -295,7 +297,7 @@ class ZabbixDriverTest(ZabbixBaseTest):
 
         # Step assertions
         self.assertIsNotNone(alarms, 'No alarms returned')
-        self.assertEqual(1, len(alarms))
+        self.assertThat(alarms, matchers.HasLength(1))
         self._assert_contains(alarm_data1, alarms)
 
         # Step 4 - get all for second time
@@ -305,7 +307,7 @@ class ZabbixDriverTest(ZabbixBaseTest):
 
         # Step assertions
         self.assertIsNotNone(alarms, 'No alarms returned')
-        self.assertEqual(1, len(alarms))
+        self.assertThat(alarms, matchers.HasLength(1))
         self._assert_contains(alarm_data1, alarms)
 
         # Step 5 - calling get changes right after get all (returns nothing)
@@ -327,12 +329,12 @@ class ZabbixDriverTest(ZabbixBaseTest):
 
         # Step assertions
         self.assertIsNotNone(get_all_alarms, 'No alarms returned')
-        self.assertEqual(2, len(get_all_alarms))
+        self.assertThat(get_all_alarms, matchers.HasLength(2))
         self._assert_contains(expected_alarm1, get_all_alarms)
         self._assert_contains(expected_alarm2, get_all_alarms)
 
         self.assertIsNotNone(changed_alarms, 'No alarms returned')
-        self.assertEqual(0, len(changed_alarms))
+        self.assertThat(changed_alarms, IsEmpty())
 
         # Step 6 - get changes
         # Step setup
@@ -356,7 +358,7 @@ class ZabbixDriverTest(ZabbixBaseTest):
 
         # Step assertions
         self.assertIsNotNone(alarms, 'No alarms returned')
-        self.assertEqual(2, len(alarms))
+        self.assertThat(alarms, matchers.HasLength(2))
         self._assert_contains(expected_alarm1, alarms)
         self._assert_contains(expected_alarm2, alarms)
 
@@ -380,7 +382,7 @@ class ZabbixDriverTest(ZabbixBaseTest):
 
         # Step assertions
         self.assertIsNotNone(alarms, 'No alarms returned')
-        self.assertEqual(1, len(alarms))
+        self.assertThat(alarms, matchers.HasLength(1))
         self._assert_contains(alarm_data1, alarms)
 
         # Step 2 - delete active alarm
@@ -392,7 +394,7 @@ class ZabbixDriverTest(ZabbixBaseTest):
 
         # Step assertions
         self.assertIsNotNone(alarms, 'No alarms returned')
-        self.assertEqual(1, len(alarms))
+        self.assertThat(alarms, matchers.HasLength(1))
         self._assert_contains(alarm_data1, alarms)
         self.assertEqual(GraphAction.DELETE_ENTITY,
                          alarms[0][DSProps.EVENT_TYPE])
@@ -403,7 +405,7 @@ class ZabbixDriverTest(ZabbixBaseTest):
 
         # Step assertions
         self.assertIsNotNone(alarms, 'alarms is None')
-        self.assertEqual(0, len(alarms))
+        self.assertThat(alarms, IsEmpty())
 
         # Step 4 -
         # Step setup
@@ -416,7 +418,7 @@ class ZabbixDriverTest(ZabbixBaseTest):
 
         # Step assertions
         self.assertIsNotNone(alarms, 'No alarms returned')
-        self.assertEqual(1, len(alarms))
+        self.assertThat(alarms, matchers.HasLength(1))
         self._assert_contains(alarm_data1, alarms)
         self.assertEqual(GraphAction.DELETE_ENTITY,
                          alarms[0][DSProps.EVENT_TYPE])

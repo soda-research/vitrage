@@ -11,6 +11,8 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+from testtools import matchers
+
 from vitrage.entity_graph.mappings.operational_resource_state import \
     OperationalResourceState
 
@@ -49,11 +51,12 @@ class SetStateRecipeTest(base.BaseTest):
         # Test Assertions
 
         # expecting for one step: [update_vertex]
-        self.assertEqual(1, len(action_steps))
+        self.assertThat(action_steps, matchers.HasLength(1))
 
         self.assertEqual(UPDATE_VERTEX, action_steps[0].type)
         update_vertex_step_params = action_steps[0].params
-        self.assertEqual(_SET_STATES_PARAM_LEN, len(update_vertex_step_params))
+        self.assertThat(update_vertex_step_params,
+                        matchers.HasLength(_SET_STATES_PARAM_LEN))
 
         vitrage_state = update_vertex_step_params[VProps.VITRAGE_STATE]
         self.assertEqual(self.props[TFields.STATE], vitrage_state)
@@ -69,11 +72,12 @@ class SetStateRecipeTest(base.BaseTest):
         # Test Assertions
 
         # expecting for one step: [update_vertex]
-        self.assertEqual(1, len(action_steps))
+        self.assertThat(action_steps, matchers.HasLength(1))
 
         self.assertEqual(UPDATE_VERTEX, action_steps[0].type)
         update_vertex_step_params = action_steps[0].params
-        self.assertEqual(_SET_STATES_PARAM_LEN, len(update_vertex_step_params))
+        self.assertThat(update_vertex_step_params,
+                        matchers.HasLength(_SET_STATES_PARAM_LEN))
 
         vitrage_state = update_vertex_step_params[VProps.VITRAGE_STATE]
         self.assertIsNone(vitrage_state)

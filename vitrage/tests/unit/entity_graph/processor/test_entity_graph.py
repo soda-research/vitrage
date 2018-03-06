@@ -11,6 +11,7 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+from testtools import matchers
 
 from vitrage.common.constants import EdgeLabel
 from vitrage.common.constants import EntityCategory
@@ -111,4 +112,4 @@ class TestEntityGraphManager(base.TestBaseProcessor):
 
         # get neighbors types
         types = PUtils.find_neighbor_types(neighbors)
-        self.assertEqual(4, len(types))
+        self.assertThat(types, matchers.HasLength(4))

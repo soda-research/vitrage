@@ -11,6 +11,7 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+from testtools import matchers
 
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.datasources.alarm_properties import AlarmProperties
@@ -48,11 +49,11 @@ class RaiseAlarmRecipeTest(base.BaseTest):
         # Test Assertions
 
         # expecting for one step: [add_vertex]
-        self.assertEqual(1, len(action_steps))
+        self.assertThat(action_steps, matchers.HasLength(1))
 
         self.assertEqual(ADD_VERTEX, action_steps[0].type)
         add_vertex_step_params = action_steps[0].params
-        self.assertEqual(4, len(add_vertex_step_params))
+        self.assertThat(add_vertex_step_params, matchers.HasLength(4))
 
         alarm_name = add_vertex_step_params[TFields.ALARM_NAME]
         self.assertEqual(self.props[TFields.ALARM_NAME], alarm_name)
@@ -76,14 +77,14 @@ class RaiseAlarmRecipeTest(base.BaseTest):
         # Test Assertions
 
         # expecting for one step: [remove_vertex]
-        self.assertEqual(1, len(action_steps))
+        self.assertThat(action_steps, matchers.HasLength(1))
 
         self.assertEqual(REMOVE_VERTEX, action_steps[0].type)
         remove_vertex_step_params = action_steps[0].params
 
         # remove_vertex expects four params: alarm name, state, target,
         # and type
-        self.assertEqual(4, len(remove_vertex_step_params))
+        self.assertThat(remove_vertex_step_params, matchers.HasLength(4))
 
         alarm_name = remove_vertex_step_params[TFields.ALARM_NAME]
         self.assertEqual(self.props[TFields.ALARM_NAME], alarm_name)

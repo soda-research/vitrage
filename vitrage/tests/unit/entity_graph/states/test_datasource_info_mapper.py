@@ -13,6 +13,7 @@
 # under the License.
 
 from oslo_config import cfg
+from testtools import matchers
 
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import VertexProperties as VProps
@@ -74,8 +75,8 @@ class TestDatasourceInfoMapper(base.BaseTest):
 
         # Total datasources plus the evaluator which is not definable
         total_datasources = len(self.conf.datasources.types) + 1
-        self.assertEqual(total_datasources,
-                         len(state_manager.datasources_state_confs))
+        self.assertThat(state_manager.datasources_state_confs,
+                        matchers.HasLength(total_datasources))
 
     def test_load_datasources_state_with_errors(self):
         # setup
@@ -97,7 +98,8 @@ class TestDatasourceInfoMapper(base.BaseTest):
         erroneous_values = 1
         num_valid_datasources = len(state_manager.datasources_state_confs) + \
             missing_states + erroneous_values
-        self.assertEqual(num_valid_datasources, len(conf.datasources.types))
+        self.assertThat(conf.datasources.types,
+                        matchers.HasLength(num_valid_datasources))
 
     def test_vitrage_operational_state_exists(self):
         # setup

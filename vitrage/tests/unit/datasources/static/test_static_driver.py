@@ -13,6 +13,7 @@
 # under the License.
 
 from oslo_config import cfg
+from testtools import matchers
 
 from vitrage.common.constants import DatasourceAction
 from vitrage.common.constants import DatasourceOpts as DSOpts
@@ -21,6 +22,7 @@ from vitrage.datasources.static import driver
 from vitrage.datasources.static import STATIC_DATASOURCE
 from vitrage.datasources.static import StaticFields
 from vitrage.tests import base
+from vitrage.tests.base import IsEmpty
 from vitrage.tests.mocks import utils
 
 
@@ -73,7 +75,7 @@ class TestStaticDriver(base.BaseTest):
             DatasourceAction.INIT_SNAPSHOT)
 
         # Test assertions
-        self.assertEqual(9, len(static_entities))
+        self.assertThat(static_entities, matchers.HasLength(9))
 
         for entity in static_entities[:-1]:  # exclude end message
             self._validate_static_entity(entity)
@@ -82,7 +84,7 @@ class TestStaticDriver(base.BaseTest):
     def test_get_changes(self):
         # Setup
         entities = self.static_driver.get_all(DatasourceAction.UPDATE)
-        self.assertEqual(8, len(entities))
+        self.assertThat(entities, matchers.HasLength(8))
 
         self.conf = cfg.ConfigOpts()
         self.conf.register_opts(self.CHANGES_OPTS,
@@ -94,7 +96,7 @@ class TestStaticDriver(base.BaseTest):
             GraphAction.UPDATE_ENTITY)
 
         # Test Assertions
-        self.assertEqual(0, len(changes))
+        self.assertThat(changes, IsEmpty())
         for entity in changes:
             self._validate_static_entity(entity)
 

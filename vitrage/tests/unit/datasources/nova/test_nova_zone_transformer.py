@@ -16,6 +16,7 @@ import datetime
 
 from oslo_config import cfg
 from oslo_log import log as logging
+from testtools import matchers
 
 from vitrage.common.constants import DatasourceOpts as DSOpts
 from vitrage.common.constants import DatasourceProperties as DSProps
@@ -140,7 +141,7 @@ class NovaZoneTransformerTest(base.BaseTest):
             self._validate_vertex_props(vertex, event)
 
             neighbors = wrapper.neighbors
-            self.assertEqual(2, len(neighbors))
+            self.assertThat(neighbors, matchers.HasLength(2))
             self._validate_neighbors(neighbors, vertex.vertex_id, event)
 
     def _validate_neighbors(self, neighbors, zone_vertex_id, event):

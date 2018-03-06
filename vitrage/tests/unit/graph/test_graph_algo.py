@@ -18,6 +18,7 @@ test_vitrage graph algorithms
 
 Tests for `vitrage` graph driver algorithms
 """
+from testtools import matchers
 
 from vitrage.common.constants import EdgeLabel
 from vitrage.common.constants import EdgeProperties as EProps
@@ -29,6 +30,7 @@ from vitrage.graph.algo_driver.sub_graph_matching import \
 from vitrage.graph.algo_driver.sub_graph_matching import subgraph_matching
 from vitrage.graph.driver.elements import Edge
 from vitrage.graph.driver.graph import Direction
+from vitrage.tests.base import IsEmpty
 from vitrage.tests.unit.graph.base import *  # noqa
 
 ROOT_ID = EntityCategory.RESOURCE + ':' + OPENSTACK_CLUSTER + ':' + CLUSTER_ID
@@ -176,8 +178,8 @@ class GraphAlgorithmTest(GraphTestBase):
                                            edge_query_dict=edge_query)
         alarms = subgraph.get_vertices(
             vertex_attr_filter={VProps.VITRAGE_CATEGORY: ALARM})
-        self.assertEqual(len(alarms), 0, 'We filtered the ON relationship,'
-                                         ' so no alarms should exist')
+        self.assertThat(alarms, IsEmpty(), 'We filtered the ON relationship,'
+                                           ' so no alarms should exist')
 
         # check that the vitrage_is_deleted=True edges are deleted from the
         # graph
@@ -301,9 +303,9 @@ class GraphAlgorithmTest(GraphTestBase):
                                                  host_alarm,
                                                  is_vertex=True),
                                          validate=True)
-        self.assertEqual(
-            0,
-            len(mappings),
+        self.assertThat(
+            mappings,
+            IsEmpty(),
             'Template - Single vertex alarm not in graph '
             'Template_root is a specific host alarm ')
         template_graph.remove_vertex(t_v_alarm_fail)
@@ -313,9 +315,9 @@ class GraphAlgorithmTest(GraphTestBase):
                                          Mapping(t_v_host_alarm,
                                                  host_alarm,
                                                  is_vertex=True))
-        self.assertEqual(
-            1,
-            len(mappings),
+        self.assertThat(
+            mappings,
+            matchers.HasLength(1),
             'Template - Single vertex (host alarm) '
             'Template_root is a specific host alarm ')
 
@@ -324,9 +326,9 @@ class GraphAlgorithmTest(GraphTestBase):
                                          Mapping(t_v_host_alarm,
                                                  host_alarm,
                                                  is_vertex=True))
-        self.assertEqual(
-            0,
-            len(mappings),
+        self.assertThat(
+            mappings,
+            IsEmpty(),
             'Template - Two disconnected vertices (host alarm , host)'
             'Template_root is a specific host alarm ')
 
@@ -335,8 +337,9 @@ class GraphAlgorithmTest(GraphTestBase):
                                          Mapping(t_v_host_alarm,
                                                  host_alarm,
                                                  is_vertex=True))
-        self.assertEqual(
-            1, len(mappings),
+        self.assertThat(
+            mappings,
+            matchers.HasLength(1),
             'Template - Two connected vertices (host alarm -ON-> host)'
             ' template_root is a specific host alarm ')
 
@@ -346,9 +349,9 @@ class GraphAlgorithmTest(GraphTestBase):
                                          Mapping(t_v_host,
                                                  host_vertex,
                                                  is_vertex=True))
-        self.assertEqual(
-            ENTITY_GRAPH_ALARMS_PER_HOST,
-            len(mappings),
+        self.assertThat(
+            mappings,
+            matchers.HasLength(ENTITY_GRAPH_ALARMS_PER_HOST),
             'Template - Two connected vertices (host alarm -ON-> host)'
             ' template_root is a specific host ')
 
@@ -357,9 +360,9 @@ class GraphAlgorithmTest(GraphTestBase):
                                          Mapping(t_v_host_alarm,
                                                  host_alarm,
                                                  is_vertex=True))
-        self.assertEqual(
-            0,
-            len(mappings),
+        self.assertThat(
+            mappings,
+            IsEmpty(),
             'Template - Two connected vertices and a disconnected vertex'
             '(host alarm -ON-> host, instance)'
             ' template_root is a specific host alarm ')
@@ -369,9 +372,9 @@ class GraphAlgorithmTest(GraphTestBase):
                                          Mapping(t_v_vm_alarm,
                                                  vm_alarm,
                                                  is_vertex=True))
-        self.assertEqual(
-            0,
-            len(mappings),
+        self.assertThat(
+            mappings,
+            IsEmpty(),
             'Template - Two connected vertices and two disconnected vertices'
             '(host alarm -ON-> host, instance, instance alarm)'
             ' template_root is a specific instance alarm ')
@@ -381,9 +384,9 @@ class GraphAlgorithmTest(GraphTestBase):
                                          Mapping(t_v_vm_alarm,
                                                  vm_alarm,
                                                  is_vertex=True))
-        self.assertEqual(
-            0,
-            len(mappings),
+        self.assertThat(
+            mappings,
+            IsEmpty(),
             'Template - Two connected vertices and two more connected vertices'
             '(host alarm -ON-> host, instance alarm -ON-> instance)'
             ' template_root is a specific instance alarm ')
@@ -393,9 +396,9 @@ class GraphAlgorithmTest(GraphTestBase):
                                          Mapping(t_v_vm_alarm,
                                                  vm_alarm,
                                                  is_vertex=True))
-        self.assertEqual(
-            ENTITY_GRAPH_ALARMS_PER_HOST,
-            len(mappings),
+        self.assertThat(
+            mappings,
+            matchers.HasLength(ENTITY_GRAPH_ALARMS_PER_HOST),
             'Template - Four connected vertices'
             '(host alarm -ON-> host -CONTAINS-> instance <-ON- instance alarm)'
             ' template_root is a specific instance alarm ')
@@ -404,9 +407,10 @@ class GraphAlgorithmTest(GraphTestBase):
                                          Mapping(t_v_host_alarm,
                                                  host_alarm,
                                                  is_vertex=True))
-        self.assertEqual(
-            ENTITY_GRAPH_VMS_PER_HOST * ENTITY_GRAPH_ALARMS_PER_VM,
-            len(mappings),
+        self.assertThat(
+            mappings,
+            matchers.HasLength(ENTITY_GRAPH_VMS_PER_HOST *
+                               ENTITY_GRAPH_ALARMS_PER_VM),
             'Template - Four connected vertices'
             '(host alarm -ON-> host -CONTAINS-> instance <-ON- instance alarm)'
             ' template_root is a specific host alarm ')
@@ -415,10 +419,11 @@ class GraphAlgorithmTest(GraphTestBase):
                                          Mapping(t_v_host,
                                                  host_vertex,
                                                  is_vertex=True))
-        self.assertEqual(
-            ENTITY_GRAPH_VMS_PER_HOST * ENTITY_GRAPH_ALARMS_PER_VM *
-            ENTITY_GRAPH_ALARMS_PER_HOST,
-            len(mappings),
+        self.assertThat(
+            mappings,
+            matchers.HasLength(ENTITY_GRAPH_VMS_PER_HOST *
+                               ENTITY_GRAPH_ALARMS_PER_VM *
+                               ENTITY_GRAPH_ALARMS_PER_HOST),
             'Template - Four connected vertices'
             '(host alarm -ON-> host -CONTAINS-> instance <-ON- instance alarm)'
             ' template_root is a specific host ')
@@ -428,9 +433,9 @@ class GraphAlgorithmTest(GraphTestBase):
                                          Mapping(t_v_vm_alarm,
                                                  vm_alarm,
                                                  is_vertex=True))
-        self.assertEqual(
-            0,
-            len(mappings),
+        self.assertThat(
+            mappings,
+            IsEmpty(),
             'Template - Four connected vertices and a disconnected vertex'
             '(host alarm -ON-> host -CONTAINS-> instance <-ON- instance alarm'
             ',switch) template_root is a instance alarm ')
@@ -440,9 +445,9 @@ class GraphAlgorithmTest(GraphTestBase):
                                          Mapping(t_v_vm_alarm,
                                                  vm_alarm,
                                                  is_vertex=True))
-        self.assertEqual(
-            ENTITY_GRAPH_ALARMS_PER_HOST,
-            len(mappings),
+        self.assertThat(
+            mappings,
+            matchers.HasLength(ENTITY_GRAPH_ALARMS_PER_HOST),
             'Template - Five connected vertices'
             '(host alarm -ON-> host -CONTAINS-> instance <-ON- instance alarm'
             ',host -USES-> switch) template_root '
@@ -452,10 +457,11 @@ class GraphAlgorithmTest(GraphTestBase):
                                          Mapping(t_v_host,
                                                  host_vertex,
                                                  is_vertex=True))
-        self.assertEqual(
-            ENTITY_GRAPH_VMS_PER_HOST * ENTITY_GRAPH_ALARMS_PER_VM *
-            ENTITY_GRAPH_ALARMS_PER_HOST,
-            len(mappings),
+        self.assertThat(
+            mappings,
+            matchers.HasLength(ENTITY_GRAPH_VMS_PER_HOST *
+                               ENTITY_GRAPH_ALARMS_PER_VM *
+                               ENTITY_GRAPH_ALARMS_PER_HOST),
             'Template - Five connected vertices'
             '(host alarm -ON-> host -CONTAINS-> instance <-ON- instance alarm'
             ',host -USES-> switch) template_root is a specific host ')
@@ -464,9 +470,9 @@ class GraphAlgorithmTest(GraphTestBase):
             Mapping(t_v_switch, v_switch, is_vertex=True),
             Mapping(t_v_vm_alarm, vm_alarm, is_vertex=True)],
             validate=False)
-        self.assertEqual(
-            ENTITY_GRAPH_ALARMS_PER_HOST,
-            len(mappings),
+        self.assertThat(
+            mappings,
+            matchers.HasLength(ENTITY_GRAPH_ALARMS_PER_HOST),
             'Template - Five connected vertices, two mappings given'
             '(host alarm -ON-> host -CONTAINS-> instance <-ON- instance alarm'
             ',host -USES-> switch) 7template_root is a specific host ')
@@ -477,9 +483,9 @@ class GraphAlgorithmTest(GraphTestBase):
                                          Mapping(t_v_vm_alarm,
                                                  vm_alarm,
                                                  is_vertex=True))
-        self.assertEqual(
-            0,
-            len(mappings),
+        self.assertThat(
+            mappings,
+            IsEmpty(),
             'Template - Five connected vertices and a invalid edge'
             '(host alarm -ON-> host -CONTAINS-> instance <-ON- instance alarm'
             ',host -USES-> switch) template_root is a instance alarm ')
@@ -493,9 +499,9 @@ class GraphAlgorithmTest(GraphTestBase):
                                          Mapping(t_v_vm_alarm,
                                                  vm_alarm,
                                                  is_vertex=True))
-        self.assertEqual(
-            1,
-            len(mappings),
+        self.assertThat(
+            mappings,
+            matchers.HasLength(1),
             'Template - FIVE connected vertices'
             '(host -CONTAINS-> instance <-ON- instance alarm'
             ',node -CONTAINS-> host -USES-> switch, node-CONTAINS->switch)'
@@ -504,9 +510,9 @@ class GraphAlgorithmTest(GraphTestBase):
         mappings = subgraph_matching(self.entity_graph, template_graph, [
             Mapping(e_node_contains_switch, e_node_to_switch, is_vertex=False),
             Mapping(t_v_vm_alarm, vm_alarm, is_vertex=True)])
-        self.assertEqual(
-            1,
-            len(mappings),
+        self.assertThat(
+            mappings,
+            matchers.HasLength(1),
             'Template - FIVE connected vertices'
             '(host -CONTAINS-> instance <-ON- instance alarm'
             ',node -CONTAINS-> host -USES-> switch, node-CONTAINS->switch)'
@@ -516,9 +522,9 @@ class GraphAlgorithmTest(GraphTestBase):
         mappings = subgraph_matching(self.entity_graph, template_graph, [
             Mapping(t_v_node, v_node, is_vertex=True),
             Mapping(t_v_switch, v_switch, is_vertex=True)], validate=True)
-        self.assertEqual(
-            0,
-            len(mappings),
+        self.assertThat(
+            mappings,
+            IsEmpty(),
             'Template - FIVE connected vertices - 2 Known Mapping[node,switch]'
             ' Check that ALL edges between the 2 known mappings are checked'
             ' we now have node-CONTAINS fail->switch AND node-CONTAINS->switch'
@@ -529,9 +535,9 @@ class GraphAlgorithmTest(GraphTestBase):
                                                  e_node_to_switch,
                                                  is_vertex=False),
                                          validate=True)
-        self.assertEqual(
-            0,
-            len(mappings),
+        self.assertThat(
+            mappings,
+            IsEmpty(),
             'Template - FIVE connected vertices - 2 Known Mapping[node,switch]'
             ' Check that ALL edges between the 2 known mappings are checked'
             ' we now have node-CONTAINS fail->switch AND node-CONTAINS->switch'
@@ -541,9 +547,9 @@ class GraphAlgorithmTest(GraphTestBase):
         mappings = subgraph_matching(self.entity_graph, template_graph, [
             Mapping(t_v_node, v_node, is_vertex=True),
             Mapping(t_v_switch, v_switch, is_vertex=True)])
-        self.assertEqual(
-            0,
-            len(mappings),
+        self.assertThat(
+            mappings,
+            IsEmpty(),
             'Template - FIVE connected vertices - 2 Known Mapping[node,switch]'
             ' But the edge between these 2 is not same as the graph '
             '(host -CONTAINS-> instance <-ON- instance alarm'
@@ -555,9 +561,9 @@ class GraphAlgorithmTest(GraphTestBase):
                                          Mapping(t_v_vm_alarm,
                                                  vm_alarm,
                                                  is_vertex=True))
-        self.assertEqual(
-            0,
-            len(mappings),
+        self.assertThat(
+            mappings,
+            IsEmpty(),
             'Template - FIVE connected vertices'
             '(host -CONTAINS-> instance <-ON- instance alarm'
             ',node -CONTAINS-> host -USES-> switch, node-CONTAINS '
@@ -610,9 +616,9 @@ class GraphAlgorithmTest(GraphTestBase):
         mappings = ga.sub_graph_matching(template_graph,
                                          Mapping(t_v_host, host, True),
                                          validate=True)
-        self.assertEqual(
-            1,
-            len(mappings),
+        self.assertThat(
+            mappings,
+            matchers.HasLength(1),
             'Template - Single vertex alarm not in graph '
             'Template_root is a specific host ' + str(mappings))
 
@@ -621,8 +627,8 @@ class GraphAlgorithmTest(GraphTestBase):
         template_graph.add_edge(e_host_contains_vm)
         mappings = ga.sub_graph_matching(template_graph,
                                          Mapping(t_v_host, host, True))
-        self.assertEqual(
-            ENTITY_GRAPH_VMS_PER_HOST, len(mappings),
+        self.assertThat(
+            mappings, matchers.HasLength(ENTITY_GRAPH_VMS_PER_HOST),
             'Template - Two connected vertices (host -> vm)'
             ' template_root is a specific host ' + str(mappings))
 
@@ -631,9 +637,9 @@ class GraphAlgorithmTest(GraphTestBase):
         template_graph.add_edge(e_alarm_not_on_vm)
         mappings = ga.sub_graph_matching(template_graph,
                                          Mapping(t_v_host, host, True))
-        self.assertEqual(
-            0,
-            len(mappings),
+        self.assertThat(
+            mappings,
+            IsEmpty(),
             'Template - Three connected vertices (host -> vm <- NOT alarm)'
             ' template_root is a specific host ' + str(mappings))
 
@@ -658,9 +664,9 @@ class GraphAlgorithmTest(GraphTestBase):
 
         mappings = temp_ga.sub_graph_matching(template_graph,
                                               Mapping(t_v_host, host, True))
-        self.assertEqual(
-            1,
-            len(mappings),
+        self.assertThat(
+            mappings,
+            matchers.HasLength(1),
             'Template - Three connected vertices (host -> vm <- NOT alarm)'
             'Template_root is a specific host ' + str(mappings))
 
@@ -669,9 +675,9 @@ class GraphAlgorithmTest(GraphTestBase):
         template_graph.add_edge(e_alarm_not_on_host)
         mappings = temp_ga.sub_graph_matching(template_graph,
                                               Mapping(t_v_host, host, True))
-        self.assertEqual(
-            1,
-            len(mappings),
+        self.assertThat(
+            mappings,
+            matchers.HasLength(1),
             'Template - Four connected vertices '
             '(NOT alarm -> host -> vm <- NOT alarm)'
             ' template_root is a specific host alarm ' + str(mappings))
@@ -698,9 +704,9 @@ class GraphAlgorithmTest(GraphTestBase):
 
         mappings = temp_ga.sub_graph_matching(template_graph,
                                               Mapping(t_v_host, host, True))
-        self.assertEqual(
-            2,
-            len(mappings),
+        self.assertThat(
+            mappings,
+            matchers.HasLength(2),
             'Template - Three connected vertices (host -> vm <- NOT alarm)'
             'Template_root is a specific host ' + str(mappings))
 
@@ -719,9 +725,9 @@ class GraphAlgorithmTest(GraphTestBase):
 
         mappings = temp_ga.sub_graph_matching(template_graph,
                                               Mapping(t_v_host, host, True))
-        self.assertEqual(
-            3,
-            len(mappings),
+        self.assertThat(
+            mappings,
+            matchers.HasLength(3),
             'Template - Three connected vertices (host -> vm <- NOT alarm)'
             'Template_root is a specific host ' + str(mappings))
 
@@ -740,9 +746,9 @@ class GraphAlgorithmTest(GraphTestBase):
                                               Mapping(t_v_vm_alarm,
                                                       deleted_vertex,
                                                       True))
-        self.assertEqual(
-            0,
-            len(mappings),
+        self.assertThat(
+            mappings,
+            IsEmpty(),
             'Template - Four connected vertices '
             '(NOT alarm -> host -> vm <- NOT alarm)'
             ' template_root is a specific host ' + str(mappings))
@@ -763,9 +769,9 @@ class GraphAlgorithmTest(GraphTestBase):
                                               Mapping(e_alarm_not_on_vm,
                                                       deleted_edge,
                                                       False))
-        self.assertEqual(
-            0,
-            len(mappings),
+        self.assertThat(
+            mappings,
+            IsEmpty(),
             'Template - Four connected vertices '
             '(NOT alarm -> host -> vm <- NOT alarm)'
             ' template_root is a specific host ' + str(mappings))
@@ -789,9 +795,9 @@ class GraphAlgorithmTest(GraphTestBase):
                                               Mapping(e_alarm_not_on_vm,
                                                       deleted_edge,
                                                       False))
-        self.assertEqual(
-            1,
-            len(mappings),
+        self.assertThat(
+            mappings,
+            matchers.HasLength(1),
             'Template - Four connected vertices '
             '(NOT alarm -> host -> vm <- NOT alarm)'
             ' template_root is a specific host ' + str(mappings))
@@ -859,18 +865,18 @@ class GraphAlgorithmTest(GraphTestBase):
         mappings = temp_ga.sub_graph_matching(
             template_graph,
             Mapping(e_alarm_not_on_vm, graph_alarm_edge, False))
-        self.assertEqual(
-            1,
-            len(mappings),
+        self.assertThat(
+            mappings,
+            matchers.HasLength(1),
             'Template - Two not connected vertices (vm <- alarm)')
 
         # find subgraphs (when edges are deleted) with event on the alarm
         mappings = temp_ga.sub_graph_matching(
             template_graph,
             Mapping(t_v_vm_alarm, alarms[0], True))
-        self.assertEqual(
-            1,
-            len(mappings),
+        self.assertThat(
+            mappings,
+            matchers.HasLength(1),
             'Template - Two not connected vertices (vm <- alarm)')
 
         ###################################################################
@@ -891,18 +897,18 @@ class GraphAlgorithmTest(GraphTestBase):
         mappings = temp_ga.sub_graph_matching(
             template_graph,
             Mapping(e_alarm_not_on_vm, graph_alarm_edge, False))
-        self.assertEqual(
-            1,
-            len(mappings),
+        self.assertThat(
+            mappings,
+            matchers.HasLength(1),
             'Template - Two not connected vertices (vm <- alarm)')
 
         # find subgraphs (when vertices are deleted) with event on the alarm
         mappings = temp_ga.sub_graph_matching(
             template_graph,
             Mapping(t_v_vm_alarm, alarms[0], True))
-        self.assertEqual(
-            0,
-            len(mappings),
+        self.assertThat(
+            mappings,
+            IsEmpty(),
             'Template - Two not connected vertices (vm <- alarm)')
 
         ###################################################################
@@ -928,9 +934,9 @@ class GraphAlgorithmTest(GraphTestBase):
             template_graph,
             Mapping(e_alarm_not_on_vm, graph_alarm_edge, False))
 
-        self.assertEqual(
-            1,
-            len(mappings),
+        self.assertThat(
+            mappings,
+            matchers.HasLength(1),
             'Template - Two not connected vertices (vm <- alarm)')
 
         # find subgraphs (when vertices and edges are deleted) with event
@@ -939,9 +945,9 @@ class GraphAlgorithmTest(GraphTestBase):
             template_graph,
             Mapping(t_v_vm_alarm, alarms[0], True))
 
-        self.assertEqual(
-            1,
-            len(mappings),
+        self.assertThat(
+            mappings,
+            matchers.HasLength(1),
             'Template - Two not connected vertices (vm <- alarm)')
 
         ###################################################################
@@ -961,9 +967,9 @@ class GraphAlgorithmTest(GraphTestBase):
         mappings = temp_ga.sub_graph_matching(
             template_graph,
             Mapping(e_alarm_not_on_vm, graph_alarm_edge, False))
-        self.assertEqual(
-            0,
-            len(mappings),
+        self.assertThat(
+            mappings,
+            IsEmpty(),
             'Template - Two not connected vertices (vm <- alarm)')
 
         # find subgraphs (when one alarm of many is deleted) with event
@@ -971,9 +977,9 @@ class GraphAlgorithmTest(GraphTestBase):
         mappings = temp_ga.sub_graph_matching(
             template_graph,
             Mapping(t_v_vm_alarm, alarms[0], True))
-        self.assertEqual(
-            0,
-            len(mappings),
+        self.assertThat(
+            mappings,
+            IsEmpty(),
             'Template - Two not connected vertices (vm <- alarm)')
 
         ###################################################################
@@ -994,9 +1000,9 @@ class GraphAlgorithmTest(GraphTestBase):
             template_graph,
             Mapping(e_alarm_not_on_vm, graph_alarm_edge, False))
 
-        self.assertEqual(
-            0,
-            len(mappings),
+        self.assertThat(
+            mappings,
+            IsEmpty(),
             'Template - Two not connected vertices (vm <- alarm)')
 
         ###################################################################
@@ -1019,9 +1025,9 @@ class GraphAlgorithmTest(GraphTestBase):
             template_graph,
             Mapping(e_alarm_not_on_vm, graph_alarm_edge, False))
 
-        self.assertEqual(
-            0,
-            len(mappings),
+        self.assertThat(
+            mappings,
+            IsEmpty(),
             'Template - Two not connected vertices (vm <- alarm)')
 
     def test_template_matching_with_not_operator_of_problematic_subgraph(self):
@@ -1127,18 +1133,18 @@ class GraphAlgorithmTest(GraphTestBase):
         mappings = temp_ga.sub_graph_matching(
             template_graph,
             Mapping(e_alarm_not_on_vm, graph_alarm_edge, False))
-        self.assertEqual(
-            0,
-            len(mappings),
+        self.assertThat(
+            mappings,
+            IsEmpty(),
             'Template - Two not connected vertices (vm <- alarm)')
 
         # trigger on alarm
         mappings = temp_ga.sub_graph_matching(
             template_graph,
             Mapping(t_v_alarm, specific_alarm, True))
-        self.assertEqual(
-            0,
-            len(mappings),
+        self.assertThat(
+            mappings,
+            IsEmpty(),
             'Template - Two not connected vertices (vm <- alarm)')
 
         ###################################################################
@@ -1174,18 +1180,18 @@ class GraphAlgorithmTest(GraphTestBase):
         mappings = temp_ga.sub_graph_matching(
             template_graph,
             Mapping(e_alarm_not_on_vm, graph_alarm_edge, False))
-        self.assertEqual(
-            1,
-            len(mappings),
+        self.assertThat(
+            mappings,
+            matchers.HasLength(1),
             'Template - Two not connected vertices (vm <- alarm)')
 
         # trigger on alarm
         mappings = temp_ga.sub_graph_matching(
             template_graph,
             Mapping(t_v_alarm, specific_alarm, True))
-        self.assertEqual(
-            1,
-            len(mappings),
+        self.assertThat(
+            mappings,
+            matchers.HasLength(1),
             'Template - Two not connected vertices (vm <- alarm)')
 
         ###################################################################
@@ -1219,18 +1225,18 @@ class GraphAlgorithmTest(GraphTestBase):
         mappings = temp_ga.sub_graph_matching(
             template_graph,
             Mapping(e_alarm_not_on_vm, graph_alarm_edge, False))
-        self.assertEqual(
-            1,
-            len(mappings),
+        self.assertThat(
+            mappings,
+            matchers.HasLength(1),
             'Template - Two not connected vertices (vm <- alarm)')
 
         # trigger on alarm
         mappings = temp_ga.sub_graph_matching(
             template_graph,
             Mapping(t_v_alarm, specific_alarm, True))
-        self.assertEqual(
-            1,
-            len(mappings),
+        self.assertThat(
+            mappings,
+            matchers.HasLength(1),
             'Template - Two not connected vertices (vm <- alarm)')
 
         ###################################################################
@@ -1265,9 +1271,9 @@ class GraphAlgorithmTest(GraphTestBase):
         mappings = temp_ga.sub_graph_matching(
             template_graph,
             Mapping(e_alarm_not_on_vm, graph_alarm_edge, False))
-        self.assertEqual(
-            0,
-            len(mappings),
+        self.assertThat(
+            mappings,
+            IsEmpty(),
             'Template - Two not connected vertices (vm <- alarm)')
 
         # trigger on edge (that wasn't deleted) between vm and alarm
@@ -1281,27 +1287,27 @@ class GraphAlgorithmTest(GraphTestBase):
         mappings = temp_ga.sub_graph_matching(
             template_graph,
             Mapping(e_alarm_not_on_vm, graph_alarm_edge, False))
-        self.assertEqual(
-            0,
-            len(mappings),
+        self.assertThat(
+            mappings,
+            IsEmpty(),
             'Template - Two not connected vertices (vm <- alarm)')
 
         # trigger on alarm
         mappings = temp_ga.sub_graph_matching(
             template_graph,
             Mapping(t_v_alarm, specific_alarm, True))
-        self.assertEqual(
-            0,
-            len(mappings),
+        self.assertThat(
+            mappings,
+            IsEmpty(),
             'Template - Two not connected vertices (vm <- alarm)')
 
         # trigger on instance
         mappings = temp_ga.sub_graph_matching(
             template_graph,
             Mapping(t_v_vm, vms[3], True))
-        self.assertEqual(
-            0,
-            len(mappings),
+        self.assertThat(
+            mappings,
+            IsEmpty(),
             'Template - Two not connected vertices (vm <- alarm)')
 
         ###################################################################
@@ -1335,9 +1341,9 @@ class GraphAlgorithmTest(GraphTestBase):
         mappings = temp_ga.sub_graph_matching(
             template_graph,
             Mapping(e_alarm_not_on_vm, graph_alarm_edge, False))
-        self.assertEqual(
-            0,
-            len(mappings),
+        self.assertThat(
+            mappings,
+            IsEmpty(),
             'Template - Two not connected vertices (vm <- alarm)')
 
         # trigger on edge (that wasn't deleted) between vm and alarm
@@ -1351,27 +1357,27 @@ class GraphAlgorithmTest(GraphTestBase):
         mappings = temp_ga.sub_graph_matching(
             template_graph,
             Mapping(e_alarm_not_on_vm, graph_alarm_edge, False))
-        self.assertEqual(
-            0,
-            len(mappings),
+        self.assertThat(
+            mappings,
+            IsEmpty(),
             'Template - Two not connected vertices (vm <- alarm)')
 
         # trigger on alarm
         mappings = temp_ga.sub_graph_matching(
             template_graph,
             Mapping(t_v_alarm, specific_alarm, True))
-        self.assertEqual(
-            0,
-            len(mappings),
+        self.assertThat(
+            mappings,
+            IsEmpty(),
             'Template - Two not connected vertices (vm <- alarm)')
 
         # trigger on instance
         mappings = temp_ga.sub_graph_matching(
             template_graph,
             Mapping(t_v_vm, vms[4], True))
-        self.assertEqual(
-            0,
-            len(mappings),
+        self.assertThat(
+            mappings,
+            IsEmpty(),
             'Template - Two not connected vertices (vm <- alarm)')
 
     @staticmethod

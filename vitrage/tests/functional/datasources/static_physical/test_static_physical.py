@@ -13,6 +13,7 @@
 # under the License.
 
 from oslo_config import cfg
+from testtools import matchers
 
 from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import EntityCategory
@@ -58,8 +59,10 @@ class TestStaticPhysical(TestDataSourcesBase):
         processor = self._create_processor_with_graph(self.conf)
         transformers = processor.transformer_manager.transformers
         transformers[SWITCH] = transformers[STATIC_PHYSICAL_DATASOURCE]
-        self.assertEqual(self._num_total_expected_vertices(),
-                         len(processor.entity_graph))
+        self.assertThat(processor.entity_graph,
+                        matchers.HasLength(
+                            self._num_total_expected_vertices())
+                        )
 
         spec_list = mock_driver.simple_switch_generators(
             switch_num=1,
@@ -76,19 +79,21 @@ class TestStaticPhysical(TestDataSourcesBase):
         processor.process_event(static_physical_event)
 
         # Test assertions
-        self.assertEqual(self._num_total_expected_vertices() + 1,
-                         len(processor.entity_graph))
+        self.assertThat(processor.entity_graph,
+                        matchers.HasLength(
+                            self._num_total_expected_vertices() + 1)
+                        )
 
         static_physical_vertices = processor.entity_graph.get_vertices(
             vertex_attr_filter={
                 VProps.VITRAGE_CATEGORY: EntityCategory.RESOURCE,
                 VProps.VITRAGE_TYPE: SWITCH
             })
-        self.assertEqual(1, len(static_physical_vertices))
+        self.assertThat(static_physical_vertices, matchers.HasLength(1))
 
         static_physical_neighbors = processor.entity_graph.neighbors(
             static_physical_vertices[0].vertex_id)
-        self.assertEqual(1, len(static_physical_neighbors))
+        self.assertThat(static_physical_neighbors, matchers.HasLength(1))
 
         self.assertEqual(NOVA_HOST_DATASOURCE,
                          static_physical_neighbors[0][VProps.VITRAGE_TYPE])

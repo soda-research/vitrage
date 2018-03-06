@@ -16,6 +16,7 @@ import datetime
 
 from oslo_config import cfg
 from oslo_log import log as logging
+from testtools import matchers
 
 from vitrage.common.constants import DatasourceOpts as DSOpts
 from vitrage.common.constants import DatasourceProperties as DSProps
@@ -195,7 +196,7 @@ class TestHeatStackTransformer(base.BaseTest):
         self.assertFalse(vertex[VProps.VITRAGE_IS_DELETED])
 
     def _validate_neighbors(self, neighbors, stack_vertex_id, event):
-        self.assertEqual(2, len(neighbors))
+        self.assertThat(neighbors, matchers.HasLength(2))
 
         instance_id = event['resources'][0]['physical_resource_id']
         self._validate_neighbor(neighbors[0],
