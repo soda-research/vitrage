@@ -83,12 +83,10 @@ def find_neighbor_types(neighbors):
 
 
 def get_vertex_types(vertex):
-    props = vertex.items()
-    if VProps.VITRAGE_CATEGORY not in props:
+    vitrage_category = vertex.get(VProps.VITRAGE_CATEGORY)
+    vitrage_type = vertex.get(VProps.VITRAGE_TYPE)
+    if not vitrage_category:
         LOG.warning('no vitrage_category in vertex: %s', str(vertex))
-
-    vitrage_category = vertex[VProps.VITRAGE_CATEGORY]
-    vitrage_type = vertex[VProps.VITRAGE_TYPE]
     return vitrage_category, vitrage_type
 
 
