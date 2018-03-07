@@ -36,6 +36,10 @@ sudo systemctl restart devstack@vitrage-graph.service
 # wait for 30 seconds
 sleep 30
 
+# use vitrage-tempest-plugin 1.0.0 in queens
+cd $DEVSTACK_PATH/vitrage-tempest-plugin/
+git_checkout_tag vitrage-tempest-plugin 1.0.0
+
 cd $DEVSTACK_PATH/tempest/
 sudo -E stestr init
 
