@@ -42,7 +42,7 @@
           export -f gate_hook
 
           function post_test_hook {
-              source $BASE/new/vitrage/devstack/post_test_hook.sh 'datasources'
+              source $BASE/new/vitrage-tempest-plugin/devstack/post_test_hook.sh 'datasources'
           }
           export -f post_test_hook
 
