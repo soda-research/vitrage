@@ -36,7 +36,7 @@ class Processor(processor.ProcessorBase):
         super(Processor, self).__init__()
         self.conf = conf
         self.transformer_manager = TransformerManager(self.conf)
-        self.state_manager = DatasourceInfoMapper(self.conf)
+        self.info_mapper = DatasourceInfoMapper(self.conf)
         self._initialize_events_actions()
         self.initialization_status = initialization_status
         self.entity_graph = e_graph
@@ -58,7 +58,7 @@ class Processor(processor.ProcessorBase):
 
         self._enrich_event(event)
         entity = self.transformer_manager.transform(event)
-        self._calculate_vitrage_aggregated_state(entity.vertex, entity.action)
+        self._calculate_vitrage_aggregated_values(entity.vertex, entity.action)
         self.actions[entity.action](entity.vertex, entity.neighbors)
         if self._graph_persistor:
             self._graph_persistor.update_last_event_timestamp(event)
@@ -223,7 +223,7 @@ class Processor(processor.ProcessorBase):
             if not graph_vertex or not PUtils.is_deleted(graph_vertex):
                 if PUtils.can_update_vertex(graph_vertex, vertex):
                     LOG.debug("Updates vertex: %s", vertex)
-                    self._calculate_vitrage_aggregated_state(vertex, action)
+                    self._calculate_vitrage_aggregated_values(vertex, action)
                     PUtils.update_entity_graph_vertex(self.entity_graph,
                                                       graph_vertex,
                                                       vertex)
@@ -301,7 +301,7 @@ class Processor(processor.ProcessorBase):
             GraphAction.END_MESSAGE: self.handle_end_message
         }
 
-    def _calculate_vitrage_aggregated_state(self, vertex, action):
+    def _calculate_vitrage_aggregated_values(self, vertex, action):
         LOG.debug("calculate event state")
 
         try:
@@ -320,7 +320,7 @@ class Processor(processor.ProcessorBase):
                           action, vertex)
                 return None
 
-            self.state_manager.vitrage_aggregated_state(vertex, graph_vertex)
+            self.info_mapper.vitrage_aggregate_values(vertex, graph_vertex)
         except Exception as e:
             LOG.exception("Calculate aggregated state failed - %s", e)
 
