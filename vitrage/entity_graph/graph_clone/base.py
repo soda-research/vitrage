@@ -91,11 +91,11 @@ class GraphCloneWorkerBase(os_service.Service):
 
     def _read_queue(self):
         while True:
-            next_task = self._task_queue.get()
-            if next_task is POISON_PILL:
-                self._task_queue.task_done()
-                break
             try:
+                next_task = self._task_queue.get()
+                if next_task is POISON_PILL:
+                    self._task_queue.task_done()
+                    break
                 self.do_task(next_task)
             except Exception as e:
                 LOG.exception("Graph may not be in sync: exception %s", e)
