@@ -96,9 +96,16 @@ PRIORITY_DELAY = 0.05
 class TwoPriorityListener(object):
     def __init__(self, conf, do_work_func, topic_low, topic_high):
         self._conf = conf
-        self._do_work_func = do_work_func
         self._lock = threading.Lock()
         self._high_event_finish_time = 0
+
+        def do_work(event):
+            try:
+                return do_work_func(event)
+            except Exception as e:
+                LOG.exception('Got Exception %s', e)
+
+        self._do_work_func = do_work
 
         self._low_pri_listener = self._init_listener(
             topic_low, self._do_low_priority_work)
