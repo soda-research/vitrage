@@ -116,6 +116,7 @@ class KeycloakAuth(base.ConfigurableMiddleware):
     def _set_req_headers(self, req):
         req.headers['X-Identity-Status'] = 'Confirmed'
         req.headers['X-Roles'] = self.roles
+        req.headers["X-Project-Id"] = self.realm_name
 
     def _unauthorized(self, message):
         body = {'error': {
