@@ -90,8 +90,8 @@ RESOURCES_ALL_QUERY = {
 
 class EntityGraphApisBase(object):
 
-    @staticmethod
-    def _get_query_with_project(vitrage_category, project_id, is_admin):
+    @classmethod
+    def _get_query_with_project(cls, vitrage_category, project_id, is_admin):
         """Generate query with tenant data
 
         Creates query for entity graph which takes into consideration the
@@ -111,6 +111,22 @@ class EntityGraphApisBase(object):
             ]
         }
 
+        cls._add_project_to_query(query, project_id, is_admin)
+
+        return query
+
+    @staticmethod
+    def _add_project_to_query(query, project_id, is_admin):
+        """Add project_id filter to the query
+
+        Each query should contain the project_id condition
+
+        :type query: string representing a json query
+        :type project_id: string
+        :type is_admin: boolean
+        :rtype: string representing a json query
+        """
+
         if is_admin:
             project_query = \
                 {'or': [{'==': {VProps.PROJECT_ID: project_id}},
@@ -119,9 +135,13 @@ class EntityGraphApisBase(object):
             project_query = \
                 {'==': {VProps.PROJECT_ID: project_id}}
 
-        query['and'].append(project_query)
+        if 'and' in query:
+            query_with_project_id = query
+            query_with_project_id['and'].append(project_query)
+        else:
+            query_with_project_id = {'and': [project_query, query]}
 
-        return query
+        return query_with_project_id
 
     def _filter_alarms(self, alarms, project_id):
         """Remove wrong alarms from the list
