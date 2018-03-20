@@ -107,7 +107,7 @@ class TopologyApis(EntityGraphApisBase):
         """
 
         if query:
-            q = query
+            q = self._add_project_to_query(query, project_id, is_admin_project)
         else:
             alarm_query = self._get_query_with_project(EntityCategory.ALARM,
                                                        project_id,
