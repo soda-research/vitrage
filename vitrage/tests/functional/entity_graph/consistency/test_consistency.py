@@ -14,7 +14,6 @@
 
 from datetime import timedelta
 import time
-import unittest
 
 from oslo_config import cfg
 from six.moves import queue
@@ -30,9 +29,6 @@ from vitrage.datasources.nova.zone import NOVA_ZONE_DATASOURCE
 from vitrage.entity_graph.consistency.consistency_enforcer \
     import ConsistencyEnforcer
 from vitrage.entity_graph.processor.processor import Processor
-from vitrage.entity_graph.vitrage_init import VitrageInit
-from vitrage.evaluator.actions.evaluator_event_transformer \
-    import VITRAGE_DATASOURCE
 from vitrage.evaluator.scenario_evaluator import ScenarioEvaluator
 from vitrage.evaluator.scenario_repository import ScenarioRepository
 from vitrage.graph.driver.networkx_graph import NXGraph
@@ -81,9 +77,7 @@ class TestConsistencyFunctional(TestFunctionalBase, TestConfiguration):
         cls.add_db(cls.conf)
         cls.load_datasources(cls.conf)
         cls.graph = NXGraph("Entity Graph")
-        cls.initialization_status = VitrageInit(cls.conf, cls.graph)
-        cls.processor = Processor(cls.conf, cls.initialization_status,
-                                  cls.graph)
+        cls.processor = Processor(cls.conf, lambda x: x, cls.graph)
 
         cls.event_queue = queue.Queue()
 
@@ -104,68 +98,8 @@ class TestConsistencyFunctional(TestFunctionalBase, TestConfiguration):
                                           actions_callback)
         cls.consistency_enforcer = ConsistencyEnforcer(
             cls.conf,
-            actions_callback,
-            cls.processor.entity_graph)
-
-    @unittest.skip("test_initializing_process skipping")
-    def test_initializing_process(self):
-        # Setup
-        num_of_host_alarms = self.NUM_HOSTS - 2
-        num_instances_per_host = 4
-        self._create_processor_with_graph(self.conf, processor=self.processor)
-        self._add_alarms()
-        self._set_end_messages()
-        self.assertThat(self.processor.entity_graph.get_vertices(),
-                        matchers.HasLength(
-                            self._num_total_expected_vertices() +
-                            num_of_host_alarms + self.NUM_INSTANCES)
-                        )
-
-        # Action
-        # eventlet.spawn(self._process_events)
-        # processor_thread = threading.Thread(target=self._process_events)
-        # processor_thread.start()
-        self.initialization_status.initializing_process(
-            self.processor.on_recieved_all_end_messages)
-        self._process_events()
-
-        # Test Assertions
-        num_correct_alarms = num_of_host_alarms + \
-            num_of_host_alarms * num_instances_per_host
-        num_undeleted_vertices_in_graph = \
-            len(self.processor.entity_graph.get_vertices(vertex_attr_filter={
-                VProps.VITRAGE_IS_DELETED: False
-            }))
-        self.assertEqual(self._num_total_expected_vertices() +
-                         num_correct_alarms,
-                         num_undeleted_vertices_in_graph)
-
-        alarm_vertices_in_graph = self.processor.entity_graph.get_vertices({
-            VProps.VITRAGE_CATEGORY: EntityCategory.ALARM,
-            VProps.VITRAGE_IS_DELETED: False
-        })
-        self.assertThat(alarm_vertices_in_graph,
-                        matchers.HasLength(num_correct_alarms))
-
-        is_deleted_alarm_vertices_in_graph = \
-            self.processor.entity_graph.get_vertices({
-                VProps.VITRAGE_CATEGORY: EntityCategory.ALARM,
-                VProps.VITRAGE_IS_DELETED: True
-            })
-        self.assertEqual(is_deleted_alarm_vertices_in_graph,
-                         matchers.HasLength(
-                             num_of_host_alarms * num_instances_per_host)
-                         )
-
-        instance_vertices = self.processor.entity_graph.get_vertices({
-            VProps.VITRAGE_CATEGORY: EntityCategory.ALARM,
-            VProps.VITRAGE_TYPE: VITRAGE_DATASOURCE,
-            VProps.VITRAGE_IS_DELETED: False
-        })
-        self.assertThat(instance_vertices,
-                        matchers.HasLength(
-                            num_of_host_alarms * num_instances_per_host)
-                        )
+            cls.processor.entity_graph,
+            actions_callback)
 
     def test_periodic_process(self):
         # Setup
@@ -234,8 +168,6 @@ class TestConsistencyFunctional(TestFunctionalBase, TestConfiguration):
         self.initialization_status.end_messages[NOVA_INSTANCE_DATASOURCE] = \
             True
         self.initialization_status.end_messages[NAGIOS_DATASOURCE] = True
-        self.initialization_status.status = \
-            self.initialization_status.RECEIVED_ALL_END_MESSAGES
 
     def _add_alarms(self):
         # find hosts and instances

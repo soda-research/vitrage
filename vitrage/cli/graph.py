@@ -15,43 +15,25 @@
 
 import sys
 
-from oslo_service import service as os_service
-
 from vitrage.api_handler.service import VitrageApiHandlerService
 from vitrage.cli import VITRAGE_TITLE
-from vitrage import entity_graph
-from vitrage.entity_graph.consistency.service import VitrageConsistencyService
+from vitrage.entity_graph import get_graph_driver
+from vitrage.entity_graph.graph_init import VitrageGraphInit
 from vitrage import service
 from vitrage import storage
 
-from vitrage.entity_graph.service import VitrageGraphService
-from vitrage.evaluator.evaluator_service import EvaluatorManager
-
 
 def main():
-    """Starts all the Entity graph services
-
-    1. Starts the Entity graph service
-    2. Starts the api_handler service
-    3. Starts the Consistency service
-    """
+    """Main method of vitrage-graph"""
 
     print(VITRAGE_TITLE)
     conf = service.prepare_service()
-    e_graph = entity_graph.get_graph_driver(conf)('Entity Graph')
-    evaluator = EvaluatorManager(conf, e_graph)
-    launcher = os_service.ServiceLauncher(conf)
+    e_graph = get_graph_driver(conf)('Entity Graph')
     db_connection = storage.get_connection_from_config(conf)
     clear_active_actions_table(db_connection)
 
-    launcher.launch_service(VitrageGraphService(
-        conf, e_graph, evaluator, db_connection))
-
-    launcher.launch_service(VitrageApiHandlerService(conf, e_graph))
-
-    launcher.launch_service(VitrageConsistencyService(conf, e_graph))
-
-    launcher.wait()
+    VitrageApiHandlerService(conf, e_graph).start()
+    VitrageGraphInit(conf, e_graph, db_connection).run()
 
 
 def clear_active_actions_table(db_connection):
@@ -61,6 +43,7 @@ def clear_active_actions_table(db_connection):
     It should be removed once graph is persistent
     """
     db_connection.active_actions.delete()
+
 
 if __name__ == "__main__":
     sys.exit(main())

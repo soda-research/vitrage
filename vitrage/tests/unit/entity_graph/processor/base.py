@@ -15,7 +15,7 @@
 from oslo_config import cfg
 
 from vitrage.common.constants import VertexProperties as VProps
-from vitrage.entity_graph import transformer_manager
+from vitrage.entity_graph.processor import transformer_manager
 from vitrage.graph import driver as graph
 from vitrage.tests.unit.entity_graph.base import TestEntityGraphUnitBase
 

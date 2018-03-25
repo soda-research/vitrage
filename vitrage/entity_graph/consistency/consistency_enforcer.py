@@ -24,8 +24,10 @@ from vitrage.common.constants import GraphAction
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.datasources.consistency import CONSISTENCY_DATASOURCE
 from vitrage.datasources import OPENSTACK_CLUSTER
+from vitrage.entity_graph import EVALUATOR_TOPIC
 from vitrage.evaluator.actions.evaluator_event_transformer \
     import VITRAGE_DATASOURCE
+from vitrage.messaging import VitrageNotifier
 from vitrage.utils.datetime import utcnow
 
 LOG = log.getLogger(__name__)
@@ -35,10 +37,11 @@ class ConsistencyEnforcer(object):
 
     def __init__(self,
                  conf,
-                 actions_callback,
-                 entity_graph):
+                 entity_graph,
+                 actions_callback=None):
         self.conf = conf
-        self.actions_callback = actions_callback
+        self.actions_callback = actions_callback or VitrageNotifier(
+            conf, 'vitrage_consistency', [EVALUATOR_TOPIC]).notify
         self.graph = entity_graph
 
     def periodic_process(self):
