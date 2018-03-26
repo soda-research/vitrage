@@ -12,6 +12,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 import os
+import sys
 import yaml
 
 from oslo_db.options import database_opts
@@ -29,7 +30,8 @@ class TestConfiguration(object):
     @classmethod
     def add_db(cls, conf):
         conf.register_opts(database_opts, group='database')
-        db_name = "sqlite:///test_%s.db" % cls.__name__
+        db_name = "sqlite:///test-%s-%s.db" % (cls.__name__,
+                                               sys.version_info[0])
         conf.set_override('connection', db_name, group='database')
         cls._db = storage.get_connection_from_config(conf)
         engine = cls._db._engine_facade.get_engine()
