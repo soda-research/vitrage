@@ -20,8 +20,8 @@ from vitrage.common.constants import UpdateMethod
 from vitrage.datasources.nagios import NAGIOS_DATASOURCE
 from vitrage.datasources.nova.host import NOVA_HOST_DATASOURCE
 from vitrage.datasources.nova.instance import NOVA_INSTANCE_DATASOURCE
+from vitrage.datasources import utils as ds_utils
 from vitrage.datasources.zabbix import ZABBIX_DATASOURCE
-from vitrage.entity_graph import utils as graph_utils
 from vitrage.tests import base
 
 
@@ -172,23 +172,18 @@ class DatasourceUpdateMethod(base.BaseTest):
                                   ZABBIX_DATASOURCE_NONE))
 
     def test_datasource_update_method_push(self):
-        drivers = {driver: utils.import_class(self.conf[driver].driver)
-                   for driver in self.conf.datasources.types}
-        push_drivers = graph_utils.get_push_datasources(drivers=drivers,
-                                                        conf=self.conf)
-        self.assertSequenceEqual(set(push_drivers), {utils.import_class(
+        driver_names = ds_utils.get_push_drivers_names(self.conf)
+        push_drivers = ds_utils.get_drivers_by_name(self.conf, driver_names)
+        self.assertSequenceEqual({utils.import_class(
             self.conf[NOVA_INSTANCE_DATASOURCE].driver), utils.import_class(
-            self.conf[ZABBIX_DATASOURCE_PUSH].driver)})
+            self.conf[ZABBIX_DATASOURCE_PUSH].driver)},
+            set(d.__class__ for d in push_drivers))
 
     def test_datasource_update_method_pull(self):
-        pull_drivers = tuple(graph_utils.get_pull_datasources(self.conf))
-        self.assertSequenceEqual(pull_drivers,
-                                 (NAGIOS_DATASOURCE,
-                                  ZABBIX_DATASOURCE_PULL))
-
-    def test_datasource_update_method_pull_with_no_changes_interval(self):
-        pull_drivers = tuple(graph_utils.get_pull_datasources(self.conf))
-        self.assertNotIn(ZABBIX_DATASOURCE_PULL_NO_INTERVAL, pull_drivers)
+        driver_names = ds_utils.get_pull_drivers_names(self.conf)
+        self.assertSequenceEqual(
+            set([NAGIOS_DATASOURCE, ZABBIX_DATASOURCE_PULL]),
+            set(driver_names))
 
     def test_datasources_notification_topic(self):
         self.assertEqual('vitrage_notifications',

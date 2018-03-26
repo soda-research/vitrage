@@ -17,7 +17,9 @@ import time
 from oslo_log import log
 import oslo_messaging
 
+from vitrage.common.constants import DatasourceAction
 from vitrage.common.utils import spawn
+from vitrage.entity_graph import datasource_rpc as ds_rpc
 from vitrage.entity_graph import EVALUATOR_TOPIC
 from vitrage.entity_graph.processor.processor import Processor
 from vitrage.entity_graph.scheduler import Scheduler
@@ -36,20 +38,22 @@ class VitrageGraphInit(object):
             self.process_event,
             conf.datasources.notification_topic_collector,
             EVALUATOR_TOPIC)
-        self.end_messages = {}
-        self.scheduler = Scheduler(conf, graph)
-        self.processor = Processor(conf,
-                                   self._handle_end_message,
-                                   graph,
-                                   self.scheduler.graph_persistor)
+        self.scheduler = Scheduler(conf, graph, self.events_coordination)
+        self.processor = Processor(conf, graph, self.scheduler.graph_persistor)
 
     def run(self):
         LOG.info('Init Started')
-        self.events_coordination.start()
-        self._wait_for_all_end_messages()
-        self.scheduler.start_periodic_tasks()
+        ds_rpc.get_all(
+            ds_rpc.create_rpc_client_instance(self.conf),
+            self.events_coordination,
+            self.conf.datasources.types,
+            action=DatasourceAction.INIT_SNAPSHOT,
+            retry_on_fault=True,
+            first_call_timeout=10)
         self.processor.start_notifier()
+        self.events_coordination.start()
         spawn(self.workers.submit_start_evaluations)
+        self.scheduler.start_periodic_tasks()
         self.workers.run()
 
     def process_event(self, event):
@@ -58,21 +62,6 @@ class VitrageGraphInit(object):
             self.workers.submit_evaluators_reload_templates()
         else:
             self.processor.process_event(event)
-
-    def _handle_end_message(self, vitrage_type):
-        self.end_messages[vitrage_type] = True
-
-    def _wait_for_all_end_messages(self):
-        start = time.time()
-        timeout = self.conf.consistency.initialization_max_retries * \
-            self.conf.consistency.initialization_interval
-        while time.time() < start + timeout:
-            if len(self.end_messages) == len(self.conf.datasources.types):
-                LOG.info('end messages received')
-                return True
-            time.sleep(0.2)
-        LOG.warning('Missing end messages %s', self.end_messages.keys())
-        return False
 
 
 PRIORITY_DELAY = 0.05
@@ -127,6 +116,10 @@ class EventsCoordination(object):
                 break
         self._do_work_func(event)
         self._lock.release()
+
+    def handle_multiple_low_priority(self, events):
+        for e in events:
+            self._do_low_priority_work(e)
 
     def _init_listener(self, topic, callback):
         if not topic:

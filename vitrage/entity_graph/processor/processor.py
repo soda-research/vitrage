@@ -32,14 +32,12 @@ LOG = log.getLogger(__name__)
 
 class Processor(processor.ProcessorBase):
 
-    def __init__(self, conf, end_messages_func=None, e_graph=None,
-                 graph_persistor=None):
+    def __init__(self, conf, e_graph=None, graph_persistor=None):
         super(Processor, self).__init__()
         self.conf = conf
         self.transformer_manager = TransformerManager(self.conf)
         self.info_mapper = DatasourceInfoMapper(self.conf)
         self._initialize_events_actions()
-        self.end_messages_func = end_messages_func
         self.entity_graph = e_graph
         self._notifier = GraphNotifier(conf)
         self._graph_persistor = graph_persistor
@@ -59,6 +57,9 @@ class Processor(processor.ProcessorBase):
 
         self._enrich_event(event)
         entity = self.transformer_manager.transform(event)
+        if entity.action not in self.actions.keys():
+            LOG.debug('deprecated or unknown entity %s ignored', str(entity))
+            return
         self._calculate_vitrage_aggregated_values(entity.vertex, entity.action)
         self.actions[entity.action](entity.vertex, entity.neighbors)
         if self._graph_persistor:
@@ -189,9 +190,6 @@ class Processor(processor.ProcessorBase):
                         "deleted_vertex - %s, graph_vertex - %s",
                         vertex, graph_vertex)
 
-    def handle_end_message(self, vertex, neighbors):
-        self.end_messages_func(vertex[VProps.VITRAGE_TYPE])
-
     def start_notifier(self):
         if self._notifier and self._notifier.enabled:
             self.entity_graph.subscribe(self._notifier.notify_when_applicable)
@@ -298,8 +296,6 @@ class Processor(processor.ProcessorBase):
             GraphAction.UPDATE_RELATIONSHIP: self.update_relationship,
             GraphAction.DELETE_RELATIONSHIP: self.delete_relationship,
             GraphAction.REMOVE_DELETED_ENTITY: self.remove_deleted_entity,
-            # should not be called explicitly
-            GraphAction.END_MESSAGE: self.handle_end_message
         }
 
     def _calculate_vitrage_aggregated_values(self, vertex, action):

@@ -39,8 +39,8 @@ class TestListenerService(base.BaseTest):
     def setUpClass(cls):
         super(TestListenerService, cls).setUpClass()
 
-    def _add_event_to_actual_events(self, event):
-        self.actual_events.append(event)
+    def _add_event_to_actual_events(self, event_type, data):
+        self.actual_events.append(data)
 
     def _set_excepted_events(self, events):
         self.excepted_events = events

@@ -18,25 +18,27 @@ from oslo_log import log
 import oslo_messaging
 from oslo_service import service as os_service
 
-from vitrage.entity_graph import utils
+from vitrage.datasources import utils
 from vitrage import messaging
-
+from vitrage.messaging import VitrageNotifier
 
 LOG = log.getLogger(__name__)
 
 
 class ListenerService(os_service.Service):
 
-    def __init__(self, conf, drivers, callback):
+    def __init__(self, conf):
         super(ListenerService, self).__init__()
-
         self.enrich_callbacks_by_events = \
-            self._create_callbacks_by_events_dict(drivers, conf)
+            self._create_callbacks_by_events_dict(conf)
 
-        topics = conf.datasources.notification_topics
-        exchange = conf.datasources.notification_exchange
-        self.listener = self._get_topics_listener(
-            conf, topics, callback, exchange)
+        topics = [conf.datasources.notification_topic_collector]
+        if conf.persistency.enable_persistency:
+            topics.append(conf.persistency.persistor_topic)
+        else:
+            LOG.warning("Not persisting events")
+        notifier = VitrageNotifier(conf, 'driver.events', topics)
+        self.listener = self._get_topics_listener(conf, notifier.notify)
 
     def start(self):
         LOG.info("Vitrage data source Listener Service - Starting...")
@@ -57,9 +59,10 @@ class ListenerService(os_service.Service):
         LOG.info("Vitrage data source Listener Service - Stopped!")
 
     @classmethod
-    def _create_callbacks_by_events_dict(cls, drivers, conf):
+    def _create_callbacks_by_events_dict(cls, conf):
         ret = defaultdict(list)
-        push_drivers = utils.get_push_datasources(drivers, conf)
+        driver_names = utils.get_push_drivers_names(conf)
+        push_drivers = utils.get_drivers_by_name(conf, driver_names)
 
         for driver in push_drivers:
             for event in driver.get_event_types():
@@ -67,8 +70,9 @@ class ListenerService(os_service.Service):
 
         return ret
 
-    def _get_topics_listener(self, conf, topics, callback, exchange=None):
-        # Create a listener for each topic
+    def _get_topics_listener(self, conf, callback):
+        topics = conf.datasources.notification_topics
+        exchange = conf.datasources.notification_exchange
         transport = messaging.get_transport(conf)
         targets = [oslo_messaging.Target(exchange=exchange, topic=topic)
                    for topic in topics]
@@ -102,5 +106,5 @@ class NotificationsEndpoint(object):
     def _enqueue_events(self, enriched_events):
         for event in enriched_events:
             if event is not None:
-                self.enqueue_callback(event)
+                self.enqueue_callback(event_type='', data=event)
                 LOG.debug('EVENT ENQUEUED: \n' + str(event))

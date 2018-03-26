@@ -77,7 +77,7 @@ class TestConsistencyFunctional(TestFunctionalBase, TestConfiguration):
         cls.add_db(cls.conf)
         cls.load_datasources(cls.conf)
         cls.graph = NXGraph("Entity Graph")
-        cls.processor = Processor(cls.conf, lambda x: x, cls.graph)
+        cls.processor = Processor(cls.conf, cls.graph)
 
         cls.event_queue = queue.Queue()
 

@@ -35,7 +35,7 @@ def get_rpc_transport(conf, url=None, optional=False, cache=True):
 def get_transport(conf, url=None, optional=False, cache=True, rpc=False):
     """Initialise the oslo_messaging layer."""
     global TRANSPORTS, DEFAULT_URL
-    cache_key = url or DEFAULT_URL
+    cache_key = url or DEFAULT_URL + '_rpc' if rpc else ''
     transport = TRANSPORTS.get(cache_key)
     if not transport or not cache:
         try:

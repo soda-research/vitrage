@@ -17,10 +17,7 @@ import sys
 from oslo_service import service as os_service
 from vitrage.cli import VITRAGE_TITLE
 from vitrage.datasources.listener_service import ListenerService
-
-from vitrage.datasources.collector_notifier import CollectorNotifier
-from vitrage.datasources import launcher as datasource_launcher
-from vitrage.entity_graph import utils
+from vitrage.datasources.rpc_service import CollectorRpcHandlerService
 from vitrage import service
 
 
@@ -31,15 +28,8 @@ def main():
     print(VITRAGE_TITLE)
     conf = service.prepare_service()
     launcher = os_service.ServiceLauncher(conf)
-    rabbitmq = CollectorNotifier(conf)
-    callback = datasource_launcher.create_send_to_queue_callback(rabbitmq)
-    launcher.launch_service(ListenerService(conf,
-                                            utils.get_drivers(conf),
-                                            callback))
-
-    datasources = datasource_launcher.Launcher(conf, callback)
-    datasources.launch()
-
+    launcher.launch_service(ListenerService(conf))
+    launcher.launch_service(CollectorRpcHandlerService(conf))
     launcher.wait()
 
 
