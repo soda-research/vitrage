@@ -25,7 +25,6 @@ from vitrage.datasources.nova.host import NOVA_HOST_DATASOURCE
 from vitrage.datasources.nova.instance import NOVA_INSTANCE_DATASOURCE
 from vitrage.datasources.nova.zone import NOVA_ZONE_DATASOURCE
 from vitrage.entity_graph.processor import processor as proc
-from vitrage.entity_graph.vitrage_init import VitrageInit
 from vitrage.graph.driver.networkx_graph import NXGraph
 import vitrage.graph.utils as graph_utils
 from vitrage.opts import register_opts
@@ -128,8 +127,7 @@ class TestEntityGraphUnitBase(base.BaseTest):
     @staticmethod
     def create_processor_and_graph(conf):
         e_graph = NXGraph("Entity Graph")
-        init = VitrageInit(conf)
-        return proc.Processor(conf, init, e_graph)
+        return proc.Processor(conf, e_graph=e_graph)
 
     @staticmethod
     def _create_event(spec_type=None,

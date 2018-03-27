@@ -22,7 +22,8 @@ from vitrage.datasources.nova.instance import NOVA_INSTANCE_DATASOURCE
 from vitrage.datasources.nova.instance.transformer import InstanceTransformer
 from vitrage.datasources.nova.zone import NOVA_ZONE_DATASOURCE
 from vitrage.datasources.nova.zone.transformer import ZoneTransformer
-from vitrage.entity_graph.transformer_manager import TransformerManager
+from vitrage.entity_graph.processor.transformer_manager import\
+    TransformerManager
 from vitrage.opts import register_opts
 from vitrage.tests import base
 

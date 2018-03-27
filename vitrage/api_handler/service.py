@@ -16,6 +16,7 @@ from oslo_log import log
 import oslo_messaging
 from oslo_service import service as os_service
 
+from vitrage.common.utils import spawn
 from vitrage.entity_graph import EVALUATOR_TOPIC
 from vitrage.messaging import VitrageNotifier
 
@@ -44,6 +45,9 @@ class VitrageApiHandlerService(os_service.Service):
         self.db = storage.get_connection_from_config(conf)
 
     def start(self):
+        spawn(self._start)
+
+    def _start(self):
         LOG.info("Vitrage Api Handler Service - Starting...")
 
         super(VitrageApiHandlerService, self).start()

@@ -23,7 +23,8 @@ from vitrage.entity_graph.mappings.datasource_info_mapper import \
 from vitrage.entity_graph.processor import base as processor
 from vitrage.entity_graph.processor.notifier import GraphNotifier
 from vitrage.entity_graph.processor import processor_utils as PUtils
-from vitrage.entity_graph.transformer_manager import TransformerManager
+from vitrage.entity_graph.processor.transformer_manager import \
+    TransformerManager
 from vitrage.graph import Direction
 
 LOG = log.getLogger(__name__)
@@ -31,14 +32,14 @@ LOG = log.getLogger(__name__)
 
 class Processor(processor.ProcessorBase):
 
-    def __init__(self, conf, initialization_status, e_graph,
+    def __init__(self, conf, end_messages_func=None, e_graph=None,
                  graph_persistor=None):
         super(Processor, self).__init__()
         self.conf = conf
         self.transformer_manager = TransformerManager(self.conf)
         self.info_mapper = DatasourceInfoMapper(self.conf)
         self._initialize_events_actions()
-        self.initialization_status = initialization_status
+        self.end_messages_func = end_messages_func
         self.entity_graph = e_graph
         self._notifier = GraphNotifier(conf)
         self._graph_persistor = graph_persistor
@@ -189,9 +190,9 @@ class Processor(processor.ProcessorBase):
                         vertex, graph_vertex)
 
     def handle_end_message(self, vertex, neighbors):
-        self.initialization_status.handle_end_message(vertex)
+        self.end_messages_func(vertex[VProps.VITRAGE_TYPE])
 
-    def on_recieved_all_end_messages(self):
+    def start_notifier(self):
         if self._notifier and self._notifier.enabled:
             self.entity_graph.subscribe(self._notifier.notify_when_applicable)
             LOG.info('Graph notifications subscription added')

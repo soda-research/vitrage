@@ -20,6 +20,7 @@ from collections import defaultdict
 import copy
 import itertools
 import random
+import threading
 
 from oslo_config import cfg
 
@@ -79,3 +80,10 @@ def get_portion(lst, num_of_portions, portion_index):
         curr_portion = next(g)
         portions[curr_portion].append(curr_item)
     return portions[portion_index]
+
+
+def spawn(target, *args, **kwargs):
+    t = threading.Thread(target=target, args=args, kwargs=kwargs)
+    t.daemon = True
+    t.start()
+    return t

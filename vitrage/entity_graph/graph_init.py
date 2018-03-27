@@ -1,99 +1,84 @@
-# Copyright 2015 - Alcatel-Lucent
+# Copyright 2018 - Nokia
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
 # a copy of the License at
 #
-#      http://www.apache.org/licenses/LICENSE-2.0
+# http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-import oslo_messaging
 import threading
 import time
 
 from oslo_log import log
-from oslo_service import service as os_service
+import oslo_messaging
 
+from vitrage.common.utils import spawn
 from vitrage.entity_graph import EVALUATOR_TOPIC
 from vitrage.entity_graph.processor.processor import Processor
-from vitrage.entity_graph.vitrage_init import VitrageInit
-from vitrage.evaluator.template_loader_service import TemplateLoaderManager
+from vitrage.entity_graph.scheduler import Scheduler
+from vitrage.entity_graph.workers import GraphWorkersManager
 from vitrage import messaging
-from vitrage.persistency.graph_persistor import GraphPersistor
 
 LOG = log.getLogger(__name__)
 
 
-class VitrageGraphService(os_service.Service):
-
-    def __init__(self,
-                 conf,
-                 graph,
-                 evaluator,
-                 db):
-        super(VitrageGraphService, self).__init__()
+class VitrageGraphInit(object):
+    def __init__(self, conf, graph, db_connection):
         self.conf = conf
-        self.graph = graph
-        self.evaluator = evaluator
-        self.templates_loader = TemplateLoaderManager(conf, graph, db)
-        self.init = VitrageInit(conf, graph, self.evaluator,
-                                self.templates_loader)
-        self.graph_persistor = GraphPersistor(conf) if \
-            self.conf.persistency.enable_persistency else None
-        self.processor = Processor(self.conf, self.init, graph,
-                                   self.graph_persistor)
-        self.listener = self._init_listener()
-
-    def _init_listener(self):
-        collector_topic = self.conf.datasources.notification_topic_collector
-        evaluator_topic = EVALUATOR_TOPIC
-        return TwoPriorityListener(
-            self.conf,
+        self.workers = GraphWorkersManager(conf, graph, db_connection)
+        self.events_coordination = EventsCoordination(
+            conf,
             self.process_event,
-            collector_topic,
-            evaluator_topic)
+            conf.datasources.notification_topic_collector,
+            EVALUATOR_TOPIC)
+        self.end_messages = {}
+        self.scheduler = Scheduler(conf, graph)
+        self.processor = Processor(conf,
+                                   self._handle_end_message,
+                                   graph,
+                                   self.scheduler.graph_persistor)
+
+    def run(self):
+        LOG.info('Init Started')
+        self.events_coordination.start()
+        self._wait_for_all_end_messages()
+        self.scheduler.start_periodic_tasks()
+        self.processor.start_notifier()
+        spawn(self.workers.submit_start_evaluations)
+        self.workers.run()
 
     def process_event(self, event):
         if event.get('template_action'):
-            self.templates_loader.handle_template_event(event)
-            self.evaluator.reload_evaluators_templates()
+            self.workers.submit_template_event(event)
+            self.workers.submit_evaluators_reload_templates()
         else:
             self.processor.process_event(event)
 
-    def start(self):
-        LOG.info("Vitrage Graph Service - Starting...")
-        super(VitrageGraphService, self).start()
-        if self.graph_persistor:
-            self.tg.add_timer(
-                self.conf.persistency.graph_persistency_interval,
-                self.graph_persistor.store_graph,
-                self.conf.persistency.graph_persistency_interval,
-                graph=self.graph)
-        self.tg.add_thread(
-            self.init.initializing_process,
-            on_end_messages_func=self.processor.on_recieved_all_end_messages)
-        self.listener.start()
-        LOG.info("Vitrage Graph Service - Started!")
+    def _handle_end_message(self, vitrage_type):
+        self.end_messages[vitrage_type] = True
 
-    def stop(self, graceful=False):
-        LOG.info("Vitrage Graph Service - Stopping...")
-        self.evaluator.stop_all_workers()
-        self.templates_loader.stop_all_workers()
-        self.listener.stop()
-        self.listener.wait()
-        super(VitrageGraphService, self).stop(graceful)
-
-        LOG.info("Vitrage Graph Service - Stopped!")
+    def _wait_for_all_end_messages(self):
+        start = time.time()
+        timeout = self.conf.consistency.initialization_max_retries * \
+            self.conf.consistency.initialization_interval
+        while time.time() < start + timeout:
+            if len(self.end_messages) == len(self.conf.datasources.types):
+                LOG.info('end messages received')
+                return True
+            time.sleep(0.2)
+        LOG.warning('Missing end messages %s', self.end_messages.keys())
+        return False
 
 
 PRIORITY_DELAY = 0.05
 
 
-class TwoPriorityListener(object):
+class EventsCoordination(object):
     def __init__(self, conf, do_work_func, topic_low, topic_high):
         self._conf = conf
         self._lock = threading.Lock()
@@ -103,7 +88,7 @@ class TwoPriorityListener(object):
             try:
                 return do_work_func(event)
             except Exception as e:
-                LOG.exception('Got Exception %s', e)
+                LOG.exception('Got Exception %s for event %s', e, str(event))
 
         self._do_work_func = do_work
 
@@ -114,7 +99,9 @@ class TwoPriorityListener(object):
 
     def start(self):
         self._high_pri_listener.start()
+        LOG.info('Listening on %s', self._high_pri_listener.targets[0].topic)
         self._low_pri_listener.start()
+        LOG.info('Listening on %s', self._low_pri_listener.targets[0].topic)
 
     def stop(self):
         self._low_pri_listener.stop()

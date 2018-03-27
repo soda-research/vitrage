@@ -13,15 +13,15 @@
 # under the License.
 import threading
 
-from vitrage.entity_graph.service import TwoPriorityListener
+from vitrage.entity_graph.graph_init import EventsCoordination
 from vitrage.tests import base
 
 
-class TwoPriorityListenerTest(base.BaseTest):
+class EventsCoordinationTest(base.BaseTest):
 
     @classmethod
     def setUpClass(cls):
-        super(TwoPriorityListenerTest, cls).setUpClass()
+        super(EventsCoordinationTest, cls).setUpClass()
         cls.calc_result = 0
 
     def do_work(self, x):
@@ -39,7 +39,7 @@ class TwoPriorityListenerTest(base.BaseTest):
         the result should be the number of low priority calls.
         0*(2^n) + 1*n
         """
-        priority_listener = TwoPriorityListener(None, self.do_work, None, None)
+        priority_listener = EventsCoordination(None, self.do_work, None, None)
 
         def write_high():
             for i in range(10000):

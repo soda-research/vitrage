@@ -35,6 +35,7 @@ class GraphPersistor(object):
         self.last_event_timestamp = datetime.datetime.utcnow()
 
     def store_graph(self, graph):
+        LOG.info('Graph persistency running..')
         try:
             graph_snapshot = graph.write_gpickle()
             db_row = models.GraphSnapshot(
