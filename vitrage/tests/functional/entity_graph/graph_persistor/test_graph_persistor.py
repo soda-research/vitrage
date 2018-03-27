@@ -11,6 +11,7 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+import sys
 import time
 
 from oslo_config import cfg
@@ -34,8 +35,8 @@ class TestGraphPersistor(TestFunctionalBase):
         cls.conf.register_opts(cls.PROCESSOR_OPTS, group='entity_graph')
         cls.conf.register_opts(cls.DATASOURCES_OPTS, group='datasources')
         cls.conf.register_opts(database_opts, group='database')
-        cls.conf.set_override('connection', 'sqlite:///test.db',
-                              group='database')
+        cls.conf.set_override('connection', 'sqlite:///test-%s.db'
+                              % sys.version_info[0], group='database')
         cls._db = storage.get_connection_from_config(cls.conf)
         engine = cls._db._engine_facade.get_engine()
         models.Base.metadata.create_all(engine)
