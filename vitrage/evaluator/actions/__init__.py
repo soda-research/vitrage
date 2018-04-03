@@ -12,4 +12,13 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-__author__ = 'stack'
+from oslo_config import cfg
+
+
+# Register options for the service
+OPTS = [
+    cfg.StrOpt('evaluator_notification_topic_prefix',
+               default='vitrage_evaluator_notifications',
+               help='A prefix of the topic on which events will be sent from '
+                    'the evaluator to the specific notifiers')
+]

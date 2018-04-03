@@ -22,6 +22,7 @@ import vitrage.api
 import vitrage.datasources
 import vitrage.entity_graph.consistency
 import vitrage.evaluator
+import vitrage.evaluator.actions
 import vitrage.keystone_client
 import vitrage.machine_learning
 import vitrage.machine_learning.plugins.jaccard_correlation
@@ -47,6 +48,7 @@ def list_opts():
         ('api', vitrage.api.OPTS),
         ('datasources', vitrage.datasources.OPTS),
         ('evaluator', vitrage.evaluator.OPTS),
+        ('evaluator_actions', vitrage.evaluator.actions.OPTS),
         ('consistency', vitrage.entity_graph.consistency.OPTS),
         ('database', vitrage.storage.OPTS),
         ('persistency', vitrage.persistency.OPTS),

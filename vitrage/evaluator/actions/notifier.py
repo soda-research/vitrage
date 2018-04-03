@@ -34,6 +34,9 @@ class EvaluatorNotifier(object):
                 LOG.info('Evaluator Notifier is disabled')
                 return
 
+            topic_prefix = \
+                conf.evaluator_actions.evaluator_notification_topic_prefix
+
             for notifier in notifier_plugins:
                 LOG.debug('Adding evaluator notifier %s', notifier)
 
@@ -41,7 +44,7 @@ class EvaluatorNotifier(object):
                     get_transport(conf),
                     driver='messagingv2',
                     publisher_id='vitrage.evaluator',
-                    topics=[notifier])
+                    topics=[topic_prefix + '.' + notifier])
 
         except Exception as e:
             LOG.info('Evaluator Notifier - missing configuration %s' % str(e))

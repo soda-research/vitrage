@@ -75,10 +75,14 @@ class VitrageNotifierService(os_service.Service):
                             endpoint=VitrageDefaultEventEndpoint(
                                 self.notifiers))
 
+        topic_prefix = \
+            conf.evaluator_actions.evaluator_notification_topic_prefix
+
         for notifier in self.notifiers:
             if notifier.use_private_topic():
                 self._init_notifier(transport=transport,
-                                    topic=notifier.get_notifier_name(),
+                                    topic=topic_prefix + '.' +
+                                    notifier.get_notifier_name(),
                                     endpoint=notifier)
 
     def _init_notifier(self, transport, topic, endpoint):
