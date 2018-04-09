@@ -12,13 +12,15 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 import copy
-
 import sys
 
+import cotyledon
+from futurist import periodics
+from futurist import ThreadPoolExecutor
 from oslo_log import log
 import oslo_messaging
-from oslo_service import service as os_service
 from tools.load_generator.notification_info import *  # noqa
+
 from vitrage.messaging import get_transport
 from vitrage import service
 
@@ -59,9 +61,9 @@ to avoid Vitrage consistency deleting the created resources.
 """
 
 
-class StressNotificationsService(os_service.Service):
-    def __init__(self, conf):
-        super(StressNotificationsService, self).__init__()
+class StressNotificationsService(cotyledon.Service):
+    def __init__(self, worker_id, conf):
+        super(StressNotificationsService, self).__init__(worker_id)
         self.oslo_notifier = None
         topics = conf.datasources.notification_topics
         self.oslo_notifier = oslo_messaging.Notifier(
@@ -69,16 +71,19 @@ class StressNotificationsService(os_service.Service):
             driver='messagingv2',
             publisher_id='vitrage.stress',
             topics=topics)
+        self.periodic = periodics.PeriodicWorker.create(
+            [], executor_factory=lambda: ThreadPoolExecutor(max_workers=10))
 
-    def start(self):
-        super(StressNotificationsService, self).start()
-        self.tg.add_timer(RUN_EVERY_X_SECONDS, self.stress_notifications, )
+    def run(self):
         LOG.info("StressNotificationsService - Started!")
+        self.periodic.add(self.stress_notifications)
+        self.periodic.start()
 
-    def stop(self, graceful=False):
-        super(StressNotificationsService, self).stop(graceful)
+    def terminate(self):
+        self.periodic.stop()
         LOG.info("StressNotificationsService - Stopped!")
 
+    @periodics.periodic(spacing=RUN_EVERY_X_SECONDS)
     def stress_notifications(self):
         notifications = []
         for i in range(EXISTING_COMPUTES_NUM * VMS_PER_COMPUTE):
@@ -137,9 +142,9 @@ def create_vm(instance_num, compute_num):
 
 def main():
     conf = service.prepare_service()
-    launcher = os_service.ServiceLauncher(conf)
-    launcher.launch_service(StressNotificationsService(conf))
-    launcher.wait()
+    sm = cotyledon.ServiceManager()
+    sm.add(StressNotificationsService, args=(conf,))
+    sm.run()
 
 
 if __name__ == "__main__":

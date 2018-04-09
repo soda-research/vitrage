@@ -16,7 +16,6 @@ from concurrent import futures
 import time
 
 from oslo_log import log
-from oslo_service import service as os_service
 
 from vitrage.common.constants import DatasourceAction
 from vitrage.datasources import utils
@@ -26,7 +25,7 @@ from vitrage import rpc as vitrage_rpc
 LOG = log.getLogger(__name__)
 
 
-class CollectorRpcHandlerService(os_service.Service):
+class CollectorRpcHandlerService(object):
 
     def __init__(self, conf):
         super(CollectorRpcHandlerService, self).__init__()
@@ -39,13 +38,11 @@ class CollectorRpcHandlerService(os_service.Service):
 
     def start(self):
         LOG.info("Collector Rpc Handler Service - Starting...")
-        super(CollectorRpcHandlerService, self).start()
         self.server.start()
         LOG.info("Collector Rpc Handler Service - Started!")
 
-    def stop(self, graceful=False):
+    def stop(self):
         LOG.info("Collector Rpc Handler Service - Stopping...")
-        super(CollectorRpcHandlerService, self).stop(graceful)
         self.server.stop()
         LOG.info("Collector Rpc Handler Service - Stopped!")
 

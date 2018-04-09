@@ -16,7 +16,6 @@ from collections import defaultdict
 
 from oslo_log import log
 import oslo_messaging
-from oslo_service import service as os_service
 
 from vitrage.datasources import utils
 from vitrage import messaging
@@ -25,7 +24,7 @@ from vitrage.messaging import VitrageNotifier
 LOG = log.getLogger(__name__)
 
 
-class ListenerService(os_service.Service):
+class ListenerService(object):
 
     def __init__(self, conf):
         super(ListenerService, self).__init__()
@@ -43,18 +42,16 @@ class ListenerService(os_service.Service):
     def start(self):
         LOG.info("Vitrage data source Listener Service - Starting...")
 
-        super(ListenerService, self).start()
         self.listener.start()
 
         LOG.info("Vitrage data source Listener Service - Started!")
 
-    def stop(self, graceful=False):
+    def stop(self):
         LOG.info("Vitrage data source Listener Service - Stopping...")
 
         # Should it be here?
         # self.listener.stop()
         # self.listener.wait()
-        super(ListenerService, self).stop(graceful)
 
         LOG.info("Vitrage data source Listener Service - Stopped!")
 

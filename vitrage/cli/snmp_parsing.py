@@ -14,7 +14,7 @@
 
 import sys
 
-from oslo_service import service as os_service
+import cotyledon
 from vitrage.cli import VITRAGE_TITLE
 from vitrage import service
 from vitrage.snmp_parsing.service import SnmpParsingService
@@ -23,9 +23,9 @@ from vitrage.snmp_parsing.service import SnmpParsingService
 def main():
     print(VITRAGE_TITLE)
     conf = service.prepare_service()
-    launcher = os_service.ServiceLauncher(conf)
-    launcher.launch_service(SnmpParsingService(conf))
-    launcher.wait()
+    sm = cotyledon.ServiceManager()
+    sm.add(SnmpParsingService, args=(conf,))
+    sm.run()
 
 
 if __name__ == "__main__":

@@ -14,7 +14,6 @@
 
 from oslo_log import log
 import oslo_messaging
-from oslo_service import service as os_service
 
 from vitrage.common.utils import spawn
 from vitrage.entity_graph import EVALUATOR_TOPIC
@@ -34,7 +33,7 @@ from vitrage import storage
 LOG = log.getLogger(__name__)
 
 
-class VitrageApiHandlerService(os_service.Service):
+class VitrageApiHandlerService(object):
 
     def __init__(self, conf, e_graph):
         super(VitrageApiHandlerService, self).__init__()
@@ -49,8 +48,6 @@ class VitrageApiHandlerService(os_service.Service):
 
     def _start(self):
         LOG.info("Vitrage Api Handler Service - Starting...")
-
-        super(VitrageApiHandlerService, self).start()
 
         transport = messaging.get_rpc_transport(self.conf)
         rabbit_hosts = self.conf.oslo_messaging_rabbit.rabbit_hosts
@@ -70,10 +67,3 @@ class VitrageApiHandlerService(os_service.Service):
         server.start()
 
         LOG.info("Vitrage Api Handler Service - Started!")
-
-    def stop(self, graceful=False):
-        LOG.info("Vitrage Api Handler Service - Stopping...")
-
-        super(VitrageApiHandlerService, self).stop(graceful)
-
-        LOG.info("Vitrage Api Handler Service - Stopped!")

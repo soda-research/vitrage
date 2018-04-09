@@ -14,8 +14,8 @@
 
 import sys
 
+import cotyledon
 from oslo_log import log
-from oslo_service import service as os_service
 from vitrage.cli import VITRAGE_TITLE
 from vitrage.persistency.service import PersistorService
 from vitrage import service
@@ -28,9 +28,9 @@ def main():
     print(VITRAGE_TITLE)
     conf = service.prepare_service()
     db_connection = storage.get_connection_from_config(conf)
-    launcher = os_service.ServiceLauncher(conf)
-    launcher.launch_service(PersistorService(conf, db_connection))
-    launcher.wait()
+    sm = cotyledon.ServiceManager()
+    sm.add(PersistorService, args=(conf, db_connection))
+    sm.run()
 
 
 if __name__ == "__main__":

@@ -14,9 +14,10 @@
 
 from datetime import datetime
 import json
+
+import cotyledon
 from oslo_log import log
 import oslo_messaging
-from oslo_service import service as os_service
 from oslo_utils import uuidutils
 from pyasn1.codec.ber import decoder
 from pysnmp.carrier.asyncore.dgram import udp
@@ -35,18 +36,17 @@ from vitrage.utils.file import load_yaml_file
 LOG = log.getLogger(__name__)
 
 
-class SnmpParsingService(os_service.Service):
+class SnmpParsingService(cotyledon.Service):
     RUN_FOREVER = 1
 
-    def __init__(self, conf):
-        super(SnmpParsingService, self).__init__()
+    def __init__(self, worker_id, conf):
+        super(SnmpParsingService, self).__init__(worker_id)
         self.conf = conf
         self.listening_port = conf.snmp_parsing.snmp_listening_port
         self._init_oslo_notifier()
 
-    def start(self):
+    def run(self):
         LOG.info("Vitrage SNMP Parsing Service - Starting...")
-        super(SnmpParsingService, self).start()
 
         transport_dispatcher = AsyncoreDispatcher()
         transport_dispatcher.registerRecvCbFun(self.callback_func)
@@ -71,11 +71,8 @@ class SnmpParsingService(os_service.Service):
             transport_dispatcher.closeDispatcher()
             raise
 
-    def stop(self, graceful=False):
+    def terminate(self):
         LOG.info("Vitrage SNMP Parsing Service - Stopping...")
-
-        super(SnmpParsingService, self).stop(graceful)
-
         LOG.info("Vitrage SNMP Parsing Service - Stopped!")
 
     # noinspection PyUnusedLocal

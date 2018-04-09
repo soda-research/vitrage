@@ -12,7 +12,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from oslo_service import service as os_service
+import cotyledon
 import sys
 
 from vitrage.cli import VITRAGE_TITLE
@@ -23,9 +23,9 @@ from vitrage import service
 def main():
     print(VITRAGE_TITLE)
     conf = service.prepare_service()
-    launcher = os_service.ServiceLauncher(conf)
-    launcher.launch_service(MachineLearningService(conf))
-    launcher.wait()
+    sm = cotyledon.ServiceManager()
+    sm.add(MachineLearningService, args=(conf,))
+    sm.run()
 
 
 if __name__ == "__main__":

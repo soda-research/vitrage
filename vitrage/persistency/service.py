@@ -14,11 +14,11 @@
 
 from __future__ import print_function
 
+import cotyledon
 import dateutil.parser
 import oslo_messaging as oslo_m
 
 from oslo_log import log
-from oslo_service import service as os_service
 from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import GraphAction
 from vitrage import messaging
@@ -28,9 +28,9 @@ from vitrage.storage.sqlalchemy import models
 LOG = log.getLogger(__name__)
 
 
-class PersistorService(os_service.Service):
-    def __init__(self, conf, db_connection):
-        super(PersistorService, self).__init__()
+class PersistorService(cotyledon.Service):
+    def __init__(self, worker_id, conf, db_connection):
+        super(PersistorService, self).__init__(worker_id)
         self.conf = conf
         self.db_connection = db_connection
         transport = messaging.get_transport(conf)
@@ -40,20 +40,18 @@ class PersistorService(os_service.Service):
             transport, [target],
             [VitragePersistorEndpoint(self.db_connection)])
 
-    def start(self):
+    def run(self):
         LOG.info("Vitrage Persistor Service - Starting...")
 
-        super(PersistorService, self).start()
         self.listener.start()
 
         LOG.info("Vitrage Persistor Service - Started!")
 
-    def stop(self, graceful=False):
+    def terminate(self):
         LOG.info("Vitrage Persistor Service - Stopping...")
 
         self.listener.stop()
         self.listener.wait()
-        super(PersistorService, self).stop(graceful)
 
         LOG.info("Vitrage Persistor Service - Stopped!")
 

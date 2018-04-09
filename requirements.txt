@@ -2,48 +2,47 @@
 # of appearance. Changing the order has an impact on the overall integration
 # process, which may cause wedges in the gate later.
 
-pbr!=2.1.0,>=2.0.0 # Apache-2.0
-Babel!=2.4.0,>=2.3.4 # BSD
-lxml!=3.7.0,>=3.4.1 # BSD
-PyMySQL>=0.7.6 # MIT License
-aodhclient>=0.9.0 # Apache-2.0
-python-ceilometerclient>=2.5.0 # Apache-2.0
-python-cinderclient>=3.3.0 # Apache-2.0
-python-dateutil>=2.5.3 # BSD
-python-keystoneclient>=3.8.0 # Apache-2.0
+pbr>=3.1.1 # Apache-2.0
+Babel>=2.5.3 # BSD
+lxml>=4.1.1 # BSD
+PyMySQL>=0.8.0 # MIT License
+aodhclient>=1.0.0 # Apache-2.0
+python-ceilometerclient>=2.9.0 # Apache-2.0
+python-cinderclient>=3.5.0 # Apache-2.0
+python-dateutil>=2.7.0 # BSD
+python-keystoneclient>=3.15.0 # Apache-2.0
 python-neutronclient>=6.7.0 # Apache-2.0
-python-novaclient>=9.1.0 # Apache-2.0
-python-heatclient>=1.10.0 # Apache-2.0
-python-mistralclient!=3.2.0,>=3.1.0 # Apache-2.0
+python-novaclient>=10.1.0 # Apache-2.0
+python-heatclient>=1.14.0 # Apache-2.0
+python-mistralclient>=3.3.0 # Apache-2.0
 pyzabbix>=0.7.4 # LGPL
-networkx<2.0,>=1.10 # BSD
+networkx<2.0,>=1.11 # BSD
 oslo.config>=5.2.0 # Apache-2.0
-oslo.context>=2.19.2 # Apache-2.0
-oslo.db>=4.27.0 # Apache-2.0
-oslo.messaging>=5.29.0 # Apache-2.0
-oslo.middleware>=3.31.0 # Apache-2.0
-oslo.serialization!=2.19.1,>=2.18.0 # Apache-2.0
-oslo.log>=3.36.0 # Apache-2.0
-oslo.policy>=1.30.0 # Apache-2.0
-oslo.service!=1.28.1,>=1.24.0 # Apache-2.0
-oslo.i18n>=3.15.3 # Apache-2.0
-pecan!=1.0.2,!=1.0.3,!=1.0.4,!=1.2,>=1.0.0 # BSD
-PasteDeploy>=1.5.0 # MIT
-Werkzeug>=0.9 # BSD License
-keystonemiddleware>=4.17.0 # Apache-2.0
-stevedore>=1.20.0 # Apache-2.0
-voluptuous>=0.8.9 # BSD License
-SQLAlchemy!=1.1.5,!=1.1.6,!=1.1.7,!=1.1.8,>=1.0.10 # MIT
-sympy>=0.7.6 # BSD
-pysnmp>=4.2.3 # BSD
-PyJWT>=1.0.1 # MIT
-osprofiler>=1.4.0 # Apache-2.0
+oslo.context>=2.20.0 # Apache-2.0
+oslo.db>=4.35.0 # Apache-2.0
+oslo.messaging>=5.36.0 # Apache-2.0
+oslo.middleware>=3.35.0 # Apache-2.0
+oslo.serialization>=2.25.0 # Apache-2.0
+oslo.log>=3.37.0 # Apache-2.0
+oslo.policy>=1.34.0 # Apache-2.0
+oslo.i18n>=3.20.0 # Apache-2.0
+pecan>=1.2.1 # BSD
+PasteDeploy>=1.5.2 # MIT
+Werkzeug>=0.14.1 # BSD License
+keystonemiddleware>=4.21.0 # Apache-2.0
+stevedore>=1.28.0 # Apache-2.0
+voluptuous>=0.11.1 # BSD License
+SQLAlchemy>=1.2.5 # MIT
+sympy>=1.1.1 # BSD
+pysnmp>=4.4.4 # BSD
+PyJWT>=1.6.0 # MIT
+osprofiler>=2.0.0 # Apache-2.0
 keystoneauth1>=3.4.0 # Apache-2.0
 PyYAML>=3.12 # MIT
-requests>=2.14.2 # Apache-2.0
-WebOb>=1.7.1 # MIT
-eventlet!=0.18.3,!=0.20.1,<0.21.0,>=0.18.2 # MIT
-six>=1.10.0 # MIT
-debtcollector>=1.2.0 # Apache-2.0
-cotyledon>=1.3.0 # Apache-2.0
+requests>=2.18.4 # Apache-2.0
+WebOb>=1.7.4 # MIT
+eventlet!=0.20.1,>=0.20.0 # MIT
+six>=1.11.0 # MIT
+debtcollector>=1.19.0 # Apache-2.0
+cotyledon>=1.6.8 # Apache-2.0
 futures>=3.0.0;python_version=='2.7' or python_version=='2.6'  # BSD

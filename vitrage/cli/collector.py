@@ -12,13 +12,30 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import cotyledon
 import sys
 
-from oslo_service import service as os_service
+
 from vitrage.cli import VITRAGE_TITLE
+from vitrage.common import utils
 from vitrage.datasources.listener_service import ListenerService
 from vitrage.datasources.rpc_service import CollectorRpcHandlerService
 from vitrage import service
+
+
+class CollectorService(cotyledon.Service):
+
+    def __init__(self, worker_id, conf):
+        super(CollectorService, self).__init__(worker_id)
+        self.csvc = CollectorRpcHandlerService(conf)
+        utils.spawn(self.csvc.start)
+        self.lsvc = ListenerService(conf)
+        utils.spawn(self.lsvc.start)
+
+    def terminate(self):
+        super(CollectorService, self).terminate()
+        self.lsvc.stop()
+        self.csvc.stop()
 
 
 def main():
@@ -27,10 +44,9 @@ def main():
 
     print(VITRAGE_TITLE)
     conf = service.prepare_service()
-    launcher = os_service.ServiceLauncher(conf)
-    launcher.launch_service(ListenerService(conf))
-    launcher.launch_service(CollectorRpcHandlerService(conf))
-    launcher.wait()
+    sm = cotyledon.ServiceManager()
+    sm.add(CollectorService, args=(conf,))
+    sm.run()
 
 
 if __name__ == "__main__":

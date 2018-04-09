@@ -12,9 +12,10 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import cotyledon
+
 from oslo_log import log
 import oslo_messaging as oslo_m
-from oslo_service import service as os_service
 from oslo_utils import importutils
 
 from vitrage import messaging
@@ -23,10 +24,10 @@ from vitrage.opts import register_opts
 LOG = log.getLogger(__name__)
 
 
-class MachineLearningService(os_service.Service):
+class MachineLearningService(cotyledon.Service):
 
-    def __init__(self, conf):
-        super(MachineLearningService, self).__init__()
+    def __init__(self, worker_id, conf):
+        super(MachineLearningService, self).__init__(worker_id)
         self.conf = conf
         self.machine_learning_plugins = self.get_machine_learning_plugins(conf)
         transport = messaging.get_transport(conf)
@@ -36,20 +37,18 @@ class MachineLearningService(os_service.Service):
             transport, [target],
             [VitrageEventEndpoint(self.machine_learning_plugins)])
 
-    def start(self):
+    def run(self):
         LOG.info("Vitrage Machine Learning Service - Starting...")
 
-        super(MachineLearningService, self).start()
         self.listener.start()
 
         LOG.info("Vitrage Machine Learning Service - Started!")
 
-    def stop(self, graceful=False):
+    def terminate(self):
         LOG.info("Vitrage Machine Learning Service - Stopping...")
 
         self.listener.stop()
         self.listener.wait()
-        super(MachineLearningService, self).stop(graceful)
 
         LOG.info("Vitrage Machine Learning Service - Stopped!")
 

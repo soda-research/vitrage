@@ -126,12 +126,12 @@ class TestSnmpParsing(base.BaseTest):
         cls.conf.register_opts(cls.OPTS, group='snmp_parsing')
 
     def test_convert_binds_to_dict(self):
-        parsing_service = SnmpParsingService(self.conf)
+        parsing_service = SnmpParsingService(1, self.conf)
         dict_converted = parsing_service._convert_binds_to_dict(BINDS_REPORTED)
         self.assertEqual(dict_converted, DICT_EXPECTED)
 
     def test_get_event_type(self):
-        parsing_service = SnmpParsingService(self.conf)
+        parsing_service = SnmpParsingService(1, self.conf)
         event_type = parsing_service._get_event_type(DICT_EXPECTED)
         self.assertEqual(event_type, 'vitrage.snmp.event')
 
@@ -139,6 +139,6 @@ class TestSnmpParsing(base.BaseTest):
         converted_trap_diff_sys = copy.copy(DICT_EXPECTED)
         converted_trap_diff_sys.update(
             {u'1.3.6.1.4.1.3902.4101.1.3.1.12': u'Different System'})
-        parsing_service = SnmpParsingService(self.conf)
+        parsing_service = SnmpParsingService(1, self.conf)
         event_type = parsing_service._get_event_type(converted_trap_diff_sys)
         self.assertIsNone(event_type)
