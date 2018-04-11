@@ -39,16 +39,11 @@ class GraphCloneManagerBase(object):
         for i in range(self._workers_num):
             worker_queue = self._run_worker(i, self._workers_num)
             self._worker_queues.append(worker_queue)
-        self.before_subscribe()
         self._entity_graph.subscribe(self.notify_graph_update)
 
     @abc.abstractmethod
     def _run_worker(self, worker_index, workers_num):
         raise NotImplementedError
-
-    @abc.abstractmethod
-    def before_subscribe(self):
-        pass
 
     def notify_graph_update(self, before, current, is_vertex, *args, **kwargs):
         """Notify all workers

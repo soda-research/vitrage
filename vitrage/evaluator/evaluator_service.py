@@ -35,7 +35,8 @@ class EvaluatorManager(base.GraphCloneManagerBase):
         workers_num = conf.evaluator.workers or processutils.get_worker_count()
         super(EvaluatorManager, self).__init__(conf, entity_graph, workers_num)
 
-    def before_subscribe(self):
+    def start(self):
+        super(EvaluatorManager, self).start()
         self.start_evaluations()
 
     def _run_worker(self, worker_index, workers_num):
