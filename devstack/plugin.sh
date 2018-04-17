@@ -326,7 +326,7 @@ function stop_vitrage {
         disable_apache_site vitrage
         restart_apache_server
     fi
-    for serv in vitrage-api vitrage-collector vitrage-graph vitrage-notifier vitrage-persistor vitrage-snmp-parsing; do
+    for serv in vitrage-api vitrage-collector vitrage-graph vitrage-notifier vitrage-persistor vitrage-ml vitrage-snmp-parsing; do
         stop_process $serv
     done
 }
