@@ -308,8 +308,24 @@ function start_vitrage {
     run_process vitrage-persistor "$VITRAGE_BIN_DIR/vitrage-persistor --config-file $VITRAGE_CONF"
     run_process vitrage-snmp-parsing "$VITRAGE_BIN_DIR/vitrage-snmp-parsing --config-file $VITRAGE_CONF"
 
-    change_systemd_kill_mode vitrage-graph vitrage-collector
+    write_systemd_dependency vitrage-graph vitrage-collector
 
+    change_systemd_kill_mode vitrage-graph
+    change_systemd_kill_mode vitrage-collector
+}
+
+
+function write_systemd_dependency {
+  local service_after=$1
+  local service_before=$2
+  local systemd_service_after="devstack@$service_after.service"
+  local systemd_service_before="devstack@$service_before.service"
+
+  local unitfile_after="$SYSTEMD_DIR/$systemd_service_after"
+
+  iniset -sudo $unitfile_after "Unit" "After" "$systemd_service_before"
+
+  $SYSTEMCTL daemon-reload
 }
 
 function change_systemd_kill_mode {
@@ -318,6 +334,8 @@ function change_systemd_kill_mode {
    local unitfile="$SYSTEMD_DIR/$systemd_service"
 
    iniset -sudo $unitfile "Service" "KillMode" "control-group"
+
+   $SYSTEMCTL daemon-reload
 }
 
 # stop_vitrage() - Stop running processes
