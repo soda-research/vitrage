@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+# coding: utf-8
+
 # Copyright 2016 - Nokia
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -22,7 +24,7 @@ from oslo_config import cfg
 import oslo_messaging as messaging
 from oslo_utils import uuidutils
 import socket
-import sys
+
 
 '''
 Expected input:
@@ -45,13 +47,21 @@ Message:
 
 
 LOG_FILE = '/var/log/zabbix/zabbix_vitrage.log'
-LOG_MAX_SIZE = 10240
+LOG_MAX_SIZE = 10000000
 LOG_FORMAT = '%(asctime)s.%(msecs).03d %(name)s[%(process)d] %(threadName)s %' \
              '(levelname)s - %(message)s'
 LOG_DATE_FMT = '%Y.%m.%d %H:%M:%S'
 ZABBIX_EVENT_TYPE = 'zabbix.alarm'
 
 debug = False
+
+
+def create_payload(body):
+    payload = {}
+    for line in body.splitlines():
+        key, prop = line.split('=', 1)
+        payload[key.lower().strip()] = prop.strip()
+    return payload
 
 
 def main():
@@ -62,8 +72,9 @@ def main():
     parser.add_argument('body', help='zabbix body')
     args = parser.parse_args()
 
-    logging.debug('[vitrage] sendto=%s, topic=%s, body=%s',
-                  args.sendto, args.topic, args.body)
+    logging.info('SENDTO: %s', args.sendto)
+    logging.info('TOPIC: %s', args.topic)
+    logging.info('BODY:\n----\n%s\n', args.body)
 
     transport_url = args.sendto
     transport = messaging.get_notification_transport(cfg.CONF, transport_url)
@@ -76,30 +87,37 @@ def main():
 
     alarm_status = args.topic.lower()
     event_type = '%s.%s' % (ZABBIX_EVENT_TYPE, alarm_status)
+    payload = create_payload(args.body)
 
-    payload = {key.lower().strip(): prop.strip() for key, prop in
-               (line.split('=') for line in args.body.splitlines())}
-
-    logging.debug('[vitrage] publisher: %s, event: %s, payload %s',
-                  publisher, event_type, payload)
-
+    logging.info('PUBLISHER: %s', publisher)
+    logging.info('EVENT_TYPE: %s', event_type)
+    logging.info('\nPAYLOAD:\n%s', payload)
     notifier.info(ctxt={'message_id': uuidutils.generate_uuid(),
                         'publisher_id': publisher,
                         'timestamp': datetime.utcnow()},
                   event_type=event_type,
                   payload=payload)
+    logging.info('MESSAGE SENT..')
+
 
 if __name__ == '__main__':
 
-    if debug:
-        logging.basicConfig(stream=sys.stderr, format=LOG_FORMAT,
-                            datefmt=LOG_DATE_FMT, level=logging.DEBUG)
-    else:
-        logging.basicConfig(filename=LOG_FILE, format=LOG_FORMAT,
-                            datefmt=LOG_DATE_FMT, level=logging.DEBUG)
     log = logging.getLogger()
+
+    if debug:
+        log.setLevel(logging.DEBUG)
+    else:
+        log.setLevel(logging.INFO)
+
     handler = RotatingFileHandler(filename=LOG_FILE,
                                   maxBytes=LOG_MAX_SIZE,
-                                  backupCount=1)
+                                  backupCount=3)
+    fmt = logging.Formatter(LOG_FORMAT, LOG_DATE_FMT)
+    handler.setFormatter(fmt)
     log.addHandler(handler)
-    main()
+
+    logging.info('***----------Script start-----------***')
+    try:
+        main()
+    except Exception as e:
+        logging.exception('MESSAGE WAS NOT SENT - %s' % e)
