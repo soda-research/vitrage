@@ -90,11 +90,6 @@ def get_vertex_types(vertex):
     return vitrage_category, vitrage_type
 
 
-def can_update_vertex(graph_vertex, new_vertex):
-    return (not graph_vertex) or \
-           (not new_vertex[VProps.VITRAGE_IS_PLACEHOLDER])
-
-
 def update_entity_graph_vertex(g, graph_vertex, updated_vertex):
     if updated_vertex[VProps.VITRAGE_IS_PLACEHOLDER] and \
             graph_vertex and not graph_vertex[VProps.VITRAGE_IS_PLACEHOLDER]:
@@ -103,4 +98,5 @@ def update_entity_graph_vertex(g, graph_vertex, updated_vertex):
         updated_vertex[VProps.VITRAGE_IS_DELETED] = \
             graph_vertex[VProps.VITRAGE_IS_DELETED]
 
-    g.update_vertex(updated_vertex)
+    g.update_vertex(updated_vertex,
+                    not updated_vertex[VProps.VITRAGE_IS_PLACEHOLDER])

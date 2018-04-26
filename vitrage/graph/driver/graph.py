@@ -242,13 +242,16 @@ class Graph(object):
         pass
 
     @abc.abstractmethod
-    def update_vertex(self, v):
+    def update_vertex(self, v, overwrite=True):
         """Update the vertex properties
 
         Update an existing vertex and create it if non existing.
 
         :param v: the vertex with the new data
         :type v: Vertex
+
+        :param overwrite: whether to overwrite existing vertices
+        :type overwrite: Boolean
         """
         pass
 
@@ -276,11 +279,13 @@ class Graph(object):
         pass
 
     @staticmethod
-    def _merge_properties(base_props, new_props):
+    def _merge_properties(base_props, new_props, overwrite):
         if base_props is None:
             base_props = copy.copy(new_props)
         else:
-            base_props.update(copy.copy(new_props))
+            # Copy new properties, and optionally overwrite the old properties
+            base_props.update({k: v for k, v in new_props.items() if
+                               overwrite or k not in base_props})
         return {k: v for k, v in base_props.items() if v is not None}
 
     @abc.abstractmethod
