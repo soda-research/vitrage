@@ -89,10 +89,11 @@ def get_client(transport, target, version_cap=None, serializer=None):
 
 
 def get_default_server(conf, topic, endpoints):
+    transport = messaging.get_rpc_transport(conf)
     target = messaging.Target(
         topic=topic,
         server=conf.oslo_messaging_rabbit.rabbit_hosts)
-    return get_server(target, endpoints, messaging.get_rpc_transport(conf))
+    return get_server(target, endpoints, transport)
 
 
 def get_server(target, endpoints, transport, serializer=None):
