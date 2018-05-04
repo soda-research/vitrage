@@ -216,3 +216,31 @@ or by configuring ``vitrage.conf``.
     password = omd
     url = http://<ip>:<port>/<site>/nagios/cgi-bin/status.cgi
     config_file = /etc/vitrage/nagios_conf.yaml
+
+
+Using the scaffold tool
+-----------------------
+
+A datasource scaffold tool is provided to get you started to create a new
+datasource. See ``tools\datasoruce-scaffold`` for details.
+
+This tool uses `cookiecutter`_ to generate the scaffold of new datasource.
+
+.. _cookiecutter: https://github.com/audreyr/cookiecutter
+
+**Install**
+
+.. code-block:: shell
+
+    pip install -r requirements.txt
+
+**Usage**
+
+.. code-block:: shell
+
+    $ cookiecutter .
+    name [sample]:
+
+Enter the name of new datasource. It will create a new folder in current
+directory including the scaffold of the new data source. Move the directory to
+``vitrage/datasources`` as a start point for a complete implemenation.
