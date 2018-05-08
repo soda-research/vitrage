@@ -173,7 +173,7 @@ class NovaHostTransformerTest(base.BaseTest):
 
         extract_value = tbase.extract_field_value
 
-        expected_id = extract_value(event, '_info', 'host_name')
+        expected_id = extract_value(event, 'host')
         observed_id = vertex[VProps.ID]
         self.assertEqual(expected_id, observed_id)
         self.assertEqual(
@@ -190,7 +190,7 @@ class NovaHostTransformerTest(base.BaseTest):
         observed_timestamp = vertex[VProps.VITRAGE_SAMPLE_TIMESTAMP]
         self.assertEqual(expected_timestamp, observed_timestamp)
 
-        expected_name = extract_value(event, '_info', 'host_name')
+        expected_name = extract_value(event, 'host')
         observed_name = vertex[VProps.NAME]
         self.assertEqual(expected_name, observed_name)
 
