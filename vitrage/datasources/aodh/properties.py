@@ -38,8 +38,14 @@ class AodhProperties(object):
     DETAIL = 'detail'
     RULE = 'rule'
     GNOCCHI_RESOURCES_THRESHOLD_RULE = 'gnocchi_resources_threshold_rule'
+    COMPOSITE_RULE = 'composite_rule'
+    GNOCCHI_AGGREGATION_BY_RESOURCES_THRESHOLD_RULE = \
+        'gnocchi_aggregation_by_resources_threshold_rule'
+    GNOCCHI_AGGREGATION_BY_METRICS_THRESHOLD_RULE = \
+        'gnocchi_aggregation_by_metrics_threshold_rule'
     USER_ID = 'user_id'
     STATE_REASON = 'state_reason'
+    METRICS = 'metrics'
 
 
 class AodhState(object):
@@ -60,3 +66,8 @@ class AodhExtendedAlarmType(object):
     VITRAGE = 'vitrage'
     THRESHOLD = 'threshold'
     GNOCCHI_RESOURCES_THRESHOLD = 'gnocchi_resources_threshold'
+    COMPOSITE = 'composite'
+    GNOCCHI_AGGREGATION_BY_METRICS_THRESHOLD =  \
+        'gnocchi_aggregation_by_metrics_threshold'
+    GNOCCHI_AGGREGATION_BY_RESOURCES_THRESHOLD = \
+        'gnocchi_aggregation_by_resources_threshold'

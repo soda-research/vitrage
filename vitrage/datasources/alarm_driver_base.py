@@ -103,8 +103,7 @@ class AlarmDriverBase(DriverBase):
         for alarm in alarms:
             alarm_key = self._alarm_key(alarm)
             old_alarm = self.cache.get(alarm_key, (None, None))[0]
-            if self._filter_and_cache_alarm(
-                alarm, old_alarm, filter_, now):
+            if self._filter_and_cache_alarm(alarm, old_alarm, filter_, now):
                 alarms_to_update.append(alarm)
 
         # add alarms that were deleted
