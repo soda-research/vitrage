@@ -13,7 +13,6 @@
 # under the License.
 
 import copy
-import json
 import networkx as nx
 from networkx.algorithms.operators.binary import compose
 from networkx.readwrite import json_graph
@@ -229,6 +228,17 @@ class NXGraph(Graph):
         else:
             return []
 
+    def vertices_iter(self, vertex_attr_filter=None, query_dict=None):
+        if not query_dict:
+            for n, data in list(self._g.nodes_iter(data=True)):
+                if check_filter(data, vertex_attr_filter):
+                    yield vertex_copy(n, data)
+        elif not vertex_attr_filter:
+            match_func = create_predicate(query_dict)
+            for n, data in list(self._g.nodes_iter(data=True)):
+                if match_func(data):
+                    yield vertex_copy(n, data)
+
     def get_vertices_by_key(self, key_values_hash):
 
         if key_values_hash in self.key_to_vertex_ids:
@@ -291,7 +301,7 @@ class NXGraph(Graph):
                 node[VProps.ID] = self._g.node[node[VProps.ID]][VProps.ID]
                 node[VProps.GRAPH_INDEX] = index
 
-        return json.dumps(node_link_data)
+        return node_link_data
 
     def to_json(self):
         return json_graph.node_link_data(self._g)

@@ -89,12 +89,6 @@ class NXAlgorithm(GraphAlgorithm):
             vertices=self._vertex_result_to_list(n_result),
             edges=self._edge_result_to_list(e_result))
 
-        LOG.debug('graph_query_vertices: find graph: nodes %s, edges %s',
-                  str(graph._g.nodes(data=True)),
-                  str(graph._g.edges(data=True)))
-        LOG.debug('graph_query_vertices: real graph: nodes %s, edges %s',
-                  str(self.graph._g.nodes(data=True)),
-                  str(self.graph._g.edges(data=True)))
         return graph
 
     def sub_graph_matching(self,
@@ -138,14 +132,14 @@ class NXAlgorithm(GraphAlgorithm):
                                             query_dict=None,
                                             edge_attr_filter=None):
         if query_dict:
-            vertices = self.graph.get_vertices(query_dict=query_dict)
+            vertices = self.graph.vertices_iter(query_dict=query_dict)
         elif vertex_attr_filter:
-            vertices = self.graph.get_vertices(
+            vertices = self.graph.vertices_iter(
                 vertex_attr_filter=vertex_attr_filter)
         else:
-            vertices = self.graph.get_vertices()
+            vertices = self.graph.vertices_iter()
 
-        vertices_ids = [vertex.vertex_id for vertex in vertices]
+        vertices_ids = (vertex.vertex_id for vertex in vertices)
 
         graph = self._create_new_graph('graph')
         graph._g = self.graph._g.subgraph(vertices_ids)
@@ -153,13 +147,6 @@ class NXAlgorithm(GraphAlgorithm):
         # delete non matching edges
         if edge_attr_filter:
             self._apply_edge_attr_filter(graph, edge_attr_filter)
-
-        LOG.debug('match query, find graph: nodes %s, edges %s',
-                  str(graph._g.nodes(data=True)),
-                  str(graph._g.edges(data=True)))
-        LOG.debug('match query, real graph: nodes %s, edges %s',
-                  str(self.graph._g.nodes(data=True)),
-                  str(self.graph._g.edges(data=True)))
 
         return graph
 
@@ -199,18 +186,19 @@ class NXAlgorithm(GraphAlgorithm):
 
     @staticmethod
     def _edge_result_to_list(edge_result):
-        d = dict()
+        keys = set()
         for source_id, target_id, label, data in edge_result:
-            d[(source_id, target_id, label)] = \
-                Edge(source_id, target_id, label, properties=data)
-        return d.values()
+            if (source_id, target_id, label) not in keys:
+                keys.add((source_id, target_id, label))
+                yield Edge(source_id, target_id, label, properties=data)
 
     @staticmethod
     def _vertex_result_to_list(vertex_result):
-        d = dict()
+        keys = set()
         for v_id, data in vertex_result:
-            d[v_id] = Vertex(vertex_id=v_id, properties=data)
-        return d.values()
+            if v_id not in keys:
+                keys.add(v_id)
+                yield Vertex(vertex_id=v_id, properties=data)
 
     @staticmethod
     def _list_union(list_1, list_2):

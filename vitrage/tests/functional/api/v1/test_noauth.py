@@ -54,7 +54,7 @@ class NoAuthTest(FunctionalTest):
 
     def test_noauth_mode_get_topology(self):
         with mock.patch('pecan.request') as request:
-            request.client.call.return_value = '{}'
+            request.client.call.return_value = {}
             params = dict(depth=None, graph_type='graph', query=None,
                           root=None,
                           all_tenants=False)

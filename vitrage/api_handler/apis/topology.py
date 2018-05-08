@@ -11,6 +11,8 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+import gc
+import threading
 
 from oslo_log import log
 from osprofiler import profiler
@@ -37,8 +39,15 @@ class TopologyApis(EntityGraphApisBase):
     def __init__(self, entity_graph, conf):
         self.entity_graph = entity_graph
         self.conf = conf
+        self.lock = threading.Lock()
 
     def get_topology(self, ctx, graph_type, depth, query, root, all_tenants):
+        with self.lock:
+            gc.collect()
+            return self._get_topology(ctx, graph_type, depth, query, root,
+                                      all_tenants)
+
+    def _get_topology(self, ctx, graph_type, depth, query, root, all_tenants):
         LOG.debug("TopologyApis get_topology - root: %s, all_tenants=%s",
                   str(root), all_tenants)
 
@@ -81,9 +90,6 @@ class TopologyApis(EntityGraphApisBase):
                     project_id,
                     is_admin_project,
                     root_id)
-
-            alarms = graph.get_vertices(query_dict=ALARMS_ALL_QUERY)
-            graph.update_vertices(alarms)
 
         return graph.json_output_graph()
 
@@ -158,8 +164,7 @@ class TopologyApis(EntityGraphApisBase):
         :type current_project_id: string
         :type is_admin_project: boolean
         """
-
-        for alarm in graph.get_vertices(query_dict=ALARMS_ALL_QUERY):
+        for alarm in graph.vertices_iter(query_dict=ALARMS_ALL_QUERY):
             if not alarm.get(VProps.PROJECT_ID, None):
                 cat_filter = {VProps.VITRAGE_CATEGORY: EntityCategory.RESOURCE}
                 resource_neighbors = \

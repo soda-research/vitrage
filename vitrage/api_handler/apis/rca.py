@@ -11,6 +11,7 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+import json
 
 from oslo_log import log
 from osprofiler import profiler
@@ -67,10 +68,10 @@ class RcaApis(EntityGraphApisBase):
         alarms = unified_graph.get_vertices(query_dict=ALARMS_ALL_QUERY)
         unified_graph.update_vertices(alarms)
 
-        json_graph = unified_graph.json_output_graph(
+        graph = unified_graph.json_output_graph(
             inspected_index=self._find_rca_index(unified_graph, root))
 
-        return json_graph
+        return json.dumps(graph)
 
     def _get_rca_for_specific_project(self,
                                       ga,

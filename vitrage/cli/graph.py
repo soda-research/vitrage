@@ -17,7 +17,7 @@ import sys
 
 from oslo_service import service as os_service
 
-from vitrage.api_handler.service import VitrageApiHandlerService
+from vitrage.api_handler.service import ApiManager
 from vitrage.cli import VITRAGE_TITLE
 from vitrage import entity_graph
 from vitrage.entity_graph.consistency.service import VitrageConsistencyService
@@ -40,14 +40,13 @@ def main():
     conf = service.prepare_service()
     e_graph = entity_graph.get_graph_driver(conf)('Entity Graph')
     evaluator = EvaluatorManager(conf, e_graph)
+    ApiManager(conf, e_graph).start()
     launcher = os_service.ServiceLauncher(conf)
     db_connection = storage.get_connection_from_config(conf)
     clear_active_actions_table(db_connection)
 
     launcher.launch_service(VitrageGraphService(
         conf, e_graph, evaluator, db_connection))
-
-    launcher.launch_service(VitrageApiHandlerService(conf, e_graph))
 
     launcher.launch_service(VitrageConsistencyService(conf, e_graph))
 

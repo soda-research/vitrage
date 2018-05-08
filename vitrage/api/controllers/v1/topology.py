@@ -77,7 +77,7 @@ class TopologyController(RootRestController):
                                                    root=root,
                                                    all_tenants=all_tenants)
             LOG.debug(graph_data)
-            graph = json.loads(graph_data)
+            graph = graph_data
             if graph_type == 'graph':
                 return graph
             if graph_type == 'tree':

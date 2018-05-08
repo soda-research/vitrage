@@ -183,7 +183,6 @@ class TestApis(TestEntityGraphUnitBase):
             query=None,
             root=None,
             all_tenants=False)
-        graph_topology = json.loads(graph_topology)
 
         # Test assertions
         self.assertEqual(8, len(graph_topology['nodes']))
@@ -205,7 +204,6 @@ class TestApis(TestEntityGraphUnitBase):
             query=None,
             root=None,
             all_tenants=False)
-        graph_topology = json.loads(graph_topology)
 
         # Test assertions
         self.assertEqual(7, len(graph_topology['nodes']))
@@ -227,7 +225,6 @@ class TestApis(TestEntityGraphUnitBase):
             query=None,
             root=None,
             all_tenants=True)
-        graph_topology = json.loads(graph_topology)
 
         # Test assertions
         self.assertEqual(12, len(graph_topology['nodes']))
