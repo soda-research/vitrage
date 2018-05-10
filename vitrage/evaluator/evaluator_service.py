@@ -14,7 +14,6 @@
 
 import multiprocessing
 
-from oslo_concurrency import processutils
 from oslo_log import log
 
 from vitrage.entity_graph import EVALUATOR_TOPIC
@@ -32,7 +31,7 @@ RELOAD_TEMPLATES = 'reload_templates'
 class EvaluatorManager(base.GraphCloneManagerBase):
 
     def __init__(self, conf, entity_graph):
-        workers_num = conf.evaluator.workers or processutils.get_worker_count()
+        workers_num = conf.evaluator.workers
         super(EvaluatorManager, self).__init__(conf, entity_graph, workers_num)
 
     def start(self):
