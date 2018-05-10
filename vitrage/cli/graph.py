@@ -40,7 +40,8 @@ def main():
     conf = service.prepare_service()
     e_graph = entity_graph.get_graph_driver(conf)('Entity Graph')
     evaluator = EvaluatorManager(conf, e_graph)
-    ApiManager(conf, e_graph).start()
+    api_handler = ApiManager(conf, e_graph)
+    api_handler.start()
     launcher = os_service.ServiceLauncher(conf)
     db_connection = storage.get_connection_from_config(conf)
     clear_active_actions_table(db_connection)
@@ -51,6 +52,7 @@ def main():
     launcher.launch_service(VitrageConsistencyService(conf, e_graph))
 
     launcher.wait()
+    api_handler.stop_all_workers()
 
 
 def clear_active_actions_table(db_connection):
