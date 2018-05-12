@@ -102,7 +102,7 @@ Create /etc/vitrage/vitrage.conf file with the following information:
     user_domain_name = Default
     password = <password>
     username = vitrage
-    auth_url = http://<ip>:35357
+    auth_url = http://<ip>:5000
     auth_type = password
 
 Replace **<ip>** with your controller node's IP.
