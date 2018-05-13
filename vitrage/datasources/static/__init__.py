@@ -59,5 +59,6 @@ class StaticFields(object):
     TARGET = 'target'
     STATIC_ID = 'static_id'
     TYPE = 'type'
+    CATEGORY = 'category'
     ID = 'id'
     NAME = 'name'

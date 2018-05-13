@@ -13,6 +13,7 @@
 # under the License.
 import itertools
 
+import copy
 from oslo_utils import uuidutils
 
 from vitrage.common.constants import EdgeProperties
@@ -50,6 +51,7 @@ class GraphGenerator(object):
         self._num_of_tripleo_controllers = num_of_tripleo_controllers
         self._num_of_zabbix_alarms_per_controller = \
             num_of_zabbix_alarms_per_controller
+        self.files_cache = {}
 
     def create_graph(self):
         graph = NXGraph()
@@ -130,7 +132,7 @@ class GraphGenerator(object):
         for source_v in source_v_list:
             for i in range(n):
                 v = self._file_to_vertex(neighbor_props_file, i)
-                v[VProps.NAME] = source_v[VProps.NAME] + "-" + v[VProps.NAME]
+                v[VProps.NAME] = v[VProps.NAME] + "-" + source_v[VProps.NAME]
                 created_vertices.append(v)
                 g.add_vertex(v)
                 if direction == Direction.OUT:
@@ -156,19 +158,25 @@ class GraphGenerator(object):
                                               source_v.vertex_id,
                                               v.vertex_id))
 
-    def _file_to_vertex(self, relative_path, index=0):
-        full_path = RESOURCES_PATH + "/vertices/"
-        props = utils.load_specs(relative_path, full_path)
+    def _file_to_vertex(self, filename, index=0):
+        props = self._load_resource_file(filename, 'vertices')
         if props.get(VProps.ID):
             props[VProps.ID] = uuidutils.generate_uuid()
         props[VProps.NAME] = "%s-%s" % (props[VProps.VITRAGE_TYPE], str(index))
         props[VProps.VITRAGE_ID] = uuidutils.generate_uuid()
         return Vertex(props[VProps.VITRAGE_ID], props)
 
-    @staticmethod
-    def _file_to_edge(relative_path, source_id, target_id):
-        full_path = RESOURCES_PATH + "/edges/"
-        props = utils.load_specs(relative_path, full_path)
+    def _file_to_edge(self, filename, source_id, target_id):
+        props = self._load_resource_file(filename, 'edges')
         return Edge(source_id, target_id,
                     props[EdgeProperties.RELATIONSHIP_TYPE],
                     props)
+
+    def _load_resource_file(self, filename, folder):
+        full_path = RESOURCES_PATH + '/' + folder + '/'
+        cache_key = (filename, folder)
+        props = self.files_cache.get(cache_key, None)
+        if not props:
+            props = utils.load_specs(filename, full_path)
+            self.files_cache[cache_key] = props
+        return copy.copy(props)

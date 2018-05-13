@@ -4,6 +4,7 @@
   "vitrage_is_deleted": false,
   "vitrage_category": "RESOURCE",
   "vitrage_operational_state": "N/A",
+  "state": "ACTIVE",
   "vitrage_type": "nova.host",
   "vitrage_sample_timestamp": "2017-12-24 10:32:41.389676+00:00",
   "vitrage_aggregated_state": null,

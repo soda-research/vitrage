@@ -57,6 +57,8 @@ class StaticTransformer(ResourceTransformerBase):
     def _create_vertex(self, entity_event):
 
         entity_type = entity_event[StaticFields.TYPE]
+        entity_category = entity_event.get(StaticFields.CATEGORY,
+                                           EntityCategory.RESOURCE)
         entity_id = entity_event[VProps.ID]
         vitrage_sample_timestamp = entity_event[DSProps.SAMPLE_DATE]
 
@@ -64,7 +66,7 @@ class StaticTransformer(ResourceTransformerBase):
             properties = {
                 VProps.VITRAGE_TYPE: entity_type,
                 VProps.ID: entity_id,
-                VProps.VITRAGE_CATEGORY: EntityCategory.RESOURCE,
+                VProps.VITRAGE_CATEGORY: entity_category,
                 VProps.VITRAGE_SAMPLE_TIMESTAMP: vitrage_sample_timestamp,
                 VProps.VITRAGE_IS_PLACEHOLDER: False
             }
@@ -79,7 +81,7 @@ class StaticTransformer(ResourceTransformerBase):
 
             return graph_utils.create_vertex(
                 entity_key,
-                vitrage_category=EntityCategory.RESOURCE,
+                vitrage_category=entity_category,
                 vitrage_type=entity_type,
                 vitrage_sample_timestamp=vitrage_sample_timestamp,
                 entity_id=entity_id,
