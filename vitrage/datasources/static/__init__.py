@@ -62,3 +62,4 @@ class StaticFields(object):
     CATEGORY = 'category'
     ID = 'id'
     NAME = 'name'
+    STATE = 'state'

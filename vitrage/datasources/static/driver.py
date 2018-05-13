@@ -17,6 +17,8 @@ from six.moves import reduce
 
 from oslo_log import log
 
+from vitrage.common.constants import DatasourceProperties as DSProps
+from vitrage.common.constants import GraphAction
 from vitrage.datasources.driver_base import DriverBase
 from vitrage.datasources.static import STATIC_DATASOURCE
 from vitrage.datasources.static import StaticFields
@@ -34,6 +36,7 @@ class StaticDriver(DriverBase):
     def __init__(self, conf):
         super(StaticDriver, self).__init__()
         self.cfg = conf
+        self.entities_cache = []
 
     @staticmethod
     def _is_valid_config(config):
@@ -49,23 +52,48 @@ class StaticDriver(DriverBase):
         pass
 
     def get_all(self, datasource_action):
-        return self.make_pickleable(self._get_all_entities(),
+        return self.make_pickleable(self._get_and_cache_all_entities(),
                                     STATIC_DATASOURCE,
                                     datasource_action)
 
     def get_changes(self, datasource_action):
-        return self.make_pickleable(self._get_changes_entities(),
+        return self.make_pickleable(self._get_and_cache_changed_entities(),
                                     STATIC_DATASOURCE,
                                     datasource_action)
 
+    def _get_and_cache_all_entities(self):
+        self.entities_cache = self._get_all_entities()
+        return self.entities_cache
+
     def _get_all_entities(self):
         files = file_utils.list_files(self.cfg.static.directory, '.yaml', True)
-        return reduce(chain, [self._get_entities_from_file(path)
-                              for path in files], [])
+        return list(reduce(chain, [self._get_entities_from_file(path)
+                                   for path in files], []))
 
-    def _get_changes_entities(self):
-        """TODO(yujunz): update from file change or CRUD"""
-        return []
+    def _get_and_cache_changed_entities(self):
+        changed_entities = []
+        new_entities = self._get_all_entities()
+
+        for new_entity in new_entities:
+            old_entity = self._find_entity(new_entity, self.entities_cache)
+
+            if old_entity:
+                # Add modified entities
+                if not self._equal_entities(old_entity, new_entity):
+                    changed_entities.append(new_entity.copy())
+            else:
+                # Add new entities
+                changed_entities.append(new_entity.copy())
+
+        # Add deleted entities
+        for old_entity in self.entities_cache:
+            if not self._find_entity(old_entity, new_entities):
+                old_entity_copy = old_entity.copy()
+                old_entity_copy[DSProps.EVENT_TYPE] = GraphAction.DELETE_ENTITY
+                changed_entities.append(old_entity_copy)
+
+        self.entities_cache = new_entities
+        return changed_entities
 
     @classmethod
     def _get_entities_from_file(cls, path):
@@ -140,3 +168,24 @@ class StaticDriver(DriverBase):
                       .format(neighbor, rel))
             return None
         return rel
+
+    @staticmethod
+    def _find_entity(search_entity, entities):
+        # naive implementation since we don't expect many static entities
+        for entity in entities:
+            if entity[StaticFields.TYPE] == search_entity[StaticFields.TYPE] \
+                    and entity[StaticFields.ID] == \
+                    search_entity[StaticFields.ID]:
+                return entity
+
+    @staticmethod
+    def _equal_entities(old_entity, new_entity):
+        # TODO(iafek): compare also the relationships
+        return old_entity.get(StaticFields.TYPE) == \
+            new_entity.get(StaticFields.TYPE) and \
+            old_entity.get(StaticFields.ID) == \
+            new_entity.get(StaticFields.ID) and \
+            old_entity.get(StaticFields.NAME) == \
+            new_entity.get(StaticFields.NAME) and \
+            old_entity.get(StaticFields.STATE) == \
+            new_entity.get(StaticFields.STATE)
