@@ -15,7 +15,6 @@
 
 import sys
 
-from vitrage.api_handler.service import VitrageApiHandlerService
 from vitrage.cli import VITRAGE_TITLE
 from vitrage.entity_graph import get_graph_driver
 from vitrage.entity_graph.graph_init import VitrageGraphInit
@@ -32,7 +31,6 @@ def main():
     db_connection = storage.get_connection_from_config(conf)
     clear_active_actions_table(db_connection)
 
-    VitrageApiHandlerService(conf, e_graph).start()
     VitrageGraphInit(conf, e_graph, db_connection).run()
 
 
