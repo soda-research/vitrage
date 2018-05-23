@@ -63,9 +63,13 @@ class DoctorDriver(AlarmDriverBase):
         return get_detail(old_alarm, DoctorDetails.STATUS) != \
             get_detail(new_alarm, DoctorDetails.STATUS)
 
-    def _get_alarms(self):
+    def get_all(self, datasource_action):
         # pulling alarms is not supported in Doctor monitor
-        return []
+        return self.make_pickleable([], DOCTOR_DATASOURCE, datasource_action)
+
+    def get_changes(self, datasource_action):
+        # pulling alarms is not supported in Doctor monitor
+        return self.make_pickleable([], DOCTOR_DATASOURCE, datasource_action)
 
     def enrich_event(self, event, event_type):
         """Enrich the given event

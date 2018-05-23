@@ -17,10 +17,14 @@ from vitrage.common.constants import DatasourceOpts as DSOpts
 from vitrage.common.constants import UpdateMethod
 from vitrage.utils import opt_exists
 
+drivers = {}
+
 
 def get_drivers_by_name(conf, driver_names):
-    return [utils.import_object(conf[d_name].driver, conf)
-            for d_name in driver_names]
+    for d_name in driver_names:
+        if not drivers.get(d_name):
+            drivers[d_name] = utils.import_object(conf[d_name].driver, conf)
+    return [drivers[d_name] for d_name in driver_names]
 
 
 def get_pull_drivers_names(conf):
