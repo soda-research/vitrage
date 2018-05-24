@@ -14,6 +14,7 @@
 
 from vitrage.common.constants import DatasourceAction
 from vitrage.common.constants import DatasourceProperties as DSProps
+from vitrage.common.constants import GraphAction
 from vitrage.datasources.cinder.volume import CINDER_VOLUME_DATASOURCE
 from vitrage.datasources.cinder.volume.driver import CinderVolumeDriver
 from vitrage.datasources.driver_base import DriverBase
@@ -131,6 +132,9 @@ class HeatStackDriver(DriverBase):
         stacks = self.client.stacks.list(global_tenant=True)
         stacks_list = self._make_stacks_list(stacks)
         stacks_with_resources = self._append_stacks_resources(stacks_list)
+        for s in stacks_with_resources:
+            if s['stack_status'].lower() in ['deleted', 'delete_in_progress']:
+                s[DSProps.EVENT_TYPE] = GraphAction.DELETE_ENTITY
         return self.make_pickleable(stacks_with_resources,
                                     HEAT_STACK_DATASOURCE,
                                     datasource_action,
