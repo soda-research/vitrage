@@ -14,6 +14,7 @@
 
 from vitrage.common.constants import DatasourceAction
 from vitrage.common.constants import DatasourceProperties as DSProps
+from vitrage.common.constants import GraphAction
 from vitrage.datasources.nova.instance import NOVA_INSTANCE_DATASOURCE
 from vitrage.datasources.nova.nova_driver_base import NovaDriverBase
 
@@ -22,7 +23,11 @@ class InstanceDriver(NovaDriverBase):
 
     @staticmethod
     def extract_events(instances):
-        return [instance.__dict__ for instance in instances]
+        events = [instance.__dict__ for instance in instances]
+        for e in events:
+            if e['status'].lower() == 'deleted':
+                e[DSProps.EVENT_TYPE] = GraphAction.DELETE_ENTITY
+        return events
 
     def get_all(self, datasource_action):
         return self.make_pickleable(
