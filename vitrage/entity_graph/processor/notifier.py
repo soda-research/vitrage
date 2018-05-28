@@ -18,6 +18,7 @@ from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import NotifierEventTypes
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.evaluator.actions import evaluator_event_transformer as evaluator
+from vitrage.graph.driver.networkx_graph import vertex_copy
 from vitrage.messaging import get_transport
 
 
@@ -75,25 +76,27 @@ class GraphNotifier(object):
         vitrage_is_deleted property set to True
         :param graph: The graph
         """
-        notification_types = _get_notification_type(before, current, is_vertex)
+        curr = current
+        notification_types = _get_notification_type(before, curr, is_vertex)
         if not notification_types:
             return
 
         # in case the vertex point to some resource add the resource to the
         # notification (useful for deduce alarm notifications)
-        if current.get(VProps.VITRAGE_RESOURCE_ID):
-            current.properties[VProps.RESOURCE] = graph.get_vertex(
-                current.get(VProps.VITRAGE_RESOURCE_ID))
+        if curr.get(VProps.VITRAGE_RESOURCE_ID):
+            curr = vertex_copy(curr.vertex_id, curr.properties)
+            curr.properties[VProps.RESOURCE] = graph.get_vertex(
+                curr.get(VProps.VITRAGE_RESOURCE_ID))
 
         LOG.info('notification_types : %s', str(notification_types))
-        LOG.info('notification properties : %s', current.properties)
+        LOG.info('notification properties : %s', curr.properties)
 
         for notification_type in notification_types:
             try:
                 self.oslo_notifier.info(
                     {},
                     notification_type,
-                    current.properties)
+                    curr.properties)
             except Exception as e:
                 LOG.exception('Cannot notify - %s - %s', notification_type, e)
 
