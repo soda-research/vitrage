@@ -44,6 +44,7 @@ GRAPH_UPDATE = 'graph_update'
 START_EVALUATION = 'start_evaluation'
 RELOAD_TEMPLATES = 'reload_templates'
 TEMPLATE_ACTION = 'template_action'
+POISON_PILL = None
 
 ADD = 'add'
 DELETE = 'delete'
@@ -68,6 +69,7 @@ class GraphWorkersManager(cotyledon.ServiceManager):
         self.add_evaluator_workers()
         self.add_template_workers()
         self.add_api_workers()
+        self.register_hooks(on_terminate=self.submit_stop_workers)
 
     def add_evaluator_workers(self):
         """Add evaluator workers
@@ -148,8 +150,6 @@ class GraphWorkersManager(cotyledon.ServiceManager):
         Enables the worker's scenario-evaluator, and run it on the entire graph
         """
         self._submit_and_wait(self._evaluator_queues, (START_EVALUATION,))
-        self._entity_graph.subscribe(self.submit_graph_update)
-        LOG.info('Init Finished')
 
     def submit_evaluators_reload_templates(self):
         """Recreate the scenario-repository in all evaluator workers
@@ -188,6 +188,10 @@ class GraphWorkersManager(cotyledon.ServiceManager):
         for t in templates:
             self._db.templates.update(t.uuid, 'status', new_status)
 
+    def submit_stop_workers(self):
+        for q in self._all_queues:
+            q.put(POISON_PILL)
+
     @staticmethod
     def _submit_and_wait(queues, payload):
         for q in queues:
@@ -206,7 +210,6 @@ class GraphCloneWorkerBase(cotyledon.Service):
         self._conf = conf
         self._task_queue = task_queues[worker_id]
         self._entity_graph = entity_graph
-        self._running = False
 
     name = 'GraphCloneWorkerBase'
 
@@ -222,20 +225,19 @@ class GraphCloneWorkerBase(cotyledon.Service):
         self._init_instance()
         self._read_queue()
 
-    def terminate(self):
-        self._running = False
-        LOG.info("%s - Stopped!", self.__class__.__name__)
-
     def _read_queue(self):
         LOG.debug("%s - reading queue %s",
                   self.__class__.__name__, self.worker_id)
-        while self._running:
+        while True:
             try:
                 next_task = self._task_queue.get()
+                if next_task is POISON_PILL:
+                    break
                 self.do_task(next_task)
             except Exception as e:
                 LOG.exception("Graph may not be in sync: exception %s", e)
             self._task_queue.task_done()
+        LOG.info("%s - Stopped!", self.__class__.__name__)
 
     def do_task(self, task):
         action = task[0]

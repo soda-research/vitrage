@@ -32,6 +32,7 @@ LOG = log.getLogger(__name__)
 class VitrageGraphInit(object):
     def __init__(self, conf, graph, db_connection):
         self.conf = conf
+        self.graph = graph
         self.workers = GraphWorkersManager(conf, graph, db_connection)
         self.events_coordination = EventsCoordination(
             conf,
@@ -51,10 +52,15 @@ class VitrageGraphInit(object):
             retry_on_fault=True,
             first_call_timeout=10)
         self.processor.start_notifier()
-        self.events_coordination.start()
-        spawn(self.workers.submit_start_evaluations)
-        self.scheduler.start_periodic_tasks()
+        spawn(self.start_all_workers)
         self.workers.run()
+
+    def start_all_workers(self):
+        self.workers.submit_start_evaluations()  # evaluate entire graph
+        self.graph.subscribe(self.workers.submit_graph_update)
+        self.scheduler.start_periodic_tasks()
+        LOG.info('Init Finished')
+        self.events_coordination.start()
 
     def process_event(self, event):
         if event.get('template_action'):
@@ -87,10 +93,10 @@ class EventsCoordination(object):
             topic_high, self._do_high_priority_work)
 
     def start(self):
-        self._high_pri_listener.start()
         LOG.info('Listening on %s', self._high_pri_listener.targets[0].topic)
-        self._low_pri_listener.start()
         LOG.info('Listening on %s', self._low_pri_listener.targets[0].topic)
+        self._high_pri_listener.start()
+        self._low_pri_listener.start()
 
     def stop(self):
         self._low_pri_listener.stop()
