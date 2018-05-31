@@ -569,3 +569,19 @@ def simple_aodh_alarm_notification_generators(alarm_num,
     ]
 
     return tg.get_trace_generators(test_entity_spec_list)
+
+
+def simple_k8s_nodes_generators(nodes_num, snapshot_events=0):
+    mapping = ['vm-{0}'.format(index) for index in range(nodes_num)]
+
+    test_entity_spec_list = []
+    if snapshot_events:
+        test_entity_spec_list.append(
+            {tg.DYNAMIC_INFO_FKEY: tg.DRIVER_KUBE_SNAPSHOT_D,
+             tg.STATIC_INFO_FKEY: tg.DRIVER_INST_SNAPSHOT_S,
+             tg.MAPPING_KEY: mapping,
+             tg.NAME_KEY: 'Nodes snapshot generator',
+             tg.NUM_EVENTS: snapshot_events
+             }
+        )
+    return tg.get_trace_generators(test_entity_spec_list)

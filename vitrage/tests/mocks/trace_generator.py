@@ -66,6 +66,7 @@ DRIVER_STACK_UPDATE_D = 'driver_stack_update_dynamic.json'
 DRIVER_STACK_SNAPSHOT_D = 'driver_stack_snapshot_dynamic.json'
 DRIVER_CONSISTENCY_UPDATE_D = 'driver_consistency_update_dynamic.json'
 DRIVER_ZONE_SNAPSHOT_D = 'driver_zone_snapshot_dynamic.json'
+DRIVER_KUBE_SNAPSHOT_D = 'driver_kubernetes_snapshot_dynamic.json'
 
 
 # Mock transformer Specs (i.e., what the transformer outputs)
@@ -119,6 +120,7 @@ class EventTraceGenerator(object):
             {DRIVER_AODH_UPDATE_D: _get_aodh_alarm_update_driver_values,
              DRIVER_DOCTOR_UPDATE_D: _get_doctor_update_driver_values,
              DRIVER_COLLECTD_UPDATE_D: _get_collectd_update_driver_values,
+             DRIVER_KUBE_SNAPSHOT_D: _get_k8s_node_snapshot_driver_values,
              DRIVER_INST_SNAPSHOT_D: _get_vm_snapshot_driver_values,
              DRIVER_INST_UPDATE_D: _get_vm_update_driver_values,
              DRIVER_HOST_SNAPSHOT_D: _get_host_snapshot_driver_values,
@@ -254,6 +256,24 @@ def _get_host_snapshot_driver_values(spec):
         static_values.append(combine_data(
             static_info, mapping, spec.get(EXTERNAL_INFO_KEY, None)
         ))
+    return static_values
+
+
+def _get_k8s_node_snapshot_driver_values(spec):
+    """Generates the static driver values for each k8s node.
+
+    :param spec: specification of event generation.
+    :type spec: dict
+    :return: list of static driver values for each k8s node.
+    :rtype: list
+    """
+
+    vm_host_mapping = spec[MAPPING_KEY]
+    static_values = []
+    for node_name in vm_host_mapping:
+        static_values.append(combine_data(node_name, None,
+                                          spec.get(EXTERNAL_INFO_KEY)))
+
     return static_values
 
 
