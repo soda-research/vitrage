@@ -27,17 +27,21 @@ LOG = log.getLogger(__name__)
 
 class MockDriver(StaticDriver):
 
-    e_graph = GraphGenerator(
-        num_of_networks=2,
-        num_of_zones_per_cluster=2,
-        num_of_hosts_per_zone=64,
-        num_of_zabbix_alarms_per_host=10,
-        num_of_instances_per_host=17,
-        num_of_ports_per_instance=2,
-        num_of_volumes_per_instance=2,
-        num_of_vitrage_alarms_per_instance=0,
-        num_of_tripleo_controllers=0,
-        num_of_zabbix_alarms_per_controller=0).create_graph()
+    def __init__(self, conf):
+        super(StaticDriver, self).__init__()
+        mock_cfg = conf.mock_graph_datasource
+        self.e_graph = GraphGenerator(
+            networks=mock_cfg.networks,
+            zones_per_cluster=mock_cfg.zones_per_cluster,
+            hosts_per_zone=mock_cfg.hosts_per_zone,
+            zabbix_alarms_per_host=mock_cfg.zabbix_alarms_per_host,
+            instances_per_host=mock_cfg.instances_per_host,
+            ports_per_instance=mock_cfg.ports_per_instance,
+            volumes_per_instance=mock_cfg.volumes_per_instance,
+            vitrage_alarms_per_instance=mock_cfg.vitrage_alarms_per_instance,
+            tripleo_controllers=mock_cfg.tripleo_controllers,
+            zabbix_alarms_per_controller=mock_cfg.zabbix_alarms_per_controller
+        ).create_graph()
 
     def get_all(self, datasource_action):
         return self.make_pickleable(self._get_mock_entities(),

@@ -29,28 +29,26 @@ RESOURCES_PATH = utils.get_resources_dir() + '/mock_configurations'
 
 class GraphGenerator(object):
     def __init__(self,
-                 num_of_networks=2,
-                 num_of_zones_per_cluster=2,
-                 num_of_hosts_per_zone=2,
-                 num_of_zabbix_alarms_per_host=2,
-                 num_of_instances_per_host=2,
-                 num_of_ports_per_instance=2,
-                 num_of_volumes_per_instance=2,
-                 num_of_vitrage_alarms_per_instance=2,
-                 num_of_tripleo_controllers=2,
-                 num_of_zabbix_alarms_per_controller=2):
-        self._num_of_networks = num_of_networks
-        self._num_of_zones_per_cluster = num_of_zones_per_cluster
-        self._num_of_hosts_per_zone = num_of_hosts_per_zone
-        self._num_of_zabbix_alarms_per_host = num_of_zabbix_alarms_per_host
-        self._num_of_instances_per_host = num_of_instances_per_host
-        self._num_of_ports_per_instance = num_of_ports_per_instance
-        self._num_of_volumes_per_instance = num_of_volumes_per_instance
-        self._num_of_vitrage_alarms_per_instance = \
-            num_of_vitrage_alarms_per_instance
-        self._num_of_tripleo_controllers = num_of_tripleo_controllers
-        self._num_of_zabbix_alarms_per_controller = \
-            num_of_zabbix_alarms_per_controller
+                 networks=2,
+                 zones_per_cluster=2,
+                 hosts_per_zone=2,
+                 zabbix_alarms_per_host=2,
+                 instances_per_host=2,
+                 ports_per_instance=2,
+                 volumes_per_instance=2,
+                 vitrage_alarms_per_instance=2,
+                 tripleo_controllers=2,
+                 zabbix_alarms_per_controller=2):
+        self._networks = networks
+        self._zones_per_cluster = zones_per_cluster
+        self._hosts_per_zone = hosts_per_zone
+        self._zabbix_alarms_per_host = zabbix_alarms_per_host
+        self._instances_per_host = instances_per_host
+        self._ports_per_instance = ports_per_instance
+        self._volumes_per_instance = volumes_per_instance
+        self._vitrage_alarms_per_instance = vitrage_alarms_per_instance
+        self._tripleo_controllers = tripleo_controllers
+        self._zabbix_alarms_per_controller = zabbix_alarms_per_controller
         self.files_cache = {}
 
     def create_graph(self):
@@ -59,31 +57,31 @@ class GraphGenerator(object):
         graph.add_vertex(v1)
 
         networks = self._create_n_vertices(graph,
-                                           self._num_of_networks,
+                                           self._networks,
                                            'neutron.network.json')
         zones = self._create_n_neighbors(graph,
-                                         self._num_of_zones_per_cluster,
+                                         self._zones_per_cluster,
                                          [v1],
                                          'nova.zone.json',
                                          'contains.json')
         hosts = self._create_n_neighbors(graph,
-                                         self._num_of_hosts_per_zone,
+                                         self._hosts_per_zone,
                                          zones,
                                          'nova.host.json',
                                          'contains.json')
         self._create_n_neighbors(graph,
-                                 self._num_of_zabbix_alarms_per_host,
+                                 self._zabbix_alarms_per_host,
                                  hosts,
                                  'zabbix.json',
                                  'on.json',
                                  Direction.IN)
         instances = self._create_n_neighbors(graph,
-                                             self._num_of_instances_per_host,
+                                             self._instances_per_host,
                                              hosts,
                                              'nova.instance.json',
                                              'contains.json')
         ports = self._create_n_neighbors(graph,
-                                         self._num_of_ports_per_instance,
+                                         self._ports_per_instance,
                                          instances,
                                          'neutron.port.json',
                                          'attached.json',
@@ -92,13 +90,13 @@ class GraphGenerator(object):
         self._round_robin_edges(graph, networks, ports, 'contains.json')
 
         self._create_n_neighbors(graph,
-                                 self._num_of_volumes_per_instance,
+                                 self._volumes_per_instance,
                                  instances,
                                  'cinder.volume.json',
                                  'attached.json',
                                  Direction.IN)
         self._create_n_neighbors(graph,
-                                 self._num_of_vitrage_alarms_per_instance,
+                                 self._vitrage_alarms_per_instance,
                                  instances,
                                  'vitrage.alarm.json',
                                  'on.json',
@@ -107,10 +105,10 @@ class GraphGenerator(object):
         # Also create non connected components:
         tripleo_controller = \
             self._create_n_vertices(graph,
-                                    self._num_of_tripleo_controllers,
+                                    self._tripleo_controllers,
                                     'tripleo.controller.json')
         self._create_n_neighbors(graph,
-                                 self._num_of_zabbix_alarms_per_controller,
+                                 self._zabbix_alarms_per_controller,
                                  tripleo_controller,
                                  'zabbix.json',
                                  'on.json',

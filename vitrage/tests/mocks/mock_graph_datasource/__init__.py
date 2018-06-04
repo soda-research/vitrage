@@ -36,4 +36,14 @@ OPTS = [
                     'Push: updates by getting notifications from the'
                     ' datasource itself.',
                required=True),
+    cfg.IntOpt('networks', default=3),
+    cfg.IntOpt('zones_per_cluster', default=2),
+    cfg.IntOpt('hosts_per_zone', default=2),
+    cfg.IntOpt('zabbix_alarms_per_host', default=2),
+    cfg.IntOpt('instances_per_host', default=2),
+    cfg.IntOpt('ports_per_instance', default=2),
+    cfg.IntOpt('volumes_per_instance', default=2),
+    cfg.IntOpt('vitrage_alarms_per_instance', default=0),
+    cfg.IntOpt('tripleo_controllers', default=3),
+    cfg.IntOpt('zabbix_alarms_per_controller', default=1),
 ]
