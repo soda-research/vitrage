@@ -102,7 +102,10 @@ class AlarmApis(EntityGraphApisBase):
         for alarm in alarms:
             severity = alarm.get(VProps.VITRAGE_OPERATIONAL_SEVERITY)
             if severity:
-                counts[severity] += 1
+                try:
+                    counts[severity] += 1
+                except KeyError:
+                    pass
 
         return json.dumps(counts)
 
