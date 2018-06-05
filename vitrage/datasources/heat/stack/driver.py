@@ -133,7 +133,8 @@ class HeatStackDriver(DriverBase):
         stacks_list = self._make_stacks_list(stacks)
         stacks_with_resources = self._append_stacks_resources(stacks_list)
         for s in stacks_with_resources:
-            if s['stack_status'].lower() in ['deleted', 'delete_in_progress']:
+            if s['stack_status'].lower() in ['delete_complete', 'deleted',
+                                             'delete_in_progress']:
                 s[DSProps.EVENT_TYPE] = GraphAction.DELETE_ENTITY
         return self.make_pickleable(stacks_with_resources,
                                     HEAT_STACK_DATASOURCE,
