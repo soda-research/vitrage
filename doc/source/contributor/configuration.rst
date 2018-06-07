@@ -25,7 +25,7 @@ Datasources
    static-config
    static-physical-config
    zabbix_vitrage
-
+   k8s_datasource
 
 Notifiers
 ---------
