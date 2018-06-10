@@ -73,7 +73,7 @@ is vitrage.yaml
 
 
 
-.. _policy.json: http://git.openstack.org/cgit/openstack/vitrage/tree/etc/vitrage/policy.json
+.. _policy.json: http://git.openstack.org/cgit/openstack/vitrage/tree/etc/vitrage/policy.json?h=stable/pike
 .. _api-paste.ini: http://git.openstack.org/cgit/openstack/vitrage/tree/etc/vitrage/api-paste.ini
 .. _datasources_values: http://git.openstack.org/cgit/openstack/vitrage/tree/etc/vitrage/datasources_values
 
