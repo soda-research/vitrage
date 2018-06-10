@@ -78,7 +78,6 @@ class Processor(processor.ProcessorBase):
         """
 
         LOG.debug('Add entity to entity graph:\n%s', new_vertex)
-
         self._add_resource_details_to_alarm(new_vertex, neighbors)
         self.entity_graph.add_vertex(new_vertex)
         self._connect_neighbors(neighbors, set(), GraphAction.CREATE_ENTITY)
