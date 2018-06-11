@@ -1,6 +1,6 @@
 metadata:
  name: basic_template_with_two_includes
- description: A template file which includes two defintion templates
+ description: A template file which includes two definition templates
 includes:
  - name: basic_def_template
  - name: large_def_template

@@ -224,10 +224,10 @@ class TransformerBase(object):
 
     @abc.abstractmethod
     def _create_entity_key(self, entity_event):
-        """Create entity key from given event
+        """Create an entity key from given event
 
-        By given an entity event, return a entity key which
-        consisting key fields
+        By given an entity event, return an entity key which
+        consists of key fields
 
         :param entity_event: event that returns from the driver
         :return: key
