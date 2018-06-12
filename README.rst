@@ -25,4 +25,5 @@ Project Resources
 * Wiki page: https://wiki.openstack.org/wiki/Vitrage
 * Launchpad: https://launchpad.net/vitrage
 * Source: https://git.openstack.org/cgit/openstack/vitrage
+* Release notes: https://docs.openstack.org/releasenotes/vitrage
 
