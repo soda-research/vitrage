@@ -33,6 +33,7 @@ class VitrageGraphInit(object):
     def __init__(self, conf, graph, db_connection):
         self.conf = conf
         self.graph = graph
+        self.db = db_connection
         self.workers = GraphWorkersManager(conf, graph, db_connection)
         self.events_coordination = EventsCoordination(
             conf,
@@ -44,6 +45,8 @@ class VitrageGraphInit(object):
 
     def run(self):
         LOG.info('Init Started')
+        LOG.info('clearing database active_actions')
+        self.db.active_actions.delete()
         ds_rpc.get_all(
             ds_rpc.create_rpc_client_instance(self.conf),
             self.events_coordination,

@@ -29,18 +29,7 @@ def main():
     conf = service.prepare_service()
     e_graph = get_graph_driver(conf)('Entity Graph')
     db_connection = storage.get_connection_from_config(conf)
-    clear_active_actions_table(db_connection)
-
     VitrageGraphInit(conf, e_graph, db_connection).run()
-
-
-def clear_active_actions_table(db_connection):
-    """Delete all data from active_actions table
-
-    The following deletes the entire vitrage database
-    It should be removed once graph is persistent
-    """
-    db_connection.active_actions.delete()
 
 
 if __name__ == "__main__":
