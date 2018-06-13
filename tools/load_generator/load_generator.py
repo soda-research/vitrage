@@ -107,8 +107,8 @@ class StressNotificationsService(cotyledon.Service):
                 {},
                 notification_type,
                 payload)
-        except Exception as e:
-            LOG.exception('Cannot notify - %s - %s', notification_type, e)
+        except Exception:
+            LOG.exception('Cannot notify - %s', notification_type)
 
 
 def create_port(port_num, instance_id, host_id, net_id):

@@ -59,8 +59,8 @@ class Scheduler(object):
             if self.graph_persistor:
                 try:
                     self.graph_persistor.store_graph(graph=self.graph)
-                except Exception as e:
-                    LOG.exception('persist failed %s', e)
+                except Exception:
+                    LOG.exception('Persist failed.')
 
         self.periodic.add(persist_periodic)
         LOG.info("added persist_periodic (spacing=%s)", spacing)
@@ -72,8 +72,8 @@ class Scheduler(object):
         def consistency_periodic():
             try:
                 self.consistency.periodic_process()
-            except Exception as e:
-                LOG.exception('run_consistency failed %s', e)
+            except Exception:
+                LOG.exception('run_consistency failed.')
 
         self.periodic.add(consistency_periodic)
         LOG.info("added consistency_periodic (spacing=%s)", spacing)
@@ -89,8 +89,8 @@ class Scheduler(object):
                                self.events_coordination,
                                self.conf.datasources.types,
                                DatasourceAction.SNAPSHOT)
-            except Exception as e:
-                LOG.exception('get_all_periodic failed %s', e)
+            except Exception:
+                LOG.exception('get_all_periodic failed.')
 
         self.periodic.add(get_all_periodic)
         LOG.info("added get_all_periodic (spacing=%s)", spacing)
@@ -106,9 +106,9 @@ class Scheduler(object):
                     ds_rpc.get_changes(rpc_client,
                                        self.events_coordination,
                                        driver_name)
-                except Exception as e:
-                    LOG.exception('get_changes_periodic %s failed %s',
-                                  driver_name, e)
+                except Exception:
+                    LOG.exception('get_changes_periodic "%s" failed.',
+                                  driver_name)
 
             self.periodic.add(get_changes_periodic)
             LOG.info("added get_changes_periodic %s (spacing=%s)",

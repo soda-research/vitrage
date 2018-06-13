@@ -113,9 +113,8 @@ class Webhook(NotifierBase):
             LOG.info('posted %s to %s. Response status %s, reason %s',
                      str(webhook_data), str(webhook[URL]),
                      resp.status_code, resp.reason)
-        except Exception as e:
-            LOG.exception("Could not post to webhook %s %s" % (
-                str(webhook['id']), str(e)))
+        except Exception:
+            LOG.exception("Could not post to webhook '%s'", str(webhook['id']))
 
     def _load_webhooks(self):
         db_webhooks = self._db.webhooks.query()

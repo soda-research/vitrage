@@ -42,10 +42,8 @@ class SnmpNotifier(NotifierBase):
 
             try:
                 self.snmp_sender.send_snmp(self._parse_alarm_data(data))
-            except Exception as e:
-                LOG.exception('Vitrage snmp Error: '
-                              'Failed to send SNMP trap: %s', e)
-                return
+            except Exception:
+                LOG.exception('Vitrage SNMP Error: Failed to send SNMP trap.')
 
     @staticmethod
     def _parse_alarm_data(data):

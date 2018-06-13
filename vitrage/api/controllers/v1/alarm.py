@@ -56,7 +56,7 @@ class AlarmsController(RootRestController):
             return self._get_alarms(vitrage_id, all_tenants)
         except Exception as e:
             to_unicode = encodeutils.exception_to_unicode(e)
-            LOG.exception('failed to get alarms %s', to_unicode)
+            LOG.exception('Failed to get alarms.')
             abort(404, to_unicode)
 
     @staticmethod
@@ -73,7 +73,7 @@ class AlarmsController(RootRestController):
 
         except Exception as e:
             to_unicode = encodeutils.exception_to_unicode(e)
-            LOG.exception('failed to open file %s ', to_unicode)
+            LOG.exception('Failed to open file.')
             abort(404, to_unicode)
 
     @pecan.expose('json')
@@ -89,7 +89,7 @@ class AlarmsController(RootRestController):
             return self._show_alarm(vitrage_id)
         except Exception as e:
             to_unicode = encodeutils.exception_to_unicode(e)
-            LOG.exception('failed to load json %s ', to_unicode)
+            LOG.exception('Failed to load JSON.')
             abort(404, to_unicode)
 
     @staticmethod
@@ -105,5 +105,5 @@ class AlarmsController(RootRestController):
 
         except Exception as e:
             to_unicode = encodeutils.exception_to_unicode(e)
-            LOG.exception('failed to load json %s ', to_unicode)
+            LOG.exception('Failed to load JSON.')
             abort(404, to_unicode)

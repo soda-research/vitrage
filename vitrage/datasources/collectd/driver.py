@@ -75,8 +75,8 @@ class CollectdDriver(AlarmDriverBase):
             LOG.debug('collectd mappings: %s', str(mappings))
 
             return mappings
-        except Exception as e:
-            LOG.exception('failed in init %s ', e)
+        except Exception:
+            LOG.exception('Failed in init.')
             return {}
 
     def enrich_event(self, event, event_type):

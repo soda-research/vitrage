@@ -50,9 +50,9 @@ class TransformerManager(object):
                             conf[datasource_type].transformer,
                             transformers, conf)
 
-            except Exception as e:
-                LOG.exception('Failed to register transformer %s. '
-                              'Exception: %s', datasource_type, e)
+            except Exception:
+                LOG.exception('Failed to register transformer %s.',
+                              datasource_type)
 
         transformers[VITRAGE_DATASOURCE] = importutils.import_object(
             "%s.%s" % (EvaluatorEventTransformer.__module__,

@@ -61,8 +61,8 @@ class NovaNotifier(NotifierBase):
             response = self.client.services.force_down(
                 host_id, 'nova-compute', is_down)
             LOG.info('RESPONSE %s', str(response.to_dict()))
-        except Exception as e:
-            LOG.exception('Failed to services.force_down - %s', e)
+        except Exception:
+            LOG.exception('Failed to services.force_down.')
 
     def _reset_instance_state(self, server_id, is_down):
         state = InstanceState.ERROR if is_down else InstanceState.ACTIVE
@@ -71,5 +71,5 @@ class NovaNotifier(NotifierBase):
                      str(server_id), str(state))
             response = self.client.servers.reset_state(server_id, state)
             LOG.info('RESPONSE %s', str(response))
-        except Exception as e:
-            LOG.exception('Failed to execute servers.reset_state - %s', e)
+        except Exception:
+            LOG.exception('Failed to execute servers.reset_state.')

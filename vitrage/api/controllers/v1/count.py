@@ -52,5 +52,5 @@ class CountsController(RootRestController):
 
         except Exception as e:
             to_unicode = encodeutils.exception_to_unicode(e)
-            LOG.exception('failed to get alarm counts %s', to_unicode)
+            LOG.exception('failed to get alarm count.')
             abort(404, to_unicode)

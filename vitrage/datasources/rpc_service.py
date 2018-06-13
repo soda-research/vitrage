@@ -79,12 +79,11 @@ class DriversEndpoint(object):
         fault_interval = self.conf.datasources.snapshot_interval_on_fault
 
         def run_driver(driver):
-            ok = True
             try:
-                return ok, driver.get_all(action)
-            except Exception as e:
-                LOG.exception('driver failed %s', e)
-                return not ok, driver
+                return True, driver.get_all(action)
+            except Exception:
+                LOG.exception('Driver failed')
+                return False, driver
 
         result = list(self.pool.map(run_driver, drivers))
         failed_drivers = [driver for success, driver in result if not success]

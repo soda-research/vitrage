@@ -60,9 +60,8 @@ class ConsistencyEnforcer(object):
                       stale_entities)
             self._push_events_to_queue(stale_entities,
                                        GraphAction.DELETE_ENTITY)
-        except Exception as e:
-            LOG.exception(
-                'Error in deleting vertices from entity_graph: %s', e)
+        except Exception:
+            LOG.exception('Error in deleting vertices from entity_graph.')
 
     def _find_placeholder_entities(self):
         vitrage_sample_tstmp = str(utcnow() - timedelta(

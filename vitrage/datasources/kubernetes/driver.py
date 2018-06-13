@@ -51,8 +51,8 @@ class KubernetesDriver(DriverBase):
                 return
 
             return k8s_client
-        except Exception as e:
-            LOG.exception('Create k8s client - Got Exception: %s', e)
+        except Exception:
+            LOG.exception('Create k8s client - Got Exception')
 
     def get_all(self, datasource_action):
         return self.make_pickleable(self._prepare_entities(

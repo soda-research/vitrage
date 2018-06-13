@@ -46,7 +46,7 @@ class WebhookController(RootRestController):
         try:
             return self._get_all(all_tenants)
         except Exception as e:
-            LOG.exception('failed to list webhooks %s', e)
+            LOG.exception('Failed to list webhooks.')
             abort(404, str(e))
 
     @staticmethod
@@ -68,7 +68,7 @@ class WebhookController(RootRestController):
         try:
             return self._get(id)
         except Exception as e:
-            LOG.exception('Failed to get webhooks %s', e)
+            LOG.exception('Failed to get webhooks.')
             abort(404, str(e))
 
     @staticmethod
@@ -91,7 +91,7 @@ class WebhookController(RootRestController):
         try:
             return self._post(**kwargs)
         except Exception as e:
-            LOG.exception('Failed to add webhooks %s', e)
+            LOG.exception('Failed to add webhooks.')
             abort(400, str(e))
 
     @staticmethod
@@ -125,8 +125,7 @@ class WebhookController(RootRestController):
         try:
             return self._delete_registration(id)
         except Exception as e:
-            LOG.exception('Failed to delete webhook %s: '
-                          '%s' % (id, str(e)))
+            LOG.exception('Failed to delete webhook "%s"', id)
             abort(404, str(e))
 
     @staticmethod

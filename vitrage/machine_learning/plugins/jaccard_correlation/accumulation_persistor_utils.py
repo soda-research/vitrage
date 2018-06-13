@@ -49,11 +49,11 @@ def save_accumulated_data(data_manager):
     try:
         with open(ACTIVITY_PATH, 'wb') as activity_f:
             pickle.dump(activity, activity_f)
-    except Exception as e:
-        LOG.exception('Cannot save alarms_intersect - %s', e)
+    except Exception:
+        LOG.exception('Cannot save alarms_intersect.')
 
     try:
         with open(INTERSECT_PATH, 'wb') as intersect_f:
             pickle.dump(intersects, intersect_f)
-    except Exception as e:
-        LOG.exception('Cannot save alarms_intersect - %s', e)
+    except Exception:
+        LOG.exception('Cannot save alarms_intersect.')

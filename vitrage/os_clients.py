@@ -57,8 +57,8 @@ def aodh_client(conf):
             session=keystone_client.get_session(conf))
         LOG.info('Aodh client created')
         return client
-    except Exception as e:
-        LOG.exception('Create Aodh client - Got Exception: %s', e)
+    except Exception:
+        LOG.exception('Create Aodh client - Got Exception.')
 
 
 def ceilometer_client(conf):
@@ -71,8 +71,8 @@ def ceilometer_client(conf):
         )
         LOG.info('Ceilometer client created')
         return client
-    except Exception as e:
-        LOG.exception('Create Ceilometer client - Got Exception: %s', e)
+    except Exception:
+        LOG.exception('Create Ceilometer client - Got Exception.')
 
 
 def nova_client(conf):
@@ -85,8 +85,8 @@ def nova_client(conf):
         )
         LOG.info('Nova client created')
         return client
-    except Exception as e:
-        LOG.exception('Create Nova client - Got Exception: %s', e)
+    except Exception:
+        LOG.exception('Create Nova client - Got Exception.')
 
 
 def cinder_client(conf):
@@ -99,8 +99,8 @@ def cinder_client(conf):
         )
         LOG.info('Cinder client created')
         return client
-    except Exception as e:
-        LOG.exception('Create Cinder client - Got Exception: %s', e)
+    except Exception:
+        LOG.exception('Create Cinder client - Got Exception.')
 
 
 def glance_client(conf):
@@ -113,8 +113,8 @@ def glance_client(conf):
         )
         LOG.info('Glance client created')
         return client
-    except Exception as e:
-        LOG.exception('Create Glance client - Got Exception: %s', e)
+    except Exception:
+        LOG.exception('Create Glance client - Got Exception')
 
 
 def neutron_client(conf):
@@ -126,8 +126,8 @@ def neutron_client(conf):
         )
         LOG.info('Neutron client created')
         return client
-    except Exception as e:
-        LOG.exception('Create Neutron client - Got Exception: %s', e)
+    except Exception:
+        LOG.exception('Create Neutron client - Got Exception.')
 
 
 def heat_client(conf):
@@ -140,8 +140,8 @@ def heat_client(conf):
         )
         LOG.info('Heat client created')
         return client
-    except Exception as e:
-        LOG.exception('Create Heat client - Got Exception: %s', e)
+    except Exception:
+        LOG.exception('Create Heat client - Got Exception.')
 
 
 def mistral_client(conf):
@@ -153,5 +153,5 @@ def mistral_client(conf):
         )
         LOG.info('Mistral client created')
         return client
-    except Exception as e:
-        LOG.exception('Create Mistral client - Got Exception: %s', e)
+    except Exception:
+        LOG.exception('Create Mistral client - Got Exception.')

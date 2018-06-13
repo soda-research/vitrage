@@ -232,8 +232,8 @@ class GraphCloneWorkerBase(cotyledon.Service):
             try:
                 next_task = self._task_queue.get()
                 self.do_task(next_task)
-            except Exception as e:
-                LOG.exception("Graph may not be in sync: exception %s", e)
+            except Exception:
+                LOG.exception("Graph may not be in sync.")
             self._task_queue.task_done()
 
     def do_task(self, task):

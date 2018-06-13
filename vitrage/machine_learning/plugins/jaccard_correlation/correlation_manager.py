@@ -105,8 +105,8 @@ class CorrelationManager(object):
                                     alarm[0][0] + " <-> alarm " +
                                     alarm[0][3] + " on " + alarm[0][2] +
                                     " with score " + str(alarm[1]) + "\n")
-        except Exception as e:
-            LOG.exception('Cannot save correlations - %s', e)
+        except Exception:
+            LOG.exception('Cannot save correlations.')
 
         if os.path.isfile(self.last_written_file):
             os.remove(self.last_written_file)

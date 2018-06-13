@@ -48,7 +48,7 @@ class ResourcesController(RootRestController):
             return self._get_resources(resource_type, all_tenants)
         except Exception as e:
             to_unicode = encodeutils.exception_to_unicode(e)
-            LOG.exception('failed to list resources %s', to_unicode)
+            LOG.exception('Failed to list resources.')
             abort(404, to_unicode)
 
     @staticmethod
@@ -66,7 +66,7 @@ class ResourcesController(RootRestController):
             return resources
         except Exception as e:
             to_unicode = encodeutils.exception_to_unicode(e)
-            LOG.exception('failed to get resources %s ', to_unicode)
+            LOG.exception('Failed to get resources.')
             abort(404, to_unicode)
 
     @pecan.expose('json')
@@ -96,6 +96,6 @@ class ResourcesController(RootRestController):
             return json.loads(resource)
         except Exception as e:
             to_unicode = encodeutils.exception_to_unicode(e)
-            LOG.exception('failed to show resource with vitrage_id(%s),'
-                          'Exception: %s', vitrage_id, to_unicode)
+            LOG.exception('failed to show resource with vitrage_id(%s).',
+                          vitrage_id)
             abort(404, to_unicode)

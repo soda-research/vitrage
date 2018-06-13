@@ -78,7 +78,7 @@ class VitrageNotifier(object):
         if self.notifier:
             try:
                 self.notifier.info({}, event_type, data)
-            except Exception as e:
-                LOG.exception('Notifier cannot notify - %e', e)
+            except Exception:
+                LOG.exception('Notifier cannot notify.')
         else:
             LOG.error('Notifier cannot notify')

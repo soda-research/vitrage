@@ -133,10 +133,9 @@ class ScenarioEvaluator(object):
         actions_to_preform = []
         try:
             actions_to_preform = self._analyze_and_filter_actions(actions)
-        except Exception as e:
-            LOG.error("Evaluator error, will not execute actions %s",
-                      str(actions))
-            LOG.exception("Caught: %s", e)
+        except Exception:
+            LOG.exception("Evaluator error, will not execute actions %s",
+                          str(actions))
 
         for action in actions_to_preform:
             LOG.info('Action: %s', self._action_str(action))

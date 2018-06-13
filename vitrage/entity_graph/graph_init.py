@@ -85,8 +85,8 @@ class EventsCoordination(object):
         def do_work(event):
             try:
                 return do_work_func(event)
-            except Exception as e:
-                LOG.exception('Got Exception %s for event %s', e, str(event))
+            except Exception:
+                LOG.exception('Got Exception for event %s', str(event))
 
         self._do_work_func = do_work
 
@@ -146,5 +146,5 @@ class PushNotificationsEndpoint(object):
     def info(self, ctxt, publisher_id, event_type, payload, metadata):
         try:
             self.process_event_callback(payload)
-        except Exception as e:
-            LOG.exception(e)
+        except Exception:
+            LOG.exception('Failed to process event callback.')

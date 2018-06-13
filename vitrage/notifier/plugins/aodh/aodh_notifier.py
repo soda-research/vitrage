@@ -63,9 +63,8 @@ class AodhNotifier(NotifierBase):
         try:
             LOG.info('Aodh Alarm - Activate: ' + str(alarm_request))
             return self.client.alarm.create(alarm_request)
-        except Exception as e:
-            LOG.exception('Failed to activate Aodh Alarm Got Exception: %s', e)
-            return
+        except Exception:
+            LOG.exception('Failed to activate Aodh Alarm. Got Exception.')
 
     def _update_aodh_alarm(self, alarm, state):
         aodh_id = alarm.get(VProps.ID)
@@ -74,9 +73,8 @@ class AodhNotifier(NotifierBase):
             alarm_update = {AodhState: state}
             return self.client.alarm.update(alarm_id=aodh_id,
                                             alarm_update=alarm_update)
-        except Exception as e:
-            LOG.exception('Failed to update Aodh Alarm Got Exception: %s', e)
-            return
+        except Exception:
+            LOG.exception('Failed to update Aodh Alarm. Got Exception.')
 
 
 def _alarm_request(data, state):

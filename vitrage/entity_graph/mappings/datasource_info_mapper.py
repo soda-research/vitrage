@@ -124,11 +124,10 @@ class DatasourceInfoMapper(object):
                     self.OPERATIONAL_VALUES: operational_values,
                     self.PRIORITY_VALUES: priority_values
                 }
-            except Exception as e:
-                LOG.exception("Exception: %s", e)
+            except Exception:
                 datasource = os.path.splitext(file_name)[0]
-                LOG.error('erroneous data sources is %s',
-                          erroneous_datasources_conf.append(datasource))
+                erroneous_datasources_conf.append(datasource)
+                LOG.exception('Erroneous data source is %s', datasource)
 
         self._check_value_confs_exists(
             [key for key in valid_datasources_conf.keys()],

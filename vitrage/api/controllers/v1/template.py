@@ -44,7 +44,7 @@ class TemplateController(RootRestController):
             return self._get_templates()
         except Exception as e:
             to_unicode = encodeutils.exception_to_unicode(e)
-            LOG.exception('failed to get template list %s', to_unicode)
+            LOG.exception('failed to get template list.')
             abort(404, to_unicode)
 
     @pecan.expose('json')
@@ -61,9 +61,8 @@ class TemplateController(RootRestController):
             return self._show_template(template_uuid)
         except Exception as e:
             to_unicode = encodeutils.exception_to_unicode(e)
-            LOG.exception('failed to show template %s --> %s',
-                          template_uuid,
-                          to_unicode)
+            LOG.exception('Failed to show template %s.',
+                          template_uuid)
             abort(404, to_unicode)
 
     @pecan.expose('json')
@@ -78,7 +77,7 @@ class TemplateController(RootRestController):
         try:
             return self._delete(uuid)
         except Exception as e:
-            LOG.exception('failed to delete template %s', e)
+            LOG.exception('Failed to delete template.')
             abort(404, str(e))
 
     @pecan.expose('json')
@@ -95,7 +94,7 @@ class TemplateController(RootRestController):
         try:
             return self._add(templates, template_type)
         except Exception as e:
-            LOG.exception('failed to add template %s', e)
+            LOG.exception('Failed to add template.')
             abort(404, str(e))
 
     @pecan.expose('json')
@@ -115,7 +114,7 @@ class TemplateController(RootRestController):
             return self._validate(templates, template_type)
         except Exception as e:
             to_unicode = encodeutils.exception_to_unicode(e)
-            LOG.exception('failed to validate template(s) %s', to_unicode)
+            LOG.exception('Failed to validate template(s).')
             abort(404, to_unicode)
 
     @classmethod
@@ -127,7 +126,7 @@ class TemplateController(RootRestController):
             return [cls._db_template_to_dict(t) for t in templates]
         except Exception as e:
             to_unicode = encodeutils.exception_to_unicode(e)
-            LOG.exception('failed to get template list %s ', to_unicode)
+            LOG.exception('Failed to get template list.')
             abort(404, to_unicode)
 
     @staticmethod
@@ -139,7 +138,7 @@ class TemplateController(RootRestController):
             return templates[0].file_content
         except Exception as e:
             to_unicode = encodeutils.exception_to_unicode(e)
-            LOG.exception('failed to show template with uuid: %s ', to_unicode)
+            LOG.exception('Failed to show template with uuid: %s ', uuid)
             abort(404, to_unicode)
 
     @staticmethod
@@ -153,7 +152,7 @@ class TemplateController(RootRestController):
             return json.loads(result_json)
         except Exception as e:
             to_unicode = encodeutils.exception_to_unicode(e)
-            LOG.exception('failed to open template file(s) %s ', to_unicode)
+            LOG.exception('Failed to open template file(s).')
             abort(404, to_unicode)
 
     @classmethod
@@ -166,7 +165,7 @@ class TemplateController(RootRestController):
                 template_type=template_type)
             return results
         except Exception as e:
-            LOG.exception('failed to add template file %s ', e)
+            LOG.exception('Failed to add template file.')
             abort(404, str(e))
 
     @staticmethod
@@ -189,5 +188,5 @@ class TemplateController(RootRestController):
                 uuids=uuid)
             return results
         except Exception as e:
-            LOG.exception('failed to delete template %s ', e)
+            LOG.exception('Failed to delete template.')
             abort(404, str(e))

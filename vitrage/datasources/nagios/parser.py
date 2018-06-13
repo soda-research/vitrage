@@ -37,9 +37,8 @@ class NagiosParser(object):
 
             return self._parse_services(status_tables)
 
-        except Exception as e:
-            LOG.exception('Failed to get nagios services %s', e)
-            return None
+        except Exception:
+            LOG.exception('Failed to get nagios services.')
 
     def _parse_services(self, status_tables):
         LOG.debug('Start parsing Nagios status')

@@ -72,7 +72,6 @@ class EvaluatorNotifier(object):
                     {},
                     NotifierEventTypes.EXECUTE_EXTERNAL_ACTION,
                     properties)
-        except Exception as e:
-            LOG.exception('Cannot notify - %s - %s',
-                          NotifierEventTypes.EXECUTE_EXTERNAL_ACTION,
-                          e)
+        except Exception:
+            LOG.exception('Cannot notify - %s.',
+                          NotifierEventTypes.EXECUTE_EXTERNAL_ACTION)

@@ -60,8 +60,8 @@ class ZabbixDriver(AlarmDriverBase):
             self._client.login(
                 self.conf.zabbix.user,
                 self.conf.zabbix.password)
-        except Exception as e:
-            LOG.exception('pyzabbix.ZabbixAPI %s', e)
+        except Exception:
+            LOG.exception('pyzabbix.ZabbixAPI error occurred.')
             self._client = None
 
     def _vitrage_type(self):
@@ -168,8 +168,8 @@ class ZabbixDriver(AlarmDriverBase):
                 }
 
             return mappings
-        except Exception as e:
-            LOG.exception('failed in init %s ', e)
+        except Exception:
+            LOG.exception('Failed in init.')
             return {}
 
     def enrich_event(self, event, event_type):

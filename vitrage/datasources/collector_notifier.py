@@ -53,6 +53,6 @@ class CollectorNotifier(object):
 
         try:
             self.oslo_notifier.info({}, '', enriched_event)
-        except Exception as e:
-            LOG.exception('Datasource event cannot be notified - %s\n'
-                          'Error - %s', enriched_event, e)
+        except Exception:
+            LOG.exception('Datasource event cannot be notified - %s.',
+                          enriched_event)

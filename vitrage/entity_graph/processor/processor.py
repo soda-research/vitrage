@@ -317,8 +317,8 @@ class Processor(processor.ProcessorBase):
                 return None
 
             self.info_mapper.vitrage_aggregate_values(vertex, graph_vertex)
-        except Exception as e:
-            LOG.exception("Calculate aggregated state failed - %s", e)
+        except Exception:
+            LOG.exception("Calculate aggregated state failed.")
 
     def _enrich_event(self, event):
         attr = self.transformer_manager.get_enrich_query(event)

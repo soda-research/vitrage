@@ -61,8 +61,8 @@ class CeilometerDriver(AlarmDriverBase):
             aodh_alarms = self.client.alarms.list()
             return [self._convert_alarm(alarm) for alarm in
                     aodh_alarms if alarm is not None]
-        except Exception as e:
-            LOG.exception("Failed to get all alarms, Exception: %s", e)
+        except Exception:
+            LOG.exception("Failed to get all alarms.")
         return []
 
     def _is_erroneous(self, alarm):
@@ -358,9 +358,8 @@ class CeilometerDriver(AlarmDriverBase):
         entity = old_alarm.copy()
         try:
             entity[CeilProps.STATE] = event[CeilProps.DETAIL][CeilProps.STATE]
-        except Exception as e:
-            LOG.exception("Failed to Convert alarm state"
-                          " transition event - %s", e)
+        except Exception:
+            LOG.exception("Failed to Convert alarm state transition event.")
 
         return self._filter_and_cache_alarm(entity, old_alarm,
                                             self._filter_get_change,

@@ -97,8 +97,8 @@ class GraphNotifier(object):
                     {},
                     notification_type,
                     curr.properties)
-            except Exception as e:
-                LOG.exception('Cannot notify - %s - %s', notification_type, e)
+            except Exception:
+                LOG.exception('Cannot notify - %s.', notification_type)
 
 
 def _get_notification_type(before, current, is_vertex):

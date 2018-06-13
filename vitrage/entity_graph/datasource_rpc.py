@@ -49,8 +49,8 @@ def get_all(rpc_client, events_coordination, driver_names, action,
             events = _call(client)
         else:
             events = _call(rpc_client)
-    except oslo_messaging.MessagingTimeout as e:
-        LOG.exception('Got MessagingTimeout %s', e)
+    except oslo_messaging.MessagingTimeout:
+        LOG.exception('Got MessagingTimeout')
         events = _call(rpc_client) if retry_on_fault else []
     t2 = time.time()
     events_coordination.handle_multiple_low_priority(events)
