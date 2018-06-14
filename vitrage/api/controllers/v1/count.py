@@ -14,7 +14,6 @@ import json
 import pecan
 
 from oslo_log import log
-from oslo_utils import encodeutils
 from oslo_utils.strutils import bool_from_string
 from pecan.core import abort
 
@@ -25,6 +24,7 @@ from vitrage.api.policy import enforce
 LOG = log.getLogger(__name__)
 
 
+# noinspection PyBroadException
 class CountsController(RootRestController):
 
     @pecan.expose('json')
@@ -50,7 +50,6 @@ class CountsController(RootRestController):
 
             return json.loads(alarm_counts_json)
 
-        except Exception as e:
-            to_unicode = encodeutils.exception_to_unicode(e)
+        except Exception:
             LOG.exception('failed to get alarm count.')
-            abort(404, to_unicode)
+            abort(404, 'Failed to get alarm count.')

@@ -16,7 +16,6 @@
 import json
 
 from oslo_log import log
-from oslo_utils import encodeutils
 from oslo_utils.strutils import bool_from_string
 from osprofiler import profiler
 import pecan
@@ -33,6 +32,7 @@ from vitrage.datasources.transformer_base import CLUSTER_ID
 LOG = log.getLogger(__name__)
 
 
+# noinspection PyBroadException
 @profiler.trace_cls("topology controller",
                     info={}, hide_args=False, trace_private=False)
 class TopologyController(RootRestController):
@@ -89,10 +89,9 @@ class TopologyController(RootRestController):
                             break
                 return RootRestController.as_tree(graph, node_id)
 
-        except Exception as e:
-            to_unicode = encodeutils.exception_to_unicode(e)
+        except Exception:
             LOG.exception('failed to get topology.')
-            abort(404, to_unicode)
+            abort(404, 'Failed to get topology.')
 
     @staticmethod
     def _check_input_para(graph_type, depth, query, root, all_tenants):

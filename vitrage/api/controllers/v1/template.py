@@ -15,7 +15,6 @@ import json
 import pecan
 
 from oslo_log import log
-from oslo_utils import encodeutils
 from osprofiler import profiler
 from pecan.core import abort
 
@@ -27,6 +26,7 @@ from vitrage.common.exception import VitrageError
 LOG = log.getLogger(__name__)
 
 
+# noinspection PyBroadException
 @profiler.trace_cls("template controller",
                     info={}, hide_args=False, trace_private=False)
 class TemplateController(RootRestController):
@@ -42,10 +42,9 @@ class TemplateController(RootRestController):
                 {})
         try:
             return self._get_templates()
-        except Exception as e:
-            to_unicode = encodeutils.exception_to_unicode(e)
+        except Exception:
             LOG.exception('failed to get template list.')
-            abort(404, to_unicode)
+            abort(404, 'Failed to get template list')
 
     @pecan.expose('json')
     def get(self, template_uuid):
@@ -59,11 +58,10 @@ class TemplateController(RootRestController):
 
         try:
             return self._show_template(template_uuid)
-        except Exception as e:
-            to_unicode = encodeutils.exception_to_unicode(e)
+        except Exception:
             LOG.exception('Failed to show template %s.',
                           template_uuid)
-            abort(404, to_unicode)
+            abort(404, 'Failed to show template.')
 
     @pecan.expose('json')
     def delete(self, **kwargs):
@@ -76,9 +74,9 @@ class TemplateController(RootRestController):
                 {})
         try:
             return self._delete(uuid)
-        except Exception as e:
+        except Exception:
             LOG.exception('Failed to delete template.')
-            abort(404, str(e))
+            abort(404, 'Failed to delete template.')
 
     @pecan.expose('json')
     def put(self, **kwargs):
@@ -93,9 +91,9 @@ class TemplateController(RootRestController):
 
         try:
             return self._add(templates, template_type)
-        except Exception as e:
+        except Exception:
             LOG.exception('Failed to add template.')
-            abort(404, str(e))
+            abort(404, 'Failed to add template.')
 
     @pecan.expose('json')
     def post(self, **kwargs):
@@ -112,10 +110,9 @@ class TemplateController(RootRestController):
 
         try:
             return self._validate(templates, template_type)
-        except Exception as e:
-            to_unicode = encodeutils.exception_to_unicode(e)
+        except Exception:
             LOG.exception('Failed to validate template(s).')
-            abort(404, to_unicode)
+            abort(404, 'Failed to validate template.')
 
     @classmethod
     def _get_templates(cls):
@@ -124,10 +121,9 @@ class TemplateController(RootRestController):
             templates = [t for t in templates if t.status != TStatus.DELETED]
             templates.sort(key=lambda template: template.created_at)
             return [cls._db_template_to_dict(t) for t in templates]
-        except Exception as e:
-            to_unicode = encodeutils.exception_to_unicode(e)
+        except Exception:
             LOG.exception('Failed to get template list.')
-            abort(404, to_unicode)
+            abort(404, 'Failed to get template list.')
 
     @staticmethod
     def _show_template(uuid):
@@ -136,10 +132,9 @@ class TemplateController(RootRestController):
             if not templates:
                 raise VitrageError("Template %s not found", uuid)
             return templates[0].file_content
-        except Exception as e:
-            to_unicode = encodeutils.exception_to_unicode(e)
+        except Exception:
             LOG.exception('Failed to show template with uuid: %s ', uuid)
-            abort(404, to_unicode)
+            abort(404, 'Failed to show template.')
 
     @staticmethod
     def _validate(templates, template_type):
@@ -150,10 +145,9 @@ class TemplateController(RootRestController):
                                                 template_type=template_type)
         try:
             return json.loads(result_json)
-        except Exception as e:
-            to_unicode = encodeutils.exception_to_unicode(e)
+        except Exception:
             LOG.exception('Failed to open template file(s).')
-            abort(404, to_unicode)
+            abort(404, 'Failed to validate template file.')
 
     @classmethod
     def _add(cls, templates, template_type):
@@ -164,9 +158,9 @@ class TemplateController(RootRestController):
                 templates=templates,
                 template_type=template_type)
             return results
-        except Exception as e:
+        except Exception:
             LOG.exception('Failed to add template file.')
-            abort(404, str(e))
+            abort(404, 'Failed to add template file.')
 
     @staticmethod
     def _db_template_to_dict(template):
@@ -187,6 +181,6 @@ class TemplateController(RootRestController):
                 'delete_template',
                 uuids=uuid)
             return results
-        except Exception as e:
+        except Exception:
             LOG.exception('Failed to delete template.')
-            abort(404, str(e))
+            abort(404, 'Failed to delete template.')

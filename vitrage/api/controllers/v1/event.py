@@ -15,7 +15,6 @@
 import pecan
 
 from oslo_log import log
-from oslo_utils import encodeutils
 from osprofiler import profiler
 from pecan.core import abort
 
@@ -26,6 +25,7 @@ from vitrage.api.policy import enforce
 LOG = log.getLogger(__name__)
 
 
+# noinspection PyBroadException
 @profiler.trace_cls("event controller",
                     info={}, hide_args=False, trace_private=False)
 class EventController(RootRestController):
@@ -51,7 +51,6 @@ class EventController(RootRestController):
                                       event_time=event_time,
                                       event_type=event_type,
                                       details=details)
-        except Exception as e:
-            to_unicode = encodeutils.exception_to_unicode(e)
-            LOG.exception('Failed to post an event %s', to_unicode)
-            abort(404, to_unicode)
+        except Exception:
+            LOG.exception('Failed to post an event')
+            abort(404, 'Failed to post event')

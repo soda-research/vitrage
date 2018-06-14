@@ -18,7 +18,6 @@ import pecan
 
 
 from oslo_log import log
-from oslo_utils import encodeutils
 from oslo_utils.strutils import bool_from_string
 from osprofiler import profiler
 from pecan.core import abort
@@ -33,6 +32,7 @@ from vitrage.common.constants import VertexProperties as Vprops
 LOG = log.getLogger(__name__)
 
 
+# noinspection PyBroadException
 @profiler.trace_cls("alarm controller",
                     info={}, hide_args=False, trace_private=False)
 class AlarmsController(RootRestController):
@@ -54,10 +54,9 @@ class AlarmsController(RootRestController):
 
         try:
             return self._get_alarms(vitrage_id, all_tenants)
-        except Exception as e:
-            to_unicode = encodeutils.exception_to_unicode(e)
+        except Exception:
             LOG.exception('Failed to get alarms.')
-            abort(404, to_unicode)
+            abort(404, 'Failed to get alarms.')
 
     @staticmethod
     def _get_alarms(vitrage_id=None, all_tenants=False):
@@ -71,10 +70,9 @@ class AlarmsController(RootRestController):
             alarms_list = json.loads(alarms_json)['alarms']
             return alarms_list
 
-        except Exception as e:
-            to_unicode = encodeutils.exception_to_unicode(e)
+        except Exception:
             LOG.exception('Failed to open file.')
-            abort(404, to_unicode)
+            abort(404, 'Failed to get alarms')
 
     @pecan.expose('json')
     def get(self, vitrage_id):
@@ -87,10 +85,9 @@ class AlarmsController(RootRestController):
 
         try:
             return self._show_alarm(vitrage_id)
-        except Exception as e:
-            to_unicode = encodeutils.exception_to_unicode(e)
+        except Exception:
             LOG.exception('Failed to load JSON.')
-            abort(404, to_unicode)
+            abort(404, "Failed to show alarm.")
 
     @staticmethod
     def _show_alarm(vitrage_id):
@@ -103,7 +100,6 @@ class AlarmsController(RootRestController):
             alarms_list = json.loads(alarm_json)
             return alarms_list
 
-        except Exception as e:
-            to_unicode = encodeutils.exception_to_unicode(e)
+        except Exception:
             LOG.exception('Failed to load JSON.')
-            abort(404, to_unicode)
+            abort(404, 'Failed to show alarm.')
