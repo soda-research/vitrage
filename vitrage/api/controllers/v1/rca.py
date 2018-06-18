@@ -17,7 +17,6 @@ import json
 import pecan
 
 from oslo_log import log
-from oslo_utils import encodeutils
 from oslo_utils.strutils import bool_from_string
 from osprofiler import profiler
 from pecan.core import abort
@@ -28,6 +27,7 @@ from vitrage.api.policy import enforce
 LOG = log.getLogger(__name__)
 
 
+# noinspection PyBroadException
 @profiler.trace_cls("rca controller",
                     info={}, hide_args=False, trace_private=False)
 class RCAController(RootRestController):
@@ -59,7 +59,6 @@ class RCAController(RootRestController):
             graph = json.loads(graph_data)
             return graph
 
-        except Exception as e:
-            to_unicode = encodeutils.exception_to_unicode(e)
+        except Exception:
             LOG.exception('Failed to get RCA.')
-            abort(404, to_unicode)
+            abort(404, 'Failed to get RCA')

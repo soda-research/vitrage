@@ -25,6 +25,7 @@ from vitrage.common.constants import TenantProps
 LOG = log.getLogger(__name__)
 
 
+# noinspection PyBroadException
 @profiler.trace_cls("webhook controller",
                     info={}, hide_args=False, trace_private=False)
 class WebhookController(RootRestController):
@@ -45,9 +46,9 @@ class WebhookController(RootRestController):
 
         try:
             return self._get_all(all_tenants)
-        except Exception as e:
+        except Exception:
             LOG.exception('Failed to list webhooks.')
-            abort(404, str(e))
+            abort(404, 'Failed to list webhooks.')
 
     @staticmethod
     def _get_all(all_tenants):
@@ -67,9 +68,9 @@ class WebhookController(RootRestController):
 
         try:
             return self._get(id)
-        except Exception as e:
-            LOG.exception('Failed to get webhooks.')
-            abort(404, str(e))
+        except Exception:
+            LOG.exception('Failed to get webhook.')
+            abort(404, 'Failed to get webhook.')
 
     @staticmethod
     def _get(id):
@@ -90,9 +91,9 @@ class WebhookController(RootRestController):
                 pecan.request.enforcer, {})
         try:
             return self._post(**kwargs)
-        except Exception as e:
+        except Exception:
             LOG.exception('Failed to add webhooks.')
-            abort(400, str(e))
+            abort(400, 'Failed to add webhooks.')
 
     @staticmethod
     def _post(**kwargs):
@@ -124,9 +125,9 @@ class WebhookController(RootRestController):
 
         try:
             return self._delete_registration(id)
-        except Exception as e:
+        except Exception:
             LOG.exception('Failed to delete webhook "%s"', id)
-            abort(404, str(e))
+            abort(404, 'Failed to delete webhook.')
 
     @staticmethod
     def _delete_registration(id):

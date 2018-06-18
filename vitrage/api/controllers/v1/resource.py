@@ -13,7 +13,6 @@ import json
 import pecan
 
 from oslo_log import log
-from oslo_utils import encodeutils
 from oslo_utils.strutils import bool_from_string
 from osprofiler import profiler
 from pecan.core import abort
@@ -25,6 +24,7 @@ from vitrage.api.policy import enforce
 LOG = log.getLogger(__name__)
 
 
+# noinspection PyBroadException
 @profiler.trace_cls("resource controller",
                     info={}, hide_args=False, trace_private=False)
 class ResourcesController(RootRestController):
@@ -46,10 +46,9 @@ class ResourcesController(RootRestController):
 
         try:
             return self._get_resources(resource_type, all_tenants)
-        except Exception as e:
-            to_unicode = encodeutils.exception_to_unicode(e)
+        except Exception:
             LOG.exception('Failed to list resources.')
-            abort(404, to_unicode)
+            abort(404, 'Failed to list resources.')
 
     @staticmethod
     def _get_resources(resource_type=None, all_tenants=False):
@@ -64,10 +63,9 @@ class ResourcesController(RootRestController):
             LOG.info(resources_json)
             resources = json.loads(resources_json)['resources']
             return resources
-        except Exception as e:
-            to_unicode = encodeutils.exception_to_unicode(e)
+        except Exception:
             LOG.exception('Failed to get resources.')
-            abort(404, to_unicode)
+            abort(404, 'Failed to list resources.')
 
     @pecan.expose('json')
     def get(self, vitrage_id):
@@ -94,8 +92,7 @@ class ResourcesController(RootRestController):
             LOG.debug('resource found = %s', resource)
 
             return json.loads(resource)
-        except Exception as e:
-            to_unicode = encodeutils.exception_to_unicode(e)
+        except Exception:
             LOG.exception('failed to show resource with vitrage_id(%s).',
                           vitrage_id)
-            abort(404, to_unicode)
+            abort(404, 'Failed to show resource.')
