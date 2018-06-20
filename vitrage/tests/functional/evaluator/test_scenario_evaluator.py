@@ -692,12 +692,12 @@ class TestScenarioEvaluator(TestFunctionalBase, TestConfiguration):
     def test_complex_not_operator_deduced_alarm(self):
         """Handles a complex not operator use case
 
-        We have created the following template: if there is a openstack.cluster
-        that has a nova.zone which is connected to a neutron.network and also
-        there is no nagios alarm of vitrage_type CLUSTER_PROBLEM on the cluster
-        and no nagios alarm of vitrage_type NETWORK_PROBLEM on the
-        neutron.network, then raise a deduced alarm on the nova.zone called
-        complex_zone_deduced_alarm.
+        We have created the following template: if there is an
+        openstack.cluster that has a nova.zone which is connected to a
+        neutron.network and also there is no nagios alarm of vitrage_type
+        CLUSTER_PROBLEM on the cluster and no nagios alarm of vitrage_type
+        NETWORK_PROBLEM on the neutron.network, then raise a deduced alarm
+        on the nova.zone called complex_zone_deduced_alarm.
         The test has 3 steps in it:
         1. create a neutron.network and connect it to a zone, and check that
            the complex_zone_deduced_alarm is raised on the nova.zone because it
