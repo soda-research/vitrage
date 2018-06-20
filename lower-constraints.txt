@@ -140,3 +140,4 @@ WebTest==2.0.29
 Werkzeug==0.14.1
 wrapt==1.10.11
 futures==3.0.0
+docutils==0.11
