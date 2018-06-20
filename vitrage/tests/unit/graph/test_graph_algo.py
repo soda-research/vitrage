@@ -438,7 +438,7 @@ class GraphAlgorithmTest(GraphTestBase):
             IsEmpty(),
             'Template - Four connected vertices and a disconnected vertex'
             '(host alarm -ON-> host -CONTAINS-> instance <-ON- instance alarm'
-            ',switch) template_root is a instance alarm ')
+            ',switch) template_root is an instance alarm ')
 
         template_graph.add_edge(e_host_uses_switch)
         mappings = ga.sub_graph_matching(template_graph,
@@ -486,9 +486,9 @@ class GraphAlgorithmTest(GraphTestBase):
         self.assertThat(
             mappings,
             IsEmpty(),
-            'Template - Five connected vertices and a invalid edge'
+            'Template - Five connected vertices and an invalid edge'
             '(host alarm -ON-> host -CONTAINS-> instance <-ON- instance alarm'
-            ',host -USES-> switch) template_root is a instance alarm ')
+            ',host -USES-> switch) template_root is an instance alarm ')
         template_graph.remove_vertex(t_v_node_not_in_graph)
 
         template_graph.remove_vertex(t_v_host_alarm)
@@ -505,7 +505,7 @@ class GraphAlgorithmTest(GraphTestBase):
             'Template - FIVE connected vertices'
             '(host -CONTAINS-> instance <-ON- instance alarm'
             ',node -CONTAINS-> host -USES-> switch, node-CONTAINS->switch)'
-            ' template_root is a instance alarm ')
+            ' template_root is an instance alarm ')
 
         mappings = subgraph_matching(self.entity_graph, template_graph, [
             Mapping(e_node_contains_switch, e_node_to_switch, is_vertex=False),
@@ -568,7 +568,7 @@ class GraphAlgorithmTest(GraphTestBase):
             '(host -CONTAINS-> instance <-ON- instance alarm'
             ',node -CONTAINS-> host -USES-> switch, node-CONTAINS '
             'fail->switch)'
-            ' template_root is a instance alarm')
+            ' template_root is an instance alarm')
 
     def test_template_matching_with_not_operator_of_complicated_subgraph(self):
         """Test the template matching algorithm with 'not' operator
