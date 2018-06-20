@@ -268,7 +268,7 @@ class Processor(processor.ProcessorBase):
         neighbor_edges = set(e for v, e in neighbors)
         for curr_edge in self.entity_graph.get_edges(vertex.vertex_id,
                                                      direction=Direction.BOTH):
-            # check if the edge in the graph has a a connection to the
+            # check if the edge in the graph has a connection to the
             # same type of resources in the new neighbors list
             neighbor_vertex = self.entity_graph.get_vertex(
                 curr_edge.other_vertex(vertex.vertex_id))
