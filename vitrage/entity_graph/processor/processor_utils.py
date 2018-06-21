@@ -50,10 +50,14 @@ def is_deleted(item):
 
 def mark_deleted(g, item):
     if isinstance(item, Vertex):
+        if item.get(VProps.VITRAGE_IS_DELETED, False):
+            return
         item[VProps.VITRAGE_IS_DELETED] = True
         item[VProps.VITRAGE_SAMPLE_TIMESTAMP] = str(utcnow())
         g.update_vertex(item)
     elif isinstance(item, Edge):
+        if item.get(EProps.VITRAGE_IS_DELETED, False):
+            return
         item[EProps.VITRAGE_IS_DELETED] = True
         item[EProps.UPDATE_TIMESTAMP] = str(utcnow())
         g.update_edge(item)
