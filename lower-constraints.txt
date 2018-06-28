@@ -81,7 +81,6 @@ ply==3.11
 prettytable==0.7.2
 pyasn1==0.4.2
 pycadf==2.7.0
-pycryptodomex==3.5.1
 pyflakes==0.8.1
 pyinotify==0.9.6
 PyJWT==1.6.0
