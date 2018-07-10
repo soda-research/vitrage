@@ -42,6 +42,7 @@ LOG = log.getLogger(__name__)
 
 # Supported message types
 GRAPH_UPDATE = 'graph_update'
+ENABLE_EVALUATION = 'enable_evaluation'
 START_EVALUATION = 'start_evaluation'
 RELOAD_TEMPLATES = 'reload_templates'
 TEMPLATE_ACTION = 'template_action'
@@ -150,6 +151,13 @@ class GraphWorkersManager(cotyledon.ServiceManager):
         Enables the worker's scenario-evaluator, and run it on the entire graph
         """
         self._submit_and_wait(self._evaluator_queues, (START_EVALUATION,))
+
+    def submit_enable_evaluations(self):
+        """Enable scenario-evaluator in all evaluator workers
+
+        Only enables the worker's scenario-evaluator, without traversing
+        """
+        self._submit_and_wait(self._evaluator_queues, (ENABLE_EVALUATION,))
 
     def submit_evaluators_reload_templates(self):
         """Recreate the scenario-repository in all evaluator workers
@@ -288,7 +296,11 @@ class EvaluatorWorker(GraphCloneWorkerBase):
         super(EvaluatorWorker, self).do_task(task)
         action = task[0]
         if action == START_EVALUATION:
+            # fresh init (without snapshot) requires iterating the graph
             self._evaluator.run_evaluator()
+        elif action == ENABLE_EVALUATION:
+            # init with a snapshot does not require iterating the graph
+            self._evaluator.enabled = True
         elif action == RELOAD_TEMPLATES:
             self._reload_templates()
 

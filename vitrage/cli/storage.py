@@ -21,3 +21,12 @@ def dbsync():
     print(VITRAGE_TITLE)
     conf = service.prepare_service()
     storage.get_connection_from_config(conf).upgrade()
+
+
+def purge_data():
+    print(VITRAGE_TITLE)
+    conf = service.prepare_service()
+    db = storage.get_connection_from_config(conf)
+    db.active_actions.delete()
+    db.events.delete()
+    db.graph_snapshots.delete()

@@ -89,12 +89,6 @@ class NXAlgorithm(GraphAlgorithm):
             vertices=self._vertex_result_to_list(n_result),
             edges=self._edge_result_to_list(e_result))
 
-        LOG.debug('graph_query_vertices: find graph: nodes %s, edges %s',
-                  str(list(graph._g.nodes(data=True))),
-                  str(list(graph._g.edges(data=True))))
-        LOG.debug('graph_query_vertices: real graph: nodes %s, edges %s',
-                  str(list(self.graph._g.nodes(data=True))),
-                  str(list(self.graph._g.edges(data=True))))
         return graph
 
     def sub_graph_matching(self,

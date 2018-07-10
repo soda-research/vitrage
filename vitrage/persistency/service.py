@@ -13,16 +13,15 @@
 # under the License.
 
 from __future__ import print_function
-
+from concurrent.futures import ThreadPoolExecutor
 import cotyledon
-import dateutil.parser
-import oslo_messaging as oslo_m
+from futurist import periodics
 
 from oslo_log import log
-from vitrage.common.constants import DatasourceProperties as DSProps
-from vitrage.common.constants import GraphAction
+import oslo_messaging as oslo_m
+
+from vitrage.common.utils import spawn
 from vitrage import messaging
-from vitrage.storage.sqlalchemy import models
 
 
 LOG = log.getLogger(__name__)
@@ -39,11 +38,13 @@ class PersistorService(cotyledon.Service):
         self.listener = messaging.get_notification_listener(
             transport, [target],
             [VitragePersistorEndpoint(self.db_connection)])
+        self.scheduler = Scheduler(conf, db_connection)
 
     def run(self):
         LOG.info("Vitrage Persistor Service - Starting...")
 
         self.listener.start()
+        self.scheduler.start_periodic_tasks()
 
         LOG.info("Vitrage Persistor Service - Started!")
 
@@ -57,19 +58,45 @@ class PersistorService(cotyledon.Service):
 
 
 class VitragePersistorEndpoint(object):
+
+    funcs = {}
+
     def __init__(self, db_connection):
         self.db_connection = db_connection
 
     def info(self, ctxt, publisher_id, event_type, payload, metadata):
-        LOG.debug('Vitrage Event Info: payload %s', payload)
-        self.process_event(payload)
+        LOG.debug('Event_type: %s Payload %s', event_type, payload)
+        if event_type and event_type in self.funcs.keys():
+            self.funcs[event_type](self.db_connection, event_type, payload)
 
-    def process_event(self, data):
-        """:param data: Serialized to a JSON formatted ``str`` """
-        if data.get(DSProps.EVENT_TYPE) == GraphAction.END_MESSAGE:
-            return
-        collector_timestamp = \
-            dateutil.parser.parse(data.get(DSProps.SAMPLE_DATE))
-        event_row = models.Event(payload=data,
-                                 collector_timestamp=collector_timestamp)
-        self.db_connection.events.create(event_row)
+
+class Scheduler(object):
+
+    def __init__(self, conf, db):
+        self.conf = conf
+        self.db = db
+        self.periodic = None
+
+    def start_periodic_tasks(self):
+        self.periodic = periodics.PeriodicWorker.create(
+            [], executor_factory=lambda: ThreadPoolExecutor(max_workers=10))
+
+        self.add_expirer_timer()
+        spawn(self.periodic.start)
+
+    def add_expirer_timer(self):
+        spacing = 60
+
+        @periodics.periodic(spacing=spacing)
+        def expirer_periodic():
+            try:
+                event_id = self.db.graph_snapshots.query_snapshot_event_id()
+                if event_id:
+                    LOG.debug('Expirer deleting event - id=%s', event_id)
+                    self.db.events.delete(event_id)
+
+            except Exception:
+                LOG.exception('DB periodic cleanup run failed.')
+
+        self.periodic.add(expirer_periodic)
+        LOG.info("Database periodic cleanup starting (spacing=%ss)", spacing)

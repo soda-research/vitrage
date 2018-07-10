@@ -29,6 +29,7 @@ from vitrage.common.constants import GraphAction
 from vitrage.common.constants import UpdateMethod
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.common.exception import VitrageTransformerError
+from vitrage.common.utils import md5
 from vitrage.datasources import OPENSTACK_CLUSTER
 import vitrage.graph.utils as graph_utils
 from vitrage.utils import datetime as datetime_utils
@@ -169,6 +170,7 @@ class TransformerBase(object):
         if vertex.get(VProps.IS_REAL_VITRAGE_ID):
             return vertex
         new_uuid = self.uuid_from_deprecated_vitrage_id(vertex.vertex_id)
+        vertex.properties[VProps.VITRAGE_CACHED_ID] = md5(vertex.vertex_id)
         vertex.vertex_id = new_uuid
         vertex.properties[VProps.VITRAGE_ID] = new_uuid
         vertex.properties[VProps.IS_REAL_VITRAGE_ID] = True
@@ -176,7 +178,7 @@ class TransformerBase(object):
 
     @classmethod
     def uuid_from_deprecated_vitrage_id(cls, vitrage_id):
-        old_vitrage_id = hash(vitrage_id)
+        old_vitrage_id = md5(vitrage_id)
         new_uuid = cls.key_to_uuid_cache.get(old_vitrage_id)
         if not new_uuid:
             new_uuid = uuidutils.generate_uuid()

@@ -22,7 +22,4 @@ OPTS = [
     cfg.BoolOpt('enable_persistency',
                 default=False,
                 help='Periodically store entity graph snapshot to database'),
-    cfg.IntOpt('graph_persistency_interval',
-               default=3600,
-               help='Store graph to database every X seconds'),
     ]

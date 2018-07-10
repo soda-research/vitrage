@@ -21,7 +21,6 @@ from vitrage.datasources.transformer_base import TransformerBase
 from vitrage.entity_graph.mappings.datasource_info_mapper import \
     DatasourceInfoMapper
 from vitrage.entity_graph.processor import base as processor
-from vitrage.entity_graph.processor.notifier import GraphNotifier
 from vitrage.entity_graph.processor import processor_utils as PUtils
 from vitrage.entity_graph.processor.transformer_manager import \
     TransformerManager
@@ -32,15 +31,13 @@ LOG = log.getLogger(__name__)
 
 class Processor(processor.ProcessorBase):
 
-    def __init__(self, conf, e_graph=None, graph_persistor=None):
+    def __init__(self, conf, e_graph=None):
         super(Processor, self).__init__()
         self.conf = conf
         self.transformer_manager = TransformerManager(self.conf)
         self.info_mapper = DatasourceInfoMapper(self.conf)
         self._initialize_events_actions()
         self.entity_graph = e_graph
-        self._notifier = GraphNotifier(conf)
-        self._graph_persistor = graph_persistor
 
     def process_event(self, event):
         """Decides which action to run on given event
@@ -60,10 +57,9 @@ class Processor(processor.ProcessorBase):
         if entity.action not in self.actions.keys():
             LOG.debug('deprecated or unknown entity %s ignored', str(entity))
             return
+
         self._calculate_vitrage_aggregated_values(entity.vertex, entity.action)
         self.actions[entity.action](entity.vertex, entity.neighbors)
-        if self._graph_persistor:
-            self._graph_persistor.update_last_event_timestamp(event)
 
     def create_entity(self, new_vertex, neighbors):
         """Adds new vertex to the entity graph
@@ -141,7 +137,7 @@ class Processor(processor.ProcessorBase):
 
             PUtils.mark_deleted(self.entity_graph, deleted_vertex)
         else:
-            LOG.warning("Delete event arrived on invalid resource: "
+            LOG.warning("Delete entity arrived on invalid resource: "
                         "deleted_vertex - %s, graph_vertex - %s",
                         deleted_vertex, graph_vertex)
 
@@ -185,14 +181,9 @@ class Processor(processor.ProcessorBase):
                 PUtils.is_newer_vertex(graph_vertex, vertex):
             self.entity_graph.remove_vertex(vertex)
         else:
-            LOG.warning("Delete event arrived on invalid resource: "
+            LOG.warning("Remove deleted entity arrived on invalid resource: "
                         "deleted_vertex - %s, graph_vertex - %s",
                         vertex, graph_vertex)
-
-    def start_notifier(self):
-        if self._notifier and self._notifier.enabled:
-            self.entity_graph.subscribe(self._notifier.notify_when_applicable)
-            LOG.info('Graph notifications subscription added')
 
     def _update_neighbors(self, vertex, neighbors):
         """Updates vertices neighbor connections

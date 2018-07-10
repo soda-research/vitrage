@@ -18,8 +18,10 @@
 # under the License.
 from collections import defaultdict
 import copy
+import hashlib
 import itertools
 import random
+import six
 import threading
 
 from oslo_config import cfg
@@ -87,3 +89,11 @@ def spawn(target, *args, **kwargs):
     t.daemon = True
     t.start()
     return t
+
+
+def md5(obj):
+    if isinstance(obj, tuple):
+        obj = str(obj)
+    if isinstance(obj, six.string_types):
+        return hashlib.md5(six.b(obj)).hexdigest()
+    raise Exception('Unknown object for md5 %s', str(obj))
