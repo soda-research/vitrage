@@ -28,6 +28,7 @@ OPTS = [
     cfg.StrOpt('glance_version', default='2', help='Glance version'),
     cfg.StrOpt('heat_version', default='1', help='Heat version'),
     cfg.StrOpt('mistral_version', default='2', help='Mistral version'),
+    cfg.StrOpt('gnocchi_version', default='1', help='Gnocchi version')
 ]
 
 _client_modules = {
@@ -39,6 +40,7 @@ _client_modules = {
     'neutron': 'neutronclient.v2_0.client',
     'heat': 'heatclient.client',
     'mistral': 'mistralclient.api.v2.client',
+    'gnocchi': 'gnocchiclient.v1.client'
 }
 
 
@@ -46,6 +48,18 @@ def driver_module(driver):
     mod_name = _client_modules[driver]
     module = utils.import_module(mod_name)
     return module
+
+
+def gnocchi_client(conf):
+    """Get an instance of the gnocchi client"""
+    try:
+        gn_client = driver_module('gnocchi')
+        client = gn_client.Client(
+            session=keystone_client.get_session(conf))
+        LOG.info('Gnocchi client created')
+        return client
+    except Exception:
+        LOG.exception('Create Gnocchi client - Got Exception')
 
 
 def aodh_client(conf):

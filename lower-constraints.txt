@@ -25,6 +25,7 @@ fixtures==3.0.0
 flake8==2.5.5
 future==0.16.0
 futurist==1.6.0
+gnocchiclient==3.3.1
 greenlet==0.4.13
 hacking==0.12.0
 idna==2.6
