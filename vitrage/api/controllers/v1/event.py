@@ -18,8 +18,10 @@ from oslo_log import log
 from osprofiler import profiler
 from pecan.core import abort
 
+from datetime import datetime
 from vitrage.api.controllers.rest import RootRestController
 from vitrage.api.policy import enforce
+from vitrage.datasources.prometheus.driver import PROMETHEUS_EVENT_TYPE
 
 
 LOG = log.getLogger(__name__)
@@ -37,9 +39,14 @@ class EventController(RootRestController):
         enforce("event post", pecan.request.headers,
                 pecan.request.enforcer, {})
 
-        event_time = kwargs['time']
-        event_type = kwargs['type']
-        details = kwargs['details']
+        prom_event_type = None
+        user_agent = pecan.request.headers.get('User-Agent')
+        if user_agent and user_agent.startswith("Alertmanager"):
+            prom_event_type = PROMETHEUS_EVENT_TYPE
+
+        event_time = kwargs.get('time', datetime.utcnow())
+        event_type = kwargs.get('type', prom_event_type)
+        details = kwargs.get('details', kwargs)
 
         self.post_event(event_time, event_type, details)
 
