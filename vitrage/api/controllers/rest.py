@@ -23,9 +23,19 @@ class RootRestController(rest.RestController):
 
     @staticmethod
     def as_tree(graph, root=OPENSTACK_CLUSTER, reverse=False):
-        linked_graph = json_graph.node_link_graph(graph)
+        if nx.__version__ >= '2.0':
+            linked_graph = json_graph.node_link_graph(
+                graph, attrs={'name': 'graph_index'})
+        else:
+            linked_graph = json_graph.node_link_graph(graph)
         if 0 == nx.number_of_nodes(linked_graph):
             return {}
         if reverse:
             linked_graph = linked_graph.reverse()
-        return json_graph.tree_data(linked_graph, root=root)
+        if nx.__version__ >= '2.0':
+            return json_graph.tree_data(
+                linked_graph,
+                root=root,
+                attrs={'id': 'graph_index', 'children': 'children'})
+        else:
+            return json_graph.tree_data(linked_graph, root=root)

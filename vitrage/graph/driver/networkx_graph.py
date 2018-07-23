@@ -84,9 +84,9 @@ class NXGraph(Graph):
     def _add_vertex(self, v):
         properties_copy = copy.copy(v.properties)
         if properties_copy:
-            self._g.add_node(n=v.vertex_id, **properties_copy)
+            self._g.add_node(v.vertex_id, **properties_copy)
         else:
-            self._g.add_node(n=v.vertex_id)
+            self._g.add_node(v.vertex_id)
 
     @Notifier.update_notify
     def add_edge(self, e):
@@ -100,11 +100,10 @@ class NXGraph(Graph):
     def _add_edge(self, e):
         properties_copy = copy.copy(e.properties)
         if properties_copy:
-            self._g.add_edge(u=e.source_id, v=e.target_id,
-                             key=e.label, **properties_copy)
+            self._g.add_edge(e.source_id, e.target_id,
+                             e.label, **properties_copy)
         else:
-            self._g.add_edge(u=e.source_id, v=e.target_id,
-                             key=e.label)
+            self._g.add_edge(e.source_id, e.target_id, e.label)
 
     def get_vertex(self, v_id):
         """Fetch a vertex from the graph

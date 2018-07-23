@@ -14,6 +14,7 @@
 
 
 import json
+import networkx as nx
 
 from oslo_log import log
 from oslo_utils.strutils import bool_from_string
@@ -81,12 +82,20 @@ class TopologyController(RootRestController):
             if graph_type == 'graph':
                 return graph
             if graph_type == 'tree':
-                node_id = CLUSTER_ID
-                if root:
+                if nx.__version__ >= '2.0':
+                    node_id = ''
                     for node in graph['nodes']:
-                        if node[VProps.VITRAGE_ID] == root:
-                            node_id = node[VProps.ID]
+                        if (root and node[VProps.VITRAGE_ID] == root) or \
+                                (not root and node[VProps.ID] == CLUSTER_ID):
+                            node_id = node[VProps.GRAPH_INDEX]
                             break
+                else:
+                    node_id = CLUSTER_ID
+                    if root:
+                        for node in graph['nodes']:
+                            if node[VProps.VITRAGE_ID] == root:
+                                node_id = node[VProps.ID]
+                                break
                 return RootRestController.as_tree(graph, node_id)
 
         except Exception:
