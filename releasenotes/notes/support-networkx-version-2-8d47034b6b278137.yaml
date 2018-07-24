@@ -1,0 +1,3 @@
+---
+fixes:
+  - Added support for Networkx version 2.1
