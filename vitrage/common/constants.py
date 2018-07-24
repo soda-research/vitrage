@@ -14,12 +14,16 @@
 # under the License.
 
 
-class VertexProperties(object):
+class ElementProperties(object):
+    VITRAGE_IS_DELETED = 'vitrage_is_deleted'
+    UPDATE_TIMESTAMP = 'update_timestamp'
+
+
+class VertexProperties(ElementProperties):
     VITRAGE_CATEGORY = 'vitrage_category'
     VITRAGE_TYPE = 'vitrage_type'
     VITRAGE_ID = 'vitrage_id'
     VITRAGE_STATE = 'vitrage_state'
-    VITRAGE_IS_DELETED = 'vitrage_is_deleted'
     VITRAGE_IS_PLACEHOLDER = 'vitrage_is_placeholder'
     VITRAGE_SAMPLE_TIMESTAMP = 'vitrage_sample_timestamp'
     VITRAGE_AGGREGATED_STATE = 'vitrage_aggregated_state'
@@ -27,10 +31,10 @@ class VertexProperties(object):
     VITRAGE_AGGREGATED_SEVERITY = 'vitrage_aggregated_severity'
     VITRAGE_OPERATIONAL_SEVERITY = 'vitrage_operational_severity'
     VITRAGE_RESOURCE_ID = 'vitrage_resource_id'
+    VITRAGE_CACHED_ID = 'vitrage_cached_id'
     ID = 'id'
     STATE = 'state'
     PROJECT_ID = 'project_id'
-    UPDATE_TIMESTAMP = 'update_timestamp'
     NAME = 'name'
     SEVERITY = 'severity'
     IS_MARKED_DOWN = 'is_marked_down'
@@ -44,10 +48,8 @@ class VertexProperties(object):
     IS_REAL_VITRAGE_ID = 'is_real_vitrage_id'
 
 
-class EdgeProperties(object):
+class EdgeProperties(ElementProperties):
     RELATIONSHIP_TYPE = 'relationship_type'
-    VITRAGE_IS_DELETED = 'vitrage_is_deleted'
-    UPDATE_TIMESTAMP = 'update_timestamp'
 
 
 class EdgeLabel(object):

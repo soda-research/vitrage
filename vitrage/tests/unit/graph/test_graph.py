@@ -427,7 +427,7 @@ class TestGraph(GraphTestBase):
         self.assertEqual(OPENSTACK_CLUSTER, found_vertex[VProps.VITRAGE_TYPE],
                          'get_vertices check node vertex')
 
-    def _check_callback_result(self, result, msg, exp_prev, exp_curr):
+    def _check_callbacks_result(self, msg, exp_prev, exp_curr):
 
         def assert_none_or_equals(exp, act, message):
             if exp:
@@ -435,12 +435,17 @@ class TestGraph(GraphTestBase):
             else:
                 self.assertIsNone(act, message)
 
-        self.assertIsNotNone(result, msg + ' Callback was not called')
-        assert_none_or_equals(exp_prev, result[0],
+        self.assertIsNotNone(self.result, msg + ' Callback was not called')
+        assert_none_or_equals(exp_prev, self.result[0],
                               msg + ' prev_item unexpected')
-        assert_none_or_equals(exp_curr, result[1],
+        assert_none_or_equals(exp_curr, self.result[1],
                               msg + ' curr_item unexpected')
+
+        self.assertEqual(self.result, self.final_result,
+                         'callback order is incorrect')
+
         self.result = None
+        self.final_result = None
 
     def _assert_none_or_equals(self, exp, act, msg):
             if exp:
@@ -453,11 +458,15 @@ class TestGraph(GraphTestBase):
 
         g = NXGraph('test_graph_callbacks')
         self.result = None
+        self.final_result = None
 
-        def callback(pre_item,
-                     current_item,
-                     is_vertex,
-                     graph):
+        def callback_2(pre_item, current_item, is_vertex, graph):
+            # We want to make sure this callback was called ^after^ the other
+            # And expect that the later callback copies the result from the
+            # prior call, hence these should be equal after both were called
+            self.final_result = self.result
+
+        def callback(pre_item, current_item, is_vertex, graph):
             LOG.info('called with: pre_event_item ' + str(pre_item) +
                      ' current_item ' + str(current_item))
             self.assertIsNotNone(current_item)
@@ -470,32 +479,31 @@ class TestGraph(GraphTestBase):
             'Got notification, but add_vertex notification is not registered')
 
         # subscribe
+        g.subscribe(callback_2, finalization=True)
         g.subscribe(callback)
 
         # These actions will trigger callbacks:
         g.add_vertex(v_node)
-        self._check_callback_result(self.result, 'add vertex', None, v_node)
+        self._check_callbacks_result('add vertex', None, v_node)
 
         g.add_vertex(v_host)
-        self._check_callback_result(self.result, 'add vertex', None, v_host)
+        self._check_callbacks_result('add vertex', None, v_host)
 
         g.add_edge(e_node_to_host)
-        self._check_callback_result(self.result, 'add edge', None,
-                                    e_node_to_host)
+        self._check_callbacks_result('add edge', None, e_node_to_host)
 
         updated_vertex = g.get_vertex(v_host.vertex_id)
         updated_vertex[VProps.VITRAGE_CATEGORY] = ALARM
         g.update_vertex(updated_vertex)
-        self._check_callback_result(self.result, 'update vertex',
-                                    v_host, updated_vertex)
+        self._check_callbacks_result('update vertex', v_host, updated_vertex)
 
         updated_edge = g.get_edge(e_node_to_host.source_id,
                                   e_node_to_host.target_id,
                                   e_node_to_host.label)
         updated_edge['ZIG'] = 'ZAG'
         g.update_edge(updated_edge)
-        self._check_callback_result(self.result, 'update edge', e_node_to_host,
-                                    updated_edge)
+        self._check_callbacks_result('update edge', e_node_to_host,
+                                     updated_edge)
 
     def test_union(self):
         v1 = v_node

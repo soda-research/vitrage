@@ -30,12 +30,12 @@ def create_rpc_client_instance(conf):
 
 
 def get_all(rpc_client, events_coordination, driver_names, action,
-            retry_on_fault=False, first_call_timeout=None):
+            retry_on_fault=False):
     LOG.info('get_all starting for %s', driver_names)
     t1 = time.time()
 
-    def _call(_client):
-        return _client.call(
+    def _call():
+        return rpc_client.call(
             {},
             'driver_get_all',
             driver_names=driver_names,
@@ -43,15 +43,10 @@ def get_all(rpc_client, events_coordination, driver_names, action,
             retry_on_fault=retry_on_fault)
 
     try:
-        if first_call_timeout:
-            # create a temporary client instance with a timeout
-            client = rpc_client.prepare(timeout=first_call_timeout)
-            events = _call(client)
-        else:
-            events = _call(rpc_client)
+        events = _call()
     except oslo_messaging.MessagingTimeout:
         LOG.exception('Got MessagingTimeout')
-        events = _call(rpc_client) if retry_on_fault else []
+        events = _call() if retry_on_fault else []
     t2 = time.time()
     events_coordination.handle_multiple_low_priority(events)
     t3 = time.time()

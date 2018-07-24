@@ -32,10 +32,6 @@ class ListenerService(object):
             self._create_callbacks_by_events_dict(conf)
 
         topics = [conf.datasources.notification_topic_collector]
-        if conf.persistency.enable_persistency:
-            topics.append(conf.persistency.persistor_topic)
-        else:
-            LOG.warning("Not persisting events")
         notifier = VitrageNotifier(conf, 'driver.events', topics)
         self.listener = self._get_topics_listener(conf, notifier.notify)
 

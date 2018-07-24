@@ -16,7 +16,7 @@ import zlib
 
 from oslo_db.sqlalchemy import models
 
-from sqlalchemy import Column, DateTime, INTEGER, String, \
+from sqlalchemy import Column, INTEGER, String, \
     SmallInteger, BigInteger, Index, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 
@@ -73,20 +73,19 @@ class Event(Base):
 
     __tablename__ = 'events'
 
-    event_id = Column("id", INTEGER, primary_key=True, nullable=False,
-                      autoincrement=True)
-    collector_timestamp = Column(DateTime, index=True, nullable=False)
+    event_id = Column("id", BigInteger(), primary_key=True, autoincrement=True)
     payload = Column(JSONEncodedDict(), nullable=False)
+    is_vertex = Column(Boolean, nullable=False)
 
     def __repr__(self):
         return \
             "<Event(" \
             "id='%s', " \
-            "collector_timestamp='%s', " \
+            "is_vertex='%s', " \
             "payload='%s')>" % \
             (
                 self.event_id,
-                self.collector_timestamp,
+                self.is_vertex,
                 self.payload
             )
 
@@ -106,7 +105,7 @@ class ActiveAction(Base, models.TimestampMixin):
     target_vertex_id = Column(String(128))
     action_id = Column(String(128), primary_key=True)
     score = Column(SmallInteger())
-    trigger = Column(BigInteger(), primary_key=True)
+    trigger = Column(String(128), primary_key=True)
 
     def __repr__(self):
         return \
@@ -134,16 +133,19 @@ class ActiveAction(Base, models.TimestampMixin):
 class GraphSnapshot(Base):
     __tablename__ = 'graph_snapshots'
 
-    last_event_timestamp = Column(DateTime, primary_key=True, nullable=False)
+    snapshot_id = Column("id", INTEGER, primary_key=True)
+    event_id = Column(BigInteger, nullable=False)
     graph_snapshot = Column(CompressedBinary((2 ** 32) - 1), nullable=False)
 
     def __repr__(self):
         return \
             "<GraphSnapshot(" \
-            "last_event_timestamp='%s', " \
+            "id=%s," \
+            "event_id='%s', " \
             "graph_snapshot='%s')>" %\
             (
-                self.last_event_timestamp,
+                self.snapshot_id,
+                self.event_id,
                 self.graph_snapshot
             )
 

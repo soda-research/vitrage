@@ -45,8 +45,8 @@ debug = false
 notifiers = nova,webhook
 
 [datasources]
-types=mock_graph_datasource
-path=vitrage.tests.mocks
+types=doctor,mock_graph_datasource
+path=vitrage.datasources,vitrage.tests.mocks
 snapshots_interval=60
 
 [mock_graph_datasource]

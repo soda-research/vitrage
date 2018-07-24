@@ -11,8 +11,9 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-
 import functools
+
+import itertools
 
 from vitrage.graph.driver.elements import Vertex
 
@@ -34,15 +35,21 @@ def _after_func(graph, item, data_before=None):
 class Notifier(object):
     def __init__(self):
         self._subscriptions = []
+        self._finalization_subscriptions = []
 
-    def subscribe(self, function):
-        self._subscriptions.append(function)
+    def subscribe(self, function, finalization=False):
+        if finalization:
+            self._finalization_subscriptions.append(function)
+        else:
+            self._subscriptions.append(function)
 
     def is_subscribed(self):
-        return len(self._subscriptions) != 0
+        size = len(self._subscriptions) + len(self._finalization_subscriptions)
+        return size != 0
 
     def notify(self, *args, **kwargs):
-        for func in self._subscriptions:
+        for func in itertools.chain(self._subscriptions,
+                                    self._finalization_subscriptions):
             func(*args, **kwargs)
 
     @staticmethod

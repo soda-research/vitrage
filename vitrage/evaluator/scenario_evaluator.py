@@ -21,6 +21,7 @@ from oslo_log import log
 
 from vitrage.common.constants import EdgeProperties as EProps
 from vitrage.common.constants import VertexProperties as VProps
+from vitrage.common.utils import md5
 from vitrage.common.utils import recursive_keypairs
 from vitrage.datasources.listener_service import defaultdict
 from vitrage.entity_graph.mappings.datasource_info_mapper \
@@ -232,7 +233,7 @@ class ScenarioEvaluator(object):
                 match_action_spec = self._get_action_spec(action_spec, match)
                 items_ids = \
                     [match_item[1].vertex_id for match_item in match.items()]
-                match_hash = hash(tuple(sorted(items_ids)))
+                match_hash = md5(tuple(sorted(items_ids)))
                 self._evaluate_property_functions(template_schema, match,
                                                   match_action_spec.properties)
 
@@ -301,11 +302,8 @@ class ScenarioEvaluator(object):
     def _generate_action_id(action_spec):
         """Generate a unique action id for the action
 
-            BEWARE: The implementation of this function MUST NOT BE CHANGED!!
-
-            The created hash is used for storing the active actions in the
-            database. If changed, existing active actions can no longer be
-            retrieved.
+        BEWARE: The value created here should not be stored in database,
+        as in python3, the hash function seed changes after program restart
         """
         targets = [(k, v.vertex_id) for k, v in action_spec.targets.items()]
         return hash(

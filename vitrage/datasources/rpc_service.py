@@ -19,7 +19,6 @@ from oslo_log import log
 
 from vitrage.common.constants import DatasourceAction
 from vitrage.datasources import utils
-from vitrage.messaging import VitrageNotifier
 from vitrage import rpc as vitrage_rpc
 
 LOG = log.getLogger(__name__)
@@ -28,13 +27,11 @@ LOG = log.getLogger(__name__)
 class CollectorRpcHandlerService(object):
 
     def __init__(self, conf):
-        super(CollectorRpcHandlerService, self).__init__()
         self.conf = conf
-        async_persistor = self.create_async_persistor(conf)
         self.server = vitrage_rpc.get_default_server(
             conf,
             conf.rpc_topic_collector,
-            [DriversEndpoint(conf, async_persistor)])
+            [DriversEndpoint(conf)])
 
     def start(self):
         LOG.info("Collector Rpc Handler Service - Starting...")
@@ -46,29 +43,11 @@ class CollectorRpcHandlerService(object):
         self.server.stop()
         LOG.info("Collector Rpc Handler Service - Stopped!")
 
-    @staticmethod
-    def create_async_persistor(conf):
-        if not conf.persistency.enable_persistency:
-            return None
-        topics = [conf.persistency.persistor_topic]
-        notifier = VitrageNotifier(conf, 'driver.events', topics)
-        persist_worker = futures.ThreadPoolExecutor(max_workers=1)
-
-        def do_persist(events):
-            for e in events:
-                notifier.notify('', e)
-
-        def do_work(events):
-            persist_worker.submit(do_persist, events)
-
-        return do_work
-
 
 class DriversEndpoint(object):
 
-    def __init__(self, conf, async_persistor):
+    def __init__(self, conf):
         self.conf = conf
-        self.async_persistor = async_persistor
         self.pool = futures.ThreadPoolExecutor(
             max_workers=len(self.conf.datasources.types))
 
@@ -93,8 +72,6 @@ class DriversEndpoint(object):
             result.extend(list(self.pool.map(run_driver, failed_drivers)))
 
         events = [e for success, events in result if success for e in events]
-        if self.async_persistor:
-            self.async_persistor(events)
         LOG.debug("run drivers get_all done.")
         return events
 
@@ -103,7 +80,5 @@ class DriversEndpoint(object):
         LOG.debug("run driver get_changes: %s", driver_name)
         drivers = utils.get_drivers_by_name(self.conf, [driver_name])
         events = drivers[0].get_changes(DatasourceAction.UPDATE)
-        if self.async_persistor:
-            self.async_persistor(events)
         LOG.debug("run driver get_changes: %s done.", driver_name)
         return events

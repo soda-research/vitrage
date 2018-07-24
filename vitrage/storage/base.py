@@ -203,12 +203,8 @@ class EventsConnection(object):
         """
         raise NotImplementedError('query events is not implemented')
 
-    def delete(self,
-               event_id=None,
-               collector_timestamp=None,
-               gt_collector_timestamp=None,
-               lt_collector_timestamp=None):
-        """Delete all events that match the filters."""
+    def delete(self, event_id=None):
+        """Delete all events older than event_id"""
         raise NotImplementedError('delete events is not implemented')
 
 

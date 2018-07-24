@@ -18,13 +18,19 @@ from oslo_log import log
 import oslo_messaging
 
 from vitrage.common.constants import DatasourceAction
+from vitrage.common.constants import VertexProperties as VProps
 from vitrage.common.utils import spawn
+from vitrage.datasources.transformer_base import TransformerBase
 from vitrage.entity_graph import datasource_rpc as ds_rpc
 from vitrage.entity_graph import EVALUATOR_TOPIC
+from vitrage.entity_graph.graph_persistency import GraphPersistency
+from vitrage.entity_graph.processor.notifier import GraphNotifier
 from vitrage.entity_graph.processor.processor import Processor
 from vitrage.entity_graph.scheduler import Scheduler
 from vitrage.entity_graph.workers import GraphWorkersManager
+from vitrage.graph.driver.networkx_graph import NXGraph
 from vitrage import messaging
+
 
 LOG = log.getLogger(__name__)
 
@@ -40,27 +46,49 @@ class VitrageGraphInit(object):
             self.process_event,
             conf.datasources.notification_topic_collector,
             EVALUATOR_TOPIC)
-        self.scheduler = Scheduler(conf, graph, self.events_coordination)
-        self.processor = Processor(conf, graph, self.scheduler.graph_persistor)
+        self.persist = GraphPersistency(conf, db_connection, graph)
+        self.scheduler = Scheduler(conf, graph, self.events_coordination,
+                                   self.persist)
+        self.processor = Processor(conf, graph)
 
     def run(self):
         LOG.info('Init Started')
-        LOG.info('clearing database active_actions')
+        graph_snapshot = self.persist.query_recent_snapshot()
+        if graph_snapshot:
+            self._restart_from_stored_graph(graph_snapshot)
+        else:
+            self._start_from_scratch()
+        self.workers.run()
+
+    def _restart_from_stored_graph(self, graph_snapshot):
+        LOG.info('Initializing graph from database snapshot (%sKb)',
+                 len(graph_snapshot.graph_snapshot) / 1024)
+        NXGraph.read_gpickle(graph_snapshot.graph_snapshot, self.graph)
+        self.persist.replay_events(self.graph, graph_snapshot.event_id)
+        self._recreate_transformers_id_cache()
+        LOG.info("%s vertices loaded", self.graph.num_vertices())
+        spawn(self._start_all_workers, is_snapshot=True)
+
+    def _start_from_scratch(self):
+        LOG.info('Starting for the first time')
+        LOG.info('Clearing database active_actions')
         self.db.active_actions.delete()
         ds_rpc.get_all(
             ds_rpc.create_rpc_client_instance(self.conf),
             self.events_coordination,
             self.conf.datasources.types,
             action=DatasourceAction.INIT_SNAPSHOT,
-            retry_on_fault=True,
-            first_call_timeout=10)
-        self.processor.start_notifier()
-        spawn(self.start_all_workers)
-        self.workers.run()
+            retry_on_fault=True)
+        LOG.info("%s vertices loaded", self.graph.num_vertices())
+        self.persist.store_graph()
+        spawn(self._start_all_workers, is_snapshot=False)
 
-    def start_all_workers(self):
-        self.workers.submit_start_evaluations()  # evaluate entire graph
-        self.graph.subscribe(self.workers.submit_graph_update)
+    def _start_all_workers(self, is_snapshot):
+        if is_snapshot:
+            self.workers.submit_enable_evaluations()
+        else:
+            self.workers.submit_start_evaluations()
+        self._add_graph_subscriptions()
         self.scheduler.start_periodic_tasks()
         LOG.info('Init Finished')
         self.events_coordination.start()
@@ -71,6 +99,24 @@ class VitrageGraphInit(object):
             self.workers.submit_evaluators_reload_templates()
         else:
             self.processor.process_event(event)
+
+    def _recreate_transformers_id_cache(self):
+        for v in self.graph.get_vertices():
+            if not v.get(VProps.VITRAGE_CACHED_ID):
+                LOG.warning("Missing vitrage_cached_id in the vertex. "
+                            "Vertex is not added to the ID cache %s", str(v))
+            else:
+                TransformerBase.key_to_uuid_cache[v[VProps.VITRAGE_CACHED_ID]]\
+                    = v.vertex_id
+
+    def _add_graph_subscriptions(self):
+        self.graph.subscribe(self.workers.submit_graph_update)
+        vitrage_notifier = GraphNotifier(self.conf)
+        if vitrage_notifier.enabled:
+            self.graph.subscribe(vitrage_notifier.notify_when_applicable)
+            LOG.info('Subscribed vitrage notifier to graph changes')
+        self.graph.subscribe(self.persist.persist_event,
+                             finalization=True)
 
 
 PRIORITY_DELAY = 0.05

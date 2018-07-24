@@ -18,6 +18,7 @@ from __future__ import absolute_import
 from oslo_db.sqlalchemy import session as db_session
 from oslo_log import log
 from sqlalchemy.engine import url as sqlalchemy_url
+from sqlalchemy import or_
 
 from vitrage.common.exception import VitrageInputError
 from vitrage import storage
@@ -79,6 +80,18 @@ class Connection(base.Connection):
     def upgrade(self, nocreate=False):
         engine = self._engine_facade.get_engine()
         engine.connect()
+
+        # As the following tables were changed in Rocky, they are removed and
+        # created. This is fine for an upgrade from Queens, since data in these
+        # was anyway deleted in each restart.
+        # starting From Rocky, data in these tables should not be removed.
+
+        models.Base.metadata.drop_all(
+            engine, tables=[
+                models.ActiveAction.__table__,
+                models.Event.__table__,
+                models.GraphSnapshot.__table__])
+
         models.Base.metadata.create_all(
             engine, tables=[models.ActiveAction.__table__,
                             models.Template.__table__,
@@ -247,6 +260,21 @@ class EventsConnection(base.EventsConnection, BaseTableConn):
         with session.begin():
             session.merge(event)
 
+    def get_last_event_id(self):
+        session = self._engine_facade.get_session()
+        query = session.query(models.Event.event_id)
+        return query.order_by(models.Event.event_id.desc()).first()
+
+    def get_replay_events(self, event_id):
+        """Get all events that occurred after the specified event_id
+
+        :rtype: list of vitrage.storage.sqlalchemy.models.Event
+        """
+        session = self._engine_facade.get_session()
+        query = session.query(models.Event)
+        query = query.filter(models.Event.event_id > event_id)
+        return query.order_by(models.Event.event_id.asc()).all()
+
     def query(self,
               event_id=None,
               collector_timestamp=None,
@@ -290,31 +318,12 @@ class EventsConnection(base.EventsConnection, BaseTableConn):
                                  lt_collector_timestamp)
         return query
 
-    def delete(self,
-               event_id=None,
-               collector_timestamp=None,
-               gt_collector_timestamp=None,
-               lt_collector_timestamp=None):
-        """Delete all events that match the filters.
-
-        :raises: vitrage.common.exception.VitrageInputError.
-        """
-        if (event_id or collector_timestamp) and \
-           (gt_collector_timestamp or lt_collector_timestamp):
-            msg = "Calling function with both specific event and range of " \
-                  "events parameters at the same time "
-            LOG.debug(msg)
-            raise VitrageInputError(msg)
-
-        query = self.query_filter(
-            models.Event,
-            event_id=event_id,
-            collector_timestamp=collector_timestamp)
-
-        query = self._update_query_gt_lt(gt_collector_timestamp,
-                                         lt_collector_timestamp,
-                                         query)
-
+    def delete(self, event_id=None):
+        """Delete all events older than event_id"""
+        session = self._engine_facade.get_session()
+        query = session.query(models.Event)
+        if event_id:
+            query = query.filter(models.Event.event_id < event_id)
         query.delete()
 
 
@@ -334,15 +343,19 @@ class GraphSnapshotsConnection(base.GraphSnapshotsConnection, BaseTableConn):
 
     def query(self, timestamp=None):
         query = self.query_filter(models.GraphSnapshot)
-        query = query.filter(models.GraphSnapshot.last_event_timestamp <=
-                             timestamp)
-        return query.order_by(
-            models.GraphSnapshot.last_event_timestamp.desc()).first()
+        query = query.filter(
+            or_(models.GraphSnapshot.updated_at >= timestamp,
+                models.GraphSnapshot.created_at >= timestamp))
+        return query.first()
 
-    def delete(self, timestamp=None):
-        """Delete all graph snapshots taken until timestamp."""
+    def query_snapshot_event_id(self):
+        """Select the event_id of the stored snapshot"""
+        session = self._engine_facade.get_session()
+        query = session.query(models.GraphSnapshot.event_id)
+        result = query.first()
+        return result[0] if result else None
+
+    def delete(self):
+        """Delete all graph snapshots"""
         query = self.query_filter(models.GraphSnapshot)
-
-        query = query.filter(models.GraphSnapshot.last_event_timestamp <=
-                             timestamp)
         query.delete()

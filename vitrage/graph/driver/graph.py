@@ -49,8 +49,25 @@ class Graph(object):
         self.graph_type = graph_type
         self.notifier = Notifier()
 
-    def subscribe(self, function):
-        self.notifier.subscribe(function)
+    def subscribe(self, function, finalization=False):
+        """Subscribe to graph changes
+
+        :param function: function will be called after each graph change
+        :param finalization: function will be called after all non finalization
+
+        Usage Example:
+        graph = NXGraph()
+        graph.subscribe(foo1, finalization=True)
+        graph.subscribe(foo2, finalization=False)
+        graph.subscribe(foo3, finalization=False)
+
+        The order of the calls in this example wii be:
+        1. foo2
+        2. foo3
+        3. foo1
+        foo1 is called last because it subscribed as a finalization function
+        """
+        self.notifier.subscribe(function, finalization)
 
     def is_subscribed(self):
         return self.notifier.is_subscribed()
