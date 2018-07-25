@@ -60,13 +60,6 @@ class TestEntityGraphUnitBase(base.BaseTest):
                    min=1)
     ]
 
-    PERSISTENCY_OPTS = [
-        cfg.StrOpt('persistor_topic',
-                   default=None),
-        cfg.BoolOpt('enable_persistency',
-                    default=True),
-    ]
-
     NUM_CLUSTERS = 1
     NUM_ZONES = 2
     NUM_HOSTS = 4

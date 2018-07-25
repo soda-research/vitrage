@@ -34,7 +34,6 @@ class TestGraphPersistor(TestFunctionalBase, TestConfiguration):
         cls.conf = cfg.ConfigOpts()
         cls.conf.register_opts(cls.PROCESSOR_OPTS, group='entity_graph')
         cls.conf.register_opts(cls.DATASOURCES_OPTS, group='datasources')
-        cls.conf.register_opts(cls.PERSISTENCY_OPTS, group='persistency')
         cls.add_db(cls.conf)
         cls.load_datasources(cls.conf)
         graph_persistency.EPSILON = 0.1
