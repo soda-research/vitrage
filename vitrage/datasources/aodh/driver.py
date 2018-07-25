@@ -11,6 +11,8 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND,  either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+import json
+import six
 
 from oslo_log import log
 
@@ -57,7 +59,14 @@ class AodhDriver(AlarmDriverBase):
             AodhExtendedAlarmType.THRESHOLD:
                 self._convert_threshold_alarm_rule,
             AodhExtendedAlarmType.GNOCCHI_RESOURCES_THRESHOLD:
-                self._convert_gnocchi_resources_threshold_alarm_rule
+                self._convert_gnocchi_resources_threshold_alarm_rule,
+            AodhExtendedAlarmType.GNOCCHI_AGGREGATION_BY_METRICS_THRESHOLD:
+                self._convert_gnocchi_aggregation_by_metrics_threshold_rule,
+            AodhExtendedAlarmType.GNOCCHI_AGGREGATION_BY_RESOURCES_THRESHOLD:
+                self._convert_gnocchi_aggregation_by_resources_threshold_rule,
+            AodhExtendedAlarmType.COMPOSITE:
+                self._convert_composite_alarm_rule
+
         }
 
     def _init_alarm_type_to_rule(self):
@@ -66,7 +75,12 @@ class AodhDriver(AlarmDriverBase):
             AodhExtendedAlarmType.EVENT: AodhProps.EVENT_RULE,
             AodhExtendedAlarmType.THRESHOLD: AodhProps.THRESHOLD_RULE,
             AodhExtendedAlarmType.GNOCCHI_RESOURCES_THRESHOLD:
-                AodhProps.GNOCCHI_RESOURCES_THRESHOLD_RULE
+                AodhProps.GNOCCHI_RESOURCES_THRESHOLD_RULE,
+            AodhExtendedAlarmType.COMPOSITE: AodhProps.COMPOSITE_RULE,
+            AodhExtendedAlarmType.GNOCCHI_AGGREGATION_BY_RESOURCES_THRESHOLD:
+                AodhProps.GNOCCHI_AGGREGATION_BY_RESOURCES_THRESHOLD_RULE,
+            AodhExtendedAlarmType.GNOCCHI_AGGREGATION_BY_METRICS_THRESHOLD:
+                AodhProps.GNOCCHI_AGGREGATION_BY_METRICS_THRESHOLD_RULE
         }
 
     @property
@@ -109,7 +123,12 @@ class AodhDriver(AlarmDriverBase):
 
         Aodh_type = [AodhExtendedAlarmType.EVENT,
                      AodhExtendedAlarmType.THRESHOLD,
-                     AodhExtendedAlarmType.GNOCCHI_RESOURCES_THRESHOLD]
+                     AodhExtendedAlarmType.GNOCCHI_RESOURCES_THRESHOLD,
+                     AodhExtendedAlarmType.
+                     GNOCCHI_AGGREGATION_BY_METRICS_THRESHOLD,
+                     AodhExtendedAlarmType.
+                     GNOCCHI_AGGREGATION_BY_RESOURCES_THRESHOLD,
+                     AodhExtendedAlarmType.COMPOSITE]
 
         alarm_type = alarm[AodhProps.TYPE]
         if alarm_type == AodhProps.EVENT and \
@@ -171,12 +190,26 @@ class AodhDriver(AlarmDriverBase):
 
     @classmethod
     def _convert_threshold_alarm_rule(cls, rule):
-        return {
-            AodhProps.RESOURCE_ID: _parse_query(rule, AodhProps.RESOURCE_ID)
-        }
+        return cls._alarm_rule_common(rule)
 
     @classmethod
     def _convert_gnocchi_resources_threshold_alarm_rule(cls, rule):
+        return cls._alarm_rule_common(rule)
+
+    @classmethod
+    def _convert_gnocchi_aggregation_by_metrics_threshold_rule(cls, rule):
+        return cls._alarm_rule_common(rule)
+
+    @classmethod
+    def _convert_gnocchi_aggregation_by_resources_threshold_rule(cls, rule):
+        return cls._alarm_rule_common(rule)
+
+    @classmethod
+    def _convert_composite_alarm_rule(cls, rule):
+        return cls._alarm_rule_common(rule)
+
+    @classmethod
+    def _alarm_rule_common(cls, rule):
         return {
             AodhProps.RESOURCE_ID: _parse_query(rule, AodhProps.RESOURCE_ID)
         }
@@ -268,7 +301,6 @@ class AodhDriver(AlarmDriverBase):
         """
         old_alarm = self._old_alarm(event)
         entity = old_alarm.copy()
-
         changed_rule = event[AodhProps.DETAIL]
         for (changed_type, changed_info) in changed_rule.items():
             # handle changed rule which may effect the neighbor
@@ -303,12 +335,41 @@ class AodhDriver(AlarmDriverBase):
 
 
 def _parse_query(data, key):
+    """Find the relevant key in a given alarm detail query.
+
+    :param data: A query is either a list of this form:
+    [
+        {
+        field: resource_id,
+        value: 54132
+        }
+    ]
+    or a string-represented dict of this form:
+    '{
+        =: { resource_id : 1235423 }
+     }'
+    """
+
     query_fields = data.get(AodhProps.QUERY, {})
-    for query in query_fields:
-        field = query['field']
-        if field == key:
-            return query['value']
-    return None
+    try:
+        if isinstance(query_fields, six.text_type):
+            query_fields = json.loads(query_fields)
+        if not isinstance(query_fields, list):
+            query_fields = [query_fields]
+        for query in query_fields:
+            field = query.get('field')
+            if field and field == key:
+                return query['value']
+            elif not field:
+                field = query.get('=', {})
+                for k in field:
+                    if k == key:
+                        return field[key]
+        return None
+
+    except Exception:
+        LOG.exception("Failed to parse AODH alarm query")
+        return None
 
 
 def _is_vitrage_alarm(rule):
