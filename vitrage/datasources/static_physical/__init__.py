@@ -12,18 +12,30 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+
 from oslo_config import cfg
+from oslo_log import versionutils
+
 from vitrage.common.constants import DatasourceOpts as DSOpts
 from vitrage.common.constants import UpdateMethod
+from vitrage.common import utils
 
 STATIC_PHYSICAL_DATASOURCE = 'static_physical'
 SWITCH = 'switch'
+
+_DEPRECATED_MSG = utils.fmt("""
+`Static_physical` was deprecated in Queens and and will be removed in Stein.
+Please use static Datasource.
+""")
 
 OPTS = [
     cfg.StrOpt(DSOpts.TRANSFORMER,
                default='vitrage.datasources.static_physical.transformer.'
                        'StaticPhysicalTransformer',
                help='Static physical transformer class path',
+               deprecated_for_removal=True,
+               deprecated_reason=_DEPRECATED_MSG,
+               deprecated_since=versionutils.deprecated.PIKE,
                required=True),
     cfg.StrOpt(DSOpts.DRIVER,
                default='vitrage.datasources.static_physical.driver.'
@@ -36,15 +48,28 @@ OPTS = [
                     'Pull: updates every [changes_interval] seconds.'
                     'Push: updates by getting notifications from the'
                     ' datasource itself.',
+               deprecated_for_removal=True,
+               deprecated_reason=_DEPRECATED_MSG,
+               deprecated_since=versionutils.deprecated.PIKE,
                required=True),
     cfg.IntOpt(DSOpts.CHANGES_INTERVAL,
                default=20,
                min=5,
                help='interval between checking changes in the configuration '
-                    'files of the physical topology data sources'),
+                    'files of the physical topology data sources',
+               deprecated_for_removal=True,
+               deprecated_reason=_DEPRECATED_MSG,
+               deprecated_since=versionutils.deprecated.PIKE),
+
     cfg.StrOpt('directory', default='/etc/vitrage/static_datasources',
-               help='Static physical data sources directory'),
+               help='Static physical data sources directory',
+               deprecated_for_removal=True,
+               deprecated_reason=_DEPRECATED_MSG,
+               deprecated_since=versionutils.deprecated.PIKE),
     cfg.ListOpt('entities',
                 default=[SWITCH],
-                help='Static physical entity types list')
+                help='Static physical entity types list',
+                deprecated_for_removal=True,
+                deprecated_reason=_DEPRECATED_MSG,
+                deprecated_since=versionutils.deprecated.PIKE)
 ]
