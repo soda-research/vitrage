@@ -33,12 +33,8 @@ class GraphPersistency(object):
         self.conf = conf
         self.db = db
         self.graph = graph
-        self.enabled = conf.persistency.enable_persistency
 
     def store_graph(self):
-        if not self.enabled:
-            return
-
         LOG.info('Persisting graph...')
         try:
             last_event_id = self.db.events.get_last_event_id()
@@ -59,8 +55,6 @@ class GraphPersistency(object):
         return t
 
     def query_recent_snapshot(self):
-        if not self.enabled:
-            return
         timestamp = self._recent_snapshot_time()
         return self.db.graph_snapshots.query(timestamp=timestamp)
 
@@ -88,11 +82,9 @@ class GraphPersistency(object):
 
     def persist_event(self, before, current, is_vertex, graph, event_id=None):
         """Callback subscribed to driver.graph updates"""
-        if not self.enabled or\
-                not self.is_important_change(before,
-                                             current,
-                                             VProps.UPDATE_TIMESTAMP,
-                                             VProps.VITRAGE_SAMPLE_TIMESTAMP):
+        if not self.is_important_change(
+                before, current, VProps.UPDATE_TIMESTAMP,
+                VProps.VITRAGE_SAMPLE_TIMESTAMP):
             return
 
         if is_vertex:

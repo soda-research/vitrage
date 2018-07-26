@@ -60,9 +60,6 @@ volumes_per_instance=2
 vitrage_alarms_per_instance=0
 tripleo_controllers=3
 zabbix_alarms_per_controller=1
-
-[persistency]
-enable_persistency=true
 EOF
 )"
 

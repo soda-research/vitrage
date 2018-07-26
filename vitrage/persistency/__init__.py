@@ -17,9 +17,5 @@ from oslo_config import cfg
 OPTS = [
     cfg.StrOpt('persistor_topic',
                default='vitrage_persistor',
-               help='The topic on which event will be sent from the '
-                    'datasources to the persistor'),
-    cfg.BoolOpt('enable_persistency',
-                default=False,
-                help='Periodically store entity graph snapshot to database'),
+               help='persistor will listen on this topic for events to store'),
     ]
