@@ -18,14 +18,13 @@ import pecan
 
 
 from oslo_log import log
-from oslo_utils.strutils import bool_from_string
 from osprofiler import profiler
 from pecan.core import abort
 
-from vitrage.api.controllers.rest import RootRestController
+from vitrage.api.controllers.v1.alarm_base import BaseAlarmsController
 from vitrage.api.controllers.v1 import count
+from vitrage.api.controllers.v1 import history
 from vitrage.api.policy import enforce
-from vitrage.common.constants import TenantProps
 from vitrage.common.constants import VertexProperties as Vprops
 
 
@@ -35,44 +34,19 @@ LOG = log.getLogger(__name__)
 # noinspection PyBroadException
 @profiler.trace_cls("alarm controller",
                     info={}, hide_args=False, trace_private=False)
-class AlarmsController(RootRestController):
+class AlarmsController(BaseAlarmsController):
     count = count.CountsController()
+    history = history.HistoryController()
 
     @pecan.expose('json')
     def get_all(self, **kwargs):
-        vitrage_id = kwargs.get(Vprops.VITRAGE_ID)
-        all_tenants = kwargs.get(TenantProps.ALL_TENANTS, False)
-        all_tenants = bool_from_string(all_tenants)
-        if all_tenants:
-            enforce("list alarms:all_tenants", pecan.request.headers,
-                    pecan.request.enforcer, {})
-        else:
-            enforce("list alarms", pecan.request.headers,
-                    pecan.request.enforcer, {})
 
-        LOG.info('returns list alarms with vitrage id %s', vitrage_id)
+        kwargs['only_active_alarms'] = True
 
-        try:
-            return self._get_alarms(vitrage_id, all_tenants)
-        except Exception:
-            LOG.exception('Failed to get alarms.')
-            abort(404, 'Failed to get alarms.')
+        LOG.info('returns alarms list with vitrage id %s',
+                 kwargs.get(Vprops.VITRAGE_ID))
 
-    @staticmethod
-    def _get_alarms(vitrage_id=None, all_tenants=False):
-        alarms_json = pecan.request.client.call(pecan.request.context,
-                                                'get_alarms',
-                                                vitrage_id=vitrage_id,
-                                                all_tenants=all_tenants)
-        LOG.info(alarms_json)
-
-        try:
-            alarms_list = json.loads(alarms_json)['alarms']
-            return alarms_list
-
-        except Exception:
-            LOG.exception('Failed to open file.')
-            abort(404, 'Failed to get alarms')
+        return self._get_alarms(**kwargs)
 
     @pecan.expose('json')
     def get(self, vitrage_id):

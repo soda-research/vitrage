@@ -16,11 +16,14 @@ import json
 
 from testtools import matchers
 
+from oslo_config import cfg
+
 from vitrage.api_handler.apis.alarm import AlarmApis
 from vitrage.api_handler.apis.rca import RcaApis
 from vitrage.api_handler.apis.resource import ResourceApis
 from vitrage.api_handler.apis.topology import TopologyApis
 from vitrage.common.constants import EdgeLabel
+from vitrage.common.constants import EdgeProperties
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.datasources import NOVA_HOST_DATASOURCE
@@ -30,18 +33,29 @@ from vitrage.datasources.transformer_base \
     import create_cluster_placeholder_vertex
 from vitrage.entity_graph.mappings.operational_alarm_severity import \
     OperationalAlarmSeverity
+from vitrage.entity_graph.processor.notifier import PersistNotifier
+from vitrage.graph.driver.networkx_graph import edge_copy
 from vitrage.graph.driver.networkx_graph import NXGraph
 import vitrage.graph.utils as graph_utils
+from vitrage.persistency.service import VitragePersistorEndpoint
 from vitrage.tests.base import IsEmpty
+from vitrage.tests.functional.test_configuration import TestConfiguration
 from vitrage.tests.unit.entity_graph.base import TestEntityGraphUnitBase
+from vitrage.utils.datetime import utcnow
 
 
-class TestApis(TestEntityGraphUnitBase):
+class TestApis(TestEntityGraphUnitBase, TestConfiguration):
+
+    @classmethod
+    def setUpClass(cls):
+        super(TestApis, cls).setUpClass()
+        cls.conf = cfg.ConfigOpts()
+        cls.add_db(cls.conf)
 
     def test_get_alarms_with_admin_project(self):
         # Setup
         graph = self._create_graph()
-        apis = AlarmApis(graph, None)
+        apis = AlarmApis(graph, self.conf, self._db)
         ctx = {'tenant': 'project_1', 'is_admin': True}
 
         # Action
@@ -55,7 +69,7 @@ class TestApis(TestEntityGraphUnitBase):
     def test_get_alarms_with_not_admin_project(self):
         # Setup
         graph = self._create_graph()
-        apis = AlarmApis(graph, None)
+        apis = AlarmApis(graph, self.conf, self._db)
         ctx = {'tenant': 'project_2', 'is_admin': False}
 
         # Action
@@ -69,7 +83,7 @@ class TestApis(TestEntityGraphUnitBase):
     def test_get_alarm_counts_with_not_admin_project(self):
         # Setup
         graph = self._create_graph()
-        apis = AlarmApis(graph, None)
+        apis = AlarmApis(graph, self.conf, self._db)
         ctx = {'tenant': 'project_2', 'is_admin': False}
 
         # Action
@@ -86,7 +100,7 @@ class TestApis(TestEntityGraphUnitBase):
     def test_get_alarms_with_all_tenants(self):
         # Setup
         graph = self._create_graph()
-        apis = AlarmApis(graph, None)
+        apis = AlarmApis(graph, self.conf, self._db)
         ctx = {'tenant': 'project_1', 'is_admin': False}
 
         # Action
@@ -100,7 +114,7 @@ class TestApis(TestEntityGraphUnitBase):
     def test_get_alarm_counts_with_all_tenants(self):
         # Setup
         graph = self._create_graph()
-        apis = AlarmApis(graph, None)
+        apis = AlarmApis(graph, self.conf, self._db)
         ctx = {'tenant': 'project_1', 'is_admin': False}
 
         # Action
@@ -117,7 +131,7 @@ class TestApis(TestEntityGraphUnitBase):
     def test_get_rca_with_admin_project(self):
         # Setup
         graph = self._create_graph()
-        apis = RcaApis(graph, None)
+        apis = RcaApis(graph, self.conf, self._db)
         ctx = {'tenant': 'project_1', 'is_admin': True}
 
         # Action
@@ -131,7 +145,7 @@ class TestApis(TestEntityGraphUnitBase):
     def test_get_rca_with_not_admin_project(self):
         # Setup
         graph = self._create_graph()
-        apis = RcaApis(graph, None)
+        apis = RcaApis(graph, self.conf, self._db)
         ctx = {'tenant': 'project_2', 'is_admin': False}
 
         # Action
@@ -147,7 +161,7 @@ class TestApis(TestEntityGraphUnitBase):
     def test_get_rca_with_not_admin_bla_project(self):
         # Setup
         graph = self._create_graph()
-        apis = RcaApis(graph, None)
+        apis = RcaApis(graph, self.conf, self._db)
         ctx = {'tenant': 'project_2', 'is_admin': False}
 
         # Action
@@ -161,7 +175,7 @@ class TestApis(TestEntityGraphUnitBase):
     def test_get_rca_with_all_tenants(self):
         # Setup
         graph = self._create_graph()
-        apis = RcaApis(graph, None)
+        apis = RcaApis(graph, self.conf, self._db)
         ctx = {'tenant': 'project_1', 'is_admin': False}
 
         # Action
@@ -433,6 +447,7 @@ class TestApis(TestEntityGraphUnitBase):
 
     def _create_graph(self):
         graph = NXGraph('Multi tenancy graph')
+        self._add_alarm_persistency_subscription(graph)
 
         # create vertices
         cluster_vertex = create_cluster_placeholder_vertex()
@@ -459,40 +474,54 @@ class TestApis(TestEntityGraphUnitBase):
                       VProps.NAME: 'host_1',
                       VProps.RESOURCE_ID: 'host_1',
                       VProps.VITRAGE_OPERATIONAL_SEVERITY:
+                          OperationalAlarmSeverity.SEVERE,
+                      VProps.VITRAGE_AGGREGATED_SEVERITY:
                           OperationalAlarmSeverity.SEVERE})
         alarm_on_instance_1_vertex = self._create_alarm(
             'alarm_on_instance_1',
             'deduced_alarm',
             project_id='project_1',
+            vitrage_resource_project_id='project_1',
             metadata={VProps.VITRAGE_TYPE: NOVA_INSTANCE_DATASOURCE,
                       VProps.NAME: 'instance_1',
                       VProps.RESOURCE_ID: 'sdg7849ythksjdg',
                       VProps.VITRAGE_OPERATIONAL_SEVERITY:
+                          OperationalAlarmSeverity.SEVERE,
+                      VProps.VITRAGE_AGGREGATED_SEVERITY:
                           OperationalAlarmSeverity.SEVERE})
         alarm_on_instance_2_vertex = self._create_alarm(
             'alarm_on_instance_2',
             'deduced_alarm',
+            vitrage_resource_project_id='project_1',
             metadata={VProps.VITRAGE_TYPE: NOVA_INSTANCE_DATASOURCE,
                       VProps.NAME: 'instance_2',
                       VProps.RESOURCE_ID: 'nbfhsdugf',
                       VProps.VITRAGE_OPERATIONAL_SEVERITY:
+                          OperationalAlarmSeverity.WARNING,
+                      VProps.VITRAGE_AGGREGATED_SEVERITY:
                           OperationalAlarmSeverity.WARNING})
         alarm_on_instance_3_vertex = self._create_alarm(
             'alarm_on_instance_3',
             'deduced_alarm',
             project_id='project_2',
+            vitrage_resource_project_id='project_2',
             metadata={VProps.VITRAGE_TYPE: NOVA_INSTANCE_DATASOURCE,
                       VProps.NAME: 'instance_3',
                       VProps.RESOURCE_ID: 'nbffhsdasdugf',
                       VProps.VITRAGE_OPERATIONAL_SEVERITY:
+                          OperationalAlarmSeverity.CRITICAL,
+                      VProps.VITRAGE_AGGREGATED_SEVERITY:
                           OperationalAlarmSeverity.CRITICAL})
         alarm_on_instance_4_vertex = self._create_alarm(
             'alarm_on_instance_4',
             'deduced_alarm',
+            vitrage_resource_project_id='project_2',
             metadata={VProps.VITRAGE_TYPE: NOVA_INSTANCE_DATASOURCE,
                       VProps.NAME: 'instance_4',
                       VProps.RESOURCE_ID: 'ngsuy76hgd87f',
                       VProps.VITRAGE_OPERATIONAL_SEVERITY:
+                          OperationalAlarmSeverity.WARNING,
+                      VProps.VITRAGE_AGGREGATED_SEVERITY:
                           OperationalAlarmSeverity.WARNING})
 
         # create links
@@ -500,63 +529,78 @@ class TestApis(TestEntityGraphUnitBase):
         edges.append(graph_utils.create_edge(
             cluster_vertex.vertex_id,
             zone_vertex.vertex_id,
-            EdgeLabel.CONTAINS))
+            EdgeLabel.CONTAINS,
+            update_timestamp=str(utcnow())))
         edges.append(graph_utils.create_edge(
             zone_vertex.vertex_id,
             host_vertex.vertex_id,
-            EdgeLabel.CONTAINS))
+            EdgeLabel.CONTAINS,
+            update_timestamp=str(utcnow())))
         edges.append(graph_utils.create_edge(
             host_vertex.vertex_id,
             instance_1_vertex.vertex_id,
-            EdgeLabel.CONTAINS))
+            EdgeLabel.CONTAINS,
+            update_timestamp=str(utcnow())))
         edges.append(graph_utils.create_edge(
             host_vertex.vertex_id,
             instance_2_vertex.vertex_id,
-            EdgeLabel.CONTAINS))
+            EdgeLabel.CONTAINS,
+            update_timestamp=str(utcnow())))
         edges.append(graph_utils.create_edge(
             host_vertex.vertex_id,
             instance_3_vertex.vertex_id,
-            EdgeLabel.CONTAINS))
+            EdgeLabel.CONTAINS,
+            update_timestamp=str(utcnow())))
         edges.append(graph_utils.create_edge(
             host_vertex.vertex_id,
             instance_4_vertex.vertex_id,
-            EdgeLabel.CONTAINS))
+            EdgeLabel.CONTAINS,
+            update_timestamp=str(utcnow())))
         edges.append(graph_utils.create_edge(
             alarm_on_host_vertex.vertex_id,
             host_vertex.vertex_id,
-            EdgeLabel.ON))
+            EdgeLabel.ON,
+            update_timestamp=str(utcnow())))
         edges.append(graph_utils.create_edge(
             alarm_on_instance_1_vertex.vertex_id,
             instance_1_vertex.vertex_id,
-            EdgeLabel.ON))
+            EdgeLabel.ON,
+            update_timestamp=str(utcnow())))
         edges.append(graph_utils.create_edge(
             alarm_on_instance_2_vertex.vertex_id,
             instance_2_vertex.vertex_id,
-            EdgeLabel.ON))
+            EdgeLabel.ON,
+            update_timestamp=str(utcnow())))
         edges.append(graph_utils.create_edge(
             alarm_on_instance_3_vertex.vertex_id,
             instance_3_vertex.vertex_id,
-            EdgeLabel.ON))
+            EdgeLabel.ON,
+            update_timestamp=str(utcnow())))
         edges.append(graph_utils.create_edge(
             alarm_on_instance_4_vertex.vertex_id,
             instance_4_vertex.vertex_id,
-            EdgeLabel.ON))
+            EdgeLabel.ON,
+            update_timestamp=str(utcnow())))
         edges.append(graph_utils.create_edge(
             alarm_on_host_vertex.vertex_id,
             alarm_on_instance_1_vertex.vertex_id,
-            EdgeLabel.CAUSES))
+            EdgeLabel.CAUSES,
+            update_timestamp=str(utcnow())))
         edges.append(graph_utils.create_edge(
             alarm_on_host_vertex.vertex_id,
             alarm_on_instance_2_vertex.vertex_id,
-            EdgeLabel.CAUSES))
+            EdgeLabel.CAUSES,
+            update_timestamp=str(utcnow())))
         edges.append(graph_utils.create_edge(
             alarm_on_host_vertex.vertex_id,
             alarm_on_instance_3_vertex.vertex_id,
-            EdgeLabel.CAUSES))
+            EdgeLabel.CAUSES,
+            update_timestamp=str(utcnow())))
         edges.append(graph_utils.create_edge(
             alarm_on_host_vertex.vertex_id,
             alarm_on_instance_4_vertex.vertex_id,
-            EdgeLabel.CAUSES))
+            EdgeLabel.CAUSES,
+            update_timestamp=str(utcnow())))
 
         # add vertices to graph
         graph.add_vertex(cluster_vertex)
@@ -577,3 +621,26 @@ class TestApis(TestEntityGraphUnitBase):
             graph.add_edge(edge)
 
         return graph
+
+    def _add_alarm_persistency_subscription(self, graph):
+
+        self._db.alarms.delete()
+        self._db.changes.delete()
+        self._db.edges.delete()
+        persistor_endpoint = VitragePersistorEndpoint(self._db)
+
+        def callback(before, curr, is_vertex, graph):
+            notification_types = PersistNotifier._get_notification_type(
+                before, curr, is_vertex)
+            if not is_vertex:
+                curr = edge_copy(
+                    curr.source_id, curr.target_id, curr.label,
+                    curr.properties)
+                curr.properties[EdgeProperties.SOURCE_ID] = curr.source_id
+                curr.properties[EdgeProperties.TARGET_ID] = curr.target_id
+
+            for notification_type in notification_types:
+                persistor_endpoint.process_event(notification_type,
+                                                 curr.properties)
+
+        graph.subscribe(callback)

@@ -14,7 +14,7 @@
 # under the License.
 from oslo_log import log
 
-from vitrage.common.constants import EntityCategory
+from vitrage.common.constants import EntityCategory as ECategory
 from vitrage.common.constants import GraphAction
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.datasources.transformer_base import TransformerBase
@@ -318,22 +318,45 @@ class Processor(processor.ProcessorBase):
         result = self.entity_graph.get_vertices(attr)
         event[TransformerBase.QUERY_RESULT] = result
 
-    @staticmethod
-    def _add_resource_details_to_alarm(vertex, neighbors):
+    def _add_resource_details_to_alarm(self, vertex, neighbors):
 
-        if not vertex.get(VProps.VITRAGE_CATEGORY) == EntityCategory.ALARM \
-                or not neighbors:
+        if not neighbors:
             return
 
-        # for the possibility that alarm doesn't have resource
-        vertex.properties[VProps.VITRAGE_RESOURCE_ID] = None
-        vertex.properties[VProps.VITRAGE_RESOURCE_TYPE] = None
+        resource = None
+        alarms = []
 
-        for neighbor in neighbors:
+        if vertex.get(VProps.VITRAGE_CATEGORY) == ECategory.ALARM:
+            alarms = [vertex]
+            for neighbor in neighbors:
+                if neighbor.vertex.get(VProps.VITRAGE_CATEGORY) ==\
+                        ECategory.RESOURCE:
+                    resource = neighbor.vertex
+        elif vertex.get(VProps.VITRAGE_CATEGORY) == ECategory.RESOURCE:
+            resource = vertex
+            for neighbor in neighbors:
+                if neighbor.vertex.get(VProps.VITRAGE_CATEGORY) == \
+                        ECategory.ALARM:
+                    alarms.append(neighbor.vertex)
 
-            if neighbor.vertex.get(VProps.VITRAGE_CATEGORY) == \
-                    EntityCategory.RESOURCE:
-                vertex.properties[VProps.VITRAGE_RESOURCE_ID] = \
-                    neighbor.vertex.vertex_id
-                vertex.properties[VProps.VITRAGE_RESOURCE_TYPE] = \
-                    neighbor.vertex.get(VProps.VITRAGE_TYPE)
+        for alarm in alarms:
+            if not resource:
+                self.add_resource_details(alarm, None, None, None)
+                continue
+
+            project_id = resource.get(VProps.PROJECT_ID)
+            if not project_id:
+                n_vertex = self.entity_graph.get_vertex(resource.vertex_id)
+                project_id = n_vertex.get(VProps.PROJECT_ID) \
+                    if n_vertex else None
+            self.add_resource_details(
+                alarm,
+                r_id=resource.vertex_id,
+                r_type=resource.get(VProps.VITRAGE_TYPE),
+                r_project_id=project_id)
+
+    @staticmethod
+    def add_resource_details(alarm, r_id, r_type, r_project_id):
+        alarm[VProps.VITRAGE_RESOURCE_ID] = r_id
+        alarm[VProps.VITRAGE_RESOURCE_TYPE] = r_type
+        alarm[VProps.VITRAGE_RESOURCE_PROJECT_ID] = r_project_id

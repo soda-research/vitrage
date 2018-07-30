@@ -43,6 +43,18 @@ class Connection(object):
     def webhooks(self):
         return None
 
+    @property
+    def alarms(self):
+        return None
+
+    @property
+    def edges(self):
+        return None
+
+    @property
+    def changes(self):
+        return None
+
     @abc.abstractmethod
     def upgrade(self, nocreate=False):
         raise NotImplementedError('upgrade is not implemented')
@@ -231,6 +243,48 @@ class GraphSnapshotsConnection(object):
         """
         raise NotImplementedError('query graph snapshot not implemented')
 
-    def delete(self, timestamp=None):
+    def delete(self):
         """Delete all graph snapshots taken until timestamp."""
         raise NotImplementedError('delete graph snapshots not implemented')
+
+
+@six.add_metaclass(abc.ABCMeta)
+class AlarmsConnection(object):
+    def create(self, alarm):
+        raise NotImplementedError('create alarm not implemented')
+
+    def update(self, vitrage_id, key, val):
+        raise NotImplementedError('update alarms not implemented')
+
+    def end_all_alarms(self, end_time):
+        raise NotImplementedError('end all alarms not implemented')
+
+    def delete(self, timestamp=None):
+        raise NotImplementedError('delete alarms not implemented')
+
+
+@six.add_metaclass(abc.ABCMeta)
+class EdgesConnection(object):
+    def create(self, edge):
+        raise NotImplementedError('create edge not implemented')
+
+    def update(self, source_id, target_id, timestamp):
+        raise NotImplementedError('update edge not implemented')
+
+    def end_all_edges(self, end_time):
+        raise NotImplementedError('end all edges not implemented')
+
+    def delete(self):
+        raise NotImplementedError('delete edges not implemented')
+
+
+@six.add_metaclass(abc.ABCMeta)
+class ChangesConnection(object):
+    def create(self, change):
+        raise NotImplementedError('create change not implemented')
+
+    def add_end_changes(self, chnges_to_add, end_time):
+        raise NotImplementedError('add end changes not implemented')
+
+    def delete(self):
+        raise NotImplementedError('delete changes not implemented')

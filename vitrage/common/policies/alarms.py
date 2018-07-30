@@ -50,6 +50,29 @@ rules = [
         ]
     ),
     policy.DocumentedRuleDefault(
+        name='list alarms history',
+        check_str=base.UNPROTECTED,
+        description='List the alarms history',
+        operations=[
+            {
+                'path': '/alarm/history',
+                'method': 'GET'
+            }
+        ]
+    ),
+    policy.DocumentedRuleDefault(
+        name='list alarms history:all_tenants',
+        check_str=base.ROLE_ADMIN,
+        description='List alarms history of all tenants '
+                    '(if the user has the permissions)',
+        operations=[
+            {
+                'path': '/alarm/history',
+                'method': 'GET'
+            }
+        ]
+    ),
+    policy.DocumentedRuleDefault(
         name='get alarms count',
         check_str=base.UNPROTECTED,
         description='Show how many alarms of each operations severity exist',

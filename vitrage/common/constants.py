@@ -31,6 +31,7 @@ class VertexProperties(ElementProperties):
     VITRAGE_AGGREGATED_SEVERITY = 'vitrage_aggregated_severity'
     VITRAGE_OPERATIONAL_SEVERITY = 'vitrage_operational_severity'
     VITRAGE_RESOURCE_ID = 'vitrage_resource_id'
+    VITRAGE_RESOURCE_PROJECT_ID = 'vitrage_resource_project_id'
     VITRAGE_CACHED_ID = 'vitrage_cached_id'
     ID = 'id'
     STATE = 'state'
@@ -49,6 +50,8 @@ class VertexProperties(ElementProperties):
 
 
 class EdgeProperties(ElementProperties):
+    SOURCE_ID = 'source_id'
+    TARGET_ID = 'target_id'
     RELATIONSHIP_TYPE = 'relationship_type'
 
 
@@ -118,9 +121,13 @@ class NotifierEventTypes(object):
     DEACTIVATE_DEDUCED_ALARM_EVENT = 'vitrage.deduced_alarm.deactivate'
     ACTIVATE_ALARM_EVENT = 'vitrage.alarm.activate'
     DEACTIVATE_ALARM_EVENT = 'vitrage.alarm.deactivate'
+    CHANGE_IN_ALARM_EVENT = 'vitrage.alarm.change'
+    CHANGE_PROJECT_ID_EVENT = 'vitrage.alarm.change_project_id'
     ACTIVATE_MARK_DOWN_EVENT = 'vitrage.mark_down.activate'
     DEACTIVATE_MARK_DOWN_EVENT = 'vitrage.mark_down.deactivate'
     EXECUTE_EXTERNAL_ACTION = 'vitrage.execute_external_action'
+    ACTIVATE_CAUSAL_RELATION = 'vitrage.causal_relationship.activate'
+    DEACTIVATE_CAUSAL_RELATION = 'vitrage.causal_relationship.deactivate'
 
 
 class TemplateTopologyFields(object):
@@ -182,3 +189,11 @@ class TenantProps(object):
     ALL_TENANTS = 'all_tenants'
     TENANT = 'tenant'
     IS_ADMIN = 'is_admin'
+
+
+class HistoryProps(object):
+    VITRAGE_ID = 'vitrage_id'
+    SOURCE_ID = 'source_id'
+    TARGET_ID = 'target_id'
+    START_TIMESTAMP = 'start_timestamp'
+    END_TIMESTAMP = 'end_timestamp'

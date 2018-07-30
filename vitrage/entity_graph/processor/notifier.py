@@ -14,13 +14,15 @@
 from oslo_log import log
 import oslo_messaging
 
+from vitrage.common.constants import EdgeLabel as ELabel
+from vitrage.common.constants import EdgeProperties as EProps
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import NotifierEventTypes
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.evaluator.actions import evaluator_event_transformer as evaluator
+from vitrage.graph.driver.networkx_graph import edge_copy
 from vitrage.graph.driver.networkx_graph import vertex_copy
 from vitrage.messaging import get_transport
-
 
 LOG = log.getLogger(__name__)
 
@@ -66,18 +68,9 @@ class GraphNotifier(object):
         return topics
 
     def notify_when_applicable(self, before, current, is_vertex, graph):
-        """Callback subscribed to driver.graph updates
-
-        :param is_vertex:
-        :param before: The graph element (vertex or edge) prior to the
-        change that happened. None if the element was just created.
-        :param current: The graph element (vertex or edge) after the
-        change that happened. Deleted elements should arrive with the
-        vitrage_is_deleted property set to True
-        :param graph: The graph
-        """
         curr = current
-        notification_types = _get_notification_type(before, curr, is_vertex)
+        notification_types = \
+            self._get_notification_type(before, curr, is_vertex)
         if not notification_types:
             return
 
@@ -88,8 +81,8 @@ class GraphNotifier(object):
             curr.properties[VProps.RESOURCE] = graph.get_vertex(
                 curr.get(VProps.VITRAGE_RESOURCE_ID))
 
-        LOG.info('notification_types : %s', str(notification_types))
-        LOG.info('notification properties : %s', curr.properties)
+        LOG.debug('notification_types : %s', str(notification_types))
+        LOG.debug('notification properties : %s', curr.properties)
 
         for notification_type in notification_types:
             try:
@@ -100,61 +93,156 @@ class GraphNotifier(object):
             except Exception:
                 LOG.exception('Cannot notify - %s.', notification_type)
 
+    @staticmethod
+    def _get_notification_type(before, current, is_vertex):
+        if not is_vertex:
+            return None
 
-def _get_notification_type(before, current, is_vertex):
-    if not is_vertex:
-        return None
-
-    def notification_type(is_active,
-                          activate_event_type,
-                          deactivate_event_type):
-        if not is_active(before):
-            if is_active(current):
-                return activate_event_type
-        else:
-            if not is_active(current):
-                return deactivate_event_type
-
-    notification_types = [
-        notification_type(_is_active_deduced_alarm,
-                          NotifierEventTypes.ACTIVATE_DEDUCED_ALARM_EVENT,
-                          NotifierEventTypes.DEACTIVATE_DEDUCED_ALARM_EVENT),
-        notification_type(_is_active_alarm,
-                          NotifierEventTypes.ACTIVATE_ALARM_EVENT,
-                          NotifierEventTypes.DEACTIVATE_ALARM_EVENT),
-        notification_type(_is_marked_down,
-                          NotifierEventTypes.ACTIVATE_MARK_DOWN_EVENT,
-                          NotifierEventTypes.DEACTIVATE_MARK_DOWN_EVENT),
-    ]
-    return list(filter(None, notification_types))
+        notification_types = [
+            notification_type(
+                before, current, _is_active_deduced_alarm,
+                NotifierEventTypes.ACTIVATE_DEDUCED_ALARM_EVENT,
+                NotifierEventTypes.DEACTIVATE_DEDUCED_ALARM_EVENT),
+            notification_type(
+                before, current, _is_active_alarm,
+                NotifierEventTypes.ACTIVATE_ALARM_EVENT,
+                NotifierEventTypes.DEACTIVATE_ALARM_EVENT),
+            notification_type(
+                before, current, _is_marked_down,
+                NotifierEventTypes.ACTIVATE_MARK_DOWN_EVENT,
+                NotifierEventTypes.DEACTIVATE_MARK_DOWN_EVENT),
+        ]
+        return list(filter(None, notification_types))
 
 
-def _is_active_deduced_alarm(vertex):
-    if not vertex:
+class PersistNotifier(object):
+    """Allows writing to message bus"""
+    def __init__(self, conf):
+        self.oslo_notifier = None
+        topics = [conf.persistency.persistor_topic]
+        self.oslo_notifier = oslo_messaging.Notifier(
+            get_transport(conf),
+            driver='messagingv2',
+            publisher_id='vitrage.graph',
+            topics=topics)
+
+    def notify_when_applicable(self, before, current, is_vertex, graph):
+
+        curr = current
+        notification_types = \
+            self._get_notification_type(before, curr, is_vertex)
+        if not notification_types:
+            return
+
+        # in case the event is on edge, add source and target ids to properties
+        # for history
+        if not is_vertex:
+            curr = edge_copy(
+                curr.source_id, curr.target_id, curr.label, curr.properties)
+            curr.properties[EProps.SOURCE_ID] = curr.source_id
+            curr.properties[EProps.TARGET_ID] = curr.target_id
+
+        LOG.debug('persist_notification_types : %s', str(notification_types))
+        LOG.debug('persist_notification properties : %s', curr.properties)
+
+        for notification_type in notification_types:
+            try:
+                self.oslo_notifier.info(
+                    {},
+                    notification_type,
+                    curr.properties)
+            except Exception:
+                LOG.exception('Cannot notify - %s.', notification_type)
+
+    @staticmethod
+    def _get_notification_type(before, current, is_vertex):
+
+        notification_types = [
+            notification_type(
+                before, current, _is_active_alarm,
+                NotifierEventTypes.ACTIVATE_ALARM_EVENT,
+                NotifierEventTypes.DEACTIVATE_ALARM_EVENT),
+            notification_type(
+                before, current, _is_active_causes_edge,
+                NotifierEventTypes.ACTIVATE_CAUSAL_RELATION,
+                NotifierEventTypes.DEACTIVATE_CAUSAL_RELATION),
+            NotifierEventTypes.CHANGE_IN_ALARM_EVENT if
+            _is_alarm_severity_change(before, current) else None,
+            NotifierEventTypes.CHANGE_PROJECT_ID_EVENT if
+            _is_resource_project_id_change(before, current) else None,
+        ]
+        return list(filter(None, notification_types))
+
+
+def notification_type(before,
+                      current,
+                      is_active,
+                      activate_event_type,
+                      deactivate_event_type):
+    if not is_active(before):
+        if is_active(current):
+            return activate_event_type
+    else:
+        if not is_active(current):
+            return deactivate_event_type
+
+
+def _is_active_deduced_alarm(entity):
+    if not entity:
         return False
-    if vertex.get(VProps.VITRAGE_CATEGORY) == EntityCategory.ALARM and \
-            vertex.get(VProps.VITRAGE_TYPE) == evaluator.VITRAGE_DATASOURCE:
-        return _is_relevant_vertex(vertex)
+    if entity.get(VProps.VITRAGE_CATEGORY) == EntityCategory.ALARM and \
+            entity.get(VProps.VITRAGE_TYPE) == evaluator.VITRAGE_DATASOURCE:
+        return _is_relevant_vertex(entity)
     return False
 
 
-def _is_active_alarm(vertex):
-    if vertex and vertex.get(VProps.VITRAGE_CATEGORY) == EntityCategory.ALARM:
-        return _is_relevant_vertex(vertex)
+def _is_active_alarm(entity):
+    if entity and entity.get(VProps.VITRAGE_CATEGORY) == EntityCategory.ALARM:
+        return _is_relevant_vertex(entity)
     return False
 
 
-def _is_marked_down(vertex):
-    if not vertex:
+def _is_marked_down(entity):
+    if not entity:
         return False
-    if vertex.get(VProps.VITRAGE_CATEGORY) == EntityCategory.RESOURCE and \
-            vertex.get(VProps.IS_MARKED_DOWN) is True:
-        return _is_relevant_vertex(vertex)
+    if entity.get(VProps.VITRAGE_CATEGORY) == EntityCategory.RESOURCE and \
+            entity.get(VProps.IS_MARKED_DOWN) is True:
+        return _is_relevant_vertex(entity)
     return False
 
 
-def _is_relevant_vertex(vertex):
-    if vertex.get(VProps.VITRAGE_IS_DELETED, False) or \
-            vertex.get(VProps.VITRAGE_IS_PLACEHOLDER, False):
+def _is_relevant_vertex(entity):
+    if entity.get(VProps.VITRAGE_IS_DELETED, False) or \
+            entity.get(VProps.VITRAGE_IS_PLACEHOLDER, False):
         return False
     return True
+
+
+def _is_active_causes_edge(entity):
+    if not entity:
+        return False
+    if not entity.get(EProps.RELATIONSHIP_TYPE) == ELabel.CAUSES:
+        return False
+    return not entity.get(EProps.VITRAGE_IS_DELETED)
+
+
+def _is_alarm_severity_change(before, curr):
+    if not (_is_active_alarm(before) and
+            _is_active_alarm(curr)):
+        return False
+    # returns true on activation, deactivation and severity change
+    if not before and curr \
+            or (before.get(VProps.VITRAGE_AGGREGATED_SEVERITY) !=
+                curr.get(VProps.VITRAGE_AGGREGATED_SEVERITY)):
+        return True
+    return False
+
+
+def _is_resource_project_id_change(before, curr):
+    if not (_is_active_alarm(before) and
+            _is_active_alarm(curr)):
+        return False
+    if (before.get(VProps.VITRAGE_RESOURCE_PROJECT_ID) !=
+            curr.get(VProps.VITRAGE_RESOURCE_PROJECT_ID)):
+        return True
+    return False

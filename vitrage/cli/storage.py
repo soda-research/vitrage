@@ -30,3 +30,6 @@ def purge_data():
     db.active_actions.delete()
     db.events.delete()
     db.graph_snapshots.delete()
+    db.changes.delete()
+    db.edges.delete()
+    db.alarms.delete()
