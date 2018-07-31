@@ -27,6 +27,7 @@ LOG = log.getLogger(__name__)
 
 
 def prepare_service(args=None, conf=None, config_files=None):
+    set_defaults()
     if conf is None:
         conf = cfg.ConfigOpts()
     log.register_options(conf)
@@ -59,3 +60,16 @@ def prepare_service(args=None, conf=None, config_files=None):
     messaging.setup()
 
     return conf
+
+
+def set_defaults():
+    from oslo_middleware import cors
+    cfg.set_defaults(cors.CORS_OPTS,
+                     allow_headers=[
+                         'Authorization',
+                         'X-Auth-Token',
+                         'X-Subject-Token',
+                         'X-User-Id',
+                         'X-Domain-Id',
+                         'X-Project-Id',
+                         'X-Roles'])

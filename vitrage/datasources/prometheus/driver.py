@@ -17,6 +17,7 @@ from oslo_log import log
 
 from vitrage.common.constants import DatasourceAction
 from vitrage.common.constants import DatasourceProperties as DSProps
+from vitrage.common.constants import EventProperties as EProps
 from vitrage.datasources.alarm_driver_base import AlarmDriverBase
 from vitrage.datasources.prometheus import PROMETHEUS_DATASOURCE
 from vitrage.datasources.prometheus.properties import get_alarm_update_time
@@ -68,23 +69,50 @@ class PrometheusDriver(AlarmDriverBase):
 
         :param event: dictionary of this form:
             {
-              "status": "firing",
-              "groupLabels": {
-                "alertname": "HighInodeUsage"
-              },
-              "groupKey": "{}:{alertname=\"HighInodeUsage\"}",
-              "commonAnnotations": {
-                "mount_point": "/%",
-                "description": "\"Consider ssh\"ing into the instance \"\n",
-                "title": "High number of inode usage",
-                "value": "96.81%",
-                "device": "/dev/vda1%",
-                "runbook": "troubleshooting/filesystem_alerts_inodes.md"
-              },
-              "alerts": [
+              "details":
                 {
                   "status": "firing",
-                  "labels": {
+                  "groupLabels": {
+                    "alertname": "HighInodeUsage"
+                  },
+                  "groupKey": "{}:{alertname=\"HighInodeUsage\"}",
+                  "commonAnnotations": {
+                    "mount_point": "/%",
+                    "description": "\"Consider ssh\"ing into instance \"\n",
+                    "title": "High number of inode usage",
+                    "value": "96.81%",
+                    "device": "/dev/vda1%",
+                    "runbook": "troubleshooting/filesystem_alerts_inodes.md"
+                  },
+                  "alerts": [
+                    {
+                      "status": "firing",
+                      "labels": {
+                        "severity": "critical",
+                        "fstype": "ext4",
+                        "instance": "localhost:9100",
+                        "job": "node",
+                        "alertname": "HighInodeUsage",
+                        "device": "/dev/vda1",
+                        "mountpoint": "/"
+                      },
+                      "endsAt": "0001-01-01T00:00:00Z",
+                      "generatorURL": "http://devstack-4:9090/graph?g0.htm1",
+                      "startsAt": "2018-05-03T12:25:38.231388525Z",
+                      "annotations": {
+                        "mount_point": "/%",
+                        "description": "\"Consider ssh\"ing into instance\"\n",
+                        "title": "High number of inode usage",
+                        "value": "96.81%",
+                        "device": "/dev/vda1%",
+                        "runbook": "filesystem_alerts_inodes.md"
+                      }
+                    }
+                  ],
+                  "version": "4",
+                  "receiver": "vitrage",
+                  "externalURL": "http://devstack-rocky-4:9093",
+                  "commonLabels": {
                     "severity": "critical",
                     "fstype": "ext4",
                     "instance": "localhost:9100",
@@ -92,32 +120,8 @@ class PrometheusDriver(AlarmDriverBase):
                     "alertname": "HighInodeUsage",
                     "device": "/dev/vda1",
                     "mountpoint": "/"
-                  },
-                  "endsAt": "0001-01-01T00:00:00Z",
-                  "generatorURL": "http://devstack-rocky-4:9090/graph?g0.htm1",
-                  "startsAt": "2018-05-03T12:25:38.231388525Z",
-                  "annotations": {
-                    "mount_point": "/%",
-                    "description": "\"Consider ssh\"ing into the instance\"\n",
-                    "title": "High number of inode usage",
-                    "value": "96.81%",
-                    "device": "/dev/vda1%",
-                    "runbook": "troubleshooting/filesystem_alerts_inodes.md"
                   }
                 }
-              ],
-              "version": "4",
-              "receiver": "vitrage",
-              "externalURL": "http://devstack-rocky-4:9093",
-              "commonLabels": {
-                "severity": "critical",
-                "fstype": "ext4",
-                "instance": "localhost:9100",
-                "job": "node",
-                "alertname": "HighInodeUsage",
-                "device": "/dev/vda1",
-                "mountpoint": "/"
-              }
             }
 
         :param event_type: The type of the event. Always 'prometheus.alarm'.
@@ -128,18 +132,21 @@ class PrometheusDriver(AlarmDriverBase):
         LOG.debug('Going to enrich event: %s', str(event))
 
         alarms = []
+        details = event.get(EProps.DETAILS)
+        if details:
+            for alarm in details.get(PProps.ALERTS, []):
+                alarm[DSProps.EVENT_TYPE] = event_type
+                alarm[PProps.STATUS] = details[PProps.STATUS]
 
-        for alarm in event.get(PProps.ALERTS, []):
-            alarm[DSProps.EVENT_TYPE] = event_type
-            alarm[PProps.STATUS] = event[PProps.STATUS]
-
-            old_alarm = self._old_alarm(alarm)
-            alarm = self._filter_and_cache_alarm(alarm, old_alarm,
+                old_alarm = self._old_alarm(alarm)
+                alarm = \
+                    self._filter_and_cache_alarm(alarm,
+                                                 old_alarm,
                                                  self._filter_get_erroneous,
                                                  get_alarm_update_time(alarm))
 
-            if alarm:
-                alarms.append(alarm)
+                if alarm:
+                    alarms.append(alarm)
 
         LOG.debug('Enriched event. Created alarm events: %s', str(alarms))
 

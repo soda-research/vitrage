@@ -42,13 +42,12 @@ class EventApis(EntityGraphApisBase):
             event = {EventProperties.TYPE: event_type,
                      EventProperties.TIME: event_time,
                      EventProperties.DETAILS: details}
-
             if details.get(DoctorDetails.STATUS) == DoctorStatus.UP:
                 notification_type = DoctorProperties.CUSTOM_EVENT_UP
             elif details.get(DoctorDetails.STATUS) == DoctorStatus.DOWN:
                 notification_type = DoctorProperties.CUSTOM_EVENT_DOWN
             else:
-                raise Exception("Unknown status")
+                notification_type = event_type
 
             self.oslo_notifier.info(
                 ctxt={'message_id': uuidutils.generate_uuid(),
