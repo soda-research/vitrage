@@ -97,3 +97,18 @@ def md5(obj):
     if isinstance(obj, six.string_types):
         return hashlib.md5(six.b(obj)).hexdigest()
     raise Exception('Unknown object for md5 %s', str(obj))
+
+
+def fmt(docstr):
+    """Format a docstring for use as documentation in sample config."""
+    # Replace newlines with spaces, as docstrings contain literal newlines that
+    # should not be rendered into the sample configuration file (instead, line
+    # wrappings should be applied automatically).
+    docstr = docstr.replace('\n', ' ')
+
+    # Because it's common for docstrings to begin and end with a newline, there
+    # is now whitespace at the beginning and end of the documentation as a side
+    # effect of replacing newlines with spaces.
+    docstr = docstr.strip()
+
+    return docstr
