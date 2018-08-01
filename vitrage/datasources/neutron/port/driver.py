@@ -44,4 +44,5 @@ class PortDriver(NeutronBase):
         return self.make_pickleable(
             ports,
             NEUTRON_PORT_DATASOURCE,
-            datasource_action)
+            datasource_action,
+            *self.properties_to_filter_out())

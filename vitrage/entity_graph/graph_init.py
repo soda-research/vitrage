@@ -173,8 +173,10 @@ class EventsCoordination(object):
         self._lock.release()
 
     def handle_multiple_low_priority(self, events):
-        for e in events:
+        index = 0
+        for index, e in enumerate(events):
             self._do_low_priority_work(e)
+        return index
 
     def _init_listener(self, topic, callback):
         if not topic:

@@ -11,7 +11,10 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+from base64 import standard_b64decode
+from six.moves import cPickle
 import time
+import zlib
 
 from oslo_log import log
 import oslo_messaging
@@ -35,12 +38,15 @@ def get_all(rpc_client, events_coordination, driver_names, action,
     t1 = time.time()
 
     def _call():
-        return rpc_client.call(
+        result = rpc_client.call(
             {},
             'driver_get_all',
             driver_names=driver_names,
             action=action,
             retry_on_fault=retry_on_fault)
+        events = cPickle.loads(zlib.decompress(standard_b64decode(result)))
+        for e in events:
+            yield e
 
     try:
         events = _call()
@@ -48,10 +54,10 @@ def get_all(rpc_client, events_coordination, driver_names, action,
         LOG.exception('Got MessagingTimeout')
         events = _call() if retry_on_fault else []
     t2 = time.time()
-    events_coordination.handle_multiple_low_priority(events)
+    count = events_coordination.handle_multiple_low_priority(events)
     t3 = time.time()
     LOG.info('get_all took %s, processing took %s for %s events',
-             t2 - t1, t3 - t2, len(events))
+             t2 - t1, t3 - t2, count)
 
 
 def get_changes(rpc_client, events_coordination, driver_name):
