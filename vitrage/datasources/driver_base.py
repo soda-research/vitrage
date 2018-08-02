@@ -20,6 +20,7 @@ from oslo_log import log
 from vitrage.common.constants import DatasourceAction
 from vitrage.common.constants import DatasourceProperties as DSProps
 from vitrage.common.constants import GraphAction
+from vitrage.common.constants import VertexProperties as VProps
 from vitrage.utils import datetime as datetime_utils
 
 LOG = log.getLogger(__name__)
@@ -27,6 +28,8 @@ LOG = log.getLogger(__name__)
 
 @six.add_metaclass(abc.ABCMeta)
 class DriverBase(object):
+
+    _datasource_name = None
 
     def __init__(self):
         pass
@@ -71,6 +74,7 @@ class DriverBase(object):
             cls._add_entity_type(entity, entity_type)
             cls._add_datasource_action(entity, datasource_action)
             cls._add_sampling_time(entity)
+            entity[VProps.VITRAGE_DATASOURCE_NAME] = cls._datasource_name
             pickleable_entities.append(entity)
         return pickleable_entities
 
@@ -136,3 +140,16 @@ class DriverBase(object):
     def properties_to_filter_out():
         """Return a list of properties to be removed from the event"""
         return []
+
+    @staticmethod
+    def should_delete_outdated_entities():
+        """Should the processor delete entities when become outdated
+
+        An entity that was not updated in the last get_all is considered
+        outdated. If this method returns true, then it will be automatically
+        deleted when outdated.
+        Note that this behavior does not suit all datasources - datasources
+        that are based only on notifications do not update their entities in
+        get_all, so they should return False.
+        """
+        return False

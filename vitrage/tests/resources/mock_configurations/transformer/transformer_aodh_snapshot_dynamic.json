@@ -14,6 +14,7 @@
   "resource_id": "3dcee183-ca42-4ccb-84af-9f0196b2e160",
   "vitrage_event_type": "alarm.creation",
   "vitrage_entity_type": "aodh",
+  "vitrage_datasource_name": "aodh",
   "vitrage_datasource_action": "snapshot",
   "vitrage_sample_date": "2016-11-29T06:31:50.094836",
   "graph_query_result": [

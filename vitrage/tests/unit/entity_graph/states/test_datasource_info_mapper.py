@@ -55,8 +55,8 @@ class TestDatasourceInfoMapper(base.BaseTest):
 
     @staticmethod
     def _load_datasources(conf):
-        for datasource_name in conf.datasources.types:
-            register_opts(conf, datasource_name, conf.datasources.path)
+        for vitrage_type in conf.datasources.types:
+            register_opts(conf, vitrage_type, conf.datasources.path)
 
     # noinspection PyAttributeOutsideInit,PyPep8Naming
     @classmethod

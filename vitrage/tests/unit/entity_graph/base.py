@@ -24,6 +24,7 @@ from vitrage.datasources.neutron.port import NEUTRON_PORT_DATASOURCE
 from vitrage.datasources.nova.host import NOVA_HOST_DATASOURCE
 from vitrage.datasources.nova.instance import NOVA_INSTANCE_DATASOURCE
 from vitrage.datasources.nova.zone import NOVA_ZONE_DATASOURCE
+from vitrage.datasources.static import STATIC_DATASOURCE
 from vitrage.entity_graph.processor import processor as proc
 from vitrage.graph.driver.networkx_graph import NXGraph
 import vitrage.graph.utils as graph_utils
@@ -49,7 +50,8 @@ class TestEntityGraphUnitBase(base.BaseTest):
                              NOVA_ZONE_DATASOURCE,
                              NEUTRON_NETWORK_DATASOURCE,
                              NEUTRON_PORT_DATASOURCE,
-                             CINDER_VOLUME_DATASOURCE],
+                             CINDER_VOLUME_DATASOURCE,
+                             STATIC_DATASOURCE],
                     help='Names of supported data sources'),
 
         cfg.ListOpt('path',
@@ -175,18 +177,23 @@ class TestEntityGraphUnitBase(base.BaseTest):
         )
 
     @staticmethod
-    def _create_resource(vitrage_id, resource_type, project_id=None):
+    def _create_resource(vitrage_id, resource_type, project_id=None,
+                         datasource_name=None, sample_timestamp=None,
+                         is_deleted=False):
+        if not datasource_name:
+            datasource_name = resource_type
         return graph_utils.create_vertex(
             vitrage_id,
             vitrage_category=EntityCategory.RESOURCE,
             vitrage_type=resource_type,
-            vitrage_sample_timestamp=None,
+            vitrage_sample_timestamp=sample_timestamp,
             update_timestamp=str(utcnow()),
-            vitrage_is_deleted=False,
+            vitrage_is_deleted=is_deleted,
             vitrage_is_placeholder=False,
             entity_id=vitrage_id,
             entity_state='active',
-            project_id=project_id
+            project_id=project_id,
+            datasource_name=datasource_name,
         )
 
     def _num_total_expected_vertices(self):

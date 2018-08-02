@@ -20,10 +20,12 @@ from vitrage.utils import opt_exists
 drivers = {}
 
 
+# noinspection PyProtectedMember
 def get_drivers_by_name(conf, driver_names):
     for d_name in driver_names:
         if not drivers.get(d_name):
             drivers[d_name] = utils.import_object(conf[d_name].driver, conf)
+            drivers[d_name].__class__._datasource_name = d_name
     return [drivers[d_name] for d_name in driver_names]
 
 
@@ -36,3 +38,7 @@ def get_pull_drivers_names(conf):
 def get_push_drivers_names(conf):
     return [name for name in conf.datasources.types
             if conf[name].update_method.lower() == UpdateMethod.PUSH]
+
+
+def get_driver_class(conf, driver_name):
+    return utils.import_class(conf[driver_name].driver)

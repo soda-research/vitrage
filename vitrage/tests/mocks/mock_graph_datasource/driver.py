@@ -91,3 +91,10 @@ class MockDriver(StaticDriver):
             del node[VProps.GRAPH_INDEX]
         if VProps.VITRAGE_TYPE in node:
             del node[VProps.VITRAGE_TYPE]
+
+    @staticmethod
+    def should_delete_outdated_entities():
+        # Unlike the static driver (its base class), the mock datasource
+        # pretends to create real entities that should not be deleted by the
+        # consistency
+        return False

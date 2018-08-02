@@ -56,8 +56,8 @@ class TestActionExecutor(TestFunctionalBase, TestConfiguration):
         cls.conf.register_opts(cls.DATASOURCES_OPTS, group='datasources')
         cls.add_db(cls.conf)
 
-        for datasource_name in cls.conf.datasources.types:
-            register_opts(cls.conf, datasource_name, cls.conf.datasources.path)
+        for vitrage_type in cls.conf.datasources.types:
+            register_opts(cls.conf, vitrage_type, cls.conf.datasources.path)
 
     def _init_executer(self):
         event_queue = queue.Queue()

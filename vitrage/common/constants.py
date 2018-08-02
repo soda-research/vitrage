@@ -47,6 +47,7 @@ class VertexProperties(ElementProperties):
     VITRAGE_RESOURCE_TYPE = 'vitrage_resource_type'
     RESOURCE = 'resource'
     IS_REAL_VITRAGE_ID = 'is_real_vitrage_id'
+    VITRAGE_DATASOURCE_NAME = 'vitrage_datasource_name'
 
 
 class EdgeProperties(ElementProperties):

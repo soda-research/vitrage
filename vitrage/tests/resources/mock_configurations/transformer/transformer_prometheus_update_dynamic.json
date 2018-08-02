@@ -1,5 +1,6 @@
 {
   "vitrage_entity_type" : "prometheus",
+  "vitrage_datasource_name": "prometheus",
   "vitrage_datasource_action" : "update",
   "vitrage_sample_date": "2018-05-06T06:31:50.094836",
   "status": "firing",
