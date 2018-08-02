@@ -86,8 +86,7 @@ class PrometheusTransformer(AlarmTransformerBase):
     @staticmethod
     def get_enrich_query(event):
         LOG.debug('event for enrich query: %s', str(event))
-        hostname = get_label(event, PLabels.INSTANCE)
-        if not hostname:
+        instance_id = event.get(PLabels.INSTANCE_ID)
+        if not instance_id:
             return None
-        hostname = hostname[:hostname.index(':')]
-        return {VProps.ID: hostname}
+        return {VProps.ID: instance_id}

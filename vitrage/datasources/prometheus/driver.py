@@ -28,6 +28,7 @@ from vitrage.datasources.prometheus.properties import PrometheusLabels \
     as PLabels
 from vitrage.datasources.prometheus.properties import PrometheusProperties \
     as PProps
+from vitrage import os_clients
 
 LOG = log.getLogger(__name__)
 
@@ -41,6 +42,13 @@ class PrometheusDriver(AlarmDriverBase):
         super(PrometheusDriver, self).__init__()
         self.conf = conf
         self._client = None
+        self._nova_client = None
+
+    @property
+    def nova_client(self):
+        if not self._nova_client:
+            self._nova_client = os_clients.nova_client(self.conf)
+        return self._nova_client
 
     def _vitrage_type(self):
         return PROMETHEUS_DATASOURCE
@@ -137,13 +145,24 @@ class PrometheusDriver(AlarmDriverBase):
             for alarm in details.get(PProps.ALERTS, []):
                 alarm[DSProps.EVENT_TYPE] = event_type
                 alarm[PProps.STATUS] = details[PProps.STATUS]
+                instance_id = get_label(alarm, PLabels.INSTANCE)
+                if ':' in instance_id:
+                    instance_id = instance_id[:instance_id.index(':')]
+
+                # The 'instance' label can be instance ip or hostname.
+                # we try to fetch the instance id from nova by its ip,
+                # and if not found we leave it as it is.
+                nova_instance = self.nova_client.servers.list(
+                    search_opts={'all_tenants': 1, 'ip': instance_id})
+                if nova_instance:
+                    instance_id = nova_instance[0].id
+                alarm[PLabels.INSTANCE_ID] = instance_id
 
                 old_alarm = self._old_alarm(alarm)
-                alarm = \
-                    self._filter_and_cache_alarm(alarm,
-                                                 old_alarm,
-                                                 self._filter_get_erroneous,
-                                                 get_alarm_update_time(alarm))
+                alarm = self._filter_and_cache_alarm(
+                    alarm, old_alarm,
+                    self._filter_get_erroneous,
+                    get_alarm_update_time(alarm))
 
                 if alarm:
                     alarms.append(alarm)

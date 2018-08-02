@@ -37,6 +37,7 @@ class PrometheusAnnotations(object):
 class PrometheusLabels(object):
     SEVERITY = 'severity'
     INSTANCE = 'instance'
+    INSTANCE_ID = 'instance_id'
     ALERT_NAME = 'alertname'    # A (unique?) name of the alert
 
 

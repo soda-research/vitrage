@@ -12,6 +12,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from mock import mock
 from oslo_config import cfg
 from testtools import matchers
 
@@ -34,15 +35,20 @@ class PrometheusDriverTest(base.BaseTest):
         cls.conf.register_opts(cls.OPTS, group=PROMETHEUS_DATASOURCE)
 
     def test_enrich_event(self):
-        # Test setup
-        driver = PrometheusDriver(self.conf)
-        event = self._generate_event()
+        with (mock.patch('vitrage.datasources.prometheus.driver.'
+                         'PrometheusDriver.nova_client')) as mock_nova_client:
 
-        # Enrich event
-        created_events = driver.enrich_event(event, PROMETHEUS_EVENT_TYPE)
+            mock_nova_client.servers.list.return_value = None
 
-        # Test assertions
-        self._assert_event_equal(created_events, PROMETHEUS_EVENT_TYPE)
+            # Test setup
+            driver = PrometheusDriver(self.conf)
+            event = self._generate_event()
+
+            # Enrich event
+            created_events = driver.enrich_event(event, PROMETHEUS_EVENT_TYPE)
+
+            # Test assertions
+            self._assert_event_equal(created_events, PROMETHEUS_EVENT_TYPE)
 
     @staticmethod
     def _generate_event():
