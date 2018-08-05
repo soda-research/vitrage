@@ -27,7 +27,6 @@ from webob import exc
 
 LOG = logging.getLogger(__name__)
 
-OPENID_CONNECT_USERINFO = '%s/realms/%s/protocol/openid-connect/userinfo'
 
 KEYCLOAK_GROUP = 'keycloak'
 KEYCLOAK_OPTS = [
@@ -42,6 +41,11 @@ KEYCLOAK_OPTS = [
     cfg.StrOpt('cafile',
                help='A PEM encoded Certificate Authority to use when verifying'
                ' HTTPs connections. Defaults to system CAs.'),
+    cfg.StrOpt(
+        'user_info_endpoint_url',
+        default='/realms/%s/protocol/openid-connect/userinfo',
+        help='Endpoint against which authorization will be performed'
+    ),
 ]
 
 
@@ -57,6 +61,8 @@ class KeycloakAuth(base.ConfigurableMiddleware):
         self.keyfile = self._conf_get('keyfile', KEYCLOAK_GROUP)
         self.cafile = self._conf_get('cafile', KEYCLOAK_GROUP) or \
             self._get_system_ca_file()
+        self.user_info_endpoint_url = self._conf_get('user_info_endpoint_url',
+                                                     KEYCLOAK_GROUP)
         self.decoded = {}
 
     @property
@@ -100,7 +106,8 @@ class KeycloakAuth(base.ConfigurableMiddleware):
             self._unauthorized(message)
 
     def call_keycloak(self):
-        endpoint = OPENID_CONNECT_USERINFO % (self.auth_url, self.realm_name)
+        endpoint = ('%s' + self.user_info_endpoint_url) % (self.auth_url,
+                                                           self.realm_name)
         headers = {'Authorization': 'Bearer %s' % self.token}
         verify = None
         if urllib.parse.urlparse(endpoint).scheme == "https":
