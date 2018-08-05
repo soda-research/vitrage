@@ -35,7 +35,7 @@ OPTS = [
                help='Static physical transformer class path',
                deprecated_for_removal=True,
                deprecated_reason=_DEPRECATED_MSG,
-               deprecated_since=versionutils.deprecated.PIKE,
+               deprecated_since=versionutils.deprecated.QUEENS,
                required=True),
     cfg.StrOpt(DSOpts.DRIVER,
                default='vitrage.datasources.static_physical.driver.'
@@ -50,7 +50,7 @@ OPTS = [
                     ' datasource itself.',
                deprecated_for_removal=True,
                deprecated_reason=_DEPRECATED_MSG,
-               deprecated_since=versionutils.deprecated.PIKE,
+               deprecated_since=versionutils.deprecated.QUEENS,
                required=True),
     cfg.IntOpt(DSOpts.CHANGES_INTERVAL,
                default=20,
@@ -59,17 +59,17 @@ OPTS = [
                     'files of the physical topology data sources',
                deprecated_for_removal=True,
                deprecated_reason=_DEPRECATED_MSG,
-               deprecated_since=versionutils.deprecated.PIKE),
+               deprecated_since=versionutils.deprecated.QUEENS),
 
     cfg.StrOpt('directory', default='/etc/vitrage/static_datasources',
                help='Static physical data sources directory',
                deprecated_for_removal=True,
                deprecated_reason=_DEPRECATED_MSG,
-               deprecated_since=versionutils.deprecated.PIKE),
+               deprecated_since=versionutils.deprecated.QUEENS),
     cfg.ListOpt('entities',
                 default=[SWITCH],
                 help='Static physical entity types list',
                 deprecated_for_removal=True,
                 deprecated_reason=_DEPRECATED_MSG,
-                deprecated_since=versionutils.deprecated.PIKE)
+                deprecated_since=versionutils.deprecated.QUEENS)
 ]
