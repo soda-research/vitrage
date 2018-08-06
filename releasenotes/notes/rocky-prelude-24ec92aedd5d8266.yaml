@@ -1,0 +1,9 @@
+---
+prelude: |
+    Perform validation on filter parameters on listing resources.
+    Vitrage Rocky release contains significant infrastructure changes that
+    bring a lot of value to the end user. The main ones are:
+
+    - Graph fast-failover and better HA support.
+    - High-scale support. The graph was tested to work with over 100,000 entities.
+    - Alarm and RCA history.
