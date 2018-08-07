@@ -11,8 +11,6 @@
 # WARRANTIES OR  CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-import json
-
 from oslo_log import log
 
 
@@ -30,7 +28,7 @@ class MockDriver(StaticDriver):
     def __init__(self, conf):
         super(StaticDriver, self).__init__()
         mock_cfg = conf.mock_graph_datasource
-        self.e_graph = GraphGenerator(
+        e_graph = GraphGenerator(
             networks=mock_cfg.networks,
             zones_per_cluster=mock_cfg.zones_per_cluster,
             hosts_per_zone=mock_cfg.hosts_per_zone,
@@ -42,19 +40,20 @@ class MockDriver(StaticDriver):
             tripleo_controllers=mock_cfg.tripleo_controllers,
             zabbix_alarms_per_controller=mock_cfg.zabbix_alarms_per_controller
         ).create_graph()
+        definitions = e_graph.json_output_graph(raw=True)
+        self.mock_entities = self._get_mock_entities(definitions)
 
     def get_all(self, datasource_action):
-        return self.make_pickleable(self._get_mock_entities(),
-                                    MOCK_DATASOURCE,
-                                    datasource_action)
+        return self.make_pickleable_iter(self.mock_entities,
+                                         MOCK_DATASOURCE,
+                                         datasource_action)
 
     def get_changes(self, datasource_action):
-        return self.make_pickleable([],
-                                    MOCK_DATASOURCE,
-                                    datasource_action)
+        return self.make_pickleable_iter([],
+                                         MOCK_DATASOURCE,
+                                         datasource_action)
 
-    def _get_mock_entities(self):
-        definitions = json.loads(self.e_graph.json_output_graph())
+    def _get_mock_entities(self, definitions):
         for node in definitions['nodes']:
             node[StaticFields.STATIC_ID] = str(node[VProps.GRAPH_INDEX])
             node[StaticFields.TYPE] = node[VProps.VITRAGE_TYPE]

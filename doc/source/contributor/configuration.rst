@@ -8,6 +8,7 @@ General
 .. toctree::
    :maxdepth: 1
 
+   high-scale
    resource-state-config
    alarm-severity-config
    profiler-config

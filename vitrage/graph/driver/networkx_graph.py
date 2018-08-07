@@ -322,7 +322,10 @@ class NXGraph(Graph):
                 node_link_data['links'][i]['target'] = vitrage_id_to_index[
                     node_link_data['links'][i]['target']]
 
-        return json.dumps(node_link_data)
+        if kwargs.get('raw', False):
+            return node_link_data
+        else:
+            return json.dumps(node_link_data)
 
     def write_gpickle(self):
         return cPickle.dumps(self._g, cPickle.HIGHEST_PROTOCOL)

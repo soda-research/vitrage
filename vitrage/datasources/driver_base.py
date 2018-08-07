@@ -52,8 +52,8 @@ class DriverBase(object):
 
     @classmethod
     def make_pickleable(cls, entities, entity_type, datasource_action, *args):
-        pickleable_entities = cls.prepare_entities(entities, entity_type,
-                                                   datasource_action, args)
+        pickleable_entities = cls.make_pickleable_without_end_msg(
+            entities, entity_type, datasource_action, *args)
 
         if datasource_action == DatasourceAction.INIT_SNAPSHOT:
             pickleable_entities.append(cls._get_end_message(entity_type))
@@ -63,12 +63,6 @@ class DriverBase(object):
     @classmethod
     def make_pickleable_without_end_msg(cls, entities, entity_type,
                                         datasource_action, *args):
-        pickleable_entities = cls.prepare_entities(entities, entity_type,
-                                                   datasource_action, args)
-        return pickleable_entities
-
-    @classmethod
-    def prepare_entities(cls, entities, entity_type, datasource_action, args):
         pickleable_entities = []
         for entity in entities:
             for field in args:
@@ -79,6 +73,18 @@ class DriverBase(object):
             cls._add_sampling_time(entity)
             pickleable_entities.append(entity)
         return pickleable_entities
+
+    @classmethod
+    def make_pickleable_iter(cls, entities, entity_type,
+                             datasource_action, *args):
+        for entity in entities:
+            for field in args:
+                entity.pop(field, None)
+
+            cls._add_entity_type(entity, entity_type)
+            cls._add_datasource_action(entity, datasource_action)
+            cls._add_sampling_time(entity)
+            yield entity
 
     @staticmethod
     def _add_entity_type(entity, entity_type):

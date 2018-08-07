@@ -11,9 +11,11 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-
+import base64
 from concurrent import futures
+from six.moves import cPickle
 import time
+import zlib
 
 from oslo_log import log
 
@@ -44,6 +46,11 @@ class CollectorRpcHandlerService(object):
         LOG.info("Collector Rpc Handler Service - Stopped!")
 
 
+def compress_events(events):
+    str_data = cPickle.dumps(events, cPickle.HIGHEST_PROTOCOL)
+    return base64.b64encode(zlib.compress(str_data))
+
+
 class DriversEndpoint(object):
 
     def __init__(self, conf):
@@ -71,7 +78,8 @@ class DriversEndpoint(object):
             time.sleep(fault_interval)
             result.extend(list(self.pool.map(run_driver, failed_drivers)))
 
-        events = [e for success, events in result if success for e in events]
+        events = compress_events([e for success, events in result if success
+                                  for e in events])
         LOG.debug("run drivers get_all done.")
         return events
 

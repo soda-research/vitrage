@@ -43,4 +43,5 @@ class NetworkDriver(NeutronBase):
         return self.make_pickleable(
             self.client.list_networks()['networks'],
             NEUTRON_NETWORK_DATASOURCE,
-            datasource_action)
+            datasource_action,
+            *self.properties_to_filter_out())
