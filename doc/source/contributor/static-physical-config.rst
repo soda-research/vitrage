@@ -1,6 +1,12 @@
-===================================================
-(Obsolete) Static Physical Datasource Configuration
-===================================================
+====================================================
+DEPRECATED: static physical datasource configuration
+====================================================
+
+**The static physical datasource is deprecated and will be removed in Stein
+release.**
+
+**Please use the static datasource instead.**
+
 
 Overview
 --------
