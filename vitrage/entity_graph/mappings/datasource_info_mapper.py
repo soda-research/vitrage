@@ -39,18 +39,21 @@ class DatasourceInfoMapper(object):
         self.category_normalizer = self._init_category_normalizer()
         self.datasources_value_confs = self._load_value_configurations()
 
-    def vitrage_operational_value(self, datasource_name, value):
-        return self._get_value_data(datasource_name,
+    def vitrage_operational_value(self, vitrage_type, value):
+        return self._get_value_data(vitrage_type,
                                     value,
                                     self.OPERATIONAL_VALUES)
 
-    def value_priority(self, datasource_name, value):
-        return self._get_value_data(datasource_name,
+    def value_priority(self, vitrage_type, value):
+        return self._get_value_data(vitrage_type,
                                     value,
                                     self.PRIORITY_VALUES)
 
     def vitrage_aggregate_values(self, new_vertex, graph_vertex):
-        datasource_name = new_vertex[VProps.VITRAGE_TYPE] if \
+        LOG.debug('new_vertex: %s', new_vertex)
+        LOG.debug('graph_vertex: %s', graph_vertex)
+
+        vitrage_type = new_vertex[VProps.VITRAGE_TYPE] if \
             VProps.VITRAGE_TYPE in new_vertex.properties else \
             graph_vertex[VProps.VITRAGE_TYPE]
 
@@ -58,15 +61,15 @@ class DatasourceInfoMapper(object):
             VProps.VITRAGE_CATEGORY in new_vertex.properties else \
             graph_vertex[VProps.VITRAGE_CATEGORY]
 
-        if datasource_name in self.datasources_value_confs or \
-                datasource_name not in self.conf.datasources.types:
+        if vitrage_type in self.datasources_value_confs or \
+                vitrage_type not in self.conf.datasources.types:
             value_properties = \
                 self.category_normalizer[vitrage_category].value_properties()
             vitrage_operational_value, vitrage_aggregated_value, value_priority = \
                 self._find_operational_value_and_priority(new_vertex,
                                                           graph_vertex,
                                                           value_properties[0],
-                                                          datasource_name)
+                                                          vitrage_type)
             value_properties.pop(0)
 
             for property_ in value_properties:
@@ -74,7 +77,7 @@ class DatasourceInfoMapper(object):
                     self._find_operational_value_and_priority(new_vertex,
                                                               graph_vertex,
                                                               property_,
-                                                              datasource_name)
+                                                              vitrage_type)
                 if t_value_priority > value_priority:
                     vitrage_operational_value = t_operational_value
                     vitrage_aggregated_value = t_aggregated_value
@@ -90,9 +93,9 @@ class DatasourceInfoMapper(object):
             self.category_normalizer[vitrage_category].set_operational_value(
                 new_vertex, self.UNDEFINED_DATASOURCE)
 
-    def get_datasource_priorities(self, datasource_name=None):
-        if datasource_name:
-            datasource_info = self.datasources_value_confs[datasource_name]
+    def get_datasource_priorities(self, vitrage_type=None):
+        if vitrage_type:
+            datasource_info = self.datasources_value_confs[vitrage_type]
             return datasource_info[self.PRIORITY_VALUES]
         else:
             priorities_dict = \
@@ -176,13 +179,13 @@ class DatasourceInfoMapper(object):
                                  operational_value, full_path,
                                  state_class_instance.__class__.__name__)
 
-    def _get_value_data(self, datasource_name, value, data_type):
+    def _get_value_data(self, vitrage_type, value, data_type):
         try:
             upper_value = value if not value else value.upper()
 
-            if datasource_name in self.datasources_value_confs:
+            if vitrage_type in self.datasources_value_confs:
                 values_conf = self.datasources_value_confs[
-                    datasource_name][data_type]
+                    vitrage_type][data_type]
 
                 return values_conf[upper_value] if upper_value in values_conf \
                     else values_conf[None]
@@ -193,14 +196,14 @@ class DatasourceInfoMapper(object):
                 return values_conf[upper_value] if upper_value in values_conf \
                     else values_conf[None]
         except Exception:
-            LOG.error('Exception in datasource: %s', datasource_name)
+            LOG.error('Exception in datasource: %s', vitrage_type)
             raise
 
     def _find_operational_value_and_priority(self,
                                              new_vertex,
                                              graph_vertex,
                                              property_,
-                                             datasource_name):
+                                             vitrage_type):
         state = self._get_updated_property(new_vertex,
                                            graph_vertex,
                                            property_)
@@ -208,9 +211,9 @@ class DatasourceInfoMapper(object):
         upper_state = state if not state else state.upper()
 
         vitrage_operational_state = self.vitrage_operational_value(
-            datasource_name, upper_state)
+            vitrage_type, upper_state)
 
-        value_priority = self.value_priority(datasource_name,
+        value_priority = self.value_priority(vitrage_type,
                                              upper_state)
 
         return vitrage_operational_state, upper_state, value_priority

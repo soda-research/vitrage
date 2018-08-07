@@ -54,11 +54,13 @@ class Processor(processor.ProcessorBase):
 
         self._enrich_event(event)
         entity = self.transformer_manager.transform(event)
+
         if entity.action not in self.actions.keys():
             LOG.debug('deprecated or unknown entity %s ignored', str(entity))
             return
 
         self._calculate_vitrage_aggregated_values(entity.vertex, entity.action)
+        self._set_datasource_name(entity, event)
         self.actions[entity.action](entity.vertex, entity.neighbors)
 
     def create_entity(self, new_vertex, neighbors):
@@ -360,3 +362,10 @@ class Processor(processor.ProcessorBase):
         alarm[VProps.VITRAGE_RESOURCE_ID] = r_id
         alarm[VProps.VITRAGE_RESOURCE_TYPE] = r_type
         alarm[VProps.VITRAGE_RESOURCE_PROJECT_ID] = r_project_id
+
+    @staticmethod
+    def _set_datasource_name(entity, event):
+        if entity.vertex and entity.action == GraphAction.CREATE_ENTITY:
+            datasource_name = event.get(VProps.VITRAGE_DATASOURCE_NAME)
+            entity.vertex.properties[VProps.VITRAGE_DATASOURCE_NAME] = \
+                datasource_name

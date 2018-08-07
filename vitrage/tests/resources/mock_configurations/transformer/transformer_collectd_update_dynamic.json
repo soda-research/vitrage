@@ -2,6 +2,7 @@
   "host": "compute-1",
   "plugin": "ovs_events",
   "vitrage_entity_type" : "collectd",
+  "vitrage_datasource_name": "collectd",
   "vitrage_datasource_action" : "update",
   "resource_type": "nova.host",
   "resource_name": "compute-1",

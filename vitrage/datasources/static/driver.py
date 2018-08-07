@@ -61,6 +61,10 @@ class StaticDriver(DriverBase):
                                     STATIC_DATASOURCE,
                                     datasource_action)
 
+    @staticmethod
+    def should_delete_outdated_entities():
+        return True
+
     def _get_and_cache_all_entities(self):
         self.entities_cache = self._get_all_entities()
         return self.entities_cache

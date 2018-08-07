@@ -99,3 +99,7 @@ class NagiosDriver(AlarmDriverBase):
     def _is_valid(self, alarm):
         return alarm[NagiosProps.RESOURCE_TYPE] is not None and \
             alarm[NagiosProps.RESOURCE_NAME] is not None
+
+    @staticmethod
+    def should_delete_outdated_entities():
+        return True

@@ -30,7 +30,8 @@ def create_vertex(vitrage_id,
                   update_timestamp=None,
                   project_id=None,
                   vitrage_resource_project_id=None,
-                  metadata=None):
+                  metadata=None,
+                  datasource_name=None):
     """A builder to create a vertex
 
     :param vitrage_id:
@@ -55,6 +56,8 @@ def create_vertex(vitrage_id,
     :type vitrage_is_placeholder: boolean
     :param project_id:
     :type project_id: str
+    :param datasource_name:
+    :type datasource_name: str
     :return:
     :rtype: Vertex
     """
@@ -71,6 +74,7 @@ def create_vertex(vitrage_id,
         VConst.VITRAGE_ID: vitrage_id,
         VConst.PROJECT_ID: project_id,
         VConst.VITRAGE_RESOURCE_PROJECT_ID: vitrage_resource_project_id,
+        VConst.VITRAGE_DATASOURCE_NAME: datasource_name,
     }
     if metadata:
         properties.update(metadata)
