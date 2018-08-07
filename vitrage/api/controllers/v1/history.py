@@ -1,10 +1,10 @@
-# Copyright 2017 - Nokia
+# Copyright 2018 - Nokia Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
 # a copy of the License at
 #
-# http://www.apache.org/licenses/LICENSE-2.0
+#      http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -12,13 +12,21 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from oslo_config import cfg
+from oslo_log import log
+import pecan
 
-OPTS = [
-    cfg.StrOpt('persistor_topic',
-               default='vitrage_persistor',
-               help='persistor will listen on this topic for events to store'),
-    cfg.IntOpt('alarm_history_ttl',
-               default=30,
-               help='The number of days inactive alarms history is kept'),
-]
+from vitrage.api.controllers.v1.alarm_base import BaseAlarmsController
+
+
+LOG = log.getLogger(__name__)
+
+
+# noinspection PyBroadException
+class HistoryController(BaseAlarmsController):
+
+    @pecan.expose('json')
+    def get_all(self, **kwargs):
+
+        LOG.info('returns history alarms')
+
+        return self._get_alarms(**kwargs)

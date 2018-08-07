@@ -29,6 +29,7 @@ def create_vertex(vitrage_id,
                   entity_state=None,
                   update_timestamp=None,
                   project_id=None,
+                  vitrage_resource_project_id=None,
                   metadata=None):
     """A builder to create a vertex
 
@@ -68,7 +69,8 @@ def create_vertex(vitrage_id,
         VConst.VITRAGE_SAMPLE_TIMESTAMP: vitrage_sample_timestamp,
         VConst.VITRAGE_IS_PLACEHOLDER: vitrage_is_placeholder,
         VConst.VITRAGE_ID: vitrage_id,
-        VConst.PROJECT_ID: project_id
+        VConst.PROJECT_ID: project_id,
+        VConst.VITRAGE_RESOURCE_PROJECT_ID: vitrage_resource_project_id,
     }
     if metadata:
         properties.update(metadata)

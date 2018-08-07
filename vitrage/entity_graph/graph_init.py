@@ -25,6 +25,7 @@ from vitrage.entity_graph import datasource_rpc as ds_rpc
 from vitrage.entity_graph import EVALUATOR_TOPIC
 from vitrage.entity_graph.graph_persistency import GraphPersistency
 from vitrage.entity_graph.processor.notifier import GraphNotifier
+from vitrage.entity_graph.processor.notifier import PersistNotifier
 from vitrage.entity_graph.processor.processor import Processor
 from vitrage.entity_graph.scheduler import Scheduler
 from vitrage.entity_graph.workers import GraphWorkersManager
@@ -67,12 +68,16 @@ class VitrageGraphInit(object):
         self.persist.replay_events(self.graph, graph_snapshot.event_id)
         self._recreate_transformers_id_cache()
         LOG.info("%s vertices loaded", self.graph.num_vertices())
+        self.subscribe_presist_notifier()
         spawn(self._start_all_workers, is_snapshot=True)
 
     def _start_from_scratch(self):
         LOG.info('Starting for the first time')
         LOG.info('Clearing database active_actions')
         self.db.active_actions.delete()
+        LOG.info('Disabling previously active alarms')
+        self.db.history_facade.disable_alarms_in_history()
+        self.subscribe_presist_notifier()
         ds_rpc.get_all(
             ds_rpc.create_rpc_client_instance(self.conf),
             self.events_coordination,
@@ -118,6 +123,8 @@ class VitrageGraphInit(object):
         self.graph.subscribe(self.persist.persist_event,
                              finalization=True)
 
+    def subscribe_presist_notifier(self):
+        self.graph.subscribe(PersistNotifier(self.conf).notify_when_applicable)
 
 PRIORITY_DELAY = 0.05
 

@@ -12,19 +12,20 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+
+from dateutil import parser
 import json
 from oslo_log import log
 from osprofiler import profiler
 
-from vitrage.api_handler.apis.base import ALARM_QUERY
-from vitrage.api_handler.apis.base import ALARMS_ALL_QUERY
 from vitrage.api_handler.apis.base import EntityGraphApisBase
 from vitrage.common.constants import EntityCategory as ECategory
+from vitrage.common.constants import HistoryProps as HProps
 from vitrage.common.constants import TenantProps
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.entity_graph.mappings.operational_alarm_severity import \
     OperationalAlarmSeverity
-
+from vitrage.storage import db_time
 
 LOG = log.getLogger(__name__)
 
@@ -33,34 +34,29 @@ LOG = log.getLogger(__name__)
                     info={}, hide_args=False, trace_private=False)
 class AlarmApis(EntityGraphApisBase):
 
-    def __init__(self, entity_graph, conf):
+    def __init__(self, entity_graph, conf, db):
         self.entity_graph = entity_graph
         self.conf = conf
+        self.db = db
 
-    def get_alarms(self, ctx, vitrage_id, all_tenants):
-        LOG.debug("AlarmApis get_alarms - vitrage_id: %s, all_tenants=%s",
-                  str(vitrage_id), all_tenants)
+    def get_alarms(self, ctx, vitrage_id, all_tenants, *args, **kwargs):
 
-        project_id = ctx.get(TenantProps.TENANT, None)
-        is_admin_project = ctx.get(TenantProps.IS_ADMIN, False)
+        kwargs = self._parse_kwargs(kwargs)
 
         if not vitrage_id or vitrage_id == 'all':
-            if all_tenants:
-                alarms = self.entity_graph.get_vertices(
-                    query_dict=ALARMS_ALL_QUERY)
-            else:
-                alarms = self._get_alarms(project_id, is_admin_project)
-                alarms += self._get_alarms_via_resource(project_id,
-                                                        is_admin_project)
-                alarms = set(alarms)
+            if not all_tenants:
+                kwargs['project_id'] = \
+                    ctx.get(TenantProps.TENANT, 'no-project')
+                kwargs['is_admin_project'] = \
+                    ctx.get(TenantProps.IS_ADMIN, False)
         else:
-            query = {VProps.VITRAGE_CATEGORY: ECategory.ALARM,
-                     VProps.VITRAGE_IS_DELETED: False}
-            alarms = self.entity_graph.neighbors(vitrage_id,
-                                                 vertex_attr_filter=query)
+            kwargs.get('filter_by', []).append(VProps.VITRAGE_RESOURCE_ID)
+            kwargs.get('filter_vals', []).append(vitrage_id)
 
-        return json.dumps({'alarms': [v.properties for v in alarms]})
+        alarms = self._get_alarms(*args, **kwargs)
+        return json.dumps({'alarms': [v.payload for v in alarms]})
 
+    # TODO(annarez): add db support
     def show_alarm(self, ctx, vitrage_id):
         LOG.debug('Show alarm with vitrage_id: %s', vitrage_id)
 
@@ -85,70 +81,58 @@ class AlarmApis(EntityGraphApisBase):
         is_admin_project = ctx.get(TenantProps.IS_ADMIN, False)
 
         if all_tenants:
-            alarms = self.entity_graph.get_vertices(
-                query_dict=ALARMS_ALL_QUERY)
+            counts = self.db.history_facade.count_active_alarms()
+
         else:
-            alarms = self._get_alarms(project_id, is_admin_project)
-            alarms += self._get_alarms_via_resource(project_id,
-                                                    is_admin_project)
-            alarms = set(alarms)
-
-        counts = {OperationalAlarmSeverity.SEVERE: 0,
-                  OperationalAlarmSeverity.CRITICAL: 0,
-                  OperationalAlarmSeverity.WARNING: 0,
-                  OperationalAlarmSeverity.OK: 0,
-                  OperationalAlarmSeverity.NA: 0}
-
-        for alarm in alarms:
-            severity = alarm.get(VProps.VITRAGE_OPERATIONAL_SEVERITY)
-            if severity:
-                try:
-                    counts[severity] += 1
-                except KeyError:
-                    pass
+            counts = self.db.history_facade.count_active_alarms(
+                project_id=project_id,
+                is_admin_project=is_admin_project)
 
         return json.dumps(counts)
 
-    def _get_alarms(self, project_id, is_admin_project):
+    def _get_alarms(self, *args, **kwargs):
         """Finds all the alarms with project_id
 
         Finds all the alarms which has the project_id. In case the tenant is
         admin then project_id can also be None.
 
-        :type project_id: string
-        :type is_admin_project: boolean
         :rtype: list
         """
-
-        alarm_query = self._get_query_with_project(ECategory.ALARM,
-                                                   project_id,
-                                                   is_admin_project)
-        alarms = self.entity_graph.get_vertices(query_dict=alarm_query)
-        return self._filter_alarms(alarms, project_id)
-
-    def _get_alarms_via_resource(self, project_id, is_admin_project):
-        """Finds all the alarms with project_id on their resource
-
-        Finds all the resource which has project_id and return all the alarms
-        on those resources project_id. In case the tenant is admin then
-        project_id can also be None.
-
-        :type project_id: string
-        :type is_admin_project: boolean
-        :rtype: list
-        """
-
-        resource_query = self._get_query_with_project(ECategory.RESOURCE,
-                                                      project_id,
-                                                      is_admin_project)
-
-        alarms = []
-        resources = self.entity_graph.get_vertices(query_dict=resource_query)
-
-        for resource in resources:
-            new_alarms = \
-                self.entity_graph.neighbors(
-                    resource.vertex_id, vertex_attr_filter=ALARM_QUERY)
-            alarms = alarms + new_alarms
+        alarms = self.db.history_facade.get_alarms(*args, **kwargs)
+        if not kwargs.get('only_active_alarms'):
+            for alarm in alarms:
+                # change operational severity of ended alarms to 'OK'
+                # TODO(annarez): in next version use 'state'
+                if alarm.end_timestamp <= db_time():
+                    alarm.payload[VProps.VITRAGE_OPERATIONAL_SEVERITY] = \
+                        OperationalAlarmSeverity.OK
+        for alarm in alarms:
+            alarm.payload[HProps.START_TIMESTAMP] = str(alarm.start_timestamp)
+            if alarm.end_timestamp <= db_time():
+                alarm.payload[HProps.END_TIMESTAMP] = str(alarm.end_timestamp)
 
         return alarms
+
+    def _parse_kwargs(self, kwargs):
+        kwargs = {k: v for k, v in kwargs.items() if v is not None}
+
+        if kwargs.get('start'):
+            kwargs['start'] = parser.parse(kwargs['start'])
+        if kwargs.get('end'):
+            kwargs['end'] = parser.parse(kwargs['end'])
+        if kwargs.get('sort_by') and type(kwargs.get('sort_by')) != list:
+            kwargs['sort_by'] = [kwargs.get('sort_by')]
+        if kwargs.get('sort_dirs') and type(kwargs.get('sort_dirs')) != list:
+            kwargs['sort_dirs'] = [kwargs.get('sort_dirs')]
+        if str(kwargs.get('next_page')).lower() == 'false':
+            kwargs['next_page'] = False
+        else:
+            kwargs['next_page'] = True
+
+        if kwargs.get('filter_by') and type(kwargs.get('filter_by')) != list:
+            kwargs['filter_by'] = [kwargs.get('filter_by')]
+        if kwargs.get('filter_vals') and type(
+                kwargs.get('filter_vals')) != list:
+            kwargs['filter_vals'] = [kwargs.get('filter_vals')]
+
+        return kwargs

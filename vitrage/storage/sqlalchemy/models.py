@@ -11,16 +11,20 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+import datetime
 import json
 import zlib
 
 from oslo_db.sqlalchemy import models
 
-from sqlalchemy import Column, INTEGER, String, \
-    SmallInteger, BigInteger, Index, Boolean
+from sqlalchemy import Column, DateTime, INTEGER, String, \
+    SmallInteger, BigInteger, Index, Boolean, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
-
+from sqlalchemy.orm import relationship
 import sqlalchemy.types as types
+
+
+DEFAULT_END_TIME = datetime.datetime(2222, 2, 22, 22, 22, 22)
 
 
 class VitrageBase(models.TimestampMixin, models.ModelBase):
@@ -42,6 +46,22 @@ class VitrageBase(models.TimestampMixin, models.ModelBase):
 
 
 Base = declarative_base(cls=VitrageBase)
+
+
+class AutoIncrementInteger(types.TypeDecorator):
+    impl = types.INT
+    count = 0
+
+    def process_bind_param(self, value, dialect):
+        value = self.count
+        self.count += 1
+        return value
+
+    def process_result_value(self, value, dialect):
+        return value
+
+
+MagicBigInt = types.BigInteger().with_variant(AutoIncrementInteger, 'sqlite')
 
 
 class JSONEncodedDict(types.TypeDecorator):
@@ -203,4 +223,119 @@ class Webhooks(Base):
                 self.url,
                 self.headers,
                 self.regex_filter
+            )
+
+
+class Alarm(Base):
+
+    __tablename__ = 'alarms'
+
+    vitrage_id = Column(String(128), primary_key=True)
+    start_timestamp = Column(DateTime, index=True, nullable=False)
+    end_timestamp = Column(DateTime, index=True, nullable=False,
+                           default=DEFAULT_END_TIME)
+    name = Column(String(256), nullable=False)
+    vitrage_type = Column(String(64), nullable=False)
+    vitrage_aggregated_severity = Column(String(64), index=True,
+                                         nullable=False)
+    project_id = Column(String(64), index=True)
+    vitrage_resource_type = Column(String(64))
+    vitrage_resource_id = Column(String(64))
+    vitrage_resource_project_id = Column(String(64), index=True)
+    payload = Column(JSONEncodedDict())
+
+    def __repr__(self):
+        return \
+            "<Alarm(" \
+            "vitrage_id='%s', " \
+            "start_timestamp='%s', " \
+            "end_timestamp='%s'," \
+            "name='%s'," \
+            "vitrage_type='%s'," \
+            "vitrage_aggregated_severity='%s'," \
+            "project_id='%s'," \
+            "vitrage_resource_type='%s'," \
+            "vitrage_resource_id='%s'," \
+            "vitrage_resource_project_id='%s'," \
+            "payload='%s')>" % \
+            (
+                self.vitrage_id,
+                self.start_timestamp,
+                self.end_timestamp,
+                self.name,
+                self.vitrage_type,
+                self.vitrage_aggregated_severity,
+                self.project_id,
+                self.vitrage_resource_type,
+                self.vitrage_resource_id,
+                self.vitrage_resource_project_id,
+                self.payload
+            )
+
+
+class Edge(Base):
+
+    __tablename__ = 'edges'
+
+    source_id = Column(String(128),
+                       ForeignKey('alarms.vitrage_id', ondelete='CASCADE'),
+                       primary_key=True)
+    target_id = Column(String(128),
+                       ForeignKey('alarms.vitrage_id', ondelete='CASCADE'),
+                       primary_key=True)
+    label = Column(String(64), nullable=False)
+    start_timestamp = Column(DateTime, nullable=False)
+    end_timestamp = Column(DateTime, nullable=False, default=DEFAULT_END_TIME)
+    payload = Column(JSONEncodedDict())
+
+    source = relationship("Alarm", foreign_keys=[source_id])
+    target = relationship("Alarm", foreign_keys=[target_id])
+
+    def __repr__(self):
+        return \
+            "<Edge(" \
+            "source_id='%s', " \
+            "target_id='%s', " \
+            "label='%s', " \
+            "start_timestamp='%s'," \
+            "end_timestamp='%s',"\
+            "payload='%s)>" % \
+            (
+                self.source_id,
+                self.target_id,
+                self.label,
+                self.start_timestamp,
+                self.end_timestamp,
+                self.payload
+            )
+
+
+class Change(Base):
+
+    __tablename__ = 'changes'
+
+    id = Column(MagicBigInt, primary_key=True, autoincrement=True)
+    vitrage_id = Column(String(128),
+                        ForeignKey('alarms.vitrage_id', ondelete='CASCADE'),
+                        index=True, nullable=False)
+    timestamp = Column(DateTime, index=True, nullable=False)
+    severity = Column(String(64), index=True, nullable=False)
+    payload = Column(JSONEncodedDict())
+
+    alarm_id = relationship("Alarm", foreign_keys=[vitrage_id])
+
+    def __repr__(self):
+        return \
+            "<Change(" \
+            "id='%s', " \
+            "vitrage_id='%s', " \
+            "timestamp='%s', " \
+            "severity='%s'," \
+            "payload='%s')>" % \
+            (
+                self.id,
+                self.vitrage_id,
+                self.timestamp,
+                self.severity,
+                self.payload
             )

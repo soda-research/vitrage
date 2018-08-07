@@ -13,16 +13,27 @@
 # under the License.
 
 from __future__ import print_function
+
+from datetime import timedelta
+
 from concurrent.futures import ThreadPoolExecutor
 import cotyledon
+import dateutil.parser
 from futurist import periodics
 
 from oslo_log import log
 import oslo_messaging as oslo_m
+from oslo_utils import timeutils
 
+from vitrage.common.constants import EdgeProperties as EProps
+from vitrage.common.constants import ElementProperties as ElementProps
+from vitrage.common.constants import HistoryProps as HProps
+from vitrage.common.constants import NotifierEventTypes as NETypes
+from vitrage.common.constants import VertexProperties as VProps
 from vitrage.common.utils import spawn
 from vitrage import messaging
-
+from vitrage.storage.sqlalchemy import models
+from vitrage.utils.datetime import utcnow
 
 LOG = log.getLogger(__name__)
 
@@ -58,16 +69,94 @@ class PersistorService(cotyledon.Service):
 
 
 class VitragePersistorEndpoint(object):
-
-    funcs = {}
-
     def __init__(self, db_connection):
-        self.db_connection = db_connection
+        self.db = db_connection
+        self.event_type_to_writer = {
+            NETypes.ACTIVATE_ALARM_EVENT: self._persist_activated_alarm,
+            NETypes.DEACTIVATE_ALARM_EVENT: self._persist_deactivate_alarm,
+            NETypes.ACTIVATE_CAUSAL_RELATION: self._persist_activate_edge,
+            NETypes.DEACTIVATE_CAUSAL_RELATION: self._persist_deactivate_edge,
+            NETypes.CHANGE_IN_ALARM_EVENT: self._persist_change,
+            NETypes.CHANGE_PROJECT_ID_EVENT: self._persist_alarm_proj_change,
+        }
 
     def info(self, ctxt, publisher_id, event_type, payload, metadata):
         LOG.debug('Event_type: %s Payload %s', event_type, payload)
-        if event_type and event_type in self.funcs.keys():
-            self.funcs[event_type](self.db_connection, event_type, payload)
+        self.process_event(event_type, payload)
+
+    def process_event(self, event_type, payload):
+        writer = self.event_type_to_writer.get(event_type)
+        if not writer:
+            LOG.warning('Unrecognized event_type: %s', event_type)
+            return
+        writer(event_type, payload)
+
+    def _persist_activated_alarm(self, event_type, data):
+        event_timestamp = self.event_time(data)
+
+        alarm_row = \
+            models.Alarm(
+                vitrage_id=data.get(VProps.VITRAGE_ID),
+                start_timestamp=event_timestamp,
+                name=data.get(VProps.NAME),
+                vitrage_type=data.get(VProps.VITRAGE_TYPE),
+                vitrage_aggregated_severity=data.get(
+                    VProps.VITRAGE_AGGREGATED_SEVERITY),
+                project_id=data.get(VProps.PROJECT_ID),
+                vitrage_resource_type=data.get(VProps.VITRAGE_RESOURCE_TYPE),
+                vitrage_resource_id=data.get(VProps.VITRAGE_RESOURCE_ID),
+                vitrage_resource_project_id=data.get(
+                    VProps.VITRAGE_RESOURCE_PROJECT_ID),
+                payload=data)
+        self.db.alarms.create(alarm_row)
+
+    def _persist_deactivate_alarm(self, event_type, data):
+        vitrage_id = data.get(VProps.VITRAGE_ID)
+        event_timestamp = self.event_time(data)
+        self.db.alarms.update(
+            vitrage_id, HProps.END_TIMESTAMP, event_timestamp)
+
+    def _persist_alarm_proj_change(self, event_type, data):
+        vitrage_id = data.get(VProps.VITRAGE_ID)
+        self.db.alarms.update(vitrage_id,
+                              VProps.VITRAGE_RESOURCE_PROJECT_ID,
+                              data.get(VProps.VITRAGE_RESOURCE_PROJECT_ID))
+
+    def _persist_activate_edge(self, event_type, data):
+        event_timestamp = self.event_time(data)
+
+        edge_row = \
+            models.Edge(
+                source_id=data.get(EProps.SOURCE_ID),
+                target_id=data.get(EProps.TARGET_ID),
+                label=data.get(EProps.RELATIONSHIP_TYPE),
+                start_timestamp=event_timestamp,
+                payload=data)
+        self.db.edges.create(edge_row)
+
+    def _persist_deactivate_edge(self, event_type, data):
+        event_timestamp = self.event_time(data)
+        source_id = data.get(EProps.SOURCE_ID)
+        target_id = data.get(EProps.TARGET_ID)
+        self.db.edges.update(
+            source_id, target_id, end_timestamp=event_timestamp)
+
+    def _persist_change(self, event_type, data):
+        event_timestamp = self.event_time(data)
+        change_row = \
+            models.Change(
+                vitrage_id=data.get(VProps.VITRAGE_ID),
+                timestamp=event_timestamp,
+                severity=data.get(VProps.VITRAGE_AGGREGATED_SEVERITY),
+                payload=data)
+        self.db.changes.create(change_row)
+
+    @staticmethod
+    def event_time(data):
+        event_timestamp = \
+            dateutil.parser.parse(data.get(ElementProps.UPDATE_TIMESTAMP))
+        event_timestamp = timeutils.normalize_time(event_timestamp)
+        return event_timestamp
 
 
 class Scheduler(object):
@@ -81,10 +170,11 @@ class Scheduler(object):
         self.periodic = periodics.PeriodicWorker.create(
             [], executor_factory=lambda: ThreadPoolExecutor(max_workers=10))
 
-        self.add_expirer_timer()
+        self.add_events_table_expirer_timer()
+        self.add_history_tables_expirer_timer()
         spawn(self.periodic.start)
 
-    def add_expirer_timer(self):
+    def add_events_table_expirer_timer(self):
         spacing = 60
 
         @periodics.periodic(spacing=spacing)
@@ -92,11 +182,27 @@ class Scheduler(object):
             try:
                 event_id = self.db.graph_snapshots.query_snapshot_event_id()
                 if event_id:
-                    LOG.debug('Expirer deleting event - id=%s', event_id)
+                    LOG.debug('Table events - deleting event id=%s', event_id)
                     self.db.events.delete(event_id)
 
             except Exception:
-                LOG.exception('DB periodic cleanup run failed.')
+                LOG.exception('Table events - periodic cleanup run failed.')
 
         self.periodic.add(expirer_periodic)
-        LOG.info("Database periodic cleanup starting (spacing=%ss)", spacing)
+        LOG.info("Table events - periodic cleanup started (%ss)", spacing)
+
+    def add_history_tables_expirer_timer(self):
+        spacing = 60
+
+        @periodics.periodic(spacing=spacing)
+        def expirer_periodic():
+            expire_by = \
+                utcnow(with_timezone=False) - \
+                timedelta(days=self.conf.persistency.alarm_history_ttl)
+            try:
+                self.db.alarms.delete_expired(expire_by)
+            except Exception:
+                LOG.exception('History tables - periodic cleanup run failed.')
+
+        self.periodic.add(expirer_periodic)
+        LOG.info("History tables - periodic cleanup started (%ss)", spacing)

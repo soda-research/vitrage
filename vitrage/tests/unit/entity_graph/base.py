@@ -31,6 +31,7 @@ from vitrage.opts import register_opts
 from vitrage.tests import base
 from vitrage.tests.mocks import mock_driver as mock_sync
 from vitrage.tests.mocks import utils
+from vitrage.utils.datetime import utcnow
 
 
 class TestEntityGraphUnitBase(base.BaseTest):
@@ -153,17 +154,23 @@ class TestEntityGraphUnitBase(base.BaseTest):
         return events_list[0]
 
     @staticmethod
-    def _create_alarm(vitrage_id, alarm_type, project_id=None, metadata=None):
+    def _create_alarm(vitrage_id,
+                      alarm_type,
+                      project_id=None,
+                      vitrage_resource_project_id=None,
+                      metadata=None):
         return graph_utils.create_vertex(
             vitrage_id,
             vitrage_category=EntityCategory.ALARM,
             vitrage_type=alarm_type,
             vitrage_sample_timestamp=None,
+            update_timestamp=str(utcnow()),
             vitrage_is_deleted=False,
             vitrage_is_placeholder=False,
             entity_id=vitrage_id,
             entity_state='active',
             project_id=project_id,
+            vitrage_resource_project_id=vitrage_resource_project_id,
             metadata=metadata
         )
 
@@ -174,6 +181,7 @@ class TestEntityGraphUnitBase(base.BaseTest):
             vitrage_category=EntityCategory.RESOURCE,
             vitrage_type=resource_type,
             vitrage_sample_timestamp=None,
+            update_timestamp=str(utcnow()),
             vitrage_is_deleted=False,
             vitrage_is_placeholder=False,
             entity_id=vitrage_id,

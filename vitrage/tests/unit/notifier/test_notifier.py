@@ -25,7 +25,7 @@ from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import NotifierEventTypes as NType
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.datasources.nova.host import NOVA_HOST_DATASOURCE
-from vitrage.entity_graph.processor.notifier import _get_notification_type
+from vitrage.entity_graph.processor.notifier import GraphNotifier as GN
 from vitrage.evaluator.actions import evaluator_event_transformer as evaluator
 from vitrage.graph import Vertex
 from vitrage.tests import base
@@ -90,59 +90,59 @@ class GraphTest(base.BaseTest):
         return lst[0] if len(lst) > 0 else None
 
     def test_notification_type_new_alarm(self):
-        ret = _get_notification_type(None, deduced_alarm, True)
+        ret = GN._get_notification_type(None, deduced_alarm, True)
         self.assertEqual(NType.ACTIVATE_DEDUCED_ALARM_EVENT,
                          self.get_first(ret),
                          'new alarm should notify activate')
 
-        ret = _get_notification_type(None, non_deduced_alarm, True)
+        ret = GN._get_notification_type(None, non_deduced_alarm, True)
         self.assertIsNone(self.get_first(ret),
                           'alarm that is not a deduced alarm')
 
     def test_notification_type_deleted_alarm(self):
-        ret = _get_notification_type(deduced_alarm, deleted_alarm, True)
+        ret = GN._get_notification_type(deduced_alarm, deleted_alarm, True)
         self.assertEqual(NType.DEACTIVATE_DEDUCED_ALARM_EVENT,
                          self.get_first(ret),
                          'deleted alarm should notify deactivate')
 
     def test_notification_type_resource_vertex(self):
-        ret = _get_notification_type(None, resource, True)
+        ret = GN._get_notification_type(None, resource, True)
         self.assertIsNone(self.get_first(ret),
                           'any non alarm vertex should be ignored')
 
     def test_notification_type_updated_alarm(self):
-        ret = _get_notification_type(deduced_alarm, deduced_alarm, True)
+        ret = GN._get_notification_type(deduced_alarm, deduced_alarm, True)
         self.assertIsNone(self.get_first(ret),
                           'A not new alarm vertex should be ignored')
 
-        ret = _get_notification_type(deleted_alarm, deduced_alarm, True)
+        ret = GN._get_notification_type(deleted_alarm, deduced_alarm, True)
         self.assertEqual(NType.ACTIVATE_DEDUCED_ALARM_EVENT,
                          self.get_first(ret),
                          'old alarm become not deleted should notify activate')
 
-        ret = _get_notification_type(placeholder_alarm, deduced_alarm, True)
+        ret = GN._get_notification_type(placeholder_alarm, deduced_alarm, True)
         self.assertEqual(NType.ACTIVATE_DEDUCED_ALARM_EVENT,
                          self.get_first(ret),
                          'placeholder become active should notify activate')
 
     def test_notification_type_placeholder_alarm(self):
-        ret = _get_notification_type(None, placeholder_alarm, True)
+        ret = GN._get_notification_type(None, placeholder_alarm, True)
         self.assertIsNone(self.get_first(ret),
                           'A not new alarm vertex should be ignored')
 
     def test_notification_type_new_host(self):
-        ret = _get_notification_type(None, forced_down_host, True)
+        ret = GN._get_notification_type(None, forced_down_host, True)
         self.assertEqual(NType.ACTIVATE_MARK_DOWN_EVENT,
                          self.get_first(ret),
                          'new host with forced_down should notify activate')
 
-        ret = _get_notification_type(None, host, True)
+        ret = GN._get_notification_type(None, host, True)
         self.assertIsNone(self.get_first(ret), 'host without forced_down')
 
     def test_notification_type_deleted_host(self):
         deleted_host = copy.deepcopy(forced_down_host)
         deleted_host[VProps.VITRAGE_IS_DELETED] = True
-        ret = _get_notification_type(forced_down_host, deleted_host, True)
+        ret = GN._get_notification_type(forced_down_host, deleted_host, True)
         self.assertEqual(
             NType.DEACTIVATE_MARK_DOWN_EVENT,
             self.get_first(ret),
@@ -150,7 +150,7 @@ class GraphTest(base.BaseTest):
 
         deleted_host = copy.deepcopy(host)
         deleted_host[VProps.VITRAGE_IS_DELETED] = True
-        ret = _get_notification_type(forced_down_host, deleted_host, True)
+        ret = GN._get_notification_type(forced_down_host, deleted_host, True)
         self.assertEqual(
             NType.DEACTIVATE_MARK_DOWN_EVENT,
             self.get_first(ret),
@@ -158,32 +158,34 @@ class GraphTest(base.BaseTest):
 
         deleted_host = copy.deepcopy(host)
         deleted_host[VProps.VITRAGE_IS_DELETED] = True
-        ret = _get_notification_type(host, deleted_host, True)
+        ret = GN._get_notification_type(host, deleted_host, True)
         self.assertIsNone(
             self.get_first(ret),
             'deleted host without forced_down should not notify')
 
     def test_notification_type_updated_host(self):
-        ret = _get_notification_type(forced_down_host, forced_down_host, True)
+        ret = GN._get_notification_type(
+            forced_down_host, forced_down_host, True)
         self.assertIsNone(self.get_first(ret),
                           'A not new host should be ignored')
 
         deleted_host = copy.deepcopy(forced_down_host)
         deleted_host[VProps.VITRAGE_IS_DELETED] = True
-        ret = _get_notification_type(deleted_host, forced_down_host, True)
+        ret = GN._get_notification_type(deleted_host, forced_down_host, True)
         self.assertEqual(NType.ACTIVATE_MARK_DOWN_EVENT,
                          self.get_first(ret),
                          'old host become not deleted should notify activate')
 
         deleted_host = copy.deepcopy(forced_down_host)
         deleted_host[VProps.VITRAGE_IS_DELETED] = True
-        ret = _get_notification_type(deleted_host, host, True)
+        ret = GN._get_notification_type(deleted_host, host, True)
         self.assertIsNone(self.get_first(ret),
                           'old host become not deleted should not notify')
 
         placeholder_host = copy.deepcopy(forced_down_host)
         placeholder_host[VProps.VITRAGE_IS_PLACEHOLDER] = True
-        ret = _get_notification_type(placeholder_host, forced_down_host, True)
+        ret = GN._get_notification_type(
+            placeholder_host, forced_down_host, True)
         self.assertEqual(NType.ACTIVATE_MARK_DOWN_EVENT,
                          self.get_first(ret),
                          'placeholder become active should notify activate')
@@ -191,6 +193,6 @@ class GraphTest(base.BaseTest):
     def test_notification_type_placeholder_host(self):
         placeholder_host = copy.deepcopy(forced_down_host)
         placeholder_host[VProps.VITRAGE_IS_PLACEHOLDER] = True
-        ret = _get_notification_type(None, placeholder_host, True)
+        ret = GN._get_notification_type(None, placeholder_host, True)
         self.assertIsNone(self.get_first(ret),
                           'A not new host vertex should be ignored')

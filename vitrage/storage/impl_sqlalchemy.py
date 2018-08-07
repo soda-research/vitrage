@@ -17,12 +17,17 @@ from __future__ import absolute_import
 
 from oslo_db.sqlalchemy import session as db_session
 from oslo_log import log
+from sqlalchemy import and_
 from sqlalchemy.engine import url as sqlalchemy_url
+from sqlalchemy import func
 from sqlalchemy import or_
 
 from vitrage.common.exception import VitrageInputError
+from vitrage.entity_graph.mappings.operational_alarm_severity import \
+    OperationalAlarmSeverity
 from vitrage import storage
 from vitrage.storage import base
+from vitrage.storage.history_facade import HistoryFacadeConnection
 from vitrage.storage.sqlalchemy import models
 from vitrage.storage.sqlalchemy.models import Template
 
@@ -47,6 +52,14 @@ class Connection(base.Connection):
         self._graph_snapshots = GraphSnapshotsConnection(self._engine_facade)
         self._webhooks = WebhooksConnection(
             self._engine_facade)
+        self._alarms = AlarmsConnection(
+            self._engine_facade)
+        self._edges = EdgesConnection(
+            self._engine_facade)
+        self._changes = ChangesConnection(
+            self._engine_facade)
+        self._history_facade = HistoryFacadeConnection(
+            self._engine_facade, self._alarms, self._edges, self._changes)
 
     @property
     def webhooks(self):
@@ -67,6 +80,22 @@ class Connection(base.Connection):
     @property
     def graph_snapshots(self):
         return self._graph_snapshots
+
+    @property
+    def alarms(self):
+        return self._alarms
+
+    @property
+    def edges(self):
+        return self._edges
+
+    @property
+    def changes(self):
+        return self._changes
+
+    @property
+    def history_facade(self):
+        return self._history_facade
 
     @staticmethod
     def _dress_url(url):
@@ -97,7 +126,10 @@ class Connection(base.Connection):
                             models.Template.__table__,
                             models.Webhooks.__table__,
                             models.Event.__table__,
-                            models.GraphSnapshot.__table__])
+                            models.GraphSnapshot.__table__,
+                            models.Alarm.__table__,
+                            models.Edge.__table__,
+                            models.Change.__table__])
         # TODO(idan_hefetz) upgrade logic is missing
 
     def disconnect(self):
@@ -359,3 +391,112 @@ class GraphSnapshotsConnection(base.GraphSnapshotsConnection, BaseTableConn):
         """Delete all graph snapshots"""
         query = self.query_filter(models.GraphSnapshot)
         query.delete()
+
+
+class AlarmsConnection(base.AlarmsConnection, BaseTableConn):
+    def __init__(self, engine_facade):
+        super(AlarmsConnection, self).__init__(engine_facade)
+
+    def create(self, alarm):
+        session = self._engine_facade.get_session()
+        with session.begin():
+            session.add(alarm)
+
+    def update(self, vitrage_id, key, val):
+        session = self._engine_facade.get_session()
+        with session.begin():
+            query = session.query(models.Alarm).filter(
+                models.Alarm.vitrage_id == vitrage_id)
+            query.update({getattr(models.Alarm, key): val})
+
+    def end_all_alarms(self, end_time):
+        session = self._engine_facade.get_session()
+        query = session.query(models.Alarm).filter(
+            models.Alarm.end_timestamp > end_time)
+        query.update({models.Alarm.end_timestamp: end_time})
+
+    def delete_expired(self, expire_by=None):
+        session = self._engine_facade.get_session()
+        query = session.query(models.Alarm)
+        query = query.filter(models.Alarm.end_timestamp < expire_by)
+        return query.delete()
+
+    def delete(self,
+               vitrage_id=None,
+               start_timestamp=None,
+               end_timestamp=None):
+        query = self.query_filter(
+            models.Alarm,
+            vitrage_id=vitrage_id,
+            start_timestamp=start_timestamp,
+            end_timestamp=end_timestamp)
+        return query.delete()
+
+
+class EdgesConnection(base.EdgesConnection, BaseTableConn):
+    def __init__(self, engine_facade):
+        super(EdgesConnection, self).__init__(engine_facade)
+
+    def create(self, edge):
+        session = self._engine_facade.get_session()
+        with session.begin():
+            session.add(edge)
+
+    def update(self, source_id, target_id, end_timestamp):
+        session = self._engine_facade.get_session()
+        with session.begin():
+            query = session.query(models.Edge).filter(and_(
+                models.Edge.source_id == source_id,
+                models.Edge.target_id == target_id))
+            query.update({models.Edge.end_timestamp: end_timestamp})
+
+    def end_all_edges(self, end_time):
+        session = self._engine_facade.get_session()
+        query = session.query(models.Edge).filter(
+            models.Edge.end_timestamp > end_time)
+        query.update({models.Edge.end_timestamp: end_time})
+
+    def delete(self):
+        query = self.query_filter(models.Edge)
+        return query.delete()
+
+
+class ChangesConnection(base.ChangesConnection, BaseTableConn):
+    def __init__(self, engine_facade):
+        super(ChangesConnection, self).__init__(engine_facade)
+
+    def create(self, change):
+        session = self._engine_facade.get_session()
+        with session.begin():
+            session.add(change)
+
+    def add_end_changes(self, vitrage_ids, end_time):
+        last_changes = self._get_alarms_last_change(vitrage_ids)
+        for id, change in last_changes.items():
+            change_row = \
+                models.Change(
+                    vitrage_id=id,
+                    timestamp=end_time,
+                    severity=OperationalAlarmSeverity.OK,
+                    payload=change.payload)
+            self.create(change_row)
+
+    def _get_alarms_last_change(self, alarm_ids):
+        session = self._engine_facade.get_session()
+        query = session.query(func.max(models.Change.timestamp),
+                              models.Change.vitrage_id,
+                              models.Change.payload).\
+            filter(models.Change.vitrage_id.in_(alarm_ids)).\
+            group_by(models.Change.vitrage_id)
+
+        rows = query.all()
+
+        result = {}
+        for change in rows:
+            result[change.vitrage_id] = change
+
+        return result
+
+    def delete(self):
+        query = self.query_filter(models.Change)
+        return query.delete()

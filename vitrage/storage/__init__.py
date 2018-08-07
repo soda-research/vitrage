@@ -17,6 +17,8 @@ import six.moves.urllib.parse as urlparse
 from stevedore import driver
 import tenacity
 
+from vitrage.utils.datetime import utcnow
+
 _NAMESPACE = 'vitrage.storage'
 
 
@@ -50,3 +52,8 @@ def get_connection_from_config(conf):
         return mgr.driver(conf, url)
 
     return _get_connection()
+
+
+def db_time():
+    ret = utcnow(with_timezone=False)
+    return ret.replace(microsecond=0)

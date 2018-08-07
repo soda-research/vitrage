@@ -11,6 +11,7 @@
       License for the specific language governing permissions and limitations
       under the License.
 
+
 Vitrage API
 -----------
 |
@@ -503,6 +504,16 @@ Query Parameters
 ================
 
 vitrage_id - (string(255)) get alarm on this resource can be 'all' for all alarms.
+
+ Optional Parameters:
+
+- limit - (int) maximum number of items to return, if limit=0 the method will return all matched items in alarms table.
+- sort_by - (array of string(255)) array of attributes by which results should be sorted.
+- sort_dirs - (array of string(255)) per-column array of sort_dirs,corresponding to sort_keys ('asc' or 'desc').
+- filter_by - (array of string(255)) array of attributes by which results will be filtered
+- filter_vals - (array of string(255)) per-column array of filter values corresponding to filter_by.
+- next_page - (bool) if True will return next page when marker is given, if False will return previous page when marker is given, otherwise, returns first page if no marker was given.
+- marker - ((string(255)) if None returns first page, else if vitrage_id is given and next_page is True, return next #limit results after marker, else, if next page is False, return #limit results before marker.
 
 Request Body
 ============

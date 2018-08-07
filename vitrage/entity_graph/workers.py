@@ -382,8 +382,8 @@ class ApiWorker(GraphCloneWorkerBase):
                                        server=rabbit_hosts)
 
         endpoints = [TopologyApis(self._entity_graph, conf),
-                     AlarmApis(self._entity_graph, conf),
-                     RcaApis(self._entity_graph, conf),
+                     AlarmApis(self._entity_graph, conf, db),
+                     RcaApis(self._entity_graph, conf, db),
                      TemplateApis(notifier, db),
                      EventApis(conf),
                      ResourceApis(self._entity_graph, conf),
