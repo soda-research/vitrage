@@ -200,7 +200,6 @@ function configure_vitrage {
     # create some folders
     mkdir -p $VITRAGE_CONF_DIR/datasources_values
     mkdir -p $VITRAGE_CONF_DIR/static_datasources
-    mkdir -p $VITRAGE_CONF_DIR/templates
 
     # copy datasources
     cp $VITRAGE_DIR/etc/vitrage/datasources_values/*.yaml $VITRAGE_CONF_DIR/datasources_values
