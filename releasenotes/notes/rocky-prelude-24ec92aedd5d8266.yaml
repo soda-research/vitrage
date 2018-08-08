@@ -1,6 +1,5 @@
 ---
 prelude: |
-    Perform validation on filter parameters on listing resources.
     Vitrage Rocky release contains significant infrastructure changes that
     bring a lot of value to the end user. The main ones are:
 
