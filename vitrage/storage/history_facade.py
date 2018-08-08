@@ -14,12 +14,15 @@
 
 from __future__ import absolute_import
 
-from oslo_db.sqlalchemy import utils as sqlalchemyutils
-from oslo_log import log
-from oslo_utils import timeutils
+import pytz
 import sqlalchemy
 from sqlalchemy import and_
 from sqlalchemy import or_
+
+from oslo_db.sqlalchemy import utils as sqlalchemyutils
+from oslo_log import log
+from oslo_utils import timeutils
+
 from vitrage.common.constants import EdgeLabel as ELable
 from vitrage.common.constants import HistoryProps as HProps
 from vitrage.common.exception import VitrageInputError
@@ -50,6 +53,11 @@ class HistoryFacadeConnection(object):
         self._alarms.end_all_alarms(end_time)
         self._edges.end_all_edges(end_time)
         self._changes.add_end_changes(changes_to_add, end_time)
+
+    @staticmethod
+    def add_utc_timezone(time):
+        time = pytz.utc.localize(time)
+        return time
 
     def count_active_alarms(self, project_id=None, is_admin_project=False):
 

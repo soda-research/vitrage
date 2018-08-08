@@ -51,9 +51,13 @@ class RcaApis(EntityGraphApisBase):
                 admin=is_admin_project)
 
         for n in db_nodes:
-            n.payload[HProps.START_TIMESTAMP] = str(n.start_timestamp)
+            start_timestamp = \
+                self.db.history_facade.add_utc_timezone(n.start_timestamp)
+            n.payload[HProps.START_TIMESTAMP] = str(start_timestamp)
             if n.end_timestamp <= db_time():
-                n.payload[HProps.END_TIMESTAMP] = str(n.end_timestamp)
+                end_timestamp = \
+                    self.db.history_facade.add_utc_timezone(n.end_timestamp)
+                n.payload[HProps.END_TIMESTAMP] = str(end_timestamp)
 
         vertices = [Vertex(vertex_id=n.vitrage_id, properties=n.payload) for n
                     in db_nodes]

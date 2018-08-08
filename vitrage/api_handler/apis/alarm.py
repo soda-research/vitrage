@@ -11,10 +11,9 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-
-
 from dateutil import parser
 import json
+
 from oslo_log import log
 from osprofiler import profiler
 
@@ -107,9 +106,14 @@ class AlarmApis(EntityGraphApisBase):
                     alarm.payload[VProps.VITRAGE_OPERATIONAL_SEVERITY] = \
                         OperationalAlarmSeverity.OK
         for alarm in alarms:
-            alarm.payload[HProps.START_TIMESTAMP] = str(alarm.start_timestamp)
+            start_timestamp = \
+                self.db.history_facade.add_utc_timezone(alarm.start_timestamp)
+            alarm.payload[HProps.START_TIMESTAMP] = str(start_timestamp)
             if alarm.end_timestamp <= db_time():
-                alarm.payload[HProps.END_TIMESTAMP] = str(alarm.end_timestamp)
+                end_timestamp = \
+                    self.db.history_facade.add_utc_timezone(
+                        alarm.end_timestamp)
+                alarm.payload[HProps.END_TIMESTAMP] = str(end_timestamp)
 
         return alarms
 
