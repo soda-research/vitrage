@@ -11,5 +11,6 @@
   "vitrage_aggregated_state": "ACTIVE",
   "vitrage_is_placeholder": false,
   "vitrage_is_deleted": false,
+  "vitrage_datasource_name": "static",
   "is_real_vitrage_id": true
 }

@@ -15,6 +15,7 @@
   "vitrage_aggregated_severity": "WARNING",
   "vitrage_resource_id": "932d6f9a-dfc4-4a32-9e7a-1fb16a68d3af",
   "vitrage_resource_type": "kubernetes_cluster",
+  "vitrage_datasource_name": "zabbix",
   "severity": "WARNING",
   "is_real_vitrage_id": true
 }
