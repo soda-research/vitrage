@@ -232,8 +232,8 @@ def _is_alarm_severity_change(before, curr):
         return False
     # returns true on activation, deactivation and severity change
     if not before and curr \
-            or (before.get(VProps.VITRAGE_AGGREGATED_SEVERITY) !=
-                curr.get(VProps.VITRAGE_AGGREGATED_SEVERITY)):
+            or (before.get(VProps.VITRAGE_OPERATIONAL_SEVERITY) !=
+                curr.get(VProps.VITRAGE_OPERATIONAL_SEVERITY)):
         return True
     return False
 

@@ -102,6 +102,8 @@ class VitragePersistorEndpoint(object):
                 vitrage_type=data.get(VProps.VITRAGE_TYPE),
                 vitrage_aggregated_severity=data.get(
                     VProps.VITRAGE_AGGREGATED_SEVERITY),
+                vitrage_operational_severity=data.get(
+                    VProps.VITRAGE_OPERATIONAL_SEVERITY),
                 project_id=data.get(VProps.PROJECT_ID),
                 vitrage_resource_type=data.get(VProps.VITRAGE_RESOURCE_TYPE),
                 vitrage_resource_id=data.get(VProps.VITRAGE_RESOURCE_ID),
@@ -147,7 +149,7 @@ class VitragePersistorEndpoint(object):
             models.Change(
                 vitrage_id=data.get(VProps.VITRAGE_ID),
                 timestamp=event_timestamp,
-                severity=data.get(VProps.VITRAGE_AGGREGATED_SEVERITY),
+                severity=data.get(VProps.VITRAGE_OPERATIONAL_SEVERITY),
                 payload=data)
         self.db.changes.create(change_row)
 
