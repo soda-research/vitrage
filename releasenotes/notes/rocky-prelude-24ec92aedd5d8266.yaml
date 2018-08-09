@@ -6,3 +6,5 @@ prelude: |
     - Graph fast-failover and better HA support.
     - High-scale support. The graph was tested to work with over 100,000 entities.
     - Alarm and RCA history.
+
+    In addition, we added Kubernetes and Prometheus datasources.
