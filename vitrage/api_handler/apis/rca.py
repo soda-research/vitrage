@@ -18,6 +18,8 @@ from osprofiler import profiler
 from vitrage.api_handler.apis.base import EntityGraphApisBase
 from vitrage.common.constants import HistoryProps as HProps
 from vitrage.common.constants import TenantProps
+from vitrage.common.constants import VertexProperties as VProps
+from vitrage.datasources.alarm_properties import AlarmProperties as AProps
 from vitrage.graph.driver.networkx_graph import NXGraph
 from vitrage.graph import Edge
 from vitrage.graph import Vertex
@@ -58,6 +60,8 @@ class RcaApis(EntityGraphApisBase):
                 end_timestamp = \
                     self.db.history_facade.add_utc_timezone(n.end_timestamp)
                 n.payload[HProps.END_TIMESTAMP] = str(end_timestamp)
+                # TODO(annarez): implement state change in processor and DB
+                n.payload[VProps.STATE] = AProps.INACTIVE_STATE
 
         vertices = [Vertex(vertex_id=n.vitrage_id, properties=n.payload) for n
                     in db_nodes]
