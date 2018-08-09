@@ -93,9 +93,13 @@ def spawn(target, *args, **kwargs):
 
 def md5(obj):
     if isinstance(obj, tuple):
-        obj = str(obj)
+        obj = str([str(o) for o in obj])
+
     if isinstance(obj, six.string_types):
-        return hashlib.md5(six.b(obj)).hexdigest()
+        if six.PY2:
+            return hashlib.md5(obj).hexdigest()
+        else:
+            return hashlib.md5(obj.encode('utf-8')).hexdigest()
     raise Exception('Unknown object for md5 %s', str(obj))
 
 
