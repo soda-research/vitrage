@@ -11,5 +11,6 @@
   "vitrage_aggregated_state": "ACTIVE",
   "vitrage_is_placeholder": false,
   "is_real_vitrage_id": true,
-  "vitrage_is_deleted": false
+  "vitrage_is_deleted": false,
+  "vitrage_datasource_name": "neutron.network"
 }

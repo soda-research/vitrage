@@ -12,6 +12,7 @@
   "vitrage_sample_timestamp": "2017-12-25 09:43:49.905125+00:00",
   "vitrage_aggregated_state": "IN-USE",
   "vitrage_is_placeholder": false,
+  "vitrage_datasource_name": "cinder.volume",
   "is_real_vitrage_id": true,
   "attachments": [
     "f96f3054-41fc-4110-a182-336fbb2168fc"

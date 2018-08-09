@@ -12,6 +12,7 @@
   "host_id": "compute-0-0",
   "vitrage_aggregated_state": "SUBOPTIMAL",
   "vitrage_is_placeholder": false,
+  "vitrage_datasource_name": "nova.instance",
   "is_real_vitrage_id": true,
   "name": "App_2-server_1-esi2oaogigfp"
 }

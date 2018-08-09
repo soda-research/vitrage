@@ -14,5 +14,6 @@
   "host_id": "compute-0-0",
   "vitrage_aggregated_state": "ACTIVE",
   "vitrage_is_placeholder": false,
+  "vitrage_datasource_name": "neutron.port",
   "is_real_vitrage_id": true
 }
