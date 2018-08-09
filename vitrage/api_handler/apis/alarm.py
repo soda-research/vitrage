@@ -22,6 +22,7 @@ from vitrage.common.constants import EntityCategory as ECategory
 from vitrage.common.constants import HistoryProps as HProps
 from vitrage.common.constants import TenantProps
 from vitrage.common.constants import VertexProperties as VProps
+from vitrage.datasources.alarm_properties import AlarmProperties as AProps
 from vitrage.entity_graph.mappings.operational_alarm_severity import \
     OperationalAlarmSeverity
 from vitrage.storage import db_time
@@ -98,13 +99,7 @@ class AlarmApis(EntityGraphApisBase):
         :rtype: list
         """
         alarms = self.db.history_facade.get_alarms(*args, **kwargs)
-        if not kwargs.get('only_active_alarms'):
-            for alarm in alarms:
-                # change operational severity of ended alarms to 'OK'
-                # TODO(annarez): in next version use 'state'
-                if alarm.end_timestamp <= db_time():
-                    alarm.payload[VProps.VITRAGE_OPERATIONAL_SEVERITY] = \
-                        OperationalAlarmSeverity.OK
+
         for alarm in alarms:
             start_timestamp = \
                 self.db.history_facade.add_utc_timezone(alarm.start_timestamp)
@@ -114,6 +109,12 @@ class AlarmApis(EntityGraphApisBase):
                     self.db.history_facade.add_utc_timezone(
                         alarm.end_timestamp)
                 alarm.payload[HProps.END_TIMESTAMP] = str(end_timestamp)
+                # change operational severity of ended alarms to 'OK'
+                # TODO(annarez): in next version use only 'state'
+                alarm.payload[VProps.VITRAGE_OPERATIONAL_SEVERITY] = \
+                    OperationalAlarmSeverity.OK
+                # TODO(annarez): implement state change in processor and DB
+                alarm.payload[VProps.STATE] = AProps.INACTIVE_STATE
 
         return alarms
 
