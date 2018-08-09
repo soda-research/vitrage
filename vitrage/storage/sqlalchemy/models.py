@@ -238,6 +238,8 @@ class Alarm(Base):
     vitrage_type = Column(String(64), nullable=False)
     vitrage_aggregated_severity = Column(String(64), index=True,
                                          nullable=False)
+    vitrage_operational_severity = Column(String(64), index=True,
+                                          nullable=False)
     project_id = Column(String(64), index=True)
     vitrage_resource_type = Column(String(64))
     vitrage_resource_id = Column(String(64))
@@ -253,6 +255,7 @@ class Alarm(Base):
             "name='%s'," \
             "vitrage_type='%s'," \
             "vitrage_aggregated_severity='%s'," \
+            "vitrage_operational_severity='%s'," \
             "project_id='%s'," \
             "vitrage_resource_type='%s'," \
             "vitrage_resource_id='%s'," \
@@ -265,6 +268,7 @@ class Alarm(Base):
                 self.name,
                 self.vitrage_type,
                 self.vitrage_aggregated_severity,
+                self.vitrage_operational_severity,
                 self.project_id,
                 self.vitrage_resource_type,
                 self.vitrage_resource_id,

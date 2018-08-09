@@ -68,15 +68,15 @@ class HistoryFacadeConnection(object):
             query, project_id, is_admin_project)
 
         query_severe = query.filter(
-            models.Alarm.vitrage_aggregated_severity == OSeverity.SEVERE)
+            models.Alarm.vitrage_operational_severity == OSeverity.SEVERE)
         query_critical = query.filter(
-            models.Alarm.vitrage_aggregated_severity == OSeverity.CRITICAL)
+            models.Alarm.vitrage_operational_severity == OSeverity.CRITICAL)
         query_warning = query.filter(
-            models.Alarm.vitrage_aggregated_severity == OSeverity.WARNING)
+            models.Alarm.vitrage_operational_severity == OSeverity.WARNING)
         query_ok = query.filter(
-            models.Alarm.vitrage_aggregated_severity == OSeverity.OK)
+            models.Alarm.vitrage_operational_severity == OSeverity.OK)
         query_na = query.filter(
-            models.Alarm.vitrage_aggregated_severity == OSeverity.NA)
+            models.Alarm.vitrage_operational_severity == OSeverity.NA)
 
         counts = {OSeverity.SEVERE: query_severe.count(),
                   OSeverity.CRITICAL: query_critical.count(),
@@ -258,8 +258,8 @@ class HistoryFacadeConnection(object):
     @staticmethod
     def _add_time_frame_to_query(query, start, end):
         start = timeutils.normalize_time(start)
-        end = timeutils.normalize_time(end)
         if start and end:
+            end = timeutils.normalize_time(end)
             query = \
                 query.filter(
                     or_(and_(models.Alarm.start_timestamp >= start,
