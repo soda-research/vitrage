@@ -87,7 +87,7 @@ class WebhookApis(object):
             if ctx.get(TenantProps.TENANT, "") == \
                     webhooks[0][Vprops.PROJECT_ID] or ctx.get(
                     TenantProps.IS_ADMIN, False):
-                return (webhooks[0])
+                return webhooks[0]
             else:
                 LOG.warning('Webhook show - Authorization failed (%s)',
                             id)
