@@ -343,7 +343,6 @@ class Processor(processor.ProcessorBase):
 
         for alarm in alarms:
             if not resource:
-                self.add_resource_details(alarm, None, None, None)
                 continue
 
             project_id = resource.get(VProps.PROJECT_ID)
@@ -361,7 +360,8 @@ class Processor(processor.ProcessorBase):
     def add_resource_details(alarm, r_id, r_type, r_project_id):
         alarm[VProps.VITRAGE_RESOURCE_ID] = r_id
         alarm[VProps.VITRAGE_RESOURCE_TYPE] = r_type
-        alarm[VProps.VITRAGE_RESOURCE_PROJECT_ID] = r_project_id
+        if r_project_id:
+            alarm[VProps.VITRAGE_RESOURCE_PROJECT_ID] = r_project_id
 
     @staticmethod
     def _set_datasource_name(entity, event):

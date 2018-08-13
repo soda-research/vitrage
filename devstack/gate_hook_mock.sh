@@ -43,6 +43,7 @@ notification_driver = messagingv2
 verbose = true
 debug = false
 notifiers = nova,webhook
+rpc_response_timeout=300
 
 [datasources]
 types=doctor,mock_graph_datasource

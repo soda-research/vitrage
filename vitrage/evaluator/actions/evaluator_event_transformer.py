@@ -137,7 +137,7 @@ class EvaluatorEventTransformer(transformer_base.TransformerBase):
                 VProps.VITRAGE_SAMPLE_TIMESTAMP:
                     event[VProps.VITRAGE_SAMPLE_TIMESTAMP],
                 VProps.IS_REAL_VITRAGE_ID: True,
-                VProps.VITRAGE_TYPE: event[VProps.VITRAGE_RESOURCE_TYPE],
+                VProps.VITRAGE_TYPE: event.get(VProps.VITRAGE_RESOURCE_TYPE),
                 VProps.VITRAGE_CATEGORY: EntityCategory.RESOURCE,
             }
             neighbor = Vertex(event[TFields.TARGET], neighbor_props)
