@@ -11,8 +11,6 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-from datetime import timedelta
-
 from oslo_log import log
 
 from vitrage.common.constants import VertexProperties as VProps
@@ -20,12 +18,9 @@ from vitrage.graph import Edge
 from vitrage.graph import Vertex
 
 from vitrage.storage.sqlalchemy import models
-from vitrage.utils.datetime import utcnow
 
 
 LOG = log.getLogger(__name__)
-
-EPSILON = 30
 
 
 class GraphPersistency(object):
@@ -48,15 +43,8 @@ class GraphPersistency(object):
         except Exception:
             LOG.exception("Graph is not stored")
 
-    def _recent_snapshot_time(self):
-        t = utcnow(with_timezone=False)
-        t = t - timedelta(seconds=3 * self.conf.datasources.snapshots_interval)
-        t = t - timedelta(seconds=EPSILON)
-        return t
-
     def query_recent_snapshot(self):
-        timestamp = self._recent_snapshot_time()
-        return self.db.graph_snapshots.query(timestamp=timestamp)
+        return self.db.graph_snapshots.query()
 
     def replay_events(self, graph, event_id):
         LOG.info('Getting events from database')
