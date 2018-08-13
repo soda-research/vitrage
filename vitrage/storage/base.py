@@ -236,8 +236,8 @@ class GraphSnapshotsConnection(object):
         """
         raise NotImplementedError('update graph snapshot not implemented')
 
-    def query(self, timestamp=None):
-        """Yields latest graph snapshot taken until timestamp.
+    def query(self):
+        """Yields latest graph snapshot
 
         :rtype: vitrage.storage.sqlalchemy.models.GraphSnapshot
         """
