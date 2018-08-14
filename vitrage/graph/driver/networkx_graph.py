@@ -232,7 +232,7 @@ class NXGraph(Graph):
         elif not vertex_attr_filter:
             vertices = []
             match_func = create_predicate(query_dict)
-            for node, node_data in self._g.nodes(data=True):
+            for node, node_data in list(self._g.nodes(data=True)):
                 v = vertex_copy(node, node_data)
                 if match_func(v):
                     vertices.append(v)
