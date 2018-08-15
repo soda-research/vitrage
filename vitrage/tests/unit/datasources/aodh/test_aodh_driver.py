@@ -816,7 +816,9 @@ class AodhDriverTest(base.BaseTest):
             rule = {"granularity": "300",
                     "threshold": "0.001",
                     "comparison_operator": "gt",
-                    "resource_type": "instance"
+                    "resource_type": "instance",
+                    AodhProps.RESOURCE_ID:
+                        "88cd2d1d-8af4-4d00-9b5e-f82f8c8b0f8d"
                     }
         return {AodhProps.DESCRIPTION: "test",
                 AodhProps.TIMESTAMP: "2016-11-09T01:39:13.839584",
