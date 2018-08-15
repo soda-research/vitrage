@@ -194,7 +194,9 @@ class AodhDriver(AlarmDriverBase):
 
     @classmethod
     def _convert_gnocchi_resources_threshold_alarm_rule(cls, rule):
-        return cls._alarm_rule_common(rule)
+        return {
+            AodhProps.RESOURCE_ID: rule[AodhProps.RESOURCE_ID]
+        }
 
     @classmethod
     def _convert_gnocchi_aggregation_by_metrics_threshold_rule(cls, rule):
