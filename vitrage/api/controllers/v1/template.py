@@ -13,6 +13,7 @@
 # under the License.
 import json
 import pecan
+from pytz import utc
 
 from oslo_log import log
 from osprofiler import profiler
@@ -118,6 +119,10 @@ class TemplateController(RootRestController):
     def _get_templates(cls):
         try:
             templates = pecan.request.storage.templates.query()
+            for template in templates:
+                template.created_at = utc.localize(template.created_at)
+                if template.updated_at:
+                    template.updated_at = utc.localize(template.updated_at)
             templates = [t for t in templates if t.status != TStatus.DELETED]
             templates.sort(key=lambda template: template.created_at)
             return [cls._db_template_to_dict(t) for t in templates]
