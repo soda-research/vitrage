@@ -11,8 +11,6 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-import time
-
 from oslo_config import cfg
 
 from vitrage.common.constants import EdgeProperties
@@ -36,7 +34,6 @@ class TestGraphPersistor(TestFunctionalBase, TestConfiguration):
         cls.conf.register_opts(cls.DATASOURCES_OPTS, group='datasources')
         cls.add_db(cls.conf)
         cls.load_datasources(cls.conf)
-        graph_persistency.EPSILON = 0.1
 
     def test_graph_store_and_query_recent_snapshot(self):
         g = GraphGenerator().create_graph()
@@ -46,11 +43,6 @@ class TestGraphPersistor(TestFunctionalBase, TestConfiguration):
         recovered_data = graph_persistor.query_recent_snapshot()
         recovered_graph = self.load_snapshot(recovered_data)
         self.assert_graph_equal(g, recovered_graph)
-
-        time.sleep(graph_persistency.EPSILON + 0.1 +
-                   3 * self.conf.datasources.snapshots_interval)
-        recovered_data = graph_persistor.query_recent_snapshot()
-        self.assertIsNone(recovered_data, 'Should not be a recent snapshot')
 
     def test_event_store_and_replay_events(self):
         g = GraphGenerator().create_graph()

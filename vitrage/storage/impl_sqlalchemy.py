@@ -20,7 +20,6 @@ from oslo_log import log
 from sqlalchemy import and_
 from sqlalchemy.engine import url as sqlalchemy_url
 from sqlalchemy import func
-from sqlalchemy import or_
 
 from vitrage.common.exception import VitrageInputError
 from vitrage.entity_graph.mappings.operational_alarm_severity import \
@@ -373,11 +372,8 @@ class GraphSnapshotsConnection(base.GraphSnapshotsConnection, BaseTableConn):
         with session.begin():
             session.merge(graph_snapshot)
 
-    def query(self, timestamp=None):
+    def query(self):
         query = self.query_filter(models.GraphSnapshot)
-        query = query.filter(
-            or_(models.GraphSnapshot.updated_at >= timestamp,
-                models.GraphSnapshot.created_at >= timestamp))
         return query.first()
 
     def query_snapshot_event_id(self):
