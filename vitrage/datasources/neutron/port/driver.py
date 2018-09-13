@@ -29,9 +29,13 @@ class PortDriver(NeutronBase):
 
     def enrich_event(self, event, event_type):
         event[DSProps.EVENT_TYPE] = event_type
+        if 'compute' not in event.get('port', {}).get('device_owner', ''):
+            return []
 
-        return PortDriver.make_pickleable([event], NEUTRON_PORT_DATASOURCE,
-                                          DatasourceAction.UPDATE)[0]
+        enriched_event = \
+            PortDriver.make_pickleable([event], NEUTRON_PORT_DATASOURCE,
+                                       DatasourceAction.UPDATE)[0]
+        return enriched_event
 
     @staticmethod
     def properties_to_filter_out():
@@ -40,7 +44,7 @@ class PortDriver(NeutronBase):
 
     def get_all(self, datasource_action):
         ports = self.client.list_ports()['ports']
-        ports = [p for p in ports if p.get('device_owner') == 'compute:nova']
+        ports = [p for p in ports if 'compute' in p.get('device_owner', '')]
         return self.make_pickleable(
             ports,
             NEUTRON_PORT_DATASOURCE,
