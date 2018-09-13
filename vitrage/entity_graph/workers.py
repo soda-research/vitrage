@@ -258,9 +258,9 @@ class GraphCloneWorkerBase(cotyledon.Service):
                 self._entity_graph.add_edge(current)
         else:
             if is_vertex:
-                self._entity_graph.delete_vertex(before)
+                self._entity_graph.remove_vertex(before)
             else:
-                self._entity_graph.delete_edge(before)
+                self._entity_graph.remove_edge(before)
 
 
 class EvaluatorWorker(GraphCloneWorkerBase):
