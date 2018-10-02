@@ -88,5 +88,6 @@ class DriversEndpoint(object):
         LOG.debug("run driver get_changes: %s", driver_name)
         drivers = utils.get_drivers_by_name(self.conf, [driver_name])
         events = drivers[0].get_changes(DatasourceAction.UPDATE)
+        events = compress_events([e for e in events])
         LOG.debug("run driver get_changes: %s done.", driver_name)
         return events

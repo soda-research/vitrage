@@ -62,8 +62,9 @@ def get_all(rpc_client, events_coordination, driver_names, action,
 
 def get_changes(rpc_client, events_coordination, driver_name):
     LOG.info('get_changes starting %s', driver_name)
-    events = rpc_client.call(
+    result = rpc_client.call(
         {},
         'driver_get_changes',
         driver_name=driver_name)
+    events = cPickle.loads(zlib.decompress(standard_b64decode(result)))
     events_coordination.handle_multiple_low_priority(events)
