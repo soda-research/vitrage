@@ -173,16 +173,24 @@ class NXGraph(Graph):
         return self._g.number_of_edges()
 
     @Notifier.update_notify
-    def update_vertex(self, v):
+    def update_vertex(self, v, overwrite=True):
         """Update the vertex properties
 
+        :param v: the vertex with the new data
         :type v: Vertex
+
+        :param overwrite: whether to overwrite existing properties
+        :type overwrite: Boolean
         """
         orig_prop = self._g.node.get(v.vertex_id, None)
         if not orig_prop:
             self._add_vertex(v)
             return
-        self._g.node[v.vertex_id].update(v.properties)
+
+        merged_props = \
+            self._merged_properties(orig_prop, v.properties, overwrite)
+        self._g.node[v.vertex_id].update(merged_props)
+
         for prop, value in v.properties.items():
             if value is None:
                 del self._g.node[v.vertex_id][prop]
