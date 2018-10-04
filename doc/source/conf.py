@@ -70,9 +70,7 @@ html_theme = 'openstackdocs'
 
 # openstackdocstheme options
 repository_name = 'openstack/vitrage'
-bug_project = 'vitrage'
-bug_tag = 'vitrage'
-
+use_storyborad = True
 html_last_updated_fmt = '%Y-%m-%d %H:%M'
 
 # Output file base name for HTML help builder.
