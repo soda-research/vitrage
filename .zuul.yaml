@@ -1,9 +1,10 @@
 - project:
     templates:
+      - check-requirements
+      - openstack-lower-constraints-jobs
       - openstack-python-jobs
       - openstack-python35-jobs
       - openstack-python36-jobs
-      - check-requirements
       - publish-openstack-docs-pti
       - release-notes-jobs-python3
     check:
@@ -11,13 +12,9 @@
         - vitrage-dsvm-api-py27
         - vitrage-dsvm-datasources-py27
         - vitrage-dsvm-mock-py27
-        - vitrage-dsvm-api-py35:
-            branches: ^(?!stable/(newton|ocata|pike)).*$
-        - vitrage-dsvm-datasources-py35:
-            branches: ^(?!stable/(newton|ocata|pike)).*$
-        - vitrage-dsvm-mock-py35:
-            branches: ^(?!stable/(newton|ocata|pike)).*$
-        - openstack-tox-lower-constraints
+        - vitrage-dsvm-api-py35
+        - vitrage-dsvm-datasources-py35
+        - vitrage-dsvm-mock-py35
         - grenade-vitrage
     gate:
       queue: vitrage
@@ -26,8 +23,8 @@
         - vitrage-dsvm-datasources-py27
         - vitrage-dsvm-api-py35
         - vitrage-dsvm-datasources-py35
-        - openstack-tox-lower-constraints
         - grenade-vitrage
+
 - job:
     name: vitrage-dsvm-api-py27
     parent: legacy-dsvm-base
