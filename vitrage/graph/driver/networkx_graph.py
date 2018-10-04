@@ -205,6 +205,7 @@ class NXGraph(Graph):
             if value is None:
                 del self._g.adj[e.source_id][e.target_id][e.label][prop]
 
+    @Notifier.update_notify
     def remove_vertex(self, v):
         """Remove Vertex v and its edges from the graph
 
@@ -213,6 +214,7 @@ class NXGraph(Graph):
 
         self._g.remove_node(n=v.vertex_id)
 
+    @Notifier.update_notify
     def remove_edge(self, e):
         """Remove an edge from the graph
 
