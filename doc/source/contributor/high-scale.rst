@@ -39,6 +39,18 @@ The following should be set in ``/etc/vitrage/vitrage.conf``, under ``[evaluator
 | workers              | Number of workers for template evaluator                | number of cores |  1              |
 +----------------------+---------------------------------------------------------+-----------------+-----------------+
 
+The default api workers count is 1.
+Increasing it will reduce the latency of parallel api calls, but will result in higher memory consumption.
+If the graph contains large amounts of entities, reducing this will reduce the memory consumption dramatically.
+
+The following should be set in ``/etc/vitrage/vitrage.conf``, under ``[api]`` section:
+
++----------------------+---------------------------------------------------------+-----------------+-----------------+
+| Name                 | Description                                             | Default Value   | Suggested Value |
++======================+=========================================================+=================+=================+
+| workers              | Number of workers for api handler                       | 1               |  1              |
++----------------------+---------------------------------------------------------+-----------------+-----------------+
+
 To apply, run ``sudo service vitrage-graph restart``
 
 
