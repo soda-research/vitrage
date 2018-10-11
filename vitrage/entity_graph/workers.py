@@ -19,6 +19,7 @@ from six.moves import _thread
 from oslo_concurrency import processutils as ps
 from oslo_log import log
 import oslo_messaging
+from oslo_utils import uuidutils
 
 from vitrage.api_handler.apis.alarm import AlarmApis
 from vitrage.api_handler.apis.event import EventApis
@@ -377,9 +378,8 @@ class ApiWorker(GraphCloneWorkerBase):
                                              [EVALUATOR_TOPIC])
         db = storage.get_connection_from_config(conf)
         transport = messaging.get_rpc_transport(conf)
-        rabbit_hosts = conf.oslo_messaging_rabbit.rabbit_hosts
         target = oslo_messaging.Target(topic=conf.rpc_topic,
-                                       server=rabbit_hosts)
+                                       server=uuidutils.generate_uuid())
 
         endpoints = [TopologyApis(self._entity_graph, conf),
                      AlarmApis(self._entity_graph, conf, db),
