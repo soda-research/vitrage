@@ -37,7 +37,7 @@ VITRAGE_DEPLOY=${VITRAGE_DEPLOY}
 # Toggle for deploying Vitrage with/without nagios
 VITRAGE_USE_NAGIOS=$(trueorfalse False VITRAGE_USE_NAGIOS)
 
-VITRAGE_DEFAULT_DATASOURCES=${VITRAGE_DEFAULT_DATASOURCES:-nova.host,nova.instance,nova.zone,nagios,static,static_physical,aodh,cinder.volume,neutron.network,neutron.port,heat.stack,doctor,prometheus}
+VITRAGE_DEFAULT_DATASOURCES=${VITRAGE_DEFAULT_DATASOURCES:-nova.host,nova.instance,nova.zone,nagios,static,static_physical,aodh,cinder.volume,neutron.network,neutron.port,heat.stack,doctor,prometheus,trove.instance,trove.cluster}
 
 # for now dont use pip install for the client
 LIBS_FROM_GIT=python-vitrageclient
