@@ -188,6 +188,11 @@ function configure_vitrage {
         disable_vitrage_datasource heat.stack
     fi
 
+    # remove trove vitrage datasource if trove datasource not installed
+    if ! is_service_enabled trove; then
+        disable_vitrage_datasource trove.instance trove.cluster
+    fi
+
     # remove nagios vitrage datasource if nagios datasource not installed
     if [ "$VITRAGE_USE_NAGIOS" == "False" ]; then
         disable_vitrage_datasource nagios
