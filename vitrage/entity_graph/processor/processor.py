@@ -364,7 +364,10 @@ class Processor(processor.ProcessorBase):
 
     @staticmethod
     def _set_datasource_name(entity, event):
-        if entity.vertex and entity.action == GraphAction.CREATE_ENTITY:
+        if entity.vertex and \
+                (entity.action == GraphAction.CREATE_ENTITY or
+                 entity.action == GraphAction.UPDATE_ENTITY):
             datasource_name = event.get(VProps.VITRAGE_DATASOURCE_NAME)
-            entity.vertex.properties[VProps.VITRAGE_DATASOURCE_NAME] = \
-                datasource_name
+            if datasource_name:
+                entity.vertex.properties[VProps.VITRAGE_DATASOURCE_NAME] = \
+                    datasource_name
