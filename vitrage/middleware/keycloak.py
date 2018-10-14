@@ -106,8 +106,11 @@ class KeycloakAuth(base.ConfigurableMiddleware):
             self._unauthorized(message)
 
     def call_keycloak(self):
-        endpoint = ('%s' + self.user_info_endpoint_url) % (self.auth_url,
-                                                           self.realm_name)
+        if self.user_info_endpoint_url.startswith(('http://', 'https://')):
+            endpoint = self.user_info_endpoint_url
+        else:
+            endpoint = ('%s' + self.user_info_endpoint_url) % \
+                       (self.auth_url, self.realm_name)
         headers = {'Authorization': 'Bearer %s' % self.token}
         verify = None
         if urllib.parse.urlparse(endpoint).scheme == "https":
