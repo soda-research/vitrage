@@ -68,8 +68,10 @@ class PrometheusDriver(AlarmDriverBase):
     def _status_changed(self, new_alarm, old_alarm):
         return new_alarm.get(PProps.STATUS) != old_alarm.get(PProps.STATUS)
 
-    def _get_alarms(self):
-        # TODO(iafek): should be implemented
+    def _get_all_alarms(self):
+        return []
+
+    def _get_changed_alarms(self):
         return []
 
     def enrich_event(self, event, event_type):
