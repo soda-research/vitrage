@@ -59,7 +59,6 @@ function _vitrage_config_apache_wsgi {
     sudo mkdir -p $VITRAGE_WSGI_DIR
 
     local vitrage_apache_conf=$(apache_site_config_for vitrage)
-    local apache_version=$(get_apache_version)
     local venv_path=""
 
     # Copy proxy vhost and wsgi file
