@@ -43,7 +43,7 @@ class BasicAndKeystoneAuth(AuthProtocol):
                        validate_default_values=True)
         password_option = loading.get_auth_plugin_conf_options('password')
         self.oslo_conf.register_opts(password_option, group=CFG_GROUP)
-        self.auth_url = self.oslo_conf.service_credentials.auth_url
+        self.auth_url = self.oslo_conf.service_credentials.auth_url or ''
 
     @property
     def reject_auth_headers(self):
