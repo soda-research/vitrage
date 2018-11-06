@@ -18,6 +18,7 @@ from oslo_config import cfg
 from oslo_log import log
 import oslo_messaging as messaging
 from oslo_messaging.rpc import dispatcher
+from oslo_utils import uuidutils
 from osprofiler import profiler
 
 OPTS = [
@@ -92,7 +93,7 @@ def get_default_server(conf, topic, endpoints):
     transport = messaging.get_rpc_transport(conf)
     target = messaging.Target(
         topic=topic,
-        server=conf.oslo_messaging_rabbit.rabbit_hosts)
+        server=uuidutils.generate_uuid())
     return get_server(target, endpoints, transport)
 
 
