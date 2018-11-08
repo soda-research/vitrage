@@ -42,9 +42,10 @@ class PrometheusLabels(object):
 
 
 def get_alarm_update_time(alarm):
-    return alarm.get(PrometheusAlertProperties.ENDS_AT) if \
-        PrometheusAlertProperties.ENDS_AT in alarm else \
-        alarm.get(PrometheusAlertProperties.STARTS_AT)
+    if PrometheusAlertStatus.FIRING == alarm.get(PrometheusProperties.STATUS):
+        return alarm.get(PrometheusAlertProperties.STARTS_AT)
+    else:
+        return alarm.get(PrometheusAlertProperties.ENDS_AT)
 
 
 def get_annotation(alarm, annotation):
