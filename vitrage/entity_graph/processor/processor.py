@@ -96,17 +96,17 @@ class Processor(processor.ProcessorBase):
         LOG.debug('Update entity in entity graph:\n%s', updated_vertex)
 
         graph_vertex = self.entity_graph.get_vertex(updated_vertex.vertex_id)
-
-        if (not graph_vertex) or \
-                PUtils.is_newer_vertex(graph_vertex, updated_vertex):
-            self._add_resource_details_to_alarm(updated_vertex, neighbors)
-            PUtils.update_entity_graph_vertex(self.entity_graph,
-                                              graph_vertex,
-                                              updated_vertex)
-            self._update_neighbors(updated_vertex, neighbors)
-        else:
-            LOG.warning("Update event arrived on invalid resource: %s",
-                        updated_vertex)
+        if graph_vertex and not PUtils.is_newer_vertex(graph_vertex,
+                                                       updated_vertex):
+            LOG.warning("Update event arrived later than expected - "
+                        "graph_vertex: %s --- updated_vertex: %s",
+                        graph_vertex, updated_vertex)
+            return
+        self._add_resource_details_to_alarm(updated_vertex, neighbors)
+        PUtils.update_entity_graph_vertex(self.entity_graph,
+                                          graph_vertex,
+                                          updated_vertex)
+        self._update_neighbors(updated_vertex, neighbors)
 
     def delete_entity(self, deleted_vertex, neighbors):
         """Deletes the vertex from the entity graph
@@ -124,24 +124,32 @@ class Processor(processor.ProcessorBase):
 
         graph_vertex = self.entity_graph.get_vertex(deleted_vertex.vertex_id)
 
-        if graph_vertex and (not PUtils.is_deleted(graph_vertex)) and \
-                PUtils.is_newer_vertex(graph_vertex, deleted_vertex):
-            neighbor_vertices = self.entity_graph.neighbors(
-                deleted_vertex.vertex_id)
-            neighbor_edges = self.entity_graph.get_edges(
-                deleted_vertex.vertex_id)
+        if not graph_vertex:
+            LOG.warning('Delete - vertex not found %s', deleted_vertex)
+            return
+        elif PUtils.is_deleted(graph_vertex):
+            LOG.warning('Delete - vertex already deleted - '
+                        "graph_vertex: %s --- deleted_vertex: %s",
+                        graph_vertex, deleted_vertex)
+            return
+        elif not PUtils.is_newer_vertex(graph_vertex, deleted_vertex):
+            LOG.warning("Delete event arrived later than expected - "
+                        "graph_vertex: %s --- deleted_vertex: %s",
+                        graph_vertex, deleted_vertex)
+            return
 
-            for edge in neighbor_edges:
-                PUtils.mark_deleted(self.entity_graph, edge)
+        neighbor_vertices = self.entity_graph.neighbors(
+            deleted_vertex.vertex_id)
+        neighbor_edges = self.entity_graph.get_edges(
+            deleted_vertex.vertex_id)
 
-            for vertex in neighbor_vertices:
-                PUtils.delete_placeholder_vertex(self.entity_graph, vertex)
+        for edge in neighbor_edges:
+            PUtils.mark_deleted(self.entity_graph, edge)
 
-            PUtils.mark_deleted(self.entity_graph, deleted_vertex)
-        else:
-            LOG.warning("Delete entity arrived on invalid resource: "
-                        "deleted_vertex - %s, graph_vertex - %s",
-                        deleted_vertex, graph_vertex)
+        for vertex in neighbor_vertices:
+            PUtils.delete_placeholder_vertex(self.entity_graph, vertex)
+
+        PUtils.mark_deleted(self.entity_graph, deleted_vertex)
 
     def update_relationship(self, entity_vertex, neighbors):
         LOG.debug('Update relationship in entity graph:\n%s', neighbors)
