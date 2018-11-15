@@ -7,7 +7,8 @@ In a production environment with > 50,000 entities, the following configuration 
 Tune RPC
 --------
 
-Vitrage-graph uses RPC to request data from vitrage-collector, these requests take longer, and there is a need to increase the timeout.
+Vitrage-api uses RPC to request data from vitrage-graph, these requests take longer, and there may be a need to
+increase the timeout.
 The following should be set in ``/etc/vitrage/vitrage.conf``, under ``[DEFAULT]`` section:
 
 +----------------------+---------------------------------------------------------+-----------------+-----------------+
@@ -19,8 +20,6 @@ The following should be set in ``/etc/vitrage/vitrage.conf``, under ``[DEFAULT]`
 To apply, restart these:
 
 ``sudo service vitrage-graph restart``
-
-``sudo service vitrage-collector restart``
 
 Restart the Vitrage api (either vitrage-api or apache)
 

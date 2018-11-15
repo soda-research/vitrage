@@ -84,7 +84,7 @@ start_vitrage
 
 # Don't succeed unless the services come up
 # Truncating some service names to 11 characters
-ensure_services_started vitrage-api vitrage-collector vitrage-graph vitrage-notifier vitrage-ml vitrage-persistor vitrage-snmp-parsing
+ensure_services_started vitrage-api vitrage-graph vitrage-notifier vitrage-ml vitrage-persistor vitrage-snmp-parsing
 
 set +o xtrace
 echo "*********************************************************************"

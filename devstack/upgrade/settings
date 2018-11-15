@@ -7,7 +7,7 @@ VITRAGE_BASE_DEVSTACK_DIR=$TOP_DIR/../../old/vitrage/devstack
 VITRAGE_DIR=$TOP_DIR/../../new/vitrage
 source $VITRAGE_BASE_DEVSTACK_DIR/settings
 
-devstack_localrc base enable_service vitrage-api vitrage-collector vitrage-graph vitrage-notifier vitrage-ml vitrage-persistor vitrage-snmp-parsing
-devstack_localrc target enable_service vitrage-api vitrage-collector vitrage-graph vitrage-notifier vitrage-ml vitrage-persistor vitrage-snmp-parsing
+devstack_localrc base enable_service vitrage-api vitrage-graph vitrage-notifier vitrage-ml vitrage-persistor vitrage-snmp-parsing
+devstack_localrc target enable_service vitrage-api vitrage-graph vitrage-notifier vitrage-ml vitrage-persistor vitrage-snmp-parsing
 BASE_RUN_SMOKE=False
 TARGET_RUN_SMOKE=False

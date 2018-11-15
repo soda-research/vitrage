@@ -17,11 +17,10 @@ import time
 from oslo_log import log
 import oslo_messaging
 
-from vitrage.common.constants import DatasourceAction
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.common.utils import spawn
 from vitrage.datasources.transformer_base import TransformerBase
-from vitrage.entity_graph import datasource_rpc as ds_rpc
+from vitrage.entity_graph import driver_exec
 from vitrage.entity_graph import EVALUATOR_TOPIC
 from vitrage.entity_graph.graph_persistency import GraphPersistency
 from vitrage.entity_graph.processor.notifier import GraphNotifier
@@ -42,14 +41,13 @@ class VitrageGraphInit(object):
         self.graph = graph
         self.db = db_connection
         self.workers = GraphWorkersManager(conf, graph, db_connection)
-        self.events_coordination = EventsCoordination(
-            conf,
-            self.process_event,
-            conf.datasources.notification_topic_collector,
-            EVALUATOR_TOPIC)
+        self.events_coordination = EventsCoordination(conf, self.process_event)
         self.persist = GraphPersistency(conf, db_connection, graph)
-        self.scheduler = Scheduler(conf, graph, self.events_coordination,
-                                   self.persist)
+        self.driver_exec = driver_exec.DriverExec(
+            self.conf,
+            self.events_coordination.handle_multiple_low_priority,
+            self.persist)
+        self.scheduler = Scheduler(conf, graph, self.driver_exec, self.persist)
         self.processor = Processor(conf, graph)
 
     def run(self):
@@ -78,14 +76,8 @@ class VitrageGraphInit(object):
         LOG.info('Disabling previously active alarms')
         self.db.history_facade.disable_alarms_in_history()
         self.subscribe_presist_notifier()
-        ds_rpc.get_all(
-            ds_rpc.create_rpc_client_instance(self.conf),
-            self.events_coordination,
-            self.conf.datasources.types,
-            action=DatasourceAction.INIT_SNAPSHOT,
-            retry_on_fault=True)
+        self.driver_exec.snapshot_get_all()
         LOG.info("%s vertices loaded", self.graph.num_vertices())
-        self.persist.store_graph()
         spawn(self._start_all_workers, is_snapshot=False)
 
     def _start_all_workers(self, is_snapshot):
@@ -130,7 +122,7 @@ PRIORITY_DELAY = 0.05
 
 
 class EventsCoordination(object):
-    def __init__(self, conf, do_work_func, topic_low, topic_high):
+    def __init__(self, conf, do_work_func):
         self._conf = conf
         self._lock = threading.Lock()
         self._high_event_finish_time = 0
@@ -143,12 +135,16 @@ class EventsCoordination(object):
 
         self._do_work_func = do_work
 
-        self._low_pri_listener = self._init_listener(
-            topic_low, self._do_low_priority_work)
-        self._high_pri_listener = self._init_listener(
-            topic_high, self._do_high_priority_work)
+        self._low_pri_listener = None
+        self._high_pri_listener = None
 
     def start(self):
+        self._low_pri_listener = driver_exec.DriversNotificationEndpoint(
+            self._conf,
+            self.handle_multiple_low_priority).init().get_listener()
+        self._high_pri_listener = self._init_listener(
+            EVALUATOR_TOPIC,
+            self._do_high_priority_work)
         LOG.info('Listening on %s', self._high_pri_listener.targets[0].topic)
         LOG.info('Listening on %s', self._low_pri_listener.targets[0].topic)
         self._high_pri_listener.start()
