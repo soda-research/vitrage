@@ -14,7 +14,6 @@
 import abc
 import cotyledon
 import multiprocessing
-from six.moves import _thread
 
 from oslo_concurrency import processutils as ps
 from oslo_log import log
@@ -184,8 +183,7 @@ class GraphWorkersManager(cotyledon.ServiceManager):
 
     @staticmethod
     def _stop():
-        # send SEGINT (instant exit) instead of SIGTERM
-        _thread.interrupt_main()
+        raise SystemExit(0)
 
 
 class GraphCloneWorkerBase(cotyledon.Service):
