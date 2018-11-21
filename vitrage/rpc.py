@@ -18,7 +18,6 @@ from oslo_config import cfg
 from oslo_log import log
 import oslo_messaging as messaging
 from oslo_messaging.rpc import dispatcher
-from oslo_utils import uuidutils
 from osprofiler import profiler
 
 
@@ -26,9 +25,6 @@ OPTS = [
     cfg.StrOpt('rpc_topic',
                default='rpcapiv1',
                help='The topic vitrage listens on'),
-    cfg.StrOpt('rpc_topic_collector',
-               default='rpc-collector',
-               help='The topic vitrage-collector listens on'),
 ]
 
 LOG = log.getLogger(__name__)
@@ -88,14 +84,6 @@ def get_client(transport, target, version_cap=None, serializer=None):
                                target,
                                version_cap=version_cap,
                                serializer=serializer)
-
-
-def get_default_server(conf, topic, endpoints):
-    transport = messaging.get_rpc_transport(conf)
-    target = messaging.Target(
-        topic=topic,
-        server=uuidutils.generate_uuid())
-    return get_server(target, endpoints, transport)
 
 
 def get_server(target, endpoints, transport, serializer=None):

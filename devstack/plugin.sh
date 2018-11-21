@@ -300,32 +300,16 @@ function start_vitrage {
         fi
     fi
 
-    run_process vitrage-collector "$VITRAGE_BIN_DIR/vitrage-collector --config-file $VITRAGE_CONF"
     run_process vitrage-graph "$VITRAGE_BIN_DIR/vitrage-graph --config-file $VITRAGE_CONF"
     run_process vitrage-notifier "$VITRAGE_BIN_DIR/vitrage-notifier --config-file $VITRAGE_CONF"
     run_process vitrage-ml "$VITRAGE_BIN_DIR/vitrage-ml --config-file $VITRAGE_CONF"
     run_process vitrage-persistor "$VITRAGE_BIN_DIR/vitrage-persistor --config-file $VITRAGE_CONF"
     run_process vitrage-snmp-parsing "$VITRAGE_BIN_DIR/vitrage-snmp-parsing --config-file $VITRAGE_CONF"
 
-    write_systemd_dependency vitrage-graph vitrage-collector
 
     change_systemd_kill_mode vitrage-graph
-    change_systemd_kill_mode vitrage-collector
 }
 
-
-function write_systemd_dependency {
-  local service_after=$1
-  local service_before=$2
-  local systemd_service_after="devstack@$service_after.service"
-  local systemd_service_before="devstack@$service_before.service"
-
-  local unitfile_after="$SYSTEMD_DIR/$systemd_service_after"
-
-  iniset -sudo $unitfile_after "Unit" "After" "$systemd_service_before"
-
-  $SYSTEMCTL daemon-reload
-}
 
 function change_systemd_kill_mode {
    local service=$1
@@ -343,7 +327,7 @@ function stop_vitrage {
         disable_apache_site vitrage
         restart_apache_server
     fi
-    for serv in vitrage-api vitrage-collector vitrage-graph vitrage-notifier vitrage-persistor vitrage-ml vitrage-snmp-parsing; do
+    for serv in vitrage-api vitrage-graph vitrage-notifier vitrage-persistor vitrage-ml vitrage-snmp-parsing; do
         stop_process $serv
     done
 }

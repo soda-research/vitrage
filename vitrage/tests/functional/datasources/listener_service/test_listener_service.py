@@ -11,9 +11,9 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+from vitrage.entity_graph.driver_exec import DriversNotificationEndpoint
 
 from vitrage.datasources.driver_base import DriverBase
-from vitrage.datasources.listener_service import NotificationsEndpoint
 from vitrage.tests import base
 from vitrage.tests.mocks import mock_driver
 
@@ -39,8 +39,8 @@ class TestListenerService(base.BaseTest):
     def setUpClass(cls):
         super(TestListenerService, cls).setUpClass()
 
-    def _add_event_to_actual_events(self, event_type, data):
-        self.actual_events.append(data)
+    def _add_event_to_actual_events(self, events):
+        self.actual_events.extend(events)
 
     def _set_excepted_events(self, events):
         self.excepted_events = events
@@ -61,9 +61,10 @@ class TestListenerService(base.BaseTest):
 
         my_test_driver = MyTestDriver()
         enrich_callbacks_by_events = {"mock": [my_test_driver.enrich_event]}
-        endpoint = NotificationsEndpoint(
-            enrich_callbacks_by_events,
+        endpoint = DriversNotificationEndpoint(
+            None,
             self._add_event_to_actual_events)
+        endpoint._enrich_event_methods = enrich_callbacks_by_events
 
         # test handling one event
         events = self._generate_events(1)

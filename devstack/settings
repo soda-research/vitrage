@@ -5,8 +5,6 @@ enable_service vitrage-api
 enable_service vitrage-graph
 # Notifier
 enable_service vitrage-notifier
-# Collector
-enable_service vitrage-collector
 # machine_learning
 enable_service vitrage-ml
 # Persistor

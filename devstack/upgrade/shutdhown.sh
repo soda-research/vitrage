@@ -29,7 +29,7 @@ set -o xtrace
 
 stop_vitrage
 
-SERVICES_DOWN="vitrage-api vitrage-collector vitrage-graph vitrage-notifier vitrage-ml vitrage-persistor vitrage-snmp-parsing"
+SERVICES_DOWN="vitrage-api vitrage-graph vitrage-notifier vitrage-ml vitrage-persistor vitrage-snmp-parsing"
 
 # sanity check that services are actually down
 ensure_services_stopped $SERVICES_DOWN

@@ -11,6 +11,7 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+from collections import defaultdict
 from collections import namedtuple
 from collections import OrderedDict
 import copy
@@ -23,7 +24,6 @@ from vitrage.common.constants import EdgeProperties as EProps
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.common.utils import md5
 from vitrage.common.utils import recursive_keypairs
-from vitrage.datasources.listener_service import defaultdict
 from vitrage.entity_graph.mappings.datasource_info_mapper \
     import DatasourceInfoMapper
 from vitrage.evaluator.actions.action_executor import ActionExecutor

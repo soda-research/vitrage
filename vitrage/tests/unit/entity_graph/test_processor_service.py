@@ -39,7 +39,7 @@ class EventsCoordinationTest(base.BaseTest):
         the result should be the number of low priority calls.
         0*(2^n) + 1*n
         """
-        priority_listener = EventsCoordination(None, self.do_work, None, None)
+        priority_listener = EventsCoordination(None, self.do_work)
 
         def write_high():
             for i in range(10000):

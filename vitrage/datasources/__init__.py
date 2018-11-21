@@ -53,8 +53,4 @@ OPTS = [
     cfg.StrOpt('notification_exchange',
                required=False,
                help='Exchange that is used for notifications.'),
-    cfg.StrOpt('notification_topic_collector',
-               default='vitrage_collector_notifications',
-               help='The topic on which event will be sent from the '
-                    'datasources to the graph processor')
 ]

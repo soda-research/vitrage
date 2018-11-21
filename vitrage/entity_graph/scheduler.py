@@ -22,31 +22,33 @@ from vitrage.common.utils import spawn
 
 from vitrage.entity_graph.consistency.consistency_enforcer import\
     ConsistencyEnforcer
-from vitrage.entity_graph import datasource_rpc as ds_rpc
 
 LOG = log.getLogger(__name__)
 
 
 class Scheduler(object):
 
-    def __init__(self, conf, graph, events_coordination, persist):
+    def __init__(self, conf, graph, driver_exec, persist):
         super(Scheduler, self).__init__()
         self.conf = conf
         self.graph = graph
-        self.events_coordination = events_coordination
+        self.driver_exec = driver_exec
         self.persist = persist
         self.consistency = ConsistencyEnforcer(conf, graph)
         self.periodic = None
 
     def start_periodic_tasks(self):
+        thread_num = len(utils.get_pull_drivers_names(self.conf))
+        thread_num += 2  # for consistency and get_all
         self.periodic = periodics.PeriodicWorker.create(
-            [], executor_factory=lambda: ThreadPoolExecutor(max_workers=10))
+            [], executor_factory=lambda: ThreadPoolExecutor(
+                max_workers=thread_num))
 
-        self.add_consistency_timer()
-        self.add_rpc_datasources_timers()
+        self._add_consistency_timer()
+        self._add_datasource_timers()
         spawn(self.periodic.start)
 
-    def add_consistency_timer(self):
+    def _add_consistency_timer(self):
         spacing = self.conf.datasources.snapshots_interval
 
         @periodics.periodic(spacing=spacing)
@@ -59,20 +61,12 @@ class Scheduler(object):
         self.periodic.add(consistency_periodic)
         LOG.info("added consistency_periodic (spacing=%s)", spacing)
 
-    def add_rpc_datasources_timers(self):
+    def _add_datasource_timers(self):
         spacing = self.conf.datasources.snapshots_interval
-        rpc_client = ds_rpc.create_rpc_client_instance(self.conf)
 
         @periodics.periodic(spacing=spacing)
         def get_all_periodic():
-            try:
-                ds_rpc.get_all(rpc_client,
-                               self.events_coordination,
-                               self.conf.datasources.types,
-                               DatasourceAction.SNAPSHOT)
-                self.persist.store_graph()
-            except Exception:
-                LOG.exception('get_all_periodic failed.')
+            self.driver_exec.snapshot_get_all(DatasourceAction.SNAPSHOT)
 
         self.periodic.add(get_all_periodic)
         LOG.info("added get_all_periodic (spacing=%s)", spacing)
@@ -80,17 +74,10 @@ class Scheduler(object):
         driver_names = utils.get_pull_drivers_names(self.conf)
         for d_name in driver_names:
             spacing = self.conf[d_name].changes_interval
-            rpc_client = ds_rpc.create_rpc_client_instance(self.conf)
 
             @periodics.periodic(spacing=spacing)
-            def get_changes_periodic(driver_name=d_name):
-                try:
-                    ds_rpc.get_changes(rpc_client,
-                                       self.events_coordination,
-                                       driver_name)
-                except Exception:
-                    LOG.exception('get_changes_periodic "%s" failed.',
-                                  driver_name)
+            def get_changes_periodic():
+                self.driver_exec.get_changes(d_name)
 
             self.periodic.add(get_changes_periodic)
             LOG.info("added get_changes_periodic %s (spacing=%s)",
