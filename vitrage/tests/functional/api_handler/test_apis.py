@@ -26,6 +26,7 @@ from vitrage.common.constants import EdgeLabel
 from vitrage.common.constants import EdgeProperties
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import VertexProperties as VProps
+from vitrage.common.utils import decompress_obj
 from vitrage.datasources import NOVA_HOST_DATASOURCE
 from vitrage.datasources import NOVA_INSTANCE_DATASOURCE
 from vitrage.datasources import NOVA_ZONE_DATASOURCE
@@ -60,7 +61,7 @@ class TestApis(TestEntityGraphUnitBase, TestConfiguration):
 
         # Action
         alarms = apis.get_alarms(ctx, vitrage_id='all', all_tenants=False)
-        alarms = json.loads(alarms)['alarms']
+        alarms = decompress_obj(alarms)['alarms']
 
         # Test assertions
         self.assertThat(alarms, matchers.HasLength(3))
@@ -74,7 +75,7 @@ class TestApis(TestEntityGraphUnitBase, TestConfiguration):
 
         # Action
         alarms = apis.get_alarms(ctx, vitrage_id='all', all_tenants=False)
-        alarms = json.loads(alarms)['alarms']
+        alarms = decompress_obj(alarms)['alarms']
 
         # Test assertions
         self.assertThat(alarms, matchers.HasLength(2))
@@ -105,7 +106,7 @@ class TestApis(TestEntityGraphUnitBase, TestConfiguration):
 
         # Action
         alarms = apis.get_alarms(ctx, vitrage_id='all', all_tenants=True)
-        alarms = json.loads(alarms)['alarms']
+        alarms = decompress_obj(alarms)['alarms']
 
         # Test assertions
         self.assertThat(alarms, matchers.HasLength(5))
@@ -200,7 +201,7 @@ class TestApis(TestEntityGraphUnitBase, TestConfiguration):
             query=None,
             root=None,
             all_tenants=False)
-        graph_topology = json.loads(graph_topology)
+        graph_topology = decompress_obj(graph_topology)
 
         # Test assertions
         self.assertThat(graph_topology['nodes'], matchers.HasLength(8))
@@ -222,7 +223,7 @@ class TestApis(TestEntityGraphUnitBase, TestConfiguration):
             query=None,
             root=None,
             all_tenants=False)
-        graph_topology = json.loads(graph_topology)
+        graph_topology = decompress_obj(graph_topology)
 
         # Test assertions
         self.assertThat(graph_topology['nodes'], matchers.HasLength(7))
@@ -244,7 +245,7 @@ class TestApis(TestEntityGraphUnitBase, TestConfiguration):
             query=None,
             root=None,
             all_tenants=True)
-        graph_topology = json.loads(graph_topology)
+        graph_topology = decompress_obj(graph_topology)
 
         # Test assertions
         self.assertThat(graph_topology['nodes'], matchers.HasLength(12))
@@ -260,7 +261,7 @@ class TestApis(TestEntityGraphUnitBase, TestConfiguration):
             ctx,
             resource_type=None,
             all_tenants=False)
-        resources = json.loads(resources)['resources']
+        resources = decompress_obj(resources)['resources']
 
         # Test assertions
         self.assertThat(resources, matchers.HasLength(5))
@@ -276,7 +277,7 @@ class TestApis(TestEntityGraphUnitBase, TestConfiguration):
             ctx,
             resource_type=None,
             all_tenants=False)
-        resources = json.loads(resources)['resources']
+        resources = decompress_obj(resources)['resources']
 
         # Test assertions
         self.assertThat(resources, matchers.HasLength(2))
@@ -292,7 +293,7 @@ class TestApis(TestEntityGraphUnitBase, TestConfiguration):
             ctx,
             resource_type=NOVA_HOST_DATASOURCE,
             all_tenants=False)
-        resources = json.loads(resources)['resources']
+        resources = decompress_obj(resources)['resources']
 
         # Test assertions
         self.assertThat(resources, IsEmpty())
@@ -308,7 +309,7 @@ class TestApis(TestEntityGraphUnitBase, TestConfiguration):
             ctx,
             resource_type=NOVA_INSTANCE_DATASOURCE,
             all_tenants=False)
-        resources = json.loads(resources)['resources']
+        resources = decompress_obj(resources)['resources']
 
         # Test assertions
         self.assertThat(resources, matchers.HasLength(2))
@@ -324,7 +325,7 @@ class TestApis(TestEntityGraphUnitBase, TestConfiguration):
             ctx,
             resource_type=None,
             all_tenants=True)
-        resources = json.loads(resources)['resources']
+        resources = decompress_obj(resources)['resources']
 
         # Test assertions
         self.assertThat(resources, matchers.HasLength(7))

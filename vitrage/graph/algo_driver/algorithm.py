@@ -79,29 +79,8 @@ class GraphAlgorithm(object):
         """
         pass
 
-    @staticmethod
-    def connected_component_subgraphs(subgraph):
-        """Generate connected components as subgraphs.
-
-        :type subgraph: NetworkX graph.
-        :rtype: list of NXGraphs
-        """
-        pass
-
-    def all_simple_paths(self, source, target):
-        """Generate all simple paths in the graph G from source to target.
-
-        A simple path is a path with no repeated nodes.
-
-        :type source: Starting node for path
-        :type target: Ending node for path
-        :rtype: lists of simple paths
-        """
-        pass
-
     @abc.abstractmethod
     def create_graph_from_matching_vertices(self,
-                                            vertex_attr_filter=None,
                                             query_dict=None,
                                             edge_attr_filter=None):
         """Generate graph using the query
@@ -109,7 +88,6 @@ class GraphAlgorithm(object):
         Finds all the vertices in the graph matching the query, and returns
         a subgraph consisted from the vertices
 
-        :type vertex_attr_filter: dictionary
         :type query_dict: dictionary
         :type edge_attr_filter: dictionary
         :rtype: NXGraph

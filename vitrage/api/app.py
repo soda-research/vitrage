@@ -38,6 +38,7 @@ APPCONFIGS = {}
 def setup_app(root, conf=None):
     app_hooks = [hooks.ConfigHook(conf),
                  hooks.TranslationHook(),
+                 hooks.GCHook(),
                  hooks.RPCHook(conf),
                  hooks.ContextHook(),
                  hooks.DBHook(conf)]

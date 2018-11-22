@@ -18,6 +18,7 @@
 from datetime import datetime
 # noinspection PyPackageRequirements
 from mock import mock
+from vitrage.common.utils import compress_obj
 
 from vitrage.storage.sqlalchemy import models
 from vitrage.tests.functional.api.v1 import FunctionalTest
@@ -54,7 +55,7 @@ class NoAuthTest(FunctionalTest):
 
     def test_noauth_mode_get_topology(self):
         with mock.patch('pecan.request') as request:
-            request.client.call.return_value = '{}'
+            request.client.call.return_value = compress_obj({})
             params = dict(depth=None, graph_type='graph', query=None,
                           root=None,
                           all_tenants=False)
@@ -66,7 +67,7 @@ class NoAuthTest(FunctionalTest):
 
     def test_noauth_mode_list_alarms(self):
         with mock.patch('pecan.request') as request:
-            request.client.call.return_value = '{"alarms": []}'
+            request.client.call.return_value = compress_obj({"alarms": []})
             params = dict(vitrage_id='all', all_tenants=False)
             data = self.get_json('/alarm/', params=params)
 
@@ -95,7 +96,7 @@ class NoAuthTest(FunctionalTest):
     def test_noauth_mode_list_resources(self):
 
         with mock.patch('pecan.request') as request:
-            request.client.call.return_value = '{"resources": []}'
+            request.client.call.return_value = compress_obj({"resources": []})
             params = dict(resource_type='all', all_tenants=False)
             data = self.get_json('/resources/', params=params)
 

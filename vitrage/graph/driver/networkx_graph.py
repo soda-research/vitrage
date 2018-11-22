@@ -250,6 +250,17 @@ class NXGraph(Graph):
         else:
             return []
 
+    def get_vertices_ids(self, query_dict):
+        if not query_dict:
+            return list(self._g.nodes())
+
+        vertices_ids = set()
+        match_func = create_predicate(query_dict)
+        for node, node_data in self._g.nodes(data=True):
+            if match_func(node_data):
+                vertices_ids.add(node)
+        return vertices_ids
+
     def get_vertices_by_key(self, key_values_hash):
 
         if key_values_hash in self.key_to_vertex_ids:

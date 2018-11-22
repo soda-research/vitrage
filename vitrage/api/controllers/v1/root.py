@@ -9,6 +9,7 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+import gc
 
 from vitrage.api.controllers.v1 import alarm
 from vitrage.api.controllers.v1 import event
@@ -20,6 +21,9 @@ from vitrage.api.controllers.v1 import webhook
 
 
 class V1Controller(object):
+
+    gc.set_threshold(1, 1, 1)
+
     topology = topology.TopologyController()
     resources = resource.ResourcesController()
     alarm = alarm.AlarmsController()

@@ -12,7 +12,6 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-
 import json
 import networkx as nx
 
@@ -27,6 +26,7 @@ from vitrage.api.policy import enforce
 from vitrage.common.constants import VertexProperties as VProps
 
 # noinspection PyProtectedMember
+from vitrage.common.utils import decompress_obj
 from vitrage.datasources.transformer_base import CLUSTER_ID
 
 
@@ -77,8 +77,7 @@ class TopologyController(RootRestController):
                                                    query=query,
                                                    root=root,
                                                    all_tenants=all_tenants)
-            LOG.debug(graph_data)
-            graph = json.loads(graph_data)
+            graph = decompress_obj(graph_data)
             if graph_type == 'graph':
                 return graph
             if graph_type == 'tree':

@@ -12,9 +12,6 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from networkx.algorithms import components
-from networkx.algorithms import simple_paths
-
 from oslo_log import log as logging
 
 from vitrage.common.constants import EdgeProperties as EProps
@@ -23,8 +20,6 @@ from vitrage.graph.algo_driver.algorithm import Mapping
 from vitrage.graph.algo_driver.sub_graph_matching import NEG_CONDITION
 from vitrage.graph.algo_driver.sub_graph_matching import subgraph_matching
 from vitrage.graph.driver import Direction
-from vitrage.graph.driver import Edge
-from vitrage.graph.driver import Vertex
 from vitrage.graph.filter import check_filter
 from vitrage.graph.query import create_predicate
 
@@ -84,10 +79,11 @@ class NXAlgorithm(GraphAlgorithm):
             e_result.extend(e_list)
             nodes_q.extend([(v_id, curr_depth + 1) for v_id, data in n_list])
 
-        graph = self._create_new_graph(
-            graph.name,
-            vertices=self._vertex_result_to_list(n_result),
-            edges=self._edge_result_to_list(e_result))
+        graph = self._create_new_graph(graph.name)
+        for v_id, data in n_result:
+            graph._g.add_node(v_id, **data)
+        for source_id, target_id, label, data in e_result:
+            graph._g.add_edge(source_id, target_id, label, **data)
 
         return graph
 
@@ -128,32 +124,15 @@ class NXAlgorithm(GraphAlgorithm):
                                      validate)
 
     def create_graph_from_matching_vertices(self,
-                                            vertex_attr_filter=None,
                                             query_dict=None,
                                             edge_attr_filter=None):
-        if query_dict:
-            vertices = self.graph.get_vertices(query_dict=query_dict)
-        elif vertex_attr_filter:
-            vertices = self.graph.get_vertices(
-                vertex_attr_filter=vertex_attr_filter)
-        else:
-            vertices = self.graph.get_vertices()
-
-        vertices_ids = [vertex.vertex_id for vertex in vertices]
-
+        vertices_ids = self.graph.get_vertices_ids(query_dict=query_dict)
         graph = self._create_new_graph('graph')
-        graph._g = self.graph._g.subgraph(vertices_ids).copy()
+        graph._g = self.graph._g.subgraph(vertices_ids)
 
         # delete non matching edges
         if edge_attr_filter:
-            self._apply_edge_attr_filter(graph, edge_attr_filter)
-
-        LOG.debug('match query, find graph: nodes %s, edges %s',
-                  str(list(graph._g.nodes(data=True))),
-                  str(list(graph._g.edges(data=True))))
-        LOG.debug('match query, real graph: nodes %s, edges %s',
-                  str(list(self.graph._g.nodes(data=True))),
-                  str(list(self.graph._g.edges(data=True))))
+            self.apply_edge_attr_filter(graph, edge_attr_filter)
 
         return graph
 
@@ -161,15 +140,6 @@ class NXAlgorithm(GraphAlgorithm):
         subgraph = self._create_new_graph('graph')
         subgraph._g = self.graph._g.subgraph(entities)
         return subgraph
-
-    def connected_component_subgraphs(self, subgraph):
-        return components.connected_component_subgraphs(
-            subgraph._g.to_undirected(), copy=False)
-
-    def all_simple_paths(self, source, target):
-        return simple_paths.all_simple_paths(self.graph._g,
-                                             source=source,
-                                             target=target)
 
     def _filtered_subgraph_matching(self,
                                     ge_v_id,
@@ -192,21 +162,6 @@ class NXAlgorithm(GraphAlgorithm):
         return []
 
     @staticmethod
-    def _edge_result_to_list(edge_result):
-        d = dict()
-        for source_id, target_id, label, data in edge_result:
-            d[(source_id, target_id, label)] = \
-                Edge(source_id, target_id, label, properties=data)
-        return d.values()
-
-    @staticmethod
-    def _vertex_result_to_list(vertex_result):
-        d = dict()
-        for v_id, data in vertex_result:
-            d[v_id] = Vertex(vertex_id=v_id, properties=data)
-        return d.values()
-
-    @staticmethod
     def _list_union(list_1, list_2):
         """Union of list that aren't hashable
 
@@ -223,7 +178,7 @@ class NXAlgorithm(GraphAlgorithm):
         return list_1
 
     @staticmethod
-    def _apply_edge_attr_filter(graph, edge_attr_filter):
+    def apply_edge_attr_filter(graph, edge_attr_filter):
         edges = graph._g.edges(data=True, keys=True)
         edges_to_remove = [(u, v, k) for (u, v, k, d) in edges
                            if not check_filter(d, edge_attr_filter)]

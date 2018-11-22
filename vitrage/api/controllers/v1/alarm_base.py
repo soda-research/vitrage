@@ -13,7 +13,6 @@
 # under the License.
 
 
-import json
 from oslo_log import log
 from oslo_utils.strutils import bool_from_string
 import pecan
@@ -23,7 +22,7 @@ from vitrage.api.controllers.rest import RootRestController
 from vitrage.api.policy import enforce
 from vitrage.common.constants import TenantProps
 from vitrage.common.constants import VertexProperties as Vprops
-
+from vitrage.common.utils import decompress_obj
 
 LOG = log.getLogger(__name__)
 
@@ -53,7 +52,7 @@ class BaseAlarmsController(RootRestController):
             enforce("list alarms", pecan.request.headers,
                     pecan.request.enforcer, {})
 
-        alarms_json = \
+        alarms = \
             pecan.request.client.call(pecan.request.context,
                                       'get_alarms',
                                       vitrage_id=vitrage_id,
@@ -71,7 +70,7 @@ class BaseAlarmsController(RootRestController):
                                       )
 
         try:
-            alarms_list = json.loads(alarms_json)['alarms']
+            alarms_list = decompress_obj(alarms)['alarms']
             return alarms_list
 
         except Exception:

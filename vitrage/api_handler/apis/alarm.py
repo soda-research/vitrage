@@ -22,6 +22,7 @@ from vitrage.common.constants import EntityCategory as ECategory
 from vitrage.common.constants import HistoryProps as HProps
 from vitrage.common.constants import TenantProps
 from vitrage.common.constants import VertexProperties as VProps
+from vitrage.common.utils import compress_obj
 from vitrage.datasources.alarm_properties import AlarmProperties as AProps
 from vitrage.entity_graph.mappings.operational_alarm_severity import \
     OperationalAlarmSeverity
@@ -54,7 +55,8 @@ class AlarmApis(EntityGraphApisBase):
             kwargs.get('filter_vals', []).append(vitrage_id)
 
         alarms = self._get_alarms(*args, **kwargs)
-        return json.dumps({'alarms': [v.payload for v in alarms]})
+        data = {'alarms': [v.payload for v in alarms]}
+        return compress_obj(data, level=1)
 
     # TODO(annarez): add db support
     def show_alarm(self, ctx, vitrage_id):

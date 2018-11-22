@@ -16,17 +16,24 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+import base64
 from collections import defaultdict
 import copy
 import hashlib
 import itertools
 import random
 import six
+from six.moves import cPickle
 import threading
+import time
+import zlib
 
 from oslo_config import cfg
+from oslo_log import log
 
 import cProfile
+
+LOG = log.getLogger(__name__)
 
 
 def recursive_keypairs(d, separator='.'):
@@ -116,3 +123,35 @@ def fmt(docstr):
     docstr = docstr.strip()
 
     return docstr
+
+
+def timed_method(log_results=False, warn_above_sec=-1):
+    def _decorator(function):
+        def wrapper(*args, **kwargs):
+            t1 = time.time()
+            result = function(*args, **kwargs)
+            t2 = time.time()
+            if warn_above_sec > 0 and warn_above_sec < t2 - t1:
+                LOG.warning(
+                    'Function %s runtime crossed limit %s seconds.',
+                    function.__name__, t2 - t1)
+            elif log_results:
+                LOG.info('Function %s timed %s', function.__name__, t2 - t1)
+            return result
+        return wrapper
+    return _decorator
+
+
+def compress_obj(obj, level=9):
+    str_data = cPickle.dumps(obj)
+    data = base64.b64encode(zlib.compress(str_data, level))
+    return data
+
+
+def decompress_obj(blob):
+    decoded_blob = base64.standard_b64decode(blob)
+    str_data = zlib.decompress(decoded_blob)
+    obj = cPickle.loads(str_data)
+    del decoded_blob
+    del str_data
+    return obj

@@ -9,7 +9,7 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-
+import gc
 import oslo_messaging
 
 from oslo_context import context
@@ -89,3 +89,9 @@ class DBHook(hooks.PecanHook):
 
     def before(self, state):
         state.request.storage = self.storage
+
+
+class GCHook(hooks.PecanHook):
+
+    def after(self, state):
+        gc.collect()

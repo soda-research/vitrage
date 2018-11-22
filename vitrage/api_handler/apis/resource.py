@@ -21,7 +21,8 @@ from vitrage.api_handler.apis.base import RESOURCES_ALL_QUERY
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import TenantProps
 from vitrage.common.constants import VertexProperties as VProps
-
+from vitrage.common.utils import compress_obj
+from vitrage.common.utils import timed_method
 
 LOG = log.getLogger(__name__)
 
@@ -34,6 +35,7 @@ class ResourceApis(EntityGraphApisBase):
         self.entity_graph = entity_graph
         self.conf = conf
 
+    @timed_method(log_results=True)
     def get_resources(self, ctx, resource_type=None, all_tenants=False):
         LOG.debug('ResourceApis get_resources - resource_type: %s,'
                   'all_tenants: %s', str(resource_type), all_tenants)
@@ -55,8 +57,8 @@ class ResourceApis(EntityGraphApisBase):
             query['and'].append(type_query)
 
         resources = self.entity_graph.get_vertices(query_dict=query)
-        return json.dumps({'resources': [resource.properties
-                                         for resource in resources]})
+        data = {'resources': [r.properties for r in resources]}
+        return compress_obj(data, level=1)
 
     def show_resource(self, ctx, vitrage_id):
 

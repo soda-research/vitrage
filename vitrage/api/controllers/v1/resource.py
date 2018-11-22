@@ -19,7 +19,7 @@ from pecan.core import abort
 
 from vitrage.api.controllers.rest import RootRestController
 from vitrage.api.policy import enforce
-
+from vitrage.common.utils import decompress_obj
 
 LOG = log.getLogger(__name__)
 
@@ -55,13 +55,12 @@ class ResourcesController(RootRestController):
         LOG.info('get_resources with type: %s, all_tenants: %s',
                  resource_type, all_tenants)
         try:
-            resources_json = \
+            resources = \
                 pecan.request.client.call(pecan.request.context,
                                           'get_resources',
                                           resource_type=resource_type,
                                           all_tenants=all_tenants)
-            LOG.info(resources_json)
-            resources = json.loads(resources_json)['resources']
+            resources = decompress_obj(resources)['resources']
             return resources
         except Exception:
             LOG.exception('Failed to get resources.')
