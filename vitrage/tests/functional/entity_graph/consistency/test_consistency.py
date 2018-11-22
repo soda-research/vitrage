@@ -19,7 +19,6 @@ from oslo_config import cfg
 from six.moves import queue
 from testtools import matchers
 
-from vitrage.common.constants import EdgeLabel
 from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.datasources.nagios import NAGIOS_DATASOURCE
@@ -32,7 +31,6 @@ from vitrage.entity_graph.processor.processor import Processor
 from vitrage.evaluator.scenario_evaluator import ScenarioEvaluator
 from vitrage.evaluator.scenario_repository import ScenarioRepository
 from vitrage.graph.driver.networkx_graph import NXGraph
-import vitrage.graph.utils as graph_utils
 from vitrage.tests.functional.base import TestFunctionalBase
 from vitrage.tests.functional.test_configuration import TestConfiguration
 from vitrage.tests.mocks import utils
@@ -106,6 +104,8 @@ class TestConsistencyFunctional(TestFunctionalBase, TestConfiguration):
         # Setup
         consistency_interval = self.conf.datasources.snapshots_interval
         self._periodic_process_setup_stage(consistency_interval)
+        self._add_alarms_by_type(consistency_interval=consistency_interval,
+                                 alarm_type='prometheus')
 
         # Action
         time.sleep(2 * consistency_interval + 1)
@@ -130,22 +130,27 @@ class TestConsistencyFunctional(TestFunctionalBase, TestConfiguration):
         # number of vertices - 3 (deleted instances)
         # number of nics - 1
         # number of volumes - 1
+        # number of prometheus alarms - 1
         self.assertThat(self.processor.entity_graph.get_vertices(),
                         matchers.HasLength(
                             # 3 instances deleted
                             self._num_total_expected_vertices() - 3 +
                             3 - 1 +     # one nic deleted
-                            3 - 1)      # one cinder.volume deleted
+                            3 - 1 +     # one cinder.volume deleted
+                            3 - 1)      # one prometheus deleted
                         )
         self.assertThat(deleted_instance_vertices, matchers.HasLength(3))
 
         # one nic was deleted, one marked as deleted, one untouched
-        self._assert_vertices_status('nic', 2, 1)
+        # same for cinder.volume
+        self._assert_vertices_status(EntityCategory.RESOURCE, 'nic', 2, 1)
+        self._assert_vertices_status(
+            EntityCategory.RESOURCE, 'cinder.volume', 2, 1)
 
-        # one cinder.volume deleted, other two are untouched
-        # cinder.volume vertices should not be marked as deleted, since the
+        # one prometheus deleted, other two are untouched
+        # prometheus vertices should not be marked as deleted, since the
         # datasource did not ask to delete outdated vertices.
-        self._assert_vertices_status('cinder.volume', 2, 0)
+        self._assert_vertices_status(EntityCategory.ALARM, 'prometheus', 2, 0)
 
     def test_should_delete_vertex(self):
         # should be deleted because the static datasource asks to delete its
@@ -154,47 +159,54 @@ class TestConsistencyFunctional(TestFunctionalBase, TestConfiguration):
         self.assertTrue(
             self.consistency_enforcer._should_delete_vertex(static_vertex))
 
-        # should not be deleted because the cinder datasource does not ask to
-        # delete its outdated vertices
+        # should be deleted because the cinder datasource asks to delete its
+        # outdated vertices
         volume_vertex = {VProps.VITRAGE_DATASOURCE_NAME: 'cinder.volume'}
-        self.assertFalse(
+        self.assertTrue(
             self.consistency_enforcer._should_delete_vertex(volume_vertex))
+
+        # should not be deleted because the prometheus datasource does not ask
+        # to delete its outdated vertices
+        prometheus_vertex = {VProps.VITRAGE_DATASOURCE_NAME: 'prometheus'}
+        self.assertFalse(
+            self.consistency_enforcer._should_delete_vertex(prometheus_vertex))
 
         # should be deleted because it is a placeholder
         placeholder_vertex = {VProps.VITRAGE_IS_PLACEHOLDER: True,
-                              VProps.VITRAGE_TYPE: 'cinder.volume'}
+                              VProps.VITRAGE_TYPE: 'prometheus'}
         self.assertTrue(self.consistency_enforcer.
                         _should_delete_vertex(placeholder_vertex))
 
-        # should be deleted because it is an openstack.cluster
+        # should not be deleted because it is an openstack.cluster
         cluster_vertex = {VProps.VITRAGE_IS_PLACEHOLDER: True,
                           VProps.VITRAGE_TYPE: 'openstack.cluster'}
         self.assertFalse(self.consistency_enforcer._should_delete_vertex(
             cluster_vertex))
 
-        vertices = \
-            [static_vertex, volume_vertex, placeholder_vertex, cluster_vertex]
+        vertices = [static_vertex, volume_vertex, prometheus_vertex,
+                    placeholder_vertex, cluster_vertex]
         vertices_to_mark_deleted = self.consistency_enforcer.\
             _filter_vertices_to_be_marked_as_deleted(vertices)
 
-        self.assertThat(vertices_to_mark_deleted, matchers.HasLength(2))
+        self.assertThat(vertices_to_mark_deleted, matchers.HasLength(3))
         self.assertTrue(static_vertex in vertices_to_mark_deleted)
         self.assertTrue(placeholder_vertex in vertices_to_mark_deleted)
-        self.assertFalse(volume_vertex in vertices_to_mark_deleted)
+        self.assertTrue(volume_vertex in vertices_to_mark_deleted)
+        self.assertFalse(prometheus_vertex in vertices_to_mark_deleted)
         self.assertFalse(cluster_vertex in vertices_to_mark_deleted)
 
-    def _assert_vertices_status(self, vitrage_type,
+    def _assert_vertices_status(self, category, vitrage_type,
                                 num_vertices, num_marked_deleted):
         vertices = \
             self.processor.entity_graph.get_vertices({
-                VProps.VITRAGE_CATEGORY: EntityCategory.RESOURCE,
+                VProps.VITRAGE_CATEGORY: category,
                 VProps.VITRAGE_TYPE: vitrage_type,
             })
         self.assertThat(vertices, matchers.HasLength(num_vertices))
 
         marked_deleted_vertices = \
             self.processor.entity_graph.get_vertices({
-                VProps.VITRAGE_CATEGORY: EntityCategory.RESOURCE,
+                VProps.VITRAGE_CATEGORY: category,
                 VProps.VITRAGE_TYPE: vitrage_type,
                 VProps.VITRAGE_IS_DELETED: True
             })
@@ -233,8 +245,12 @@ class TestConsistencyFunctional(TestFunctionalBase, TestConfiguration):
                 current_time + timedelta(seconds=2 * consistency_interval + 1))
             self.processor.entity_graph.update_vertex(instance_vertices[i])
 
-        self._add_static_resources(consistency_interval)
-        self._add_cinder_volume_resources(consistency_interval)
+        self._add_resources_by_type(consistency_interval=consistency_interval,
+                                    datasource_name='static',
+                                    resource_type='nic')
+        self._add_resources_by_type(consistency_interval=consistency_interval,
+                                    datasource_name='cinder.volume',
+                                    resource_type='cinder.volume')
 
     def _set_end_messages(self):
         self.initialization_status.end_messages[NOVA_ZONE_DATASOURCE] = True
@@ -242,41 +258,6 @@ class TestConsistencyFunctional(TestFunctionalBase, TestConfiguration):
         self.initialization_status.end_messages[NOVA_INSTANCE_DATASOURCE] = \
             True
         self.initialization_status.end_messages[NAGIOS_DATASOURCE] = True
-
-    def _add_alarms(self):
-        # find hosts and instances
-        host_vertices = self.processor.entity_graph.get_vertices({
-            VProps.VITRAGE_CATEGORY: EntityCategory.RESOURCE,
-            VProps.VITRAGE_TYPE: NOVA_HOST_DATASOURCE
-        })
-
-        # add host alarms + deduced alarms
-        self.evaluator.enabled = True
-        alarms_on_hosts_list = []
-        for index, host_vertex in enumerate(host_vertices):
-            alarm_name = '%s:%s' % ('nagios_alarm_on_host_',
-                                    host_vertex[VProps.NAME])
-            alarms_on_hosts_list.append(
-                self._create_alarm(alarm_name, NAGIOS_DATASOURCE))
-            self.processor.entity_graph.add_vertex(alarms_on_hosts_list[index])
-            edge = graph_utils.create_edge(
-                alarms_on_hosts_list[index].vertex_id,
-                host_vertex.vertex_id,
-                EdgeLabel.ON)
-            self.processor.entity_graph.add_edge(edge)
-
-            # reliable action to check that the events in the queue
-            while self.event_queue.empty():
-                time.sleep(0.1)
-
-            while not self.event_queue.empty():
-                self.processor.process_event(self.event_queue.get())
-
-        # remove external alarms
-        self.evaluator.enabled = False
-        self.processor.entity_graph.remove_vertex(alarms_on_hosts_list[2])
-        self.processor.entity_graph.remove_vertex(alarms_on_hosts_list[3])
-        self.evaluator.enabled = True
 
     def _update_timestamp(self, lst, timestamp):
         for vertex in lst:
@@ -302,19 +283,41 @@ class TestConsistencyFunctional(TestFunctionalBase, TestConfiguration):
             if num_retries == 30:
                 return
 
-    def _add_static_resources(self, consistency_interval):
-        self._add_resources_with_different_timestamps(
-            consistency_interval=consistency_interval,
-            datasource_name='static', resource_type='nic')
+    def _add_resources_by_type(self, consistency_interval, resource_type,
+                               datasource_name):
+        def _create_resource_by_type(v_id, v_type, ds_name, timestamp,
+                                     is_deleted=False):
+            return self._create_resource(
+                vitrage_id=v_id, resource_type=v_type, datasource_name=ds_name,
+                sample_timestamp=timestamp, is_deleted=is_deleted)
 
-    def _add_cinder_volume_resources(self, consistency_interval):
-        self._add_resources_with_different_timestamps(
+        self._add_entities_with_different_timestamps(
             consistency_interval=consistency_interval,
-            datasource_name='cinder.volume', resource_type='cinder.volume')
+            create_func=_create_resource_by_type,
+            category=EntityCategory.RESOURCE,
+            datasource_name=datasource_name, resource_type=resource_type)
 
-    def _add_resources_with_different_timestamps(self, consistency_interval,
-                                                 datasource_name,
-                                                 resource_type):
+    def _add_alarms_by_type(
+            self, consistency_interval, alarm_type):
+        def _create_alarm_by_type(v_id, v_type, ds_name, timestamp,
+                                  is_deleted=False):
+            return self._create_alarm(
+                vitrage_id=v_id, alarm_type=v_type, datasource_name=ds_name,
+                project_id=None, vitrage_resource_project_id=None,
+                metadata=None, vitrage_sample_timestamp=timestamp,
+                is_deleted=is_deleted)
+
+        self._add_entities_with_different_timestamps(
+            consistency_interval=consistency_interval,
+            create_func=_create_alarm_by_type,
+            category=EntityCategory.ALARM,
+            datasource_name=alarm_type, resource_type=alarm_type)
+
+    def _add_entities_with_different_timestamps(self, consistency_interval,
+                                                create_func,
+                                                category,
+                                                datasource_name,
+                                                resource_type):
         # add resources to the graph:
         # - updated_resource
         # - outdated_resource with an old timestamp
@@ -325,16 +328,15 @@ class TestConsistencyFunctional(TestFunctionalBase, TestConfiguration):
         past_timestamp = \
             str(utcnow() - timedelta(seconds=2 * consistency_interval - 1))
 
-        updated_resource = self._create_resource(
-            vitrage_id=resource_type + '1234', resource_type=resource_type,
-            datasource_name=datasource_name, sample_timestamp=future_timestamp)
-        outdated_resource = self._create_resource(
-            vitrage_id=resource_type + '5678', resource_type=resource_type,
-            datasource_name=datasource_name, sample_timestamp=past_timestamp)
-        deleted_resource = self._create_resource(
-            vitrage_id=resource_type + '9999', resource_type=resource_type,
-            datasource_name=datasource_name, sample_timestamp=past_timestamp,
-            is_deleted=True)
+        updated_resource = create_func(
+            v_id=resource_type + '1234', v_type=resource_type,
+            ds_name=datasource_name, timestamp=future_timestamp)
+        outdated_resource = create_func(
+            v_id=resource_type + '5678', v_type=resource_type,
+            ds_name=datasource_name, timestamp=past_timestamp)
+        deleted_resource = create_func(
+            v_id=resource_type + '9999', v_type=resource_type,
+            ds_name=datasource_name, timestamp=past_timestamp, is_deleted=True)
 
         self.graph.add_vertex(updated_resource)
         self.graph.add_vertex(outdated_resource)
@@ -342,7 +344,7 @@ class TestConsistencyFunctional(TestFunctionalBase, TestConfiguration):
 
         # get the list of vertices
         resource_vertices = self.processor.entity_graph.get_vertices({
-            VProps.VITRAGE_CATEGORY: EntityCategory.RESOURCE,
+            VProps.VITRAGE_CATEGORY: category,
             VProps.VITRAGE_TYPE: resource_type
         })
 
