@@ -52,17 +52,23 @@ class ConsistencyEnforcer(object):
             LOG.info('Periodic consistency check..')
 
             old_deleted_entities = self._find_old_deleted_entities()
-            LOG.debug('Found %s vertices to be deleted by consistency service'
-                      ': %s', len(old_deleted_entities), old_deleted_entities)
+            if old_deleted_entities:
+                LOG.info('Consistency will remove %s deleted entities',
+                         len(old_deleted_entities))
+                LOG.debug('Consistency entities to remove: %s',
+                          old_deleted_entities)
             self._push_events_to_queue(old_deleted_entities,
                                        GraphAction.REMOVE_DELETED_ENTITY)
 
             stale_entities = self._find_outdated_entities_to_mark_as_deleted()
-            LOG.debug('Found %s outdated vertices to be marked as deleted '
-                      'by the consistency service: %s', len(stale_entities),
-                      stale_entities)
+            if stale_entities:
+                LOG.info('Consistency will mark %s entities as deleted',
+                         len(stale_entities))
+                LOG.debug('Consistency entities to mark deleted: %s',
+                          stale_entities)
             self._push_events_to_queue(stale_entities,
                                        GraphAction.DELETE_ENTITY)
+            LOG.info('Periodic consistency check done.')
         except Exception:
             LOG.exception('Error in deleting vertices from entity_graph.')
 
