@@ -140,3 +140,7 @@ class HeatStackDriver(DriverBase):
                                     HEAT_STACK_DATASOURCE,
                                     datasource_action,
                                     *self.properties_to_filter_out())
+
+    @staticmethod
+    def should_delete_outdated_entities():
+        return True

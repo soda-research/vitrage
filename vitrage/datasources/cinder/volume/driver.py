@@ -65,3 +65,7 @@ class CinderVolumeDriver(DriverBase):
                 'volume.detach.end',
                 'volume.delete.start',
                 'volume.delete.end']
+
+    @staticmethod
+    def should_delete_outdated_entities():
+        return True

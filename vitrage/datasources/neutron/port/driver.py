@@ -50,3 +50,7 @@ class PortDriver(NeutronBase):
             NEUTRON_PORT_DATASOURCE,
             datasource_action,
             *self.properties_to_filter_out())
+
+    @staticmethod
+    def should_delete_outdated_entities():
+        return True

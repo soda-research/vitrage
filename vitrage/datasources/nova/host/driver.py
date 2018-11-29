@@ -29,3 +29,7 @@ class HostDriver(NovaDriverBase):
     @staticmethod
     def properties_to_filter_out():
         return ['manager']
+
+    @staticmethod
+    def should_delete_outdated_entities():
+        return True

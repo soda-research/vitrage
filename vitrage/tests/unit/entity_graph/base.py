@@ -160,20 +160,24 @@ class TestEntityGraphUnitBase(base.BaseTest):
                       alarm_type,
                       project_id=None,
                       vitrage_resource_project_id=None,
-                      metadata=None):
+                      metadata=None,
+                      vitrage_sample_timestamp=None,
+                      datasource_name=None,
+                      is_deleted=False):
         return graph_utils.create_vertex(
             vitrage_id,
             vitrage_category=EntityCategory.ALARM,
             vitrage_type=alarm_type,
-            vitrage_sample_timestamp=None,
+            vitrage_sample_timestamp=vitrage_sample_timestamp,
             update_timestamp=str(utcnow()),
-            vitrage_is_deleted=False,
+            vitrage_is_deleted=is_deleted,
             vitrage_is_placeholder=False,
             entity_id=vitrage_id,
             entity_state='active',
             project_id=project_id,
             vitrage_resource_project_id=vitrage_resource_project_id,
-            metadata=metadata
+            metadata=metadata,
+            datasource_name=datasource_name
         )
 
     @staticmethod
