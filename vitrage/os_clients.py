@@ -29,7 +29,12 @@ OPTS = [
     cfg.StrOpt('heat_version', default='1', help='Heat version'),
     cfg.StrOpt('mistral_version', default='2', help='Mistral version'),
     cfg.StrOpt('gnocchi_version', default='1', help='Gnocchi version'),
-    cfg.StrOpt('trove_version', default='1', help='Trove version')
+    cfg.StrOpt('trove_version', default='1', help='Trove version'),
+    cfg.StrOpt('monasca_version', default='2', help='Monasca version'),
+    cfg.StrOpt('monasca_url', help='Monasca API URL'),
+    cfg.StrOpt('monasca_username', help='Monasca username'),
+    cfg.StrOpt('monasca_password', help='Monasca password'),
+    cfg.StrOpt('monasca_project_name', help='Monasca project name')
 ]
 
 _client_modules = {
@@ -42,7 +47,8 @@ _client_modules = {
     'heat': 'heatclient.client',
     'mistral': 'mistralclient.api.v2.client',
     'gnocchi': 'gnocchiclient.v1.client',
-    'trove': 'troveclient.v1.client'
+    'trove': 'troveclient.v1.client',
+    'monasca': 'monascaclient.v2_0.client'
 }
 
 
@@ -185,3 +191,31 @@ def mistral_client(conf):
         return client
     except Exception:
         LOG.exception('Create Mistral client - Got Exception.')
+
+
+def monasca_client(conf):
+    """Get an instance of Monasca client"""
+    from keystoneauth1 import session
+    from keystoneauth1 import identity
+
+    try:
+        mon_client = driver_module('monasca')
+
+        auth = identity.Password(
+            auth_url=conf.service_credentials.auth_url,
+            username=conf.monasca_username,
+            password=conf.monasca_password,
+            user_domain_name='default',
+            project_name=conf.monasca_project_name,
+            project_domain_name='default'
+        )
+        session = session.Session(auth=auth)
+
+        client = mon_client.Client(
+            session=session,
+            endpoint=conf.monasca_url
+        )
+        LOG.info('Monasca client created')
+        return client
+    except Exception:
+        LOG.exception('Create Monasca client - Got Exception.')
