@@ -98,6 +98,7 @@ python-heatclient==1.14.0
 python-keystoneclient==3.15.0
 python-mimeparse==1.6.0
 python-mistralclient==3.3.0
+python-monascaclient==1.7.1
 python-neutronclient==6.7.0
 python-novaclient==10.1.0
 python-openstackclient==3.12.0

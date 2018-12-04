@@ -12,11 +12,13 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from keystoneauth1 import identity, session
 from oslo_config import cfg
 from oslo_log import log
 from oslo_utils import importutils as utils
 
 from vitrage import keystone_client
+
 
 LOG = log.getLogger(__name__)
 
@@ -30,6 +32,7 @@ OPTS = [
     cfg.StrOpt('mistral_version', default='2', help='Mistral version'),
     cfg.StrOpt('gnocchi_version', default='1', help='Gnocchi version'),
     cfg.StrOpt('trove_version', default='1', help='Trove version'),
+    cfg.StrOpt('monasca_version', default='2_0', help='Monasca version'),
     cfg.BoolOpt('use_nova_versioned_notifications',
                 default=True,
                 help='Indicates whether to use Nova versioned notifications.'
@@ -49,7 +52,8 @@ _client_modules = {
     'heat': 'heatclient.client',
     'mistral': 'mistralclient.api.v2.client',
     'gnocchi': 'gnocchiclient.v1.client',
-    'trove': 'troveclient.v1.client'
+    'trove': 'troveclient.v1.client',
+    'monasca': 'monascaclient.client'
 }
 
 
@@ -192,3 +196,27 @@ def mistral_client(conf):
         return client
     except Exception:
         LOG.exception('Create Mistral client - Got Exception.')
+
+
+def monasca_client(conf):
+    """Get an instance of Monasca client"""
+    try:
+        mon_client = driver_module('monasca')
+
+        auth = identity.Password(
+            auth_url=conf.monasca.auth_url,
+            username=conf.monasca.username,
+            password=conf.monasca.password,
+            project_name=conf.monasca.project_name,
+            user_domain_id=conf.monasca.user_domain_id,
+            project_domain_id=conf.monasca.project_domain_id
+        )
+        client = mon_client.Client(
+            api_version=conf.monasca_version,
+            session=session.Session(auth=auth),
+            endpoint=conf.monasca.url
+        )
+        LOG.info('Monasca client created')
+        return client
+    except Exception:
+        LOG.exception('Create Monasca client - Got Exception.')
