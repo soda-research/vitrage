@@ -19,7 +19,86 @@ from vitrage.datasources.nova.instance import NOVA_INSTANCE_DATASOURCE
 from vitrage.datasources.nova.nova_driver_base import NovaDriverBase
 
 
+# versioned notifications
+VERSIONED_NOTIFICATIONS = {
+    'instance.create.end',
+    'instance.create.error',
+    'instance.delete.end',
+    'instance.delete.start',
+    'instance.evacuate',
+    'instance.interface_attach.end',
+    'instance.interface_attach.error',
+    'instance.interface_detach.end',
+    'instance.live_migration_abort.end',
+    'instance.live_migration_force_complete.end',
+    'instance.live_migration_post.end',
+    'instance.live_migration_post_dest.end',
+    'instance.live_migration_rollback.end',
+    'instance.live_migration_rollback_dest.end',
+    'instance.lock',
+    'instance.pause.end',
+    'instance.power_off.end',
+    'instance.power_on.end',
+    'instance.reboot.end',
+    'instance.reboot.error',
+    'instance.rebuild.end',
+    'instance.rebuild.error',
+    'instance.rescue.end',
+    'instance.resize.end',
+    'instance.resize.error',
+    'instance.resize_confirm.end',
+    'instance.resize_finish.end',
+    'instance.resize_prep.end',
+    'instance.resize_revert.end',
+    'instance.restore.end',
+    'instance.resume.end',
+    'instance.shelve.end',
+    'instance.shelve_offload.end',
+    'instance.shutdown.end',
+    'instance.soft_delete.end',
+    'instance.snapshot.end',
+    'instance.suspend.end',
+    'instance.unlock',
+    'instance.unpause.end',
+    'instance.unrescue.end',
+    'instance.unshelve.end',
+    'instance.update',
+    'instance.volume_attach.end',
+    'instance.volume_attach.error',
+    'instance.volume_detach.end',
+    'instance.volume_swap.end',
+    'instance.volume_swap.error',
+}
+
+# legacy (unversioned) notifications
+LEGACY_NOTIFICATIONS = {
+    'compute.instance.create.error',
+    'compute.instance.create.end',
+    'compute.instance.delete.start',
+    'compute.instance.delete.end',
+    'compute.instance.finish_resize.end',
+    'compute.instance.live_migration.post.dest.end',
+    'compute.instance.live_migration._post.end',
+    'compute.instance.power_off.end',
+    'compute.instance.power_on.end',
+    'compute.instance.reboot.end',
+    'compute.instance.rebuild.end',
+    'compute.instance.resize.end',
+    'compute.instance.resize.revert.end',
+    'compute.instance.resume.end',
+    'compute.instance.shutdown.end',
+    'compute.instance.suspend.end',
+    'compute.instance.volume.attach',
+    'compute.instance.volume.detach',
+    'compute.instance.pause.end',
+    'compute.instance.unpause.end'
+}
+
+
 class InstanceDriver(NovaDriverBase):
+
+    def __init__(self, conf):
+        super(InstanceDriver, self).__init__(conf)
 
     @staticmethod
     def extract_events(instances):
@@ -38,11 +117,19 @@ class InstanceDriver(NovaDriverBase):
             *self.properties_to_filter_out())
 
     def enrich_event(self, event, event_type):
-        event[DSProps.EVENT_TYPE] = event_type
+        use_versioned = self.conf.use_nova_versioned_notifications
 
-        return InstanceDriver.make_pickleable([event],
-                                              NOVA_INSTANCE_DATASOURCE,
-                                              DatasourceAction.UPDATE)[0]
+        # Send to the processor only events of the matching types. Nova may
+        # send both versioned and legacy notifications, and we don't want to
+        # handle a similar event twice.
+        if (use_versioned and event_type in VERSIONED_NOTIFICATIONS) or \
+                ((not use_versioned) and event_type in LEGACY_NOTIFICATIONS):
+            event[DSProps.EVENT_TYPE] = event_type
+            return InstanceDriver.make_pickleable([event],
+                                                  NOVA_INSTANCE_DATASOURCE,
+                                                  DatasourceAction.UPDATE)[0]
+
+        return []
 
     @staticmethod
     def properties_to_filter_out():
@@ -50,27 +137,7 @@ class InstanceDriver(NovaDriverBase):
 
     @staticmethod
     def get_event_types():
-        # Add event_types to receive notifications about
-        return ['compute.instance.create.error',
-                'compute.instance.create.end',
-                'compute.instance.delete.start',
-                'compute.instance.delete.end',
-                'compute.instance.finish_resize.end',
-                'compute.instance.live_migration.post.dest.end',
-                'compute.instance.live_migration._post.end',
-                'compute.instance.power_off.end',
-                'compute.instance.power_on.end',
-                'compute.instance.reboot.end',
-                'compute.instance.rebuild.end',
-                'compute.instance.resize.end',
-                'compute.instance.resize.revert.end',
-                'compute.instance.resume.end',
-                'compute.instance.shutdown.end',
-                'compute.instance.suspend.end',
-                'compute.instance.volume.attach',
-                'compute.instance.volume.detach',
-                'compute.instance.pause.end',
-                'compute.instance.unpause.end']
+        return list(VERSIONED_NOTIFICATIONS | LEGACY_NOTIFICATIONS)
 
     @staticmethod
     def should_delete_outdated_entities():

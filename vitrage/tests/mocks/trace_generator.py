@@ -53,7 +53,8 @@ DRIVER_COLLECTD_UPDATE_D = 'driver_collectd_update_dynamic.json'
 DRIVER_HOST_SNAPSHOT_D = 'driver_host_snapshot_dynamic.json'
 DRIVER_INST_SNAPSHOT_D = 'driver_inst_snapshot_dynamic.json'
 DRIVER_INST_SNAPSHOT_S = 'driver_inst_snapshot_static.json'
-DRIVER_INST_UPDATE_D = 'driver_inst_update_dynamic.json'
+DRIVER_INST_UPDATE_LEGACY_D = 'driver_inst_update_legacy_dynamic.json'
+DRIVER_INST_UPDATE_VERSIONED_D = 'driver_inst_update_versioned_dynamic.json'
 DRIVER_NAGIOS_SNAPSHOT_D = 'driver_nagios_snapshot_dynamic.json'
 DRIVER_NAGIOS_SNAPSHOT_S = 'driver_nagios_snapshot_static.json'
 DRIVER_PROMETHEUS_UPDATE_D = 'driver_prometheus_update_dynamic.json'
@@ -123,7 +124,9 @@ class EventTraceGenerator(object):
              DRIVER_COLLECTD_UPDATE_D: _get_simple_update_driver_values,
              DRIVER_KUBE_SNAPSHOT_D: _get_k8s_node_snapshot_driver_values,
              DRIVER_INST_SNAPSHOT_D: _get_vm_snapshot_driver_values,
-             DRIVER_INST_UPDATE_D: _get_vm_update_driver_values,
+             DRIVER_INST_UPDATE_LEGACY_D: _get_vm_update_legacy_driver_values,
+             DRIVER_INST_UPDATE_VERSIONED_D:
+                 _get_vm_update_versioned_driver_values,
              DRIVER_HOST_SNAPSHOT_D: _get_host_snapshot_driver_values,
              DRIVER_ZONE_SNAPSHOT_D: _get_zone_snapshot_driver_values,
              DRIVER_VOLUME_SNAPSHOT_D: _get_volume_snapshot_driver_values,
@@ -487,7 +490,7 @@ def _get_trans_vm_snapshot_values(spec):
     return static_values
 
 
-def _get_vm_update_driver_values(spec):
+def _get_vm_update_legacy_driver_values(spec):
     """Generates the static driver values for each vm, for updates.
 
     :param spec: specification of event generation.
@@ -504,6 +507,35 @@ def _get_vm_update_driver_values(spec):
     for vm_name, host_name in vm_host_mapping:
         mapping = {'payload': {'host': host_name,
                                'display_name': vm_name}}
+        static_values.append(combine_data(
+            static_info, mapping, spec.get(EXTERNAL_INFO_KEY, None)
+        ))
+
+    return static_values
+
+
+def _get_vm_update_versioned_driver_values(spec):
+    """Generates the static driver values for each vm, for updates.
+
+    :param spec: specification of event generation.
+    :type spec: dict
+    :return: list of static driver values for each vm updates.
+    :rtype: list
+    """
+
+    vm_host_mapping = spec[MAPPING_KEY]
+    static_info = None
+    if spec[STATIC_INFO_FKEY] is not None:
+        static_info = utils.load_specs(spec[STATIC_INFO_FKEY])
+    static_values = []
+    for vm_name, host_name in vm_host_mapping:
+        mapping = {
+            'nova_object.data': {
+                'host': host_name,
+                'display_name': vm_name
+            }
+
+        }
         static_values.append(combine_data(
             static_info, mapping, spec.get(EXTERNAL_INFO_KEY, None)
         ))

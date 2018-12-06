@@ -45,9 +45,9 @@ class TestFunctionalBase(TestEntityGraphUnitBase):
             snap_vals={DSProps.DATASOURCE_ACTION:
                        DatasourceAction.INIT_SNAPSHOT})
         gen_list += mock_driver.simple_instance_generators(
-            self.NUM_HOSTS,
-            self.NUM_INSTANCES,
-            self.NUM_INSTANCES,
+            host_num=self.NUM_HOSTS,
+            vm_num=self.NUM_INSTANCES,
+            snapshot_events=self.NUM_INSTANCES,
             snap_vals={DSProps.DATASOURCE_ACTION:
                        DatasourceAction.INIT_SNAPSHOT})
         return mock_driver.generate_sequential_events_list(gen_list)

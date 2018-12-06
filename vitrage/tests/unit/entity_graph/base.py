@@ -63,6 +63,11 @@ class TestEntityGraphUnitBase(base.BaseTest):
                    min=1)
     ]
 
+    OS_CLIENTS_OPTS = [
+        cfg.BoolOpt('use_nova_versioned_notifications',
+                    default=False, required=True),
+    ]
+
     NUM_CLUSTERS = 1
     NUM_ZONES = 2
     NUM_HOSTS = 4
@@ -98,9 +103,9 @@ class TestEntityGraphUnitBase(base.BaseTest):
             snap_vals={DSProps.DATASOURCE_ACTION:
                        DatasourceAction.INIT_SNAPSHOT})
         gen_list += mock_sync.simple_instance_generators(
-            self.NUM_HOSTS,
-            self.NUM_INSTANCES,
-            self.NUM_INSTANCES,
+            host_num=self.NUM_HOSTS,
+            vm_num=self.NUM_INSTANCES,
+            snapshot_events=self.NUM_INSTANCES,
             snap_vals={DSProps.DATASOURCE_ACTION:
                        DatasourceAction.INIT_SNAPSHOT})
         return mock_sync.generate_sequential_events_list(gen_list)
@@ -138,7 +143,8 @@ class TestEntityGraphUnitBase(base.BaseTest):
                       event_type=None,
                       properties=None):
         # generate event
-        spec_list = mock_sync.simple_instance_generators(1, 1, 1)
+        spec_list = mock_sync.simple_instance_generators(host_num=1, vm_num=1,
+                                                         snapshot_events=1)
         events_list = mock_sync.generate_random_events_list(
             spec_list)
 
@@ -161,7 +167,7 @@ class TestEntityGraphUnitBase(base.BaseTest):
                       project_id=None,
                       vitrage_resource_project_id=None,
                       metadata=None,
-                      vitrage_sample_timestamp=None,
+                      vitrage_sample_timestamp='',
                       datasource_name=None,
                       is_deleted=False):
         return graph_utils.create_vertex(

@@ -88,6 +88,7 @@ def generate_sequential_events_list(generator_spec_list):
 
 def simple_instance_generators(host_num, vm_num,
                                snapshot_events=0, update_events=0,
+                               use_nova_versioned_format=True,
                                snap_vals=None, update_vals=None):
     """A function for returning vm event generators.
 
@@ -98,6 +99,8 @@ def simple_instance_generators(host_num, vm_num,
     :param vm_num: number of vms
     :param snapshot_events: number of snapshot events per instance
     :param update_events: number of update events per instance
+    :param use_nova_versioned_format: use the format of Nova versioned
+           notifications for the update events
     :param snap_vals: preset vals for ALL snapshot events
     :param update_vals: preset vals for ALL update events
     :return: generators for vm_num vms as specified
@@ -118,9 +121,13 @@ def simple_instance_generators(host_num, vm_num,
              tg.NUM_EVENTS: snapshot_events
              }
         )
+
+    dynamic_info = tg.DRIVER_INST_UPDATE_VERSIONED_D \
+        if use_nova_versioned_format else tg.DRIVER_INST_UPDATE_LEGACY_D
+
     if update_events:
         test_entity_spec_list.append(
-            {tg.DYNAMIC_INFO_FKEY: tg.DRIVER_INST_UPDATE_D,
+            {tg.DYNAMIC_INFO_FKEY: dynamic_info,
              tg.STATIC_INFO_FKEY: None,
              tg.EXTERNAL_INFO_KEY: update_vals,
              tg.MAPPING_KEY: mapping,
@@ -128,6 +135,7 @@ def simple_instance_generators(host_num, vm_num,
              tg.NUM_EVENTS: update_events
              }
         )
+
     return tg.get_trace_generators(test_entity_spec_list)
 
 

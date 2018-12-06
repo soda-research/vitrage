@@ -28,7 +28,14 @@ OPTS = [
     cfg.StrOpt('glance_version', default='2', help='Glance version'),
     cfg.StrOpt('heat_version', default='1', help='Heat version'),
     cfg.StrOpt('mistral_version', default='2', help='Mistral version'),
-    cfg.StrOpt('gnocchi_version', default='1', help='Gnocchi version')
+    cfg.StrOpt('gnocchi_version', default='1', help='Gnocchi version'),
+    cfg.BoolOpt('use_nova_versioned_notifications',
+                default=False,
+                help='Indicates whether to use Nova versioned notifications.'
+                     'The default is True. If False, the deprecated Nova '
+                     'legacy notifications will be used.'
+                     'This flag must be set to False if notification_format '
+                     'is set to "unversioned" in nova.conf'),
 ]
 
 _client_modules = {

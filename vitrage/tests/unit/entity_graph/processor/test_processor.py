@@ -46,6 +46,7 @@ class TestProcessor(TestEntityGraphUnitBase):
         cls.conf = cfg.ConfigOpts()
         cls.conf.register_opts(cls.PROCESSOR_OPTS, group='entity_graph')
         cls.conf.register_opts(cls.DATASOURCES_OPTS, group='datasources')
+        cls.conf.register_opts(cls.OS_CLIENTS_OPTS)
         cls.load_datasources(cls.conf)
 
     def test_process_event(self):
@@ -57,13 +58,14 @@ class TestProcessor(TestEntityGraphUnitBase):
         self._check_graph(processor, self.NUM_VERTICES_AFTER_CREATION,
                           self.NUM_EDGES_AFTER_CREATION)
 
-        # check update instance even
+        # check update instance event
         event[DSProps.DATASOURCE_ACTION] = DSAction.UPDATE
         event[DSProps.EVENT_TYPE] = 'compute.instance.volume.attach'
         event['hostname'] = 'new_host'
         event['instance_id'] = event['id']
         event['state'] = event['status']
         event['host'] = event['OS-EXT-SRV-ATTR:host']
+
         processor.process_event(event)
         self._check_graph(processor, self.NUM_VERTICES_AFTER_CREATION,
                           self.NUM_EDGES_AFTER_CREATION)

@@ -19,6 +19,12 @@ from vitrage.common.constants import EntityCategory
 from vitrage.common.constants import GraphAction
 from vitrage.common.constants import VertexProperties as VProps
 from vitrage.datasources.nova.host import NOVA_HOST_DATASOURCE
+from vitrage.datasources.nova.instance.field_extractor import \
+    LegacyNotificationFieldExtractor
+from vitrage.datasources.nova.instance.field_extractor import \
+    SnapshotEventFieldExtractor
+from vitrage.datasources.nova.instance.field_extractor import \
+    VersionedNotificationFieldExtractor
 from vitrage.datasources.nova.instance import NOVA_INSTANCE_DATASOURCE
 from vitrage.datasources.resource_transformer_base import \
     ResourceTransformerBase
@@ -31,38 +37,38 @@ LOG = logging.getLogger(__name__)
 
 class InstanceTransformer(ResourceTransformerBase):
 
+    snapshot_extractor = SnapshotEventFieldExtractor()
+    legacy_notifications_extractor = LegacyNotificationFieldExtractor()
+    versioned_notifications_extractor = VersionedNotificationFieldExtractor()
+
     # graph actions which need to refer them differently
     GRAPH_ACTION_MAPPING = {
         'compute.instance.delete.end': GraphAction.DELETE_ENTITY,
+        'instance.delete.end': GraphAction.DELETE_ENTITY,
     }
 
     def __init__(self, transformers, conf):
         super(InstanceTransformer, self).__init__(transformers, conf)
 
     def _create_snapshot_entity_vertex(self, entity_event):
-
-        name = extract_field_value(entity_event, 'name')
-        entity_id = extract_field_value(entity_event, 'id')
-        state = extract_field_value(entity_event, 'status')
-        host = extract_field_value(entity_event, 'OS-EXT-SRV-ATTR:host')
-
-        return self._create_vertex(entity_event, name, entity_id, state, host)
+        LOG.debug('got snapshot')
+        return self._create_vertex(entity_event)
 
     def _create_update_entity_vertex(self, entity_event):
+        LOG.debug('got event: %s', entity_event[DSProps.EVENT_TYPE])
+        return self._create_vertex(entity_event)
 
-        name = extract_field_value(entity_event, 'hostname')
-        entity_id = extract_field_value(entity_event, 'instance_id')
-        state = extract_field_value(entity_event, 'state')
-        host = extract_field_value(entity_event, 'host')
-
-        return self._create_vertex(entity_event, name, entity_id, state, host)
-
-    def _create_vertex(self, entity_event, name, entity_id, state, host):
+    def _create_vertex(self, entity_event):
+        field_extractor = self._get_field_extractor(entity_event)
+        if not field_extractor:
+            LOG.warning('Failed to identify event type for event: %s',
+                        entity_event)
+            return
 
         metadata = {
-            VProps.NAME: name,
-            VProps.PROJECT_ID: entity_event.get('tenant_id', None),
-            'host_id': host
+            VProps.NAME: field_extractor.name(entity_event),
+            VProps.PROJECT_ID: field_extractor.tenant_id(entity_event),
+            'host_id': field_extractor.host(entity_event)
         }
 
         vitrage_sample_timestamp = entity_event[DSProps.SAMPLE_DATE]
@@ -78,21 +84,26 @@ class InstanceTransformer(ResourceTransformerBase):
             vitrage_category=EntityCategory.RESOURCE,
             vitrage_type=NOVA_INSTANCE_DATASOURCE,
             vitrage_sample_timestamp=vitrage_sample_timestamp,
-            entity_id=entity_id,
-            entity_state=state,
+            entity_id=field_extractor.entity_id(entity_event),
+            entity_state=field_extractor.state(entity_event),
             update_timestamp=update_timestamp,
             metadata=metadata)
 
     def _create_snapshot_neighbors(self, entity_event):
-        return self._create_instance_neighbors(entity_event,
-                                               'OS-EXT-SRV-ATTR:host')
+        return self._create_instance_neighbors(entity_event)
 
     def _create_update_neighbors(self, entity_event):
-        return self._create_instance_neighbors(entity_event,
-                                               'host')
+        return self._create_instance_neighbors(entity_event)
 
-    def _create_instance_neighbors(self, entity_event, host_property_name):
-        host_name = entity_event.get(host_property_name)
+    def _create_instance_neighbors(self, entity_event):
+        field_extractor = self._get_field_extractor(entity_event)
+        if not field_extractor:
+            LOG.warning('Failed to identify event type for event: %s',
+                        entity_event)
+            return []
+
+        host_name = field_extractor.host(entity_event)
+
         host_neighbor = self._create_neighbor(entity_event,
                                               host_name,
                                               NOVA_HOST_DATASOURCE,
@@ -104,14 +115,22 @@ class InstanceTransformer(ResourceTransformerBase):
     def _create_entity_key(self, event):
         LOG.debug('Creating key for instance event: %s', str(event))
 
-        instance_id = 'instance_id' if tbase.is_update_event(event) else 'id'
-        key_fields = self._key_values(NOVA_INSTANCE_DATASOURCE,
-                                      extract_field_value(event,
-                                                          instance_id))
+        instance_id = self._get_field_extractor(event).entity_id(event)
+        key_fields = self._key_values(NOVA_INSTANCE_DATASOURCE, instance_id)
         key = tbase.build_key(key_fields)
+
         LOG.debug('Created key: %s', key)
 
         return key
 
     def get_vitrage_type(self):
         return NOVA_INSTANCE_DATASOURCE
+
+    def _get_field_extractor(self, event):
+        """Return an object that extracts the field values from the event"""
+        if tbase.is_update_event(event):
+            return self.versioned_notifications_extractor if \
+                self.conf.use_nova_versioned_notifications is True else \
+                self.legacy_notifications_extractor
+        else:
+            return self.snapshot_extractor
