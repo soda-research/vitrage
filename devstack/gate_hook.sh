@@ -64,9 +64,6 @@ topics = notifications, vitrage_notifications
 [DEFAULT]
 notifiers = mistral,nova,webhook
 
-[static_physical]
-changes_interval = 5
-
 [datasources]
 snapshots_interval = 120
 EOF

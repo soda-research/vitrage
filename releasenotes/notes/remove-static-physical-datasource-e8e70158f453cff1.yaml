@@ -1,0 +1,4 @@
+---
+deprecations:
+  - The static_physical datasource was removed. Please use the static
+    datasource instead.

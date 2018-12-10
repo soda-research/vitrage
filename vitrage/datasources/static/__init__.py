@@ -41,9 +41,6 @@ OPTS = [
                min=10,
                help='interval in seconds between checking changes in the'
                     'static configuration files'),
-    # NOTE: This folder is already used by static_physical datasource. Legacy
-    # configuration files will NOT be converted automatically. But user will
-    # receive deprecation warnings.
     cfg.StrOpt('directory', default='/etc/vitrage/static_datasources',
                help='static data sources configuration directory')]
 

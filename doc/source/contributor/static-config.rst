@@ -5,14 +5,15 @@ Static Datasource Configuration
 Overview
 --------
 
-The static datasource allows users to integrate the **unmanaged** resources and topology into Vitrage. Unmanaged means
-the resource, relationship or property can not be retrieved from any API or database, except static configuration file.
+The static datasource allows users to integrate **unmanaged** resources and
+topology into Vitrage. Unmanaged means the resource, relationship or property
+can not be retrieved from any API or database, except static configuration
+file. The static configuration may include physical, virtual or application
+resources.
 
-This datasource is static - pre-configured in a file. This is sufficient in many cases where the resources and
-relationship is relatively unchanging.
-
-Static datasource suppresses the legacy static physical datasource. Theoretically both physical and virtual resources
-and relationship between them can be configured in it.
+This datasource is static. It is configured in a file that is being reloaded
+periodically, based on the configuration. This is sufficient in many cases
+where the resources and relationship is relatively unchanging.
 
 Configure Access to Static
 --------------------------
@@ -20,13 +21,13 @@ Configure Access to Static
 The following should be set in **/etc/vitrage/vitrage.conf**, under
 ``[static]`` section:
 
-+------------------+---------------------------------------------------------+----------------------------------+
-| Name             | Description                                             | Default Value                    |
-+==================+=========================================================+==================================+
-| directory        | Directory path from where to load the configurations    | /etc/vitrage/static_datasources/ |
-+------------------+---------------------------------------------------------+----------------------------------+
-| changes_interval | Interval of checking changes in the configuration files | 30 seconds                       |
-+------------------+---------------------------------------------------------+----------------------------------+
++------------------+--------------------------------------------------------+----------------------------------+
+| Name             | Description                                            | Default Value                    |
++==================+========================================================+==================================+
+| directory        | Directory path from where to load the configurations   | /etc/vitrage/static_datasources/ |
++------------------+--------------------------------------------------------+----------------------------------+
+| changes_interval | Interval of checking changes in the configuration file | 30 seconds                       |
++------------------+--------------------------------------------------------+----------------------------------+
 
 Configure Static Mapping
 ------------------------
@@ -44,11 +45,6 @@ Static datasource use the same semantics as Vitrage template, except for the fol
 
 There may be more than one configuration file. All files will be read from ``/etc/vitrage/static_datasources/``. See
 previous section on how to configure this location.
-
-Notes:
-  - Static datasource shares the same configuration folder as legacy static physical datasource.
-  - Both static configuration and legacy static physical configuration will be loaded in Ocata release.
-  - The format is distinguished by checking existence of ``metadata`` key which is only available in static datasource.
 
 Example
 +++++++

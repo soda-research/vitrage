@@ -317,56 +317,6 @@ def simple_consistency_generators(consistency_num, update_events=0,
     return tg.get_trace_generators(test_entity_spec_list)
 
 
-def simple_switch_generators(switch_num, host_num,
-                             snapshot_events=0, snap_vals=None,
-                             update_events=0, update_vals=None):
-    """A function for returning switch events generators.
-
-    Returns generators for a given number of switches and hosts.
-    Hosts will be distributed across switches in round-robin style.
-    Switches are interconnected in a line.
-
-    :param update_vals:  number of events from update event
-    :param update_events: number of values from update event
-    :param switch_num: number of zones
-    :param host_num: number of hosts
-    :param snapshot_events: number of snapshot events per zone
-    :param snap_vals: preset values for ALL snapshot events
-    :return: generators for switch events as specified
-    """
-
-    mapping = [('host-{0}'.format(index), 'switch-{0}'.format(index %
-                                                              switch_num))
-               for index in range(host_num)
-               ]
-
-    test_entity_spec_list = []
-    if snapshot_events:
-        test_entity_spec_list.append(
-            {tg.DYNAMIC_INFO_FKEY: tg.DRIVER_SWITCH_SNAPSHOT_D,
-             tg.STATIC_INFO_FKEY: None,
-             tg.EXTERNAL_INFO_KEY: snap_vals,
-             tg.MAPPING_KEY: mapping,
-             tg.NAME_KEY: 'Switch snapshot generator',
-             tg.NUM_EVENTS: snapshot_events
-             }
-        )
-    if update_events:
-        update_vals = {} if not update_vals else update_vals
-        update_vals[DSProps.DATASOURCE_ACTION] = \
-            DatasourceAction.UPDATE
-        test_entity_spec_list.append(
-            {tg.DYNAMIC_INFO_FKEY: tg.DRIVER_SWITCH_SNAPSHOT_D,
-             tg.STATIC_INFO_FKEY: None,
-             tg.EXTERNAL_INFO_KEY: update_vals,
-             tg.MAPPING_KEY: mapping,
-             tg.NAME_KEY: 'Switch update generator',
-             tg.NUM_EVENTS: update_events
-             }
-        )
-    return tg.get_trace_generators(test_entity_spec_list)
-
-
 def simple_static_generators(switch_num=2, host_num=10,
                              snapshot_events=0, snap_vals=None,
                              update_events=0, update_vals=None):
