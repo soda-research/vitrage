@@ -58,7 +58,6 @@ DRIVER_NAGIOS_SNAPSHOT_D = 'driver_nagios_snapshot_dynamic.json'
 DRIVER_NAGIOS_SNAPSHOT_S = 'driver_nagios_snapshot_static.json'
 DRIVER_PROMETHEUS_UPDATE_D = 'driver_prometheus_update_dynamic.json'
 DRIVER_ZABBIX_SNAPSHOT_D = 'driver_zabbix_snapshot_dynamic.json'
-DRIVER_SWITCH_SNAPSHOT_D = 'driver_switch_snapshot_dynamic.json'
 DRIVER_STATIC_SNAPSHOT_D = 'driver_static_snapshot_dynamic.json'
 DRIVER_STATIC_SNAPSHOT_S = 'driver_static_snapshot_static.json'
 DRIVER_VOLUME_UPDATE_D = 'driver_volume_update_dynamic.json'
@@ -131,7 +130,6 @@ class EventTraceGenerator(object):
              DRIVER_VOLUME_UPDATE_D: _get_volume_update_driver_values,
              DRIVER_STACK_SNAPSHOT_D: _get_stack_snapshot_driver_values,
              DRIVER_STACK_UPDATE_D: _get_stack_update_driver_values,
-             DRIVER_SWITCH_SNAPSHOT_D: _get_switch_snapshot_driver_values,
              DRIVER_STATIC_SNAPSHOT_D: _get_static_snapshot_driver_values,
              DRIVER_NAGIOS_SNAPSHOT_D: _get_nagios_alarm_driver_values,
              DRIVER_ZABBIX_SNAPSHOT_D: _get_zabbix_alarm_driver_values,
@@ -510,46 +508,6 @@ def _get_vm_update_driver_values(spec):
             static_info, mapping, spec.get(EXTERNAL_INFO_KEY, None)
         ))
 
-    return static_values
-
-
-def _get_switch_snapshot_driver_values(spec):
-    """Generates the static driver values for each zone.
-
-    :param spec: specification of event generation.
-    :type spec: dict
-    :return: list of static driver values for each zone.
-    :rtype: list
-    """
-
-    host_switch_mapping = spec[MAPPING_KEY]
-    static_info = None
-    if spec[STATIC_INFO_FKEY] is not None:
-        static_info = utils.load_specs(spec[STATIC_INFO_FKEY])
-
-    static_values = []
-
-    switches_info = {}
-    for host_name, switch_name in host_switch_mapping:
-        switch_info = switches_info.get(switch_name, [])
-
-        relationship_info = {"type": NOVA_HOST_DATASOURCE,
-                             "name": host_name,
-                             "id": host_name,
-                             "relation_type": "contains"
-                             }
-
-        switch_info.append(relationship_info)
-        switches_info[switch_name] = switch_info
-
-    for host_name, switch_name in host_switch_mapping:
-        mapping = {'name': switch_name,
-                   'id': switch_name,
-                   'relationships': switches_info[switch_name]
-                   }
-        static_values.append(combine_data(static_info,
-                                          mapping,
-                                          spec.get(EXTERNAL_INFO_KEY, None)))
     return static_values
 
 

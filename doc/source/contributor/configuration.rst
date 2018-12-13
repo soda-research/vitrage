@@ -24,7 +24,6 @@ Datasources
 
    nagios-config
    static-config
-   static-physical-config
    zabbix_vitrage
    k8s_datasource
 

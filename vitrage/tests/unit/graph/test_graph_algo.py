@@ -111,14 +111,14 @@ class GraphAlgorithmTest(GraphTestBase):
 
         query = {
             'or': [
-                {'==': {VProps.VITRAGE_TYPE: SWITCH}},
+                {'==': {VProps.VITRAGE_TYPE: 'switch'}},
                 {'==': {VProps.VITRAGE_TYPE: NOVA_HOST_DATASOURCE}},
             ]
         }
         subgraph = ga.graph_query_vertices(
             root_id=first_host_id, query_dict=query, depth=1)
         self.assertEqual(
-            1,  # For SWITCH
+            1,  # For 'switch'
             subgraph.num_edges(), 'num of BOTH edges Host (depth 1)')
 
         subgraph = ga.graph_query_vertices(root_id=first_host_id, depth=2)
@@ -266,7 +266,7 @@ class GraphAlgorithmTest(GraphTestBase):
         t_v_vm_alarm = graph_utils.create_vertex(
             vitrage_id='4', vitrage_category=ALARM, vitrage_type=ALARM_ON_VM)
         t_v_switch = graph_utils.create_vertex(
-            vitrage_id='5', vitrage_category=RESOURCE, vitrage_type=SWITCH)
+            vitrage_id='5', vitrage_category=RESOURCE, vitrage_type='switch')
         t_v_node = graph_utils.create_vertex(
             vitrage_id='6',
             vitrage_category=RESOURCE,

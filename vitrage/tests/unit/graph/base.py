@@ -31,7 +31,6 @@ from vitrage.common.exception import VitrageError
 from vitrage.datasources.nova.host import NOVA_HOST_DATASOURCE
 from vitrage.datasources.nova.instance import NOVA_INSTANCE_DATASOURCE
 from vitrage.datasources import OPENSTACK_CLUSTER
-from vitrage.datasources.static_physical import SWITCH
 from vitrage.datasources.transformer_base import CLUSTER_ID
 from vitrage.graph.driver.networkx_graph import NXGraph
 from vitrage.graph import utils as graph_utils
@@ -80,9 +79,9 @@ v_alarm = graph_utils.create_vertex(
     metadata={VProps.RESOURCE_ID: '333333333333',
               VProps.NAME: 'anotheralarm'})
 v_switch = graph_utils.create_vertex(
-    vitrage_id=SWITCH + '1212121212',
+    vitrage_id='switch1212121212',
     vitrage_category=RESOURCE,
-    vitrage_type=SWITCH,
+    vitrage_type='switch',
     entity_id='1212121212')
 
 e_node_to_host = graph_utils.create_edge(
