@@ -55,6 +55,7 @@ class NXGraph(Graph):
         self._g = nx.MultiDiGraph()
         self.add_vertices(vertices)
         self.add_edges(edges)
+        self.ready = False
 
     def __len__(self):
         return len(self._g)

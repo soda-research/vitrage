@@ -48,9 +48,13 @@ class GraphPersistency(object):
 
     def replay_events(self, graph, event_id):
         LOG.info('Getting events from database')
-        events = self.db.events.get_replay_events(
+        count = self.do_replay_events(self.db, graph, event_id)
+        LOG.info('%s database events applied ', count)
+
+    @staticmethod
+    def do_replay_events(db, graph, event_id):
+        events = db.events.get_replay_events(
             event_id=event_id)
-        LOG.info('Applying %s database events', len(events))
 
         for event in events:
             if event.is_vertex:
@@ -67,6 +71,7 @@ class GraphPersistency(object):
                 del event.payload['label']
                 e = Edge(source_id, target_id, label, event.payload)
                 graph.update_edge(e)
+        return len(events)
 
     def persist_event(self, before, current, is_vertex, graph, event_id=None):
         """Callback subscribed to driver.graph updates"""

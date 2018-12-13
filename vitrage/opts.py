@@ -102,8 +102,6 @@ def _normalize_path_to_datasource_name(path_list, top=os.getcwd()):
 def register_opts(conf, package_name, paths):
     """register opts of package package_name, with base path in paths"""
     for path in paths:
-        LOG.info("package name: %s" % package_name)
-        LOG.info("path: % s" % path)
         try:
             opt = importutils.import_module(
                 "%s.%s" % (path, package_name)).OPTS
@@ -113,5 +111,6 @@ def register_opts(conf, package_name, paths):
             )
             return
         except ImportError:
-            LOG.error("Failed to register config options for %s" %
-                      package_name)
+            pass
+    LOG.error("Failed to import config options for %s. Not found in %s",
+              package_name, str(paths))
