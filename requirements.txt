@@ -27,6 +27,7 @@ oslo.serialization>=2.25.0 # Apache-2.0
 oslo.log>=3.37.0 # Apache-2.0
 oslo.policy>=1.34.0 # Apache-2.0
 oslo.i18n>=3.20.0 # Apache-2.0
+oslo.upgradecheck>=0.1.1 # Apache-2.0
 pecan>=1.2.1 # BSD
 PasteDeploy>=1.5.2 # MIT
 Werkzeug>=0.14.1 # BSD License

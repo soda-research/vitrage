@@ -79,6 +79,13 @@ Developer Guide
    contributor/devstack-installation
    contributor/configuration
 
+CLI Guide
+---------
+.. toctree::
+   :maxdepth: 1
+
+   cli/index
+
 Design Documents
 ----------------
 
