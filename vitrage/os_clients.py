@@ -32,6 +32,7 @@ OPTS = [
     cfg.StrOpt('trove_version', default='1', help='Trove version'),
     cfg.StrOpt('monasca_version', default='2', help='Monasca version'),
     cfg.StrOpt('monasca_url', help='Monasca API URL'),
+    cfg.StrOpt('monasca_auth_url', help='Monasca authentication URL'),
     cfg.StrOpt('monasca_username', help='Monasca username'),
     cfg.StrOpt('monasca_password', help='Monasca password'),
     cfg.StrOpt('monasca_project_name', help='Monasca project name')
@@ -202,7 +203,7 @@ def monasca_client(conf):
         mon_client = driver_module('monasca')
 
         auth = identity.Password(
-            auth_url=conf.service_credentials.auth_url,
+            auth_url=conf.monasca_auth_url,
             username=conf.monasca_username,
             password=conf.monasca_password,
             user_domain_name='default',
