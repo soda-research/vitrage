@@ -25,6 +25,10 @@ Enabling Vitrage in DevStack
    notification_topics = notifications,vitrage_notifications
    notification_driver=messagingv2
 
+   [notifications]
+   versioned_notifications_topics = versioned_notifications,vitrage_notifications
+   notification_driver = messagingv2
+
 4. Add this to add notification from neutron to vitrage
    (make sure neutron is enabled in devstack)
 

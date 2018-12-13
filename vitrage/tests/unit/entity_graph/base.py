@@ -65,7 +65,7 @@ class TestEntityGraphUnitBase(base.BaseTest):
 
     OS_CLIENTS_OPTS = [
         cfg.BoolOpt('use_nova_versioned_notifications',
-                    default=False, required=True),
+                    default=True, required=True),
     ]
 
     NUM_CLUSTERS = 1

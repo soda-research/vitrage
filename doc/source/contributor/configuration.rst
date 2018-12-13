@@ -26,6 +26,7 @@ Datasources
    static-config
    zabbix_vitrage
    k8s_datasource
+   nova-config
 
 Notifiers
 ---------

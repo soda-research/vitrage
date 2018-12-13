@@ -38,6 +38,10 @@ DEVSTACK_LOCAL_CONFIG+="$(cat <<EOF
 notification_topics = notifications,vitrage_notifications
 notification_driver = messagingv2
 
+[notifications]
+versioned_notifications_topics = versioned_notifications,vitrage_notifications
+notification_driver = messagingv2
+
 [[post-config|\$NEUTRON_CONF]]
 [DEFAULT]
 notification_topics = notifications,vitrage_notifications

@@ -1,3 +1,5 @@
 ---
 features:
-  - Added support for Nova versioned notifications.
+  - Use Nova versioned notifications instead of the legacy, unversioned ones.
+    This bahavior is controlled by the ``use_nova_versioned_notifications``
+    configuration option.

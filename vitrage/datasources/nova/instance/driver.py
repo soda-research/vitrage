@@ -97,9 +97,6 @@ LEGACY_NOTIFICATIONS = {
 
 class InstanceDriver(NovaDriverBase):
 
-    def __init__(self, conf):
-        super(InstanceDriver, self).__init__(conf)
-
     @staticmethod
     def extract_events(instances):
         events = [instance.__dict__ for instance in instances]

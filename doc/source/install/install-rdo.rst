@@ -144,6 +144,10 @@ Neutron, Heat and Aodh) to Vitrage, set the following in their conf files:
    notification_driver=messagingv2
 
 
+[notifications]
+versioned_notifications_topics = versioned_notifications,vitrage_notifications
+notification_driver = messagingv2
+
 Initialize Vitrage
 ------------------
 

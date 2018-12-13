@@ -30,7 +30,7 @@ OPTS = [
     cfg.StrOpt('mistral_version', default='2', help='Mistral version'),
     cfg.StrOpt('gnocchi_version', default='1', help='Gnocchi version'),
     cfg.BoolOpt('use_nova_versioned_notifications',
-                default=False,
+                default=True,
                 help='Indicates whether to use Nova versioned notifications.'
                      'The default is True. If False, the deprecated Nova '
                      'legacy notifications will be used.'

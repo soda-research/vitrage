@@ -58,13 +58,17 @@ class TestProcessor(TestEntityGraphUnitBase):
         self._check_graph(processor, self.NUM_VERTICES_AFTER_CREATION,
                           self.NUM_EDGES_AFTER_CREATION)
 
-        # check update instance event
+        # check update instance event (versioned notification format)
         event[DSProps.DATASOURCE_ACTION] = DSAction.UPDATE
-        event[DSProps.EVENT_TYPE] = 'compute.instance.volume.attach'
-        event['hostname'] = 'new_host'
-        event['instance_id'] = event['id']
-        event['state'] = event['status']
-        event['host'] = event['OS-EXT-SRV-ATTR:host']
+        event[DSProps.EVENT_TYPE] = 'instance.volume_attach.end'
+
+        nova_object_data = {
+            'host_name': 'new_host',
+            'uuid': event['id'],
+            'state': event['status'],
+            'host': event['OS-EXT-SRV-ATTR:host']
+        }
+        event['nova_object.data'] = nova_object_data
 
         processor.process_event(event)
         self._check_graph(processor, self.NUM_VERTICES_AFTER_CREATION,
