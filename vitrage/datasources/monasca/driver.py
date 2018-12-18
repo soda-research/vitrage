@@ -75,7 +75,7 @@ class MonascaDriver(AlarmDriverBase):
         pass
 
     def _is_erroneous(self, alarm):
-        return alarm and alarm[MProps.STATUS] != MAlarmStatuses.OK
+        return alarm and alarm[MProps.STATUS] == MAlarmStatuses.ALARM
 
     def _status_changed(self, new_alarm, old_alarm):
         return new_alarm and old_alarm and \
