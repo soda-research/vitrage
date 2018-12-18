@@ -28,6 +28,7 @@ OPTS = [
     cfg.StrOpt('glance_version', default='2', help='Glance version'),
     cfg.StrOpt('heat_version', default='1', help='Heat version'),
     cfg.StrOpt('mistral_version', default='2', help='Mistral version'),
+    cfg.StrOpt('mistral_url', help='Mistral API URL'),
     cfg.StrOpt('gnocchi_version', default='1', help='Gnocchi version'),
     cfg.StrOpt('trove_version', default='1', help='Trove version'),
     cfg.StrOpt('monasca_version', default='2', help='Monasca version'),
@@ -187,6 +188,7 @@ def mistral_client(conf):
         mi_client = driver_module('mistral')
         client = mi_client.Client(
             session=keystone_client.get_session(conf),
+            mistral_url=conf.mistral_url
         )
         LOG.info('Mistral client created')
         return client
