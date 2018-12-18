@@ -1,6 +1,6 @@
 # Install and start **Vitrage** service in devstack
 #
-# To enable vitragebehaviortack add an entry to local.conf that
+# To enable vitrage behavior add an entry to local.conf that
 # looks like
 #
 # [[local|localrc]]
@@ -25,21 +25,13 @@ else
     VITRAGE_BIN_DIR=$(get_python_exec_prefix)
 fi
 
-if [ -z "$VITRAGE_DEPLOY" ]; then
-    # Default
-    VITRAGE_DEPLOY=simple
-
-    # Fallback to common wsgi devstack configuration
-    if [ "$ENABLE_HTTPD_MOD_WSGI_SERVICES" == "True" ]; then
-        VITRAGE_DEPLOY=mod_wsgi
-
-    # Deprecated config
-    elif [ -n "$VITRAGE_USE_MOD_WSGI" ] ; then
-        echo_summary "VITRAGE_USE_MOD_WSGI is deprecated, use VITRAGE_DEPLOY instead"
-        if [ "$VITRAGE_USE_MOD_WSGI" == True ]; then
-            VITRAGE_DEPLOY=mod_wsgi
-        fi
-    fi
+# VITRAGE_DEPLOY defines how vitrage is deployed, allowed values:
+# - mod_wsgi : Run vitrage under Apache HTTPd mod_wsgi
+# - uwsgi : Run vitrage under uwsgi
+if [[ "$WSGI_MODE" == "uwsgi" ]]; then
+    VITRAGE_DEPLOY=${VITRAGE_DEPLOY:-uwsgi}
+else
+    VITRAGE_DEPLOY=${VITRAGE_DEPLOY:-mod_wsgi}
 fi
 
 # Test if any Vitrage services are enabled
@@ -50,7 +42,11 @@ function is_vitrage_enabled {
 }
 
 function vitrage_service_url {
-    echo "$VITRAGE_SERVICE_PROTOCOL://$VITRAGE_SERVICE_HOST:$VITRAGE_SERVICE_PORT"
+    if [[ "$VITRAGE_DEPLOY" == "mod_wsgi" ]]; then
+       echo "$VITRAGE_SERVICE_PROTOCOL://$VITRAGE_SERVICE_HOST:$VITRAGE_SERVICE_PORT"
+    else
+       echo "$VITRAGE_SERVICE_PROTOCOL://$VITRAGE_SERVICE_HOST/rca"
+    fi
 }
 
 
@@ -114,8 +110,10 @@ function _vitrage_cleanup_apache_wsgi {
 # cleanup_vitrage() - Remove residual data files, anything left over
 # from previous runs that a clean run would need to clean up
 function cleanup_vitrage {
-    if [ "$VITRAGE_DEPLOY" == "mod_wsgi" ]; then
+    if [[ "$VITRAGE_DEPLOY" == "mod_wsgi" ]]; then
         _vitrage_cleanup_apache_wsgi
+    else
+       remove_uwsgi_config "$VITRAGE_UWSGI_FILE" "$VITRAGE_PUBLIC_UWSGI"
     fi
 
     # delete all vitrage configurations
@@ -135,7 +133,7 @@ function disable_vitrage_datasource {
 
 # Set configuration for database backend.
 function vitrage_configure_db_backend {
-    if [ "$VITRAGE_DATABASE" = 'mysql' ] || [ "$VITRAGE_DATABASE" = 'postgresql' ] ; then
+    if [[ "$VITRAGE_DATABASE" = 'mysql' ]] || [[ "$VITRAGE_DATABASE" = 'postgresql' ]] ; then
         iniset $VITRAGE_CONF database connection $(database_connection_url vitrage)
     else
         die $LINENO "Unable to configure unknown VITRAGE_DATABASE $VITRAGE_DATABASE"
@@ -149,14 +147,12 @@ function configure_vitrage {
     iniset $VITRAGE_CONF DEFAULT debug "$ENABLE_DEBUG_LOG_LEVEL"
 
     # Set up logging
-    if [ "$SYSLOG" != "False" ]; then
+    if [[ "$SYSLOG" != "False" ]]; then
         iniset $VITRAGE_CONF DEFAULT use_syslog "True"
     fi
 
     # Format logging
-    if [ "$LOG_COLOR" == "True" ] && [ "$SYSLOG" == "False" ] && [ "$VITRAGE_DEPLOY" != "mod_wsgi" ]; then
-        setup_colorized_logging $VITRAGE_CONF DEFAULT
-    fi
+    setup_logging $VITRAGE_CONF
 
     cp $VITRAGE_DIR/etc/vitrage/api-paste.ini $VITRAGE_CONF_DIR
 
@@ -189,7 +185,7 @@ function configure_vitrage {
     fi
 
     # remove nagios vitrage datasource if nagios datasource not installed
-    if [ "$VITRAGE_USE_NAGIOS" == "False" ]; then
+    if [[ "$VITRAGE_USE_NAGIOS" == "False" ]]; then
         disable_vitrage_datasource nagios
     fi
 
@@ -210,32 +206,10 @@ function configure_vitrage {
     iniset $VITRAGE_CONF "keystone_authtoken" project_name $admin_project_name
     iniset $VITRAGE_CONF "keystone_authtoken" project_domain_name $admin_domain_name
 
-    if [ "$VITRAGE_DEPLOY" == "mod_wsgi" ]; then
+    if [[ "$VITRAGE_DEPLOY" == "mod_wsgi" ]]; then
         _vitrage_config_apache_wsgi
-    elif [ "$VITRAGE_DEPLOY" == "uwsgi" ]; then
-        # iniset creates these files when it's called if they don't exist.
-        VITRAGE_UWSGI_FILE=$VITRAGE_CONF_DIR/vitrage-uwsgi.ini
-
-        rm -f "$VITRAGE_UWSGI_FILE"
-
-        iniset "$VITRAGE_UWSGI_FILE" uwsgi http $VITRAGE_SERVICE_HOST:$VITRAGE_SERVICE_PORT
-        iniset "$VITRAGE_UWSGI_FILE" uwsgi wsgi-file "$VITRAGE_DIR/vitrage/api/app.wsgi"
-        # This is running standalone
-        iniset "$VITRAGE_UWSGI_FILE" uwsgi master true
-        # Set die-on-term & exit-on-reload so that uwsgi shuts down
-        iniset "$VITRAGE_UWSGI_FILE" uwsgi die-on-term true
-        iniset "$VITRAGE_UWSGI_FILE" uwsgi exit-on-reload true
-        iniset "$VITRAGE_UWSGI_FILE" uwsgi threads 10
-        iniset "$VITRAGE_UWSGI_FILE" uwsgi processes $API_WORKERS
-        iniset "$VITRAGE_UWSGI_FILE" uwsgi enable-threads true
-        iniset "$VITRAGE_UWSGI_FILE" uwsgi plugins python
-        iniset "$VITRAGE_UWSGI_FILE" uwsgi lazy-apps true
-        # uwsgi recommends this to prevent thundering herd on accept.
-        iniset "$VITRAGE_UWSGI_FILE" uwsgi thunder-lock true
-        # Override default size for headers from the 4k default.
-        iniset "$VITRAGE_UWSGI_FILE" uwsgi buffer-size 65535
-        # Make sure client doesn't try to re-use the connection.
-        iniset "$VITRAGE_UWSGI_FILE" uwsgi add-header "Connection: close"
+    else
+        write_uwsgi_config "$VITRAGE_UWSGI_FILE" "$VITRAGE_PUBLIC_UWSGI" "/rca"
     fi
 }
 
@@ -246,7 +220,7 @@ function init_vitrage {
 
     # Create and upgrade database only when used
     if is_service_enabled mysql postgresql; then
-        if [ "$VITRAGE_DATABASE" = 'mysql' ] || [ "$VITRAGE_DATABASE" = 'postgresql' ] ; then
+        if [[ "$VITRAGE_DATABASE" = 'mysql' ]] || [[ "$VITRAGE_DATABASE" = 'postgresql' ]] ; then
             recreate_database vitrage
             $VITRAGE_BIN_DIR/vitrage-dbsync
         fi
@@ -263,9 +237,9 @@ function install_vitrage {
     setup_develop "$VITRAGE_DIR"
     sudo install -d -o $STACK_USER -m 755 $VITRAGE_CONF_DIR
 
-    if [ "$VITRAGE_DEPLOY" == "mod_wsgi" ]; then
+    if [[ "$VITRAGE_DEPLOY" == "mod_wsgi" ]]; then
         install_apache_wsgi
-    elif [ "$VITRAGE_DEPLOY" == "uwsgi" ]; then
+    elif [[ "$VITRAGE_DEPLOY" == "uwsgi" ]]; then
         pip_install uwsgi
     fi
 }
@@ -286,8 +260,8 @@ function start_vitrage {
     if [[ "$VITRAGE_DEPLOY" == "mod_wsgi" ]]; then
         enable_apache_site vitrage
         restart_apache_server
-    elif [ "$VITRAGE_DEPLOY" == "uwsgi" ]; then
-        run_process vitrage-api "$VITRAGE_BIN_DIR/uwsgi $VITRAGE_UWSGI_FILE"
+    elif [[ "$VITRAGE_DEPLOY" == "uwsgi" ]]; then
+        run_process vitrage-api "$VITRAGE_BIN_DIR/uwsgi --procname-prefix vitrage --ini $VITRAGE_UWSGI_FILE" ""
     else
         run_process vitrage-api "$VITRAGE_BIN_DIR/vitrage-api -d -v --config-file $VITRAGE_CONF"
     fi
@@ -323,7 +297,7 @@ function change_systemd_kill_mode {
 
 # stop_vitrage() - Stop running processes
 function stop_vitrage {
-    if [ "$VITRAGE_DEPLOY" == "mod_wsgi" ]; then
+    if [[ "$VITRAGE_DEPLOY" == "mod_wsgi" ]]; then
         disable_apache_site vitrage
         restart_apache_server
     fi

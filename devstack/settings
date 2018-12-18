@@ -18,6 +18,8 @@ VITRAGE_CONF_DIR=/etc/vitrage
 VITRAGE_CONF=$VITRAGE_CONF_DIR/vitrage.conf
 VITRAGE_AUTH_CACHE_DIR=${VITRAGE_AUTH_CACHE_DIR:-/var/cache/vitrage}
 VITRAGE_WSGI_DIR=${VITRAGE_WSGI_DIR:-/var/www/vitrage}
+VITRAGE_UWSGI_FILE=$VITRAGE_CONF_DIR/vitrage-uwsgi.ini
+VITRAGE_PUBLIC_UWSGI=$VITRAGE_DIR/vitrage/api/app.wsgi
 
 # Set up database backend
 VITRAGE_DATABASE=${VITRAGE_DATABASE:-mysql}
@@ -26,13 +28,6 @@ VITRAGE_DATABASE=${VITRAGE_DATABASE:-mysql}
 VITRAGE_SERVICE_PROTOCOL=http
 VITRAGE_SERVICE_HOST=$SERVICE_HOST
 VITRAGE_SERVICE_PORT=${VITRAGE_SERVICE_PORT:-8999}
-
-# VITRAGE_DEPLOY defines how Vitrage is deployed, allowed values:
-# - mod_wsgi : Run Vitrage under Apache HTTPd mod_wsgi
-# - simple : Run vitrage-api
-# - uwsgi : Run Vitrage under uwsgi
-# - <empty>: Fallback to VITRAGE_USE_MOD_WSGI or ENABLE_HTTPD_MOD_WSGI_SERVICES
-VITRAGE_DEPLOY=${VITRAGE_DEPLOY}
 
 # Toggle for deploying Vitrage with/without nagios
 VITRAGE_USE_NAGIOS=$(trueorfalse False VITRAGE_USE_NAGIOS)
