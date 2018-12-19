@@ -90,7 +90,7 @@ def get_server(target, endpoints, transport, serializer=None):
     assert transport is not None
 
     if profiler:
-        LOG.info('profiler enabled for RPC server')
+        LOG.debug('profiler enabled for RPC server')
         serializer = ProfilerContextSerializer(serializer=serializer)
 
     access_policy = dispatcher.DefaultRPCAccessPolicy

@@ -46,7 +46,7 @@ class RPCHook(hooks.PecanHook):
         target = oslo_messaging.Target(topic=conf.rpc_topic)
         self.client = vitrage_rpc.get_client(transport, target)
 
-    def before(self, state):
+    def on_route(self, state):
         state.request.client = self.client
 
 

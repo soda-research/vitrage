@@ -11,15 +11,32 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-
 import networkx as nx
 from networkx.readwrite import json_graph
+import oslo_messaging
+import pecan
 from pecan import rest
 
 from vitrage.datasources import OPENSTACK_CLUSTER
 
 
 class RootRestController(rest.RestController):
+
+    @pecan.expose()
+    def _route(self, args, request=None):
+        """All requests go through here
+
+        We can check the backend status
+        """
+        try:
+            client = pecan.request.client.prepare(timeout=5)
+            backend_is_alive = client.call(pecan.request.context, 'is_alive')
+            if backend_is_alive:
+                return super(RootRestController, self)._route(args, request)
+            else:
+                pecan.abort(503, detail='vitrage-graph is not ready')
+        except oslo_messaging.MessagingTimeout:
+            pecan.abort(503, detail='vitrage-graph not available')
 
     @staticmethod
     def as_tree(graph, root=OPENSTACK_CLUSTER, reverse=False):

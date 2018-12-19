@@ -217,4 +217,5 @@ class ScenarioRepository(object):
 
     def log_enabled_scenarios(self):
         scenarios = [s for s in self._all_scenarios if s.enabled]
-        LOG.info("Scenarios:\n%s", sorted([s.id for s in scenarios]))
+        if scenarios:
+            LOG.info("Scenarios:\n%s", sorted([s.id for s in scenarios]))

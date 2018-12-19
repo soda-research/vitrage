@@ -157,5 +157,7 @@ class ConsistencyEnforcer(object):
             if driver_class.should_delete_outdated_entities():
                 self.datasources_to_mark_deleted.append(driver_name)
 
-        LOG.info('Vertices of the following datasources will be deleted if '
-                 'they become outdated: %s', self.datasources_to_mark_deleted)
+        if self.datasources_to_mark_deleted:
+            LOG.info('Vertices of the following datasources will be deleted if'
+                     'they become outdated: %s',
+                     self.datasources_to_mark_deleted)

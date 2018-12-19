@@ -21,53 +21,60 @@ from vitrage.common.constants import VertexProperties as VProps
 from vitrage.common.utils import spawn
 from vitrage.datasources.transformer_base import TransformerBase
 from vitrage.entity_graph import driver_exec
+from vitrage.entity_graph import get_graph_driver
+
 from vitrage.entity_graph import EVALUATOR_TOPIC
 from vitrage.entity_graph.graph_persistency import GraphPersistency
 from vitrage.entity_graph.processor.notifier import GraphNotifier
 from vitrage.entity_graph.processor.notifier import PersistNotifier
 from vitrage.entity_graph.processor.processor import Processor
 from vitrage.entity_graph.scheduler import Scheduler
-from vitrage.entity_graph.workers import GraphWorkersManager
 from vitrage.graph.driver.networkx_graph import NXGraph
 from vitrage import messaging
-
+from vitrage import storage
 
 LOG = log.getLogger(__name__)
 
 
 class VitrageGraphInit(object):
-    def __init__(self, conf, graph, db_connection):
+    def __init__(self, conf, workers):
         self.conf = conf
-        self.graph = graph
-        self.db = db_connection
-        self.workers = GraphWorkersManager(conf, graph, db_connection)
+        self.graph = get_graph_driver(conf)('Entity Graph')
+        self.db = db_connection = storage.get_connection_from_config(conf)
+        self.workers = workers
         self.events_coordination = EventsCoordination(conf, self.process_event)
-        self.persist = GraphPersistency(conf, db_connection, graph)
+        self.persist = GraphPersistency(conf, db_connection, self.graph)
         self.driver_exec = driver_exec.DriverExec(
             self.conf,
             self.events_coordination.handle_multiple_low_priority,
             self.persist)
-        self.scheduler = Scheduler(conf, graph, self.driver_exec, self.persist)
-        self.processor = Processor(conf, graph)
+        self.scheduler = Scheduler(conf, self.graph, self.driver_exec,
+                                   self.persist)
+        self.processor = Processor(conf, self.graph)
 
     def run(self):
         LOG.info('Init Started')
         graph_snapshot = self.persist.query_recent_snapshot()
         if graph_snapshot:
+            t = spawn(self.workers.submit_read_db_graph)
             self._restart_from_stored_graph(graph_snapshot)
+            t.join()
+            self.workers.submit_enable_evaluations()
+
         else:
             self._start_from_scratch()
-        self.workers.run()
+            self.workers.submit_read_db_graph()
+            self.workers.submit_start_evaluations()
+        self._init_finale()
 
     def _restart_from_stored_graph(self, graph_snapshot):
-        LOG.info('Initializing graph from database snapshot (%sKb)',
+        LOG.info('Main process - loading graph from database snapshot (%sKb)',
                  len(graph_snapshot.graph_snapshot) / 1024)
         NXGraph.read_gpickle(graph_snapshot.graph_snapshot, self.graph)
         self.persist.replay_events(self.graph, graph_snapshot.event_id)
         self._recreate_transformers_id_cache()
         LOG.info("%s vertices loaded", self.graph.num_vertices())
         self.subscribe_presist_notifier()
-        spawn(self._start_all_workers, is_snapshot=True)
 
     def _start_from_scratch(self):
         LOG.info('Starting for the first time')
@@ -78,13 +85,8 @@ class VitrageGraphInit(object):
         self.subscribe_presist_notifier()
         self.driver_exec.snapshot_get_all()
         LOG.info("%s vertices loaded", self.graph.num_vertices())
-        spawn(self._start_all_workers, is_snapshot=False)
 
-    def _start_all_workers(self, is_snapshot):
-        if is_snapshot:
-            self.workers.submit_enable_evaluations()
-        else:
-            self.workers.submit_start_evaluations()
+    def _init_finale(self):
         self._add_graph_subscriptions()
         self.scheduler.start_periodic_tasks()
         LOG.info('Init Finished')
