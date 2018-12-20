@@ -29,6 +29,7 @@ OPTS = [
     cfg.StrOpt('heat_version', default='1', help='Heat version'),
     cfg.StrOpt('mistral_version', default='2', help='Mistral version'),
     cfg.StrOpt('gnocchi_version', default='1', help='Gnocchi version'),
+    cfg.StrOpt('trove_version', default='1', help='Trove version'),
     cfg.BoolOpt('use_nova_versioned_notifications',
                 default=True,
                 help='Indicates whether to use Nova versioned notifications.'
@@ -47,7 +48,8 @@ _client_modules = {
     'neutron': 'neutronclient.v2_0.client',
     'heat': 'heatclient.client',
     'mistral': 'mistralclient.api.v2.client',
-    'gnocchi': 'gnocchiclient.v1.client'
+    'gnocchi': 'gnocchiclient.v1.client',
+    'trove': 'troveclient.v1.client'
 }
 
 
@@ -108,6 +110,20 @@ def nova_client(conf):
         return client
     except Exception:
         LOG.exception('Create Nova client - Got Exception.')
+
+
+def trove_client(conf):
+    """Get an instance of trove client"""
+    try:
+        tr_client = driver_module('trove')
+        client = tr_client.Client(
+            version=conf.trove_version,
+            session=keystone_client.get_session(conf),
+        )
+        LOG.info('Trove client created')
+        return client
+    except Exception:
+        LOG.exception('Create Trove client - Got Exception.')
 
 
 def cinder_client(conf):
