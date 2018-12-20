@@ -65,7 +65,7 @@ class VitrageGraphInit(object):
             self._start_from_scratch()
             self.workers.submit_read_db_graph()
             self.workers.submit_start_evaluations()
-        self._init_finale()
+        self._init_finale(immediate_get_all=True if graph_snapshot else False)
 
     def _restart_from_stored_graph(self, graph_snapshot):
         LOG.info('Main process - loading graph from database snapshot (%sKb)',
@@ -86,9 +86,9 @@ class VitrageGraphInit(object):
         self.driver_exec.snapshot_get_all()
         LOG.info("%s vertices loaded", self.graph.num_vertices())
 
-    def _init_finale(self):
+    def _init_finale(self, immediate_get_all):
         self._add_graph_subscriptions()
-        self.scheduler.start_periodic_tasks()
+        self.scheduler.start_periodic_tasks(immediate_get_all)
         LOG.info('Init Finished')
         self.events_coordination.start()
 

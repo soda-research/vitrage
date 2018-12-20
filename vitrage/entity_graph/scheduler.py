@@ -37,7 +37,7 @@ class Scheduler(object):
         self.consistency = ConsistencyEnforcer(conf, graph)
         self.periodic = None
 
-    def start_periodic_tasks(self):
+    def start_periodic_tasks(self, immediate_get_all):
         thread_num = len(utils.get_pull_drivers_names(self.conf))
         thread_num += 2  # for consistency and get_all
         self.periodic = periodics.PeriodicWorker.create(
@@ -45,7 +45,7 @@ class Scheduler(object):
                 max_workers=thread_num))
 
         self._add_consistency_timer()
-        self._add_datasource_timers()
+        self._add_datasource_timers(immediate_get_all)
         spawn(self.periodic.start)
 
     def _add_consistency_timer(self):
@@ -61,10 +61,10 @@ class Scheduler(object):
         self.periodic.add(consistency_periodic)
         LOG.info("added consistency_periodic (spacing=%s)", spacing)
 
-    def _add_datasource_timers(self):
+    def _add_datasource_timers(self, run_immediately):
         spacing = self.conf.datasources.snapshots_interval
 
-        @periodics.periodic(spacing=spacing)
+        @periodics.periodic(spacing=spacing, run_immediately=run_immediately)
         def get_all_periodic():
             self.driver_exec.snapshot_get_all(DatasourceAction.SNAPSHOT)
 
