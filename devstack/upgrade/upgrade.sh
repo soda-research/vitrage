@@ -54,6 +54,9 @@ VITRAGE_DEVSTACK_DIR=$(dirname $(dirname $0))
 VITRAGE_DIR=$(dirname $(dirname $0))/../../vitrage
 VITRAGE_CONF_DIR=/etc/vitrage
 VITRAGE_CONF=$VITRAGE_CONF_DIR/vitrage.conf
+VITRAGE_UWSGI_FILE=$VITRAGE_CONF_DIR/vitrage-uwsgi.ini
+VITRAGE_PUBLIC_UWSGI=$VITRAGE_DIR/vitrage/api/app.wsgi
+
 # Duplicate some setup bits from target DevStack
 source $TARGET_DEVSTACK_DIR/functions
 source $TARGET_DEVSTACK_DIR/stackrc
@@ -74,6 +77,9 @@ source $VITRAGE_DEVSTACK_DIR/plugin.sh stack install
 
 # calls upgrade-vitrage for specific release
 upgrade_project vitrage $RUN_DIR $BASE_DEVSTACK_BRANCH $TARGET_DEVSTACK_BRANCH
+
+# do config upgrade
+write_uwsgi_config "$VITRAGE_UWSGI_FILE" "$VITRAGE_PUBLIC_UWSGI" "/rca"
 
 # Simulate init_vitrage()
 VITRAGE_BIN_DIR=$(dirname $(which vitrage-dbsync))
